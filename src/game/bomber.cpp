@@ -614,6 +614,7 @@ namespace bomber
             if(!entities::ents.inrange(f.ent) || !f.enabled) continue;
             int owner = ai::owner(d);
             bool home = isbomberhome(f, owner) || isbombertarg(f, owner);
+            if(d->aitype == AI_BOT && m_duke(game::gamemode, game::mutators) && home) continue;
             static vector<int> targets; // build a list of others who are interested in this
             targets.setsize(0);
             bool regen = d->aitype != AI_BOT || f.team != owner || !m_regen(game::gamemode, game::mutators) || d->health >= m_health(game::gamemode, game::mutators, d->model);
@@ -677,6 +678,7 @@ namespace bomber
                     {
                         ai::interest &n = interests.add();
                         bool team = owner == ai::owner(t);
+                        if(d->aitype == AI_BOT && m_duke(game::gamemode, game::mutators) && team) continue;
                         n.state = team ? ai::AI_S_DEFEND : ai::AI_S_PURSUE;
                         n.node = t->lastnode;
                         n.target = t->clientnum;
@@ -693,7 +695,10 @@ namespace bomber
     bool aidefense(gameent *d, ai::aistate &b)
     {
         if(d->aitype == AI_BOT)
+        {
             loopv(st.flags) if(st.flags[i].owner == d) return aihomerun(d, b);
+            if(m_duke(game::gamemode, game::mutators)) return false;
+        }
         if(st.flags.inrange(b.target))
         {
             bomberstate::flag &f = st.flags[b.target];
