@@ -100,9 +100,10 @@ namespace hud
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, dominatingtex, "<grey>textures/dominating", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, dominatedtex, "<grey>textures/dominated", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, inputtex, "textures/menu", 3);
-    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, waittex, "<grey>textures/wait", 3);
-    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, spectex, "<grey>textures/spec", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, waitingtex, "<grey>textures/waiting", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, spectatortex, "<grey>textures/spectator", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, chattex, "<grey>textures/chat", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, editingtex, "<grey>textures/editing", 3);
 
     TVAR(IDF_PERSIST|IDF_PRELOAD, progresstex, "<grey>textures/progress", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, warningtex, "<grey>textures/warning", 3);
@@ -436,15 +437,15 @@ namespace hud
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, firstbloodtex, "textures/rewards/firstblood", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, breakertex, "textures/rewards/breaker", 3);
 
-    TVAR(IDF_PERSIST, privnonetex, "<grey>textures/privs/none.png", 3);
-    TVAR(IDF_PERSIST, privbottex, "<grey>textures/privs/bot.png", 3);
-    TVAR(IDF_PERSIST, privplayertex, "<grey>textures/privs/player.png", 3);
-    TVAR(IDF_PERSIST, privsupportertex, "<grey>textures/privs/supporter.png", 3);
-    TVAR(IDF_PERSIST, privmoderatortex, "<grey>textures/privs/moderator.png", 3);
-    TVAR(IDF_PERSIST, privoperatortex, "<grey>textures/privs/operator.png", 3);
-    TVAR(IDF_PERSIST, privadministratortex, "<grey>textures/privs/administrator.png", 3);
-    TVAR(IDF_PERSIST, privdevelopertex, "<grey>textures/privs/developer.png", 3);
-    TVAR(IDF_PERSIST, privcreatortex, "<grey>textures/privs/creator.png", 3);
+    TVAR(IDF_PERSIST, privnonetex, "<grey>textures/privs/none", 3);
+    TVAR(IDF_PERSIST, privbottex, "<grey>textures/privs/bot", 3);
+    TVAR(IDF_PERSIST, privplayertex, "<grey>textures/privs/player", 3);
+    TVAR(IDF_PERSIST, privsupportertex, "<grey>textures/privs/supporter", 3);
+    TVAR(IDF_PERSIST, privmoderatortex, "<grey>textures/privs/moderator", 3);
+    TVAR(IDF_PERSIST, privoperatortex, "<grey>textures/privs/operator", 3);
+    TVAR(IDF_PERSIST, privadministratortex, "<grey>textures/privs/administrator", 3);
+    TVAR(IDF_PERSIST, privdevelopertex, "<grey>textures/privs/developer", 3);
+    TVAR(IDF_PERSIST, privcreatortex, "<grey>textures/privs/creator", 3);
 
     VAR(IDF_PERSIST|IDF_HEX, privnonecolour, 0, 0x888888, 0xFFFFFF);
     VAR(IDF_PERSIST|IDF_HEX, privplayercolour, 0, 0xAAAAAA, 0xFFFFFF);
@@ -455,41 +456,41 @@ namespace hud
     VAR(IDF_PERSIST|IDF_HEX, privdevelopercolour, 0, 0x44FF88, 0xFFFFFF);
     VAR(IDF_PERSIST|IDF_HEX, privcreatorcolour, 0, 0x8844FF, 0xFFFFFF);
 
-    TVAR(IDF_PERSIST, modeeditingtex, "<grey>textures/modes/editing.png", 3);
+    TVAR(IDF_PERSIST, modeeditingtex, "<grey>textures/modes/editing", 3);
 #ifdef CAMPAIGN
-    TVAR(IDF_PERSIST, modecampaigntex, "<grey>textures/modes/campaign.png", 3);
+    TVAR(IDF_PERSIST, modecampaigntex, "<grey>textures/modes/campaign", 3);
 #endif
-    TVAR(IDF_PERSIST, modedeathmatchtex, "<grey>textures/modes/deathmatch.png", 3);
-    TVAR(IDF_PERSIST, modetimetrialtex, "<grey>textures/modes/timetrial.png", 3);
-    TVAR(IDF_PERSIST, modegauntlettex, "<grey>textures/modes/gauntlet.png", 3);
+    TVAR(IDF_PERSIST, modedeathmatchtex, "<grey>textures/modes/deathmatch", 3);
+    TVAR(IDF_PERSIST, modetimetrialtex, "<grey>textures/modes/timetrial", 3);
+    TVAR(IDF_PERSIST, modegauntlettex, "<grey>textures/modes/gauntlet", 3);
 
-    TVAR(IDF_PERSIST, modecapturetex, "<grey>textures/modes/capture.png", 3);
-    TVAR(IDF_PERSIST, modecapturereturntex, "<grey>textures/modes/capturereturn.png", 3);
-    TVAR(IDF_PERSIST, modecapturedefendtex, "<grey>textures/modes/capturedefend.png", 3);
-    TVAR(IDF_PERSIST, modecaptureprotecttex, "<grey>textures/modes/captureprotect.png", 3);
+    TVAR(IDF_PERSIST, modecapturetex, "<grey>textures/modes/capture", 3);
+    TVAR(IDF_PERSIST, modecapturereturntex, "<grey>textures/modes/capturereturn", 3);
+    TVAR(IDF_PERSIST, modecapturedefendtex, "<grey>textures/modes/capturedefend", 3);
+    TVAR(IDF_PERSIST, modecaptureprotecttex, "<grey>textures/modes/captureprotect", 3);
 
-    TVAR(IDF_PERSIST, modedefendtex, "<grey>textures/modes/defend.png", 3);
-    TVAR(IDF_PERSIST, modedefendquicktex, "<grey>textures/modes/defendquick.png", 3);
-    TVAR(IDF_PERSIST, modedefendconquertex, "<grey>textures/modes/defendconquer.png", 3);
+    TVAR(IDF_PERSIST, modedefendtex, "<grey>textures/modes/defend", 3);
+    TVAR(IDF_PERSIST, modedefendquicktex, "<grey>textures/modes/defendquick", 3);
+    TVAR(IDF_PERSIST, modedefendconquertex, "<grey>textures/modes/defendconquer", 3);
 
-    TVAR(IDF_PERSIST, modebombertex, "<grey>textures/modes/bomber.png", 3);
-    TVAR(IDF_PERSIST, modebomberbaskettex, "<grey>textures/modes/bomberbasket.png", 3);
-    TVAR(IDF_PERSIST, modebomberholdtex, "<grey>textures/modes/bomberhold.png", 3);
+    TVAR(IDF_PERSIST, modebombertex, "<grey>textures/modes/bomber", 3);
+    TVAR(IDF_PERSIST, modebomberbaskettex, "<grey>textures/modes/bomberbasket", 3);
+    TVAR(IDF_PERSIST, modebomberholdtex, "<grey>textures/modes/bomberhold", 3);
 
-    TVAR(IDF_PERSIST, modemultitex, "<grey>textures/modes/multi.png", 3);
-    TVAR(IDF_PERSIST, modeffatex, "<grey>textures/modes/ffa.png", 3);
-    TVAR(IDF_PERSIST, modecooptex, "<grey>textures/modes/coop.png", 3);
-    TVAR(IDF_PERSIST, modeinstatex, "<grey>textures/modes/instagib.png", 3);
-    TVAR(IDF_PERSIST, modemedievaltex, "<grey>textures/modes/medieval.png", 3);
-    TVAR(IDF_PERSIST, modekaboomtex, "<grey>textures/modes/kaboom.png", 3);
-    TVAR(IDF_PERSIST, modedueltex, "<grey>textures/modes/duel.png", 3);
-    TVAR(IDF_PERSIST, modesurvivortex, "<grey>textures/modes/survivor.png", 3);
-    TVAR(IDF_PERSIST, modeclassictex, "<grey>textures/modes/classic.png", 3);
-    TVAR(IDF_PERSIST, modeonslaughttex, "<grey>textures/modes/onslaught.png", 3);
-    TVAR(IDF_PERSIST, modejetpacktex, "<grey>textures/modes/jetpack.png", 3);
-    TVAR(IDF_PERSIST, modevampiretex, "<grey>textures/modes/vampire.png", 3);
-    TVAR(IDF_PERSIST, modeexperttex, "<grey>textures/modes/expert.png", 3);
-    TVAR(IDF_PERSIST, moderesizetex, "<grey>textures/modes/resize.png", 3);
+    TVAR(IDF_PERSIST, modemultitex, "<grey>textures/modes/multi", 3);
+    TVAR(IDF_PERSIST, modeffatex, "<grey>textures/modes/ffa", 3);
+    TVAR(IDF_PERSIST, modecooptex, "<grey>textures/modes/coop", 3);
+    TVAR(IDF_PERSIST, modeinstatex, "<grey>textures/modes/instagib", 3);
+    TVAR(IDF_PERSIST, modemedievaltex, "<grey>textures/modes/medieval", 3);
+    TVAR(IDF_PERSIST, modekaboomtex, "<grey>textures/modes/kaboom", 3);
+    TVAR(IDF_PERSIST, modedueltex, "<grey>textures/modes/duel", 3);
+    TVAR(IDF_PERSIST, modesurvivortex, "<grey>textures/modes/survivor", 3);
+    TVAR(IDF_PERSIST, modeclassictex, "<grey>textures/modes/classic", 3);
+    TVAR(IDF_PERSIST, modeonslaughttex, "<grey>textures/modes/onslaught", 3);
+    TVAR(IDF_PERSIST, modejetpacktex, "<grey>textures/modes/jetpack", 3);
+    TVAR(IDF_PERSIST, modevampiretex, "<grey>textures/modes/vampire", 3);
+    TVAR(IDF_PERSIST, modeexperttex, "<grey>textures/modes/expert", 3);
+    TVAR(IDF_PERSIST, moderesizetex, "<grey>textures/modes/resize", 3);
 
     void modetexs(int g, int m, bool before, bool implied, vector<char> &list)
     {
@@ -2243,12 +2244,6 @@ namespace hud
         return privtexs[clamp(priv, 0, PRIV_MAX-1)];
     }
 
-    int privcolour(int priv, int aitype)
-    {
-        const int privcols[PRIV_MAX] = { privnonecolour, privplayercolour, privsupportercolour, privmoderatorcolour, privoperatorcolour, privadministratorcolour, privdevelopercolour, privcreatorcolour };
-        return privcols[clamp(priv, 0, PRIV_MAX-1)];
-    }
-
     const char *itemtex(int type, int stype)
     {
         switch(type)
@@ -2631,9 +2626,9 @@ namespace hud
             const char *state = "", *tex = "";
             switch(st)
             {
-                case CS_EDITING: state = "EDIT"; tex = modeeditingtex; break;
-                case CS_SPECTATOR: state = "SPEC"; tex = spectex; break;
-                case CS_WAITING: state = "WAIT"; tex = waittex; break;
+                case CS_EDITING: state = "EDIT"; tex = editingtex; break;
+                case CS_SPECTATOR: state = "SPEC"; tex = spectatortex; break;
+                case CS_WAITING: state = "WAIT"; tex = waitingtex; break;
                 case CS_DEAD: state = "DEAD"; tex = deadtex; break;
             }
             if(inventorystatus&1 && *state)
