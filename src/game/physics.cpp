@@ -387,7 +387,7 @@ namespace physics
         return vel;
     }
 
-    float impulsevelocity(physent *d, float amt, int &cost)
+    float impulsevelocity(physent *d, float amt, int &cost, int type)
     {
         float scale = d->speedscale;
         if(gameent::is(d))
@@ -405,7 +405,7 @@ namespace physics
                 int diff = impulsemeter-e->impulse[IM_METER];
                 if(cost > diff)
                 {
-                    if(impulsecostrelax)
+                    if(impulsecostrelax&type)
                     {
                         scale *= float(diff)/float(cost);
                         cost = diff;
@@ -807,7 +807,7 @@ namespace physics
                     if(!dash && !melee) d->impulse[IM_JUMP] = lastmillis;
                 }
                 int cost = impulsecost;
-                float force = impulsevelocity(d, skew, cost);
+                float force = impulsevelocity(d, skew, cost, melee ? IM_A_PARKOUR : (dash ? IM_A_DASH : IM_A_BOOST));
                 if(force > 0)
                 {
                     vec dir(0, 0, 1);
@@ -913,7 +913,7 @@ namespace physics
             if(d->action[AC_JUMP] && canimpulse(d, IM_A_PARKOUR, true))
             {
                 int cost = impulsecost;
-                float mag = impulsevelocity(d, impulseparkourkick, cost);
+                float mag = impulsevelocity(d, impulseparkourkick, cost, IM_A_PARKOUR);
                 if(mag > 0)
                 {
                     vec rft; vecfromyawpitch(d->yaw, 0, 1, 0, rft);
@@ -1029,7 +1029,7 @@ namespace physics
                         if(!d->impulse[IM_TIME] || (d->impulse[IM_TYPE] != IM_T_KICK && d->impulse[IM_TYPE] != IM_T_VAULT) || lastmillis-d->impulse[IM_TIME] > impulsekickdelay)
                         {
                             int cost = impulsecost;
-                            float mag = impulsevelocity(d, vault ? impulseparkourvault : impulseparkourkick, cost);
+                            float mag = impulsevelocity(d, vault ? impulseparkourvault : impulseparkourkick, cost, IM_A_PARKOUR);
                             if(mag > 0)
                             {
                                 vecfromyawpitch(d->yaw, vault ? 90.f : fabs(d->pitch), 1, 0, dir);
@@ -1053,7 +1053,7 @@ namespace physics
                         if(!d->turnside)
                         {
                             int cost = impulsecost;
-                            float mag = impulsevelocity(d, impulseparkour, cost);
+                            float mag = impulsevelocity(d, impulseparkour, cost, IM_A_PARKOUR);
                             if(mag > 0)
                             {
                                 (d->vel = rft.normalize()).mul(mag);
