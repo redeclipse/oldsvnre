@@ -9,28 +9,54 @@ namespace bomber
         return false;
     }
 
+    float fixrot(float c)
+    {
+        float angle = c;
+        while(angle < 0.0f) angle += 360.0f;
+        while(angle >= 360.0f) angle -= 360.0f;
+        return angle;
+    }
+
+    float offrot(float a, float b)
+    {
+        float angle = fixrot(a)-fixrot(b);
+        while(angle < -180.0f) angle += 360.0f;
+        while(angle >= 180.0f) angle -= 360.0f;
+        return fabs(angle);
+    }
+
+    VAR(IDF_PERSIST, bombertargetintersect, 0, 1, 1);
+    VAR(IDF_PERSIST, bombertargetangle, 0, 1, 1);
     int findtarget(gameent *d)
     {
-        float bestdist = 1e16f;
+        vec dest;
         gameent *e = NULL;
+        if(bombertargetintersect)
+        {
+            findorientation(d->o, d->yaw, d->pitch, dest);
+            if((e = game::intersectclosest(d->o, dest, d)) != NULL) return e->clientnum;
+        }
+        float bestangle = 1e16f, bestdist = 1e16f;
         int best = -1;
-        vec targ;
         int numdyns = game::numdynents();
         loopk(d->aitype != AI_NONE ? 4 : 2)
         {
+            float fx = k >= 2 ? 360 : (d->ai ? d->ai->views[0] : curfov), fy = k >= 2 ? 360 : (d->ai ? d->ai->views[1] : fovy);
             loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && e->team == d->team && e->state == CS_ALIVE && (k%2 ? d->aitype == AI_BOT : d->aitype == AI_NONE))
             {
-                float fx = k >= 2 ? 360 : (d->ai ? d->ai->views[0] : curfov), fy = k >= 2 ? 360 : (d->ai ? d->ai->views[1] : fovy);
-                if(getsight(d->o, d->yaw, d->pitch, e->o, targ, bestdist, fx, fy))
+                if(getsight(d->o, d->yaw, d->pitch, e->o, dest, 1e16f, fx, fy))
                 {
-                    vec dir = vec(e->o).sub(d->o).normalize();
-                    float yaw, pitch; vectoyawpitch(dir, yaw, pitch);
-                    while(yaw < 0) yaw += 360; while(yaw >= 360) yaw -= 360;
-                    float dist = fabs(d->yaw-yaw);
-                    if(dist < bestdist)
+                    vec dir = vec(e->o).sub(d->o);
+                    float dist = dir.magnitude();
+                    if(dist > 1e-3f) dir.div(dist);
+                    float yaw = 0, pitch = 0;
+                    vectoyawpitch(dir, yaw, pitch);
+                    float offyaw = offrot(d->yaw, yaw), offpitch = offrot(d->pitch, pitch), offangle = offpitch+offyaw;
+                    if(best < 0 || (bombertargetangle ? (offangle < bestangle || (offangle <= bestangle && dist < bestdist)) : (dist < bestdist || (dist <= bestdist && offangle < bestangle))))
                     {
                         best = e->clientnum;
                         bestdist = dist;
+                        bestangle = offangle;
                     }
                 }
             }
