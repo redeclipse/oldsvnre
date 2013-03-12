@@ -87,6 +87,21 @@ namespace aiman
                 ci->state.model = rnd(PLAYERTYPES);
                 ci->state.setvanity("tophat/metal badge"); // the first slot is special
                 copystring(ci->name, aistyle[ci->state.aitype].name, MAXNAMELEN);
+                if(ci->state.aitype == AI_BOT)
+                {
+                    const char *list = ci->state.model ? G(botfemalenames) : G(botmalenames);
+                    int len = listlen(list);
+                    if(len > 0)
+                    {
+                        int r = rnd(len);
+                        char *name = indexlist(list, r);
+                        if(name)
+                        {
+                            if(*name) copystring(ci->name, name, MAXNAMELEN);
+                            delete[] name;
+                        }
+                    }
+                }
                 ci->state.state = CS_DEAD;
                 ci->team = type == AI_BOT ? T_NEUTRAL : T_ENEMY;
                 ci->online = ci->connected = ci->ready = true;

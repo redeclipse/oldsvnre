@@ -944,7 +944,7 @@ namespace server
         }
         defformatstring(cname)("\fs\f[%d]%s", TEAM(ci->team, colour), name);
         concatstring(colored, cname);
-        if(!name[0] || ci->state.aitype == AI_BOT || (ci->state.aitype < AI_START && dupname && duplicatename(ci, name)))
+        if(!name[0] || (ci->state.aitype < AI_START && dupname && duplicatename(ci, name)))
         {
             defformatstring(s)("%s[%d]", name[0] ? " " : "", ci->clientnum);
             concatstring(colored, s);

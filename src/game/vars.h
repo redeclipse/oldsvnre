@@ -316,6 +316,8 @@ GVAR(0, botskillmin, 1, 75, 101);
 GVAR(0, botskillmax, 1, 85, 101);
 GVAR(0, botlimit, 0, 32, VAR_MAX);
 GVAR(0, botoffset, VAR_MIN, 0, VAR_MAX);
+GSVAR(IDF_ADMIN, botmalenames, "");
+GSVAR(IDF_ADMIN, botfemalenames, "");
 GFVAR(0, botspeed, 0, 1, FVAR_MAX);
 GFVAR(0, botscale, FVAR_NONZERO, 1, FVAR_MAX);
 GFVAR(0, coopbalance, FVAR_NONZERO, 1.5f, FVAR_MAX);
