@@ -264,8 +264,10 @@ static const char *gettexvar(const char *var)
 static float draw_icon(Texture *&tex, const char *name, float x, float y, float scale)
 {
     if(!name && !*name) return 0;
-    if(*name == '$') name = gettexvar(++name);
-    Texture *t = textureload(name, 3);
+    const char *file = name;
+    if(*file == '$') file = gettexvar(++file);
+    if(!*file) { conoutf("invalid texture: %s (%s)", name, file); return 0; }
+    Texture *t = textureload(file, 3);
     if(!t) return 0;
     if(tex != t)
     {
@@ -283,8 +285,11 @@ static float draw_icon(Texture *&tex, const char *name, float x, float y, float 
 
 static float icon_width(const char *name, float scale)
 {
-    if(*name == '$') name = gettexvar(++name);
-    Texture *t = textureload(name, 3);
+    if(!name && !*name) return 0;
+    const char *file = name;
+    if(*file == '$') file = gettexvar(++file);
+    if(!*file) { conoutf("invalid texture: %s (%s)", name, file); return 0; }
+    Texture *t = textureload(file, 3);
     if(!t) return 0;
     return (t->w*scale*FONTX)/t->h;
 }

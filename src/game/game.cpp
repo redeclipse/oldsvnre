@@ -1867,7 +1867,7 @@ namespace game
         }
         defformatstring(cname)("\fs\f[%d]%s", TEAM(d->team, colour), name);
         concatstring(colored, cname);
-        if(!name[0] || d->aitype == AI_BOT || (d->aitype < AI_START && dupname && duplicatename(d, name)))
+        if(!name[0] || (d->aitype < AI_START && dupname && duplicatename(d, name)))
         {
             defformatstring(s)("%s[%d]", name[0] ? " " : "", d->clientnum);
             concatstring(colored, s);
