@@ -1575,8 +1575,8 @@ namespace game
 #endif
         if(aistyle[d->aitype].living && gibscale > 0)
         {
-            int gib = clamp(max(damage, 5)/5, 1, 15), amt = int((rnd(gib)+gib+1)*gibscale);
-            if(d->obliterated) amt *= 3;
+            int gib = clamp(max(damage, 10)/10, 1, 20), amt = int((rnd(gib)+gib)*gibscale);
+            if(d->obliterated) amt *= 2;
             loopi(amt) projs::create(pos, pos, true, d, PRJ_GIBS, rnd(gibfade)+gibfade, 0, rnd(500)+1, rnd(50)+10);
         }
         if(m_team(gamemode, mutators) && d->team == actor->team && d != actor && actor == player1)
