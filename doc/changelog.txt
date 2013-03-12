@@ -3,8 +3,6 @@ Gameplay:
  * Increased overall AI skill
  * Radar now always tracks players who are dominating you, and shows everyone
    else if you are last alive in duel/survivor
- * Made duel/survivor enter overtime if a round is in progress when
-   intermission is scheduled to start
  * New thirdperson style with camera postion to the side (adjust with
    /thirdpersondist and /thirdpersonside)
  * New default firstperson style with visible legs
@@ -14,23 +12,25 @@ Gameplay:
 
 Weapons:
  * Weapons no longer reset gravity acceleration (reduces in-air pinning)
- * Plasma primary damage and explosion radius increased
+ * Plasma primary damage and explosion radius increased, reload speed increased
  * Melee now only activates if player is airborne or dashing/sliding, and only
    in a short window of time
  * Mines, new weapon, primary proximity mine, secondary tripwire mine,
    pickup-based (like grenade)
- * Rifle explosion size and hitpush reduced (reduces hit area, total explosion
-   damage, and pushing force)
- * SMG secondary now sticks to objects and explodes radially after a short
+ * Rifle explosion size, hitpush and firing speed reduced
+ * SMG secondary now sticks to geometry and explodes radially after a short
    delay, primary spread reduced
  * Pistol secondary spread increased
  * Sword range halved
  * Projectiles now pass through teleporters
+ * Grenade firing speed increased
 
 Modes & Mutators:
  * Reduced number of bots in coop to 3/2 of humans
  * Enabled multi-coop (one human team and multiple bot teams)
  * Removed expert from default set of allowed mutators
+ * Made duel/survivor enter overtime if a round is in progress when
+   intermission is scheduled to start
  * Changed default mutator to arena (classic pickup play available as
    "classic" mutator)
  * Removed ballistic mutator
@@ -38,6 +38,10 @@ Modes & Mutators:
    spawn at normal mine & grenade spawns)
  * Added gauntlet mode (one team tries to run a trial map, other team tries to
    hinder, switches at half-time)
+ * Time-trial now spawns with weapons for movement tricks, collisions and
+   weapons have no effect on opponents
+ * Passing the bomber-ball now prioritizes players close to crosshair
+ * Bomber-ball 'hold' now resets bomb fuse when bomb-carrier kills enemies
 
 Maps:
  * Assigned map music to all maps
@@ -85,6 +89,7 @@ Interface & Menus:
  * Added new "circle bar" showing health, impulse and ammo simultaneously at
    crosshair location
  * Added sliders to set player(over|under)tone in extra tab of profile menu
+ * Bots now have names
 
 Modding & Mapmaking:
  * Added support for up to 4 types of water, lava, and glass
@@ -117,7 +122,7 @@ Data Assets:
  * Added 121 new textures from philipk's 'pk01' and 'pk02' sets
  * grunt renamed to drone
  * Improved shotgun animation
- * Improved thirdperson player model animation
+ * Improved thirdperson player model and weapon animation
  * Added vanity items for players
  * Added new vapour sound
  * Added support for models rotating off of their model links and spin rolling
@@ -160,6 +165,8 @@ Additional fixed bugs:
  * #303 - Red Eclipse shortly shows 1 death too many while waiting to respawn
  * #254 - getvartype always returns 0
  * #281 - /resetgl gives blurshader error if octadir is used
+ * #344 - "cancel" in loadout selection just makes the loadout selection menu
+          reappear
 
 
 = Red Eclipse 1.3.1 =
