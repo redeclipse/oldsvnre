@@ -229,7 +229,6 @@ GFVAR(0, teamdamagescale, FVAR_MIN, 1, FVAR_MAX); // 0 = off, anything else = sc
 GVAR(0, teambalance, 0, 1, 2); // 0 = off, 1 = by number then rank, 2 = by rank then number
 GVAR(0, teampersist, 0, 1, 2); // 0 = off, 1 = only attempt, 2 = forced
 GVAR(0, pointlimit, 0, 0, VAR_MAX); // finish when score is this or more
-GVAR(0, forcebalance, -1, -1, 1); // -1 = off, 0 = force no balancing, 1 = force map balancing
 
 GVAR(0, capturelimit, 0, 0, VAR_MAX); // finish when score is this or more
 GVAR(0, captureresetdelay, 0, 30000, VAR_MAX);
