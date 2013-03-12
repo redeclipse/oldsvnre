@@ -5,7 +5,7 @@ namespace bomber
 
     void killed(gameent *d, gameent *actor)
     {
-        if(m_gsp1(game::gamemode, game::mutators) && (!m_team(game::gamemode, game::mutators) || d->team != actor->team))
+        if(actor && m_gsp1(game::gamemode, game::mutators) && (!m_team(game::gamemode, game::mutators) || d->team != actor->team))
         {
             loopv(st.flags) if(isbomberaffinity(st.flags[i]) && st.flags[i].owner == actor)
                 st.flags[i].taketime = lastmillis;

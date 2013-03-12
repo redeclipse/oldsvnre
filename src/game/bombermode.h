@@ -58,7 +58,7 @@ struct bomberservmode : bomberstate, servmode
     {
         if(!hasflaginfo) return;
         dropaffinity(ci, ci->state.o, vec(ci->state.vel).add(ci->state.falling));
-        if(m_gsp1(gamemode, mutators) && (!m_team(gamemode, mutators) || ci->team != actor->team))
+        if(actor && m_gsp1(gamemode, mutators) && (!m_team(gamemode, mutators) || ci->team != actor->team))
         {
             loopv(flags) if(isbomberaffinity(flags[i]) && flags[i].owner == actor->clientnum)
                 flags[i].taketime = gamemillis;
