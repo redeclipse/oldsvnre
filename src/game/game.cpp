@@ -1257,8 +1257,7 @@ namespace game
         if(style&FRAG_HEADSHOT) d->headless = true;
         bool burning = burn(d, weap, flags), bleeding = bleed(d, weap, flags), shocking = shock(d, weap, flags), isfocus = d == focus || actor == focus,
              isme = d == player1 || actor == player1, allowanc = obitannounce && (obitannounce >= 2 || isfocus) && (m_fight(gamemode) || isme) && actor->aitype < AI_START;
-        int anc = d == focus && !m_duke(gamemode, mutators) && !m_trial(gamemode) && allowanc ? S_V_FRAGGED : -1,
-            dth = d->aitype >= AI_START || d->obliterated ? S_SPLOSH : S_DEATH, curmat = material&MATF_VOLUME;
+        int anc = d == focus && allowanc ? S_V_FRAGGED : -1, dth = d->aitype >= AI_START || d->obliterated ? S_SPLOSH : S_DEATH, curmat = material&MATF_VOLUME;
         if(d != player1) d->resetinterp();
         if(!isme) { loopv(log) if(log[i] == player1) { isme = true; break; } }
         formatstring(d->obit)("%s ", colourname(d));

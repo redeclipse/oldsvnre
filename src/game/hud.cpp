@@ -2483,7 +2483,7 @@ namespace hud
                 if(inventoryhealth == 1) sy += ty;
                 popfont();
             }
-            if(inventoryvelocity >= (m_trial(game::gamemode) || m_gauntlet(game::gamemode) ? 1 : 2))
+            if(inventoryvelocity >= (m_checkpoint(game::gamemode) ? 1 : 2))
             {
                 float fade = blend*inventoryvelocityblend;
                 pushfont("emphasis");

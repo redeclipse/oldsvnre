@@ -2176,6 +2176,12 @@ namespace server
         if(ci->team != team)
         {
             bool reenter = false;
+            if(m_checkpoint(gamemode))
+            {
+                ci->state.cpmillis = 0;
+                ci->state.cpnodes.shrink(0);
+                sendf(-1, 1, "ri3", N_CHECKPOINT, ci->clientnum, -1);
+            }
             if(flags&TT_RESET) waiting(ci, DROP_WEAPONS);
             else if(flags&TT_SMODE && ci->state.state == CS_ALIVE)
             {
@@ -3360,14 +3366,11 @@ namespace server
             mutate(smuts, if(!mut->damage(ci, ci, ci->state.health, -1, flags, material)) { return; });
         }
         ci->state.spree = 0;
-        if(m_trial(gamemode)) // only want this in time sensitive games
+        if(m_checkpoint(gamemode) && (!flags || ci->state.cpnodes.length() == 1)) // reset if suicided or hasn't reached another checkpoint yet
         {
-            if(!flags || ci->state.cpnodes.length() == 1) // reset if suicided or hasn't reached another checkpoint yet
-            {
-                ci->state.cpmillis = 0;
-                ci->state.cpnodes.shrink(0);
-                sendf(-1, 1, "ri3", N_CHECKPOINT, ci->clientnum, -1);
-            }
+            ci->state.cpmillis = 0;
+            ci->state.cpnodes.shrink(0);
+            sendf(-1, 1, "ri3", N_CHECKPOINT, ci->clientnum, -1);
         }
         else if(!m_nopoints(gamemode, mutators)) givepoints(ci, smode ? smode->points(ci, ci) : -1);
         ci->state.deaths++;
