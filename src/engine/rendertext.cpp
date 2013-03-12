@@ -1,8 +1,9 @@
 #include "engine.h"
 
-VAR(IDF_PERSIST, blinkingtext, 0, 250, VAR_MAX);
+VAR(IDF_PERSIST, textblinking, 0, 350, VAR_MAX);
 FVARF(IDF_PERSIST, textscale, FVAR_NONZERO, 1, FVAR_MAX, UI::setup());
-FVAR(IDF_PERSIST, fadedtext, 0, 0.65f, 1);
+FVAR(IDF_PERSIST, textfaded, 0, 0.65f, 1);
+VAR(IDF_PERSIST, textminintensity, 0, 36, 255);
 
 static inline bool htcmp(const char *key, const font &f) { return !strcmp(key, f.name); }
 
@@ -201,7 +202,10 @@ static float draw_char(Texture *&tex, int c, float x, float y, float scale)
     return scale*info.advance;
 }
 
-static void text_color(char c, char *stack, int size, int &sp, bvec &color, int r, int g, int b, int a)
+#define TVEC1(a) (ivec::fromcolor(a).mul(255-textminintensity).div(255).add(textminintensity).min(255))
+#define TVEC3(a, b, c) (ivec(a, b, c).mul(255-textminintensity).div(255).add(textminintensity).min(255))
+
+static void text_color(char c, char *stack, int size, int &sp, ivec &color, int r, int g, int b, int a)
 {
     char d = c;
     if(d=='s') // save color
@@ -218,33 +222,33 @@ static void text_color(char c, char *stack, int size, int &sp, bvec &color, int 
     int f = a;
     switch(d)
     {
-        case 'g': case '0': color = bvec( 64, 255,  64); break; // green
-        case 'b': case '1': color = bvec(86,  92,  255); break; // blue
-        case 'y': case '2': color = bvec(255, 255,   0); break; // yellow
-        case 'r': case '3': color = bvec(255,  64,  64); break; // red
-        case 'a': case '4': color = bvec(192, 192, 192); break; // grey
-        case 'm': case '5': color = bvec(255, 186, 255); break; // magenta
-        case 'o': case '6': color = bvec(255,  64,   0); break; // orange
-        case 'w': case '7': color = bvec(255, 255, 255); break; // white
-        case 'k': case '8': color = bvec(0,     0,   0); break; // black
-        case 'c': case '9': color = bvec(64,  255, 255); break; // cyan
-        case 'v': color = bvec(192,  96, 255); break; // violet
-        case 'p': color = bvec(224,  64, 224); break; // purple
-        case 'n': color = bvec(164,  72,  56); break; // brown
-        case 'G': color = bvec( 86, 164,  56); break; // dark green
-        case 'B': color = bvec( 56,  64, 172); break; // dark blue
-        case 'Y': color = bvec(172, 172,   0); break; // dark yellow
-        case 'R': color = bvec(172,  56,  56); break; // dark red
-        case 'M': color = bvec(172,  72, 172); break; // dark magenta
-        case 'O': color = bvec(172,  56,   0); break; // dark orange
-        case 'C': color = bvec(48,  172, 172); break; // dark cyan
-        case 'A': case 'd': color = bvec(102, 102, 102); break; // dark grey
-        case 'P': color = bvec(255, 168, 168); break; // pink
+        case 'g': case '0': color = TVEC3( 64, 255,  64); break; // green
+        case 'b': case '1': color = TVEC3(86,  92,  255); break; // blue
+        case 'y': case '2': color = TVEC3(255, 255,   0); break; // yellow
+        case 'r': case '3': color = TVEC3(255,  64,  64); break; // red
+        case 'a': case '4': color = TVEC3(192, 192, 192); break; // grey
+        case 'm': case '5': color = TVEC3(255, 186, 255); break; // magenta
+        case 'o': case '6': color = TVEC3(255,  64,   0); break; // orange
+        case 'w': case '7': color = TVEC3(255, 255, 255); break; // white
+        case 'k': case '8': color = TVEC3(0,     0,   0); break; // black
+        case 'c': case '9': color = TVEC3(64,  255, 255); break; // cyan
+        case 'v': color = TVEC3(192,  96, 255); break; // violet
+        case 'p': color = TVEC3(224,  64, 224); break; // purple
+        case 'n': color = TVEC3(164,  72,  56); break; // brown
+        case 'G': color = TVEC3( 86, 164,  56); break; // dark green
+        case 'B': color = TVEC3( 56,  64, 172); break; // dark blue
+        case 'Y': color = TVEC3(172, 172,   0); break; // dark yellow
+        case 'R': color = TVEC3(172,  56,  56); break; // dark red
+        case 'M': color = TVEC3(172,  72, 172); break; // dark magenta
+        case 'O': color = TVEC3(172,  56,   0); break; // dark orange
+        case 'C': color = TVEC3(48,  172, 172); break; // dark cyan
+        case 'A': case 'd': color = TVEC3(102, 102, 102); break; // dark grey
+        case 'P': color = TVEC3(255, 168, 168); break; // pink
         case 'e': case 'E': f -= d!='E' ? f/2 : f/4; break;
-        case 'u': color = bvec(r, g, b); break; // user colour
+        case 'u': color = TVEC3(r, g, b); break; // user colour
         case 'Z': default: break; // everything else
     }
-    glColor4ub(color.x, color.y, color.z, f);
+    glColor4ub((uchar)color.x, (uchar)color.y, (uchar)color.z, f);
 }
 
 #define FONTX int(curfont->maxh*textscale)
@@ -299,7 +303,7 @@ static float icon_width(const char *name, float scale)
     if(g[h] == 'z' && g[h+1]) \
     { \
         h++; \
-        bool alt = blinkingtext && totalmillis%(blinkingtext*2) > blinkingtext; \
+        bool alt = textblinking && totalmillis%(textblinking*2) > textblinking; \
         TEXTCOLOR(h); \
         if(g[h+1]) \
         { \
@@ -314,7 +318,7 @@ static float icon_width(const char *name, float scale)
         const char *end = strchr(start, ']'); \
         if(end) \
         { \
-            if(end > start) { TEXTHEXCOLOR(bvec(parseint(start))); } \
+            if(end > start) { TEXTHEXCOLOR(TVEC1(parseint(start))); } \
             h += end-start; \
         } \
         else break; \
@@ -466,18 +470,18 @@ int draw_text(const char *str, int rleft, int rtop, int r, int g, int b, int a, 
         { \
             cx = x; \
             cy = y; \
-            if(!hasfade && fadedtext < 1) \
+            if(!hasfade && textfaded < 1) \
             { \
                 hasfade = true; \
-                fade = int(fade*fadedtext); \
+                fade = int(fade*textfaded); \
                 xtraverts += varray::end(); \
-                glColor4ub(color.x, color.y, color.z, fade); \
+                glColor4ub((uchar)color.x, (uchar)color.y, (uchar)color.z, fade); \
             } \
         }
     #define TEXTWHITE(idx)
     #define TEXTLINE(idx) ly += FONTH;
     #define TEXTCOLOR(idx) if(usecolor) text_color(str[idx], colorstack, sizeof(colorstack), colorpos, color, r, g, b, fade);
-    #define TEXTHEXCOLOR(ret) if(usecolor) { xtraverts += varray::end(); color = ret; glColor4ub(color.x, color.y, color.z, fade); }
+    #define TEXTHEXCOLOR(ret) if(usecolor) { xtraverts += varray::end(); color = ret; color.mul(255-textminintensity).div(255).add(textminintensity); glColor4ub((uchar)color.x, (uchar)color.y, (uchar)color.z, fade); }
     #define TEXTICON(ret) { x += draw_icon(tex, ret, left+x, top+y, scale)+2; }
     #define TEXTCHAR(idx) { draw_char(tex, c, left+x, top+y, scale); x += cw; }
     #define TEXTWORD TEXTWORDSKELETON
@@ -495,7 +499,7 @@ int draw_text(const char *str, int rleft, int rtop, int r, int g, int b, int a, 
     float cx = -FONTW, cy = 0;
     char colorstack[10];
     memset(colorstack, 'u', sizeof(colorstack)); //indicate user color
-    bvec color(r, g, b);
+    ivec color = TVEC3(r, g, b);
     glColor4ub(color.x, color.y, color.z, fade);
     TEXTSKELETON
     TEXTEND(cursor)

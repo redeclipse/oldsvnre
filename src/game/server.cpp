@@ -932,13 +932,20 @@ namespace server
         return TEAM(ci->team, colour);
     }
 
+    const char *privnamex(int priv, int aitype)
+    {
+        if(aitype != AI_NONE) return "bot";
+        const char *privnames[PRIV_MAX] = { "none", "player", "supporter", "moderator", "operator", "administrator", "developer", "creator" };
+        return privnames[clamp(priv, 0, PRIV_MAX-1)];
+    }
+
     const char *colourname(clientinfo *ci, char *name = NULL, bool icon = true, bool dupname = true)
     {
         if(!name) name = ci->name;
         static string colored; colored[0] = 0;
         if(icon)
         {
-            defformatstring(cicon)("\fs\f[%d]\f($priv%stex)\fS", findcolour(ci), privname(ci->privilege, false, ci->state.aitype));
+            defformatstring(cicon)("\fs\f[%d]\f($priv%stex)\fS", findcolour(ci), privnamex(ci->privilege, ci->state.aitype));
             concatstring(colored, cicon);
         }
         defformatstring(cname)("\fs\f[%d]%s", TEAM(ci->team, colour), name);
