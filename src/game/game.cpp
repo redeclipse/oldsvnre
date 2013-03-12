@@ -80,10 +80,11 @@ namespace game
     FVAR(IDF_PERSIST, firstpersonbodyside, -10, 0, 10);
     FVAR(IDF_PERSIST, firstpersonbodypitch, -1, 1, 1);
 
-    FVAR(IDF_PERSIST, firstpersonspine, 0, 3, 20);
+    FVAR(IDF_PERSIST, firstpersonspine, 0, 3.25f, 20);
     FVAR(IDF_PERSIST, firstpersonpitchmin, 0, 90, 90);
     FVAR(IDF_PERSIST, firstpersonpitchmax, 0, 45, 90);
     FVAR(IDF_PERSIST, firstpersonpitchscale, -1, 1, 1);
+    FVAR(IDF_PERSIST, firstpersonbodyfeet, -1, 4.75f, 20);
 
     VAR(IDF_PERSIST, firstpersonsway, 0, 1, 1);
     FVAR(IDF_PERSIST, firstpersonswaymin, 0, 0.1f, 1);
@@ -2750,11 +2751,10 @@ namespace game
         {
             o.sub(vec(yaw*RAD, 0.f).mul(firstpersonbodydist+firstpersonspineoffset));
             o.sub(vec(yaw*RAD, 0.f).rotate_around_z(90*RAD).mul(firstpersonbodyside));
-            float hoff = d->zradius-d->height;
-            if(hoff > 0 && (!onfloor || d->timeonfloor < 25))
+            if(firstpersonbodyfeet >= 0 && d->wantshitbox())
             {
-                if(onfloor) hoff *= (25-d->timeonfloor)/25.f;
-                o.z -= hoff;
+                float minz = max(d->toe[0].z, d->toe[1].z)+firstpersonbodyfeet;
+                if(minz > camera1->o.z) o.z -= minz-camera1->o.z;
             }
         }
         else if(third == 1 && d == focus && d == player1 && thirdpersonview(true, d))
@@ -3214,8 +3214,8 @@ namespace game
             {
                 if(d->hasmelee(lastmillis, true, physics::sliding(d, true), d->physstate >= PHYS_SLOPE || d->onladder || physics::liquidcheck(d))) loopi(2)
                 {
-                    float amt = (lastmillis-d->weaplast[W_MELEE])/float(W2(W_MELEE, time, true)), scale = (amt > 0.5f ? 1.f-amt : amt)*2;
-                    part_create(PART_HINT, 1, d->toe[i], TEAM(d->team, colour), 2.f, scale*blend, 0, 0);
+                    float amt = 1-((lastmillis-d->weaplast[W_MELEE])/float(d->weapwait[W_MELEE]));
+                    part_create(PART_HINT, 1, d->toe[i], TEAM(d->team, colour), 2.f, amt*blend, 0, 0);
                 }
                 bool last = lastmillis-d->weaplast[d->weapselect] > 0,
                      powering = last && d->weapstate[d->weapselect] == W_S_POWER,
