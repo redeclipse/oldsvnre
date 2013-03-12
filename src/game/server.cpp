@@ -819,7 +819,6 @@ namespace server
     {
         setpause(false);
         setmod(sv_botoffset, 0);
-        setmod(sv_forcebalance, 0);
         if(*sv_prevmaps) setmods(sv_prevmaps, "");
         if(G(resetmmonend)) { mastermode = MM_OPEN; resetallows(); }
         if(G(resetbansonend)) resetbans();
@@ -1941,7 +1940,6 @@ namespace server
         setpause(false);
         checkdemorecord(true);
         setmod(sv_botoffset, 0);
-        setmod(sv_forcebalance, 0);
         if(G(resetmmonend) >= 2) { mastermode = MM_OPEN; resetallows(); }
         if(G(resetvarsonend) >= 2) resetgamevars(true);
         if(G(resetbansonend) >= 2) resetbans();
