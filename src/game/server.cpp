@@ -945,10 +945,10 @@ namespace server
         static string colored; colored[0] = 0;
         if(icon)
         {
-            defformatstring(cicon)("\fs\f[%d]\f($priv%stex)\fS", findcolour(ci), privnamex(ci->privilege, ci->state.aitype));
+            defformatstring(cicon)("\fs\f[%d]\f($priv%stex)\fS", TEAM(ci->team, colour), privnamex(ci->privilege, ci->state.aitype));
             concatstring(colored, cicon);
         }
-        defformatstring(cname)("\fs\f[%d]%s", TEAM(ci->team, colour), name);
+        defformatstring(cname)("\fs\f[%d]%s", findcolour(ci), name);
         concatstring(colored, cname);
         if(!name[0] || (ci->state.aitype < AI_START && dupname && duplicatename(ci, name)))
         {
@@ -1053,9 +1053,19 @@ namespace server
                 if(m_capture(mode) && m_gsp3(mode, muts)) break;
                 else if(m_bomber(mode) && m_gsp2(mode, muts)) break;
             }
-            if(type == 1 || type == 3 || type == 4) concatstring(mtname, i >= G_M_GSP ? gametype[mode].gsp[i-G_M_GSP] : mutstype[i].name);
+            if(type == 1 || type == 3 || type == 4)
+            {
+                const char *n = i >= G_M_GSP ? gametype[mode].gsp[i-G_M_GSP] : mutstype[i].name;
+                if(!n || !*n) { mtname[0] = 0; break; }
+                concatstring(mtname, n);
+            }
             if(type == 3 || type == 4) concatstring(mtname, ": ");
-            if(type == 2 || type == 3 || type == 4 || type == 5) concatstring(mtname, i >= G_M_GSP ? gametype[mode].gsd[i-G_M_GSP] : mutstype[i].desc);
+            if(type == 2 || type == 3 || type == 4 || type == 5)
+            {
+                const char *n = i >= G_M_GSP ? gametype[mode].gsd[i-G_M_GSP] : mutstype[i].desc;
+                if(!n || !*n) { mtname[0] = 0; break; }
+                concatstring(mtname, n);
+            }
             break;
         }
         return mtname;

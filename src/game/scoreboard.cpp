@@ -46,6 +46,7 @@ namespace hud
     VAR(IDF_PERSIST, scoreconnecting, 0, 0, 1);
     VAR(IDF_PERSIST, scorehostinfo, 0, 0, 1);
     VAR(IDF_PERSIST, scoreicons, 0, 1, 1);
+    VAR(IDF_PERSIST|IDF_HEX, scorehilight, 0, 0x888888, 0xFFFFFF);
 
     static bool scoreson = false, scoresoff = false, shownscores = false;
     static int menustart = 0, menulastpress = 0;
@@ -399,23 +400,26 @@ namespace hud
             float hostpad = 0;
             bool hashandle = false;
             bool hashost = false;
+            bool hasbots = false;
             loopk(numgroups)
             {
                 scoregroup &sg = *groups[k];
-                loopscoregroup(namepad = max(namepad, (float)text_width(game::colourname(o))));
-                if(scorehandles) loopscoregroup({
-                    if(o->handle[0])
+                loopscoregroup({
+                    if(scorebotinfo && o->aitype > AI_NONE) hasbots = true;
+                    namepad = max(namepad, (float)text_width(game::colourname(o, NULL, false, true)));
+                    if(scorehandles && o->handle[0])
                     {
                         handlepad = max(handlepad, (float)text_width(o->handle));
                         hashandle = true;
                     }
-                });
-                if(scorehostinfo) loopscoregroup({
-                    const char *host = scorehost(o);
-                    if(host && *host)
+                    if(scorehostinfo)
                     {
-                        hostpad = max(hostpad, (float)text_width(host));
-                        if(o->ownernum != game::player1->clientnum) hashost = true;
+                        const char *host = scorehost(o);
+                        if(host && *host)
+                        {
+                            hostpad = max(hostpad, (float)text_width(host));
+                            if(o->ownernum != game::player1->clientnum) hashost = true;
+                        }
                     }
                 });
             }
@@ -432,48 +436,34 @@ namespace hud
                 uicenter(g, {
                     scoregroup &sg = *groups[k];
                     int bgcolor = sg.team && m_fight(game::gamemode) && m_team(game::gamemode, game::mutators) ? TEAM(sg.team, colour) : 0x333333;
-                    uilist(g, {
-                        if(sg.team && m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
-                        {
-                            uicenterlist(g, {
-                                g.background(bgcolor);
-                                g.text("", 0, teamtexname(sg.team), TEAM(sg.team, colour));
-                            });
-                        }
-                        g.space(1);
-                        loopscoregroup({
-                            const char *status = questiontex;
-                            switch(o->state)
-                            {
-                                case CS_ALIVE: status = playertex; break;
-                                case CS_DEAD: status = deadtex; break;
-                                case CS_WAITING: status = waitingtex; break;
-                                case CS_EDITING: status = editingtex; break;
-                                default: break;
-                            }
-                            uicenterlist(g, g.text("", 0, status, TEAM(sg.team, colour)));
-                        });
-                    });
-
                     if(sg.team && m_team(game::gamemode, game::mutators))
                     {
                         g.pushlist();
                         uilist(g, {
                             g.background(bgcolor);
                             if(m_defend(game::gamemode) && ((defendlimit && sg.total >= defendlimit) || sg.total == INT_MAX))
-                                g.textf("%s: WIN", 0xFFFFFF, NULL, 0, TEAM(sg.team, name));
-                            else if(m_laptime(game::gamemode, game::mutators)) g.textf("%s: %s", 0xFFFFFF, NULL, 0, TEAM(sg.team, name), sg.total ? timetostr(sg.total) : "\fadnf");
-                            else g.textf("%s: %d", 0xFFFFFF, NULL, 0, TEAM(sg.team, name), sg.total);
+                                g.textf("%s: WIN", 0xFFFFFF, teamtexname(sg.team), TEAM(sg.team, colour), TEAM(sg.team, name));
+                            else if(m_laptime(game::gamemode, game::mutators)) g.textf("%s: %s", 0xFFFFFF, teamtexname(sg.team), TEAM(sg.team, colour), TEAM(sg.team, name), sg.total ? timetostr(sg.total) : "\fadnf");
+                            else g.textf("%s: %d", 0xFFFFFF, teamtexname(sg.team), TEAM(sg.team, colour), TEAM(sg.team, name), sg.total);
                             g.spring();
                         });
                         g.pushlist();
                     }
 
                     uilist(g, {
+                        uicenterlist(g, uipad(g, 0.25f, g.strut(1)));
+                        loopscoregroup(uicenterlist(g, {
+                            uipad(g, 0.25f, uicenterlist(g, g.text("", 0, hud::privtex(o->privilege, o->aitype), TEAM(sg.team, colour))));
+                        }));
+                    });
+
+                    uilist(g, {
                         uicenterlist(g, uipad(g, namepad, uicenterlist(g, g.text("name", 0xFFFFFF))));
                         loopscoregroup(uicenterlist(g, {
-                            if(o == game::player1) g.background(0x808080);
-                            uipad(g, 0.5f, uicenterlist(g, g.textf("%s", 0xFFFFFF, NULL, 0, game::colourname(o))));
+                            uipad(g, 0.25f, uicenterlist(g, {
+                                if(o == game::player1 && scorehilight) g.background(scorehilight);
+                                uilist(g, uipad(g, 0.25f, g.textf("%s", 0xFFFFFF, NULL, 0, game::colourname(o, NULL, false, true))));
+                            }));
                         }));
                     });
 
@@ -481,7 +471,9 @@ namespace hud
                     {
                         uilist(g, {
                             uicenterlist(g, uipad(g, 1, g.text("points", 0xFFFFFF)));
-                            loopscoregroup(uicenterlist(g, uipad(g, 0.5f, g.textf("%d", 0xFFFFFF, NULL, 0, o->points))));
+                            loopscoregroup(uicenterlist(g, {
+                                uipad(g, 0.5f, g.textf("%d", 0xFFFFFF, NULL, 0, o->points));
+                            }));
                         });
                     }
 
@@ -491,14 +483,18 @@ namespace hud
                         {
                             uilist(g, {
                                 uicenterlist(g, uipad(g, 4, g.text("best", 0xFFFFFF)));
-                                loopscoregroup(uicenterlist(g, uipad(g, 0.5f, g.textf("%s", 0xFFFFFF, NULL, 0, o->cptime ? timetostr(o->cptime) : "\fadnf"))));
+                                loopscoregroup(uicenterlist(g, {
+                                    uipad(g, 0.5f, g.textf("%s", 0xFFFFFF, NULL, 0, o->cptime ? timetostr(o->cptime) : "\fadnf"))
+                                }));
                             });
                         }
                         if(scorelaps && (scorelaps >= 2 || !m_laptime(game::gamemode, game::mutators)))
                         {
                             uilist(g, {
                                 uicenterlist(g, uipad(g, 4, g.text("laps", 0xFFFFFF)));
-                                loopscoregroup(uicenterlist(g, uipad(g, 0.5f, g.textf("%d", 0xFFFFFF, NULL, 0, o->cplaps))));
+                                loopscoregroup(uicenterlist(g, {
+                                    uipad(g, 0.5f, g.textf("%d", 0xFFFFFF, NULL, 0, o->cplaps))
+                                }));
                             });
                         }
                     }
@@ -507,7 +503,9 @@ namespace hud
                     {
                         uilist(g, {
                             uicenterlist(g, uipad(g, 1, g.text("frags", 0xFFFFFF)));
-                            loopscoregroup(uicenterlist(g, uipad(g, 0.5f, g.textf("%d", 0xFFFFFF, NULL, 0, o->frags))));
+                            loopscoregroup(uicenterlist(g, {
+                                uipad(g, 0.5f, g.textf("%d", 0xFFFFFF, NULL, 0, o->frags))
+                            }));
                         });
                     }
 
@@ -515,7 +513,9 @@ namespace hud
                     {
                         uilist(g, {
                             uicenterlist(g, uipad(g, 2, g.text("pj", 0xFFFFFF)));
-                            loopscoregroup(uicenterlist(g, uipad(g, 0.5f, g.textf("%d", 0xFFFFFF, NULL, 0, o->plag))));
+                            loopscoregroup(uicenterlist(g, {
+                                uipad(g, 0.5f, g.textf("%d", 0xFFFFFF, NULL, 0, o->plag))
+                            }));
                         });
                     }
 
@@ -523,7 +523,9 @@ namespace hud
                     {
                         uilist(g, {
                             uicenterlist(g, uipad(g, 2, g.text("ping", 0xFFFFFF)));
-                            loopscoregroup(uicenterlist(g, uipad(g, 0.5f, g.textf("%d", 0xFFFFFF, NULL, 0, o->ping))));
+                            loopscoregroup(uicenterlist(g, {
+                                uipad(g, 0.5f, g.textf("%d", 0xFFFFFF, NULL, 0, o->ping))
+                            }));
                         });
                     }
 
@@ -531,33 +533,32 @@ namespace hud
                     {
                         uilist(g, {
                             uicenterlist(g, uipad(g, 1, g.text("cn", 0xFFFFFF)));
-                            loopscoregroup(uicenterlist(g, uipad(g, 0.5f, g.textf("%d", 0xFFFFFF, NULL, 0, o->clientnum))));
+                            loopscoregroup(uicenterlist(g, {
+                                uipad(g, 0.5f, g.textf("%d", 0xFFFFFF, NULL, 0, o->clientnum))
+                            }));
                         });
                     }
 
-                    if(scorebotinfo)
+                    if(scorebotinfo && hasbots)
                     {
-                        bool hasbots = false;
-                        loopscoregroup(if(o->aitype > AI_NONE) { hasbots = true; break; });
-                        if(hasbots)
-                        {
-                            uilist(g, {
-                                uicenterlist(g, uipad(g, 1, g.text("sk", 0xFFFFFF)));
-                                loopscoregroup({
-                                    uicenterlist(g, uipad(g, 0.5f, {
-                                        if(o->aitype > AI_NONE) g.textf("%d", 0xFFFFFF, NULL, 0, o->skill);
-                                        else g.strut(1);
-                                    }));
+                        uilist(g, {
+                            uicenterlist(g, uipad(g, 1, g.text("sk", 0xFFFFFF)));
+                            loopscoregroup(uicenterlist(g, {
+                                uipad(g, 0.5f, {
+                                    if(o->aitype > AI_NONE) g.textf("%d", 0xFFFFFF, NULL, 0, o->skill);
+                                    else g.strut(1);
                                 });
-                            });
-                        }
+                            }));
+                        });
                     }
                     if(scorehandles && hashandle)
                     {
                         uilist(g, {
                             uicenterlist(g, uipad(g, handlepad, g.strut(1)));
                             loopscoregroup({
-                                uicenterlist(g, uipad(g, 0.5f, g.textf("%s", 0xFFFFFF, NULL, 0, o->handle)));
+                                uicenterlist(g, {
+                                    uipad(g, 0.5f, g.textf("%s", 0xFFFFFF, NULL, 0, o->handle))
+                                });
                             });
                         });
                     }
@@ -565,26 +566,43 @@ namespace hud
                     {
                         uilist(g, {
                             uicenterlist(g, uipad(g, hostpad, g.strut(1)));
-                            loopscoregroup(uicenterlist(g, uipad(g, 0.5f, g.textf("%s", 0xFFFFFF, NULL, 0, scorehost(o)))));
+                            loopscoregroup(uicenterlist(g, {
+                                uipad(g, 0.5f, g.textf("%s", 0xFFFFFF, NULL, 0, scorehost(o)))
+                            }));
                         });
                     }
-
                     if(scoreicons)
                     {
                         uilist(g, {
-                            uicenterlist(g, uipad(g, 0.25f, g.strut(1)));
-                            loopscoregroup(uicenterlist(g, uipad(g, 0.5f, {
-                                if((!m_team(game::gamemode, game::mutators) || o->team != game::focus->team))
+                            uicenterlist(g, uipad(g, 0.125f, g.strut(1)));
+                            loopscoregroup(uicenterlist(g, {
+                                uipad(g, 0.125f, {
+                                    if((!m_team(game::gamemode, game::mutators) || o->team != game::focus->team))
+                                    {
+                                        if(o->dominating.find(game::focus) >= 0) g.text("", 0, dominatingtex, TEAM(sg.team, colour));
+                                        else if(o->dominated.find(game::focus) >= 0) g.text("", 0, dominatedtex, TEAM(sg.team, colour));
+                                        else g.space(1);
+                                    }
+                                    else g.space(1);
+                                });
+                            }));
+                        });
+                        uilist(g, {
+                            uicenterlist(g, uipad(g, 0.125f, g.strut(1)));
+                            loopscoregroup(uicenterlist(g, {
+                                const char *status = questiontex;
+                                switch(o->state)
                                 {
-                                    if(o->dominating.find(game::focus) >= 0) g.text("", 0xFFFFFF, dominatingtex, 0xFFFFFF);
-                                    else if(o->dominated.find(game::focus) >= 0) g.text("", 0xFFFFFF, dominatedtex, 0xFFFFFF);
-                                    else g.strut(1);
+                                    case CS_ALIVE: status = playertex; break;
+                                    case CS_DEAD: status = deadtex; break;
+                                    case CS_WAITING: status = waitingtex; break;
+                                    case CS_EDITING: status = editingtex; break;
+                                    default: break; // spectators shouldn't be here
                                 }
-                                else g.strut(1);
-                            })));
+                                uipad(g, 0.125f, g.text("", 0, status, TEAM(sg.team, colour)));
+                            }));
                         });
                     }
-
                     if(sg.team && m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
                     {
                         g.poplist(); // horizontal
@@ -598,7 +616,7 @@ namespace hud
         if(scorespectators && spectators.length())
         {
             g.space(0.5f);
-            uifont(g, "little", {
+            uicenterlist(g, uifont(g, "little", {
                 int count = numgroups > 1 ? 5 : 3;
                 bool pushed = false;
                 loopv(spectators)
@@ -609,17 +627,14 @@ namespace hud
                         g.pushlist();
                         pushed = true;
                     }
-                    uicenter(g, uilistv(g, 2, uipad(g, 0.5f, {
-                        g.text("", 0xFFFFFF, spectatortex, game::getcolour(o, game::playerdisplaytone));
-                        uilistv(g, 2, {
-                            if(o == game::player1) g.background(0x406040);
-                            uilistv(g, 2, uipad(g, 0.25f, {
-                                if(scoreclientnum || game::player1->privilege >= PRIV_ELEVATED)
-                                    g.textf("%s [%d]", 0xFFFFFF, NULL, 0, game::colourname(o, NULL, true, false), o->clientnum);
-                                else g.textf("%s ", 0xFFFFFF, NULL, 0, game::colourname(o));
-                            }));
+                    uicenterlist(g, {
+                        if(o == game::player1 && scorehilight) g.background(scorehilight);
+                        uipad(g, 0.5f, {
+                            if(scoreclientnum || game::player1->privilege >= PRIV_ELEVATED)
+                                g.textf("%s [%d]", 0xFFFFFF, NULL, 0, game::colourname(o, NULL, true, false), o->clientnum);
+                            else g.textf("%s ", 0xFFFFFF, NULL, 0, game::colourname(o));
                         });
-                    })));
+                    });
                     if(!((i+1)%count) && pushed)
                     {
                         g.poplist();
@@ -627,7 +642,7 @@ namespace hud
                     }
                 }
                 if(pushed) g.poplist();
-            });
+            }));
         }
         if(m_play(game::gamemode) && game::player1->state != CS_SPECTATOR && (game::intermission || scoresinfo))
         {

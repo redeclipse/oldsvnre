@@ -224,6 +224,13 @@ namespace game
     VAR(IDF_PERSIST, autoloadweap, 0, 0, 1); // 0 = off, 1 = auto-set loadout weapons
     SVAR(IDF_PERSIST, favloadweaps, "");
 
+    bool needname(gameent *d)
+    {
+        if(!d || *d->name || client::waiting()) return false;
+        return true;
+    }
+    ICOMMAND(0, needname, "b", (int *cn), intret(needname(*cn >= 0 ? getclient(*cn) : player1) ? 1 : 0));
+
     bool needloadout(gameent *d)
     {
         if(!d || !m_loadout(gamemode, mutators) || client::waiting()) return false;
@@ -1863,10 +1870,10 @@ namespace game
         static string colored; colored[0] = 0;
         if(icon)
         {
-            defformatstring(cicon)("\fs\f[%d]\f($priv%stex)\fS", findcolour(d), hud::privname(d->privilege, d->aitype));
+            defformatstring(cicon)("\fs\f[%d]\f($priv%stex)\fS", TEAM(d->team, colour), hud::privname(d->privilege, d->aitype));
             concatstring(colored, cicon);
         }
-        defformatstring(cname)("\fs\f[%d]%s", TEAM(d->team, colour), name);
+        defformatstring(cname)("\fs\f[%d]%s", findcolour(d), name);
         concatstring(colored, cname);
         if(!name[0] || (d->aitype < AI_START && dupname && duplicatename(d, name)))
         {
@@ -2572,7 +2579,7 @@ namespace game
             return;
         }
 
-        if(!*player1->name && !menuactive()) showgui("profile", -1);
+        if(needname(player1) && !menuactive()) showgui("profile", -1);
         if(connected())
         {
             player1->conopen = commandmillis > 0 || hud::hasinput(true);
