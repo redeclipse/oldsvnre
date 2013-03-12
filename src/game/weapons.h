@@ -104,8 +104,8 @@ WPVARM(0, aiskew, 0, VAR_MAX,
     1,          100,        1,          10,         20,         10,         10,         40,         5,          5,          10
 );
 WPVARM(0, attackdelay, 1, VAR_MAX,
-    500,        150,        600,        600,        100,        100,        350,        750,        1000,       1000,       1500,
-    1000,       500,        1000,       1250,       800,        1000,       1500,       1250,       1000,       1000,       1500
+    500,        150,        600,        600,        100,        100,        350,        1000,       750,        1000,       1500,
+    1000,       500,        1000,       1250,       800,        1000,       1500,       1500,       750,        1000,       1500
 );
 WPVAR(0, carried, 0, 1,
     0,          0,          1,          1,          1,          1,          1,          1,          0,          0,          1
@@ -127,7 +127,7 @@ WPVARK(0, collide, 0, VAR_MAX,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER|COLLIDE_TRACE,
     BOUNCE_GEOM|IMPACT_PLAYER|COLLIDE_TRACE|IMPACT_SHOTS|DRILL_PLAYER,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE|COLLIDE_OWNER,
-    IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE|COLLIDE_OWNER|STICK_GEOM|STICK_PLAYER,
+    IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE|COLLIDE_OWNER|STICK_GEOM,
     BOUNCE_GEOM|BOUNCE_PLAYER|COLLIDE_OWNER,
     IMPACT_GEOM|IMPACT_SHOTS|COLLIDE_OWNER|STICK_GEOM,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER|COLLIDE_TRACE|DRILL_GEOM|DRILL_PLAYER,
@@ -421,7 +421,7 @@ WPFVARM(0, relativity, 0, FVAR_MAX,
     0.0f,       0.05f,      0.0f,       0.75f,      0.05f,      0.5f,       0.1f,       0.0f,       1.0f,       1.0f,       0.0f
 );
 WPVAR(0, reloaddelay, 0, VAR_MAX,
-    50,         1000,       50,         750,        2000,       1750,       2250,       2250,       2000,       2500,       3000
+    50,         1000,       50,         750,        2000,       1750,       2000,       2500,       2500,       5000,       10000
 );
 WPVAR(0, reloads, -1, VAR_MAX,
     -1,         -1,         -1,         -1,         -1,         -1,         -1,         -1,         0,          0,          0
