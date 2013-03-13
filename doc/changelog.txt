@@ -17,13 +17,15 @@ Weapons:
    in a short window of time
  * Mines, new weapon, primary proximity mine, secondary tripwire mine,
    pickup-based (like grenade)
- * Rifle explosion size, hitpush and firing speed reduced
+ * Rifle explosion size, hitpush, stun and firing speed reduced, damage, recoil
+   and accuracy increased
  * SMG secondary now sticks to geometry and explodes radially after a short
-   delay, primary spread reduced
+   delay, primary spread reduced, ricochet speed increased
  * Pistol secondary spread increased
  * Sword range halved
  * Projectiles now pass through teleporters
  * Grenade firing speed increased
+ * Rocket direct damage increased, flak damage reduced
 
 Modes & Mutators:
  * Reduced number of bots in coop to 3/2 of humans
