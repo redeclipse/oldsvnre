@@ -1612,7 +1612,7 @@ namespace server
         if(ci->state.aitype >= AI_START) return ci->state.aientity;
         else
         {
-            if(m_checkpoint(gamemode) && !ci->state.cpnodes.empty() && (!m_gauntlet(gamemode) || ci->team == T_ALPHA))
+            if(m_checkpoint(gamemode) && !ci->state.cpnodes.empty() && (!m_gauntlet(gamemode) || !m_gsp2(gamemode, mutators) || ci->team == T_ALPHA))
             {
                 int checkpoint = ci->state.cpnodes.last();
                 if(sents.inrange(checkpoint)) return checkpoint;
@@ -3326,6 +3326,12 @@ namespace server
                     }
                 }
             }
+            if(m_checkpoint(gamemode) && (target->state.cpnodes.length() == 1 || (m_gauntlet(gamemode) && m_gsp2(gamemode, mutators))))
+            {  // reset if hasn't reached another checkpoint yet, or hard gauntlet
+                target->state.cpmillis = 0;
+                target->state.cpnodes.shrink(0);
+                sendf(-1, 1, "ri3", N_CHECKPOINT, target->clientnum, -1);
+            }
             if(pointvalue && !m_nopoints(gamemode, mutators))
             {
                 if(actor != target && actor->state.aitype >= AI_START && target->state.aitype < AI_START)
@@ -3394,8 +3400,8 @@ namespace server
             mutate(smuts, if(!mut->damage(ci, ci, ci->state.health, -1, flags, material)) { return; });
         }
         ci->state.spree = 0;
-        if(m_checkpoint(gamemode) && (!flags || ci->state.cpnodes.length() == 1)) // reset if suicided or hasn't reached another checkpoint yet
-        {
+        if(m_checkpoint(gamemode) && (!flags || ci->state.cpnodes.length() == 1 || (m_gauntlet(gamemode) && m_gsp2(gamemode, mutators))))
+        { // reset if suicided, hasn't reached another checkpoint yet, or hard gauntlet
             ci->state.cpmillis = 0;
             ci->state.cpnodes.shrink(0);
             sendf(-1, 1, "ri3", N_CHECKPOINT, ci->clientnum, -1);
@@ -4963,7 +4969,8 @@ namespace server
                                     if(sents[ent].attrs[6] == CP_FINISH) waiting(cp); // so they start again
                                     break;
                                 }
-                                case CP_RESPAWN: case CP_START:
+                                case CP_RESPAWN: if(m_gauntlet(gamemode) && m_gsp2(gamemode, mutators)) break; // hard gauntlet
+                                case CP_START:
                                 {
                                     sendf(-1, 1, "ri4", N_CHECKPOINT, cp->clientnum, ent, -1);
                                     if(!cp->state.cpmillis || sents[ent].attrs[6] != CP_RESPAWN) cp->state.cpmillis = gamemillis;
