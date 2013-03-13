@@ -75,7 +75,7 @@ namespace auth
         if(!ci) return false;
         if(!connectedmaster() && !quickauthchecks)
         {
-            srvmsgftforce(ci->clientnum, CON_EVENT, "\founable to verify, not connected to master server");
+            if(!ci->local) srvmsgftforce(ci->clientnum, CON_EVENT, "\founable to verify, not connected to master server");
             return false;
         }
         else if(ci->authreq)

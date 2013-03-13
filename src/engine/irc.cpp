@@ -789,7 +789,7 @@ void irccmd(ircnet *n, ircchan *c, char *s)
                     ircsend(n, "PRIVMSG %s :\vACTION %s\v", c->name, r);
                     ircprintf(n, 1, c->name, "\fv* %s %s", n->nick, r);
                 }
-                else ircprintf(n, 4, NULL, "\fcyou are not on a channel");
+                else ircprintf(n, 4, NULL, "\fyyou are not on a channel");
             }
             else if(!strcasecmp(q, "JOIN"))
             {
@@ -806,7 +806,7 @@ void irccmd(ircnet *n, ircchan *c, char *s)
                     ircsend(n, "PART %s", d->name);
                     d->updated |= IRCUP_LEAVE;
                 }
-                else ircprintf(n, 4, NULL, "\fcyou are not on a channel");
+                else ircprintf(n, 4, NULL, "\fyyou are not on a channel");
             }
             else if(!strcasecmp(q, "QUIT"))
             {
@@ -818,7 +818,7 @@ void irccmd(ircnet *n, ircchan *c, char *s)
             DELETEA(q); DELETEA(r);
             return;
         }
-        ircprintf(n, 4, c ? c->name : NULL, "\fcyou are not on a channel");
+        ircprintf(n, 4, c ? c->name : NULL, "\fyyou are not on a channel");
     }
     else if(c)
     {
