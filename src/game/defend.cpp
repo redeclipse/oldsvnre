@@ -130,14 +130,21 @@ namespace defend
 
     void drawnotices(int w, int h, int &tx, int &ty, float blend)
     {
-        if(game::player1->state == CS_ALIVE && hud::shownotices >= 3)
+        if(game::focus->state == CS_ALIVE && hud::shownotices >= 3)
         {
-            loopv(st.flags) if(insideaffinity(st.flags[i], game::player1) && (st.flags[i].owner == game::player1->team || st.flags[i].enemy == game::player1->team))
+            if(game::focus->lastbuff)
+            {
+                pushfont("reduced");
+                if(defendregenbuff && defendregenextra) ty += draw_textx("Buffing: \fs\fc%d%%\fS damage, \fs\fc%d%%\fS shield, +\fs\fc%d\fS regen", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, int(defendbuffdamage*100), int(defendbuffshield*100), defendregenextra)*hud::noticescale;
+                else ty += draw_textx("Buffing: \fs\fc%d%%\fS damage, \fs\fc%d%%\fS shield", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, int(defendbuffdamage*100), int(defendbuffshield*100))*hud::noticescale;
+                popfont();
+            }
+            loopv(st.flags) if(insideaffinity(st.flags[i], game::focus) && (st.flags[i].owner == game::focus->team || st.flags[i].enemy == game::focus->team))
             {
                 defendstate::flag &f = st.flags[i];
                 pushfont("emphasis");
                 float occupy = !f.owner || f.enemy ? clamp(f.converted/float((!defendinstant && f.owner ? 2 : 1) * defendcount), 0.f, 1.f) : 1.f;
-                bool overthrow = f.owner && f.enemy == game::player1->team;
+                bool overthrow = f.owner && f.enemy == game::focus->team;
                 ty += draw_textx("%s \fs\f[%d]\f(%s)\f(%s)\fS \fs%s%d%%\fS", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, overthrow ? "Overthrow" : "Secure", TEAM(f.owner, colour), hud::teamtexname(f.owner), hud::flagtex, overthrow ? "\fy" : (occupy < 1.f ? "\fc" : "\fg"), int(occupy*100.f))*hud::noticescale;
                 popfont();
                 break;

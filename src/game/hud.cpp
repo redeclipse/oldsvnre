@@ -281,7 +281,7 @@ namespace hud
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, shockingtex, "<grey>textures/alerts/shock", 3);
 
     VAR(IDF_PERSIST, inventorygameinfo, 0, 15, 31); // &1 = mode, &2 = important, &4 = duel/survivor, &8 = non-alive, &16 = force all
-    FVAR(IDF_PERSIST, inventorygameinfoblend, 0, 0.75f, 1);
+    FVAR(IDF_PERSIST, inventorygameinfoblend, 0, 0.6f, 1);
     VAR(IDF_PERSIST, inventorygameinfoflash, 0, 3000, VAR_MAX);
 
     VAR(IDF_PERSIST, inventoryconopen, 0, 1, 1);
