@@ -1264,7 +1264,7 @@ namespace hud
             if(target->state == CS_DEAD || target->state == CS_WAITING)
             {
                 int sdelay = m_delay(game::gamemode, game::mutators), delay = target->respawnwait(lastmillis, sdelay);
-                SEARCHBINDCACHE(attackkey)("action 0", 0);
+                SEARCHBINDCACHE(attackkey)("primary", 0);
                 if(delay || m_duke(game::gamemode, game::mutators) || (m_fight(game::gamemode) && maxalive > 0))
                 {
                     if(target->state == CS_WAITING && m_duke(game::gamemode, game::mutators)) ty += draw_textx("Queued for new round", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw);
@@ -1341,7 +1341,7 @@ namespace hud
                     actitems.setsize(0);
                     if(entities::collateitems(target, actitems))
                     {
-                        SEARCHBINDCACHE(actionkey)("action 3", 0);
+                        SEARCHBINDCACHE(actionkey)("use", 0);
                         while(!actitems.empty())
                         {
                             actitem &t = actitems.last();
@@ -1404,14 +1404,14 @@ namespace hud
                         pushfont("little");
                         if(target->canshoot(target->weapselect, 0, m_weapon(game::gamemode, game::mutators), lastmillis, (1<<W_S_RELOAD)))
                         {
-                            SEARCHBINDCACHE(attackkey)("action 0", 0);
+                            SEARCHBINDCACHE(attackkey)("primary", 0);
                             ty += draw_textx("Press \fs\fc%s\fS to attack", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, attackkey);
-                            SEARCHBINDCACHE(altkey)("action 1", 0);
+                            SEARCHBINDCACHE(altkey)("secondary", 0);
                             ty += draw_textx("Press \fs\fc%s\fS to %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, altkey, W(target->weapselect, zooms) ? "zoom" : "alt-attack");
                         }
                         if(target->canreload(target->weapselect, m_weapon(game::gamemode, game::mutators), false, lastmillis))
                         {
-                            SEARCHBINDCACHE(reloadkey)("action 2", 0);
+                            SEARCHBINDCACHE(reloadkey)("reload", 0);
                             ty += draw_textx("Press \fs\fc%s\fS to reload ammo", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, reloadkey);
                         }
                         popfont();

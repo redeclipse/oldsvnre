@@ -150,7 +150,7 @@ namespace weapons
         if(!game::intermission && d == game::player1 && W2(d->weapselect, sub, WS(flags)) && d->canreload(d->weapselect, m_weapon(game::gamemode, game::mutators), false, lastmillis))
         {
             bool noammo = d->ammo[d->weapselect] < W2(d->weapselect, sub, WS(flags)),
-                 noattack = !d->action[AC_ATTACK] && !d->action[AC_ALTERNATE];
+                 noattack = !d->action[AC_PRIMARY] && !d->action[AC_SECONDARY];
             if((noammo || noattack) && !d->action[AC_USE] && d->weapstate[d->weapselect] == W_S_IDLE && (noammo || lastmillis-d->weaplast[d->weapselect] >= autoreloaddelay))
                 return autoreloading >= (noammo ? 1 : (W(d->weapselect, add) < W(d->weapselect, max) ? 2 : (W(d->weapselect, zooms) ? 4 : 3)));
         }
@@ -187,7 +187,7 @@ namespace weapons
     {
         float r = 1; int y = 0;
         if(inairspread && (physics::jetpack(d) || d->timeinair) && !d->onladder) { r += inairspread; y++; }
-        if(impulsespread > 0 && physics::sprinting(d)) { r += impulsespread; y++; }
+        if(impulsespread > 0 && physics::pacing(d)) { r += impulsespread; y++; }
         else if(movespread > 0 && (d->move || d->strafe)) { r += movespread; y++; }
         else if(stillspread > 0 && !physics::sliding(d) && !physics::iscrouching(d) && !zooming) { r += stillspread; y++; }
         if(x) *x = y;
@@ -315,8 +315,8 @@ namespace weapons
     {
         if(!game::allowmove(d)) return;
         bool secondary = physics::secondaryweap(d), alt = secondary && !W(d->weapselect, zooms);
-        if(doshot(d, targ, d->weapselect, d->action[alt ? AC_ALTERNATE : AC_ATTACK], secondary, force))
-            if(!W2(d->weapselect, fullauto, secondary)) d->action[alt ? AC_ALTERNATE : AC_ATTACK] = false;
+        if(doshot(d, targ, d->weapselect, d->action[alt ? AC_SECONDARY : AC_PRIMARY], secondary, force))
+            if(!W2(d->weapselect, fullauto, secondary)) d->action[alt ? AC_SECONDARY : AC_PRIMARY] = false;
     }
 
     void preload()

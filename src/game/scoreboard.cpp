@@ -296,7 +296,7 @@ namespace hud
                     {
                         if(game::player1->state == CS_DEAD || game::player1->state == CS_WAITING)
                         {
-                            SEARCHBINDCACHE(attackkey)("action 0", 0);
+                            SEARCHBINDCACHE(attackkey)("primary", 0);
                             int sdelay = m_delay(game::gamemode, game::mutators);
                             int delay = game::player1->respawnwait(lastmillis, sdelay);
                             if(delay || m_duke(game::gamemode, game::mutators) || (m_fight(game::gamemode) && maxalive > 0))

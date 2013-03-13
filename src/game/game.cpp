@@ -2595,8 +2595,8 @@ namespace game
                         state = W_S_IDLE;
                 }
                 if(zooming && (!W(player1->weapselect, zooms) || state != W_S_IDLE)) zoomset(false, lastmillis);
-                else if(W(player1->weapselect, zooms) && state == W_S_IDLE && zooming != player1->action[AC_ALTERNATE])
-                    zoomset(player1->action[AC_ALTERNATE], lastmillis);
+                else if(W(player1->weapselect, zooms) && state == W_S_IDLE && zooming != player1->action[AC_SECONDARY])
+                    zoomset(player1->action[AC_SECONDARY], lastmillis);
             }
             else if(zooming) zoomset(false, lastmillis);
 
@@ -2840,7 +2840,7 @@ namespace game
                 }
                 else if(d->turnside) anim |= ((d->turnside>0 ? ANIM_WALL_RUN_LEFT : ANIM_WALL_RUN_RIGHT)|ANIM_LOOP)<<ANIM_SECONDARY;
                 else if(physics::sliding(d, true)) anim |= (ANIM_POWERSLIDE|ANIM_LOOP)<<ANIM_SECONDARY;
-                else if(physics::sprinting(d))
+                else if(physics::pacing(d))
                 {
                     if(d->move>0) anim |= (ANIM_IMPULSE_FORWARD|ANIM_LOOP)<<ANIM_SECONDARY;
                     else if(d->strafe) anim |= ((d->strafe>0 ? ANIM_IMPULSE_LEFT : ANIM_IMPULSE_RIGHT)|ANIM_LOOP)<<ANIM_SECONDARY;

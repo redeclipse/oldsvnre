@@ -104,7 +104,7 @@ namespace capture
                 char *str = buildflagstr(hasflags, hasflags.length() <= 3);
                 ty += draw_textx("You have: \fs%s\fS", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, str)*hud::noticescale;
                 popfont();
-                SEARCHBINDCACHE(altkey)("action 9", 0);
+                SEARCHBINDCACHE(altkey)("affinity", 0);
                 pushfont("reduced");
                 ty += draw_textx("Press \fs\fc%s\fS to drop", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, altkey)*hud::noticescale;
                 popfont();
