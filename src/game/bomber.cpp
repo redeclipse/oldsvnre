@@ -133,15 +133,22 @@ namespace bomber
 
     void drawnotices(int w, int h, int &tx, int &ty, float blend)
     {
-        if(game::player1->state == CS_ALIVE && hud::shownotices >= 3)
+        if(game::focus->state == CS_ALIVE && hud::shownotices >= 3)
         {
+            if(game::focus->lastbuff)
+            {
+                pushfont("reduced");
+                if(bomberregenbuff && bomberregenextra) ty += draw_textx("Buffing: \fs\fc%d%%\fS damage, \fs\fc%d%%\fS shield, +\fs\fc%d\fS regen", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, int(bomberbuffdamage*100), int(bomberbuffshield*100), bomberregenextra)*hud::noticescale;
+                else ty += draw_textx("Buffing: \fs\fc%d%%\fS damage, \fs\fc%d%%\fS shield", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, int(bomberbuffdamage*100), int(bomberbuffshield*100))*hud::noticescale;
+                popfont();
+            }
             loopv(st.flags)
             {
                 bomberstate::flag &f = st.flags[i];
-                if(f.owner == game::player1)
+                if(f.owner == game::focus)
                 {
                     pushfont("emphasis");
-                    ty += draw_textx("You have: \fs\f[%d]\f(%s)bomb\fS", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, pulsecols[PULSE_DISCO][clamp((lastmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)], hud::bombtex)*hud::noticescale;
+                    ty += draw_textx("Holding: \fs\f[%d]\f(%s)bomb\fS", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, pulsecols[PULSE_DISCO][clamp((lastmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)], hud::bombtex)*hud::noticescale;
                     popfont();
                     if(carrytime)
                     {

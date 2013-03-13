@@ -84,17 +84,24 @@ namespace capture
 
     void drawnotices(int w, int h, int &tx, int &ty, float blend)
     {
-        if(game::player1->state == CS_ALIVE && hud::shownotices >= 3)
+        if(game::focus->state == CS_ALIVE && hud::shownotices >= 3)
         {
+            if(game::focus->lastbuff)
+            {
+                pushfont("reduced");
+                if(captureregenbuff && captureregenextra) ty += draw_textx("Buffing: \fs\fc%d%%\fS damage, \fs\fc%d%%\fS shield, +\fs\fc%d\fS regen", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, int(capturebuffdamage*100), int(capturebuffshield*100), captureregenextra)*hud::noticescale;
+                else ty += draw_textx("Buffing: \fs\fc%d%%\fS damage, \fs\fc%d%%\fS shield", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, int(capturebuffdamage*100), int(capturebuffshield*100))*hud::noticescale;
+                popfont();
+            }
             static vector<int> hasflags, taken, droppedflags;
             hasflags.setsize(0); taken.setsize(0); droppedflags.setsize(0);
             loopv(st.flags)
             {
                 capturestate::flag &f = st.flags[i];
-                if(f.owner == game::player1) hasflags.add(i);
-                else if(f.team == game::player1->team)
+                if(f.owner == game::focus) hasflags.add(i);
+                else if(f.team == game::focus->team)
                 {
-                    if(f.owner && f.owner->team != game::player1->team) taken.add(i);
+                    if(f.owner && f.owner->team != game::focus->team) taken.add(i);
                     else if(f.droptime) droppedflags.add(i);
                 }
             }
@@ -102,7 +109,7 @@ namespace capture
             {
                 pushfont("emphasis");
                 char *str = buildflagstr(hasflags, hasflags.length() <= 3);
-                ty += draw_textx("You have: \fs%s\fS", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, str)*hud::noticescale;
+                ty += draw_textx("Holding: \fs%s\fS", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, str)*hud::noticescale;
                 popfont();
                 SEARCHBINDCACHE(altkey)("affinity", 0);
                 pushfont("reduced");
