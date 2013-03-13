@@ -539,8 +539,11 @@ namespace entities
             {
                 case TELEPORT:
                 {
-                    if(e.attrs[8]&(1<<TELE_NOAFFIN) && d->state == CS_ALIVE && gameent::is(d) && physics::carryaffinity((gameent *)d))
-                        break;
+                    if(e.attrs[8]&(1<<TELE_NOAFFIN))
+                    {
+                        if(gameent::is(d) && physics::carryaffinity((gameent *)d)) break;
+                        if(projent::is(d) && ((projent *)d)->type == PRJ_AFFINITY) break;
+                    }
                     int millis = d->lastused(n, true);
                     if(millis && lastmillis-millis < triggertime(e)) break;
                     e.lastemit = lastmillis;
@@ -566,7 +569,7 @@ namespace entities
                                           yaw = f.attrs[0] < 0 ? (lastmillis/5)%360 : f.attrs[0], pitch = f.attrs[1];
                                     game::fixrange(yaw, pitch);
                                     vecfromyawpitch(yaw, pitch, 1, 0, d->vel);
-                                    d->vel.mul(mag);
+                                    d->vel.normalize().mul(mag);
                                     if(d->state == CS_ALIVE) switch(f.attrs[5])
                                     {
                                         case 2: break; // keep
@@ -604,7 +607,9 @@ namespace entities
                                     {
                                         projent *g = (projent *)d;
                                         g->lastbounce = lastmillis;
+                                        g->movement = 0;
                                         g->from = g->o;
+                                        g->to = vec(g->vel).normalize().mul(getworldsize()).add(g->o);
                                     }
                                 }
                                 else if(gameent::is(d)) warpragdoll(d, d->vel, vec(f.o).sub(e.o));

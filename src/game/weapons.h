@@ -128,7 +128,7 @@ WPVARK(0, collide, 0, VAR_MAX,
     BOUNCE_GEOM|IMPACT_PLAYER|COLLIDE_TRACE|IMPACT_SHOTS|DRILL_PLAYER,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE|COLLIDE_OWNER,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE|COLLIDE_OWNER|STICK_GEOM,
-    BOUNCE_GEOM|BOUNCE_PLAYER|COLLIDE_OWNER,
+    IMPACT_GEOM|IMPACT_PLAYER|COLLIDE_OWNER|STICK_GEOM|STICK_PLAYER,
     IMPACT_GEOM|IMPACT_SHOTS|COLLIDE_OWNER|STICK_GEOM,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER|COLLIDE_TRACE|DRILL_GEOM|DRILL_PLAYER,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER|STICK_GEOM|STICK_PLAYER|COLLIDE_PROJ,
@@ -152,7 +152,7 @@ WPVARK(0, collide, 0, VAR_MAX,
     BOUNCE_GEOM|IMPACT_PLAYER|COLLIDE_TRACE|IMPACT_SHOTS|DRILL_PLAYER|COLLIDE_OWNER,
     BOUNCE_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE|COLLIDE_OWNER,
     BOUNCE_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE|COLLIDE_OWNER,
-    BOUNCE_GEOM|BOUNCE_PLAYER|COLLIDE_OWNER,
+    IMPACT_GEOM|IMPACT_PLAYER|COLLIDE_OWNER|STICK_GEOM|STICK_PLAYER,
     IMPACT_GEOM|IMPACT_SHOTS|COLLIDE_OWNER|STICK_GEOM|STICK_PLAYER,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE|DRILL_PLAYER|COLLIDE_OWNER,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER|STICK_GEOM|STICK_PLAYER|COLLIDE_PROJ,
@@ -183,7 +183,7 @@ WPVARK(0, damage, VAR_MIN, VAR_MAX,
     30,         35,         30,         15,         22,         5,          15,         35,         100,        100,        150,
     40,         5,          60,         4,          4,          5,          10,         150,        100,        100,        150,
     25,         5,          15,         15,         15,         10,         10,         10,         150,        100,        300,
-    10,         5,          30,         5,          5,          5,          5,          10,         150,        100,        300
+    10,         5,          30,         8,          10,         5,          5,          10,         150,        100,        300
 );
 WPFVARK(0, delta, 0, FVAR_MAX,
     10.0f,      10.0f,      10.0f,      10.0f,      10.0f,      10.0f,      10.0f,      10.0f,      10.0f,      10.0f,      10.0f,
@@ -234,8 +234,8 @@ WPFVARM(0, fragoffset, 0, FVAR_MAX,
     4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       1.0f,       4.0f,       1.0f,       2.0f
 );
 WPVARM(0, fragrays, 0, VAR_MAX,
-    5,          5,          5,          5,          5,          5,          5,          5,          75,         75,         75,
-    5,          5,          5,          50,         50,         5,          5,          5,          75,         10,         75
+    5,          5,          5,          5,          5,          5,          5,          5,          30,         30,         30,
+    5,          5,          5,          20,         20,         5,          5,          5,          30,         10,         30
 );
 WPFVARM(0, fragrel, 0, FVAR_MAX,
     1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       0.0f,       0.0f,       0.0f,
@@ -251,7 +251,7 @@ WPFVARM(0, fragskew, 0, FVAR_MAX,
 );
 WPVARM(0, fragspeed, 0, VAR_MAX,
     0,          0,          0,          0,          0,          200,        0,          0,          300,        750,        400,
-    0,          0,          0,          0,          0,          250,        0,          0,          300,        7500,       400
+    0,          0,          0,          0,          100,        250,        0,          0,          300,        7500,       400
 );
 WPFVARM(0, fragspread, 0, FVAR_MAX,
     1.0f,       1.0f,       1.0f,       1.0f,       0.2f,       0.1f,       1.0f,       0.25f,      1.0f,       0.5f,       1.0f,
@@ -262,8 +262,8 @@ WPVARM(0, fragdelay, 0, VAR_MAX,
     0,          1,          0,          0,          5,          0,          0,          0,          3,          100,        3
 );
 WPVARM(0, fragtime, 1, VAR_MAX,
-    500,        500,        500,        250,        500,        1000,       500,        500,        3000,       1000,       3000,
-    500,        500,        500,        2000,       800,        3000,       500,        500,        3000,       5000,       3000
+    500,        500,        500,        250,        500,        1000,       500,        500,        1000,       1000,       1000,
+    500,        500,        500,        2000,       1000,       3000,       500,        500,        1000,       5000,       1000
 );
 WPVARM(0, fragweap, -1, W_MAX*2-1,
     -1,         -1,         -1,         -1,         -1,         -1,         -1,         -1,         W_SHOTGUN,  W_RIFLE,    W_SMG,
@@ -347,14 +347,14 @@ WPVARK(IDF_HEX, partcol, -3, 0xFFFFFF,
 WPFVARK(0, partlen, 0, FVAR_MAX,
     0.0f,       10.0f,      0.0f,       25.0f,      30.0f,      0.0f,       0.0f,       512.0f,     0.0f,       4.0f,       0.0f,
     0.0f,       10.0f,      0.0f,       15.0f,      15.0f,      5.0f,       0.0f,       1024.0f,    0.0f,       4.0f,       0.0f,
-    0.0f,       10.0f,      0.0f,       25.0f,      30.0f,      0.0f,       0.0f,       512.0f,     0.0f,       4.0f,       0.0f,
-    0.0f,       10.0f,      0.0f,       15.0f,      15.0f,      5.0f,       0.0f,       1024.0f,    0.0f,       4.0f,       0.0f
+    0.0f,       10.0f,      0.0f,       5.0f,       5.0f,       0.0f,       0.0f,       512.0f,     0.0f,       4.0f,       0.0f,
+    0.0f,       10.0f,      0.0f,       5.0f,       5.0f,       5.0f,       0.0f,       1024.0f,    0.0f,       4.0f,       0.0f
 );
 WPFVARK(0, partsize, 0, FVAR_MAX,
     1.0f,       2.0f,       1.0f,       0.65f,      0.5f,       10.0f,      8.0f,       1.5f,       1.0f,       2.0f,       3.0f,
     2.0f,       0.5f,       1.25f,      0.45f,      0.35f,      10.0f,      24.0f,      3.0f,       1.0f,       2.0f,       3.0f,
-    1.0f,       2.0f,       1.0f,       0.65f,      0.5f,       10.0f,      8.0f,       0.75f,      1.0f,       2.0f,       3.0f,
-    2.0f,       0.5f,       1.25f,      0.45f,      0.35f,      10.0f,      24.0f,      4.0f,       1.0f,       2.0f,       3.0f
+    1.0f,       2.0f,       1.0f,       0.25f,      0.25f,      10.0f,      8.0f,       0.75f,      1.0f,       2.0f,       3.0f,
+    2.0f,       0.5f,       1.25f,      0.25f,      0.25f,      10.0f,      24.0f,      4.0f,       1.0f,       2.0f,       3.0f
 );
 WPVARK(0, parttype, 0, W_MAX-1,
     W_MELEE,    W_PISTOL,   W_SWORD,    W_SHOTGUN,  W_SMG,      W_FLAMER,   W_PLASMA,   W_RIFLE,    W_GRENADE,  W_MINE,     W_ROCKET,
