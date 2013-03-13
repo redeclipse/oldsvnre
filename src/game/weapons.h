@@ -333,10 +333,10 @@ WPFVARK(0, minspeed, 0, FVAR_MAX,
     50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f
 );
 WPVAR(0, modes, -G_ALL, G_ALL,
-    -G_SW,      -G_SW,      -G_SW,      -G_SW,      -G_SW,      -G_SW,      -G_SW,      -G_SW,      -G_SW,      -G_SW,      -G_SW
+    0,          -G_SW,      -G_SW,      -G_SW,      -G_SW,      -G_SW,      -G_SW,      -G_SW,      -G_SW,      -G_SW,      -G_SW
 );
 WPVAR(0, muts, -G_M_ALL, G_M_ALL,
-    0,          -G_M_SW,    -G_M_SW,    -G_M_SW,    -G_M_SW,    -G_M_SW,    -G_M_SW,    -G_M_SW,    0,          -G_M_IN,    -G_M_DK
+    0,          -G_M_SW,    -G_M_SW,    -G_M_SW,    -G_M_SW,    -G_M_SW,    -G_M_SW,    -G_M_SW,    0,          -G_M_IM,    -G_M_DK
 );
 WPVARK(IDF_HEX, partcol, -3, 0xFFFFFF,
     0xEEEE22,   0x666611,   0x4040F0,   0xF0F020,   0xF05820,   -1,         0x40F0C8,   0xA020F0,   -1,         0x00F068,   -1,
@@ -347,14 +347,14 @@ WPVARK(IDF_HEX, partcol, -3, 0xFFFFFF,
 WPFVARK(0, partlen, 0, FVAR_MAX,
     0.0f,       10.0f,      0.0f,       25.0f,      30.0f,      0.0f,       0.0f,       512.0f,     0.0f,       4.0f,       0.0f,
     0.0f,       10.0f,      0.0f,       15.0f,      15.0f,      5.0f,       0.0f,       1024.0f,    0.0f,       4.0f,       0.0f,
-    0.0f,       10.0f,      0.0f,       5.0f,       5.0f,       0.0f,       0.0f,       512.0f,     0.0f,       4.0f,       0.0f,
-    0.0f,       10.0f,      0.0f,       5.0f,       5.0f,       5.0f,       0.0f,       1024.0f,    0.0f,       4.0f,       0.0f
+    0.0f,       10.0f,      0.0f,       7.5f,       7.5f,       0.0f,       0.0f,       512.0f,     0.0f,       4.0f,       0.0f,
+    0.0f,       10.0f,      0.0f,       7.5f,       7.5f,       5.0f,       0.0f,       1024.0f,    0.0f,       4.0f,       0.0f
 );
 WPFVARK(0, partsize, 0, FVAR_MAX,
     1.0f,       2.0f,       1.0f,       0.65f,      0.5f,       10.0f,      8.0f,       1.5f,       1.0f,       2.0f,       3.0f,
     2.0f,       0.5f,       1.25f,      0.45f,      0.35f,      10.0f,      24.0f,      3.0f,       1.0f,       2.0f,       3.0f,
-    1.0f,       2.0f,       1.0f,       0.25f,      0.25f,      10.0f,      8.0f,       0.75f,      1.0f,       2.0f,       3.0f,
-    2.0f,       0.5f,       1.25f,      0.25f,      0.25f,      10.0f,      24.0f,      4.0f,       1.0f,       2.0f,       3.0f
+    1.0f,       2.0f,       1.0f,       0.35f,      0.35f,      10.0f,      8.0f,       0.75f,      1.0f,       2.0f,       3.0f,
+    2.0f,       0.5f,       1.25f,      0.35f,      0.35f,      10.0f,      24.0f,      4.0f,       1.0f,       2.0f,       3.0f
 );
 WPVARK(0, parttype, 0, W_MAX-1,
     W_MELEE,    W_PISTOL,   W_SWORD,    W_SHOTGUN,  W_SMG,      W_FLAMER,   W_PLASMA,   W_RIFLE,    W_GRENADE,  W_MINE,     W_ROCKET,

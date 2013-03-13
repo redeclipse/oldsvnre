@@ -159,7 +159,7 @@ namespace bomber
                         if(m_gsp1(game::gamemode, game::mutators))
                         {
                             pushfont("reduced");
-                            ty += draw_textx("Kill enemies to reset the fuse timer", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED)*hud::noticescale;
+                            ty += draw_textx("Killing enemies resets fuse timer", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED)*hud::noticescale;
                             popfont();
                         }
                     }
