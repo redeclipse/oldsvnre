@@ -32,7 +32,7 @@ enum
     G_M_ROTATE = (1<<G_M_MULTI)|(1<<G_M_FFA)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_SURVIVOR)|(1<<G_M_CLASSIC)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_RESIZE)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3),
     G_M_SW = (1<<G_M_INSTA)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM),
     G_M_DK = (1<<G_M_DUEL)|(1<<G_M_SURVIVOR),
-    G_M_IN = (1<<G_M_INSTA),
+    G_M_IM = (1<<G_M_INSTA)|(1<<G_M_MEDIEVAL),
 };
 
 enum { G_F_GSP = 0, G_F_NUM };
