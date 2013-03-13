@@ -308,8 +308,7 @@ extern mutstypes mutstype[];
 
 #define w_reload(w1,w2)     (w1 != W_MELEE ? (isweap(w2) ? (w1 == w2 ? -1 : W(w1, reloads)) : (w1 < 0-w2 ? -1 : W(w1, reloads))) : 0)
 #define w_carry(w1,w2)      (w1 > W_MELEE && (isweap(w2) ? w1 != w2 : w1 >= 0-w2) && (isweap(w1) && W(w1, carried)))
-#define w_attx(a,b,w)       (m_kaboom(a,b) && ((w) == W_GRENADE || (w) == W_MINE) ? W_ROCKET : (w))
-#define w_attr(a,b,w1,w2)   (m_edit(a) ? w1 : w_attx(a, b, ((w1 >= W_OFFSET && w1 != w2) ? w1 : (w2 == W_GRENADE ? W_MINE : W_GRENADE))))
+#define w_attr(a,b,w1,w2)   (m_edit(a) ? w1 : ((w1 >= W_OFFSET && w1 != w2) ? w1 : (w2 == W_GRENADE ? W_MINE : W_GRENADE)))
 #define w_spawn(weap)       int(ceilf(G(itemspawntime)*W(weap, frequency)))
 
 #define mapshrink(a,b,c) if((a) && (b) && (c) && *(c)) \
