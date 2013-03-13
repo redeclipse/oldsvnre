@@ -20,9 +20,9 @@ namespace physics
 
     VAR(IDF_PERSIST, dashstyle, 0, 1, 1); // 0 = only with impulse, 1 = double tap
     VAR(IDF_PERSIST, crouchstyle, 0, 0, 2); // 0 = press and hold, 1 = double-tap toggle, 2 = toggle
-    VAR(IDF_PERSIST, sprintstyle, 0, 3, 5); // 0 = press and hold, 1 = double-tap toggle, 2 = toggle, 3-5 = same, but auto engage if impulsesprint == 0
+    VAR(IDF_PERSIST, pacingstyle, 0, 3, 5); // 0 = press and hold, 1 = double-tap toggle, 2 = toggle, 3-5 = same, but auto engage if impulsepacing == 0
 
-    int physsteps = 0, lastphysframe = 0, lastmove = 0, lastdirmove = 0, laststrafe = 0, lastdirstrafe = 0, lastcrouch = 0, lastsprint = 0;
+    int physsteps = 0, lastphysframe = 0, lastmove = 0, lastdirmove = 0, laststrafe = 0, lastdirstrafe = 0, lastcrouch = 0, lastpacing = 0;
 
     #define isjetpack (PHYS(gravity) == 0 || m_jetpack(game::gamemode, game::mutators))
     bool allowjet(physent *d, bool fly)
@@ -101,7 +101,7 @@ namespace physics
                 switch(type)
                 {
                     case AC_CROUCH: style = crouchstyle; last = &lastcrouch; break;
-                    case AC_SPRINT: style = sprintstyle%3; last = &lastsprint; break;
+                    case AC_PACING: style = pacingstyle%3; last = &lastpacing; break;
                     default: break;
                 }
                 switch(style)
@@ -144,11 +144,21 @@ namespace physics
             else
             {
                 game::player1->action[type] = false;
-                if((type == AC_ATTACK || type == AC_JUMP) && down) game::respawn(game::player1);
+                if((type == AC_PRIMARY || type == AC_JUMP) && down) game::respawn(game::player1);
             }
         }
     }
-    ICOMMAND(0, action, "iD", (int *i, int *n), { doaction(*i, *n!=0); });
+    //ICOMMAND(0, action, "iD", (int *i, int *n), doaction(*i, *n!=0)); // deprecated
+    ICOMMAND(0, primary, "D", (int *n), doaction(AC_PRIMARY, *n!=0));
+    ICOMMAND(0, secondary, "D", (int *n), doaction(AC_SECONDARY, *n!=0));
+    ICOMMAND(0, reload, "D", (int *n), doaction(AC_RELOAD, *n!=0));
+    ICOMMAND(0, use, "D", (int *n), doaction(AC_USE, *n!=0));
+    ICOMMAND(0, jump, "D", (int *n), doaction(AC_JUMP, *n!=0));
+    ICOMMAND(0, pacing, "D", (int *n), doaction(AC_PACING, *n!=0));
+    ICOMMAND(0, crouch, "D", (int *n), doaction(AC_CROUCH, *n!=0));
+    ICOMMAND(0, special, "D", (int *n), doaction(AC_SPECIAL, *n!=0));
+    ICOMMAND(0, drop, "D", (int *n), doaction(AC_DROP, *n!=0));
+    ICOMMAND(0, affinity, "D", (int *n), doaction(AC_AFFINITY, *n!=0));
 
     bool carryaffinity(gameent *d)
     {
@@ -172,8 +182,8 @@ namespace physics
         {
             if(d->weapselect != W_MELEE || (d->physstate == PHYS_FALL && !d->onladder))
             {
-                if(d->action[AC_ALTERNATE] && (!d->action[AC_ATTACK] || d->actiontime[AC_ALTERNATE] > d->actiontime[AC_ATTACK])) return true;
-                else if(d->actiontime[AC_ALTERNATE] > d->actiontime[AC_ATTACK] && W2(d->weapselect, power, true) && d->weapstate[d->weapselect] == W_S_POWER) return true;
+                if(d->action[AC_SECONDARY] && (!d->action[AC_PRIMARY] || d->actiontime[AC_SECONDARY] > d->actiontime[AC_PRIMARY])) return true;
+                else if(d->actiontime[AC_SECONDARY] > d->actiontime[AC_PRIMARY] && W2(d->weapselect, power, true) && d->weapstate[d->weapselect] == W_S_POWER) return true;
             }
         }
         return false;
@@ -257,9 +267,9 @@ namespace physics
         return false;
     }
 
-    bool sprinting(physent *d, bool turn)
+    bool pacing(physent *d, bool turn)
     {
-        if(allowimpulse(d, IM_A_SPRINT) && (gameent::is(d)) && d->state == CS_ALIVE && movesprint > 0)
+        if(allowimpulse(d, IM_A_SPRINT) && (gameent::is(d)) && d->state == CS_ALIVE && movepacing > 0)
         {
             gameent *e = (gameent *)d;
             if(!iscrouching(e) && (e != game::player1 || !W(e->weapselect, zooms) || !game::inzoom()))
@@ -267,8 +277,8 @@ namespace physics
                 if(turn && e->turnside) return true;
                 if((e != game::player1 && !e->ai) || !impulsemeter || e->impulse[IM_METER] < impulsemeter)
                 {
-                    bool value = e->action[AC_SPRINT];
-                    if(d == game::player1 && sprintstyle >= 3 && impulsesprint == 0) value = !value;
+                    bool value = e->action[AC_PACING];
+                    if(d == game::player1 && pacingstyle >= 3 && impulsepacing == 0) value = !value;
                     if(value && (e->move || e->strafe)) return true;
                 }
             }
@@ -376,7 +386,7 @@ namespace physics
                 case PHYS_STEP_UP: vel *= movestepup; break;
                 default: break;
             }
-            if(sprinting(e, false)) vel *= movesprint;
+            if(pacing(e, false)) vel *= movepacing;
             if(jetpack(e)) vel *= movejet;
             if(carryaffinity(e))
             {
@@ -841,16 +851,16 @@ namespace physics
         if(impulsemeter && millis)
         {
             #define impchk (!impulsemeter || d->impulse[IM_METER]+len <= impulsemeter)
-            bool sprint = sprinting(d, false);
-            if(sprint && impulsesprint > 0)
+            bool quickpace = pacing(d, false);
+            if(quickpace && impulsepacing > 0)
             {
-                int len = int(ceilf(millis*impulsesprint));
+                int len = int(ceilf(millis*impulsepacing));
                 if(len > 0 && impchk)
                 {
                     d->impulse[IM_METER] += len;
                     d->impulse[IM_REGEN] = lastmillis;
                 }
-                else sprint = d->action[AC_SPRINT] = false;
+                else quickpace = d->action[AC_PACING] = false;
             }
             if(jetting)
             {
@@ -877,7 +887,7 @@ namespace physics
                         else collect = false; \
                     }
                 impulsemod(allowjet(d), impulseregenjet);
-                impulsemod(sprint, impulseregensprint);
+                impulsemod(quickpace, impulseregenpacing);
                 impulsemod(d->move || d->strafe, impulseregenmove);
                 impulsemod((!onfloor && PHYS(gravity) > 0) || sliding(d), impulseregeninair);
                 impulsemod(onfloor && iscrouching(d) && !sliding(d), impulseregencrouch);

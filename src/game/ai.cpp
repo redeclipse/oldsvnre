@@ -107,7 +107,7 @@ namespace ai
         {
             if(d->weapstate[d->weapselect] == W_S_POWER)
             {
-                if(d->action[AC_ALTERNATE] && (!d->action[AC_ATTACK] || d->actiontime[AC_ALTERNATE] > d->actiontime[AC_ATTACK]))
+                if(d->action[AC_SECONDARY] && (!d->action[AC_PRIMARY] || d->actiontime[AC_SECONDARY] > d->actiontime[AC_PRIMARY]))
                     return true;
             }
             switch(d->weapselect)
@@ -1179,15 +1179,15 @@ namespace ai
                     if(insight || quick)
                     {
                         bool shoot = canshoot(d, e, alt);
-                        if(d->action[alt ? AC_ALTERNATE : AC_ATTACK] && W2(d->weapselect, power, alt) && W2(d->weapselect, cooked, alt))
+                        if(d->action[alt ? AC_SECONDARY : AC_PRIMARY] && W2(d->weapselect, power, alt) && W2(d->weapselect, cooked, alt))
                         { // TODO: make AI more aware of what they're shooting
                             int cooked = W2(d->weapselect, cooked, alt);
                             if(cooked&8) shoot = false; // inverted life
                         }
                         if(shoot && hastarget(d, b, e, alt, yaw, pitch, dp.squaredist(ep)))
                         {
-                            d->action[alt ? AC_ALTERNATE : AC_ATTACK] = true;
-                            d->actiontime[alt ? AC_ALTERNATE : AC_ATTACK] = lastmillis;
+                            d->action[alt ? AC_SECONDARY : AC_PRIMARY] = true;
+                            d->actiontime[alt ? AC_SECONDARY : AC_PRIMARY] = lastmillis;
                             result = 3;
                         }
                         else result = 2;
@@ -1222,7 +1222,7 @@ namespace ai
             d->ai->enemyseen = d->ai->enemymillis = 0;
             result = 0;
         }
-        if(result < 3) d->action[AC_ATTACK] = d->action[AC_ALTERNATE] = false;
+        if(result < 3) d->action[AC_PRIMARY] = d->action[AC_SECONDARY] = false;
 
         game::fixrange(d->ai->targyaw, d->ai->targpitch);
         if(!result) game::scaleyawpitch(d->yaw, d->pitch, d->ai->targyaw, d->ai->targpitch, frame, frame*0.5f);
@@ -1233,12 +1233,12 @@ namespace ai
             bool wantsrun = false;
             if(physics::allowimpulse(d, IM_A_SPRINT))
             {
-                if(!impulsemeter || impulsesprint == 0 || impulseregensprint > 0) wantsrun = true;
+                if(!impulsemeter || impulsepacing == 0 || impulseregenpacing > 0) wantsrun = true;
                 else if(b.idle == -1 && !d->ai->dontmove)
-                    wantsrun = (d->action[AC_SPRINT] || !d->actiontime[AC_SPRINT] || lastmillis-d->actiontime[AC_SPRINT] > PHYSMILLIS*2);
+                    wantsrun = (d->action[AC_PACING] || !d->actiontime[AC_PACING] || lastmillis-d->actiontime[AC_PACING] > PHYSMILLIS*2);
             }
-            if(d->action[AC_SPRINT] != wantsrun)
-                if((d->action[AC_SPRINT] = !d->action[AC_SPRINT]) == true) d->actiontime[AC_SPRINT] = lastmillis;
+            if(d->action[AC_PACING] != wantsrun)
+                if((d->action[AC_PACING] = !d->action[AC_PACING]) == true) d->actiontime[AC_PACING] = lastmillis;
         }
 
         if(d->ai->dontmove || (d->aitype >= AI_START && lastmillis-d->lastpain <= PHYSMILLIS/3)) d->move = d->strafe = 0;
