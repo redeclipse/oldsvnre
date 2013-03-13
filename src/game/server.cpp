@@ -590,9 +590,9 @@ namespace server
                         if(x%2) x++;
                         x = x/2;
                     }
-                    int alive = 0;
-                    loopv(playing) if(playing[i] && ci->team == playing[i]->team) alive++;
-                    if(x-alive == 0)
+                    int slots = x;
+                    loopv(playing) if(playing[i] && ci->team == playing[i]->team) slots--;
+                    if(!slots)
                     {
                         int wait = 0;
                         loopv(spawnq) if(spawnq[i] && spawnq[i]->team == ci->team && spawnq[i]->state.aitype == AI_NONE)
@@ -1595,15 +1595,19 @@ namespace server
                 }
                 cplayers = totalspawns/3;
             }
-            if(!G(numplayers)) G(numplayers) = cplayers;
-            if(!G(maxplayers)) G(maxplayers) = G(numplayers)*2;
-            if(m_fight(gamemode) && m_team(gamemode, mutators))
+            if(!m_edit(gamemode))
             {
-                int offt = G(numplayers)%numt, offq = G(maxplayers)%numt;
-                if(offt) G(numplayers) += numt-offt;
-                if(offq) G(maxplayers) += numt-offq;
+                int np = G(numplayers) ? G(numplayers) : cplayers, mp = G(maxplayers) ? G(maxplayers) : np*3/2;
+                if(m_fight(gamemode) && m_team(gamemode, mutators))
+                {
+                    int offt = np%numt, offq = mp%numt;
+                    if(offt) np += numt-offt;
+                    if(offq) mp += numt-offq;
+                }
+                if(mp < np) mp = np;
+                if(np != G(numplayers)) setmod(sv_numplayers, np);
+                if(mp != G(maxplayers)) setmod(sv_maxplayers, np);
             }
-            if(G(maxplayers) < G(numplayers)) G(maxplayers) = G(numplayers);
         }
     }
 
