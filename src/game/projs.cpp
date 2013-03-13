@@ -370,7 +370,7 @@ namespace projs
             }
             if(init) updatenormal(proj);
         }
-        return proj.stick != 0;
+        return proj.stuck != 0;
     }
 
     void stick(projent &proj, const vec &dir, gameent *d = NULL)

@@ -4567,8 +4567,7 @@ namespace server
 
                     bool havecn = true;
                     clientinfo *cp = (clientinfo *)getinfo(lcn);
-                    if(!cp || (cp->clientnum != sender && cp->state.ownernum != sender))
-                        havecn = false;
+                    if(!hasclient(cp, ci)) havecn = false;
 
                     p.get();
                     getuint(p);
@@ -4799,7 +4798,7 @@ namespace server
                 {
                     int lcn = getint(p);
                     clientinfo *cp = (clientinfo *)getinfo(lcn);
-                    bool havecn = (cp && (cp->clientnum == ci->clientnum || cp->state.ownernum == ci->clientnum));
+                    bool havecn = hasclient(cp, ci);
                     shotevent *ev = new shotevent;
                     ev->id = getint(p);
                     ev->weap = getint(p);
@@ -4836,8 +4835,7 @@ namespace server
                 { // gee this looks familiar
                     int lcn = getint(p), id = getint(p), weap = getint(p);
                     clientinfo *cp = (clientinfo *)getinfo(lcn);
-                    if(!cp || (cp->clientnum != ci->clientnum && cp->state.ownernum != ci->clientnum) || !isweap(weap))
-                        break;
+                    if(!hasclient(cp, ci)) break;
                     dropevent *ev = new dropevent;
                     ev->id = id;
                     ev->weap = weap;
@@ -4850,8 +4848,7 @@ namespace server
                 {
                     int lcn = getint(p), id = getint(p), weap = getint(p);
                     clientinfo *cp = (clientinfo *)getinfo(lcn);
-                    if(!cp || (cp->clientnum != ci->clientnum && cp->state.ownernum != ci->clientnum) || !isweap(weap))
-                        break;
+                    if(!hasclient(cp, ci)) break;
                     reloadevent *ev = new reloadevent;
                     ev->id = id;
                     ev->weap = weap;
@@ -4864,7 +4861,7 @@ namespace server
                 {
                     int lcn = getint(p), millis = getint(p);
                     clientinfo *cp = (clientinfo *)getinfo(lcn);
-                    bool havecn = (cp && (cp->clientnum == ci->clientnum || cp->state.ownernum == ci->clientnum));
+                    bool havecn = hasclient(cp, ci);
                     destroyevent *ev = new destroyevent;
                     ev->weap = getint(p);
                     ev->flags = getint(p);
@@ -4893,7 +4890,7 @@ namespace server
                 {
                     int lcn = getint(p), millis = getint(p);
                     clientinfo *cp = (clientinfo *)getinfo(lcn);
-                    bool havecn = (cp && (cp->clientnum == ci->clientnum || cp->state.ownernum == ci->clientnum));
+                    bool havecn = hasclient(cp, ci);
                     stickyevent *ev = new stickyevent;
                     ev->weap = getint(p);
                     ev->flags = getint(p);
