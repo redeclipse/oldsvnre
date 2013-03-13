@@ -1868,12 +1868,13 @@ namespace game
     {
         if(!name) name = d->name;
         static string colored; colored[0] = 0;
+        concatstring(colored, "\fs");
         if(icon)
         {
-            defformatstring(cicon)("\fs\f[%d]\f($priv%stex)\fS", TEAM(d->team, colour), hud::privname(d->privilege, d->aitype));
+            defformatstring(cicon)("\f[%d]\f($priv%stex)", TEAM(d->team, colour), hud::privname(d->privilege, d->aitype));
             concatstring(colored, cicon);
         }
-        defformatstring(cname)("\fs\f[%d]%s", findcolour(d), name);
+        defformatstring(cname)("\f[%d]%s", findcolour(d), name);
         concatstring(colored, cname);
         if(!name[0] || (d->aitype < AI_START && dupname && duplicatename(d, name)))
         {
