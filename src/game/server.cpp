@@ -943,7 +943,7 @@ namespace server
     {
         if(!name) name = ci->name;
         static string colored; colored[0] = 0;
-        concatstring(colored, "\fS");
+        concatstring(colored, "\fs");
         if(icon)
         {
             defformatstring(cicon)("\f[%d]\f($priv%stex)", TEAM(ci->team, colour), privnamex(ci->privilege, ci->state.aitype));
@@ -2610,7 +2610,7 @@ namespace server
                     delete[] s;
                     if(ret)
                     {
-                        if(*ret) conoutft(CON_MESG, "\fc%s returned %s", id->name, ret);
+                        if(*ret) conoutft(CON_MESG, "\fy\fs\fc%s\fS returned \fs\fc%s\fS", id->name, ret);
                         delete[] ret;
                     }
                     return true;
@@ -2619,7 +2619,7 @@ namespace server
                 {
                     if(nargs <= 1 || !arg)
                     {
-                        conoutft(CON_MESG, id->flags&IDF_HEX && *id->storage.i >= 0 ? (id->maxval==0xFFFFFF ? "\fc%s = 0x%.6X" : "\fc%s = 0x%X") : "\fc%s = %d", id->name, *id->storage.i);
+                        conoutft(CON_MESG, id->flags&IDF_HEX && *id->storage.i >= 0 ? (id->maxval==0xFFFFFF ? "\fy%s = 0x%.6X" : "\fy%s = 0x%X") : "\fy%s = %d", id->name, *id->storage.i);
                         return true;
                     }
                     if(id->maxval < id->minval || id->flags&IDF_READONLY)
@@ -2650,7 +2650,7 @@ namespace server
                 {
                     if(nargs <= 1 || !arg)
                     {
-                        conoutft(CON_MESG, "\fc%s = %s", id->name, floatstr(*id->storage.f));
+                        conoutft(CON_MESG, "\fy%s = %s", id->name, floatstr(*id->storage.f));
                         return true;
                     }
                     if(id->maxvalf < id->minvalf || id->flags&IDF_READONLY)
@@ -2678,7 +2678,7 @@ namespace server
                 {
                     if(nargs <= 1 || !arg)
                     {
-                        conoutft(CON_MESG, strchr(*id->storage.s, '"') ? "\fc%s = [%s]" : "\fc%s = \"%s\"", id->name, *id->storage.s);
+                        conoutft(CON_MESG, strchr(*id->storage.s, '"') ? "\fy%s = [%s]" : "\fy%s = \"%s\"", id->name, *id->storage.s);
                         return true;
                     }
                     if(id->flags&IDF_READONLY)
@@ -2741,8 +2741,8 @@ namespace server
                     else formatstring(s)(slen, "%s %s", id->name, arg);
                     char *ret = executestr(s);
                     delete[] s;
-                    if(ret && *ret) srvoutf(-3, "\fc%s executed %s (returned: %s)", colourname(ci), name, ret);
-                    else srvoutf(-3, "\fc%s executed %s", colourname(ci), name);
+                    if(ret && *ret) srvoutf(-3, "\fy%s executed %s (returned: %s)", colourname(ci), name, ret);
+                    else srvoutf(-3, "\fy%s executed %s", colourname(ci), name);
                     delete[] ret;
                     return;
                 }
@@ -2750,7 +2750,7 @@ namespace server
                 {
                     if(nargs <= 1 || !arg)
                     {
-                        srvmsgf(ci->clientnum, id->flags&IDF_HEX && *id->storage.i >= 0 ? (id->maxval==0xFFFFFF ? "\fc%s = 0x%.6X" : "\fc%s = 0x%X") : "\fc%s = %d", name, *id->storage.i);
+                        srvmsgf(ci->clientnum, id->flags&IDF_HEX && *id->storage.i >= 0 ? (id->maxval==0xFFFFFF ? "\fy%s = 0x%.6X" : "\fy%s = 0x%X") : "\fy%s = %d", name, *id->storage.i);
                         return;
                     }
                     else if(locked && !haspriv(ci, locked, "change that variable"))
@@ -2783,7 +2783,7 @@ namespace server
                 {
                     if(nargs <= 1 || !arg)
                     {
-                        srvmsgf(ci->clientnum, "\fc%s = %s", name, floatstr(*id->storage.f));
+                        srvmsgf(ci->clientnum, "\fy%s = %s", name, floatstr(*id->storage.f));
                         return;
                     }
                     else if(locked && !haspriv(ci, locked, "change that variable"))
@@ -2813,7 +2813,7 @@ namespace server
                 {
                     if(nargs <= 1 || !arg)
                     {
-                        srvmsgf(ci->clientnum, strchr(*id->storage.s, '"') ? "\fc%s = [%s]" : "\fc%s = \"%s\"", name, *id->storage.s);
+                        srvmsgf(ci->clientnum, strchr(*id->storage.s, '"') ? "\fy%s = [%s]" : "\fy%s = \"%s\"", name, *id->storage.s);
                         return;
                     }
                     else if(locked && !haspriv(ci, locked, "change that variable"))
@@ -2839,7 +2839,7 @@ namespace server
             if(val)
             {
                 sendf(-1, 1, "ri2sis", N_COMMAND, ci->clientnum, name, strlen(val), val);
-                relayf(3, "\fc%s set %s to %s", colourname(ci), name, val);
+                relayf(3, "\fy%s set %s to %s", colourname(ci), name, val);
             }
         }
         else srvmsgf(ci->clientnum, "\frunknown command: %s", cmd);
@@ -5572,14 +5572,14 @@ namespace server
                         case ID_VAR:
                         {
                             int val = getint(p);
-                            relayf(3, "\fc%s set worldvar %s to %d", colourname(ci), text, val);
+                            relayf(3, "\fy%s set worldvar %s to %d", colourname(ci), text, val);
                             QUEUE_INT(val);
                             break;
                         }
                         case ID_FVAR:
                         {
                             float val = getfloat(p);
-                            relayf(3, "\fc%s set worldvar %s to %s", colourname(ci), text, floatstr(val));
+                            relayf(3, "\fy%s set worldvar %s to %s", colourname(ci), text, floatstr(val));
                             QUEUE_FLT(val);
                             break;
                         }
@@ -5590,7 +5590,7 @@ namespace server
                             if(vlen < 0 || vlen > p.remaining()) break;
                             char *val = newstring(vlen);
                             getstring(val, p, vlen+1);
-                            relayf(3, "\fc%s set world%s %s to %s", colourname(ci), t == ID_ALIAS ? "alias" : "var", text, val);
+                            relayf(3, "\fy%s set world%s %s to %s", colourname(ci), t == ID_ALIAS ? "alias" : "var", text, val);
                             QUEUE_INT(vlen);
                             QUEUE_STR(val);
                             delete[] val;

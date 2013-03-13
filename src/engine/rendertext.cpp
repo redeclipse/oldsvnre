@@ -237,7 +237,7 @@ static void text_color(char c, cvec *stack, int size, int &sp, cvec &color, int 
         case 's': // save
         {
             if(sp < size-1) stack[++sp] = color;
-            return;
+            break;
         }
         case 'S': // restore
         {
