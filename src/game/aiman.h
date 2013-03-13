@@ -130,7 +130,7 @@ namespace aiman
         if(owner) owner->bots.removeobj(ci);
         clients.removeobj(ci);
         delclient(cn);
-        dorefresh = 1;
+        dorefresh = max(dorefresh, 1);
     }
 
     bool delai(int type, bool skip)

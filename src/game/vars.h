@@ -309,7 +309,9 @@ GVAR(0, bomberregendelay, 0, 1000, VAR_MAX); // regen this often when buffed
 GVAR(0, bomberregenextra, 0, 2, VAR_MAX); // add this to regen when buffed
 GVAR(0, bomberbasket, 0, 1, 1); // you can score by throwing the bomb into the goal
 
-GVAR(IDF_ADMIN, airefresh, 0, 1000, VAR_MAX);
+GVAR(IDF_ADMIN, aiinitdelay, 0, 10000, VAR_MAX);
+GVAR(IDF_ADMIN, ailongdelay, 0, 30000, VAR_MAX);
+GVAR(IDF_ADMIN, airefreshdelay, 0, 1000, VAR_MAX);
 GVAR(0, botbalance, -1, -1, VAR_MAX); // -1 = always use numplayers, 0 = don't balance, 1 or more = fill only with this*numteams
 GVAR(0, botskillmin, 1, 75, 101);
 GVAR(0, botskillmax, 1, 85, 101);

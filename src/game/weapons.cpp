@@ -58,7 +58,7 @@ namespace weapons
                 else
                 {
                     int offset = d->weapload[d->weapselect];
-                    d->ammo[weap] = max(d->ammo[d->weapselect]-offset, 0);
+                    d->ammo[d->weapselect] = max(d->ammo[d->weapselect]-offset, 0);
                     d->reloads[d->weapselect] = max(d->reloads[d->weapselect]-1, 0);
                     d->weapload[d->weapselect] = -d->weapload[d->weapselect];
                 }

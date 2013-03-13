@@ -532,7 +532,7 @@ void disconnectmaster()
         server::disconnectedmaster();
         enet_socket_destroy(mastersock);
         mastersock = ENET_SOCKET_NULL;
-        conoutf("disconnected from master server");
+        if(servertype >= 2) conoutf("disconnected from master server");
     }
 
     masterout.setsize(0);
@@ -553,7 +553,7 @@ ENetSocket connectmaster(bool reuse)
 
     if(masteraddress.host == ENET_HOST_ANY)
     {
-        conoutf("\falooking up %s:[%d]...", servermaster, servermasterport);
+        if(servertype >= 2) conoutf("\falooking up %s:[%d]...", servermaster, servermasterport);
         masteraddress.port = servermasterport;
         if(!resolverwait(servermaster, &masteraddress))
         {
@@ -582,12 +582,12 @@ bool connectedmaster() { return mastersock != ENET_SOCKET_NULL; }
 
 bool requestmaster(const char *req)
 {
-    if(mastersock == ENET_SOCKET_NULL)
-    {
-        mastersock = connectmaster();
+    // RE master server need an init message
+    //if(mastersock == ENET_SOCKET_NULL)
+    //{
+    //    mastersock = connectmaster();
         if(mastersock == ENET_SOCKET_NULL) return false;
-    }
-
+    //}
     masterout.put(req, strlen(req));
     return true;
 }
@@ -693,22 +693,24 @@ void checkserversockets()        // reply all server info requests
     CHECKSOCKET(lansock);
     if(maxsock == ENET_SOCKET_NULL || enet_socketset_select(maxsock, &sockset, NULL, 0) <= 0) return;
 
-    ENetBuffer buf;
-    uchar pong[MAXTRANS];
-    loopi(2)
+    if(serverhost)
     {
-        ENetSocket sock = i ? lansock : pongsock;
-        if(sock == ENET_SOCKET_NULL || !ENET_SOCKETSET_CHECK(sockset, sock)) continue;
+        ENetBuffer buf;
+        uchar pong[MAXTRANS];
+        loopi(2)
+        {
+            ENetSocket sock = i ? lansock : pongsock;
+            if(sock == ENET_SOCKET_NULL || !ENET_SOCKETSET_CHECK(sockset, sock)) continue;
 
-        buf.data = pong;
-        buf.dataLength = sizeof(pong);
-        int len = enet_socket_receive(sock, &pongaddr, &buf, 1);
-        if(len < 0) return;
-        ucharbuf req(pong, len), p(pong, sizeof(pong));
-        p.len += len;
-        server::queryreply(req, p);
+            buf.data = pong;
+            buf.dataLength = sizeof(pong);
+            int len = enet_socket_receive(sock, &pongaddr, &buf, 1);
+            if(len < 0) return;
+            ucharbuf req(pong, len), p(pong, sizeof(pong));
+            p.len += len;
+            server::queryreply(req, p);
+        }
     }
-
     if(mastersock != ENET_SOCKET_NULL && ENET_SOCKETSET_CHECK(sockset, mastersock)) flushmasterinput();
 }
 
@@ -716,14 +718,14 @@ void serverslice(uint timeout)  // main server update, called from main loop in 
 {
     server::serverupdate();
 
+    flushmasteroutput();
+    checkserversockets();
+
     if(!serverhost)
     {
         server::sendpackets();
         return;
     }
-
-    flushmasteroutput();
-    checkserversockets();
 
     if(servertype >= 2 && totalmillis-laststatus >= 60000)  // display bandwidth stats, useful for server ops
     {

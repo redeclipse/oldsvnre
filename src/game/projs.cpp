@@ -450,7 +450,11 @@ namespace projs
                 }
                 else continue;
             }
-            else if((test = proj.o.squaredist(list[i].o)) > radius) continue;
+            else
+            {
+                radius *= radius;
+                if((test = proj.o.squaredist(list[i].o)) > radius) continue;
+            }
 
             if(closeent < 0 || test <= closedist)
             {
@@ -487,7 +491,6 @@ namespace projs
                 toolent &t = entities::ents[i]->type == TELEPORT ? teleports.add() : pushers.add();
                 t.ent = i;
                 t.radius = entities::ents[i]->attrs[3] > 0 ? entities::ents[i]->attrs[3] : enttype[entities::ents[i]->type].radius;
-                t.radius *= t.radius;
                 t.o = entities::ents[i]->o;
                 break;
             }
