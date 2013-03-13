@@ -1416,3 +1416,50 @@ extern vec closestpointcylinder(const vec &center, const vec &start, const vec &
 
 extern const vec2 sincos360[];
 
+struct cvec
+{
+    union
+    {
+        struct { int x, y, z, w; };
+        struct { int r, g, b, a; };
+        int v[4];
+    };
+
+    cvec() {}
+    cvec(const vec &v) : x(int(v.x)), y(int(v.y)), z(int(v.z)), w(255) {}
+    cvec(const vec4 &v) : x(int(v.x)), y(int(v.y)), z(int(v.z)), w(int(v.w)) {}
+
+    cvec(int a, int b, int c) : x(a), y(b), z(c), w(255) {}
+    cvec(int a, int b, int c, int d) : x(a), y(b), z(c) {}
+
+    vec4 tovec4() const { return vec4(x, y, z, w); }
+    int toint() const { return (x>0?1:0) + (y>0?2:0) + (z>0?4:0); }
+
+    int &operator[](int i)       { return v[i]; }
+    int  operator[](int i) const { return v[i]; }
+
+    bool operator==(const cvec &v) const { return x==v.x && y==v.y && z==v.z && w==v.w; }
+    bool operator!=(const cvec &v) const { return x!=v.x || y!=v.y || z!=v.z || w!=v.w; }
+    bool iszero() const { return x==0 && y==0 && z==0 && w==0; }
+    cvec &alpha(int n) { a = n; return *this; }
+    cvec &shl(int n) { x<<= n; y<<= n; z<<= n; w<<= n; return *this; }
+    cvec &shr(int n) { x>>= n; y>>= n; z>>= n; w>>= n; return *this; }
+    cvec &mul(int n) { x *= n; y *= n; z *= n; w *= n; return *this; }
+    cvec &div(int n) { x /= n; y /= n; z /= n; w /= n; return *this; }
+    cvec &add(int n) { x += n; y += n; z += n; w += n; return *this; }
+    cvec &sub(int n) { x -= n; y -= n; z -= n; w -= n; return *this; }
+    cvec &mul(const cvec &v) { x *= v.x; y *= v.y; z *= v.z; w *= v.w; return *this; }
+    cvec &div(const cvec &v) { x /= v.x; y /= v.y; z /= v.z; w /= v.w; return *this; }
+    cvec &add(const cvec &v) { x += v.x; y += v.y; z += v.z; w += v.w; return *this; }
+    cvec &sub(const cvec &v) { x -= v.x; y -= v.y; z -= v.z; w -= v.w; return *this; }
+    cvec &mask(int n) { x &= n; y &= n; z &= n; w &= n; return *this; }
+    cvec &neg() { return mul(-1); }
+    cvec &min(const cvec &o) { x = ::min(x, o.x); y = ::min(y, o.y); z = ::min(z, o.z); w = ::min(w, o.w); return *this; }
+    cvec &max(const cvec &o) { x = ::max(x, o.x); y = ::max(y, o.y); z = ::max(z, o.z); w = ::max(w, o.w); return *this; }
+    cvec &min(int n) { x = ::min(x, n); y = ::min(y, n); z = ::min(z, n); w = ::min(w, n); return *this; }
+    cvec &max(int n) { x = ::max(x, n); y = ::max(y, n); z = ::max(z, n); w = ::max(w, n); return *this; }
+    cvec &abs() { x = ::abs(x); y = ::abs(y); z = ::abs(z); w = ::abs(w); return *this; }
+    static cvec from24c(int color) { return cvec(int((color>>16)&0xFF), int((color>>8)&0xFF), int(color&0xFF), 255); }
+    static cvec from32c(int color) { return cvec(int((color>>24)&0xFF), int((color>>16)&0xFF), int((color>>8)&0xFF), int(color&0xFF)); }
+    static cvec from24ca(int color, int alpha) { return cvec(int((color>>16)&0xFF), int((color>>8)&0xFF), int(color&0xFF), alpha); }
+};

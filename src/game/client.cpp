@@ -858,8 +858,8 @@ namespace client
             defformatstring(t)(" (\fs\f[%d]%s\fS)", TEAM(d->team, colour), TEAM(d->team, name));
             concatstring(m, t);
         }
-        if(flags&SAY_ACTION) formatstring(s)("\fv* \fs%s\fS \fs\fv%s\fS", m, text);
-        else formatstring(s)("\fa<\fs\fw%s\fS> \fs\fw%s\fS", m, text);
+        if(flags&SAY_ACTION) formatstring(s)("\fv* %s %s", m, text);
+        else formatstring(s)("\fw<%s> %s", m, text);
 
         int snd = S_CHAT;
         ident *wid = idents.access(flags&SAY_ACTION ? "on_action" : "on_text");

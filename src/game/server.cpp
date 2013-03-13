@@ -943,12 +943,13 @@ namespace server
     {
         if(!name) name = ci->name;
         static string colored; colored[0] = 0;
+        concatstring(colored, "\fS");
         if(icon)
         {
-            defformatstring(cicon)("\fs\f[%d]\f($priv%stex)\fS", TEAM(ci->team, colour), privnamex(ci->privilege, ci->state.aitype));
+            defformatstring(cicon)("\f[%d]\f($priv%stex)", TEAM(ci->team, colour), privnamex(ci->privilege, ci->state.aitype));
             concatstring(colored, cicon);
         }
-        defformatstring(cname)("\fs\f[%d]%s", findcolour(ci), name);
+        defformatstring(cname)("\f[%d]%s", findcolour(ci), name);
         concatstring(colored, cname);
         if(!name[0] || (ci->state.aitype < AI_START && dupname && duplicatename(ci, name)))
         {
@@ -5079,8 +5080,8 @@ namespace server
                         defformatstring(t)(" (\fs\f[%d]%s\fS)", TEAM(cp->team, colour), TEAM(cp->team, name));
                         concatstring(m, t);
                     }
-                    if(flags&SAY_ACTION) relayf(0, "\fv* \fs%s\fS \fs\fv%s\fS", m, output);
-                    else relayf(0, "\fa<\fs\fw%s\fS> \fs\fw%s\fS", m, output);
+                    if(flags&SAY_ACTION) relayf(0, "\fv* %s %s", m, output);
+                    else relayf(0, "\fw<%s> %s", m, output);
                     break;
                 }
 
