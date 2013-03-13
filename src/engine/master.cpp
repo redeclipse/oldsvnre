@@ -39,9 +39,9 @@ struct masterclient
     int inputpos, outputpos, port, numpings, lastcontrol;
     enet_uint32 lastping, lastpong, lastactivity;
     vector<authreq> authreqs;
-    bool isserver, ishttp, listserver, shouldping, shouldpurge;
+    bool isserver, isquick, ishttp, listserver, shouldping, shouldpurge;
 
-    masterclient() : inputpos(0), outputpos(0), port(MASTER_PORT), numpings(0), lastcontrol(-1), lastping(0), lastpong(0), lastactivity(0), isserver(false), ishttp(false), listserver(false), shouldping(false), shouldpurge(false) {}
+    masterclient() : inputpos(0), outputpos(0), port(MASTER_PORT), numpings(0), lastcontrol(-1), lastping(0), lastpong(0), lastactivity(0), isserver(false), isquick(false), ishttp(false), listserver(false), shouldping(false), shouldpurge(false) {}
 };
 
 static vector<masterclient *> masterclients;
@@ -282,29 +282,38 @@ bool checkmasterclientinput(masterclient &c)
             numargs--;
             c.ishttp = true;
         }
-        bool found = false;
-        if(!strcmp(w[0], "server") && !c.ishttp)
+        bool found = false, server = !strcmp(w[0], "server");
+        if((server || !strcmp(w[0], "quick")) && !c.ishttp)
         {
             c.port = MASTER_PORT;
-            if(w[1]) c.port = clamp(atoi(w[1]), 1, VAR_MAX);
-            c.shouldping = true;
-            c.numpings = 0;
             c.lastactivity = totalmillis ? totalmillis : 1;
-            c.lastcontrol = controlversion;
-            if(c.isserver)
+            if(!server)
             {
-                masteroutf(c, "echo \"server updated, sending ping request\"\n");
-                conoutf("master peer %s updated server info",  c.name);
+                c.isquick = true;
+                masteroutf(c, "echo \"session initiated, awaiting auth requests\"\n");
+                conoutf("master peer %s quickly checking auth request",  c.name);
             }
             else
             {
-                if(*masterscriptserver) masteroutf(c, "%s\n", masterscriptserver);
-                masteroutf(c, "echo \"server registered, sending ping request\"\n");
-                conoutf("master peer %s registered as a server",  c.name);
+                if(w[1]) c.port = clamp(atoi(w[1]), 1, VAR_MAX);
+                c.shouldping = true;
+                c.numpings = 0;
+                c.lastcontrol = controlversion;
+                loopv(control) if(control[i].flag == ipinfo::LOCAL)
+                    masteroutf(c, "%s %u %u\n", ipinfotypes[control[i].type], control[i].ip, control[i].mask);
+                if(c.isserver)
+                {
+                    masteroutf(c, "echo \"server updated, sending ping request\"\n");
+                    conoutf("master peer %s updated server info",  c.name);
+                }
+                else
+                {
+                    if(*masterscriptserver) masteroutf(c, "%s\n", masterscriptserver);
+                    masteroutf(c, "echo \"server registered, sending ping request\"\n");
+                    conoutf("master peer %s registered as a server",  c.name);
+                }
                 c.isserver = true;
             }
-            loopv(control) if(control[i].flag == ipinfo::LOCAL)
-                masteroutf(c, "%s %u %u\n", ipinfotypes[control[i].type], control[i].ip, control[i].mask);
             found = true;
         }
         if(!strcmp(w[0], "version") || !strcmp(w[0], "update"))
@@ -329,7 +338,7 @@ bool checkmasterclientinput(masterclient &c)
             c.shouldpurge = true;
             found = true;
         }
-        if(c.isserver)
+        if(c.isserver || c.isquick)
         {
             if(!strcmp(w[0], "reqauth")) { reqauth(c, uint(atoi(w[1])), w[2]); found = true; }
             if(!strcmp(w[0], "confauth")) { confauth(c, uint(atoi(w[1])), w[2]); found = true; }

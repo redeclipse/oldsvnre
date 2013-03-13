@@ -42,10 +42,12 @@ void localopadd(const char *name, const char *flags)
 }
 ICOMMAND(0, addlocalop, "ss", (char *n, char *f), localopadd(n, f));
 
+VAR(IDF_PERSIST, quickauthchecks, 0, 0, 1);
 namespace auth
 {
     int lastconnect = 0, lastactivity = 0;
     uint nextauthreq = 1;
+    bool quickcheck = false;
 
     clientinfo *findauth(uint id)
     {
@@ -58,22 +60,27 @@ namespace auth
     {
         if(!nextauthreq) nextauthreq = 1;
         ci->authreq = nextauthreq++;
+        if(!connectedmaster())
+        {
+            if(quickauthchecks) quickcheck = true;
+            return;
+        }
+        srvmsgftforce(ci->clientnum, CON_EVENT, "\fyplease wait, requesting credential match..");
         requestmasterf("reqauth %u %s\n", ci->authreq, ci->authname);
         lastactivity = totalmillis;
-        srvmsgft(ci->clientnum, CON_EVENT, "\fyplease wait, requesting credential match..");
     }
 
     bool tryauth(clientinfo *ci, const char *user)
     {
         if(!ci) return false;
-        else if(!connectedmaster())
+        if(!connectedmaster() && !quickauthchecks)
         {
-            srvmsgft(ci->clientnum, CON_EVENT, "\founable to verify, not connected to master server");
+            srvmsgftforce(ci->clientnum, CON_EVENT, "\founable to verify, not connected to master server");
             return false;
         }
         else if(ci->authreq)
         {
-            srvmsgft(ci->clientnum, CON_EVENT, "\foplease wait, still processing previous attempt..");
+            srvmsgftforce(ci->clientnum, CON_EVENT, "\foplease wait, still processing previous attempt..");
             return true;
         }
         filtertext(ci->authname, user, true, true, false, 100);
@@ -122,30 +129,36 @@ namespace auth
         }
     }
 
-    int allowconnect(clientinfo *ci, bool connecting = true, const char *pwd = "", const char *authname = "")
+    bool tryident(clientinfo *ci, bool connecting = true, const char *pwd = "", const char *authname = "")
     {
-        if(ci->local) return DISC_NONE;
-        if(m_local(gamemode)) return DISC_PRIVATE;
-        int minpriv = max(int(PRIV_ELEVATED), G(connectlock));
-        if(haspriv(ci, minpriv)) return DISC_NONE;
         if(*authname)
         {
-            if(ci->connectauth) return DISC_NONE;
+            if(ci->connectauth) return true;
             if(tryauth(ci, authname))
             {
                 ci->connectauth = true;
-                return DISC_NONE;
+                return true;
             }
         }
         if(*pwd)
         {
             if(adminpass[0] && checkpassword(ci, adminpass, pwd))
             {
-                if(G(autoadmin)) setprivilege(ci, true, PRIV_ADMINISTRATOR);
-                return DISC_NONE;
+                if(G(autoadmin) || G(connectlock)) setprivilege(ci, true, PRIV_ADMINISTRATOR);
+                return true;
             }
-            if(serverpass[0] && checkpassword(ci, serverpass, pwd)) return DISC_NONE;
+            if(serverpass[0] && checkpassword(ci, serverpass, pwd)) return true;
         }
+        int minpriv = max(int(PRIV_ELEVATED), G(connectlock));
+        if(haspriv(ci, minpriv)) return true;
+        return false;
+    }
+
+    int allowconnect(clientinfo *ci, bool connecting = true, const char *pwd = "", const char *authname = "")
+    {
+        if(ci->local) { tryident(ci, connecting, pwd, authname); return DISC_NONE; }
+        if(m_local(gamemode)) return DISC_PRIVATE;
+        if(tryident(ci, connecting, pwd, authname)) return DISC_NONE;
         // above here are short circuits
         if(numclients() >= G(serverclients)) return DISC_MAXCLIENTS;
         uint ip = getclientip(ci->clientnum);
@@ -162,7 +175,7 @@ namespace auth
         clientinfo *ci = findauth(id);
         if(!ci) return;
         ci->authreq = ci->authname[0] = 0;
-        srvmsgft(ci->clientnum, CON_EVENT, "\foauthority request failed, please check your credentials");
+        srvmsgftforce(ci->clientnum, CON_EVENT, "\foauthority request failed, please check your credentials");
         if(ci->connectauth)
         {
             ci->connectauth = false;
@@ -249,7 +262,7 @@ namespace auth
             else numargs = i;
         }
         if(!strcmp(w[0], "error")) conoutf("master server error: %s", w[1]);
-        else if(!strcmp(w[0], "echo")) conoutf("master server reply: %s", w[1]);
+        else if(!strcmp(w[0], "echo")) { conoutf("master server reply: %s", w[1]); }
         else if(!strcmp(w[0], "failauth")) authfailed((uint)(atoi(w[1])));
         else if(!strcmp(w[0], "succauth")) authsucceeded((uint)(atoi(w[1])), w[2], w[3]);
         else if(!strcmp(w[0], "chalauth")) authchallenged((uint)(atoi(w[1])), w[2]);
@@ -270,32 +283,37 @@ namespace auth
     void regserver()
     {
         loopvrev(control) if(control[i].flag == ipinfo::GLOBAL) control.remove(i);
-        conoutf("updating master server");
-        requestmasterf("server %d\n", serverport);
+        if(quickcheck) requestmasterf("quick\n");
+        else
+        {
+            conoutf("updating master server");
+            requestmasterf("server %d\n", serverport);
+        }
         lastactivity = totalmillis;
     }
 
     void update()
     {
-        if(servertype < 2)
+        if(servertype < 2 && !quickcheck)
         {
             if(connectedmaster()) disconnectmaster();
             return;
         }
-        else if(!connectedmaster() && (!lastconnect || totalmillis-lastconnect > 60*1000))
+        if(!connectedmaster() && (!lastconnect || totalmillis-lastconnect > 60*1000))
         {
             lastconnect = totalmillis;
             if(connectmaster() == ENET_SOCKET_NULL) return;
             regserver();
             loopv(clients) if(clients[i]->authreq) reqauth(clients[i]);
+            loopv(connects) if(connects[i]->authreq) reqauth(connects[i]);
         }
-
-        if(totalmillis-lastactivity > 30*60*1000) regserver();
+        if(!quickcheck && totalmillis-lastactivity > 30*60*1000) regserver();
     }
 }
 
 void disconnectedmaster()
 {
+    auth::quickcheck = false;
 }
 
 void processmasterinput(const char *cmd, int cmdlen, const char *args)

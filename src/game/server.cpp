@@ -1671,7 +1671,7 @@ namespace server
         setupitems(true);
         setupspawns(true);
         hasgameinfo = true;
-        aiman::dorefresh = G(airefresh);
+        aiman::dorefresh = numclients() >= 2 ? (m_duke(gamemode, mutators) || m_bomber(gamemode) ? G(ailongdelay) : G(aiinitdelay)) : G(airefreshdelay);
     }
 
     void sendspawn(clientinfo *ci)
@@ -1740,6 +1740,13 @@ namespace server
             defvformatstring(str, s, s);
             sendf(cn, 1, "ri2s", N_SERVMSG, conlevel, str);
         }
+    }
+
+    void srvmsgftforce(int cn, int conlevel, const char *s, ...)
+    {
+        defvformatstring(str, s, s);
+        if(cn < 0 || allowbroadcast(cn)) sendf(cn, 1, "ri2s", N_SERVMSG, conlevel, str);
+        if(cn >= 0 && !allowbroadcast(cn)) sendf(cn, 1, "ri2s", N_SERVMSG, conlevel, str);
     }
 
     void srvmsgf(int cn, const char *s, ...)
@@ -2224,7 +2231,7 @@ namespace server
                 if(smode) smode->entergame(ci);
                 mutate(smuts, mut->entergame(ci));
             }
-            if(ci->state.aitype == AI_NONE) aiman::dorefresh = G(airefresh); // get the ai to reorganise
+            if(ci->state.aitype == AI_NONE) aiman::dorefresh = max(aiman::dorefresh, G(airefreshdelay)); // get the ai to reorganise
         }
         if(flags&TT_INFO) sendf(-1, 1, "ri3", N_SETTEAM, ci->clientnum, ci->team);
     }
@@ -2409,7 +2416,7 @@ namespace server
         if(smode) smode->reset(false);
         mutate(smuts, mut->reset(false));
         aiman::clearai();
-        aiman::dorefresh = G(airefresh);
+        aiman::dorefresh = 0;
 
         const char *reqmap = name && *name ? name : pickmap(smapname, gamemode, mutators);
 #ifdef STANDALONE // interferes with savemap on clients, in which case we can just use the auto-request
@@ -3956,7 +3963,7 @@ namespace server
             ci->state.state = CS_SPECTATOR;
             ci->state.timeplayed += lastmillis-ci->state.lasttimeplayed;
             setteam(ci, T_NEUTRAL, TT_SMINFO);
-            aiman::dorefresh = G(airefresh);
+            aiman::dorefresh = max(aiman::dorefresh, G(airefreshdelay));
         }
         else if(ci->state.state == CS_SPECTATOR && !val)
         {
@@ -3969,7 +3976,7 @@ namespace server
             waiting(ci, DROP_RESET);
             if(smode) smode->entergame(ci);
             mutate(smuts, mut->entergame(ci));
-            aiman::dorefresh = G(airefresh);
+            aiman::dorefresh = max(aiman::dorefresh, G(airefreshdelay));
         }
         return true;
     }
@@ -4159,7 +4166,7 @@ namespace server
                 }
                 savescore(ci);
                 aiman::removeai(ci, complete);
-                if(!complete) aiman::dorefresh = G(airefresh);
+                if(!complete) aiman::dorefresh = max(aiman::dorefresh, G(airefreshdelay));
             }
             sendf(-1, 1, "ri3", N_DISCONNECT, n, reason);
             ci->connected = false;
@@ -4470,7 +4477,7 @@ namespace server
         else if(m_edit(gamemode))
         {
             ci->ready = true;
-            aiman::dorefresh = G(airefresh);
+            aiman::dorefresh = max(aiman::dorefresh, G(airefreshdelay));
         }
     }
 
@@ -4702,7 +4709,7 @@ namespace server
                     if(!ci->ready)
                     {
                         ci->ready = true;
-                        aiman::dorefresh = G(airefresh);
+                        aiman::dorefresh = max(aiman::dorefresh, G(airefreshdelay));
                     }
                     if(strcmp(text, smapname))
                     {
