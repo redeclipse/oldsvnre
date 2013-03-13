@@ -1244,8 +1244,7 @@ namespace hud
             if(*mapauthor) ty += draw_textx("by %s", tx, ty, 255, 255, 255, tf, TEXT_CENTERED, -1, tw, mapauthor);
             popfont();
             pushfont("little");
-            defformatstring(gname)("%s", server::gamename(game::gamemode, game::mutators));
-            if(strlen(gname) > 32) formatstring(gname)("%s", server::gamename(game::gamemode, game::mutators, 1));
+            defformatstring(gname)("%s", server::gamename(game::gamemode, game::mutators, 0, 32));
             ty += draw_textx("[ \fs\fa%s\fS ]", tx, ty, 255, 255, 255, tf, TEXT_CENTERED, -1, tw, gname);
             popfont();
         }

@@ -269,8 +269,7 @@ namespace hud
                     uicenterlist(g, uifont(g, "emphasis", g.textf("%s", 0xFFFFFF, NULL, 0, *maptitle ? maptitle : mapname)));
                     if(*mapauthor) uicenterlist(g, uifont(g, "default", g.textf("by %s", 0xFFFFFF, NULL, 0, mapauthor)));
                     uicenterlist(g, uifont(g, "reduced", {
-                        defformatstring(gname)("%s", server::gamename(game::gamemode, game::mutators));
-                        if(strlen(gname) > 32) formatstring(gname)("%s", server::gamename(game::gamemode, game::mutators, 1));
+                        defformatstring(gname)("%s", server::gamename(game::gamemode, game::mutators, 0, 32));
                         g.textf("%s", 0xFFFFFF, NULL, 0, gname);
                         if((m_play(game::gamemode) || client::demoplayback) && game::timeremaining >= 0)
                         {

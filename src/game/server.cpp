@@ -993,36 +993,47 @@ namespace server
     }
     ICOMMAND(0, getversion, "i", (int *a), intret(getver(*a)));
 
-    const char *gamename(int mode, int muts, int compact)
+    const char *gamename(int mode, int muts, int compact, int limit)
     {
         if(!m_game(mode)) mode = G_DEATHMATCH;
         if(gametype[mode].implied) muts |= gametype[mode].implied;
         static string gname; gname[0] = 0;
-        if(gametype[mode].mutators[0] && muts)
+        int start = clamp(compact, 0, 3), lps = clamp(4-start, 1, 4);
+        loopk(lps)
         {
-            int implied = gametype[mode].implied;
-            loopi(G_M_NUM) if(muts&(1<<mutstype[i].type)) implied |= mutstype[i].implied&~(1<<mutstype[i].type);
-            loopi(G_M_NUM) if((gametype[mode].mutators[0]&(1<<mutstype[i].type)) && (muts&(1<<mutstype[i].type)) && (!implied || !(implied&(1<<mutstype[i].type))))
+            int iter = start+k;
+            if(gametype[mode].mutators[0] && muts)
             {
-                const char *mut = i < G_M_GSP ? mutstype[i].name : gametype[mode].gsp[i-G_M_GSP];
-                if(mut && *mut)
+                int implied = gametype[mode].implied;
+                loopi(G_M_NUM) if(muts&(1<<mutstype[i].type)) implied |= mutstype[i].implied&~(1<<mutstype[i].type);
+                loopi(G_M_NUM) if((gametype[mode].mutators[0]&(1<<mutstype[i].type)) && (muts&(1<<mutstype[i].type)) && (!implied || !(implied&(1<<mutstype[i].type))))
                 {
-                    string name;
-                    switch(compact)
+                    const char *mut = i < G_M_GSP ? mutstype[i].name : gametype[mode].gsp[i-G_M_GSP];
+                    if(mut && *mut)
                     {
-                        case 2: formatstring(name)("%s%c", *gname ? gname : "", mut[0]); break;
-                        case 1: formatstring(name)("%s%s%c", *gname ? gname : "", *gname ? "-" : "", mut[0]); break;
-                        case 0: default: formatstring(name)("%s%s%s", *gname ? gname : "", *gname ? "-" : "", mut); break;
+                        string name;
+                        switch(iter)
+                        {
+                            case 2: case 3: formatstring(name)("%s%s%c", *gname ? gname : "", *gname ? "-" : "", mut[0]); break;
+                            case 1: formatstring(name)("%s%s%c%c", *gname ? gname : "", *gname ? "-" : "", mut[0], mut[1]); break;
+                            case 0: default: formatstring(name)("%s%s%s", *gname ? gname : "", *gname ? "-" : "", mut); break;
+                        }
+                        copystring(gname, name);
                     }
-                    copystring(gname, name);
                 }
             }
+            defformatstring(mname)("%s%s%s", *gname ? gname : "", *gname ? " " : "", k < 3 ? gametype[mode].name : gametype[mode].sname);
+            if(k < 3 && limit > 0 && int(strlen(mname)) >= limit)
+            {
+                gname[0] = 0;
+                continue; // let's try again
+            }
+            copystring(gname, mname);
+            break;
         }
-        defformatstring(mname)("%s%s%s", *gname ? gname : "", *gname ? " " : "", gametype[mode].name);
-        copystring(gname, mname);
         return gname;
     }
-    ICOMMAND(0, gamename, "iii", (int *g, int *m, int *c), result(gamename(*g, *m, *c)));
+    ICOMMAND(0, gamename, "iiii", (int *g, int *m, int *c, int *t), result(gamename(*g, *m, *c, *t)));
 
     const char *modedesc(int mode, int muts, int type)
     {
@@ -1052,6 +1063,7 @@ namespace server
             {
                 if(m_capture(mode) && m_gsp3(mode, muts)) break;
                 else if(m_bomber(mode) && m_gsp2(mode, muts)) break;
+                else if(m_gauntlet(mode) && m_gsp1(mode, muts)) break;
             }
             if(type == 1 || type == 3 || type == 4)
             {
@@ -1889,7 +1901,7 @@ namespace server
         demofile &d = demos.add();
         char *timestr = ctime(&clocktime), *trim = timestr + strlen(timestr);
         while(trim>timestr && iscubespace(*--trim)) *trim = '\0';
-        formatstring(d.info)("%s: %s, %s, %.2f%s", timestr, gamename(gamemode, mutators), smapname, len > 1024*1024 ? len/(1024*1024.f) : len/1024.0f, len > 1024*1024 ? "MB" : "kB");
+        formatstring(d.info)("%s: %s, %s, %.2f%s", timestr, gamename(gamemode, mutators, 0, 32), smapname, len > 1024*1024 ? len/(1024*1024.f) : len/1024.0f, len > 1024*1024 ? "MB" : "kB");
         srvoutf(4, "\fydemo \fs\fc%s\fS recorded", d.info);
         d.data = new uchar[len];
         d.len = len;
