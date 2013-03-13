@@ -40,7 +40,7 @@ enum { G_F_GSP = 0, G_F_NUM };
 struct gametypes
 {
     int type, flags, implied, mutators[G_M_GSN+1];
-    const char *name, *gsp[G_M_GSN], *desc, *gsd[G_M_GSN];
+    const char *name, *sname, *gsp[G_M_GSN], *desc, *gsd[G_M_GSN];
 };
 struct mutstypes
 {
@@ -51,7 +51,7 @@ struct mutstypes
 gametypes gametype[] = {
     {
         G_DEMO, 0, 0, { 0, 0, 0, 0 },
-        "demo", { "", "", "" },
+        "demo", "demo", { "", "", "" },
         "play back previously recorded games", { "", "", "" },
     },
     {
@@ -60,7 +60,7 @@ gametypes gametype[] = {
             (1<<G_M_FFA)|(1<<G_M_CLASSIC)|(1<<G_M_JETPACK),
             0, 0, 0
         },
-        "editing", { "", "", "" },
+        "editing", "editing", { "", "", "" },
         "create and edit existing maps", { "", "", "" },
     },
 #ifdef CAMPAIGN
@@ -70,7 +70,7 @@ gametypes gametype[] = {
             (1<<G_M_INSTA)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE),
             0, 0, 0
         },
-        "campaign", { "", "", "" },
+        "campaign", "campaign", { "", "", "" },
         "make your way through the mission alive", { "", "", "" },
     },
 #endif
@@ -80,7 +80,7 @@ gametypes gametype[] = {
             (1<<G_M_MULTI)|(1<<G_M_FFA)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_DUEL)|(1<<G_M_SURVIVOR)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE),
             0, 0, 0
         },
-        "deathmatch", { "", "", "" },
+        "deathmatch", "dm", { "", "", "" },
         "shoot to kill and earn points by fragging", { "", "", "" },
     },
     {
@@ -91,7 +91,7 @@ gametypes gametype[] = {
             (1<<G_M_MULTI)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_DUEL)|(1<<G_M_SURVIVOR)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP2),
             (1<<G_M_MULTI)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_DUEL)|(1<<G_M_SURVIVOR)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP3)
         },
-        "capture-the-flag", { "quick", "defend", "protect" },
+        "capture-the-flag", "capture", { "quick", "defend", "protect" },
         "take the enemy flag and return it to the base", { "dropped flags instantly return to base", "dropped flags must be defended until they reset", "protect the flag and hold the enemy flag to score" },
     },
     {
@@ -102,7 +102,7 @@ gametypes gametype[] = {
             (1<<G_M_MULTI)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1)|(1<<G_M_GSP2),
             (1<<G_M_MULTI)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP3)
         },
-        "defend-the-flag", { "quick", "conquer", "king" },
+        "defend-the-flag", "defend", { "quick", "conquer", "king" },
         "defend the flags to earn points", { "flags secure quicker than normal", "match ends when all flags are secured", "king of the hill with one flag" },
     },
     {
@@ -112,7 +112,7 @@ gametypes gametype[] = {
             (1<<G_M_MULTI)|(1<<G_M_FFA)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1),
             0, 0
         },
-        "bomber-ball", { "hold", "", "" },
+        "bomber-ball", "bomber", { "hold", "", "" },
         "get the bomb into the enemy goal to score", { "hold the bomb as long as possible to score points", "", "" },
     },
     {
@@ -121,7 +121,7 @@ gametypes gametype[] = {
             (1<<G_M_FFA)|(1<<G_M_INSTA)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE),
             0, 0, 0
         },
-        "time-trial", { "", "", "" },
+        "time-trial", "trial", { "", "", "" },
         "compete for the fastest time completing a lap", { "", "", "" },
     },
     {
@@ -131,7 +131,7 @@ gametypes gametype[] = {
             (1<<G_M_INSTA)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1),
             0, 0
         },
-        "gauntlet", { "timed", "", "" },
+        "gauntlet", "gauntlet", { "timed", "", "" },
         "compete for the most laps while the other team attacks", { "compete for the best lap time while the other team attacks", "", "" },
     },
 };
