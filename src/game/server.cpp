@@ -3727,7 +3727,7 @@ namespace server
                 takeammo(ci, gs.weapselect, gs.weapload[gs.weapselect]);
                 gs.reloads[gs.weapselect] = max(gs.reloads[gs.weapselect]-1, 0);
                 gs.weapload[gs.weapselect] = -gs.weapload[gs.weapselect];
-                sendf(-1, 1, "ri6", N_RELOAD, ci->clientnum, gs.weapselect, gs.weapload[gs.weapselect], gs.ammo[gs.weapselect], gs.reloads[gs.weapselect]--);
+                sendf(-1, 1, "ri6", N_RELOAD, ci->clientnum, gs.weapselect, gs.weapload[gs.weapselect], gs.ammo[gs.weapselect], gs.reloads[gs.weapselect]);
             }
             else return;
         }

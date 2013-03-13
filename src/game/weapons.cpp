@@ -46,43 +46,48 @@ namespace weapons
 
     bool weapselect(gameent *d, int weap, int filter, bool local)
     {
-        if(!local || (!game::intermission && d->canswitch(weap, m_weapon(game::gamemode, game::mutators), lastmillis, filter)))
+        if(game::intermission || (!local && (d == game::player1 || d->ai))) return false;
+        if(local)
         {
-            if(local) client::addmsg(N_WSELECT, "ri3", d->clientnum, lastmillis-game::maptime, weap);
-            playsound(WSND(weap, S_W_SWITCH), d->o, d, 0, -1, -1, -1, &d->wschan);
-            d->weapswitch(weap, lastmillis, weaponswitchdelay);
-            return true;
+            int interrupts = filter;
+            interrupts &= ~(1<<W_S_RELOAD);
+            if(!d->canswitch(weap, m_weapon(game::gamemode, game::mutators), lastmillis, interrupts))
+            {
+                if(!d->canswitch(weap, m_weapon(game::gamemode, game::mutators), lastmillis, (1<<W_S_RELOAD))) return false;
+                else if(!isweap(d->weapselect) || d->weapload[d->weapselect] <= 0) return false;
+                else
+                {
+                    int offset = d->weapload[d->weapselect];
+                    d->ammo[weap] = max(d->ammo[d->weapselect]-offset, 0);
+                    d->reloads[d->weapselect] = max(d->reloads[d->weapselect]-1, 0);
+                    d->weapload[d->weapselect] = -d->weapload[d->weapselect];
+                }
+            }
+            client::addmsg(N_WSELECT, "ri3", d->clientnum, lastmillis-game::maptime, weap);
         }
-        return false;
+        playsound(WSND(weap, S_W_SWITCH), d->o, d, 0, -1, -1, -1, &d->wschan);
+        d->weapswitch(weap, lastmillis, weaponswitchdelay);
+        return true;
     }
 
     bool weapreload(gameent *d, int weap, int load, int ammo, int reloads, bool local)
     {
-        if(!local || (!game::intermission && d->canreload(weap, m_weapon(game::gamemode, game::mutators), false, lastmillis)))
+        if(game::intermission || (!local && (d == game::player1 || d->ai))) return false;
+        if(local)
         {
-            bool doact = false;
-            if(local)
-            {
-                client::addmsg(N_RELOAD, "ri3", d->clientnum, lastmillis-game::maptime, weap);
-                int oldammo = d->ammo[weap];
-                ammo = min(max(d->ammo[weap], 0) + W(weap, add), W(weap, max));
-                reloads = max(d->reloads[weap], 0) + 1;
-                load = ammo-oldammo;
-                doact = true;
-            }
-            else if(d != game::player1 && !d->ai) doact = true;
-            else if(load < 0) return false; // because we've already gone ahead..
-            d->weapload[weap] = load;
-            d->ammo[weap] = min(ammo, W(weap, max));
-            d->reloads[weap] = max(reloads, 0);
-            if(doact)
-            {
-                playsound(WSND(weap, S_W_RELOAD), d->o, d, 0, -1, -1, -1, &d->wschan);
-                d->setweapstate(weap, W_S_RELOAD, W(weap, reloaddelay), lastmillis);
-            }
-            return true;
+            if(!d->canreload(weap, m_weapon(game::gamemode, game::mutators), false, lastmillis)) return false;
+            client::addmsg(N_RELOAD, "ri3", d->clientnum, lastmillis-game::maptime, weap);
+            int oldammo = d->ammo[weap];
+            ammo = min(max(d->ammo[weap], 0) + W(weap, add), W(weap, max));
+            reloads = max(d->reloads[weap], 0) + 1;
+            load = ammo-oldammo;
         }
-        return false;
+        d->weapload[weap] = load;
+        d->ammo[weap] = min(ammo, W(weap, max));
+        d->reloads[weap] = max(reloads, 0);
+        playsound(WSND(weap, S_W_RELOAD), d->o, d, 0, -1, -1, -1, &d->wschan);
+        d->setweapstate(weap, W_S_RELOAD, W(weap, reloaddelay), lastmillis);
+        return true;
     }
 
     void weaponswitch(gameent *d, int a = -1, int b = -1)
