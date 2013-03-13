@@ -42,6 +42,8 @@ Modes & Mutators:
    weapons have no effect on opponents
  * Passing the bomber-ball now prioritizes players close to crosshair
  * Bomber-ball 'hold' now resets bomb fuse when bomb-carrier kills enemies
+ * Bomber-ball and capture-the-flag 'survivor' and 'duel' now has respawn, no
+   regenerating health, and resets after score/capture
 
 Maps:
  * Assigned map music to all maps
