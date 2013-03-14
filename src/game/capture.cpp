@@ -89,8 +89,8 @@ namespace capture
             if(game::focus->lastbuff)
             {
                 pushfont("reduced");
-                if(captureregenbuff && captureregenextra) ty += draw_textx("Buffing: \fs\fc%d%%\fS damage, \fs\fc%d%%\fS shield, +\fs\fc%d\fS regen", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, int(capturebuffdamage*100), int(capturebuffshield*100), captureregenextra)*hud::noticescale;
-                else ty += draw_textx("Buffing: \fs\fc%d%%\fS damage, \fs\fc%d%%\fS shield", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, int(capturebuffdamage*100), int(capturebuffshield*100))*hud::noticescale;
+                if(captureregenbuff && captureregenextra) ty += draw_textx("Buffing: \fs\fo%d%%\fS damage, \fs\fg%d%%\fS shield, +\fs\fy%d\fS regen", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, int(capturebuffdamage*100), int(capturebuffshield*100), captureregenextra)*hud::noticescale;
+                else ty += draw_textx("Buffing: \fs\fo%d%%\fS damage, \fs\fg%d%%\fS shield", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, int(capturebuffdamage*100), int(capturebuffshield*100))*hud::noticescale;
                 popfont();
             }
             static vector<int> hasflags, taken, droppedflags;
