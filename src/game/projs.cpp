@@ -1491,7 +1491,7 @@ namespace projs
                     float radius = (proj.radius+0.5f)*(clamp(1.f-proj.lifespan, 0.1f, 1.f)+0.25f), blend = clamp(1.25f-proj.lifespan, 0.25f, 1.f)*(0.75f+(rnd(25)/100.f)); // gets smaller as it gets older
                     if(projtrails && lastmillis-proj.lasteffect >= projtraildelay) { effect = true; proj.lasteffect = lastmillis - (lastmillis%projtraildelay); }
                     int len = effect ? max(int(projtraillength*0.5f*max(1.f-proj.lifespan, 0.1f)), 1) : 1,
-                        colour = proj.id && isweap(proj.weap) ? FWCOL(H, explcol, proj) : pulsecols[PULSE_FIRE][rnd(PULSECOLOURS)];
+                        colour = !proj.id && isweap(proj.weap) ? FWCOL(H, explcol, proj) : pulsecols[PULSE_FIRE][rnd(PULSECOLOURS)];
                     part_create(PART_FIREBALL, len, proj.o, colour, radius, blend, -5);
                 }
                 break;
@@ -2292,7 +2292,7 @@ namespace projs
                     if(!proj.limited)
                     {
                         flags |= MDL_LIGHTFX;
-                        vec burncol = proj.id && isweap(proj.weap) ? FWCOL(P, explcol, proj) : game::rescolour(&proj, PULSE_BURN);
+                        vec burncol = !proj.id && isweap(proj.weap) ? FWCOL(P, explcol, proj) : game::rescolour(&proj, PULSE_BURN);
                         burncol.lerp(proj.light.effect, clamp((proj.lifespan - 0.3f)/0.5f, 0.0f, 1.0f));
                         proj.light.effect.max(burncol);
                     }
