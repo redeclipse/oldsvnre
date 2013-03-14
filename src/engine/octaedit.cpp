@@ -209,7 +209,7 @@ void countselchild(cube *c, const ivec &cor, int size)
     {
         ivec o(i, cor.x, cor.y, cor.z, size);
         if(c[i].children) countselchild(c[i].children, o, size/2);
-        else 
+        else
         {
             selchildcount++;
             if(c[i].material != MAT_AIR && selchildmat != MAT_AIR)
@@ -417,7 +417,7 @@ void rendereditcursor()
             selchildcount = 0;
             selchildmat = -1;
             countselchild(worldroot, ivec(0, 0, 0), hdr.worldsize/2);
-            if(mag>=1 && selchildcount==1) 
+            if(mag>=1 && selchildcount==1)
             {
                 selchildmat = c->material;
                 if(mag>1) selchildcount = -mag;
@@ -1859,7 +1859,7 @@ void vcolor(float *r, float *g, float *b)
     if(noedit() || multiplayer()) return;
     VSlot ds;
     ds.changed = 1<<VSLOT_COLOR;
-    ds.colorscale = vec(clamp(*r, 0.0f, 1.0f), clamp(*g, 0.0f, 1.0f), clamp(*b, 0.0f, 1.0f));
+    ds.colorscale = vec(max(*r, 0.0f), max(*g, 0.0f), max(*b, 0.0f));
     mpeditvslot(ds, allfaces, sel, true);
 }
 COMMAND(0, vcolor, "fff");
@@ -2130,7 +2130,7 @@ void rotatecube(cube &c, int d) // rotates cube clockwise. see pics in cvs for h
 
 void mpflip(selinfo &sel, bool local)
 {
-    if(local) 
+    if(local)
     {
         client::edittrigger(sel, EDIT_FLIP);
         makeundo();
@@ -2157,7 +2157,7 @@ void flip()
 
 void mprotate(int cw, selinfo &sel, bool local)
 {
-    if(local) 
+    if(local)
     {
         client::edittrigger(sel, EDIT_ROTATE, cw);
         makeundo();
@@ -2238,7 +2238,7 @@ void mpeditmat(int matid, int filter, int style, selinfo &sel, bool local)
         case 2: filtergeom = EDITMATF_EMPTY; break;
         case 3: filtergeom = EDITMATF_NOTSOLID; break;
         case 4: filtergeom = EDITMATF_SOLID; break;
-    } 
+    }
     if(matid < 0)
     {
         matid = 0;
