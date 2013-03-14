@@ -2612,7 +2612,6 @@ COMMAND(0, substr, "siiN");
 COMMAND(0, sublist, "siiN");
 ICOMMAND(0, listlen, "s", (char *s), intret(listlen(s)));
 ICOMMAND(0, indexof, "ss", (char *list, char *elem), intret(listincludes(list, elem, strlen(elem))));
-ICOMMAND(0, shrinklist, "ssi", (char *s, char *t, int *n), commandret->setstr(shrinklist(s, t, *n)));
 COMMANDN(0, getalias, getalias_, "s");
 
 void looplist(ident *id, const char *list, const uint *body, bool search)
@@ -2693,12 +2692,13 @@ char *listdel(const char *s, const char *del)
     return newstring(p.getbuf(), p.length()-1);
 }
 
-char *shrinklist(const char *list, const char *limit, int failover)
+char *shrinklist(const char *list, const char *limit, int failover, bool invert)
 {
     vector<char> p;
     for(const char *s = list, *start, *end, *qstart, *qend; parselist(s, start, end, qstart, qend);)
     {
-        if(listincludes(limit, start, end-start) >= 0)
+        int inlist = listincludes(limit, start, end-start);
+        if(invert ? inlist < 0 : inlist >= 0)
         {
             if(!p.empty()) p.add(' ');
             p.put(qstart, qend-qstart);
@@ -2709,8 +2709,8 @@ char *shrinklist(const char *list, const char *limit, int failover)
         const char *all = "";
         switch(failover)
         {
-            case 2: all = *limit ? limit : list; break;
-            case 1: default: all = *list ? list : limit; break;
+            case 2: all = limit; break;
+            case 1: default: all = list; break;
         }
         return newstring(all);
     }
@@ -2746,7 +2746,7 @@ void listsplice(const char *s, const char *vals, int *skip, int *count, int *num
 COMMAND(0, listsplice, "ssiiN");
 
 ICOMMAND(0, listdel, "ss", (char *list, char *del), commandret->setstr(listdel(list, del)));
-ICOMMAND(0, shrinklist, "ssi", (char *s, char *t, int *n), commandret->setstr(shrinklist(s, t, *n)));
+ICOMMAND(0, shrinklist, "ssii", (char *s, char *t, int *n, int *v), commandret->setstr(shrinklist(s, t, *n, *v!=0)));
 ICOMMAND(0, listfind, "rse", (ident *id, char *list, uint *body), looplist(id, list, body, true));
 ICOMMAND(0, looplist, "rse", (ident *id, char *list, uint *body), looplist(id, list, body, false));
 ICOMMAND(0, loopfiles, "rsse", (ident *id, char *dir, char *ext, uint *body),

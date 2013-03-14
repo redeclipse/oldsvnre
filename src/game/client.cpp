@@ -39,11 +39,15 @@ namespace client
     void makemaplist(int g, int m, int c)
     {
          char *list = NULL;
-         maplist(list, g, m, c, mapsfilter);
-         if(list)
+         loopi(2)
          {
-             result(list);
-             DELETEA(list);
+             maplist(list, g, m, c, mapsfilter, i!=0);
+             if(list)
+             {
+                 result(list);
+                 DELETEA(list);
+                 return;
+             }
          }
     }
     ICOMMAND(0, getmaplist, "iii", (int *g, int *m, int *c), makemaplist(*g, *m, *c));
@@ -568,7 +572,7 @@ namespace client
             case 2:
                 if(!m_edit(reqmode) && reqmap && *reqmap)
                 {
-                    int n = listincludes(prevmaps, reqmap, strlen(reqmap));
+                    int n = listincludes(previousmaps, reqmap, strlen(reqmap));
                     if(n >= 0 && n < G(maphistory) && !haspriv(game::player1, G(votelock))) return true;
                 }
                 break;
@@ -591,12 +595,12 @@ namespace client
                 case 1:
                 {
                     list = newstring(G(allowmaps));
-                    mapcull(list, reqmode, reqmuts, numplayers(), G(mapsfilter));
+                    mapcull(list, reqmode, reqmuts, numplayers(), G(mapsfilter), true);
                     break;
                 }
                 case 2:
                 {
-                    maplist(list, reqmode, reqmuts, numplayers(), G(mapsfilter));
+                    maplist(list, reqmode, reqmuts, numplayers(), G(mapsfilter), true);
                     break;
                 }
                 case 0: default: break;

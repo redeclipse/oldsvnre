@@ -326,7 +326,7 @@ extern int listlen(const char *s);
 extern char *indexlist(const char *s, int pos);
 extern const char *indexlist(const char *s, int pos, int &len);
 extern int listincludes(const char *list, const char *needl, int needlelen);
-extern char *shrinklist(const char *list, const char *limit, int failover);
+extern char *shrinklist(const char *list, const char *limit, int failover = 0, bool invert = false);
 
 extern void checksleep(int millis);
 extern void clearsleep(bool clearworlds = true);

@@ -2398,7 +2398,7 @@ namespace hud
 
     int drawbar(int x, int y, int w, int h, int type, float top, float bottom, float fade, float amt, const char *tex, const char *bgtex, int tone, float bgglow, float blend, float pulse, float throb)
     {
-        int sy = 0, offset = int(w*throb), id = clamp(type, 0, 2);
+        int offset = int(w*throb), id = clamp(type, 0, 2);
         if(*bgtex)
         {
             int glow = 0;
@@ -2415,7 +2415,7 @@ namespace hud
             glColor4f(gr, gg, gb, fade*gf);
             drawtexture(x-offset-glow, y-h-offset-glow, w+glow*2+offset*2, h+glow*2+offset*2);
         }
-        if(amt <= 0.f) return sy;
+        if(amt <= 0.f) return h;
         settexture(tex, 3);
         glBegin(GL_TRIANGLE_STRIP);
         float btoff = 1-bottom, middle = btoff-top;
@@ -2452,8 +2452,7 @@ namespace hud
             glColor4f(r, g, b, hfade); glTexCoord2f(1, off*middle+top); glVertex2f(cx + cw, cy + off*ch);
         }
         glEnd();
-        sy += h;
-        return sy;
+        return h;
     }
 
     int drawhealth(int x, int y, int s, float blend, bool interm)
