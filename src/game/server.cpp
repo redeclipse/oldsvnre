@@ -819,7 +819,7 @@ namespace server
     {
         setpause(false);
         setmod(sv_botoffset, 0);
-        if(*sv_prevmaps) setmods(sv_prevmaps, "");
+        if(*sv_previousmaps) setmods(sv_previousmaps, "");
         if(G(resetmmonend)) { mastermode = MM_OPEN; resetallows(); }
         if(G(resetbansonend)) resetbans();
         if(G(resetmutesonend)) resetmutes();
@@ -1136,30 +1136,26 @@ namespace server
         }
         else *chosen = 0;
         int rotate = force ? force : G(rotatemaps);
-        if(rotate)
+        if(rotate) loopj(2)
         {
             char *list = NULL;
-            maplist(list, mode, muts, numclients(), G(rotatemapsfilter));
+            maplist(list, mode, muts, numclients(), G(rotatemapsfilter), j!=0);
             if(list)
             {
-                int n = listlen(list), p = -1, c = -1;
-                if(*chosen)
-                {
-                    p = listincludes(list, chosen, strlen(chosen));
-                    if(p >= 0 && rotate == 1) c = p >= 0 && p < n-1 ? p+1 : 0;
-                }
-                if(c < 0)
-                {
-                    c = n ? rnd(n) : 0;
-                    if(c == p) c = p >= 0 && p < n-1 ? p+1 : 0;
-                }
+                bool found = false;
+                int n = listlen(list), c = n ? rnd(n) : 0;
                 if(c >= 0)
                 {
                     int len = 0;
                     const char *elem = indexlist(list, c, len);
-                    if(len > 0) copystring(chosen, elem, len+1);
+                    if(len > 0)
+                    {
+                        copystring(chosen, elem, len+1);
+                        found = true;
+                    }
                 }
                 DELETEA(list);
+                if(found) break;
             }
         }
         return *chosen ? chosen : pickmap(suggest, mode, muts);
@@ -2097,7 +2093,7 @@ namespace server
                 case 2:
                     if(!m_edit(reqmode))
                     {
-                        int n = listincludes(sv_prevmaps, reqmap, strlen(reqmap));
+                        int n = listincludes(sv_previousmaps, reqmap, strlen(reqmap));
                         if(n >= 0 && n < G(maphistory) && !haspriv(ci, G(votelock), "vote for a recently played map")) return;
                     }
                     break;
@@ -2122,12 +2118,12 @@ namespace server
                     case 1:
                     {
                         list = newstring(G(allowmaps));
-                        mapcull(list, reqmode, reqmuts, numclients(), G(mapsfilter));
+                        mapcull(list, reqmode, reqmuts, numclients(), G(mapsfilter), true);
                         break;
                     }
                     case 2:
                     {
-                        maplist(list, reqmode, reqmuts, numclients(), G(mapsfilter));
+                        maplist(list, reqmode, reqmuts, numclients(), G(mapsfilter), true);
                         break;
                     }
                     case 0: default: break;
@@ -2470,10 +2466,10 @@ namespace server
         {
             vector<char> buf;
             buf.put(smapname, strlen(smapname));
-            if(*sv_prevmaps && numclients())
+            if(*sv_previousmaps && numclients())
             {
                 vector<char *> prev;
-                explodelist(sv_prevmaps, prev);
+                explodelist(sv_previousmaps, prev);
                 loopvrev(prev) if(!strcmp(prev[i], smapname))
                 {
                     delete[] prev[i];
@@ -2494,7 +2490,7 @@ namespace server
             }
             buf.add(0);
             const char *str = buf.getbuf();
-            if(*str) setmods(sv_prevmaps, str);
+            if(*str) setmods(sv_previousmaps, str);
         }
 
         if(numclients())

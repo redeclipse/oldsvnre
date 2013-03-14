@@ -4,7 +4,7 @@ enum
     G_DEMO = 0, G_EDITMODE, G_CAMPAIGN, G_DEATHMATCH, G_CAPTURE, G_DEFEND, G_BOMBER, G_TRIAL, G_GAUNTLET, G_MAX,
     G_START = G_EDITMODE, G_PLAY = G_CAMPAIGN, G_FIGHT = G_DEATHMATCH,
     G_RAND = G_BOMBER-G_DEATHMATCH+1, G_COUNT = G_MAX-G_PLAY,
-    G_NEVER = (1<<G_DEMO)|(1<<G_EDITMODE),
+    G_NEVER = (1<<G_DEMO)|(1<<G_EDITMODE)|(1<<G_GAUNTLET),
     G_LIMIT = (1<<G_DEATHMATCH)|(1<<G_CAPTURE)|(1<<G_DEFEND)|(1<<G_BOMBER),
     G_ALL = (1<<G_DEMO)|(1<<G_EDITMODE)|(1<<G_CAMPAIGN)|(1<<G_DEATHMATCH)|(1<<G_CAPTURE)|(1<<G_DEFEND)|(1<<G_BOMBER)|(1<<G_TRIAL)|(1<<G_GAUNTLET),
     G_SW = (1<<G_TRIAL),
@@ -15,7 +15,7 @@ enum
     G_DEMO = 0, G_EDITMODE, G_DEATHMATCH, G_CAPTURE, G_DEFEND, G_BOMBER, G_TRIAL, G_GAUNTLET, G_MAX,
     G_START = G_EDITMODE, G_PLAY = G_DEATHMATCH, G_FIGHT = G_DEATHMATCH,
     G_RAND = G_BOMBER-G_DEATHMATCH+1, G_COUNT = G_MAX-G_PLAY,
-    G_NEVER = (1<<G_DEMO)|(1<<G_EDITMODE),
+    G_NEVER = (1<<G_DEMO)|(1<<G_EDITMODE)|(1<<G_GAUNTLET),
     G_LIMIT = (1<<G_DEATHMATCH)|(1<<G_CAPTURE)|(1<<G_DEFEND)|(1<<G_BOMBER)|(1<<G_GAUNTLET),
     G_ALL = (1<<G_DEMO)|(1<<G_EDITMODE)|(1<<G_DEATHMATCH)|(1<<G_CAPTURE)|(1<<G_DEFEND)|(1<<G_BOMBER)|(1<<G_TRIAL)|(1<<G_GAUNTLET),
     G_SW = (1<<G_TRIAL),
@@ -312,30 +312,30 @@ extern mutstypes mutstype[];
 #define w_spawn(weap)       int(ceilf(G(itemspawntime)*W(weap, frequency)))
 #define m_jet(a,b)          (PHYS(gravity) == 0 || m_jetpack(a, b))
 
-#define mapshrink(a,b,c) if((a) && (b) && (c) && *(c)) \
+#define mapshrink(a,b,c,d) if((a) && (b) && (c) && *(c)) \
 { \
-    char *p = shrinklist(b, c, 1); \
+    char *p = shrinklist(b, c, 1, d); \
     if(p) \
     { \
         DELETEA(b); \
         b = p; \
     } \
 }
-
-#define mapcull(a,b,c,d,e) \
+#define mapcull(a,b,c,d,e,f) \
 { \
-    mapshrink(m_multi(b, c) && (m_capture(b) || (m_bomber(b) && !m_gsp2(b, c))), a, G(multimaps)); \
-    mapshrink(m_duel(b, c), a, G(duelmaps)); \
-    mapshrink(m_jetpack(b, c), a, G(jetpackmaps)); \
+    mapshrink(m_multi(b, c) && (m_capture(b) || (m_bomber(b) && !m_gsp2(b, c))), a, G(multimaps), false) \
+    mapshrink(m_duel(b, c), a, G(duelmaps), false) \
+    mapshrink(m_jetpack(b, c), a, G(jetpackmaps), false) \
     if(d > 0 && e >= 2 && m_fight(b) && !m_duel(b, c)) \
     { \
-        mapshrink(G(smallmapmax) && d <= G(smallmapmax), a, G(smallmaps)) \
-        else mapshrink(G(mediummapmax) && d <= G(mediummapmax), a, G(mediummaps)) \
-        else mapshrink(G(mediummapmax) && d > G(mediummapmax), a, G(largemaps)) \
+        mapshrink(G(smallmapmax) && d <= G(smallmapmax), a, G(smallmaps), false) \
+        else mapshrink(G(mediummapmax) && d <= G(mediummapmax), a, G(mediummaps), false) \
+        else mapshrink(G(mediummapmax) && d > G(mediummapmax), a, G(largemaps), false) \
     } \
+    mapshrink(!f, a, G(previousmaps), true) \
 }
 #ifdef CAMPAIGN
-#define maplist(a,b,c,d,e) \
+#define maplist(a,b,c,d,e,f) \
 { \
     if(m_campaign(b)) a = newstring(G(campaignmaps)); \
     else if(m_capture(b)) a = newstring(G(capturemaps)); \
@@ -345,10 +345,11 @@ extern mutstypes mutstype[];
     else if(m_gauntlet(b)) a = newstring(G(gauntletmaps)); \
     else if(m_fight(b)) a = newstring(G(mainmaps)); \
     else a = newstring(G(allowmaps)); \
-    if(e) mapcull(a, b, c, d, e); \
+    if(e) mapcull(a, b, c, d, e, f) \
+    else mapshrink(!f, a, G(previousmaps), true) \
 }
 #else
-#define maplist(a,b,c,d,e) \
+#define maplist(a,b,c,d,e,f) \
 { \
     if(m_capture(b)) a = newstring(G(capturemaps)); \
     else if(m_defend(b)) a = newstring(m_gsp3(b, c) ? G(kingmaps) : G(defendmaps)); \
@@ -357,7 +358,8 @@ extern mutstypes mutstype[];
     else if(m_gauntlet(b)) a = newstring(G(gauntletmaps)); \
     else if(m_fight(b)) a = newstring(G(mainmaps)); \
     else a = newstring(G(allowmaps)); \
-    if(e) mapcull(a, b, c, d, e); \
+    if(e) mapcull(a, b, c, d, e, f) \
+    else mapshrink(!f, a, G(previousmaps), true) \
 }
 #endif
 #ifdef GAMESERVER

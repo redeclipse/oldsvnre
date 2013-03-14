@@ -111,7 +111,7 @@ GVAR(IDF_ADMIN, mapsfilter, 0, 1, 2); // 0 = off, 1 = filter based on mutators, 
 GVAR(IDF_ADMIN, mapslock, 0, PRIV_OPERATOR, PRIV_MAX);
 GVAR(IDF_ADMIN, mapslocktype, 0, 2, 2); // 0 = off, 1 = allow maps, 2 = rotation maps
 
-GSVAR(IDF_READONLY, prevmaps, "");
+GSVAR(IDF_READONLY, previousmaps, "");
 GVAR(IDF_ADMIN, maphistory, 0, 3, VAR_MAX);
 
 GVAR(IDF_ADMIN, rotatemaps, 0, 2, 2); // 0 = off, 1 = sequence, 2 = random
@@ -123,7 +123,7 @@ GVAR(IDF_ADMIN, rotatemapsfilter, 0, 2, 2); // 0 = off, 1 = filter based on muta
 
 GVAR(IDF_ADMIN, varslock, 0, PRIV_OPERATOR, PRIV_MAX);
 GVAR(IDF_ADMIN, votelock, 0, PRIV_OPERATOR, PRIV_MAX);
-GVAR(IDF_ADMIN, votelocktype, 0, 2, 2); // 0 = off, 1 = lock level only, 2 = lock level can select prevmaps
+GVAR(IDF_ADMIN, votelocktype, 0, 2, 2); // 0 = off, 1 = lock level only, 2 = lock level can select previousmaps
 GVAR(IDF_ADMIN, votewait, 0, 2500, VAR_MAX);
 GVAR(IDF_ADMIN, votestyle, 0, 2, 2); // 0 = votes don't pass mid-match, 1 = passes if votethreshold is met, 2 = passes if unanimous
 GVAR(IDF_ADMIN, voteinterm, 0, 2, 2); // 0 = must wait entire time, 1 = passes if votethreshold is met, 2 = passes if unanimous
