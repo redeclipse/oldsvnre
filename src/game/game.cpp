@@ -3212,7 +3212,7 @@ namespace game
         renderclient(d, third, trans, size, team, a[0].tag ? a : NULL, secondary, animflags, animdelay, lastaction, early);
     }
 
-    void rendercheck(gameent *d)
+    void rendercheck(gameent *d, bool third = false)
     {
         d->checktags();
         if(rendernormally)
@@ -3220,10 +3220,13 @@ namespace game
             float blend = opacity(d, thirdpersonview(true));
             if(d->state == CS_ALIVE)
             {
+                float minz = d == focus && !third && firstpersonbodyfeet >= 0 && d->wantshitbox() ? camera1->o.z-firstpersonbodyfeet : 0.f;
                 if(d->hasmelee(lastmillis, true, physics::sliding(d, true), d->physstate >= PHYS_SLOPE || d->onladder || physics::liquidcheck(d))) loopi(2)
                 {
+                    vec pos = d->toe[i];
+                    if(minz > 0 && pos.z > minz) pos.z -= pos.z-minz;
                     float amt = 1-((lastmillis-d->weaplast[W_MELEE])/float(d->weapwait[W_MELEE]));
-                    part_create(PART_HINT, 1, d->toe[i], TEAM(d->team, colour), 2.f, amt*blend, 0, 0);
+                    part_create(PART_HINT, 1, pos, TEAM(d->team, colour), 2.f, amt*blend, 0, 0);
                 }
                 bool last = lastmillis-d->weaplast[d->weapselect] > 0,
                      powering = last && d->weapstate[d->weapselect] == W_S_POWER,
@@ -3340,7 +3343,7 @@ namespace game
         else if(!third && focus->state == CS_ALIVE) renderplayer(focus, 0, opacity(focus, false), focus->curscale, early);
         if(project && !third) viewproject();
         if(!third && focus->state == CS_ALIVE && firstpersonmodel == 2) renderplayer(focus, 2, opacity(focus, false), focus->curscale, early);
-        if(rendernormally && early) rendercheck(focus);
+        if(rendernormally && early) rendercheck(focus, third);
     }
 
     void renderplayerpreview(int model, int color, int team, int weap, const char *vanity, float scale, float blend)
