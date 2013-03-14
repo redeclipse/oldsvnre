@@ -519,7 +519,7 @@ namespace client
     bool haspriv(gameent *d, int priv)
     {
         if(!d) return false;
-        if(d == game::player1 && !remote) return true;
+        if(!priv || (d == game::player1 && !remote)) return true;
         return d->privilege >= priv;
     }
     ICOMMAND(0, issupporter, "i", (int *cn), intret(haspriv(game::getclient(*cn), PRIV_SUPPORTER) ? 1 : 0));

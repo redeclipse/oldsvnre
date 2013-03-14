@@ -1485,6 +1485,7 @@ namespace client
     extern bool isignored(int cn);
     extern void addmsg(int type, const char *fmt = NULL, ...);
     extern void c2sinfo(bool force = false);
+    extern bool haspriv(gameent *d, int priv = PRIV_NONE);
 }
 
 namespace physics
