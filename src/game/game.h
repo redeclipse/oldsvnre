@@ -1602,7 +1602,7 @@ namespace game
 #ifdef VANITY
     extern void vanityreset();
     extern void vanitybuild(gameent *d);
-    extern const char *vanityfname(gameent *d, int n);
+    extern const char *vanityfname(gameent *d, int n, bool proj = false);
 #endif
 
     extern bool followswitch(int n, bool other = false);
