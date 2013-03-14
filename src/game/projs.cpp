@@ -368,7 +368,11 @@ namespace projs
                 }
                 return false;
             }
-            if(init) updatenormal(proj);
+            if(init)
+            {
+                proj.norm = proj.sticknrm;
+                updatenormal(proj);
+            }
         }
         return proj.stuck != 0;
     }
