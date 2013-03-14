@@ -310,6 +310,7 @@ extern mutstypes mutstype[];
 #define w_carry(w1,w2)      (w1 > W_MELEE && (isweap(w2) ? w1 != w2 : w1 >= 0-w2) && (isweap(w1) && W(w1, carried)))
 #define w_attr(a,b,w1,w2)   (m_edit(a) ? w1 : ((w1 >= W_OFFSET && w1 != w2) ? w1 : (w2 == W_GRENADE ? W_MINE : W_GRENADE)))
 #define w_spawn(weap)       int(ceilf(G(itemspawntime)*W(weap, frequency)))
+#define m_jet(a,b)          (PHYS(gravity) == 0 || m_jetpack(a, b))
 
 #define mapshrink(a,b,c) if((a) && (b) && (c) && *(c)) \
 { \
