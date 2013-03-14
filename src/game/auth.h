@@ -117,7 +117,8 @@ namespace auth
             int others = 0;
             loopv(clients) if(clients[i]->privilege >= PRIV_MODERATOR || clients[i]->local) others++;
             if(!others) mastermode = MM_OPEN;
-            if(privilege >= PRIV_ELEVATED) formatstring(msg)("\fy%s is no longer \fs\fc%s\fS", colourname(ci), privname(privilege, true));
+            if(privilege >= PRIV_ELEVATED)
+                formatstring(msg)("\fy%s is no longer \fs\fc%s\fS", colourname(ci), privname(privilege, true));
         }
         if(*msg) srvoutforce(ci, -2, "%s", msg);
         privupdate = true;
