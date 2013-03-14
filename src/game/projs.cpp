@@ -713,7 +713,7 @@ namespace projs
             }
         }
         if(!init) physics::entinmap(&proj, proj.projcollide&COLLIDE_PLAYER);
-        else if(proj.projtype == PRJ_AFFINITY) proj.o.z += proj.height;
+        else if(proj.projtype == PRJ_AFFINITY) proj.o.z += proj.height*2;
     }
 
     void updatetargets(projent &proj, int style = 0)
