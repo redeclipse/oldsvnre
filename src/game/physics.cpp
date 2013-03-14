@@ -275,7 +275,7 @@ namespace physics
         return false;
     }
 
-    bool liquidcheck(physent *d) { return d->inliquid && d->submerged >= PHYS(liquidsubmerge); }
+    bool liquidcheck(physent *d) { return d->inliquid && !d->onladder && d->submerged >= PHYS(liquidsubmerge); }
 
     float liquidmerge(physent *d, float from, float to)
     {
@@ -365,7 +365,7 @@ namespace physics
         {
             gameent *e = (gameent *)pl;
             vel *= movespeed/100.f*(1.f-clamp(e->stunned(lastmillis), 0.f, 1.f));
-            if((!e->timeinair && !sliding(e) && iscrouching(e)) || (e == game::player1 && game::inzoom()))
+            if((!e->airmillis && !sliding(e) && iscrouching(e)) || (e == game::player1 && game::inzoom()))
                 vel *= movecrawl;
             if(e->move >= 0) vel *= e->strafe ? movestrafe : movestraight;
             switch(e->physstate)
@@ -535,7 +535,7 @@ namespace physics
                     d->o.z -= margin;
                     if(d->physstate == PHYS_FALL || d->floor != floor)
                     {
-                        d->timeinair = 0;
+                        d->airmillis = 0;
                         d->floor = floor;
                         switchfloor(d, dir, d->floor);
                     }
@@ -552,7 +552,7 @@ namespace physics
         {
             if(d->physstate == PHYS_FALL || d->floor != floor)
             {
-                d->timeinair = 0;
+                d->airmillis = 0;
                 d->floor = floor;
                 switchfloor(d, dir, d->floor);
             }
@@ -605,7 +605,7 @@ namespace physics
                 d->floor = stepfloor;
                 if(init)
                 {
-                    d->timeinair = 0;
+                    d->airmillis = 0;
                     d->physstate = PHYS_STEP_DOWN;
                 }
                 return true;
@@ -643,13 +643,13 @@ namespace physics
         if(floor.z > 0.0f && floor.z < slopez)
         {
             if(floor.z >= wallz) switchfloor(d, dir, floor);
-            d->timeinair = 0;
+            d->airmillis = 0;
             d->physstate = PHYS_SLIDE;
             d->floor = floor;
         }
         else if(sticktospecial(d))
         {
-            d->timeinair = 0;
+            d->airmillis = 0;
             d->physstate = PHYS_FLOOR;
             d->floor = vec(0, 0, 1);
         }
@@ -659,7 +659,7 @@ namespace physics
     void landing(physent *d, vec &dir, const vec &floor, bool collided)
     {
         switchfloor(d, dir, floor);
-        d->timeinair = 0;
+        d->airmillis = 0;
         if((d->physstate!=PHYS_STEP_UP && d->physstate!=PHYS_STEP_DOWN) || !collided)
             d->physstate = floor.z >= floorz ? PHYS_FLOOR : PHYS_SLOPE;
         d->floor = floor;
@@ -1100,13 +1100,13 @@ namespace physics
         }
         if(d->physstate == PHYS_FALL && !d->onladder && !d->turnside)
         {
-            d->timeinair += millis;
-            d->timeonfloor = 0;
+            if(!d->airmillis) d->airmillis = NZT(lastmillis);
+            d->floormillis = 0;
         }
         else
         {
-            d->timeinair = 0;
-            d->timeonfloor += millis;
+            d->airmillis = 0;
+            if(!d->floormillis) d->floormillis = NZT(lastmillis);
         }
         if(!d->turnside)
         {
@@ -1130,18 +1130,15 @@ namespace physics
             m.normalize();
         }
         if(!floating && gameent::is(pl)) modifymovement((gameent *)pl, m, local, wantsmove, millis);
+        else if(pl->physstate == PHYS_FALL && !pl->onladder)
+        {
+            if(!pl->airmillis) pl->airmillis = NZT(lastmillis);
+            pl->floormillis = 0;
+        }
         else
         {
-            if(pl->physstate == PHYS_FALL && !pl->onladder)
-            {
-                pl->timeinair += millis;
-                pl->timeonfloor = 0;
-            }
-            else
-            {
-                pl->timeinair = 0;
-                pl->timeonfloor += millis;
-            }
+            pl->airmillis = 0;
+            if(!pl->floormillis) pl->floormillis = NZT(lastmillis);
         }
 
         m.mul(movevelocity(pl, floating));
@@ -1280,7 +1277,7 @@ namespace physics
             if(pl->physstate != PHYS_FLOAT)
             {
                 pl->physstate = PHYS_FLOAT;
-                pl->timeinair = pl->timeonfloor = 0;
+                pl->airmillis = pl->floormillis = 0;
                 pl->falling = vec(0, 0, 0);
             }
             pl->o.add(vel);
@@ -1288,14 +1285,14 @@ namespace physics
         else // apply velocity with collision
         {
             float mag = vec(pl->vel).add(pl->falling).magnitude();
-            int collisions = 0, timeinair = pl->timeinair;
+            int collisions = 0, timeinair = pl->airtime(lastmillis);
             vel.mul(1.0f/moveres);
             loopi(moveres) if(!move(pl, vel)) { if(++collisions<5) i--; } // discrete steps collision detection & sliding
             if(player)
             {
                 gameent *d = (gameent *)pl;
                 if(local && jetting && !jetpack(d)) d->action[AC_JUMP] = false;
-                if(!d->timeinair)
+                if(!d->airmillis)
                 {
                     if(local && impulsemethod&2 && timeinair >= impulsedelay && d->move == 1 && allowimpulse(d, IM_A_DASH) && d->action[AC_CROUCH])
                     {
@@ -1434,7 +1431,6 @@ namespace physics
     void updatephysstate(physent *d)
     {
         if(d->physstate == PHYS_FALL && !d->onladder) return;
-        d->timeinair = 0;
         vec old(d->o);
         /* Attempt to reconstruct the floor state.
          * May be inaccurate since movement collisions are not considered.
