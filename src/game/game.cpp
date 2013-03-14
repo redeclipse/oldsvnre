@@ -1236,8 +1236,7 @@ namespace game
                         float hit = WF(WK(flags), weap, hitpush, WS(flags))*amt;
                         if(hit > 0)
                         {
-                            vec psh = vec(dir).mul(hit);
-                            if(!psh.iszero()) d->vel.add(psh);
+                            d->vel.add(vec(dir).mul(hit));
                             d->quake = min(d->quake+max(int(hit), 1), quakelimit);
                         }
                     }

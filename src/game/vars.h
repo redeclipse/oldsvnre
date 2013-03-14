@@ -373,8 +373,8 @@ GVAR(0, impulsekickdelay, 0, 350, VAR_MAX); // minimum time between wall kicks/c
 GFVAR(0, impulsevaultmin, FVAR_NONZERO, 0.25f, FVAR_MAX); // minimum percentage of height for vault
 GFVAR(0, impulsevaultmax, FVAR_NONZERO, 1.f, FVAR_MAX); // maximum percentage of height for vault
 
-GVAR(0, impulsemeter, 0, 20000, VAR_MAX); // impulse dash length; 0 = unlimited, anything else = timer
-GVAR(0, impulsecost, 0, 4000, VAR_MAX); // cost of impulse move
+GVAR(0, impulsemeter, 0, 30000, VAR_MAX); // impulse dash length; 0 = unlimited, anything else = timer
+GVAR(0, impulsecost, 0, 5000, VAR_MAX); // cost of impulse move
 GVAR(0, impulsecostrelax, 0, IM_A_RELAX, IM_A_ALL); // whether the cost of an impulse move is unimportant; bit: 0 = off, 1 = dash, 2 = boost, 4 = pacing, 8 = parkour
 GVAR(0, impulsecostscale, 0, 0, 1); // whether the cost scales depend on the amount the impulse scales
 GVAR(0, impulseskate, 0, 1000, VAR_MAX); // length of time a run along a wall can last

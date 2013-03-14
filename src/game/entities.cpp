@@ -668,7 +668,9 @@ namespace entities
                         {
                             projent *g = (projent *)d;
                             g->lastbounce = lastmillis;
+                            g->movement = 0;
                             g->from = g->o;
+                            g->to = vec(g->vel).normalize().mul(getworldsize()).add(g->o);
                         }
                     }
                     else if(gameent::is(d)) warpragdoll(d, d->vel);
