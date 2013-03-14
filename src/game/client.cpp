@@ -1662,7 +1662,6 @@ namespace client
                         }
                         case SPHY_BOOST: case SPHY_KICK: case SPHY_VAULT: case SPHY_SKATE: case SPHY_DASH: case SPHY_MELEE:
                         {
-                            t->resetphys();
                             t->doimpulse(0, IM_T_BOOST+(st-SPHY_BOOST), lastmillis);
                             game::impulseeffect(t);
                             break;

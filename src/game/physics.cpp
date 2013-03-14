@@ -1260,7 +1260,7 @@ namespace physics
             modifyvelocity(pl, local, false, millis);
             jetting = jetpack(pl);
             if(!sticktospecial(pl) && !pl->onladder && !jetting) modifygravity(pl, millis); // apply gravity
-            else pl->resetphys();
+            else pl->resetphys(false);
         }
         else
         {
