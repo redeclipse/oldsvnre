@@ -941,7 +941,10 @@ namespace projs
                 if(proj.owner)
                 {
                     if(proj.owner->state == CS_DEAD || proj.owner->state == CS_WAITING)
-                        proj.o = proj.owner->center();
+                    {
+                        proj.o = proj.owner->headpos();
+                        proj.lifesize = proj.owner->curscale;
+                    }
                     else
                     {
                         proj.lifemillis = proj.lifetime = 1;
