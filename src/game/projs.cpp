@@ -2252,6 +2252,7 @@ namespace projs
 
     void fadeproj(projent &proj, float &trans, float &size)
     {
+        if(proj.projtype == PRJ_SHOT && proj.owner && physics::isghost(proj.owner, game::focus)) trans *= 0.5f;
         if(proj.fadetime && proj.lifemillis)
         {
             int interval = min(proj.lifemillis, proj.fadetime);
