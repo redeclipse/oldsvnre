@@ -2801,7 +2801,7 @@ namespace game
                 }
                 else if(physics::liquidcheck(d) && d->physstate <= PHYS_FALL)
                     anim |= ((d->move || d->strafe || d->vel.z+d->falling.z>0 ? int(ANIM_SWIM) : int(ANIM_SINK))|ANIM_LOOP)<<ANIM_SECONDARY;
-                else if(d->physstate == PHYS_FALL && !d->turnside && !d->onladder)
+                else if(d->physstate == PHYS_FALL && !d->turnside && !d->onladder && d->timeinair)
                 {
                     if(d->impulse[IM_TYPE] != IM_T_NONE && lastmillis-d->impulse[IM_TIME] <= 1000)
                     {
