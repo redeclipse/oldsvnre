@@ -569,7 +569,7 @@ namespace ai
             if(dropping && d->lastnode != curnode && iswaypoint(d->lastnode))
             {
                 linkwaypoint(waypoints[d->lastnode], curnode);
-                if(!d->timeinair) linkwaypoint(waypoints[curnode], d->lastnode);
+                if(!d->airmillis) linkwaypoint(waypoints[curnode], d->lastnode);
             }
             d->lastnode = curnode;
             if(d->ai && iswaypoint(prevnode) && d->lastnode != prevnode) d->ai->addprevnode(prevnode);

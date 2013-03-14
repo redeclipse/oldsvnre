@@ -2458,7 +2458,8 @@ namespace hud
     int drawhealth(int x, int y, int s, float blend, bool interm)
     {
         int size = s+s/2, width = s-s/4, sy = 0;
-        if(!interm && game::focus->state == CS_ALIVE)
+        bool alive = !interm && game::focus->state == CS_ALIVE;
+        if(alive)
         {
             if(inventoryhealth)
             {
@@ -2509,34 +2510,6 @@ namespace hud
                     sy += draw_textx("impulse", x+width/2, y-sy, 255, 255, 255, int(fade*255), TEXT_CENTER_UP, -1, -1);
                     popfont();
                 }
-            }
-            if(inventorygameinfo)
-            {
-                float gr = 1, gg = 1, gb = 1, fade = blend*inventorygameinfoblend;
-                if(inventorytone) skewcolour(gr, gg, gb, inventorytone);
-                if(inventorygameinfoflash && lastmillis-game::focus->lastspawn <= inventorygameinfoflash)
-                {
-                    int millis = lastmillis%1000;
-                    float amt = millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f);
-                    flashcolour(gr, gg, gb, 1.f, 1.f, 1.f, amt);
-                }
-                #define ADDMODE(a) sy += drawitem(a, x, y-sy, width, 0, false, true, gr, gg, gb, fade);
-                if(inventorygameinfo&1 || inventorygameinfo&16) ADDMODEICON(game::gamemode, game::mutators)
-                if(inventorygameinfo&16 && m_multi(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_MULTI))) ADDMODE(modemultitex)
-                if(inventorygameinfo&16 && m_ffa(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_FFA))) ADDMODE(modeffatex)
-                if(inventorygameinfo&16 && m_coop(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_COOP))) ADDMODE(modecooptex)
-                if(inventorygameinfo&16 && m_insta(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_INSTA))) ADDMODE(modeinstatex)
-                if(inventorygameinfo&16 && m_medieval(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_MEDIEVAL))) ADDMODE(modemedievaltex)
-                if(inventorygameinfo&16 && m_kaboom(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_KABOOM))) ADDMODE(modekaboomtex)
-                if((inventorygameinfo&4 || inventorygameinfo&16) && m_duel(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_DUEL))) ADDMODE(modedueltex)
-                if((inventorygameinfo&4 || inventorygameinfo&16) && m_survivor(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_SURVIVOR))) ADDMODE(modesurvivortex)
-                if(inventorygameinfo&16 && m_classic(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_CLASSIC))) ADDMODE(modeclassictex)
-                if(inventorygameinfo&16 && m_onslaught(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_ONSLAUGHT))) ADDMODE(modeonslaughttex)
-                if((inventorygameinfo&2 || inventorygameinfo&16) && (PHYS(gravity) == 0 || (m_jetpack(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_JETPACK))))) ADDMODE(modejetpacktex)
-                if((inventorygameinfo&2 || inventorygameinfo&16) && m_vampire(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_VAMPIRE))) ADDMODE(modevampiretex)
-                if((inventorygameinfo&2 || inventorygameinfo&16) && m_expert(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_EXPERT))) ADDMODE(modeexperttex)
-                if(inventorygameinfo&4 && m_resize(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_RESIZE))) ADDMODE(moderesizetex)
-                #undef ADDMODE
             }
             if(inventoryalert)
             {
@@ -2631,28 +2604,35 @@ namespace hud
                 if(inventorytone) skewcolour(gr, gg, gb, inventorytone);
                 sy += drawitem(tex, x, y-sy, width, 0, false, true, gr, gg, gb, fade);
             }
-            if(inventorygameinfo&8 || inventorygameinfo&16)
+        }
+        if(inventorygameinfo)
+        {
+            bool over = (!alive && inventorygameinfo&8) || inventorygameinfo&16;
+            float gr = 1, gg = 1, gb = 1, fade = blend*inventorygameinfoblend;
+            if(inventorytone) skewcolour(gr, gg, gb, inventorytone);
+            if(alive && inventorygameinfoflash && lastmillis-game::focus->lastspawn <= inventorygameinfoflash)
             {
-                float gr = 1, gg = 1, gb = 1, fade = blend*inventorygameinfoblend;
-                if(inventorytone) skewcolour(gr, gg, gb, inventorytone);
-                #define ADDMODE(a) sy += drawitem(a, x, y-sy, width, 0, false, true, gr, gg, gb, fade);
-                if(st != CS_EDITING || !*tex) ADDMODEICON(game::gamemode, game::mutators)
-                if(m_multi(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_MULTI))) ADDMODE(modemultitex)
-                if(m_ffa(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_FFA))) ADDMODE(modeffatex)
-                if(m_coop(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_COOP))) ADDMODE(modecooptex)
-                if(m_insta(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_INSTA))) ADDMODE(modeinstatex)
-                if(m_medieval(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_MEDIEVAL))) ADDMODE(modemedievaltex)
-                if(m_kaboom(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_KABOOM))) ADDMODE(modekaboomtex)
-                if(m_duel(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_DUEL))) ADDMODE(modedueltex)
-                if(m_survivor(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_SURVIVOR))) ADDMODE(modesurvivortex)
-                if(m_classic(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_CLASSIC))) ADDMODE(modeclassictex)
-                if(m_onslaught(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_ONSLAUGHT))) ADDMODE(modeonslaughttex)
-                if((PHYS(gravity) == 0 || (m_jetpack(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_JETPACK))))) ADDMODE(modejetpacktex)
-                if(m_vampire(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_VAMPIRE))) ADDMODE(modevampiretex)
-                if(m_expert(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_EXPERT))) ADDMODE(modeexperttex)
-                if(m_resize(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_RESIZE))) ADDMODE(moderesizetex)
-                #undef ADDMODE
+                int millis = lastmillis%1000;
+                float amt = millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f);
+                flashcolour(gr, gg, gb, 1.f, 1.f, 1.f, amt);
             }
+            #define ADDMODE(a) sy += drawitem(a, x, y-sy, width, 0, false, true, gr, gg, gb, fade);
+            if((alive && inventorygameinfo&1) || over) ADDMODEICON(game::gamemode, game::mutators)
+            if(over && m_multi(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_MULTI))) ADDMODE(modemultitex)
+            if(over && m_ffa(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_FFA))) ADDMODE(modeffatex)
+            if(over && m_coop(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_COOP))) ADDMODE(modecooptex)
+            if(over && m_insta(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_INSTA))) ADDMODE(modeinstatex)
+            if(over && m_medieval(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_MEDIEVAL))) ADDMODE(modemedievaltex)
+            if(over && m_kaboom(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_KABOOM))) ADDMODE(modekaboomtex)
+            if(((alive && inventorygameinfo&4) || over) && m_duel(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_DUEL))) ADDMODE(modedueltex)
+            if(((alive && inventorygameinfo&4) || over) && m_survivor(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_SURVIVOR))) ADDMODE(modesurvivortex)
+            if(over && m_classic(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_CLASSIC))) ADDMODE(modeclassictex)
+            if(over && m_onslaught(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_ONSLAUGHT))) ADDMODE(modeonslaughttex)
+            if(((alive && inventorygameinfo&2) || over) && m_jet(game::gamemode, game::mutators)) ADDMODE(modejetpacktex)
+            if(((alive && inventorygameinfo&2) || over) && m_vampire(game::gamemode, game::mutators)) ADDMODE(modevampiretex)
+            if(((alive && inventorygameinfo&2) || over) && m_expert(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_EXPERT))) ADDMODE(modeexperttex)
+            if((alive && inventorygameinfo&4) && m_resize(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_RESIZE))) ADDMODE(moderesizetex)
+            #undef ADDMODE
         }
         return sy;
     }

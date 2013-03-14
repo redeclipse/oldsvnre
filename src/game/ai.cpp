@@ -1050,9 +1050,10 @@ namespace ai
     void jumpto(gameent *d, aistate &b, const vec &pos, bool locked)
     {
         vec off = vec(pos).sub(d->feetpos());
-        bool sequenced = d->ai->blockseq || d->ai->targseq, offground = d->timeinair && !physics::liquidcheck(d) && !d->onladder,
-             jet = d->timeinair > 250 && !d->turnside && off.z >= JUMPMIN && physics::canjet(d),
-             impulse = d->timeinair > 500 && !d->turnside && off.z >= JUMPMIN && physics::canimpulse(d, IM_A_BOOST, false) && !physics::jetpack(d),
+        int airtime = d->airtime(lastmillis);
+        bool sequenced = d->ai->blockseq || d->ai->targseq, offground = airtime && !physics::liquidcheck(d) && !d->onladder,
+             jet = airtime > 250 && !d->turnside && off.z >= JUMPMIN && physics::canjet(d),
+             impulse = airtime > 500 && !d->turnside && off.z >= JUMPMIN && physics::canimpulse(d, IM_A_BOOST, false) && !physics::jetpack(d),
              jumper = !offground && (locked || sequenced || off.z >= JUMPMIN || (d->aitype == AI_BOT && lastmillis >= d->ai->jumprand)),
              jump = (impulse || jet || jumper) && (jet || lastmillis >= d->ai->jumpseed);
         if(jump)
@@ -1083,9 +1084,9 @@ namespace ai
             seed *= 100; if(b.idle) seed *= 10;
             d->ai->jumprand = lastmillis+seed+rnd(seed);
         }
-        if(!sequenced && !d->onladder && d->timeinair)
+        if(!sequenced && !d->onladder && airtime)
         {
-            if(d->timeinair > 300 && !d->turnside && (d->skill >= 100 || !rnd(101-d->skill)) && physics::canimpulse(d, IM_A_PARKOUR, true))
+            if(airtime > 300 && !d->turnside && (d->skill >= 100 || !rnd(101-d->skill)) && physics::canimpulse(d, IM_A_PARKOUR, true))
                 d->action[AC_SPECIAL] = true;
             else if(!passive() && lastmillis-d->ai->lastmelee >= (201-d->skill)*5 && d->canmelee(m_weapon(game::gamemode, game::mutators), lastmillis))
             {

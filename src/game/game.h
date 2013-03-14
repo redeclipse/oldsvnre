@@ -1057,7 +1057,7 @@ struct gameent : dynent, gamestate
     {
         stopmoving(true);
         clearstate();
-        inmaterial = timeinair = timeonfloor = 0;
+        inmaterial = airmillis = floormillis = 0;
         inliquid = onladder = false;
         strafe = move = 0;
         physstate = PHYS_FALL;
@@ -1248,7 +1248,7 @@ struct gameent : dynent, gamestate
 
     void resetjump()
     {
-        timeinair = turnside = impulse[IM_COUNT] = impulse[IM_TYPE] = impulse[IM_JUMP] = impulse[IM_JET] = 0;
+        airmillis = turnside = impulse[IM_COUNT] = impulse[IM_TYPE] = impulse[IM_JUMP] = impulse[IM_JET] = 0;
     }
 
     void resetair()

@@ -418,7 +418,7 @@ namespace game
             case 4: if(!physics::iscrouching(player1)) break;
             case 3: if(player1->physstate != PHYS_FLOOR) break;
             case 2: if(player1->move || player1->strafe) break;
-            case 1: if(physics::sliding(player1, true) || (player1->timeinair && (!zooming || !lastzoom || player1->timeinair >= zoomlocktime || player1->impulse[IM_JUMP]))) break;
+            case 1: if(physics::sliding(player1, true) || (player1->airmillis && (!zooming || !lastzoom || player1->airtime(lastmillis) >= zoomlocktime || player1->impulse[IM_JUMP]))) break;
             case 0: default: return true; break;
         }
         zoomset(false, 0);
@@ -987,7 +987,7 @@ namespace game
             else d->height = d->zradius;
         }
         else d->height = d->zradius;
-        d->o.z += d->timeinair ? offset : d->height;
+        d->o.z += d->airmillis ? offset : d->height;
 
         d->checktags();
 
@@ -2557,7 +2557,7 @@ namespace game
             if(!maptime) { maptime = -1; return; } // skip the first loop
             else if(maptime < 0)
             {
-                maptime = max(lastmillis, 1);
+                maptime = NZT(lastmillis);
                 musicdone(false);
                 RUNWORLD("on_start");
                 return;
@@ -2812,43 +2812,40 @@ namespace game
                 }
                 else if(physics::liquidcheck(d) && d->physstate <= PHYS_FALL)
                     anim |= ((d->move || d->strafe || d->vel.z+d->falling.z>0 ? int(ANIM_SWIM) : int(ANIM_SINK))|ANIM_LOOP)<<ANIM_SECONDARY;
-                else if(d->physstate == PHYS_FALL && !d->turnside && !d->onladder && d->timeinair)
+                else if(d->physstate == PHYS_FALL && !d->turnside && !d->onladder && d->impulse[IM_TYPE] != IM_T_NONE && lastmillis-d->impulse[IM_TIME] <= 1000)
                 {
-                    if(d->impulse[IM_TYPE] != IM_T_NONE && lastmillis-d->impulse[IM_TIME] <= 1000)
+                    basetime2 = d->impulse[IM_TIME];
+                    if(d->impulse[IM_TYPE] == IM_T_KICK || d->impulse[IM_TYPE] == IM_T_VAULT) anim |= ANIM_WALL_JUMP<<ANIM_SECONDARY;
+                    else if(melee)
                     {
-                        basetime2 = d->impulse[IM_TIME];
-                        if(d->impulse[IM_TYPE] == IM_T_KICK || d->impulse[IM_TYPE] == IM_T_VAULT) anim |= ANIM_WALL_JUMP<<ANIM_SECONDARY;
-                        else if(melee)
-                        {
-                            anim |= ANIM_FLYKICK<<ANIM_SECONDARY;
-                            basetime2 = d->weaplast[W_MELEE];
-                        }
-                        else if(d->move>0) anim |= ANIM_DASH_FORWARD<<ANIM_SECONDARY;
-                        else if(d->strafe) anim |= (d->strafe>0 ? ANIM_DASH_LEFT : ANIM_DASH_RIGHT)<<ANIM_SECONDARY;
-                        else if(d->move<0) anim |= ANIM_DASH_BACKWARD<<ANIM_SECONDARY;
-                        else anim |= ANIM_DASH_UP<<ANIM_SECONDARY;
+                        anim |= ANIM_FLYKICK<<ANIM_SECONDARY;
+                        basetime2 = d->weaplast[W_MELEE];
                     }
-                    else
+                    else if(d->move>0) anim |= ANIM_DASH_FORWARD<<ANIM_SECONDARY;
+                    else if(d->strafe) anim |= (d->strafe>0 ? ANIM_DASH_LEFT : ANIM_DASH_RIGHT)<<ANIM_SECONDARY;
+                    else if(d->move<0) anim |= ANIM_DASH_BACKWARD<<ANIM_SECONDARY;
+                    else anim |= ANIM_DASH_UP<<ANIM_SECONDARY;
+                }
+                else if(d->physstate == PHYS_FALL && !d->turnside && !d->onladder && d->airmillis)
+                {
+                    basetime2 = max(d->airmillis, d->impulse[IM_JUMP]);
+                    if(melee)
                     {
-                        basetime2 = d->impulse[IM_JUMP] ? d->impulse[IM_JUMP] : lastmillis-d->timeinair;
-                        if(melee)
-                        {
-                            anim |= ANIM_FLYKICK<<ANIM_SECONDARY;
-                            basetime2 = d->weaplast[W_MELEE];
-                        }
-                        else if(d->action[AC_CROUCH] || d->actiontime[AC_CROUCH]<0)
-                        {
-                            if(d->move>0) anim |= ANIM_CROUCH_JUMP_FORWARD<<ANIM_SECONDARY;
-                            else if(d->strafe) anim |= (d->strafe>0 ? ANIM_CROUCH_JUMP_LEFT : ANIM_CROUCH_JUMP_RIGHT)<<ANIM_SECONDARY;
-                            else if(d->move<0) anim |= ANIM_CROUCH_JUMP_BACKWARD<<ANIM_SECONDARY;
-                            else anim |= ANIM_CROUCH_JUMP<<ANIM_SECONDARY;
-                        }
-                        else if(d->move>0) anim |= ANIM_JUMP_FORWARD<<ANIM_SECONDARY;
-                        else if(d->strafe) anim |= (d->strafe>0 ? ANIM_JUMP_LEFT : ANIM_JUMP_RIGHT)<<ANIM_SECONDARY;
-                        else if(d->move<0) anim |= ANIM_JUMP_BACKWARD<<ANIM_SECONDARY;
-                        else anim |= ANIM_JUMP<<ANIM_SECONDARY;
-                        if(!basetime2) anim |= ANIM_END<<ANIM_SECONDARY;
+                        anim |= ANIM_FLYKICK<<ANIM_SECONDARY;
+                        basetime2 = d->weaplast[W_MELEE];
                     }
+                    else if(d->action[AC_CROUCH] || d->actiontime[AC_CROUCH]<0)
+                    {
+                        if(d->move>0) anim |= ANIM_CROUCH_JUMP_FORWARD<<ANIM_SECONDARY;
+                        else if(d->strafe) anim |= (d->strafe>0 ? ANIM_CROUCH_JUMP_LEFT : ANIM_CROUCH_JUMP_RIGHT)<<ANIM_SECONDARY;
+                        else if(d->move<0) anim |= ANIM_CROUCH_JUMP_BACKWARD<<ANIM_SECONDARY;
+                        else anim |= ANIM_CROUCH_JUMP<<ANIM_SECONDARY;
+                    }
+                    else if(d->move>0) anim |= ANIM_JUMP_FORWARD<<ANIM_SECONDARY;
+                    else if(d->strafe) anim |= (d->strafe>0 ? ANIM_JUMP_LEFT : ANIM_JUMP_RIGHT)<<ANIM_SECONDARY;
+                    else if(d->move<0) anim |= ANIM_JUMP_BACKWARD<<ANIM_SECONDARY;
+                    else anim |= ANIM_JUMP<<ANIM_SECONDARY;
+                    if(!basetime2) anim |= ANIM_END<<ANIM_SECONDARY;
                 }
                 else if(d->turnside) anim |= ((d->turnside>0 ? ANIM_WALL_RUN_LEFT : ANIM_WALL_RUN_RIGHT)|ANIM_LOOP)<<ANIM_SECONDARY;
                 else if(physics::sliding(d, true)) anim |= (ANIM_POWERSLIDE|ANIM_LOOP)<<ANIM_SECONDARY;

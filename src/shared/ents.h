@@ -85,7 +85,7 @@ struct physent                                  // base entity type, can be affe
     vec deltapos, newpos;
     float yaw, pitch, roll;
     float speed, weight;
-    int timeinair, timeonfloor;
+    int airmillis, floormillis;
     float radius, height, aboveeye;             // bounding box size
     float xradius, yradius, zradius, zmargin;
     vec floor;                                  // the normal of floor the dynent is on
@@ -118,7 +118,7 @@ struct physent                                  // base entity type, can be affe
 
     void reset()
     {
-        inmaterial = timeinair = timeonfloor = 0;
+        inmaterial = airmillis = floormillis = 0;
         blocked = inliquid = onladder = false;
         strafe = move = 0;
         physstate = PHYS_FALL;
@@ -133,6 +133,18 @@ struct physent                                  // base entity type, can be affe
         falling = vec(0, 0, 0);
         floor = vec(0, 0, 1);
         if(fall) physstate = PHYS_FALL;
+    }
+
+    int airtime(int millis)
+    {
+        if(airmillis) return millis-airmillis;
+        return 0;
+    }
+
+    int floortime(int millis)
+    {
+        if(floormillis) return millis-floormillis;
+        return 0;
     }
 
     vec abovehead(float offset = 1) const { return vec(o).add(vec(0, 0, aboveeye+offset)); }
