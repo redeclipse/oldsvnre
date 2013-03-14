@@ -26,23 +26,20 @@ namespace physics
 
     bool allowimpulse(physent *d, int type)
     {
-        if(d && (gameent::is(d)))
+        if(d && gameent::is(d))
             return (type ? impulseallowed&type : impulseallowed != 0) && (impulsestyle || m_jet(game::gamemode, game::mutators));
         return false;
     }
 
     bool canimpulse(physent *d, int type, bool kick)
     {
-        if(gameent::is(d))
+        if(gameent::is(d) && allowimpulse(d, type))
         {
             gameent *e = (gameent *)d;
-            if(e->aitype < AI_START && allowimpulse(d, type))
-            {
-                if(!kick && impulsestyle == 1 && e->impulse[IM_TYPE] > IM_T_NONE && e->impulse[IM_TYPE] < IM_T_WALL) return false;
-                if(e->impulse[IM_TIME] && lastmillis-e->impulse[IM_TIME] <= impulsedelay) return false;
-                if(impulsestyle <= 2 && e->impulse[IM_COUNT] >= impulsecount) return false;
-                return true;
-            }
+            if(!kick && impulsestyle == 1 && e->impulse[IM_TYPE] > IM_T_NONE && e->impulse[IM_TYPE] < IM_T_WALL) return false;
+            if(e->impulse[IM_TIME] && lastmillis-e->impulse[IM_TIME] <= impulsedelay) return false;
+            if(impulsestyle <= 2 && e->impulse[IM_COUNT] >= impulsecount) return false;
+            return true;
         }
         return false;
     }
@@ -52,7 +49,7 @@ namespace physics
         if((gameent::is(d)) && d->state == CS_ALIVE && m_jet(game::gamemode, game::mutators))
         {
             gameent *e = (gameent *)d;
-            if(e->physstate == PHYS_FALL && !e->onladder && (!e->impulse[IM_TIME] || lastmillis-e->impulse[IM_TIME] > jetdelay) && e->aitype < AI_START)
+            if(e->physstate == PHYS_FALL && !e->onladder && (!e->impulse[IM_TIME] || lastmillis-e->impulse[IM_TIME] > jetdelay))
                 return true;
         }
         return false;
