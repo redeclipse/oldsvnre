@@ -713,7 +713,7 @@ namespace projs
             }
         }
         if(!init) physics::entinmap(&proj, proj.projcollide&COLLIDE_PLAYER);
-        else if(proj.projtype == PRJ_AFFINITY) proj.o.z += proj.height*2;
+        else if(proj.projtype == PRJ_AFFINITY) proj.o.z += proj.height;
     }
 
     void updatetargets(projent &proj, int style = 0)
@@ -808,7 +808,7 @@ namespace projs
                     proj.relativity = gibsrelativity;
                     proj.waterfric = gibswaterfric;
                     proj.weight = gibsweight*proj.lifesize;
-                    proj.vel.add(vec(rnd(21)-10, rnd(21)-10, rnd(proj.owner->headless ? 71 : 21)-10));
+                    proj.vel.add(vec(rnd(21)-10, rnd(21)-10, rnd(proj.owner && proj.owner->headless ? 71 : 21)-10));
                     proj.projcollide = BOUNCE_GEOM|BOUNCE_PLAYER;
                     proj.escaped = !proj.owner || proj.owner->state != CS_ALIVE;
                     proj.fadetime = rnd(50)+50;
@@ -952,7 +952,7 @@ namespace projs
                     }
                 }
 #ifdef VANITY
-                proj.mdl = game::vanityfname(proj.owner, proj.weap);
+                proj.mdl = game::vanityfname(proj.owner, proj.weap, true);
                 proj.reflectivity = 0.f;
                 proj.elasticity = vanityelasticity;
                 proj.relativity = vanityrelativity;
@@ -2005,7 +2005,7 @@ namespace projs
                     if(proj.vel.dot2(axis) >= 0) { proj.roll -= diff; if(proj.roll < -180) proj.roll = 180 - fmod(180 - proj.roll, 360); }
                     else { proj.roll += diff; if(proj.roll > 180) proj.roll = fmod(proj.roll + 180, 360) - 180; }
                 }
-                break;
+                if(proj.projtype != PRJ_VANITY) break;
             }
             case PRJ_EJECT:
                 if(!proj.lastbounce || proj.movement >= 1)
@@ -2021,6 +2021,11 @@ namespace projs
                 {
                     if(proj.pitch < 0) { proj.pitch += max(diff, !proj.lastbounce || proj.movement >= 1 ? 1.f : 5.f); if(proj.pitch > 0) proj.pitch = 0; }
                     else if(proj.pitch > 0) { proj.pitch -= max(diff, !proj.lastbounce || proj.movement >= 1 ? 1.f : 5.f); if(proj.pitch < 0) proj.pitch = 0; }
+                }
+                if(proj.roll != 0)
+                {
+                    if(proj.roll < 0) { proj.roll += max(diff, !proj.lastbounce || proj.movement >= 1 ? 1.f : 5.f); if(proj.roll > 0) proj.roll = 0; }
+                    else if(proj.roll > 0) { proj.roll -= max(diff, !proj.lastbounce || proj.movement >= 1 ? 1.f : 5.f); if(proj.roll < 0) proj.roll = 0; }
                 }
                 break;
             }

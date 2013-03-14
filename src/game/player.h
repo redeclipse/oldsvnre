@@ -121,9 +121,10 @@ extern const char *playertypes[PLAYERTYPES][3];
 struct vanityfile
 {
     char *id, *name;
+    bool proj;
 
-    vanityfile() : id(NULL), name(NULL) {}
-    vanityfile(const char *d, const char *n) : id(newstring(d)), name(newstring(n)) {}
+    vanityfile() : id(NULL), name(NULL), proj(false) {}
+    vanityfile(const char *d, const char *n, bool p = false) : id(newstring(d)), name(newstring(n)), proj(p) {}
     ~vanityfile()
     {
         if(id) delete[] id;
@@ -133,15 +134,16 @@ struct vanityfile
 struct vanitys
 {
     int type, cond, style, priv;
-    char *ref, *model, *name, *tag;
+    char *ref, *model, *proj, *name, *tag;
     vector<vanityfile> files;
 
-    vanitys() : type(-1), cond(0), style(0), priv(0), ref(NULL), model(NULL), name(NULL), tag(NULL) {}
-    vanitys(int t, const char *r, const char *n, const char *g, int c, int s, int p) : type(t), cond(c), style(s), priv(p), ref(newstring(r)), name(newstring(n)), tag(newstring(g)) { setmodel(r); }
+    vanitys() : type(-1), cond(0), style(0), priv(0), ref(NULL), model(NULL), proj(NULL), name(NULL), tag(NULL) {}
+    vanitys(int t, const char *r, const char *n, const char *g, int c, int s, int p) : type(t), cond(c), style(s), priv(p), ref(newstring(r)), model(NULL), proj(NULL), name(newstring(n)), tag(newstring(g)) { setmodel(r); }
     ~vanitys()
     {
         if(ref) delete[] ref;
         if(model) delete[] model;
+        if(proj) delete[] proj;
         if(name) delete[] name;
         if(tag) delete[] tag;
         loopvrev(files) files.remove(i);
@@ -152,6 +154,12 @@ struct vanitys
         if(model) delete[] model;
         defformatstring(m)("vanities/%s", r);
         model = newstring(m);
+        if(proj)
+        {
+            delete[] proj;
+            formatstring(m)("vanities/%s/proj", r);
+            proj = newstring(m);
+        }
     }
 };
 #ifdef GAMEWORLD

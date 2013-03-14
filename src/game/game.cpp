@@ -309,7 +309,7 @@ namespace game
         vanitylist.deletearrays();
     }
 
-    const char *vanityfname(gameent *d, int n)
+    const char *vanityfname(gameent *d, int n, bool proj)
     {
         const char *file = NULL;
         if(vanities.inrange(n)) switch(vanities[n].style)
@@ -317,18 +317,30 @@ namespace game
             case 1:
             {
                 const char *id = hud::privname(d->privilege, d->aitype);
-                loopv(vanities[n].files) if(!strcmp(vanities[n].files[i].id, id)) file = vanities[n].files[i].name;
+                loopv(vanities[n].files)
+                    if(vanities[n].files[i].proj == proj && !strcmp(vanities[n].files[i].id, id))
+                        file = vanities[n].files[i].name;
                 if(!file)
                 {
                     vanityfile &f = vanities[n].files.add();
-                    defformatstring(fn)("%s/%s", vanities[n].model, id);
+                    defformatstring(fn)("%s/%s%s", vanities[n].model, id, proj ? "/proj" : "");
                     f.id = newstring(id);
                     f.name = newstring(fn);
+                    f.proj = proj;
                     file = f.name;
                 }
                 break;
             }
-            case 0: default: file = vanities[n].model; break;
+            case 0: default:
+            {
+                if(proj && !vanities[n].proj)
+                {
+                    defformatstring(fn)("%s/proj", vanities[n].model);
+                    vanities[n].proj = newstring(fn);
+                }
+                file = proj ? vanities[n].proj : vanities[n].model;
+                break;
+            }
         }
         return file;
     }
@@ -3149,25 +3161,7 @@ namespace game
                 if(vanities[d->vitems[k]].cond&1 && idx == 2) continue;
                 if(vanities[d->vitems[k]].cond&2 && idx == 3) continue;
                 if(!client::haspriv(d, vanities[d->vitems[k]].priv)) continue;
-                const char *file = NULL;
-                switch(vanities[d->vitems[k]].style)
-                {
-                    case 1:
-                    {
-                        const char *id = hud::privname(d->privilege, d->aitype);
-                        loopv(vanities[d->vitems[k]].files) if(!strcmp(vanities[d->vitems[k]].files[i].id, id)) file = vanities[d->vitems[k]].files[i].name;
-                        if(!file)
-                        {
-                            defformatstring(fn)("%s/%s", vanities[d->vitems[k]].model, id);
-                            vanityfile &f = vanities[d->vitems[k]].files.add();
-                            f.id = newstring(id);
-                            f.name = newstring(fn);
-                            file = f.name;
-                        }
-                        break;
-                    }
-                    case 0: default: file = vanities[d->vitems[k]].model; break;
-                }
+                const char *file = vanityfname(d, d->vitems[k]);
                 if(file)
                 {
                     a[ai++] = modelattach(vanities[d->vitems[k]].tag, file);
