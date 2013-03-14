@@ -84,9 +84,9 @@ namespace capture
 
     void drawnotices(int w, int h, int &tx, int &ty, float blend)
     {
-        if(game::focus->state == CS_ALIVE && hud::shownotices >= 3)
+        if(game::focus->state == CS_ALIVE && hud::shownotices >= 2)
         {
-            if(game::focus->lastbuff)
+            if(game::focus->lastbuff && hud::shownotices >= 3)
             {
                 pushfont("reduced");
                 if(captureregenbuff && captureregenextra) ty += draw_textx("Buffing: \fs\fo%d%%\fS damage, \fs\fg%d%%\fS shield, +\fs\fy%d\fS regen", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, int(capturebuffdamage*100), int(capturebuffshield*100), captureregenextra)*hud::noticescale;

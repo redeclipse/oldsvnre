@@ -1575,7 +1575,7 @@ namespace game
             {
                 if(found[vanities[d->vitems[k]].type]) continue;
                 if(!(vanities[d->vitems[k]].cond&2)) continue;
-                if(d->privilege < vanities[d->vitems[k]].priv) continue;
+                if(!client::haspriv(d, vanities[d->vitems[k]].priv)) continue;
                 projs::create(pos, pos, true, d, PRJ_VANITY, rnd(gibfade)+gibfade, 0, 0, rnd(50)+10, -1, d->vitems[k], 0, 0);
                 found[vanities[d->vitems[k]].type]++;
             }
@@ -3148,7 +3148,7 @@ namespace game
                 if(found[vanities[d->vitems[k]].type]) continue;
                 if(vanities[d->vitems[k]].cond&1 && idx == 2) continue;
                 if(vanities[d->vitems[k]].cond&2 && idx == 3) continue;
-                if(d->privilege < vanities[d->vitems[k]].priv) continue;
+                if(!client::haspriv(d, vanities[d->vitems[k]].priv)) continue;
                 const char *file = NULL;
                 switch(vanities[d->vitems[k]].style)
                 {

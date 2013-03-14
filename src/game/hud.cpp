@@ -1276,7 +1276,7 @@ namespace hud
                         if(n) ty += draw_textx("Respawn queued, waiting for \fs\fy%d\fS %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, n, n != 1 ? "players" : "player");
                         else ty += draw_textx("Prepare to respawn, you are \fs\fgnext\fS in the queue", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw);
                     }
-                    if(target == game::player1 && target->state != CS_WAITING && shownotices >= 3 && lastmillis-target->lastdeath >= 500)
+                    if(target == game::player1 && target->state != CS_WAITING && shownotices >= 2 && lastmillis-target->lastdeath >= 500)
                     {
                         pushfont("little");
                         ty += draw_textx("Press \fs\fc%s\fS to enter respawn queue", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, attackkey);
@@ -1286,7 +1286,7 @@ namespace hud
                 else
                 {
                     ty += draw_textx("Ready to respawn", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
-                    if(target == game::player1 && target->state != CS_WAITING && shownotices >= 3)
+                    if(target == game::player1 && target->state != CS_WAITING && shownotices >= 2)
                     {
                         pushfont("little");
                         ty += draw_textx("Press \fs\fc%s\fS to respawn now", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, attackkey);
@@ -1303,7 +1303,7 @@ namespace hud
                 {
                     if(target == game::player1 && !client::demoplayback)
                     {
-                        if(target->state == CS_WAITING && shownotices >= 3)
+                        if(target->state == CS_WAITING && shownotices >= 2)
                         {
                             SEARCHBINDCACHE(waitmodekey)("waitmodeswitch", 3);
                             pushfont("little");
@@ -1335,7 +1335,7 @@ namespace hud
                     ty += draw_textx("%s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, target->obit);
                     popfont();
                 }
-                if(target == game::player1 && shownotices >= 3 && game::allowmove(target))
+                if(target == game::player1 && shownotices >= 2 && game::allowmove(target))
                 {
                     pushfont("emphasis");
                     static vector<actitem> actitems;
