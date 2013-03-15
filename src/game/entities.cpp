@@ -609,7 +609,7 @@ namespace entities
                                         g->lastbounce = lastmillis;
                                         g->movement = 0;
                                         g->from = g->o;
-                                        g->to = vec(g->vel).normalize().mul(getworldsize()).add(g->o);
+                                        g->to = g->dest = vec(g->vel).normalize().mul(getworldsize()).add(g->o);
                                     }
                                 }
                                 else if(gameent::is(d)) warpragdoll(d, d->vel, vec(f.o).sub(e.o));
@@ -670,7 +670,7 @@ namespace entities
                             g->lastbounce = lastmillis;
                             g->movement = 0;
                             g->from = g->o;
-                            g->to = vec(g->vel).normalize().mul(getworldsize()).add(g->o);
+                            g->to = g->dest = vec(g->vel).normalize().mul(getworldsize()).add(g->o);
                         }
                     }
                     else if(gameent::is(d)) warpragdoll(d, d->vel);
