@@ -1798,34 +1798,33 @@ namespace projs
         return 1; // live!
     }
 
-    int step(projent &proj, const vec &dir, const vec &oldpos)
+    int step(projent &proj, const vec &dir, const vec &oldpos, bool skip)
     {
         int ret = check(proj, dir);
-        if(proj.interacts && checkitems(proj)) return 1;
+        if(!ret) return 0;
+        if(!skip && proj.interacts && checkitems(proj)) return -1;
         if(proj.projtype == PRJ_SHOT) updatetaper(proj, proj.distance+proj.o.dist(oldpos));
         if(ret == 1 && (!collide(&proj, dir, 0.f, proj.projcollide&COLLIDE_DYNENT) || inside))
             ret = impact(proj, dir, hitplayer, hitflags, wall);
         return ret;
     }
 
-    int trace(projent &proj, const vec &dir, const vec &oldpos, int mat = -1)
+    int trace(projent &proj, const vec &dir, const vec &oldpos, int mat, bool skip)
     {
         int ret = check(proj, dir, mat);
-        if(ret == 1)
+        if(!ret) return 0;
+        vec to(proj.o), ray = dir;
+        to.add(dir);
+        float maxdist = ray.magnitude();
+        if(maxdist > 0)
         {
-            vec to(proj.o), ray = dir;
-            to.add(dir);
-            float maxdist = ray.magnitude();
-            if(maxdist > 0)
-            {
-                ray.mul(1/maxdist);
-                float dist = tracecollide(&proj, proj.o, ray, maxdist, RAY_CLIPMAT|RAY_ALPHAPOLY, proj.projcollide&COLLIDE_DYNENT),
-                      total = dist >= 0 ? dist : maxdist;
-                if(proj.interacts && checkitems(proj, ray, total)) return 1;
-                proj.o.add(vec(ray).mul(total));
-                if(proj.projtype == PRJ_SHOT) updatetaper(proj, proj.distance+proj.o.dist(oldpos));
-                if(dist >= 0) ret = impact(proj, dir, hitplayer, hitflags, hitsurface);
-            }
+            ray.mul(1/maxdist);
+            float dist = tracecollide(&proj, proj.o, ray, maxdist, RAY_CLIPMAT|RAY_ALPHAPOLY, proj.projcollide&COLLIDE_DYNENT),
+                  total = dist >= 0 ? dist : maxdist;
+            if(!skip && proj.interacts && checkitems(proj, ray, total)) return -1;
+            proj.o.add(vec(ray).mul(total));
+            if(proj.projtype == PRJ_SHOT) updatetaper(proj, proj.distance+proj.o.dist(oldpos));
+            if(dist >= 0) ret = impact(proj, dir, hitplayer, hitflags, hitsurface);
         }
         return ret;
     }
@@ -1847,77 +1846,8 @@ namespace projs
         }
     }
 
-    bool move(projent &proj, int qtime)
+    bool moveproj(projent &proj, float secs, bool skip = false)
     {
-        float secs = float(qtime)/1000.f;
-        if(proj.projtype == PRJ_AFFINITY && m_bomber(game::gamemode) && proj.target && !proj.lastbounce)
-        {
-            vec targ = vec(proj.target->o).sub(proj.o).normalize();
-            if(!targ.iszero())
-            {
-                vec dir = vec(proj.vel).normalize();
-                float amt = clamp(bomberdelta*secs, 1e-8f, 1.f), mag = max(proj.vel.magnitude(), bomberminspeed);
-                dir.mul(1.f-amt).add(targ.mul(amt)).normalize();
-                if(!dir.iszero()) (proj.vel = dir).mul(mag);
-            }
-        }
-        else if(proj.projtype == PRJ_SHOT && proj.escaped && WF(WK(proj.flags), proj.weap, guided, WS(proj.flags)) && lastmillis-proj.spawntime >= WF(WK(proj.flags), proj.weap, guideddelay, WS(proj.flags)))
-        {
-            vec dir = vec(proj.vel).normalize();
-            switch(WF(WK(proj.flags), proj.weap, guided, WS(proj.flags)))
-            {
-                case 6: default: break; // use original dest
-                case 5: case 4: case 3: case 2:
-                {
-                    if(WF(WK(proj.flags), proj.weap, guided, WS(proj.flags))%2 && proj.target && proj.target->state == CS_ALIVE)
-                        proj.dest = proj.target->center();
-                    gameent *t = NULL;
-                    switch(WF(WK(proj.flags), proj.weap, guided, WS(proj.flags)))
-                    {
-                        case 2: case 3: default:
-                        {
-                            if(proj.owner && proj.owner->state == CS_ALIVE)
-                            {
-                                vec dest;
-                                findorientation(proj.owner->o, proj.owner->yaw, proj.owner->pitch, dest);
-                                t = game::intersectclosest(proj.owner->o, dest, proj.owner);
-                                break;
-                            } // otherwise..
-                        }
-                        case 4: case 5:
-                        {
-                            float yaw, pitch;
-                            vectoyawpitch(dir, yaw, pitch);
-                            vec dest; findorientation(proj.o, yaw, pitch, dest);
-                            t = game::intersectclosest(proj.o, dest, proj.owner);
-                            break;
-                        }
-                    }
-                    if(t && (!m_team(game::gamemode, game::mutators) || (t->type != ENT_PLAYER && t->type != ENT_AI) || ((gameent *)t)->team != proj.owner->team))
-                    {
-                        if(proj.target && proj.o.dist(proj.target->o) < proj.o.dist(t->o)) break;
-                        proj.target = t;
-                        proj.dest = proj.target->center();
-                    }
-                    break;
-                }
-                case 1:
-                {
-                    if(proj.owner && proj.owner->state == CS_ALIVE)
-                        findorientation(proj.owner->o, proj.owner->yaw, proj.owner->pitch, proj.dest);
-                    break;
-                }
-            }
-            if(!proj.dest.iszero())
-            {
-                float amt = clamp(WF(WK(proj.flags), proj.weap, delta, WS(proj.flags))*secs, 1e-8f, 1.f),
-                      mag = max(proj.vel.magnitude(), physics::movevelocity(&proj));
-                dir.mul(1.f-amt).add(vec(proj.dest).sub(proj.o).normalize().mul(amt)).normalize();
-                if(!dir.iszero()) (proj.vel = dir).mul(mag);
-            }
-        }
-        if(proj.weight != 0.f) proj.vel.z -= physics::gravityvel(&proj)*secs;
-
         vec dir(proj.vel), pos(proj.o);
         int mat = lookupmaterial(vec(proj.o.x, proj.o.y, proj.o.z + (proj.aboveeye - proj.height)/2));
         if(isliquid(mat&MATF_VOLUME) && proj.waterfric > 0) dir.div(proj.waterfric);
@@ -1928,11 +1858,12 @@ namespace projs
         bool blocked = false;
         if(proj.projcollide&COLLIDE_TRACE)
         {
-            switch(trace(proj, dir, pos, mat))
+            switch(trace(proj, dir, pos, mat, skip))
             {
                 case 2: blocked = true; break;
                 case 1: break;
                 case 0: return false;
+                case -1: return moveproj(proj, secs, true);
             }
         }
         else
@@ -1946,22 +1877,24 @@ namespace projs
                 if(barrier < stepdist)
                 {
                     proj.o.add(ray.mul(barrier-0.15f));
-                    switch(step(proj, ray, pos))
+                    switch(step(proj, ray, pos, skip))
                     {
                         case 2: proj.o = pos; blocked = true; break;
                         case 1: proj.o = pos; break;
                         case 0: return false;
+                        case -1: return moveproj(proj, secs, true);
                     }
                 }
             }
             if(!blocked)
             {
                 proj.o.add(dir);
-                switch(step(proj, dir, pos))
+                switch(step(proj, dir, pos, skip))
                 {
                     case 2: proj.o = pos; if(proj.projtype == PRJ_SHOT) blocked = true; break;
                     case 1: default: break;
                     case 0: proj.o = pos; if(proj.projtype == PRJ_SHOT) { dir.rescale(max(dir.magnitude()-0.15f, 0.0f)); proj.o.add(dir); } return false;
+                    case -1: return moveproj(proj, secs, true);
                 }
             }
         }
@@ -2035,6 +1968,79 @@ namespace projs
             default: break;
         }
         return true;
+    }
+
+    bool move(projent &proj, int qtime)
+    {
+        float secs = float(qtime)/1000.f;
+        if(proj.projtype == PRJ_AFFINITY && m_bomber(game::gamemode) && proj.target && !proj.lastbounce)
+        {
+            vec targ = vec(proj.target->o).sub(proj.o).normalize();
+            if(!targ.iszero())
+            {
+                vec dir = vec(proj.vel).normalize();
+                float amt = clamp(bomberdelta*secs, 1e-8f, 1.f), mag = max(proj.vel.magnitude(), bomberminspeed);
+                dir.mul(1.f-amt).add(targ.mul(amt)).normalize();
+                if(!dir.iszero()) (proj.vel = dir).mul(mag);
+            }
+        }
+        else if(proj.projtype == PRJ_SHOT && proj.escaped && WF(WK(proj.flags), proj.weap, guided, WS(proj.flags)) && lastmillis-proj.spawntime >= WF(WK(proj.flags), proj.weap, guideddelay, WS(proj.flags)))
+        {
+            vec dir = vec(proj.vel).normalize();
+            switch(WF(WK(proj.flags), proj.weap, guided, WS(proj.flags)))
+            {
+                case 6: default: break; // use original dest
+                case 5: case 4: case 3: case 2:
+                {
+                    if(WF(WK(proj.flags), proj.weap, guided, WS(proj.flags))%2 && proj.target && proj.target->state == CS_ALIVE)
+                        proj.dest = proj.target->center();
+                    gameent *t = NULL;
+                    switch(WF(WK(proj.flags), proj.weap, guided, WS(proj.flags)))
+                    {
+                        case 2: case 3: default:
+                        {
+                            if(proj.owner && proj.owner->state == CS_ALIVE)
+                            {
+                                vec dest;
+                                findorientation(proj.owner->o, proj.owner->yaw, proj.owner->pitch, dest);
+                                t = game::intersectclosest(proj.owner->o, dest, proj.owner);
+                                break;
+                            } // otherwise..
+                        }
+                        case 4: case 5:
+                        {
+                            float yaw, pitch;
+                            vectoyawpitch(dir, yaw, pitch);
+                            vec dest; findorientation(proj.o, yaw, pitch, dest);
+                            t = game::intersectclosest(proj.o, dest, proj.owner);
+                            break;
+                        }
+                    }
+                    if(t && (!m_team(game::gamemode, game::mutators) || (t->type != ENT_PLAYER && t->type != ENT_AI) || ((gameent *)t)->team != proj.owner->team))
+                    {
+                        if(proj.target && proj.o.dist(proj.target->o) < proj.o.dist(t->o)) break;
+                        proj.target = t;
+                        proj.dest = proj.target->center();
+                    }
+                    break;
+                }
+                case 1:
+                {
+                    if(proj.owner && proj.owner->state == CS_ALIVE)
+                        findorientation(proj.owner->o, proj.owner->yaw, proj.owner->pitch, proj.dest);
+                    break;
+                }
+            }
+            if(!proj.dest.iszero())
+            {
+                float amt = clamp(WF(WK(proj.flags), proj.weap, delta, WS(proj.flags))*secs, 1e-8f, 1.f),
+                      mag = max(proj.vel.magnitude(), physics::movevelocity(&proj));
+                dir.mul(1.f-amt).add(vec(proj.dest).sub(proj.o).normalize().mul(amt)).normalize();
+                if(!dir.iszero()) (proj.vel = dir).mul(mag);
+            }
+        }
+        if(proj.weight != 0.f) proj.vel.z -= physics::gravityvel(&proj)*secs;
+        return moveproj(proj, secs);
     }
 
     bool moveframe(projent &proj)
