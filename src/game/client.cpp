@@ -10,6 +10,7 @@ namespace client
 
     VAR(IDF_PERSIST, showpresence, 0, 1, 2); // 0 = never show join/leave, 1 = show only during game, 2 = show when connecting/disconnecting
     VAR(IDF_PERSIST, showteamchange, 0, 1, 2); // 0 = never show, 1 = show only when switching between, 2 = show when entering match too
+    VAR(IDF_PERSIST, showservervariables, 0, 0, 1); // determines if variables set by the server are printed to the console
 
     int state() { return game::player1->state; }
     ICOMMAND(0, getplayerstate, "", (), intret(state()));
@@ -943,8 +944,8 @@ namespace client
                 }
                 default: return;
             }
-            if((d || verbose >= 2) && val)
-                conoutft(CON_EVENT, "\fy%s set \fs\fc%s\fS to \fs\fc%s\fS", d ? game::colourname(d) : (connected(false) ? "the server" : "you"), cmd, val);
+            if((d || showservervariables) && val)
+                conoutft(CON_EVENT, "\fy%s set \fs\fc%s\fS to \fs\fc%s\fS (%s)", d ? game::colourname(d) : (connected(false) ? "the server" : "you"), cmd, val, arg);
         }
         else if(verbose) conoutft(CON_EVENT, "\fr%s sent unknown command: \fc%s", d ? game::colourname(d) : "the server", cmd);
     }

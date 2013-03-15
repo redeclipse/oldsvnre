@@ -1587,7 +1587,7 @@ namespace game
                 if(found[vanities[d->vitems[k]].type]) continue;
                 if(!(vanities[d->vitems[k]].cond&2)) continue;
                 if(!client::haspriv(d, vanities[d->vitems[k]].priv)) continue;
-                projs::create(pos, pos, true, d, PRJ_VANITY, rnd(gibfade)+gibfade, 0, 0, rnd(50)+10, -1, d->vitems[k], 0, 0);
+                projs::create(pos, pos, true, d, PRJ_VANITY, (rnd(gibfade)+gibfade)*2, 0, 0, rnd(50)+10, -1, d->vitems[k], 0, 0);
                 found[vanities[d->vitems[k]].type]++;
             }
         }
