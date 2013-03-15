@@ -74,7 +74,8 @@ namespace game
     VAR(IDF_PERSIST, firstpersonmodel, 0, 2, 2);
     VAR(IDF_PERSIST, firstpersonfov, 90, 100, 150);
     FVAR(IDF_PERSIST, firstpersonblend, 0, 1, 1);
-    FVAR(IDF_PERSIST, firstpersondepth, 0, 0.5f, 1);
+    FVAR(IDF_PERSIST, firstpersondepth, 0, 0.25f, 1);
+    FVAR(IDF_PERSIST, firstpersonbodydepth, 0, 0.65f, 1);
 
     FVAR(IDF_PERSIST, firstpersonbodydist, -10, 0, 10);
     FVAR(IDF_PERSIST, firstpersonbodyside, -10, 0, 10);
@@ -2770,6 +2771,13 @@ namespace game
         {
             o.sub(vec(yaw*RAD, 0.f).mul(firstpersonbodydist+firstpersonspineoffset));
             o.sub(vec(yaw*RAD, 0.f).rotate_around_z(90*RAD).mul(firstpersonbodyside));
+            if((!onfloor || d->floortime(lastmillis) <= 50) && d->zradius > d->height)
+            {
+                float offz = d->zradius-d->height;
+                if(onfloor) offz *= 1-(d->floortime(lastmillis)/50.f);
+                else if(d->airtime(lastmillis) <= 50) offz *= d->airtime(lastmillis)/50.f;
+                o.z -= offz;
+            }
             if(firstpersonbodyfeet >= 0 && d->wantshitbox())
             {
                 float minz = max(d->toe[0].z, d->toe[1].z)+firstpersonbodyfeet;
@@ -2812,42 +2820,45 @@ namespace game
                 }
                 else if(physics::liquidcheck(d) && d->physstate <= PHYS_FALL)
                     anim |= ((d->move || d->strafe || d->vel.z+d->falling.z>0 ? int(ANIM_SWIM) : int(ANIM_SINK))|ANIM_LOOP)<<ANIM_SECONDARY;
-                else if(d->physstate == PHYS_FALL && !d->turnside && !d->onladder && d->impulse[IM_TYPE] != IM_T_NONE && lastmillis-d->impulse[IM_TIME] <= 1000)
-                {
-                    basetime2 = d->impulse[IM_TIME];
-                    if(d->impulse[IM_TYPE] == IM_T_KICK || d->impulse[IM_TYPE] == IM_T_VAULT) anim |= ANIM_WALL_JUMP<<ANIM_SECONDARY;
-                    else if(melee)
-                    {
-                        anim |= ANIM_FLYKICK<<ANIM_SECONDARY;
-                        basetime2 = d->weaplast[W_MELEE];
-                    }
-                    else if(d->move>0) anim |= ANIM_DASH_FORWARD<<ANIM_SECONDARY;
-                    else if(d->strafe) anim |= (d->strafe>0 ? ANIM_DASH_LEFT : ANIM_DASH_RIGHT)<<ANIM_SECONDARY;
-                    else if(d->move<0) anim |= ANIM_DASH_BACKWARD<<ANIM_SECONDARY;
-                    else anim |= ANIM_DASH_UP<<ANIM_SECONDARY;
-                }
-                else if(d->physstate == PHYS_FALL && !d->turnside && !d->onladder && d->airmillis)
-                {
-                    basetime2 = max(d->airmillis, d->impulse[IM_JUMP]);
-                    if(melee)
-                    {
-                        anim |= ANIM_FLYKICK<<ANIM_SECONDARY;
-                        basetime2 = d->weaplast[W_MELEE];
-                    }
-                    else if(d->action[AC_CROUCH] || d->actiontime[AC_CROUCH]<0)
-                    {
-                        if(d->move>0) anim |= ANIM_CROUCH_JUMP_FORWARD<<ANIM_SECONDARY;
-                        else if(d->strafe) anim |= (d->strafe>0 ? ANIM_CROUCH_JUMP_LEFT : ANIM_CROUCH_JUMP_RIGHT)<<ANIM_SECONDARY;
-                        else if(d->move<0) anim |= ANIM_CROUCH_JUMP_BACKWARD<<ANIM_SECONDARY;
-                        else anim |= ANIM_CROUCH_JUMP<<ANIM_SECONDARY;
-                    }
-                    else if(d->move>0) anim |= ANIM_JUMP_FORWARD<<ANIM_SECONDARY;
-                    else if(d->strafe) anim |= (d->strafe>0 ? ANIM_JUMP_LEFT : ANIM_JUMP_RIGHT)<<ANIM_SECONDARY;
-                    else if(d->move<0) anim |= ANIM_JUMP_BACKWARD<<ANIM_SECONDARY;
-                    else anim |= ANIM_JUMP<<ANIM_SECONDARY;
-                    if(!basetime2) anim |= ANIM_END<<ANIM_SECONDARY;
-                }
                 else if(d->turnside) anim |= ((d->turnside>0 ? ANIM_WALL_RUN_LEFT : ANIM_WALL_RUN_RIGHT)|ANIM_LOOP)<<ANIM_SECONDARY;
+                else if(d->physstate == PHYS_FALL && !d->onladder)
+                {
+                    if(d->impulse[IM_TYPE] != IM_T_NONE && lastmillis-d->impulse[IM_TIME] <= 1000)
+                    {
+                        basetime2 = d->impulse[IM_TIME];
+                        if(d->impulse[IM_TYPE] == IM_T_KICK || d->impulse[IM_TYPE] == IM_T_VAULT) anim |= ANIM_WALL_JUMP<<ANIM_SECONDARY;
+                        else if(melee)
+                        {
+                            anim |= ANIM_FLYKICK<<ANIM_SECONDARY;
+                            basetime2 = d->weaplast[W_MELEE];
+                        }
+                        else if(d->move>0) anim |= ANIM_DASH_FORWARD<<ANIM_SECONDARY;
+                        else if(d->strafe) anim |= (d->strafe>0 ? ANIM_DASH_LEFT : ANIM_DASH_RIGHT)<<ANIM_SECONDARY;
+                        else if(d->move<0) anim |= ANIM_DASH_BACKWARD<<ANIM_SECONDARY;
+                        else anim |= ANIM_DASH_UP<<ANIM_SECONDARY;
+                    }
+                    else if(d->airmillis)
+                    {
+                        basetime2 = max(d->airmillis, d->impulse[IM_JUMP]);
+                        if(melee)
+                        {
+                            anim |= ANIM_FLYKICK<<ANIM_SECONDARY;
+                            basetime2 = d->weaplast[W_MELEE];
+                        }
+                        else if(d->action[AC_CROUCH] || d->actiontime[AC_CROUCH]<0)
+                        {
+                            if(d->move>0) anim |= ANIM_CROUCH_JUMP_FORWARD<<ANIM_SECONDARY;
+                            else if(d->strafe) anim |= (d->strafe>0 ? ANIM_CROUCH_JUMP_LEFT : ANIM_CROUCH_JUMP_RIGHT)<<ANIM_SECONDARY;
+                            else if(d->move<0) anim |= ANIM_CROUCH_JUMP_BACKWARD<<ANIM_SECONDARY;
+                            else anim |= ANIM_CROUCH_JUMP<<ANIM_SECONDARY;
+                        }
+                        else if(d->move>0) anim |= ANIM_JUMP_FORWARD<<ANIM_SECONDARY;
+                        else if(d->strafe) anim |= (d->strafe>0 ? ANIM_JUMP_LEFT : ANIM_JUMP_RIGHT)<<ANIM_SECONDARY;
+                        else if(d->move<0) anim |= ANIM_JUMP_BACKWARD<<ANIM_SECONDARY;
+                        else anim |= ANIM_JUMP<<ANIM_SECONDARY;
+                        if(!basetime2) anim |= ANIM_END<<ANIM_SECONDARY;
+                    }
+                }
                 else if(physics::sliding(d, true)) anim |= (ANIM_POWERSLIDE|ANIM_LOOP)<<ANIM_SECONDARY;
                 else if(physics::pacing(d))
                 {
@@ -3332,7 +3343,12 @@ namespace game
         if(third || !rendernormally) renderplayer(focus, 1, opacity(focus, thirdpersonview(true)), focus->curscale, early);
         else if(!third && focus->state == CS_ALIVE) renderplayer(focus, 0, opacity(focus, false), focus->curscale, early);
         if(project && !third) viewproject();
-        if(!third && focus->state == CS_ALIVE && firstpersonmodel == 2) renderplayer(focus, 2, opacity(focus, false), focus->curscale, early);
+        if(!third && focus->state == CS_ALIVE && firstpersonmodel == 2)
+        {
+            if(project) viewproject(firstpersonbodydepth);
+            renderplayer(focus, 2, opacity(focus, false), focus->curscale, early);
+            if(project) viewproject();
+        }
         if(rendernormally && early) rendercheck(focus, third);
     }
 
