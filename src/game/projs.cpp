@@ -808,7 +808,7 @@ namespace projs
                     proj.relativity = gibsrelativity;
                     proj.waterfric = gibswaterfric;
                     proj.weight = gibsweight*proj.lifesize;
-                    proj.vel.add(vec(rnd(21)-10, rnd(21)-10, rnd(proj.owner && proj.owner->headless ? 71 : 21)-10));
+                    proj.vel.add(vec(rnd(21)-10, rnd(21)-10, proj.owner && proj.owner->headless ? rnd(61)+10 : rnd(21)-10));
                     proj.projcollide = BOUNCE_GEOM|BOUNCE_PLAYER;
                     proj.escaped = !proj.owner || proj.owner->state != CS_ALIVE;
                     proj.fadetime = rnd(50)+50;
@@ -962,7 +962,7 @@ namespace projs
                 proj.waterfric = vanitywaterfric;
                 proj.weight = vanityweight;
 #endif
-                proj.vel.add(vec(rnd(21)-10, rnd(21)-10, rnd(51)-10));
+                proj.vel.add(vec(rnd(21)-10, rnd(21)-10, rnd(61)+10));
                 proj.projcollide = BOUNCE_GEOM|BOUNCE_PLAYER;
                 proj.escaped = !proj.owner || proj.owner->state != CS_ALIVE;
                 proj.fadetime = rnd(250)+250;

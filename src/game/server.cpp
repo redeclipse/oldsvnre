@@ -729,9 +729,47 @@ namespace server
         return 0;
     }
 
-    #define setmod(a,b) { if(a != b) { setvar(#a, b, true);  sendf(-1, 1, "ri2sis", N_COMMAND, -1, &(#a)[3], strlen(#b), #b); } }
-    #define setmodf(a,b) { if(a != b) { setfvar(#a, b, true);  sendf(-1, 1, "ri2sis", N_COMMAND, -1, &(#a)[3], strlen(#b), #b); } }
-    #define setmods(a,b) { if(strcmp(a, b)) { setsvar(#a, b, true);  sendf(-1, 1, "ri2sis", N_COMMAND, -1, &(#a)[3], strlen(b), b); } }
+    #define setmod(a,b) \
+    { \
+        if(a != b) \
+        { \
+            ident *id = getident(#a); \
+            if(id && id->type == ID_VAR && id->flags&IDF_SERVER) \
+            { \
+                *id->storage.i = clamp(b, id->minval, id->maxval); \
+                id->changed(); \
+                const char *sval = intstr(id); \
+                sendf(-1, 1, "ri2sis", N_COMMAND, -1, &id->name[3], strlen(sval), sval); \
+            } \
+        } \
+    }
+    #define setmodf(a,b) \
+    { \
+        if(a != b) \
+        { \
+            ident *id = getident(#a); \
+            if(id && id->type == ID_FVAR && id->flags&IDF_SERVER) \
+            { \
+                *id->storage.f = clamp(b, id->minvalf, id->maxvalf); \
+                id->changed(); \
+                const char *sval = floatstr(id); \
+                if(sval) sendf(-1, 1, "ri2sis", N_COMMAND, -1, &id->name[3], strlen(sval), sval); \
+            } \
+        } \
+    }
+    #define setmods(a,b) \
+    { \
+        if(strcmp(a, b)) \
+        { \
+            ident *id = getident(#a); \
+            if(id && id->type == ID_SVAR && id->flags&IDF_SERVER) \
+            { \
+                delete[] *id->storage.s; \
+                *id->storage.s = newstring(b); \
+                sendf(-1, 1, "ri2sis", N_COMMAND, -1, &id->name[3], strlen(*id->storage.s), *id->storage.s); \
+            } \
+        } \
+    }
 
     int numgamevars = 0, numgamemods = 0;
     void resetgamevars(bool flush)
@@ -1593,6 +1631,7 @@ namespace server
             }
             if(!m_edit(gamemode))
             {
+                if(!cplayers) cplayers = totalspawns ? totalspawns : 1;
                 int np = G(numplayers) ? G(numplayers) : cplayers, mp = G(maxplayers) ? G(maxplayers) : np*3/2;
                 if(m_fight(gamemode) && m_team(gamemode, mutators))
                 {
@@ -1602,7 +1641,7 @@ namespace server
                 }
                 if(mp < np) mp = np;
                 if(np != G(numplayers)) setmod(sv_numplayers, np);
-                if(mp != G(maxplayers)) setmod(sv_maxplayers, np);
+                if(mp != G(maxplayers)) setmod(sv_maxplayers, mp);
             }
         }
     }
