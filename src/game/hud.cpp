@@ -2617,7 +2617,7 @@ namespace hud
                 flashcolour(gr, gg, gb, 1.f, 1.f, 1.f, amt);
             }
             #define ADDMODE(a) sy += drawitem(a, x, y-sy, width, 0, false, true, gr, gg, gb, fade);
-            if((alive && inventorygameinfo&1) || over) ADDMODEICON(game::gamemode, game::mutators)
+            if(game::focus->state != CS_EDITING && ((alive && inventorygameinfo&1) || over)) ADDMODEICON(game::gamemode, game::mutators)
             if(over && m_multi(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_MULTI))) ADDMODE(modemultitex)
             if(over && m_ffa(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_FFA))) ADDMODE(modeffatex)
             if(over && m_coop(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_COOP))) ADDMODE(modecooptex)
