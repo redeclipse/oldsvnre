@@ -222,6 +222,9 @@ namespace game
 #ifndef MEK
     VAR(IDF_PERSIST, forceplayermodel, -1, -1, PLAYERTYPES-1);
 #endif
+#ifdef VANITY
+    VAR(IDF_PERSIST, vanitymodels, 0, 1, 1);
+#endif
     VAR(IDF_PERSIST, headlessmodels, 0, 1, 1);
     VAR(IDF_PERSIST, autoloadweap, 0, 0, 1); // 0 = off, 1 = auto-set loadout weapons
     SVAR(IDF_PERSIST, favloadweaps, "");
@@ -1580,7 +1583,7 @@ namespace game
         vec pos = d->wantshitbox() ? d->head : d->headpos();
         pos.z -= d->zradius*0.125f;
 #ifdef VANITY
-        if(d->headless && headlessmodels && *d->vanity)
+        if(vanitymodels && d->headless && headlessmodels && *d->vanity)
         {
             if(d->vitems.empty()) vanitybuild(d);
             int found[VANITYMAX] = {0};
@@ -3158,7 +3161,7 @@ namespace game
         int ai = 0;
 #ifdef VANITY
         modelattach a[1+VANITYMAX+12];
-        if(third && *d->vanity)
+        if(vanitymodels && third && *d->vanity)
         {
             int idx = third == 1 && (d->state == CS_DEAD || d->state == CS_WAITING) && d->headless && headlessmodels ? 3 : third;
             if(d->vitems.empty())
