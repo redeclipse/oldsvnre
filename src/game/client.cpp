@@ -1800,11 +1800,12 @@ namespace client
                         break;
                     }
                     int colour = getint(p), model = getint(p), team = clamp(getint(p), int(T_NEUTRAL), int(T_ENEMY)), priv = getint(p);
-                    getstring(text, p);
-                    filtertext(text, text, true, true, true, MAXNAMELEN);
-                    const char *namestr = text;
+                    string name;
+                    getstring(name, p);
+                    filtertext(name, name, true, true, true, MAXNAMELEN);
+                    const char *namestr = name;
                     while(*namestr && iscubespace(*namestr)) namestr++;
-                    if(!*namestr) namestr = copystring(text, "unnamed");
+                    if(!*namestr) namestr = copystring(name, "unnamed");
                     getstring(d->hostname, p);
                     if(!d->hostname[0]) copystring(d->hostname, "unknown");
                     getstring(d->handle, p);
