@@ -34,6 +34,43 @@ char *gettime(time_t ctime, char *format)
 }
 ICOMMAND(0, gettime, "is", (int *n, char *a), result(gettime(*n, a)));
 
+const char *timestr(int dur, int style)
+{
+    static string buf; buf[0] = 0;
+    int tm = dur, ms = 0, ss = 0, mn = 0;
+    if(style < 2 && tm > 0)
+    {
+        ms = tm%1000;
+        tm = (tm-ms)/1000;
+    }
+    if(style < 0 && tm > 0) ss = tm;
+    else if(style < 4 && tm > 0)
+    {
+        ss = tm%60;
+        tm = (tm-ss)/60;
+        if(tm > 0) mn = tm;
+    }
+    switch(style)
+    {
+        case -1: formatstring(buf)("%d.%d", ss, ms/100); break;
+        case 0: formatstring(buf)("%d:%02d.%03d", mn, ss, ms); break;
+        case 1: formatstring(buf)("%d:%02d.%d", mn, ss, ms/100); break;
+        case 2: formatstring(buf)("%d:%02d", mn, ss); break;
+        case 3:
+        {
+            if(mn > 0)
+            {
+                formatstring(buf)("%dm%ds", mn, ss);
+                break;
+            }
+            formatstring(buf)("%ds", ss);
+            break;
+        }
+    }
+    return buf;
+}
+ICOMMAND(0, timestr, "ii", (int *d, int *s), result(timestr(*d, *s)));
+
 vector<ipinfo> control;
 void addipinfo(vector<ipinfo> &info, int type, const char *name)
 {

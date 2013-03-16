@@ -157,6 +157,10 @@ GVAR(0, spawnprotect, 0, 3000, VAR_MAX); // delay before damage can be dealt to 
 GVAR(0, duelprotect, 0, 5000, VAR_MAX); // .. in duel/survivor matches
 GVAR(0, instaprotect, 0, 3000, VAR_MAX); // .. in instagib matches
 
+GVAR(0, balancemaps, -1, -1, 1); // determined if map team balancing is used: -1 = map default, 0 = off, 1 = on
+GVAR(0, balancedelay, 0, 10000, 30000); // before mapbalance forces
+GVAR(0, balancenospawn, 0, 1, 1); // prevent respawning when waiting to balance
+
 #ifdef CAMPAIGN
 GVAR(0, campaignghost, 0, 0, 1); // 0 = all players are solid, 1 = all players are ghosts
 #endif

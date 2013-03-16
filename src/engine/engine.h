@@ -537,6 +537,7 @@ extern bool depthfxing;
 extern void drawdepthfxtex();
 
 // server
+extern const char *timestr(int dur, int style = 0);
 extern vector<char *> gameargs;
 extern void initgame();
 extern void changeservertype();

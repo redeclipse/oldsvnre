@@ -945,7 +945,7 @@ namespace client
                 default: return;
             }
             if((d || showservervariables) && val)
-                conoutft(CON_EVENT, "\fy%s set \fs\fc%s\fS to \fs\fc%s\fS (%s)", d ? game::colourname(d) : (connected(false) ? "the server" : "you"), cmd, val, arg);
+                conoutft(CON_EVENT, "\fy%s set \fs\fc%s\fS to \fs\fc%s\fS", d ? game::colourname(d) : (connected(false) ? "the server" : "you"), cmd, val);
         }
         else if(verbose) conoutft(CON_EVENT, "\fr%s sent unknown command: \fc%s", d ? game::colourname(d) : "the server", cmd);
     }
@@ -2437,8 +2437,8 @@ namespace client
                             t->cpmillis = t->impulse[IM_METER] = 0;
                             if(showlaptimes > (t != game::focus ? (t->aitype > AI_NONE ? 2 : 1) : 0))
                             {
-                                defformatstring(best)("%s", hud::timetostr(t->cptime));
-                                conoutft(t != game::player1 ? CON_INFO : CON_SELF, "%s completed in \fs\fg%s\fS (best: \fs\fy%s\fS, laps: \fs\fc%d\fS)", game::colourname(t), hud::timetostr(t->cplast), best, t->cplaps);
+                                defformatstring(best)("%s", timestr(t->cptime));
+                                conoutft(t != game::player1 ? CON_INFO : CON_SELF, "%s completed in \fs\fg%s\fS (best: \fs\fy%s\fS, laps: \fs\fc%d\fS)", game::colourname(t), timestr(t->cplast), best, t->cplaps);
                             }
                         }
                     }
