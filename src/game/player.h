@@ -110,7 +110,7 @@ CLASSDEF(float, speed);
 #ifdef GAMEWORLD
 const char *playertypes[PLAYERTYPES][5] = {
     { "actors/player/male/hwep",      "actors/player/male",     "actors/player/male/body",      "actors/player/male/headless",      "male" },
-    { "actors/player/female/hwep",    "actors/player/female",   "actors/player/male/body",      "actors/player/male/headless",      "female" }
+    { "actors/player/female/hwep",    "actors/player/female",   "actors/player/male/body",      "actors/player/female/headless",      "female" }
 };
 #else
 extern const char *playertypes[PLAYERTYPES][3];
