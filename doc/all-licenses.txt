@@ -49,7 +49,6 @@ License: Zlib
 
 Files: game/fps/maps/deadsimple*
 Copyright: Jonathan 'Wicked' Roels
-           2010-2013 Red Eclipse Team
            2013 Ulukai <jonathan.denil@gmail.com>
 License: CC-BY-SA-3.0
 
@@ -223,7 +222,7 @@ License:
  Licensed publicly for everyone to use, modify and distribute as long as the
  author is credited for the original work.
 
-Files: data/textures/announcer/*
+Files: data/textures/rewards/*
 Copyright: Ed Merrit, Ten by Twenty, <http://www.tenbytwenty.com/>
            2011, Red Eclipse Team
 License: Akashi-Font and CC-BY-SA-3.0+
