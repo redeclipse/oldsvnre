@@ -195,9 +195,9 @@ namespace hud
                                 }
                                 else break;
                             }
-                            game::announcef(S_V_DRAW, CON_MESG, NULL, true, "\fw\fs\f[%d]%s\fS tied %swith a total score of: \fs\fc%s\fS", TEAM(sg.team, colour), TEAM(sg.team, name), winner, m_laptime(game::gamemode, game::mutators) ? timetostr(sg.total) : intstr(sg.total));
+                            game::announcef(S_V_DRAW, CON_MESG, NULL, true, "\fw\fs\f[%d]%s\fS tied %swith a total score of: \fs\fc%s\fS", TEAM(sg.team, colour), TEAM(sg.team, name), winner, m_laptime(game::gamemode, game::mutators) ? timestr(sg.total) : intstr(sg.total));
                         }
-                        else game::announcef(anc, CON_MESG, NULL, true, "\fwteam \fs\f[%d]%s\fS won the match with a total score of: \fs\fc%s\fS", TEAM(sg.team, colour), TEAM(sg.team, name), m_laptime(game::gamemode, game::mutators) ? timetostr(sg.total) : intstr(sg.total));
+                        else game::announcef(anc, CON_MESG, NULL, true, "\fwteam \fs\f[%d]%s\fS won the match with a total score of: \fs\fc%s\fS", TEAM(sg.team, colour), TEAM(sg.team, name), m_laptime(game::gamemode, game::mutators) ? timestr(sg.total) : intstr(sg.total));
                     }
                 }
                 else
@@ -217,9 +217,9 @@ namespace hud
                                 }
                                 else break;
                             }
-                            game::announcef(S_V_DRAW, CON_MESG, NULL, true, "\fw%s tied %swith the fastest lap: \fs\fc%s\fS", game::colourname(sg.players[0]), winner, sg.players[0]->cptime ? timetostr(sg.players[0]->cptime) : "dnf");
+                            game::announcef(S_V_DRAW, CON_MESG, NULL, true, "\fw%s tied %swith the fastest lap: \fs\fc%s\fS", game::colourname(sg.players[0]), winner, sg.players[0]->cptime ? timestr(sg.players[0]->cptime) : "dnf");
                         }
-                        else game::announcef(anc, CON_MESG, NULL, true, "\fw%s won the match with the fastest lap: \fs\fc%s\fS", game::colourname(sg.players[0]), sg.players[0]->cptime ? timetostr(sg.players[0]->cptime) : "dnf");
+                        else game::announcef(anc, CON_MESG, NULL, true, "\fw%s won the match with the fastest lap: \fs\fc%s\fS", game::colourname(sg.players[0]), sg.players[0]->cptime ? timestr(sg.players[0]->cptime) : "dnf");
                     }
                     else
                     {
@@ -283,7 +283,7 @@ namespace hud
                         {
                             if(game::intermission) g.textf(", \fs\fyintermission\fS", 0xFFFFFF, NULL, 0);
                             else if(paused) g.textf(", \fs\fopaused\fS", 0xFFFFFF, NULL, 0);
-                            else if(game::timeremaining) g.textf(", \fs\fg%s\fS remain", 0xFFFFFF, NULL, 0, timetostr(game::timeremaining, 2));
+                            else if(game::timeremaining) g.textf(", \fs\fg%s\fS remain", 0xFFFFFF, NULL, 0, timestr(game::timeremaining, 2));
                         }
                     }));
                     if(*connectname)
@@ -311,7 +311,7 @@ namespace hud
                             {
                                 uicenterlist(g, uifont(g, "reduced", {
                                     if(m_duke(game::gamemode, game::mutators)) g.textf("Queued for new round", 0xFFFFFF, NULL, 0);
-                                    else if(delay) g.textf("%s: Down for \fs\fy%s\fS", 0xFFFFFF, NULL, 0, game::player1->state == CS_WAITING ? "Please Wait" : "Fragged", timetostr(delay, -1));
+                                    else if(delay) g.textf("%s: Down for \fs\fy%s\fS", 0xFFFFFF, NULL, 0, game::player1->state == CS_WAITING ? "Please Wait" : "Fragged", timestr(delay, -1));
                                     else if(game::player1->state == CS_WAITING && m_fight(game::gamemode) && maxalive > 0 && maxalivequeue)
                                     {
                                         int n = game::numwaiting();
@@ -450,7 +450,7 @@ namespace hud
                             g.background(bgcolor);
                             if(m_defend(game::gamemode) && ((defendlimit && sg.total >= defendlimit) || sg.total == INT_MAX))
                                 g.textf("%s: WIN", 0xFFFFFF, teamtexname(sg.team), TEAM(sg.team, colour), TEAM(sg.team, name));
-                            else if(m_laptime(game::gamemode, game::mutators)) g.textf("%s: %s", 0xFFFFFF, teamtexname(sg.team), TEAM(sg.team, colour), TEAM(sg.team, name), sg.total ? timetostr(sg.total) : "\fadnf");
+                            else if(m_laptime(game::gamemode, game::mutators)) g.textf("%s: %s", 0xFFFFFF, teamtexname(sg.team), TEAM(sg.team, colour), TEAM(sg.team, name), sg.total ? timestr(sg.total) : "\fadnf");
                             else g.textf("%s: %d", 0xFFFFFF, teamtexname(sg.team), TEAM(sg.team, colour), TEAM(sg.team, name), sg.total);
                             g.spring();
                         });
@@ -491,7 +491,7 @@ namespace hud
                             uilist(g, {
                                 uicenterlist(g, uipad(g, 4, g.text("best", 0xFFFFFF)));
                                 loopscoregroup(uicenterlist(g, {
-                                    uipad(g, 0.5f, g.textf("%s", 0xFFFFFF, NULL, 0, o->cptime ? timetostr(o->cptime) : "\fadnf"))
+                                    uipad(g, 0.5f, g.textf("%s", 0xFFFFFF, NULL, 0, o->cptime ? timestr(o->cptime) : "\fadnf"))
                                 }));
                             });
                         }
@@ -723,11 +723,11 @@ namespace hud
             scoregroup &sg = *groups[0];
             if(m_team(game::gamemode, game::mutators))
             {
-                if(sg.total) sy += draw_textx("\fg%s", x, y, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, timetostr(sg.total));
+                if(sg.total) sy += draw_textx("\fg%s", x, y, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, timestr(sg.total));
             }
             else if(!sg.players.empty())
             {
-                if(sg.players[0]->cptime) sy += draw_textx("\fg%s", x, y, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, timetostr(sg.players[0]->cptime));
+                if(sg.players[0]->cptime) sy += draw_textx("\fg%s", x, y, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, timestr(sg.players[0]->cptime));
             }
             popfont();
         }

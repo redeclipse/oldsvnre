@@ -1678,7 +1678,7 @@ namespace ai
                     defformatstring(s)("%s%s (%s) %s:%d",
                         top ? "<default>\fg" : "<sub>\fy",
                         stnames[b.type],
-                        hud::timetostr(lastmillis-b.millis),
+                        timestr(lastmillis-b.millis),
                         sttypes[b.targtype+1], b.target
                     );
                     part_textcopy(pos, s);

@@ -607,33 +607,6 @@ namespace hud
         return UI::keypress(code, isdown, cooked); // ignore UI if compass is open
     }
 
-    char *timetostr(int dur, int style)
-    {
-        static string timestr; timestr[0] = 0;
-        int tm = dur, ms = 0, ss = 0, mn = 0;
-        if(style < 2 && tm > 0)
-        {
-            ms = tm%1000;
-            tm = (tm-ms)/1000;
-        }
-        if(style < 0 && tm > 0) ss = tm;
-        else if(style < 3 && tm > 0)
-        {
-            ss = tm%60;
-            tm = (tm-ss)/60;
-            if(tm > 0) mn = tm;
-        }
-        switch(style)
-        {
-            case -1: formatstring(timestr)("%d.%d", ss, ms/100); break;
-            case 0: formatstring(timestr)("%d:%02d.%03d", mn, ss, ms); break;
-            case 1: formatstring(timestr)("%d:%02d.%d", mn, ss, ms/100); break;
-            case 2: formatstring(timestr)("%d:%02d", mn, ss); break;
-        }
-        return timestr;
-    }
-    ICOMMAND(0, timetostr, "ii", (int *d, int *s), result(timetostr(*d, *s)));
-
     float motionblur(float scale)
     {
         float amt = 0;
@@ -1269,7 +1242,7 @@ namespace hud
                 if(delay || m_duke(game::gamemode, game::mutators) || (m_fight(game::gamemode) && maxalive > 0))
                 {
                     if(target->state == CS_WAITING && m_duke(game::gamemode, game::mutators)) ty += draw_textx("Queued for new round", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw);
-                    else if(delay) ty += draw_textx("%s: Down for \fs\fy%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, target == game::player1 && target->state == CS_WAITING ? "Please Wait" : "Fragged", timetostr(delay, -1));
+                    else if(delay) ty += draw_textx("%s: Down for \fs\fy%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, target == game::player1 && target->state == CS_WAITING ? "Please Wait" : "Fragged", timestr(delay, -1));
                     else if(target == game::player1 && target->state == CS_WAITING && m_fight(game::gamemode) && maxalive > 0 && maxalivequeue)
                     {
                         int n = game::numwaiting();
@@ -2648,11 +2621,11 @@ namespace hud
                 pushfont("emphasis");
                 sy += draw_textx("\falap: \fw%d", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, game::focus->cplaps+1);
                 if(game::focus->cptime)
-                    sy += draw_textx("\fy%s", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, timetostr(game::focus->cptime));
+                    sy += draw_textx("\fy%s", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, timestr(game::focus->cptime));
                 if(game::focus->cpmillis)
-                    sy += draw_textx("%s", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, timetostr(lastmillis-game::focus->cpmillis, 1));
+                    sy += draw_textx("%s", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, timestr(lastmillis-game::focus->cpmillis, 1));
                 else if(game::focus->cplast)
-                    sy += draw_textx("\fzwe%s", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, timetostr(game::focus->cplast));
+                    sy += draw_textx("\fzwe%s", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, timestr(game::focus->cplast));
                 popfont();
             }
             sy += trialinventory(x, y-sy, s, fade);
@@ -2933,7 +2906,7 @@ namespace hud
         {
             glPushMatrix();
             glScalef(noticescale, noticescale, 1);
-            pushfont("super");
+            pushfont("huge");
             int ty = int(((hudheight/2)-int(hudheight/2*eventoffset))/noticescale), tx = int((hudwidth/2)/noticescale),
                 tf = int(255*hudblend*noticeblend), tr = 255, tg = 255, tb = 255,
                 tw = int((hudwidth-(int(hudsize*gapsize)*2+int(hudsize*inventorysize)*2))/noticescale);
@@ -2945,12 +2918,8 @@ namespace hud
                 if(game::focus->state == CS_ALIVE && !lastteam) lastteam = totalmillis;
                 if(totalmillis-lastteam <= teamnoticedelay)
                 {
-                    if(!m_team(game::gamemode, game::mutators))
-                    {
-                        if(m_trial(game::gamemode)) to += draw_textx("Time Trial", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
-                        else if(m_gauntlet(game::gamemode)) to += draw_textx("Gauntlet", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
-                        else to += draw_textx("Free-for-all Deathmatch", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
-                    }
+                    if(m_trial(game::gamemode)) to += draw_textx("Time Trial", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
+                    else if(!m_team(game::gamemode, game::mutators)) to += draw_textx("Free-for-all Deathmatch", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
                     else to += draw_textx("You are on team \fs\f[%d]\f(%s)%s\fS", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, TEAM(game::focus->team, colour), teamtexname(game::focus->team), TEAM(game::focus->team, name));
                 }
             }

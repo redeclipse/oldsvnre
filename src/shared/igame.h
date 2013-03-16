@@ -56,7 +56,6 @@ namespace hud
     extern void gamemenus();
     extern void update(int w, int h);
     extern bool needminimap();
-    extern char *timetostr(int dur, int style = 0);
     extern void drawquad(float x, float y, float w, float h, float tx1 = 0, float ty1 = 0, float tx2 = 1, float ty2 = 1, bool flipx = false, bool flipy = false);
     extern void drawcoord(float x, float y, float w, float h, float tx = 0, float ty = 0, float tw = 1, float th = 1, bool flipx = false, bool flipy = false);
     extern void drawtexture(float x, float y, float w, float h, bool flipx = false, bool flipy = false);

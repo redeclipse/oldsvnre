@@ -440,7 +440,7 @@ namespace server
     servmode *smode;
     vector<servmode *> smuts;
     #define mutate(a,b) { loopvk(a) { servmode *mut = a[k]; { b; } } }
-    int curbalance = 0, totalspawns = 0;
+    int curbalance = 0, nextbalance = 0, totalspawns = 0;
 
     vector<score> scores;
     score &teamscore(int team)
@@ -628,12 +628,14 @@ namespace server
             if(ci->state.aitype >= AI_START) return true;
             else if(tryspawn)
             {
+                if(m_balance(gamemode) && G(balancenospawn) && nextbalance && nextbalance >= gamemillis) return false;
                 if(m_loadout(gamemode, mutators) && !chkloadweap(ci)) return false;
                 if(spawnqueue(true) && spawnq.find(ci) < 0 && playing.find(ci) < 0) queue(ci);
                 return true;
             }
             else
             {
+                if(m_balance(gamemode) && G(balancenospawn) && nextbalance && nextbalance >= gamemillis) return false;
                 if(m_loadout(gamemode, mutators) && !chkloadweap(ci, false)) return false;
                 int delay = ci->state.aitype >= AI_START && ci->state.lastdeath ? G(enemyspawntime) : m_delay(gamemode, mutators);
                 if(delay && ci->state.respawnwait(gamemillis, delay)) return false;
@@ -1371,33 +1373,49 @@ namespace server
                 }
             }
         }
-        if(iterate && balance && m_team(gamemode, mutators))
+        if(iterate && balance && m_team(gamemode, mutators) && gamelimit > 0)
         {
-            int numt = numteams(gamemode, mutators), balpart = (gamelimit > 0 ? gamelimit : 600000)/numt, balance = gamemillis/balpart;
+            int numt = numteams(gamemode, mutators),
+                delpart = min(gamelimit/(numt*2), G(balancedelay)), timetotal = gamelimit-(delpart*numt),
+                balpart = (timetotal/numt)+(delpart*curbalance), balance = gamemillis/balpart;
             if(balance != curbalance)
             {
-                int oldbalance = curbalance;
-                curbalance = balance;
-                if(smode) smode->balance(oldbalance);
-                mutate(smuts, mut->balance(oldbalance));
-                static vector<clientinfo *> assign[T_TOTAL];
-                loopk(T_TOTAL) assign[k].setsize(0);
-                loopv(clients) if(clients[i]->team >= T_FIRST && clients[i]->team <= T_LAST)
-                    assign[clients[i]->team-T_FIRST].add(clients[i]);
-                int scores[T_TOTAL] = {0}, flags = (m_balreset(gamemode) ? TT_DEFAULT : 0)|TT_INFO;
-                loopk(T_TOTAL) scores[k] = teamscore(k+T_FIRST).total;
-                loopk(T_TOTAL)
+                if(!nextbalance)
                 {
-                    int from = mapbals[oldbalance][k], fromt = from-T_FIRST,
-                        to = mapbals[curbalance][k], tot = to-T_FIRST;
-                    loopv(assign[fromt]) setteam(assign[fromt][i], to, flags);
-                    score &cs = teamscore(from);
-                    cs.total = scores[tot];
-                    sendf(-1, 1, "ri3", N_SCORE, cs.team, cs.total);
+                    if(delpart > 0)
+                    {
+                        nextbalance = NZT(gamemillis+delpart);
+                        int secs = (delpart%1000)/1000;
+                        ancmsgft(-1, S_V_BALWARN, CON_EVENT, "\fy\fs\fcteams\fS will be \fs\fzygreassigned\fS%s in \fs\fzyc%d\fS %s", !m_gauntlet(gamemode) ? " for map balance" : "", secs, secs != 1 ? "seconds" : "second");
+                    }
+                    else nextbalance = NZT(gamemillis);
                 }
-                ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fyteams have been reassigned%s", !m_gauntlet(gamemode) ? " for map balance" : "");
-                if(smode) smode->layout();
-                mutate(smuts, mut->layout());
+                if(gamemillis >= nextbalance)
+                {
+                    int oldbalance = curbalance;
+                    curbalance = balance;
+                    if(smode) smode->balance(oldbalance);
+                    mutate(smuts, mut->balance(oldbalance));
+                    static vector<clientinfo *> assign[T_TOTAL];
+                    loopk(T_TOTAL) assign[k].setsize(0);
+                    loopv(clients) if(clients[i]->team >= T_FIRST && clients[i]->team <= T_LAST)
+                        assign[clients[i]->team-T_FIRST].add(clients[i]);
+                    int scores[T_TOTAL] = {0}, flags = (m_balreset(gamemode) ? TT_DEFAULT : 0)|TT_INFO;
+                    loopk(T_TOTAL) scores[k] = teamscore(k+T_FIRST).total;
+                    loopk(T_TOTAL)
+                    {
+                        int from = mapbals[oldbalance][k], fromt = from-T_FIRST,
+                            to = mapbals[curbalance][k], tot = to-T_FIRST;
+                        loopv(assign[fromt]) setteam(assign[fromt][i], to, flags);
+                        score &cs = teamscore(from);
+                        cs.total = scores[tot];
+                        sendf(-1, 1, "ri3", N_SCORE, cs.team, cs.total);
+                    }
+                    ancmsgft(-1, S_V_BALALERT, CON_EVENT, "\fy\fs\fcteams\fS have %sbeen \fs\fzygreassigned\fS%s", delpart > 0 ? "now " : "", !m_gauntlet(gamemode) ? " for map balance" : "");
+                    if(smode) smode->layout();
+                    mutate(smuts, mut->layout());
+                    nextbalance = -1;
+                }
             }
         }
     }
@@ -2442,7 +2460,7 @@ namespace server
         hasgameinfo = maprequest = mapsending = shouldcheckvotes = firstblood = false;
         stopdemo();
         changemode(gamemode = mode, mutators = muts);
-        curbalance = gamemillis = interm = 0;
+        curbalance = nextbalance = gamemillis = interm = 0;
         oldtimelimit = G(timelimit);
         timeremaining = G(timelimit) ? G(timelimit)*60 : -1;
         gamelimit = G(timelimit) ? timeremaining*1000 : 0;
