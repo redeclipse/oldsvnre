@@ -1385,8 +1385,8 @@ namespace server
                     if(delpart > 0)
                     {
                         nextbalance = NZT(gamemillis+delpart);
-                        int secs = (delpart%1000)/1000;
-                        ancmsgft(-1, S_V_BALWARN, CON_EVENT, "\fy\fs\fcteams\fS will be \fs\fzygreassigned\fS%s in \fs\fzyc%d\fS %s", !m_gauntlet(gamemode) ? " for map balance" : "", secs, secs != 1 ? "seconds" : "second");
+                        int secs = delpart/1000;
+                        ancmsgft(-1, S_V_BALWARN, CON_EVENT, "\fy\fs\fcteams\fS will be \fs\fzygreassigned\fS in \fs\fzyc%d\fS %s%s", secs, secs != 1 ? "seconds" : "second", !m_gauntlet(gamemode) ? " for map balance" : "");
                     }
                     else nextbalance = NZT(gamemillis);
                 }
@@ -1783,20 +1783,14 @@ namespace server
 
     void ancmsgft(int cn, int snd, int conlevel, const char *s, ...)
     {
-        if(cn < 0 || allowbroadcast(cn))
-        {
-            defvformatstring(str, s, s);
-            sendf(cn, 1, "ri3s", N_ANNOUNCE, snd, conlevel, str);
-        }
+        defvformatstring(str, s, s);
+        if(cn < 0 || allowbroadcast(cn)) sendf(cn, 1, "ri3s", N_ANNOUNCE, snd, conlevel, str);
     }
 
     void srvmsgft(int cn, int conlevel, const char *s, ...)
     {
-        if(cn < 0 || allowbroadcast(cn))
-        {
-            defvformatstring(str, s, s);
-            sendf(cn, 1, "ri2s", N_SERVMSG, conlevel, str);
-        }
+        defvformatstring(str, s, s);
+        if(cn < 0 || allowbroadcast(cn)) sendf(cn, 1, "ri2s", N_SERVMSG, conlevel, str);
     }
 
     void srvmsgftforce(int cn, int conlevel, const char *s, ...)
@@ -1808,9 +1802,9 @@ namespace server
 
     void srvmsgf(int cn, const char *s, ...)
     {
+        defvformatstring(str, s, s);
         if(cn < 0 || allowbroadcast(cn))
         {
-            defvformatstring(str, s, s);
             int conlevel = CON_MESG;
             switch(cn)
             {
