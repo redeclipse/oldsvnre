@@ -439,7 +439,6 @@ namespace projs
             float test = 1e16f, radius = list[i].radius;
             if(ray.iszero())
             {
-                radius *= 2;
                 vec to = vec(ray).mul(dist).add(proj.o);
                 float x1 = floor(min(proj.o.x, to.x)), y1 = floor(min(proj.o.y, to.y)),
                       x2 = ceil(max(proj.o.x, to.x)), y2 = ceil(max(proj.o.y, to.y));
