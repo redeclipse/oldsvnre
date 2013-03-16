@@ -121,7 +121,7 @@ namespace auth
                 formatstring(msg)("\fy%s is no longer \fs\fc%s\fS", colourname(ci), privname(privilege, true));
         }
         if(*msg) srvoutforce(ci, -2, "%s", msg);
-        privupdate = true;
+        sendf(-1, 1, "ri3s", N_CURRENTPRIV, ci->clientnum, ci->privilege, ci->handle);
         if(paused)
         {
             int others = 0;
