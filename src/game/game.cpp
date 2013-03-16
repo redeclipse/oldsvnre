@@ -2780,11 +2780,11 @@ namespace game
         {
             o.sub(vec(yaw*RAD, 0.f).mul(firstpersonbodydist+firstpersonspineoffset));
             o.sub(vec(yaw*RAD, 0.f).rotate_around_z(90*RAD).mul(firstpersonbodyside));
-            if((!onfloor || d->floortime(lastmillis) <= 50) && d->zradius > d->height)
+            if((!onfloor || d->floortime(lastmillis) <= 40) && d->zradius > d->height)
             {
                 float offz = d->zradius-d->height;
-                if(onfloor) offz *= 1-(d->floortime(lastmillis)/50.f);
-                else if(d->airtime(lastmillis) <= 50) offz *= d->airtime(lastmillis)/50.f;
+                if(onfloor) offz *= 1-(d->floortime(lastmillis)/40.f);
+                else if(d->airtime(lastmillis) <= 40) offz *= d->airtime(lastmillis)/40.f;
                 o.z -= offz;
             }
             if(firstpersonbodyfeet >= 0 && d->wantshitbox())
@@ -2846,7 +2846,7 @@ namespace game
                         else if(d->move<0) anim |= ANIM_DASH_BACKWARD<<ANIM_SECONDARY;
                         else anim |= ANIM_DASH_UP<<ANIM_SECONDARY;
                     }
-                    else if(d->airmillis)
+                    else if(d->airtime(lastmillis) > 40)
                     {
                         basetime2 = max(d->airmillis, d->impulse[IM_JUMP]);
                         if(melee)
