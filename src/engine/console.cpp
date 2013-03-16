@@ -6,7 +6,7 @@ vector<cline> conlines;
 int commandmillis = -1;
 string commandbuf;
 char *commandaction = NULL, *commandicon = NULL;
-enum { CF_COMPLETE = 1<<0, CF_EXECUTE = 1<<1 };
+enum { CF_COMPLETE = 1<<0, CF_EXECUTE = 1<<1, CF_MESSAGE = 1<<2 };
 int commandflags = 0, commandpos = -1, commandcolour = 0;
 
 void conline(int type, const char *sf, int n)
@@ -283,7 +283,8 @@ void inputcommand(char *init, char *action = NULL, char *icon = NULL, int colour
     {
         case 'c': commandflags |= CF_COMPLETE; break;
         case 'x': commandflags |= CF_EXECUTE; break;
-        case 's': commandflags |= CF_COMPLETE|CF_EXECUTE; break;
+        case 'm': commandflags |= CF_MESSAGE; break;
+        case 's': commandflags |= CF_COMPLETE|CF_EXECUTE|CF_MESSAGE; break;
     }
     else if(init) commandflags |= CF_COMPLETE|CF_EXECUTE;
 }
@@ -497,8 +498,9 @@ void processkey(int code, bool isdown, int cooked)
     resetcomplete();
     if(cooked)
     {
-        size_t len = (int)strlen(commandbuf);
-        if(len+1<sizeof(commandbuf))
+        size_t len = (int)strlen(commandbuf), maxlen = sizeof(commandbuf);
+        if(commandflags&CF_MESSAGE) maxlen = min((size_t)client::maxmsglen(), maxlen);
+        if(len+1 < maxlen)
         {
             if(commandpos<0) commandbuf[len] = cooked;
             else

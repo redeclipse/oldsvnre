@@ -15,6 +15,8 @@ namespace client
     int state() { return game::player1->state; }
     ICOMMAND(0, getplayerstate, "", (), intret(state()));
 
+    int maxmsglen() { return G(messagelength); }
+
     int otherclients()
     {
         int n = 0; // ai don't count
