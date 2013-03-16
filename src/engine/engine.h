@@ -58,6 +58,8 @@ extern bool checkipinfo(vector<ipinfo> &info, int type, enet_uint32 ip);
 extern void writecfg();
 extern void rehash(bool reload = true);
 
+#define NZT(t) (t != 0 ? t : 1)
+
 #ifndef STANDALONE
 #include "world.h"
 #include "octa.h"
@@ -588,7 +590,6 @@ extern string commandbuf;
 extern char *commandaction, *commandicon;
 extern bool fullconsole;
 // main
-#define NZT(t) (t != 0 ? t : 1)
 extern void quit();
 enum
 {
