@@ -270,7 +270,7 @@ extern mutstypes mutstype[];
 #define m_gsp3(a,b)         ((b&(1<<G_M_GSP3)) || (gametype[a].implied&(1<<G_M_GSP3)))
 #define m_gsp(a,b)          (m_gsp1(a,b) || m_gsp2(a,b) || m_gsp3(a,b))
 
-#define m_team(a,b)         (m_multi(a, b) || (!(b&(1<<G_M_FFA)) && !(gametype[a].implied&(1<<G_M_FFA))))
+#define m_team(a,b)         (m_multi(a, b) || !m_ffa(a, b))
 #define m_sweaps(a,b)       (m_insta(a, b) || m_medieval(a, b) || m_kaboom(a, b))
 #define m_limited(a,b)      (m_insta(a, b) || m_medieval(a, b))
 #define m_special(a,b)      (m_sweaps(a, b) || !m_classic(a, b))

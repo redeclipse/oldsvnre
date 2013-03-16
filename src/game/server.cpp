@@ -1043,11 +1043,11 @@ namespace server
         loopk(lps)
         {
             int iter = start+k;
-            if(gametype[mode].mutators[0] && muts)
+            if(muts)
             {
                 int implied = gametype[mode].implied;
                 loopi(G_M_NUM) if(muts&(1<<mutstype[i].type)) implied |= mutstype[i].implied&~(1<<mutstype[i].type);
-                loopi(G_M_NUM) if((gametype[mode].mutators[0]&(1<<mutstype[i].type)) && (muts&(1<<mutstype[i].type)) && (!implied || !(implied&(1<<mutstype[i].type))))
+                loopi(G_M_NUM) if(muts&(1<<mutstype[i].type) && (!implied || !(implied&(1<<mutstype[i].type))))
                 {
                     const char *mut = i < G_M_GSP ? mutstype[i].name : gametype[mode].gsp[i-G_M_GSP];
                     if(mut && *mut)
