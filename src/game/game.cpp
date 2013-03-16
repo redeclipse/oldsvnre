@@ -2908,7 +2908,7 @@ namespace game
         if(d->ragdoll && (deathanim!=2 || (anim&ANIM_INDEX)!=ANIM_DYING)) cleanragdoll(d);
         if(!((anim>>ANIM_SECONDARY)&ANIM_INDEX)) anim |= (ANIM_IDLE|ANIM_LOOP)<<ANIM_SECONDARY;
 
-        int flags = MDL_LIGHT;
+        int flags = MDL_LIGHT|MDL_LIGHTFX;
         if(d != focus && !(anim&ANIM_RAGDOLL)) flags |= MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_CULL_QUERY;
         if(d->type == ENT_PLAYER)
         {
@@ -2921,7 +2921,6 @@ namespace game
         dynent *e = third ? (third != 2 ? (dynent *)d : (dynent *)&bodymodel) : (dynent *)&avatarmodel;
         if(e->light.millis != lastmillis)
         {
-            flags |= MDL_LIGHTFX;
             e->light.effect = vec::hexcolor(getcolour(d, playerlighttone)).mul(playerlightmix);
             e->light.material[0] = bvec(getcolour(d, playerovertone));
             e->light.material[1] = bvec(getcolour(d, playerundertone));
