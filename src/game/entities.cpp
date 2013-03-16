@@ -771,17 +771,25 @@ namespace entities
             gameentity &e = *(gameentity *)ents[n];
             bool on = m%2, spawned = e.spawned;
             if((e.spawned = on) == true) e.lastspawn = lastmillis;
-            if(e.type == TRIGGER && cantrigger(n))
+            if(e.type == TRIGGER && cantrigger(n) && (e.attrs[1] == TR_TOGGLE || e.attrs[1] == TR_LINK || e.attrs[1] == TR_ONCE))
             {
-                if((m >= 2 || e.lastemit <= 0 || e.spawned != spawned) && (e.attrs[1] == TR_TOGGLE || e.attrs[1] == TR_LINK || e.attrs[1] == TR_ONCE))
+                if(m >= 2 || e.lastemit <= 0 || e.spawned != spawned)
                 {
-                    e.lastemit = m <= 1 ? lastmillis-(e.lastemit ? max(triggertime(e)-(lastmillis-e.lastemit), 0) : triggertime(e)) : -1;
+                    if(m >= 2) e.lastemit = -1;
+                    else if(e.lastemit > 0)
+                    {
+                        int last = lastmillis-e.lastemit, trig = triggertime(e);
+                        if(last > 0 && last < trig) e.lastemit = lastmillis-(trig-last);
+                        else e.lastemit = lastmillis;
+                    }
+                    else e.lastemit = lastmillis;
                     execlink(NULL, n, false);
                     loopv(e.kin) if(ents.inrange(e.kin[i]))
                     {
                         gameentity &f = *(gameentity *)ents[e.kin[i]];
                         if(!cantrigger(e.kin[i])) continue;
-                        f.spawned = e.spawned; f.lastemit = e.lastemit;
+                        f.spawned = e.spawned;
+                        f.lastemit = e.lastemit;
                         execlink(NULL, e.kin[i], false, n);
                     }
                 }
