@@ -97,8 +97,16 @@ namespace hud
             if(y->team) return false;
         }
         else if(!y->team) return true;
-        if(x->total > y->total) return true;
-        if(x->total < y->total) return false;
+        if(m_laptime(game::gamemode, game::mutators))
+        {
+            if(x->total < y->total) return true;
+            if(x->total > y->total) return false;
+        }
+        else
+        {
+            if(x->total > y->total) return true;
+            if(x->total < y->total) return false;
+        }
         if(x->players.length() > y->players.length()) return true;
         if(x->players.length() < y->players.length()) return false;
         return x->team && y->team && x->team < y->team;
@@ -187,9 +195,9 @@ namespace hud
                                 }
                                 else break;
                             }
-                            game::announcef(S_V_DRAW, CON_MESG, NULL, true, "\fw\fs\f[%d]%s\fS tied %swith a total score of: \fs\fc%d\fS", TEAM(sg.team, colour), TEAM(sg.team, name), winner, sg.total);
+                            game::announcef(S_V_DRAW, CON_MESG, NULL, true, "\fw\fs\f[%d]%s\fS tied %swith a total score of: \fs\fc%s\fS", TEAM(sg.team, colour), TEAM(sg.team, name), winner, m_laptime(game::gamemode, game::mutators) ? timetostr(sg.total) : intstr(sg.total));
                         }
-                        else game::announcef(anc, CON_MESG, NULL, true, "\fwteam \fs\f[%d]%s\fS won the match with a total score of: \fs\fc%d\fS", TEAM(sg.team, colour), TEAM(sg.team, name), sg.total);
+                        else game::announcef(anc, CON_MESG, NULL, true, "\fwteam \fs\f[%d]%s\fS won the match with a total score of: \fs\fc%s\fS", TEAM(sg.team, colour), TEAM(sg.team, name), m_laptime(game::gamemode, game::mutators) ? timetostr(sg.total) : intstr(sg.total));
                     }
                 }
                 else
