@@ -68,6 +68,7 @@ Maps:
  * Industrial, removed
  * Lab, removed
  * Wet, updated
+ * Ghost, updated
 
 Interface & Menus:
  * Overall reduced font sizes
