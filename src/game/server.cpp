@@ -379,7 +379,7 @@ namespace server
     bool maprequest = false, inovertime = false;
     enet_uint32 lastsend = 0;
     int mastermode = MM_OPEN;
-    bool privupdate = false, updatecontrols = false, mapsending = false, shouldcheckvotes = false;
+    bool updatecontrols = false, mapsending = false, shouldcheckvotes = false;
     stream *mapdata[SENDMAP_MAX] = { NULL };
     vector<clientinfo *> clients, connects;
 
@@ -2972,6 +2972,13 @@ namespace server
             putint(p, ci->state.model);
             sendstring(ci->state.vanity, p);
             putint(p, ci->team);
+            if(ci->privilege > PRIV_NONE)
+            {
+                putint(p, N_CURRENTPRIV);
+                putint(p, ci->clientnum);
+                putint(p, ci->privilege);
+                sendstring(ci->handle, p);
+            }
         }
     }
 
@@ -4156,13 +4163,6 @@ namespace server
                 if(smode) smode->update();
                 mutate(smuts, mut->update());
             }
-
-            if(privupdate)
-            {
-                loopv(clients) sendf(-1, 1, "ri3s", N_CURRENTPRIV, clients[i]->clientnum, clients[i]->privilege, clients[i]->handle);
-                privupdate = false;
-            }
-
             if(interm && totalmillis-interm >= 0) startintermission(true); // wait then call for next map
             if(shouldcheckvotes) checkvotes();
         }
@@ -4504,7 +4504,6 @@ namespace server
 
         ci->connected = true;
         ci->needclipboard = totalmillis ? totalmillis : 1;
-        privupdate = true;
         ci->state.lasttimeplayed = lastmillis;
 
         sendwelcome(ci);
