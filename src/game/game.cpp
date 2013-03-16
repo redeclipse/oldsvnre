@@ -3067,7 +3067,7 @@ namespace game
         int team = m_fight(gamemode) && m_team(gamemode, mutators) ? d->team : T_NEUTRAL,
             weap = d->weapselect, lastaction = 0, animflags = ANIM_IDLE|ANIM_LOOP, weapflags = animflags, weapaction = 0, animdelay = 0;
         bool secondary = false, showweap = third != 2 && isweap(weap) && (d->aitype < AI_START || aistyle[d->aitype].useweap);
-
+        float weapscale = 1.f;
         if(d->state == CS_DEAD || d->state == CS_WAITING)
         {
             showweap = false;
@@ -3107,12 +3107,18 @@ namespace game
                     case W_S_SWITCH:
                     case W_S_USE:
                     {
-                        if(lastmillis-d->weaplast[weap] <= d->weapwait[weap]/3)
+                        int millis = lastmillis-d->weaplast[weap], off = d->weapwait[weap]/3;
+                        if(millis <= off)
                         {
                             if(!d->hasweap(d->lastweap, m_weapon(gamemode, mutators))) showweap = false;
-                            else weap = d->lastweap;
+                            else
+                            {
+                                weap = d->lastweap;
+                                weapscale = 1-(millis/float(off));
+                            }
                         }
                         else if(!d->hasweap(weap, m_weapon(gamemode, mutators))) showweap = false;
+                        else if(millis <= off*2) weapscale = (millis-off)/float(off);
                         weapflags = animflags = ANIM_SWITCH+(d->weapstate[weap]-W_S_SWITCH);
                         break;
                     }
@@ -3195,7 +3201,7 @@ namespace game
 #else
         bool hasweapon = showweap && *weapmdl;
 #endif
-        if(hasweapon) a[ai++] = modelattach("tag_weapon", weapmdl, weapflags, weapaction);
+        if(hasweapon) a[ai++] = modelattach("tag_weapon", weapmdl, weapflags, weapaction, trans, weapscale*size);
         if(rendernormally && (early || d != focus))
         {
             if(third != 2)
