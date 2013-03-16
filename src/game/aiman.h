@@ -85,7 +85,7 @@ namespace aiman
                 ci->state.lasttimeplayed = lastmillis;
                 ci->state.colour = rnd(0xFFFFFF);
                 ci->state.model = rnd(PLAYERTYPES);
-                ci->state.setvanity("tophat/metal badge"); // the first slot is special
+                ci->state.setvanity(ci->state.model ? G(botfemalevanities) : G(botmalevanities)); // the first slot is special
                 copystring(ci->name, aistyle[ci->state.aitype].name, MAXNAMELEN);
                 if(ci->state.aitype == AI_BOT)
                 {
