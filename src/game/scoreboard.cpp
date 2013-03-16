@@ -452,7 +452,7 @@ namespace hud
                     uilist(g, {
                         uicenterlist(g, uipad(g, 0.25f, g.strut(1)));
                         loopscoregroup(uicenterlist(g, {
-                            uipad(g, 0.25f, uicenterlist(g, g.text("", 0, hud::privtex(o->privilege, o->aitype), TEAM(sg.team, colour))));
+                            uipad(g, 0.25f, uicenterlist(g, g.text("", 0, hud::privtex(o->privilege, o->aitype), game::findcolour(o))));
                         }));
                     });
 
