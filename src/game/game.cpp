@@ -140,7 +140,8 @@ namespace game
     FVAR(IDF_PERSIST, spectvyawthresh, 0, 0, 360);
     FVAR(IDF_PERSIST, spectvpitchthresh, 0, 0, 180);
     VAR(IDF_PERSIST, spectvdead, 0, 1, 2); // 0 = never, 1 = in all but duel/survivor, 2 = always
-    VAR(IDF_PERSIST, spectvaiming, 0, 2, 2); // 0 = aim in direction followed player is facing, 1 = aim in direction determined by spectv when dead, 2 = always aim in direction
+    VAR(IDF_PERSIST, spectvfirstperson, 0, 0, 2); // 0 = aim in direction followed player is facing, 1 = aim in direction determined by spectv when dead, 2 = always aim in direction
+    VAR(IDF_PERSIST, spectvthirdperson, 0, 2, 2); // 0 = aim in direction followed player is facing, 1 = aim in direction determined by spectv when dead, 2 = always aim in direction
 
     VAR(IDF_PERSIST, deathcamstyle, 0, 2, 2); // 0 = no follow, 1 = follow attacker, 2 = follow self
     VAR(IDF_PERSIST, deathcamspeed, 0, 500, VAR_MAX);
@@ -1883,10 +1884,10 @@ namespace game
         concatstring(colored, "\fs");
         if(icon)
         {
-            defformatstring(cicon)("\f[%d]\f($priv%stex)", TEAM(d->team, colour), hud::privname(d->privilege, d->aitype));
+            defformatstring(cicon)("\f[%d]\f($priv%stex)", findcolour(d), hud::privname(d->privilege, d->aitype));
             concatstring(colored, cicon);
         }
-        defformatstring(cname)("\f[%d]%s", findcolour(d), name);
+        defformatstring(cname)("\f[%d]%s", TEAM(d->team, colour), name);
         concatstring(colored, cname);
         if(!name[0] || (d->aitype < AI_START && dupname && duplicatename(d, name)))
         {
@@ -2233,12 +2234,20 @@ namespace game
         else return c->pos(amt);
     }
 
+    bool spectvaiming(gameent *d)
+    {
+        bool third = d != player1 ? followthirdperson : thirdperson;
+        int level = third ? spectvthirdperson : spectvfirstperson;
+        if(level >= (d->state == CS_DEAD || d->state == CS_WAITING ? 1 : 2)) return true;
+        return false;
+    }
+
     bool camupdate(cament *c, float amt, bool renew = false, bool force = false)
     {
         float foglevel = float(fog*2/3);
         c->reset();
         if(!force && c->player && !allowspec(c->player, spectvdead)) return false;
-        bool aim = !c->player || spectvaiming >= (c->player->state == CS_DEAD || c->player->state == CS_WAITING ? 1 : 2);
+        bool aim = !c->player || spectvaiming(c->player);
         float yaw = c->player ? c->player->yaw : camera1->yaw, pitch = c->player ? c->player->pitch : camera1->pitch;
         fixrange(yaw, pitch);
         vec from = c->pos(amt), dir(0, 0, 0), trg;
@@ -2407,7 +2416,7 @@ namespace game
                 }
             }
         }
-        bool chase = cam->player && (forced || spectvaiming >= (cam->player->state == CS_DEAD || cam->player->state == CS_WAITING ? 1 : 2));
+        bool chase = cam->player && (forced || spectvaiming(cam->player));
         if(!cam->player || chase)
         {
             float yaw = camera1->yaw, pitch = camera1->pitch;

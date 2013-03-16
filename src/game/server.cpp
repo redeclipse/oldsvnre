@@ -984,10 +984,10 @@ namespace server
         concatstring(colored, "\fs");
         if(icon)
         {
-            defformatstring(cicon)("\f[%d]\f($priv%stex)", TEAM(ci->team, colour), privnamex(ci->privilege, ci->state.aitype));
+            defformatstring(cicon)("\f[%d]\f($priv%stex)", findcolour(ci), privnamex(ci->privilege, ci->state.aitype));
             concatstring(colored, cicon);
         }
-        defformatstring(cname)("\f[%d]%s", findcolour(ci), name);
+        defformatstring(cname)("\f[%d]%s", TEAM(ci->team, colour), name);
         concatstring(colored, cname);
         if(!name[0] || (ci->state.aitype < AI_START && dupname && duplicatename(ci, name)))
         {
