@@ -2966,19 +2966,14 @@ namespace server
         {
             putint(p, N_CLIENTINIT);
             putint(p, ci->clientnum);
-            sendstring(gethostname(ci->clientnum), p);
-            sendstring(ci->name, p);
             putint(p, ci->state.colour);
             putint(p, ci->state.model);
-            sendstring(ci->state.vanity, p);
             putint(p, ci->team);
-            if(ci->privilege > PRIV_NONE)
-            {
-                putint(p, N_CURRENTPRIV);
-                putint(p, ci->clientnum);
-                putint(p, ci->privilege);
-                sendstring(ci->handle, p);
-            }
+            putint(p, ci->privilege);
+            sendstring(ci->name, p);
+            sendstring(gethostname(ci->clientnum), p);
+            sendstring(ci->handle, p);
+            sendstring(ci->state.vanity, p);
         }
     }
 
@@ -4521,7 +4516,12 @@ namespace server
         if(restorescore(ci)) sendresume(ci);
         sendinitclient(ci);
         int amt = numclients();
-        relayf(2, "\fg%s (%s) has joined the game (%d %s)", colourname(ci), gethostname(ci->clientnum), amt, amt != 1 ? "players" : "player");
+        if(ci->privilege > PRIV_NONE)
+        {
+            if(ci->handle[0]) relayf(2, "\fg%s (%s) has joined the game (\fs\fy%s\fS: \fs\fc%s\fS) (%d %s)", colourname(ci), gethostname(ci->clientnum), privname(ci->privilege), ci->handle, amt, amt != 1 ? "players" : "player");
+            else relayf(2, "\fg%s (%s) has joined the game (\fs\fylocal %s\fS) (%d %s)", colourname(ci), gethostname(ci->clientnum), privname(ci->privilege), amt, amt != 1 ? "players" : "player");
+        }
+        else relayf(2, "\fg%s (%s) has joined the game (%d %s)", colourname(ci), gethostname(ci->clientnum), amt, amt != 1 ? "players" : "player");
 
         if(m_demo(gamemode)) setupdemoplayback();
         else if(m_edit(gamemode))

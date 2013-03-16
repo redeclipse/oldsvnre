@@ -65,7 +65,7 @@ namespace auth
             if(quickauthchecks) quickcheck = true;
             return;
         }
-        srvmsgftforce(ci->clientnum, CON_EVENT, "\fyplease wait, requesting credential match..");
+        if(!ci->connectauth) srvmsgftforce(ci->clientnum, CON_EVENT, "\fyplease wait, requesting credential match..");
         requestmasterf("reqauth %u %s\n", ci->authreq, ci->authname);
         lastactivity = totalmillis;
     }
@@ -120,8 +120,8 @@ namespace auth
             if(privilege >= PRIV_ELEVATED)
                 formatstring(msg)("\fy%s is no longer \fs\fc%s\fS", colourname(ci), privname(privilege, true));
         }
-        if(*msg) srvoutforce(ci, -2, "%s", msg);
-        sendf(-1, 1, "ri3s", N_CURRENTPRIV, ci->clientnum, ci->privilege, ci->handle);
+        if(ci->connected && *msg) srvoutforce(ci, -2, "%s", msg);
+        sendf(ci->connected ? -1 : ci->clientnum, 1, "ri3s", N_CURRENTPRIV, ci->clientnum, ci->privilege, ci->handle);
         if(paused)
         {
             int others = 0;
