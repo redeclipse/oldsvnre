@@ -12,7 +12,7 @@ joints {
 }
 
 mesh {
-	// meshes: Cube
+	// meshes: Cylinder
 	
 	shader ""
 
@@ -368,7 +368,7 @@ mesh {
 }
 
 mesh {
-	// meshes: Cylinder
+	// meshes: Cube
 	
 	shader ""
 
