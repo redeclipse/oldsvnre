@@ -1446,6 +1446,7 @@ struct skelmodel : animmodel
             return skel->findtag(name);
         }
 
+        void *animkey() { return skel; }
         int totalframes() const { return max(skel->numframes, 1); }
 
         virtual skelanimspec *loadanim(const char *filename) { return NULL; }
