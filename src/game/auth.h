@@ -88,11 +88,11 @@ namespace auth
         return true;
     }
 
-    void setprivilege(clientinfo *ci, bool val, int flags = 0, bool authed = false, bool local = true)
+    void setprivilege(clientinfo *ci, int val, int flags = 0, bool authed = false, bool local = true)
     {
         int privilege = ci->privilege;
         mkstring(msg);
-        if(val)
+        if(val > 0)
         {
             if(ci->privilege >= flags) return;
             privilege = ci->privilege = flags;
@@ -117,11 +117,14 @@ namespace auth
             int others = 0;
             loopv(clients) if(clients[i]->privilege >= PRIV_MODERATOR || clients[i]->local) others++;
             if(!others) mastermode = MM_OPEN;
-            //if(privilege >= PRIV_ELEVATED)
-            //    formatstring(msg)("\fy%s is no longer \fs\fc%s\fS", colourname(ci), privname(privilege, true));
+            if(!val && privilege >= PRIV_ELEVATED)
+                formatstring(msg)("\fy%s is no longer \fs\fc%s\fS", colourname(ci), privname(privilege, true));
         }
-        if(ci->connected && *msg) srvoutforce(ci, -2, "%s", msg);
-        sendf(ci->connected ? -1 : ci->clientnum, 1, "ri3s", N_CURRENTPRIV, ci->clientnum, ci->privilege, ci->handle);
+        if(val >= 0)
+        {
+            if(ci->connected && *msg) srvoutforce(ci, -2, "%s", msg);
+            sendf(ci->connected ? -1 : ci->clientnum, 1, "ri3s", N_CURRENTPRIV, ci->clientnum, ci->privilege, ci->handle);
+        }
         if(paused)
         {
             int others = 0;
@@ -145,7 +148,7 @@ namespace auth
         {
             if(adminpass[0] && checkpassword(ci, adminpass, pwd))
             {
-                if(G(autoadmin) || G(connectlock)) setprivilege(ci, true, PRIV_ADMINISTRATOR);
+                if(G(autoadmin) || G(connectlock)) setprivilege(ci, 1, PRIV_ADMINISTRATOR);
                 return true;
             }
             if(serverpass[0] && checkpassword(ci, serverpass, pwd)) return true;
@@ -220,7 +223,7 @@ namespace auth
                 local = true;
             }
         }
-        if(n > PRIV_NONE) setprivilege(ci, true, n, true, local);
+        if(n > PRIV_NONE) setprivilege(ci, 1, n, true, local);
         else ci->authname[0] = 0;
         if(ci->connectauth)
         {
