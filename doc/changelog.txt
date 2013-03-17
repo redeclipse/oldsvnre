@@ -38,8 +38,8 @@ Modes & Mutators:
  * Removed ballistic mutator
  * Added kaboom mutator (only grenades and mines with reloading ammo, rockets
    spawn at normal mine & grenade spawns)
- * Added gauntlet mode (one team tries to run a trial map, other team tries to
-   hinder, switches at half-time)
+ * Added gauntlet mode (one team tries to run to the other side of a map, other
+   team tries to hinder, switches at half-time)
  * Time-trial now spawns with weapons for movement tricks, collisions and
    weapons have no effect on opponents
  * Passing the bomber-ball now prioritizes players close to crosshair
