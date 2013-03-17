@@ -138,7 +138,8 @@ namespace bomber
             if(game::focus->lastbuff && hud::shownotices >= 3)
             {
                 pushfont("reduced");
-                if(bomberregenbuff && bomberregenextra) ty += draw_textx("Buffing: \fs\fo%d%%\fS damage, \fs\fg%d%%\fS shield, +\fs\fy%d\fS regen", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, int(bomberbuffdamage*100), int(bomberbuffshield*100), bomberregenextra)*hud::noticescale;
+                if(m_regen(game::gamemode, game::mutators) && bomberregenbuff && bomberregenextra)
+                    ty += draw_textx("Buffing: \fs\fo%d%%\fS damage, \fs\fg%d%%\fS shield, +\fs\fy%d\fS regen", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, int(bomberbuffdamage*100), int(bomberbuffshield*100), bomberregenextra)*hud::noticescale;
                 else ty += draw_textx("Buffing: \fs\fo%d%%\fS damage, \fs\fg%d%%\fS shield", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, int(bomberbuffdamage*100), int(bomberbuffshield*100))*hud::noticescale;
                 popfont();
             }

@@ -133,7 +133,7 @@ gametypes gametype[] = {
             0
         },
         "gauntlet", "gauntlet", { "timed", "hard", "" },
-        "compete for the most laps while the other team attacks", { "compete for the best lap time while the other team attacks", "no checkpoints are available for the attacking team", "" },
+        "attack and defend for the most number laps completed", { "attack and defend for the fastest time completing a lap", "the defending team is permanently buffed", "" },
     },
 };
 mutstypes mutstype[] = {
@@ -286,7 +286,7 @@ extern mutstypes mutstype[];
 #define m_checkpoint(a)     (m_trial(a) || m_gauntlet(a))
 #define m_ghost(a)          (m_trial(a) ? G(trialghost) : (m_gauntlet(a) ? G(gauntletghost) : 0))
 #endif
-#define m_bots(a)           (m_fight(a) && !m_trial(a) && !m_gauntlet(a))
+#define m_bots(a)           (m_fight(a) && !m_trial(a))
 #define m_nopoints(a,b)     (m_duke(a, b) || (m_bomber(a) && m_gsp1(a, b)))
 #define m_teamscore(a)      (m_dm(a))
 #define m_laptime(a,b)      (m_trial(a) || (m_gauntlet(a) && m_gsp1(a, b)))

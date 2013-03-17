@@ -100,6 +100,11 @@ namespace projs
                 if(actor->lastbuff) skew *= bomberbuffdamage;
                 if(target->lastbuff) skew /= bomberbuffshield;
             }
+            else if(m_gauntlet(game::gamemode) && gauntletbuffdelay)
+            {
+                if(actor->lastbuff) skew *= gauntletbuffdamage;
+                if(target->lastbuff) skew /= gauntletbuffshield;
+            }
         }
         if(!(flags&HIT_HEAD))
         {

@@ -266,8 +266,8 @@ namespace hud
 
     VAR(IDF_PERSIST, inventoryvelocity, 0, 0, 2);
     FVAR(IDF_PERSIST, inventoryvelocityblend, 0, 1, 1);
-    VAR(IDF_PERSIST, inventorytrial, 0, 2, 2);
-    FVAR(IDF_PERSIST, inventorytrialblend, 0, 1, 1);
+    VAR(IDF_PERSIST, inventorycheckpoint, 0, 2, 2);
+    FVAR(IDF_PERSIST, inventorycheckpointblend, 0, 1, 1);
     VAR(IDF_PERSIST, inventorystatus, 0, 3, 3); // 0 = off, 1 = text, 2 = icon, 3 = icon + tex
     FVAR(IDF_PERSIST, inventorystatusblend, 0, 1, 1);
     FVAR(IDF_PERSIST, inventorystatusiconblend, 0, 0.5f, 1);
@@ -1425,6 +1425,14 @@ namespace hud
             if(m_capture(game::gamemode)) capture::drawnotices(hudwidth, hudheight, tx, ty, tf/255.f);
             else if(m_defend(game::gamemode)) defend::drawnotices(hudwidth, hudheight, tx, ty, tf/255.f);
             else if(m_bomber(game::gamemode)) bomber::drawnotices(hudwidth, hudheight, tx, ty, tf/255.f);
+            else if(m_gauntlet(game::gamemode) && game::focus->state == CS_ALIVE && game::focus->lastbuff && hud::shownotices >= 3)
+            {
+                pushfont("reduced");
+                if(m_regen(game::gamemode, game::mutators) && gauntletregenbuff && gauntletregenextra)
+                    ty += draw_textx("Buffing: \fs\fo%d%%\fS damage, \fs\fg%d%%\fS shield, +\fs\fy%d\fS regen", tx, ty, 255, 255, 255, tf, TEXT_CENTERED, -1, -1, int(gauntletbuffdamage*100), int(gauntletbuffshield*100), gauntletregenextra)*hud::noticescale;
+                else ty += draw_textx("Buffing: \fs\fo%d%%\fS damage, \fs\fg%d%%\fS shield", tx, ty, 255, 255, 255, tf, TEXT_CENTERED, -1, -1, int(gauntletbuffdamage*100), int(gauntletbuffshield*100))*hud::noticescale;
+                popfont();
+            }
         }
         popfont();
         glPopMatrix();
@@ -2613,12 +2621,12 @@ namespace hud
     int drawtimer(int x, int y, int s, float blend)
     {
         int sy = 0;
-        if(inventorytrial && m_laptime(game::gamemode, game::mutators) && game::focus->state != CS_EDITING && game::focus->state != CS_SPECTATOR)
+        if(inventorycheckpoint && m_checkpoint(game::gamemode) && game::focus->state != CS_EDITING && game::focus->state != CS_SPECTATOR)
         {
-            float fade = blend*inventorytrialblend;
+            float fade = blend*inventorycheckpointblend;
+            pushfont("default");
             if((game::focus->cpmillis || game::focus->cptime) && (game::focus->state == CS_ALIVE || game::focus->state == CS_DEAD || game::focus->state == CS_WAITING))
             {
-                pushfont("emphasis");
                 sy += draw_textx("\falap: \fw%d", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, game::focus->cplaps+1);
                 if(game::focus->cptime)
                     sy += draw_textx("\fy%s", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, timestr(game::focus->cptime));
@@ -2626,9 +2634,9 @@ namespace hud
                     sy += draw_textx("%s", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, timestr(lastmillis-game::focus->cpmillis, 1));
                 else if(game::focus->cplast)
                     sy += draw_textx("\fzwe%s", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, timestr(game::focus->cplast));
-                popfont();
             }
             sy += trialinventory(x, y-sy, s, fade);
+            popfont();
         }
         return sy;
     }

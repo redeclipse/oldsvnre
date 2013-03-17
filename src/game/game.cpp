@@ -751,6 +751,12 @@ namespace game
                 if(m_capture(gamemode)) capture::adddynlights();
                 else if(m_defend(gamemode)) defend::adddynlights();
                 else if(m_bomber(gamemode)) bomber::adddynlights();
+                else if(m_gauntlet(gamemode))
+                {
+                    int numents = entities::lastenttype[CHECKPOINT];
+                    loopi(numents) if(entities::ents[i]->type == CHECKPOINT && (entities::ents[i]->attrs[6] == CP_LAST || entities::ents[i]->attrs[6] == CP_FINISH))
+                        adddynlight(entities::ents[i]->o, float(max(entities::ents[i]->attrs[0], enttype[entities::ents[i]->type].radius)), vec::hexcolor(TEAM(T_ALPHA, colour)), 0, 0, DL_KEEP);
+                }
             }
             gameent *d = NULL;
             int numdyns = numdynents();
