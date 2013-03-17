@@ -460,7 +460,7 @@ namespace hud
                     uilist(g, {
                         uicenterlist(g, uipad(g, 0.25f, g.strut(1)));
                         loopscoregroup(uicenterlist(g, {
-                            uipad(g, 0.25f, uicenterlist(g, g.textf("\f[%d]\f($priv%stex)", 0xFFFFFF, NULL, 0, game::findcolour(o), hud::privtex(o->privilege, o->aitype))));
+                            uipad(g, 0.25f, uicenterlist(g, g.textf("\f[%d]\f($priv%stex)", 0xFFFFFF, NULL, 0, game::findcolour(o), hud::privname(o->privilege, o->aitype))));
                         }));
                     });
 
