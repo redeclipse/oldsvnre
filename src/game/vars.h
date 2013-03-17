@@ -189,8 +189,8 @@ GVAR(0, bleeddamage, 0, 3, VAR_MAX);
 GVAR(0, shocktime, 0, 5500, VAR_MAX);
 GVAR(0, shockdelay, 0, 1000, VAR_MAX);
 GVAR(0, shockdamage, 0, 3, VAR_MAX);
-GFVAR(0, shockstunscale, 0, 0.75f, FVAR_MAX);
-GFVAR(0, shockstunfall, 0, 0.15f, FVAR_MAX);
+GFVAR(0, shockstunscale, 0, 0.5f, FVAR_MAX);
+GFVAR(0, shockstunfall, 0, 0.1f, FVAR_MAX);
 GVAR(0, shockstuntime, 0, 1000, VAR_MAX);
 
 GVAR(0, regendelay, 0, 3000, VAR_MAX); // regen after no damage for this long
