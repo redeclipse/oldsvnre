@@ -245,7 +245,7 @@ namespace defend
             hasteams = false;
             break;
         }
-        if(m_gsp3(game::gamemode, game::mutators))
+        if(m_gsp2(game::gamemode, game::mutators))
         {
             vec average(0, 0, 0);
             int count = 0;
@@ -428,7 +428,7 @@ namespace defend
                 }
                 else walk = 1;
             }
-            return ai::defense(d, b, f.o, !f.enemy || m_gsp3(game::gamemode, game::mutators) ? ai::CLOSEDIST : float(enttype[AFFINITY].radius), !f.enemy || m_gsp3(game::gamemode, game::mutators) ? ai::CLOSEDIST : float(enttype[AFFINITY].radius*walk*8), walk);
+            return ai::defense(d, b, f.o, !f.enemy || m_gsp2(game::gamemode, game::mutators) ? ai::CLOSEDIST : float(enttype[AFFINITY].radius), !f.enemy || m_gsp2(game::gamemode, game::mutators) ? ai::CLOSEDIST : float(enttype[AFFINITY].radius*walk*8), walk);
         }
         return false;
     }
