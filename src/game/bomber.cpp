@@ -289,7 +289,7 @@ namespace bomber
         loopv(st.flags) // flags/bases
         {
             bomberstate::flag &f = st.flags[i];
-            if(!entities::ents.inrange(f.ent) || !f.enabled || (f.owner == game::focus && !game::thirdpersonview(true))) continue;
+            if(!entities::ents.inrange(f.ent) || !f.enabled || (f.owner == game::focus && !game::thirdpersonview(true) && rendernormally)) continue;
             vec above(f.pos(true, true));
             float trans = isbomberaffinity(f) ? 1.f : 0.5f;
             if(!isbomberaffinity(f) || !f.interptime) // || (!f.droptime && !f.owner))
