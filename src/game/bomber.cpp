@@ -331,8 +331,8 @@ namespace bomber
                 }
                 else if(!m_gsp1(game::gamemode, game::mutators))
                 {
-                    part_explosion(above, enttype[AFFINITY].radius*trans, PART_SHOCKWAVE, 1, TEAM(f.team, colour), 1.f, trans*0.25f);
-                    part_explosion(above, enttype[AFFINITY].radius/2*trans, PART_SHOCKBALL, 1, TEAM(f.team, colour), 1.f, trans*0.65f);
+                    part_explosion(above, enttype[AFFINITY].radius*trans, PART_SHOCKWAVE, 1, TEAM(f.team, colour), 1.f, trans*0.125f);
+                    part_explosion(above, enttype[AFFINITY].radius/4*trans, PART_SHOCKBALL, 1, TEAM(f.team, colour), 1.f, trans*0.25f);
                     above.z += enttype[AFFINITY].radius*trans+2.5f;
                     defformatstring(info)("<super>%s base", TEAM(f.team, name));
                     part_textcopy(above, info, PART_TEXT, 1, TEAM(f.team, colour), 2, 1);

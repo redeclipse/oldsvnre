@@ -471,7 +471,7 @@ namespace hud
 
     TVAR(IDF_PERSIST, modedefendtex, "<grey>textures/modes/defend", 3);
     TVAR(IDF_PERSIST, modedefendquicktex, "<grey>textures/modes/defendquick", 3);
-    TVAR(IDF_PERSIST, modedefendconquertex, "<grey>textures/modes/defendconquer", 3);
+    TVAR(IDF_PERSIST, modedefendkingtex, "<grey>textures/modes/defendking", 3);
 
     TVAR(IDF_PERSIST, modebombertex, "<grey>textures/modes/bomber", 3);
     TVAR(IDF_PERSIST, modebomberbaskettex, "<grey>textures/modes/bomberbasket", 3);
@@ -509,7 +509,7 @@ namespace hud
         else if(m_defend(g)) \
         { \
             if(m_gsp1(g, m)) ADDMODE(modedefendquicktex) \
-            else if(m_gsp2(g, m)) ADDMODE(modedefendconquertex) \
+            else if(m_gsp2(g, m)) ADDMODE(modedefendkingtex) \
             else ADDMODE(modedefendtex) \
         } \
         else if(m_bomber(g)) \
@@ -536,7 +536,7 @@ namespace hud
         else if(m_defend(g)) \
         { \
             if(m_gsp1(g, m)) ADDMODE(modedefendquicktex) \
-            else if(m_gsp2(g, m)) ADDMODE(modedefendconquertex) \
+            else if(m_gsp2(g, m)) ADDMODE(modedefendkingtex) \
             else ADDMODE(modedefendtex) \
         } \
         else if(m_bomber(g)) \

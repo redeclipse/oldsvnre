@@ -78,7 +78,7 @@ struct defendservmode : defendstate, servmode
             }
             else if(b.owner)
             {
-                if(!m_gsp3(gamemode, mutators) || b.owners)
+                if(!m_gsp2(gamemode, mutators) || b.owners)
                 {
                     b.securetime += t;
                     int score = b.securetime/G(defendinterval) - (b.securetime-t)/G(defendinterval);
@@ -137,7 +137,8 @@ struct defendservmode : defendstate, servmode
 
     void endcheck()
     {
-        int maxscore = !m_balance(gamemode) && G(defendlimit) ? G(defendlimit) : INT_MAX-1;
+        if(m_balance(gamemode)) return;
+        int maxscore = G(defendlimit) ? G(defendlimit) : INT_MAX-1;
         loopi(numteams(gamemode, mutators))
         {
             int steam = i+T_FIRST;
@@ -146,35 +147,6 @@ struct defendservmode : defendstate, servmode
                 teamscore(steam).total = maxscore;
                 ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fyscore limit has been reached");
                 winner(steam, maxscore);
-                return;
-            }
-        }
-        if(!m_balance(gamemode) && m_gsp2(gamemode, mutators))
-        {
-            int steam = T_NEUTRAL;
-            loopv(flags)
-            {
-                flag &b = flags[i];
-                if(b.owner)
-                {
-                    if(!steam) steam = b.owner;
-                    else if(steam != b.owner)
-                    {
-                        steam = T_NEUTRAL;
-                        break;
-                    }
-                }
-                else
-                {
-                    steam = T_NEUTRAL;
-                    break;
-                }
-            }
-            if(steam)
-            {
-                teamscore(steam).total = INT_MAX;
-                ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fyall flags have been secured");
-                winner(steam, INT_MAX);
                 return;
             }
         }
