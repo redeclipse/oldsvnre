@@ -311,7 +311,6 @@ GFVAR(0, bomberbuffshield, 1, 1.5f, FVAR_MAX); // divide incoming damage by this
 GVAR(0, bomberregenbuff, 0, 1, 1); // 0 = off, 1 = modify regeneration when buffed
 GVAR(0, bomberregendelay, 0, 1000, VAR_MAX); // regen this often when buffed
 GVAR(0, bomberregenextra, 0, 2, VAR_MAX); // add this to regen when buffed
-GVAR(0, bomberbasket, 0, 1, 1); // you can score by throwing the bomb into the goal
 
 GVAR(0, gauntletbuffing, 0, 1, 2); // buffed; 0 = off, 1 = when guarding, 2 = always (always on if gsp2)
 GVAR(0, gauntletbuffdelay, 0, 1000, VAR_MAX); // buffed for this long after leaving

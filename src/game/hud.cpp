@@ -474,8 +474,8 @@ namespace hud
     TVAR(IDF_PERSIST, modedefendkingtex, "<grey>textures/modes/defendking", 3);
 
     TVAR(IDF_PERSIST, modebombertex, "<grey>textures/modes/bomber", 3);
-    TVAR(IDF_PERSIST, modebomberbaskettex, "<grey>textures/modes/bomberbasket", 3);
     TVAR(IDF_PERSIST, modebomberholdtex, "<grey>textures/modes/bomberhold", 3);
+    TVAR(IDF_PERSIST, modebombertouchtex, "<grey>textures/modes/bombertouch", 3);
 
     TVAR(IDF_PERSIST, modemultitex, "<grey>textures/modes/multi", 3);
     TVAR(IDF_PERSIST, modeffatex, "<grey>textures/modes/ffa", 3);
@@ -514,8 +514,8 @@ namespace hud
         } \
         else if(m_bomber(g)) \
         { \
-            if(G(bomberbasket)) ADDMODE(modebomberbaskettex) \
-            else if(m_gsp1(g, m)) ADDMODE(modebomberholdtex) \
+            if(m_gsp1(g, m)) ADDMODE(modebomberholdtex) \
+            else if(m_gsp2(g, m)) ADDMODE(modebombertouchtex) \
             else ADDMODE(modebombertex) \
         } \
         else ADDMODE(modedeathmatchtex) \
@@ -541,8 +541,8 @@ namespace hud
         } \
         else if(m_bomber(g)) \
         { \
-            if(G(bomberbasket)) ADDMODE(modebomberbaskettex) \
-            else if(m_gsp1(g, m)) ADDMODE(modebomberholdtex) \
+            if(m_gsp1(g, m)) ADDMODE(modebomberholdtex) \
+            else if(m_gsp2(g, m)) ADDMODE(modebombertouchtex) \
             else ADDMODE(modebombertex) \
         } \
         else ADDMODE(modedeathmatchtex) \
