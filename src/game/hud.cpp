@@ -306,7 +306,7 @@ namespace hud
     FVAR(IDF_PERSIST, clipoffset, 0, 0.04f, 1000);
     FVAR(IDF_PERSIST, clipminscale, 0, 0.3f, 1000);
     FVAR(IDF_PERSIST, clipmaxscale, 0, 1, 1000);
-    FVAR(IDF_PERSIST, clipblend, 0, 0.65f, 1);
+    FVAR(IDF_PERSIST, clipblend, 0, 0.6f, 1);
     FVAR(IDF_PERSIST, clipcolour, 0, 1, 1);
     VAR(IDF_PERSIST, cliplength, 0, 0, VAR_MAX);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, meleecliptex, "<grey>textures/weapons/clips/melee", 3);
@@ -324,23 +324,23 @@ namespace hud
     FVAR(IDF_PERSIST, pistolclipoffset, 0, 0.1f, 0.5f);
     FVAR(IDF_PERSIST, swordclipoffset, 0, 0.25f, 0.5f);
     FVAR(IDF_PERSIST, shotgunclipoffset, 0, 0.125f, 0.5f);
-    FVAR(IDF_PERSIST, smgclipoffset, 0, 0.375f, 0.5f);
-    FVAR(IDF_PERSIST, flamerclipoffset, 0, 0.3f, 0.5f);
+    FVAR(IDF_PERSIST, smgclipoffset, 0, 0.35f, 0.5f);
+    FVAR(IDF_PERSIST, flamerclipoffset, 0, 0.5f, 0.5f);
     FVAR(IDF_PERSIST, plasmaclipoffset, 0, 0.1f, 0.5f);
     FVAR(IDF_PERSIST, rifleclipoffset, 0, 0.25f, 0.5f);
     FVAR(IDF_PERSIST, grenadeclipoffset, 0, 0, 0.5f);
     FVAR(IDF_PERSIST, mineclipoffset, 0, 0, 0.5f);
     FVAR(IDF_PERSIST, rocketclipoffset, 0, 0, 0.5f);
     FVAR(IDF_PERSIST, meleeclipskew, 0, 0.75f, 10);
-    FVAR(IDF_PERSIST, pistolclipskew, 0, 1, 10);
+    FVAR(IDF_PERSIST, pistolclipskew, 0, 0.75f, 10);
     FVAR(IDF_PERSIST, swordclipskew, 0, 2, 10);
-    FVAR(IDF_PERSIST, shotgunclipskew, 0, 1, 10);
-    FVAR(IDF_PERSIST, smgclipskew, 0, 1, 10);
-    FVAR(IDF_PERSIST, flamerclipskew, 0, 1, 10);
-    FVAR(IDF_PERSIST, plasmaclipskew, 0, 1, 10);
+    FVAR(IDF_PERSIST, shotgunclipskew, 0, 0.8f, 10);
+    FVAR(IDF_PERSIST, smgclipskew, 0, 0.65f, 10);
+    FVAR(IDF_PERSIST, flamerclipskew, 0, 0.65f, 10);
+    FVAR(IDF_PERSIST, plasmaclipskew, 0, 0.65f, 10);
     FVAR(IDF_PERSIST, rifleclipskew, 0, 1, 10);
-    FVAR(IDF_PERSIST, grenadeclipskew, 0, 1, 10);
-    FVAR(IDF_PERSIST, mineclipskew, 0, 1, 10);
+    FVAR(IDF_PERSIST, grenadeclipskew, 0, 1.5f, 10);
+    FVAR(IDF_PERSIST, mineclipskew, 0, 2.f, 10);
     FVAR(IDF_PERSIST, rocketclipskew, 0, 1, 10);
     VAR(IDF_PERSIST, meleecliprotate, 0, 12, 7); // "round-the-clock" rotation of texture, 0 = off, &1 = flip x, &2 = flip y, &4 = angle, &8 = spin
     VAR(IDF_PERSIST, pistolcliprotate, 0, 12, 15);
@@ -350,8 +350,8 @@ namespace hud
     VAR(IDF_PERSIST, flamercliprotate, 0, 12, 15);
     VAR(IDF_PERSIST, plasmacliprotate, 0, 12, 15);
     VAR(IDF_PERSIST, riflecliprotate, 0, 12, 15);
-    VAR(IDF_PERSIST, grenadecliprotate, 0, 1, 15);
-    VAR(IDF_PERSIST, minecliprotate, 0, 1, 15);
+    VAR(IDF_PERSIST, grenadecliprotate, 0, 11, 15);
+    VAR(IDF_PERSIST, minecliprotate, 0, 11, 15);
     VAR(IDF_PERSIST, rocketcliprotate, 0, 12, 15);
 
     VAR(IDF_PERSIST, showradar, 0, 1, 2);
