@@ -2183,7 +2183,7 @@ namespace projs
                 proj.state = CS_DEAD;
                 proj.escaped = true;
             }
-            if(m_bomber(game::gamemode) && G(bomberbasket) && proj.projtype == PRJ_AFFINITY && !proj.beenused && bomber::st.flags.inrange(proj.id))
+            if(m_bomber(game::gamemode) && !m_gsp2(game::gamemode, game::mutators) && proj.projtype == PRJ_AFFINITY && !proj.beenused && bomber::st.flags.inrange(proj.id))
             {
                 gameent *d = bomber::st.flags[proj.id].lastowner;
                 if(d && (d == game::player1 || d->ai))

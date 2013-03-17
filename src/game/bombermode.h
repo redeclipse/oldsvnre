@@ -105,7 +105,7 @@ struct bomberservmode : bomberstate, servmode
 
     void scoreaffinity(clientinfo *ci, int relay, int goal)
     {
-        if(!m_team(gamemode, mutators) || !G(bomberbasket) || !flags.inrange(relay) || !flags.inrange(goal) || flags[relay].lastowner != ci->clientnum || !flags[relay].droptime) return;
+        if(!m_team(gamemode, mutators) || m_gsp2(gamemode, mutators) || !flags.inrange(relay) || !flags.inrange(goal) || flags[relay].lastowner != ci->clientnum || !flags[relay].droptime) return;
         scorebomb(ci, relay, goal);
     }
 
