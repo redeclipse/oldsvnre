@@ -33,7 +33,7 @@ VAR(IDF_PERSIST, flarecutoff, 0, 1000, VAR_MAX);
 VAR(IDF_PERSIST, flaresize, 1, 100, VAR_MAX);
 VAR(IDF_PERSIST, flaresundist, 1, 8192, VAR_MAX);
 VAR(IDF_PERSIST, flareshine, 1, 50, VAR_MAX);
-FVAR(IDF_PERSIST, flareblend, 0, 0.9f, 1);
+FVAR(IDF_PERSIST, flareblend, 0, 0.75f, 1);
 FVAR(IDF_PERSIST, flareadjust, 0, 0.7f, 1);
 
 struct flarerenderer : partrenderer
