@@ -242,7 +242,7 @@ namespace capture
             int pcolour = (int(light->material[0].x)<<16)|(int(light->material[0].y)<<8)|int(light->material[0].z);
             if(!f.owner && !f.droptime)
                 rendermodel(light, "props/flag", ANIM_MAPMODEL|ANIM_LOOP, f.pos(true), entities::ents[f.ent]->attrs[1], entities::ents[f.ent]->attrs[2], 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, 1);
-            else
+            else if(!f.owner || f.owner != game::focus || game::thirdpersonview(true) || !(rendernormally))
             {
                 vec lac(f.pos(true));
                 float yaw = 0, pitch = 0, roll = 0;
