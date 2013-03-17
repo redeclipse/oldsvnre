@@ -756,8 +756,7 @@ namespace server
                 }
                 else loopv(sents) if(sents[i].type == CHECKPOINT && (sents[i].attrs[6] == CP_LAST || sents[i].attrs[6] == CP_FINISH))
                 {
-                    float radius = float(sents[i].attrs[0] ? sents[i].attrs[0] : enttype[sents[i].type].radius)*G(gauntletbuffarea);
-                    if(ci->state.o.dist(sents[i].o) > radius) continue;
+                    if(ci->state.o.dist(sents[i].o) > G(gauntletbuffarea)) continue;
                     if(!ci->state.lastbuff) sendf(-1, 1, "ri4", N_SPHY, ci->clientnum, SPHY_BUFF, 1);
                     ci->state.lastbuff = gamemillis;
                     return;

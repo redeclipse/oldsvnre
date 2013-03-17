@@ -2257,7 +2257,7 @@ namespace entities
             {
                 float radius = float(max(e.attrs[0], enttype[e.type].radius));
                 part_explosion(e.o, radius, PART_SHOCKWAVE, 1, TEAM(T_ALPHA, colour), 1, 0.25f);
-                part_explosion(e.o, radius/2, PART_SHOCKBALL, 1, TEAM(T_ALPHA, colour), 1, 0.75f);
+                part_explosion(e.o, radius/2, PART_SHOCKBALL, 1, TEAM(T_ALPHA, colour), 1, 0.35f);
             }
             else if(e.type != PARTICLES && e.type != TELEPORT && !m_edit(game::gamemode) && enttype[e.type].usetype != EU_ITEM) continue;
             else if(e.o.squaredist(camera1->o) > maxdist) continue;
