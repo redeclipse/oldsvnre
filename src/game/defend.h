@@ -165,10 +165,11 @@ struct defendstate
         return dist;
     }
 
-    bool insideaffinity(const flag &b, const vec &o, float scale = 1.f)
+    bool insideaffinity(const flag &b, const vec &o, float radius = 0)
     {
+        if(radius <= 0) radius = enttype[AFFINITY].radius;
         float dx = (b.o.x-o.x), dy = (b.o.y-o.y), dz = (b.o.z-o.z);
-        return dx*dx + dy*dy <= (enttype[AFFINITY].radius*enttype[AFFINITY].radius)*scale && fabs(dz) <= enttype[AFFINITY].radius*scale;
+        return dx*dx + dy*dy <= radius*radius && fabs(dz) <= radius;
     }
 };
 
