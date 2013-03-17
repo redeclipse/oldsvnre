@@ -71,6 +71,7 @@ Maps:
  * Lab, removed
  * Wet, updated
  * Ghost, updated (retextured, new lighting)
+ * Isolation, removed
 
 Interface & Menus:
  * Overall reduced font sizes
