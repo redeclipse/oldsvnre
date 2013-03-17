@@ -34,7 +34,7 @@ Modes & Mutators:
  * Made duel/survivor enter overtime if a round is in progress when
    intermission is scheduled to start
  * Changed default mutator to arena (classic pickup play available as
-   "classic" mutator)
+   'classic' mutator)
  * Removed ballistic mutator
  * Added kaboom mutator (only grenades and mines with reloading ammo, rockets
    spawn at normal mine & grenade spawns)
@@ -46,6 +46,8 @@ Modes & Mutators:
  * Bomber-ball 'hold' now resets bomb fuse when bomb-carrier kills enemies
  * Bomber-ball and capture-the-flag 'survivor' and 'duel' now has respawn, no
    regenerating health, and resets after score/capture
+ * Capture-the-flag 'return' is now default, old behaviour wher flag returns
+   instantly is now available as 'quick'
 
 Maps:
  * Assigned map music to all maps
