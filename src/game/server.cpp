@@ -4258,7 +4258,7 @@ namespace server
                     loopvk(clients[i]->state.fraglog) if(clients[i]->state.fraglog[k] == ci->clientnum)
                         clients[i]->state.fraglog.remove(k--);
                 }
-                if(ci->privilege) auth::setprivilege(ci, false);
+                if(ci->privilege) auth::setprivilege(ci, -1);
                 if(smode) smode->leavegame(ci, true);
                 mutate(smuts, mut->leavegame(ci, true));
                 ci->state.timeplayed += lastmillis-ci->state.lasttimeplayed;
@@ -5772,7 +5772,7 @@ namespace server
                     if(val != 0)
                     {
                         if(adminpass[0] && (ci->local || (text[0] && checkpassword(ci, adminpass, text))))
-                            auth::setprivilege(ci, true, PRIV_ADMINISTRATOR);
+                            auth::setprivilege(ci, 1, PRIV_ADMINISTRATOR);
                         else if(ci->privilege <= PRIV_PLAYER)
                         {
                             bool fail = false;
@@ -5787,10 +5787,10 @@ namespace server
                                 fail = true;
                                 break;
                             }
-                            if(!fail) auth::setprivilege(ci, true, PRIV_ELEVATED);
+                            if(!fail) auth::setprivilege(ci, 1, PRIV_ELEVATED);
                         }
                     }
-                    else auth::setprivilege(ci, false);
+                    else auth::setprivilege(ci, 0);
                     break; // don't broadcast the password
                 }
 

@@ -39,7 +39,7 @@ namespace hud
     VAR(IDF_PERSIST, scorepoints, 0, 1, 1);
     VAR(IDF_PERSIST, scoretimer, 0, 1, 2);
     VAR(IDF_PERSIST, scorelaps, 0, 1, 2);
-    VAR(IDF_PERSIST, scorefrags, 0, 1, 2);
+    VAR(IDF_PERSIST, scorefrags, 0, 2, 2);
     VAR(IDF_PERSIST, scoreclientnum, 0, 1, 1);
     VAR(IDF_PERSIST, scorebotinfo, 0, 0, 1);
     VAR(IDF_PERSIST, scorespectators, 0, 1, 1);
@@ -430,9 +430,9 @@ namespace hud
                     }
                 });
             }
-            namepad = max((namepad-(text_width("name")-guibound[0]))*0.5f/guibound[0], 0.25f);
-            if(hashandle) handlepad = max((handlepad-guibound[0]*2)*0.5f/guibound[0], 0.25f);
-            if(hashost) hostpad = max((hostpad-guibound[0]*2)*0.5f/guibound[0], 0.25f);
+            namepad = max((namepad-text_width("name"))/float(guibound[0]), 0.25f);
+            if(hashandle) handlepad = max((handlepad-guibound[0])/float(guibound[0]), 0.25f);
+            if(hashost) hostpad = max((hostpad-guibound[0])/float(guibound[0]), 0.25f);
             loopk(numgroups)
             {
                 if((k%2)==0)
@@ -460,7 +460,7 @@ namespace hud
                     uilist(g, {
                         uicenterlist(g, uipad(g, 0.25f, g.strut(1)));
                         loopscoregroup(uicenterlist(g, {
-                            uipad(g, 0.25f, uicenterlist(g, g.text("", 0, hud::privtex(o->privilege, o->aitype), game::findcolour(o))));
+                            uipad(g, 0.25f, uicenterlist(g, g.textf("\f[%d]\f($priv%stex)", 0xFFFFFF, NULL, 0, game::findcolour(o), hud::privtex(o->privilege, o->aitype))));
                         }));
                     });
 
@@ -564,7 +564,7 @@ namespace hud
                             uicenterlist(g, uipad(g, handlepad, g.strut(1)));
                             loopscoregroup({
                                 uicenterlist(g, {
-                                    uipad(g, 0.5f, g.textf("%s", 0xFFFFFF, NULL, 0, o->handle))
+                                    uipad(g, 0.5f, g.textf("%s", 0xFFFFFF, NULL, 0, o->handle[0] ? o->handle : "-"))
                                 });
                             });
                         });
@@ -584,10 +584,10 @@ namespace hud
                             uicenterlist(g, uipad(g, 0.125f, g.strut(1)));
                             loopscoregroup(uicenterlist(g, {
                                 uipad(g, 0.125f, {
-                                    if(o != game::focus && (!m_team(game::gamemode, game::mutators) || o->team != game::focus->team))
+                                    if(!m_team(game::gamemode, game::mutators) || o->team != game::focus->team)
                                     {
-                                        if(o->dominating.find(game::focus) >= 0) g.text("", 0, dominatingtex, TEAM(sg.team, colour));
-                                        else if(o->dominated.find(game::focus) >= 0) g.text("", 0, dominatedtex, TEAM(sg.team, colour));
+                                        if(game::focus->dominating.find(o) >= 0) g.text("", 0, dominatedtex, TEAM(sg.team, colour));
+                                        else if(game::focus->dominated.find(o) >= 0) g.text("", 0, dominatingtex, TEAM(sg.team, colour));
                                         else g.space(1);
                                     }
                                     else g.space(1);
@@ -623,7 +623,7 @@ namespace hud
         if(scorespectators && spectators.length())
         {
             g.space(0.5f);
-            uicenterlist(g, uilist(g, uifont(g, "little", {
+            uicenterlist(g, uicenterlist(g, uifont(g, "little", {
                 int count = numgroups > 1 ? 5 : 3;
                 bool pushed = false;
                 loopv(spectators)
@@ -634,14 +634,14 @@ namespace hud
                         g.pushlist();
                         pushed = true;
                     }
-                    uicenterlist(g, uilist(g, {
+                    uicenterlist(g, uicenterlist(g, uipad(g, 0.25f, {
                         if(o == game::player1 && scorehilight) g.background(scorehilight);
-                        uipad(g, 0.5f, {
+                        uipad(g, 0.25f, {
                             if(scoreclientnum || game::player1->privilege >= PRIV_ELEVATED)
                                 g.textf("%s [%d]", 0xFFFFFF, NULL, 0, game::colourname(o, NULL, true, false), o->clientnum);
                             else g.textf("%s ", 0xFFFFFF, NULL, 0, game::colourname(o));
                         });
-                    }));
+                    })));
                     if(!((i+1)%count) && pushed)
                     {
                         g.poplist();

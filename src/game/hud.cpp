@@ -2620,8 +2620,10 @@ namespace hud
 
     int drawtimer(int x, int y, int s, float blend)
     {
+        if(game::focus->state != CS_EDITING && game::focus->state != CS_SPECTATOR) return 0;
+        if(m_gauntlet(game::gamemode) && game::focus->team != T_ALPHA) return 0;
         int sy = 0;
-        if(inventorycheckpoint && m_checkpoint(game::gamemode) && game::focus->state != CS_EDITING && game::focus->state != CS_SPECTATOR)
+        if(inventorycheckpoint && m_checkpoint(game::gamemode))
         {
             float fade = blend*inventorycheckpointblend;
             pushfont("default");
@@ -2927,7 +2929,7 @@ namespace hud
                 if(totalmillis-lastteam <= teamnoticedelay)
                 {
                     if(m_trial(game::gamemode)) to += draw_textx("Time Trial", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
-                    else if(!m_team(game::gamemode, game::mutators)) to += draw_textx("Free-for-all Deathmatch", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
+                    else if(!m_team(game::gamemode, game::mutators)) to += draw_textx("Free-for-all %s", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, -1, m_bomber(game::gamemode) ? "Bomber-ball" : "Deathmatch");
                     else to += draw_textx("You are on team \fs\f[%d]\f(%s)%s\fS", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, TEAM(game::focus->team, colour), teamtexname(game::focus->team), TEAM(game::focus->team, name));
                 }
             }
