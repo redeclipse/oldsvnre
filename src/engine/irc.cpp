@@ -111,7 +111,7 @@ void ircsend(ircnet *n, const char *msg, ...)
     }
 }
 
-VAR(0, ircfilter, 0, 1, 2);
+VAR(0, ircfilter, 0, 2, 2);
 
 void converttext(char *dst, const char *src)
 {
@@ -148,8 +148,7 @@ void converttext(char *dst, const char *src)
                 case 'v': *dst++ = '\f'; *dst++ = '0'; *dst++ = '6'; break; // violet
                 case 'p': *dst++ = '\f'; *dst++ = '0'; *dst++ = '6'; break; // purple
                 case 'n': *dst++ = '\f'; *dst++ = '0'; *dst++ = '5'; break; // brown
-                case 'd': case 'A': *dst++ = '\f'; *dst++ = '0'; *dst++ = '1'; break; // dark grey
-                case 'u': case 'w': case '7': case 'k': case '8': *dst++ = '\f'; *dst++ = '0'; *dst++ = '0'; break;
+                case 'u': case 'w': case '7': case 'k': case '8': case 'd': case 'A': *dst++ = '\f'; *dst++ = '0'; *dst++ = '1'; break; // dark grey
                 default: colorstack[colorpos] = oldcolor; break;
             }
             continue;
