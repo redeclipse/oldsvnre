@@ -584,7 +584,7 @@ namespace hud
                             uicenterlist(g, uipad(g, 0.125f, g.strut(1)));
                             loopscoregroup(uicenterlist(g, {
                                 uipad(g, 0.125f, {
-                                    if((!m_team(game::gamemode, game::mutators) || o->team != game::focus->team))
+                                    if(o != game::focus && (!m_team(game::gamemode, game::mutators) || o->team != game::focus->team))
                                     {
                                         if(o->dominating.find(game::focus) >= 0) g.text("", 0, dominatingtex, TEAM(sg.team, colour));
                                         else if(o->dominated.find(game::focus) >= 0) g.text("", 0, dominatedtex, TEAM(sg.team, colour));
@@ -623,7 +623,7 @@ namespace hud
         if(scorespectators && spectators.length())
         {
             g.space(0.5f);
-            uicenterlist(g, uifont(g, "little", {
+            uicenterlist(g, uilist(g, uifont(g, "little", {
                 int count = numgroups > 1 ? 5 : 3;
                 bool pushed = false;
                 loopv(spectators)
@@ -634,14 +634,14 @@ namespace hud
                         g.pushlist();
                         pushed = true;
                     }
-                    uicenterlist(g, {
+                    uicenterlist(g, uilist(g, {
                         if(o == game::player1 && scorehilight) g.background(scorehilight);
                         uipad(g, 0.5f, {
                             if(scoreclientnum || game::player1->privilege >= PRIV_ELEVATED)
                                 g.textf("%s [%d]", 0xFFFFFF, NULL, 0, game::colourname(o, NULL, true, false), o->clientnum);
                             else g.textf("%s ", 0xFFFFFF, NULL, 0, game::colourname(o));
                         });
-                    });
+                    }));
                     if(!((i+1)%count) && pushed)
                     {
                         g.poplist();
@@ -649,7 +649,7 @@ namespace hud
                     }
                 }
                 if(pushed) g.poplist();
-            }));
+            })));
         }
         if(m_play(game::gamemode) && game::player1->state != CS_SPECTATOR && (game::intermission || scoresinfo))
         {
@@ -719,17 +719,24 @@ namespace hud
         int sy = 0;
         if(groupplayers())
         {
-            pushfont("reduced");
             scoregroup &sg = *groups[0];
-            if(m_team(game::gamemode, game::mutators))
+            if(m_laptime(game::gamemode, game::mutators))
             {
-                if(sg.total) sy += draw_textx("\fg%s", x, y, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, timestr(sg.total));
+                pushfont("reduced");
+                if(m_team(game::gamemode, game::mutators))
+                {
+                    if(sg.total) sy += draw_textx("best: \fg%s", x, y, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, timestr(sg.total));
+                }
+                else if(!sg.players.empty())
+                {
+                    if(sg.players[0]->cptime) sy += draw_textx("best: \fg%s", x, y, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, timestr(sg.players[0]->cptime));
+                }
+                popfont();
             }
-            else if(!sg.players.empty())
+            else if(m_team(game::gamemode, game::mutators))
             {
-                if(sg.players[0]->cptime) sy += draw_textx("\fg%s", x, y, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, timestr(sg.players[0]->cptime));
+                if(sg.total) sy += draw_textx("best: \fg%d", x, y, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, sg.total);
             }
-            popfont();
         }
         return sy;
     }

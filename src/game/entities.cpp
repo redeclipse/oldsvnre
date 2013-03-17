@@ -2,7 +2,7 @@
 namespace entities
 {
     vector<extentity *> ents;
-    int lastenttype[MAXENTTYPES], lastusetype[EU_MAX], numactors = 0;
+    int lastenttype[MAXENTTYPES], lastusetype[EU_MAX], numactors = 0, numcheckpoints = 0;
 
     VAR(IDF_PERSIST, showlighting, 0, 0, 1);
     VAR(IDF_PERSIST, showentmodels, 0, 1, 2);
@@ -949,9 +949,9 @@ namespace entities
                     while(e.attrs[6] < 0) e.attrs[6] += CP_MAX;
                     while(e.attrs[6] >= CP_MAX) e.attrs[6] -= CP_MAX;
                 }
+                if(create && (e.attrs[6] == CP_LAST || e.attrs[6] == CP_FINISH)) numcheckpoints++;
                 break;
             case ACTOR:
-                if(create) numactors++;
                 while(e.attrs[0] < 0) e.attrs[0] += AI_TOTAL;
                 while(e.attrs[0] >= AI_TOTAL) e.attrs[0] -= AI_TOTAL;
                 while(e.attrs[1] < 0) e.attrs[1] += 360;
@@ -965,6 +965,7 @@ namespace entities
                 if(e.attrs[7] < 0) e.attrs[7] = 0;
                 if(e.attrs[8] < 0) e.attrs[8] = 0;
                 if(e.attrs[9] < 0) e.attrs[9] = 0;
+                if(create) numactors++;
                 break;
             case AFFINITY:
                 while(e.attrs[0] < 0) e.attrs[0] += T_ALL;
@@ -1777,7 +1778,7 @@ namespace entities
 
     void initents(stream *g, int mtype, int mver, char *gid, int gver)
     {
-        numactors = 0;
+        numactors = numcheckpoints = 0;
         ai::oldwaypoints.setsize(0);
         loopv(ents)
         {
@@ -1796,6 +1797,7 @@ namespace entities
             switch(ents[i]->type)
             {
                 case ACTOR: numactors++; break;
+                case CHECKPOINT: if(ents[i]->attrs[6] == CP_LAST || ents[i]->attrs[6] == CP_FINISH) numcheckpoints++; break;
                 default: break;
             }
         }
@@ -1805,7 +1807,8 @@ namespace entities
         {
             loopv(ents) if(ents[i]->type == PLAYERSTART || ents[i]->type == WEAPON)
             {
-                extentity &e = *newent(); ents.add(&e);
+                extentity &e = *newent();
+                ents.add(&e);
                 e.type = ACTOR;
                 e.o = ents[i]->o;
                 e.attrs.add(0, max(5, enttype[ACTOR].numattrs));
@@ -1825,6 +1828,23 @@ namespace entities
                 }
                 numactors++;
             }
+        }
+        if(m_gauntlet(game::gamemode) && !numcheckpoints) loopj(3)
+        {
+            loopv(ents) if(j == 2 || (ents[i]->type == (!j ? AFFINITY : PLAYERSTART) && ents[i]->attrs[0] == T_OMEGA))
+            {
+                extentity &e = *newent();
+                ents.add(&e);
+                e.type = CHECKPOINT;
+                e.o = ents[i]->o;
+                e.attrs.add(0, max(5, enttype[CHECKPOINT].numattrs));
+                e.attrs[0] = enttype[AFFINITY].radius;
+                if(j != 2) e.attrs[1] = ents[i]->attrs[1];
+                e.attrs[6] = CP_FINISH;
+                numcheckpoints++;
+                break;
+            }
+            if(numcheckpoints) break;
         }
         loopv(ents)
         {
@@ -2160,10 +2180,10 @@ namespace entities
                 else if(e.spawned || (e.lastemit > 0 && lastmillis-e.lastemit <= triggertime(e)/2))
                     makeparticle(o, e.attrs);
                 break;
-
             case TELEPORT:
                 if(e.attrs[4]) maketeleport(e);
                 break;
+            default: break;
         }
 
         vec off(0, 0, 2.f), pos(o);
@@ -2229,11 +2249,18 @@ namespace entities
     {
         float maxdist = float(maxparticledistance)*float(maxparticledistance);
         int numents = m_edit(game::gamemode) ? ents.length() : max(lastusetype[EU_ITEM], max(lastenttype[PARTICLES], lastenttype[TELEPORT]));
+        if(m_gauntlet(game::gamemode)) numents = max(numents, lastenttype[CHECKPOINT]);
         loopi(numents)
         {
             gameentity &e = *(gameentity *)ents[i];
-            if(e.type != PARTICLES && e.type != TELEPORT && !m_edit(game::gamemode) && enttype[e.type].usetype != EU_ITEM) continue;
-            if(e.o.squaredist(camera1->o) > maxdist) continue;
+            if(m_gauntlet(game::gamemode) && e.type == CHECKPOINT && (e.attrs[6] == CP_FINISH || e.attrs[6] == CP_LAST))
+            {
+                float radius = float(max(e.attrs[0], enttype[e.type].radius));
+                part_explosion(e.o, radius, PART_SHOCKWAVE, 1, TEAM(T_ALPHA, colour), 1, 0.25f);
+                part_explosion(e.o, radius/2, PART_SHOCKBALL, 1, TEAM(T_ALPHA, colour), 1, 0.75f);
+            }
+            else if(e.type != PARTICLES && e.type != TELEPORT && !m_edit(game::gamemode) && enttype[e.type].usetype != EU_ITEM) continue;
+            else if(e.o.squaredist(camera1->o) > maxdist) continue;
             float skew = 1;
             bool active = false;
             if(e.spawned)

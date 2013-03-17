@@ -192,7 +192,7 @@ enttypes enttype[] = {
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             (1<<ENT_PLAYER)|(1<<ENT_AI),
-            false,  true,   false,      false,      false,
+            false,  true,   false,      true,       false,
                 "checkpoint",   { "radius", "yaw",      "pitch",    "modes",    "muts",     "id",       "type" }
     },
 #ifdef MEK

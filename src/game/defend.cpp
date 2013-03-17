@@ -135,7 +135,8 @@ namespace defend
             if(game::focus->lastbuff && hud::shownotices >= 3)
             {
                 pushfont("reduced");
-                if(defendregenbuff && defendregenextra) ty += draw_textx("Buffing: \fs\fo%d%%\fS damage, \fs\fg%d%%\fS shield, +\fs\fy%d\fS regen", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, int(defendbuffdamage*100), int(defendbuffshield*100), defendregenextra)*hud::noticescale;
+                if(m_regen(game::gamemode, game::mutators) && defendregenbuff && defendregenextra)
+                    ty += draw_textx("Buffing: \fs\fo%d%%\fS damage, \fs\fg%d%%\fS shield, +\fs\fy%d\fS regen", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, int(defendbuffdamage*100), int(defendbuffshield*100), defendregenextra)*hud::noticescale;
                 else ty += draw_textx("Buffing: \fs\fo%d%%\fS damage, \fs\fg%d%%\fS shield", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, int(defendbuffdamage*100), int(defendbuffshield*100))*hud::noticescale;
                 popfont();
             }

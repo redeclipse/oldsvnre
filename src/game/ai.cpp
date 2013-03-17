@@ -25,8 +25,8 @@ namespace ai
 
     void startmap(const char *name, const char *reqname, bool empty)    // called just after a map load
     {
-        ai::savewaypoints();
-        ai::clearwaypoints(true);
+        savewaypoints();
+        clearwaypoints(true);
         showwaypoints = dropwaypoints = 0;
     }
 
@@ -564,6 +564,29 @@ namespace ai
                 if(m_capture(game::gamemode)) capture::aifind(d, b, interests);
                 else if(m_defend(game::gamemode)) defend::aifind(d, b, interests);
                 else if(m_bomber(game::gamemode)) bomber::aifind(d, b, interests);
+                else if(m_gauntlet(game::gamemode))
+                {
+                    int numents = entities::lastenttype[CHECKPOINT];
+                    loopi(numents) if(entities::ents[i]->type == CHECKPOINT && (entities::ents[i]->attrs[6] == CP_LAST || entities::ents[i]->attrs[6] == CP_FINISH))
+                    { // defend the flag
+                        interest &n = interests.add();
+                        if(d->team != T_ALPHA)
+                        {
+                            n.state = AI_S_DEFEND;
+                            n.target = n.node = randomnode(d, b, entities::ents[i]->o, CLOSEDIST, FARDIST);
+                            n.score = entities::ents[i]->o.squaredist(d->feetpos())/100.f;
+                        }
+                        else
+                        {
+                            n.state = AI_S_PURSUE;
+                            n.target = n.node = closestwaypoint(entities::ents[i]->o, CLOSEDIST, true);
+                            n.score = entities::ents[i]->o.squaredist(d->feetpos())/100.f;
+                        }
+                        n.targtype = AI_T_NODE;
+                        n.tolerance = 0.5f;
+                        n.team = true;
+                    }
+                }
             }
 #ifdef CAMPAIGN
             if(m_campaign(game::gamemode) && aicampaign)
@@ -1128,7 +1151,7 @@ namespace ai
             {
                 d->ai->targyaw += 90+rnd(180);
                 d->ai->lastturn = lastmillis;
-                if(m_checkpoint(game::gamemode)) d->ai->dontmove = idle = true;
+                //if(m_checkpoint(game::gamemode)) d->ai->dontmove = idle = true;
             }
             d->ai->targpitch = 0;
             vec dir(d->ai->targyaw, d->ai->targpitch);

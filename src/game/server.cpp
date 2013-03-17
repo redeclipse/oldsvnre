@@ -713,6 +713,64 @@ namespace server
         }
     } spawnmutator;
 
+    struct gauntletservmode : servmode
+    {
+        void spawned(clientinfo *ci)
+        {
+            ci->state.cpmillis = gamemillis;
+            ci->state.cpnodes.shrink(0);
+            sendf(-1, 1, "ri3", N_CHECKPOINT, ci->clientnum, -2);
+        }
+
+        void initclient(clientinfo *ci, packetbuf &p, bool connecting)
+        {
+            loopv(clients)
+            {
+                clientinfo *oi = clients[i];
+                if(!oi || !oi->connected || (ci && oi->clientnum == ci->clientnum) || oi->team != T_OMEGA || !oi->state.lastbuff) continue;
+                putint(p, N_SPHY);
+                putint(p, oi->clientnum);
+                putint(p, SPHY_BUFF);
+                putint(p, 1);
+            }
+        }
+
+        void regen(clientinfo *ci, int &total, int &amt, int &delay)
+        {
+            if(!G(gauntletregenbuff) || ci->team != T_OMEGA || !ci->state.lastbuff) return;
+            if(G(maxhealth)) total = max(m_maxhealth(gamemode, mutators, ci->state.model), total);
+            if(ci->state.lastregen && G(gauntletregendelay)) delay = G(gauntletregendelay);
+            if(G(gauntletregenextra)) amt += G(gauntletregenextra);
+        }
+
+        void checkclient(clientinfo *ci)
+        {
+            if(ci->state.state != CS_ALIVE || m_insta(gamemode, mutators) || ci->team != T_OMEGA) return;
+            if(G(gauntletbuffing))
+            {
+                if(m_gsp2(gamemode, mutators))
+                {
+                    if(!ci->state.lastbuff) sendf(-1, 1, "ri4", N_SPHY, ci->clientnum, SPHY_BUFF, 1);
+                    ci->state.lastbuff = gamemillis;
+                    return;
+                }
+                else loopv(sents) if(sents[i].type == CHECKPOINT && (sents[i].attrs[6] == CP_LAST || sents[i].attrs[6] == CP_FINISH))
+                {
+                    float radius = float(sents[i].attrs[0] ? sents[i].attrs[0] : enttype[sents[i].type].radius)*G(gauntletbuffarea);
+                    if(ci->state.o.dist(sents[i].o) > radius) continue;
+                    if(!ci->state.lastbuff) sendf(-1, 1, "ri4", N_SPHY, ci->clientnum, SPHY_BUFF, 1);
+                    ci->state.lastbuff = gamemillis;
+                    return;
+                }
+            }
+            if(ci->state.lastbuff && (!G(gauntletbuffing) || gamemillis-ci->state.lastbuff > G(gauntletbuffdelay)))
+            {
+                ci->state.lastbuff = 0;
+                sendf(-1, 1, "ri4", N_SPHY, ci->clientnum, SPHY_BUFF, 0);
+            }
+        }
+    } gauntletmode;
+
     SVAR(0, serverpass, "");
     SVAR(0, adminpass, "");
 
@@ -1669,7 +1727,7 @@ namespace server
         if(ci->state.aitype >= AI_START) return ci->state.aientity;
         else
         {
-            if(m_checkpoint(gamemode) && !ci->state.cpnodes.empty() && (!m_gauntlet(gamemode) || !m_gsp2(gamemode, mutators) || ci->team == T_ALPHA))
+            if(m_checkpoint(gamemode) && !m_gauntlet(gamemode) && !ci->state.cpnodes.empty())
             {
                 int checkpoint = ci->state.cpnodes.last();
                 if(sents.inrange(checkpoint)) return checkpoint;
@@ -2491,6 +2549,7 @@ namespace server
         if(m_capture(gamemode)) smode = &capturemode;
         else if(m_defend(gamemode)) smode = &defendmode;
         else if(m_bomber(gamemode)) smode = &bombermode;
+        else if(m_gauntlet(gamemode)) smode = &gauntletmode;
         else smode = NULL;
         smuts.shrink(0);
         smuts.add(&spawnmutator);
@@ -3386,8 +3445,8 @@ namespace server
                     }
                 }
             }
-            if(m_checkpoint(gamemode) && (target->state.cpnodes.length() == 1 || (m_gauntlet(gamemode) && m_gsp2(gamemode, mutators))))
-            {  // reset if hasn't reached another checkpoint yet, or hard gauntlet
+            if(m_checkpoint(gamemode) && (m_gauntlet(gamemode) || target->state.cpnodes.length() == 1))
+            {  // reset if hasn't reached another checkpoint yet
                 target->state.cpmillis = 0;
                 target->state.cpnodes.shrink(0);
                 sendf(-1, 1, "ri3", N_CHECKPOINT, target->clientnum, -1);
@@ -3460,8 +3519,8 @@ namespace server
             mutate(smuts, if(!mut->damage(ci, ci, ci->state.health, -1, flags, material)) { return; });
         }
         ci->state.spree = 0;
-        if(m_checkpoint(gamemode) && (!flags || ci->state.cpnodes.length() == 1 || (m_gauntlet(gamemode) && m_gsp2(gamemode, mutators))))
-        { // reset if suicided, hasn't reached another checkpoint yet, or hard gauntlet
+        if(m_checkpoint(gamemode) && (!flags || m_gauntlet(gamemode) || ci->state.cpnodes.length() == 1))
+        { // reset if suicided, hasn't reached another checkpoint yet
             ci->state.cpmillis = 0;
             ci->state.cpnodes.shrink(0);
             sendf(-1, 1, "ri3", N_CHECKPOINT, ci->clientnum, -1);
@@ -3512,6 +3571,11 @@ namespace server
             {
                 if(actor->state.lastbuff) skew *= G(bomberbuffdamage);
                 if(target->state.lastbuff) skew /= G(bomberbuffshield);
+            }
+            else if(m_gauntlet(gamemode) && G(gauntletbuffdelay))
+            {
+                if(actor->state.lastbuff) skew *= G(gauntletbuffdamage);
+                if(target->state.lastbuff) skew /= G(gauntletbuffshield);
             }
         }
         if(!(flags&HIT_HEAD))
@@ -5026,9 +5090,9 @@ namespace server
                                     if(sents[ent].attrs[6] == CP_FINISH) waiting(cp); // so they start again
                                     break;
                                 }
-                                case CP_RESPAWN: if(m_gauntlet(gamemode) && m_gsp2(gamemode, mutators)) break; // hard gauntlet
-                                case CP_START:
+                                case CP_RESPAWN: case CP_START:
                                 {
+                                    if(m_gauntlet(gamemode) || cp->state.cpnodes.find(ent) >= 0) break;
                                     sendf(-1, 1, "ri4", N_CHECKPOINT, cp->clientnum, ent, -1);
                                     if(!cp->state.cpmillis || sents[ent].attrs[6] != CP_RESPAWN) cp->state.cpmillis = gamemillis;
                                     cp->state.cpnodes.add(ent);

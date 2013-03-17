@@ -2420,7 +2420,7 @@ namespace client
                     }
                     if(ent >= 0)
                     {
-                        if(entities::ents.inrange(ent) && entities::ents[ent]->type == CHECKPOINT)
+                        if(m_trial(game::gamemode) && entities::ents.inrange(ent) && entities::ents[ent]->type == CHECKPOINT)
                         {
                             if(t != game::player1 && !t->ai && (!t->cpmillis || entities::ents[ent]->attrs[6] == CP_START))
                                 t->cpmillis = lastmillis;
@@ -2443,7 +2443,7 @@ namespace client
                     else
                     {
                         t->checkpoint = -1;
-                        t->cpmillis = 0;
+                        t->cpmillis = ent == -2 ? lastmillis : 0;
                     }
                 }
 
