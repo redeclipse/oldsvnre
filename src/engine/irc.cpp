@@ -200,7 +200,8 @@ int ircrecv(ircnet *n)
         buf.data = n->input + n->inputlen;
         buf.dataLength = sizeof(n->input) - n->inputlen;
         int len = enet_socket_receive(n->sock, NULL, &buf, 1);
-        if(len <= 0) return -3;
+        if(!len) break;
+        if(len < 0) return -3;
         loopi(len) switch(n->input[n->inputlen+i])
         {
             case '\x01': n->input[n->inputlen+i] = '\v'; break;
