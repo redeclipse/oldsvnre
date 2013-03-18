@@ -802,7 +802,7 @@ SVAR(0, progresstitle, "");
 SVAR(0, progresstext, "");
 FVAR(0, progressamt, 0, 0, 1);
 FVAR(0, progresspart, 0, 0, 1);
-VAR(IDF_PERSIST, progressdelay, 0, 50, VAR_MAX);
+VAR(IDF_PERSIST, progressdelay, 0, 100, VAR_MAX);
 VAR(IDF_PERSIST, progressupdate, 0, 0, 1);
 int lastprogress = 0;
 
