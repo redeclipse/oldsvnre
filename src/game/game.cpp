@@ -1608,10 +1608,10 @@ namespace game
             if(d->obliterated) amt *= 2;
             loopi(amt) projs::create(pos, pos, true, d, PRJ_GIBS, rnd(gibfade)+gibfade, 0, rnd(500)+1, rnd(50)+10);
         }
-        if(m_team(gamemode, mutators) && d->team == actor->team && d != actor && actor == player1)
+        if(m_team(gamemode, mutators) && d->team == actor->team && d != actor && actor == player1 && isweap(weap) && WF(WK(flags), weap, teampenalty, WS(flags)))
         {
             hud::teamkills.add(totalmillis);
-            if(hud::numteamkills() >= hud::teamkillnum) hud::lastteam = totalmillis;
+            if(hud::numteamkills() >= teamkillwarn) hud::lastteam = totalmillis;
         }
         if(m_bomber(gamemode)) bomber::killed(d, actor);
         ai::killed(d, actor);
@@ -2984,7 +2984,7 @@ namespace game
 
     void renderabovehead(gameent *d, float trans)
     {
-        vec pos = d->abovehead(d->state != CS_DEAD ? 1 : -1);
+        vec pos = d->abovehead(d->state != CS_DEAD ? 2 : -2);
         float blend = aboveheadblend*trans;
         if(aboveheadnames && d != player1)
         {
@@ -2995,13 +2995,13 @@ namespace game
         if(aboveheadstatus)
         {
             Texture *t = NULL;
-            int colour = getcolour(d, playerovertone);
+            int colour = getcolour(d, playerdisplaytone);
             if(d->state == CS_DEAD || d->state == CS_WAITING) t = textureload(hud::deadtex, 3);
             else if(d->state == CS_ALIVE)
             {
                 if(d->conopen) t = textureload(hud::chattex, 3);
-                else if(m_team(gamemode, mutators) && aboveheadteam > (d->team != focus->team ? 1 : 0))
-                    t = textureload(hud::teamtexname(d->team), 3+max(hud::numteamkills()-hud::teamkillnum, 0));
+                else if(m_team(gamemode, mutators) && (hud::numteamkills() >= teamkillwarn || aboveheadteam > (d->team != focus->team ? 1 : 0)))
+                    t = textureload(hud::teamtexname(d->team), 3+min(hud::numteamkills(), 7));
                 else if(!m_team(gamemode, mutators) || d->team != focus->team)
                 {
                     if(d->dominating.find(focus) >= 0) t = textureload(hud::dominatingtex, 3);
