@@ -12,7 +12,8 @@ Gameplay:
 
 Weapons:
  * Weapons no longer reset gravity acceleration (reduces in-air pinning)
- * Plasma primary damage, projectile speed, stun and reload speed increased, clip size halved, projectile size decreased
+ * Plasma primary damage, projectile speed, stun, particle size and reload
+   speed increased, clip size halved
  * Melee now only activates if player is airborne or dashing/sliding, and only
    in a short window of time
  * Mines, new weapon, primary proximity mine, secondary tripwire mine,
