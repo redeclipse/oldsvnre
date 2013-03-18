@@ -681,7 +681,8 @@ namespace hud
         }
         vec c = vec::hexcolor(colour);
         int size = int(s*skew); size += int(size*inventoryglow);
-        if(m_defend(game::gamemode) && score == INT_MAX)
+        if(m_laptime(game::gamemode, game::mutators)) drawitem(icon, x, y+size, s, inventoryscorebg!=0, 0, false, c.r, c.g, c.b, fade, skew, "huge", "%s%s", col, timestr(score));
+        else if(m_defend(game::gamemode) && score == INT_MAX)
             drawitem(icon, x, y+size, s, inventoryscorebg!=0, 0, false, c.r, c.g, c.b, fade, skew, "huge", "%sWIN", col);
         else drawitem(icon, x, y+size, s, inventoryscorebg!=0, 0, false, c.r, c.g, c.b, fade, skew, "huge", "%s%d", col, score);
         drawitemtext(x, y+size, 0, false, skew, "default", fade, "\f[%d]%s", colour, name);
