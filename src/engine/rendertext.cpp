@@ -231,7 +231,7 @@ static void text_color(char c, cvec *stack, int size, int &sp, cvec &color, int 
         case 'O': stack[sp] = color = TVECX(172,  56,   0, alpha); break; // dark orange
         case 'C': stack[sp] = color = TVECX(48,  172, 172, alpha); break; // dark cyan
         case 'A': case 'd': stack[sp] = color = TVECX(102, 102, 102, alpha); break; // dark grey
-        case 'P': stack[sp] = color = TVECX(255, 168, 168, alpha); break; // pink
+        case 'P': stack[sp] = color = TVECX(255, 128, 128, alpha); break; // pink
         case 'e': case 'E': (stack[sp] = color = stack[sp]).alpha(c != 'E' ? a/2 : a/4); break;
         case 'u': case 'Z': stack[sp] = color = TVECX(r, g, b, a); break; // default colour
         case 's': // save

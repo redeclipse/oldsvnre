@@ -547,6 +547,13 @@ namespace client
     }
     ICOMMAND(0, isspectator, "i", (int *cn), intret(isspectator(*cn) ? 1 : 0));
 
+    bool isquarantine(int cn)
+    {
+        gameent *d = game::getclient(cn);
+        return d && d->quarantine;
+    }
+    ICOMMAND(0, isquarantine, "i", (int *cn), intret(isquarantine(*cn) ? 1 : 0));
+
     bool isai(int cn, int type)
     {
         gameent *d = game::getclient(cn);
@@ -753,7 +760,7 @@ namespace client
     void togglespectator(int val, const char *who)
     {
         int i = who[0] ? parseplayer(who) : game::player1->clientnum;
-        if(i>=0) addmsg(N_SPECTATOR, "rii", i, val);
+        if(i >= 0) addmsg(N_SPECTATOR, "rii", i, val);
     }
     ICOMMAND(0, spectator, "is", (int *val, char *who), togglespectator(*val, who));
 
@@ -2317,20 +2324,25 @@ namespace client
                     gameent *s = game::newclient(sn);
                     if(!s) break;
                     if(s == game::player1) game::resetfollow();
-                    if(val)
+                    if(val != 0)
                     {
                         if(s == game::player1 && editmode) toggleedit();
                         s->state = CS_SPECTATOR;
                         s->checkpoint = -1;
                         s->cpmillis = 0;
+                        s->quarantine = val == 2;
                     }
-                    else if(s->state == CS_SPECTATOR)
+                    else
                     {
-                        s->state = CS_WAITING;
-                        s->checkpoint = -1;
-                        s->cpmillis = 0;
-                        if(s != game::player1 && !s->ai) s->resetinterp();
-                        game::waiting.removeobj(s);
+                        if(s->state == CS_SPECTATOR)
+                        {
+                            s->state = CS_WAITING;
+                            s->checkpoint = -1;
+                            s->cpmillis = 0;
+                            if(s != game::player1 && !s->ai) s->resetinterp();
+                            game::waiting.removeobj(s);
+                        }
+                        s->quarantine = false;
                     }
                     break;
                 }

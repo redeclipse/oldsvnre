@@ -489,10 +489,11 @@ struct gamestate
     int lastweap, weapselect, weapload[W_MAX], weapshot[W_MAX], weapstate[W_MAX], weapwait[W_MAX], weaplast[W_MAX];
     int lastdeath, lastspawn, lastrespawn, lastpain, lastregen, lastbuff, lastres[WR_MAX], lastrestime[WR_MAX];
     int aitype, aientity, ownernum, skill, points, frags, deaths, cpmillis, cptime, cplaps;
+    bool quarantine;
     string vanity;
     vector<int> loadweap;
     gamestate() : colour(0), model(0), weapselect(W_MELEE), lastdeath(0), lastspawn(0), lastrespawn(0), lastpain(0), lastregen(0), lastbuff(0),
-        aitype(AI_NONE), aientity(-1), ownernum(-1), skill(0), points(0), frags(0), deaths(0), cpmillis(0), cptime(0), cplaps(0)
+        aitype(AI_NONE), aientity(-1), ownernum(-1), skill(0), points(0), frags(0), deaths(0), cpmillis(0), cptime(0), cplaps(0), quarantine(false)
     {
         setvanity();
         loadweap.shrink(0);
