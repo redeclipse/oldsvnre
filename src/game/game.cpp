@@ -166,18 +166,18 @@ namespace game
     VAR(IDF_PERSIST, aboveheaddamage, 0, 0, 1);
     VAR(IDF_PERSIST, aboveheadicons, 0, 5, 7);
     FVAR(IDF_PERSIST, aboveheadblend, 0.f, 1, 1.f);
-    FVAR(IDF_PERSIST, aboveheadnamesize, 0, 2, 1000);
-    FVAR(IDF_PERSIST, aboveheadstatussize, 0, 2, 1000);
-    FVAR(IDF_PERSIST, aboveheadiconsize, 0, 3.f, 1000);
-    FVAR(IDF_PERSIST, aboveheadeventsize, 0, 3.f, 1000);
-    FVAR(IDF_PERSIST, aboveitemiconsize, 0, 2.5f, 1000);
+    FVAR(IDF_PERSIST, aboveheadnamesize, 0, 2.5f, 1000);
+    FVAR(IDF_PERSIST, aboveheadstatussize, 0, 2.5f, 1000);
+    FVAR(IDF_PERSIST, aboveheadiconsize, 0, 2.5f, 1000);
+    FVAR(IDF_PERSIST, aboveheadeventsize, 0, 2.5f, 1000);
+    FVAR(IDF_PERSIST, aboveitemiconsize, 0, 2.25f, 1000);
 
-    FVAR(IDF_PERSIST, aboveheadsmooth, 0, 0.5f, 1);
-    VAR(IDF_PERSIST, aboveheadsmoothmillis, 1, 200, 10000);
+    FVAR(IDF_PERSIST, aboveheadsmooth, 0, 0.25f, 1);
+    VAR(IDF_PERSIST, aboveheadsmoothmillis, 1, 100, 10000);
 
-    VAR(IDF_PERSIST, eventiconfade, 500, 5000, VAR_MAX);
-    VAR(IDF_PERSIST, eventiconshort, 500, 3000, VAR_MAX);
-    VAR(IDF_PERSIST, eventiconcrit, 500, 2000, VAR_MAX);
+    VAR(IDF_PERSIST, eventiconfade, 500, 7000, VAR_MAX);
+    VAR(IDF_PERSIST, eventiconshort, 500, 3500, VAR_MAX);
+    VAR(IDF_PERSIST, eventiconcrit, 500, 1000, VAR_MAX);
 
     VAR(IDF_PERSIST, showobituaries, 0, 4, 5); // 0 = off, 1 = only me, 2 = 1 + announcements, 3 = 2 + but dying bots, 4 = 3 + but bot vs bot, 5 = all
     VAR(IDF_PERSIST, showobitdists, 0, 1, 1);
@@ -204,11 +204,11 @@ namespace game
     VAR(IDF_PERSIST, bloodsize, 1, 50, 1000);
     VAR(IDF_PERSIST, bloodsparks, 0, 0, 1);
     FVAR(IDF_PERSIST, debrisscale, 0, 1, 1000);
-    VAR(IDF_PERSIST, debrisfade, 1, 5000, VAR_MAX);
+    VAR(IDF_PERSIST, debrisfade, 1, 3500, VAR_MAX);
     FVAR(IDF_PERSIST, gibscale, 0, 1, 1000);
     VAR(IDF_PERSIST, gibfade, 1, 5000, VAR_MAX);
     FVAR(IDF_PERSIST, impulsescale, 0, 1, 1000);
-    VAR(IDF_PERSIST, impulsefade, 0, 200, VAR_MAX);
+    VAR(IDF_PERSIST, impulsefade, 0, 350, VAR_MAX);
     VAR(IDF_PERSIST, ragdolleffect, 2, 500, VAR_MAX);
 
     VAR(IDF_PERSIST, playerovertone, -1, CTONE_TEAM, CTONE_MAX-1);
@@ -216,6 +216,7 @@ namespace game
     VAR(IDF_PERSIST, playerdisplaytone, -1, CTONE_TONE, CTONE_MAX-1);
     VAR(IDF_PERSIST, playereffecttone, -1, CTONE_TEAM, CTONE_MAX-1);
     VAR(IDF_PERSIST, playerlighttone, -1, CTONE_TEAM, CTONE_MAX-1);
+    VAR(IDF_PERSIST, playerteamtone, -1, CTONE_TEAM, CTONE_MAX-1);
     FVAR(IDF_PERSIST, playerlightmix, 0, 0.75f, 100);
     FVAR(IDF_PERSIST, playertonemix, 0, 0.25f, 1);
     FVAR(IDF_PERSIST, playerblend, 0, 1, 1);
@@ -835,23 +836,22 @@ namespace game
 
     void boosteffect(gameent *d, const vec &pos, int num, int len, bool shape = false)
     {
-        float scale = 0.75f+(rnd(25)/100.f);
-        part_create(PART_HINT, shape ? 10 : 1, pos, 0x1818A8, scale, min(0.75f*scale, 0.95f), 0, 0);
-        part_create(PART_FIREBALL, shape ? 10 : 1, pos, 0xFF6818, scale*0.75f, min(0.75f*scale, 0.95f), 0, 0);
-        if(shape) regularshape(PART_FIREBALL, int(d->radius)*2, pulsecols[PULSE_FIRE][rnd(PULSECOLOURS)], 21, num, len, pos, scale, 0.75f, -5, 0, 10);
-        else regular_part_create(PART_FIREBALL, len, pos, pulsecols[PULSE_FIRE][rnd(PULSECOLOURS)], 0.6f*scale, min(0.75f*scale, 0.95f), -10, 0);
+        float scale = 0.6f+(rnd(40)/100.f);
+        part_create(PART_HINT, shape ? len/2 : 1, pos, 0x1818A8, scale*1.5f, min(0.75f*scale, 0.95f), 0, 0);
+        part_create(PART_FIREBALL, shape ? len/2 : 1, pos, pulsecols[PULSE_FIRE][rnd(PULSECOLOURS)], scale*1.25f, min(0.75f*scale, 0.95f), 0, 0);
+        if(shape) loopi(num) regularshape(PART_FIREBALL, int(d->radius)*2, pulsecols[PULSE_FIRE][rnd(PULSECOLOURS)], 21, 1, len, pos, scale*1.25f, 0.75f, -5, 0, 10);
     }
 
     void impulseeffect(gameent *d, int effect)
     {
         if(!gameent::is(d)) return;
-        int num = int((effect ? 5 : 25)*impulsescale), len = effect ? impulsefade/5 : impulsefade;
+        int num = int((effect ? 5 : 20)*impulsescale);
         switch(effect)
         {
             case 0: playsound(S_IMPULSE, d->o, d); // fail through
             case 1:
             {
-                if(num > 0 && len > 0) loopi(2) boosteffect(d, d->jet[i], num, len, effect==0);
+                if(num > 0 && impulsefade > 0) loopi(2) boosteffect(d, d->jet[i], num, impulsefade, effect==0);
                 break;
             }
             case 2:
@@ -862,7 +862,7 @@ namespace game
                     sounds[d->jschan].ends = lastmillis+250;
                 }
                 else playsound(S_JET, d->o, d, SND_LOOP, 1, -1, -1, &d->jschan, lastmillis+250);
-                if(num > 0 && len > 0) boosteffect(d, d->jet[2], num, len);
+                if(num > 0 && impulsefade > 0) boosteffect(d, d->jet[2], num, impulsefade);
             }
         }
     }
@@ -3002,13 +3002,13 @@ namespace game
         if(aboveheadstatus)
         {
             Texture *t = NULL;
-            int colour = getcolour(d, playerdisplaytone);
+            int colour = getcolour(d, playerteamtone);
             if(d->state == CS_DEAD || d->state == CS_WAITING) t = textureload(hud::deadtex, 3);
             else if(d->state == CS_ALIVE)
             {
                 if(d->conopen) t = textureload(hud::chattex, 3);
                 else if(m_team(gamemode, mutators) && (hud::numteamkills() >= teamkillwarn || aboveheadteam > (d->team != focus->team ? 1 : 0)))
-                    t = textureload(hud::teamtexname(d->team), 3+min(hud::numteamkills(), 7));
+                    t = textureload(hud::teamtexname(d->team), 3);
                 else if(!m_team(gamemode, mutators) || d->team != focus->team)
                 {
                     if(d->dominating.find(focus) >= 0) t = textureload(hud::dominatingtex, 3);

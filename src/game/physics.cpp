@@ -7,8 +7,8 @@ namespace physics
     FVAR(IDF_WORLD, wallz, 0, 0.2f, 1);
     FVAR(IDF_WORLD, stepspeed, 1e-4f, 1.f, 1000);
 
-    FVAR(IDF_PERSIST, floatspeed, 1e-4f, 200, 1000);
-    FVAR(IDF_PERSIST, floatcoast, 0, 3.f, 1000);
+    FVAR(IDF_PERSIST, floatspeed, FVAR_NONZERO, 200, FVAR_MAX);
+    FVAR(IDF_PERSIST, floatcoast, 0, 3.f, FVAR_MAX);
 
     VAR(IDF_PERSIST, physframetime, 5, 5, 20);
     VAR(IDF_PERSIST, physinterp, 0, 1, 1);
