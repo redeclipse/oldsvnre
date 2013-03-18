@@ -304,6 +304,13 @@ namespace game
     }
     ICOMMAND(0, getvanity, "bb", (int *t, int *v), vanityinfo(*t, *v));
 
+    int vanityfind(const char *name)
+    {
+        loopv(vanities) if(!strcmp(vanities[i].ref, name)) return i;
+        return -1;
+    }
+    ICOMMAND(0, findvanity, "s", (char *s), intret(vanityfind(s)));
+
     void vanitybuild(gameent *d)
     {
         vector<char *> vanitylist;
