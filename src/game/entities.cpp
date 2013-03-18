@@ -873,6 +873,9 @@ namespace entities
             case LIGHT:
             {
                 if(e.attrs[0] < 0) e.attrs[0] = 0;
+                if(e.attrs[1] < 0) e.attrs[1] = 0;
+                if(e.attrs[2] < 0) e.attrs[2] = 0;
+                if(e.attrs[3] < 0) e.attrs[3] = 0;
                 if(e.attrs[4] < 0) e.attrs[4] = 3;
                 if(e.attrs[4] > 3) e.attrs[4] = 0;
                 break;
