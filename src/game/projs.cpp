@@ -138,6 +138,7 @@ namespace projs
 
     void hitpush(gameent *d, projent &proj, int flags = 0, float radial = 0, float dist = 0, float scale = 1)
     {
+        if(dist < 0) dist = 0.f;
         vec dir, middle = d->center();
         dir = vec(middle).sub(proj.o);
         float dmag = dir.magnitude();
