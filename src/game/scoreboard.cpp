@@ -294,6 +294,13 @@ namespace hud
                             uifont(g, "little", g.textf("\fd(\fa%s:[%d]\fd)", 0xFFFFFF, NULL, 0, connectname, connectport));
                         });
                     }
+                    if(game::player1->quarantine)
+                    {
+                        uicenterlist(g, {
+                            uifont(g, "default", g.textf("You are \fzoyQUARANTINED", 0xFFFFFF, NULL, 0));
+                            uifont(g, "reduced", g.textf("Please await instructions from a moderator", 0xFFFFFF, NULL, 0));
+                        });
+                    }
                     if(client::demoplayback)
                     {
                         uicenterlist(g, {

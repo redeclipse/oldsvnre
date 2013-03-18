@@ -1223,10 +1223,18 @@ namespace hud
             popfont();
         }
 
-        if(game::player1->state == CS_SPECTATOR)
+        if(game::player1->quarantine)
+        {
+            pushfont("emphasis");
+            ty += draw_textx("You are \fzoyQUARANTINED", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw);
+            popfont();
+            ty += draw_textx("Please await instructions from a moderator", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw);
+        }
+        else if(game::player1->state == CS_SPECTATOR)
             ty += draw_textx("[ %s ]", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, showname() ? game::colourname(game::focus) : (game::tvmode() ? "SpecTV" : "Spectating"));
         else if(game::player1->state == CS_WAITING && showname())
             ty += draw_textx("[ %s ]", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, game::colourname(game::focus));
+
 
         if(game::intermission)
             ty += draw_textx("Intermission", tx, ty, 255, 255, 255, tf, TEXT_CENTERED, -1, tw);

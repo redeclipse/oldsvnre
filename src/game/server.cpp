@@ -2447,11 +2447,12 @@ namespace server
 
     #include "auth.h"
 
-    void spectator(clientinfo *ci, int sender = -1)
+    void spectator(clientinfo *ci, bool quarantine = false, int sender = -1)
     {
         if(!ci || ci->state.aitype > AI_NONE) return;
         ci->state.state = CS_SPECTATOR;
-        sendf(sender, 1, "ri3", N_SPECTATOR, ci->clientnum, 1);
+        ci->state.quarantine = quarantine;
+        sendf(sender, 1, "ri3", N_SPECTATOR, ci->clientnum, quarantine ? 2 : 1);
         setteam(ci, T_NEUTRAL, TT_SMINFO);
     }
 
@@ -2472,6 +2473,7 @@ namespace server
             case ALST_FIRST: if(ci->state.state == CS_SPECTATOR || gamemode >= G_EDITMODE) return false; // first spawn, falls through
             case ALST_TRY: // try spawn
             {
+                if(ci->state.quarantine) return false;
                 uint ip = getclientip(ci->clientnum);
                 if(ci->state.aitype == AI_NONE && mastermode >= MM_LOCKED && ci->state.state == CS_SPECTATOR && ip && !checkipinfo(control, ipinfo::ALLOW, ip))
                     return false;
@@ -2482,17 +2484,18 @@ namespace server
             }
             case ALST_SPAWN: // spawn
             {
+                if(ci->state.quarantine) return false;
                 if(ci->state.state != CS_DEAD && ci->state.state != CS_WAITING) return false;
                 if(ci->state.lastdeath && gamemillis-ci->state.lastdeath <= DEATHMILLIS) return false;
                 //if(crclocked(ci)) return false;
                 break;
             }
             case ALST_SPEC: return ci->state.aitype == AI_NONE; // spec
-            case ALST_WALK: if(ci->state.state != CS_EDITING) return false;
+            case ALST_WALK: if(ci->state.quarantine || ci->state.state != CS_EDITING) return false;
             case ALST_EDIT: // edit on/off
             {
                 uint ip = getclientip(ci->clientnum);
-                if(ci->state.aitype != AI_NONE || !m_edit(gamemode) || (mastermode >= MM_LOCKED && ci->state.state == CS_SPECTATOR && ip && !checkipinfo(control, ipinfo::ALLOW, ip))) return false;
+                if(ci->state.quarantine || ci->state.aitype != AI_NONE || !m_edit(gamemode) || (mastermode >= MM_LOCKED && ci->state.state == CS_SPECTATOR && ip && !checkipinfo(control, ipinfo::ALLOW, ip))) return false;
                 break;
             }
             default: break;
@@ -3159,8 +3162,8 @@ namespace server
             ci->team = T_NEUTRAL;
             putint(p, N_SPECTATOR);
             putint(p, ci->clientnum);
-            putint(p, 1);
-            sendf(-1, 1, "ri3x", N_SPECTATOR, ci->clientnum, 1, ci->clientnum);
+            putint(p, ci->state.quarantine ? 2 : 1);
+            sendf(-1, 1, "ri3x", N_SPECTATOR, ci->clientnum, ci->state.quarantine ? 2 : 1, ci->clientnum);
             putint(p, N_SETTEAM);
             putint(p, ci->clientnum);
             putint(p, ci->team);
@@ -4062,7 +4065,7 @@ namespace server
         }
     }
 
-    bool spectate(clientinfo *ci, bool val)
+    bool spectate(clientinfo *ci, bool val, bool quarantine = false)
     {
         if(ci->state.state != CS_SPECTATOR && val)
         {
@@ -4074,10 +4077,11 @@ namespace server
             }
             if(smode) smode->leavegame(ci);
             mutate(smuts, mut->leavegame(ci));
-            sendf(-1, 1, "ri3", N_SPECTATOR, ci->clientnum, val);
+            sendf(-1, 1, "ri3", N_SPECTATOR, ci->clientnum, quarantine ? 2 : 1);
             ci->state.cpnodes.shrink(0);
             ci->state.cpmillis = 0;
             ci->state.state = CS_SPECTATOR;
+            ci->state.quarantine = quarantine;
             ci->state.timeplayed += lastmillis-ci->state.lasttimeplayed;
             setteam(ci, T_NEUTRAL, TT_SMINFO);
             aiman::dorefresh = max(aiman::dorefresh, G(airefreshdelay));
@@ -5550,14 +5554,14 @@ namespace server
                                     c.mask = 0xFFFFFFFF; \
                                     c.type = value; \
                                     c.time = totalmillis ? totalmillis : 1; \
-                                    if(text[0]) srvoutf(-3, "%s added \fs\fc" #y "\fS on %s (%s): %s", name, colourname(cp), gethostname(cp->clientnum), text); \
-                                    else srvoutf(-3, "%s added \fs\fc" #y "\fS on %s", name, colourname(cp)); \
+                                    if(text[0]) srvoutf(-3, "\fP%s added \fs\fc" #y "\fS on %s (%s): %s", name, colourname(cp), gethostname(cp->clientnum), text); \
+                                    else srvoutf(-3, "\fP%s added \fs\fc" #y "\fS on %s", name, colourname(cp)); \
                                     if(value == ipinfo::BAN) updatecontrols = true; \
                                 } \
                                 else \
                                 { \
-                                    if(text[0]) srvoutf(-3, "%s \fs\fckicked\fS %s: %s", name, colourname(cp), text); \
-                                    else srvoutf(-3, "%s \fs\fckicked\fS %s", name, colourname(cp)); \
+                                    if(text[0]) srvoutf(-3, "\fP%s \fs\fckicked\fS %s: %s", name, colourname(cp), text); \
+                                    else srvoutf(-3, "\fP%s \fs\fckicked\fS %s", name, colourname(cp)); \
                                     cp->kicked = updatecontrols = true; \
                                 } \
                             } \
@@ -5583,7 +5587,12 @@ namespace server
                     if(!cp || cp->state.aitype > AI_NONE || (val ? cp->state.state == CS_SPECTATOR : cp->state.state != CS_SPECTATOR)) break;
                     if((sn != sender || !allowstate(cp, val ? ALST_SPEC : ALST_TRY)) && !haspriv(ci, G(speclock), sn != sender ? "control other players" : (val ? "enter spectator" : "exit spectator")))
                         break;
-                    spectate(cp, val);
+                    spectate(cp, val!=0, val==2);
+                    if(val==2 && cp->state.quarantine)
+                    {
+                        defformatstring(name)("%s", colourname(ci));
+                        srvoutf(-3, "\fP%s \fs\fcquarantined\fS %s", name, colourname(cp));
+                    }
                     break;
                 }
 

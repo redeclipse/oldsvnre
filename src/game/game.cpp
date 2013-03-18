@@ -1420,7 +1420,7 @@ namespace game
             }
             else if(m_team(gamemode, mutators) && d->team == actor->team)
             {
-                concatstring(d->obit, " \fs\fzPwteam-mate\fS ");
+                concatstring(d->obit, " \fs\fzawteam-mate\fS ");
                 concatstring(d->obit, colourname(actor));
                 if(actor == focus) { anc = S_ALARM; override = true; }
             }
@@ -1455,7 +1455,7 @@ namespace game
 
                 if(style&FRAG_BREAKER)
                 {
-                    concatstring(d->obit, " \fs\fzywspree-breaking\fS");
+                    concatstring(d->obit, " \fs\fzPwspree-breaking\fS");
                     actor->addicon(eventicon::BREAKER, lastmillis, eventiconfade);
                     if(!override && allowanc) anc = S_V_BREAKER;
                 }
@@ -1491,7 +1491,7 @@ namespace game
             {
                 if(style&FRAG_FIRSTBLOOD)
                 {
-                    concatstring(d->obit, " for \fs\fzwrfirst blood\fS");
+                    concatstring(d->obit, " for \fs\fzrwfirst blood\fS");
                     actor->addicon(eventicon::FIRSTBLOOD, lastmillis, eventiconfade, 0);
                     if(!override && allowanc)
                     {
@@ -1502,7 +1502,7 @@ namespace game
 
                 if(style&FRAG_SPREE1)
                 {
-                    concatstring(d->obit, " in total \fs\fzcwcarnage\fS");
+                    concatstring(d->obit, " in total \fs\fzYwcarnage\fS");
                     actor->addicon(eventicon::SPREE, lastmillis, eventiconfade, 0);
                     if(!override && allowanc)
                     {
@@ -1512,7 +1512,7 @@ namespace game
                 }
                 else if(style&FRAG_SPREE2)
                 {
-                    concatstring(d->obit, " on a \fs\fzcwslaughter\fS");
+                    concatstring(d->obit, " on a \fs\fzYwslaughter\fS");
                     actor->addicon(eventicon::SPREE, lastmillis, eventiconfade, 1);
                     if(!override && allowanc)
                     {
@@ -1522,7 +1522,7 @@ namespace game
                 }
                 else if(style&FRAG_SPREE3)
                 {
-                    concatstring(d->obit, " on a \fs\fzcwmassacre\fS");
+                    concatstring(d->obit, " on a \fs\fzYwmassacre\fS");
                     actor->addicon(eventicon::SPREE, lastmillis, eventiconfade, 2);
                     if(!override && allowanc)
                     {
@@ -1532,7 +1532,7 @@ namespace game
                 }
                 else if(style&FRAG_SPREE4)
                 {
-                    concatstring(d->obit, " in a \fs\fzcwbloodbath\fS");
+                    concatstring(d->obit, " in a \fs\fzYPbloodbath\fS");
                     actor->addicon(eventicon::SPREE, lastmillis, eventiconfade, 3);
                     if(!override && allowanc)
                     {
@@ -1540,7 +1540,6 @@ namespace game
                         override = true;
                     }
                 }
-                if(flags&HIT_CRIT) concatstring(d->obit, " with a \fs\fzywcritical\fS hit");
             }
         }
         if(!log.empty())
