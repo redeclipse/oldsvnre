@@ -3560,7 +3560,7 @@ namespace server
 
         float skew = clamp(scale, 0.f, 1.f)*G(damagescale);
         if(radial > 0) skew *= clamp(1.f-dist/size, 1e-6f, 1.f);
-        else if(WF(WK(flags), weap, taperin, WS(flags)) > 0 || WF(WK(flags), weap, taperout, WS(flags)) > 0) skew *= clamp(dist, 0.f, 1.f);
+        else if(WF(WK(flags), weap, taper, WS(flags))) skew *= clamp(dist, 0.f, 1.f);
         if(!m_insta(gamemode, mutators))
         {
             if(m_capture(gamemode) && G(capturebuffdelay))
@@ -3682,7 +3682,7 @@ namespace server
                 else
                 {
                     int hflags = flags|h.flags;
-                    float skew = float(scale)/DNF, rad = clamp(float(radial)/DNF, 0.f, WX(WK(flags), weap, explode, WS(flags), gamemode, mutators, skew)),
+                    float skew = float(scale)/DNF, rad = radial > 0 ? clamp(radial/DNF, 0.f, WX(WK(flags), weap, explode, WS(flags), gamemode, mutators, skew)) : 0.f,
                           size = rad > 0 ? (hflags&HIT_WAVE ? rad*WF(WK(flags), weap, wavepush, WS(flags)) : rad) : 0.f, dist = float(h.dist)/DNF;
                     if(target->state.state == CS_ALIVE && !target->state.protect(gamemillis, m_protect(gamemode, mutators)))
                     {
@@ -5013,7 +5013,7 @@ namespace server
                         hit.flags = getint(p);
                         hit.proj = getint(p);
                         hit.target = getint(p);
-                        hit.dist = getint(p);
+                        hit.dist = max(getint(p), 0);
                         loopk(3) hit.dir[k] = getint(p);
                     }
                     if(havecn) cp->events.add(ev);
