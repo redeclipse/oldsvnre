@@ -4097,7 +4097,7 @@ namespace server
             ci->state.cpmillis = 0;
             ci->state.state = CS_DEAD;
             ci->state.lasttimeplayed = lastmillis;
-            ci->state.quarantine = quarantine;
+            ci->state.quarantine = false;
             waiting(ci, DROP_RESET);
             if(smode) smode->entergame(ci);
             mutate(smuts, mut->entergame(ci));
