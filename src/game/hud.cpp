@@ -2626,7 +2626,7 @@ namespace hud
 
     int drawtimer(int x, int y, int s, float blend)
     {
-        if(game::focus->state != CS_EDITING && game::focus->state != CS_SPECTATOR) return 0;
+        if(game::focus->state == CS_EDITING || game::focus->state == CS_SPECTATOR) return 0;
         if(m_gauntlet(game::gamemode) && game::focus->team != T_ALPHA) return 0;
         int sy = 0;
         if(inventorycheckpoint && m_checkpoint(game::gamemode))
