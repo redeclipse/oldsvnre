@@ -235,6 +235,7 @@ namespace server
         int points, score, frags, spree, crits, rewards, timeplayed, deaths, shotdamage, damage;
         int warnings[WARN_MAX][2];
         vector<teamkill> teamkills;
+        bool quarantine;
 
         void save(servstate &gs)
         {
@@ -250,6 +251,7 @@ namespace server
             shotdamage = gs.shotdamage;
             damage = gs.damage;
             loopi(WARN_MAX) loopj(2) warnings[i][j] = gs.warnings[i][j];
+            quarantine = gs.quarantine;
         }
 
         void restore(servstate &gs)
@@ -266,6 +268,7 @@ namespace server
             gs.shotdamage = shotdamage;
             gs.damage = damage;
             loopi(WARN_MAX) loopj(2) gs.warnings[i][j] = warnings[i][j];
+            gs.quarantine = quarantine;
         }
 
         void mapchange()
