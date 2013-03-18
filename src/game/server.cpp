@@ -4097,6 +4097,7 @@ namespace server
             ci->state.cpmillis = 0;
             ci->state.state = CS_DEAD;
             ci->state.lasttimeplayed = lastmillis;
+            ci->state.quarantine = quarantine;
             waiting(ci, DROP_RESET);
             if(smode) smode->entergame(ci);
             mutate(smuts, mut->entergame(ci));
@@ -5590,7 +5591,7 @@ namespace server
                     if(!cp || cp->state.aitype > AI_NONE || (val ? cp->state.state == CS_SPECTATOR : cp->state.state != CS_SPECTATOR)) break;
                     if((sn != sender || !allowstate(cp, val ? ALST_SPEC : ALST_TRY)) && !haspriv(ci, G(speclock), sn != sender ? "control other players" : (val ? "enter spectator" : "exit spectator")))
                         break;
-                    spectate(cp, val!=0, val==2);
+                    spectate(cp, val!=0, val!=0 && val==2);
                     if(val==2 && cp->state.quarantine)
                     {
                         defformatstring(name)("%s", colourname(ci));
