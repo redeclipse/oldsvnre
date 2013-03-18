@@ -2366,6 +2366,7 @@ namespace client
                     game::waiting.removeobj(s);
                     if(s->state == CS_ALIVE) s->lastdeath = lastmillis; // so spawndelay shows properly
                     s->state = CS_WAITING;
+                    s->quarantine = false;
                     s->weapreset(true);
                     break;
                 }
