@@ -297,8 +297,8 @@ namespace projs
                 default:
                     if(weaptype[proj.weap].melee)
                     {
-                        part_flare(proj.o, proj.from, 500, type == W_SWORD ? PART_LIGHTNING_FLARE : PART_MUZZLE_FLARE, FWCOL(H, partcol, proj), WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags))*proj.curscale, 0.75f);
-                        part_create(PART_PLASMA, 500, proj.o, FWCOL(H, partcol, proj), WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags))*proj.curscale, 0.5f);
+                        part_flare(proj.o, proj.from, type == W_SWORD ? 750 : 100, type == W_SWORD ? PART_LIGHTNING_FLARE : PART_MUZZLE_FLARE, FWCOL(H, partcol, proj), WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags))*proj.curscale, 0.5f);
+                        if(type != W_SWORD) part_create(PART_PLASMA, 100, proj.o, FWCOL(H, partcol, proj), WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags))*proj.curscale, 0.25f);
                     }
                     break;
             }
