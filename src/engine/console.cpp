@@ -894,18 +894,19 @@ void complete(char *s, const char *cmdprefix)
 void setidflag(const char *s, const char *v, int flag, const char *msg, bool alias)
 {
     ident *id = idents.access(s);
-    if(!id || (alias && id->type != ID_ALIAS)) conoutf("\fradding %s of %s failed as it is not available", msg, s);
-    else
+    if(!id || (alias && id->type != ID_ALIAS))
     {
-        bool on = false;
-        if(isnumeric(*v)) on = atoi(v) != 0;
-        else if(!strcasecmp("false", v)) on = false;
-        else if(!strcasecmp("true", v)) on = true;
-        else if(!strcasecmp("on", v)) on = true;
-        else if(!strcasecmp("off", v)) on = false;
-        if(on && !(id->flags&flag)) id->flags |= flag;
-        else if(!on && id->flags&flag) id->flags &= ~flag;
+        if(verbose) conoutf("\fradding %s of %s failed as it is not available", msg, s);
+        return;
     }
+    bool on = false;
+    if(isnumeric(*v)) on = atoi(v) != 0;
+    else if(!strcasecmp("false", v)) on = false;
+    else if(!strcasecmp("true", v)) on = true;
+    else if(!strcasecmp("on", v)) on = true;
+    else if(!strcasecmp("off", v)) on = false;
+    if(on && !(id->flags&flag)) id->flags |= flag;
+    else if(!on && id->flags&flag) id->flags &= ~flag;
 }
 
 ICOMMAND(0, setcomplete, "ss", (char *s, char *t), setidflag(s, t, IDF_COMPLETE, "complete", false));
@@ -914,14 +915,15 @@ ICOMMAND(0, setpersist, "ss", (char *s, char *t), setidflag(s, t, IDF_PERSIST, "
 void setiddesc(const char *s, const char *v, const char *u)
 {
     ident *id = idents.access(s);
-    if(!id) conoutf("\fradding description of %s failed as it is not available", s);
-    else
+    if(!id)
     {
-        DELETEA(id->desc);
-        if(v && *v) id->desc = newstring(v);
-        DELETEA(id->usage);
-        if(u && *u) id->usage = newstring(u);
+        if(verbose) conoutf("\fradding description of %s failed as it is not available", s);
+        return;
     }
+    DELETEA(id->desc);
+    if(v && *v) id->desc = newstring(v);
+    DELETEA(id->usage);
+    if(u && *u) id->usage = newstring(u);
 }
 ICOMMAND(0, setdesc, "sss", (char *s, char *t, char *u), setiddesc(s, t, u));
 
