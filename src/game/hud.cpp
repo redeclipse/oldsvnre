@@ -136,8 +136,6 @@ namespace hud
     VAR(IDF_PERSIST, teamhurttime, 0, 2500, VAR_MAX);
     VAR(IDF_PERSIST, teamhurtdist, 0, 0, VAR_MAX);
     FVAR(IDF_PERSIST, teamhurtsize, 0, 0.0175f, 1000);
-    VAR(IDF_PERSIST, teamkillnum, 0, 3, VAR_MAX);
-    VAR(IDF_PERSIST, teamkilltime, 0, 60000, VAR_MAX);
 
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, underlaytex, "", 3);
     VAR(IDF_PERSIST, underlaydisplay, 0, 0, 2); // 0 = only firstperson and alive, 1 = only when alive, 2 = always
@@ -1185,7 +1183,7 @@ namespace hud
         int numkilled = 0;
         loopvrev(teamkills)
         {
-            if(totalmillis-teamkills[i] <= teamkilltime) numkilled++;
+            if(totalmillis-teamkills[i] <= teamkilltime*60000) numkilled++;
             else teamkills.remove(i);
         }
         return numkilled;
@@ -2929,7 +2927,7 @@ namespace hud
                 tf = int(255*hudblend*noticeblend), tr = 255, tg = 255, tb = 255,
                 tw = int((hudwidth-(int(hudsize*gapsize)*2+int(hudsize*inventorysize)*2))/noticescale);
             if(noticestone) skewcolour(tr, tg, tb, noticestone);
-            if(teamkillnum && m_team(game::gamemode, game::mutators) && numteamkills() >= teamkillnum)
+            if(teamkillwarn && m_team(game::gamemode, game::mutators) && numteamkills() >= teamkillwarn)
                 to += draw_textx("\fzryDo NOT shoot team mates", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
             if(teamnotices >= 2)
             {

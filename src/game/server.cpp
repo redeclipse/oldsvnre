@@ -3367,7 +3367,7 @@ namespace server
             if(m_team(gamemode, mutators) && actor->team == target->team)
             {
                 actor->state.spree = 0;
-                if(actor->state.aitype < AI_START)
+                if(actor->state.aitype < AI_START && isweap(weap) && WF(WK(flags), weap, teampenalty, WS(flags)))
                 {
                     pointvalue *= G(teamkillpenalty);
                     if(actor != target) isteamkill = true;
