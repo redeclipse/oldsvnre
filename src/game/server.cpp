@@ -5591,11 +5591,17 @@ namespace server
                     if(!cp || cp->state.aitype > AI_NONE || (val ? cp->state.state == CS_SPECTATOR : cp->state.state != CS_SPECTATOR)) break;
                     if((sn != sender || !allowstate(cp, val ? ALST_SPEC : ALST_TRY)) && !haspriv(ci, G(speclock), sn != sender ? "control other players" : (val ? "enter spectator" : "exit spectator")))
                         break;
-                    spectate(cp, val!=0, val!=0 && val==2);
-                    if(val==2 && cp->state.quarantine)
+                    bool spec = val != 0, quarantine = cp != ci && val != 0 && val == 2, wasq = cp->state.quarantine;
+                    spectate(cp, spec, quarantine);
+                    if(quarantine && cp->state.quarantine)
                     {
                         defformatstring(name)("%s", colourname(ci));
                         srvoutf(-3, "\fP%s \fs\fcquarantined\fS %s", name, colourname(cp));
+                    }
+                    else if(wasq && !cp->state.quarantine)
+                    {
+                        defformatstring(name)("%s", colourname(ci));
+                        srvoutf(-3, "\fP%s \fs\fcreleased\fS %s from \fs\fcquarantine\fS", name, colourname(cp));
                     }
                     break;
                 }
