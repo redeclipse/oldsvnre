@@ -12,20 +12,22 @@ Gameplay:
 
 Weapons:
  * Weapons no longer reset gravity acceleration (reduces in-air pinning)
- * Plasma primary damage and explosion radius increased, reload speed increased
+ * Plasma primary damage, projectile speed, stun and reload speed increased, clip size halved, projectile size decreased
  * Melee now only activates if player is airborne or dashing/sliding, and only
    in a short window of time
  * Mines, new weapon, primary proximity mine, secondary tripwire mine,
    pickup-based (like grenade)
- * Rifle explosion size, hitpush, stun and firing speed reduced, damage, recoil
-   and accuracy increased
+ * Rifle explosion size, hitpush, and firing speed reduced, primary damage,
+   recoil, clip size, accuracy and particle speed increased
  * SMG secondary now sticks to geometry and explodes radially after a short
    delay, primary spread reduced, ricochet speed increased
- * Pistol secondary spread increased
+ * Pistol projectile speed decreased, secondary spread increased, primary
+   damage decreased
  * Sword range halved
  * Projectiles now pass through teleporters
  * Grenade firing speed increased
  * Rocket direct damage increased, flak damage reduced
+ * Flamer clip size decreased, primary explosion radius decreased, secondary explosion radius increased, secondary damage decreased
 
 Modes & Mutators:
  * Reduced number of bots in coop to 3/2 of humans
