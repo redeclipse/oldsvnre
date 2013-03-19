@@ -177,7 +177,7 @@ namespace server
         float yaw, pitch, roll;
         int state;
         projectilestate dropped, weapshots[W_MAX][2];
-        int score, spree, crits, rewards[2], shotdamage, damage;
+        int score, spree, rewards[2], shotdamage, damage;
         int lasttimeplayed, timeplayed, aireinit, lastboost, lastresowner[WR_MAX];
         vector<int> fraglog, fragmillis, cpnodes, chatmillis;
         vector<dmghist> damagelog;
@@ -202,7 +202,7 @@ namespace server
             loopi(W_MAX) loopj(2) weapshots[i][j].reset();
             if(!change) score = timeplayed = 0;
             else gamestate::mapchange();
-            frags = spree = crits = rewards[0] = rewards[1] = deaths = shotdamage = damage = 0;
+            frags = spree = rewards[0] = rewards[1] = deaths = shotdamage = damage = 0;
             fraglog.shrink(0);
             fragmillis.shrink(0);
             cpnodes.shrink(0);
@@ -232,7 +232,7 @@ namespace server
     {
         uint ip;
         string name;
-        int points, score, frags, spree, crits, rewards, timeplayed, deaths, shotdamage, damage;
+        int points, score, frags, spree, rewards, timeplayed, deaths, shotdamage, damage;
         int warnings[WARN_MAX][2];
         vector<teamkill> teamkills;
         bool quarantine;
@@ -243,7 +243,6 @@ namespace server
             score = gs.score;
             frags = gs.frags;
             spree = gs.spree;
-            crits = gs.crits;
             rewards = gs.rewards[0];
             timeplayed = gs.timeplayed;
             deaths = gs.deaths;
@@ -260,7 +259,6 @@ namespace server
             gs.score = score;
             gs.frags = frags;
             gs.spree = spree;
-            gs.crits = crits;
             gs.rewards[0] = rewards;
             gs.timeplayed = timeplayed;
             gs.deaths = deaths;
@@ -273,7 +271,7 @@ namespace server
 
         void mapchange()
         {
-            points = frags = spree = crits = rewards = deaths = shotdamage = damage = 0;
+            points = frags = spree = rewards = deaths = shotdamage = damage = 0;
             teamkills.shrink(0);
         }
     };
@@ -3304,30 +3302,6 @@ namespace server
         }
         else
         {
-            if(isweap(weap) && G(criticalchance) > 0 && W(weap, critmult) > 0)
-            {
-                bool crdash = W2(weap, critdash, WS(flags)) && actor->state.lastboost && gamemillis-actor->state.lastboost <= W2(weap, critdash, WS(flags));
-                actor->state.crits++;
-                int offset = G(criticalchance)-actor->state.crits;
-                if(target != actor)
-                {
-                    if(crdash && W(weap, critboost) > 0) offset = int(offset/float(W(weap, critboost)));
-                    if(W(weap, critdist) != 0)
-                    {
-                        float dist = actor->state.o.dist(target->state.o);
-                        if(W(weap, critdist) < 0 && dist < 0-W(weap, critdist))
-                            offset = int(offset*clamp(dist, 1.f, 0-W(weap, critdist))/(0-W(weap, critdist)));
-                        else if(W(weap, critdist) > 0 && dist > W(weap, critdist))
-                            offset = int(offset*W(weap, critdist)/clamp(dist, W(weap, critdist), 1e16f));
-                    }
-                }
-                if(offset <= 0 || !rnd(offset))
-                {
-                    realflags |= HIT_CRIT;
-                    realdamage = int(realdamage*W(weap, critmult));
-                    actor->state.crits = 0;
-                }
-            }
             if(realdamage >= 0 && target->state.armour > 0)
             {
                 int absorb = realdamage/2; // armour absorbs half until depleted

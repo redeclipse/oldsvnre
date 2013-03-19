@@ -326,8 +326,8 @@ GVAR(IDF_ADMIN, aiinitdelay, 0, 5000, VAR_MAX);
 GVAR(IDF_ADMIN, ailongdelay, 0, 10000, VAR_MAX);
 GVAR(IDF_ADMIN, airefreshdelay, 0, 1000, VAR_MAX);
 GVAR(0, botbalance, -1, -1, VAR_MAX); // -1 = always use numplayers, 0 = don't balance, 1 or more = fill only with this*numteams
-GVAR(0, botskillmin, 1, 75, 101);
-GVAR(0, botskillmax, 1, 85, 101);
+GVAR(0, botskillmin, 1, 60, 101);
+GVAR(0, botskillmax, 1, 75, 101);
 GVAR(0, botlimit, 0, 32, VAR_MAX);
 GVAR(0, botoffset, VAR_MIN, 0, VAR_MAX);
 GSVAR(IDF_ADMIN, botmalenames, "");
@@ -338,11 +338,11 @@ GFVAR(0, botspeed, 0, 1, FVAR_MAX);
 GFVAR(0, botscale, FVAR_NONZERO, 1, FVAR_MAX);
 GFVAR(0, coopbalance, FVAR_NONZERO, 1.5f, FVAR_MAX);
 GFVAR(0, coopmultibalance, FVAR_NONZERO, 2, FVAR_MAX);
-GVAR(0, coopskillmin, 1, 85, 101);
-GVAR(0, coopskillmax, 1, 95, 101);
+GVAR(0, coopskillmin, 1, 75, 101);
+GVAR(0, coopskillmax, 1, 85, 101);
 GVAR(0, enemybalance, 1, 1, 3);
-GVAR(0, enemyskillmin, 1, 80, 101);
-GVAR(0, enemyskillmax, 1, 90, 101);
+GVAR(0, enemyskillmin, 1, 65, 101);
+GVAR(0, enemyskillmax, 1, 80, 101);
 GVAR(0, enemyspawntime, 1, 30000, VAR_MAX); // when enemies respawn
 GVAR(0, enemyspawndelay, 0, 1000, VAR_MAX); // after map start enemies first spawn
 GVAR(0, enemyspawnstyle, 0, 1, 3); // 0 = all at once, 1 = staggered, 2 = random, 3 = randomise between both
@@ -380,10 +380,10 @@ GFVAR(0, impulseparkournorm, 0, 0.5f, FVAR_MAX); // minimum parkour surface z no
 GVAR(0, impulseallowed, 0, IM_A_ALL, IM_A_ALL); // impulse actions allowed; bit: 0 = off, 1 = dash, 2 = boost, 4 = pacing, 8 = parkour
 GVAR(0, impulsestyle, 0, 1, 3); // impulse style; 0 = off, 1 = touch and count, 2 = count only, 3 = freestyle
 GVAR(0, impulsecount, 0, 6, VAR_MAX); // number of impulse actions per air transit
-GVAR(0, impulseslip, 0, 350, VAR_MAX); // time before floor friction kicks back in
-GVAR(0, impulseslide, 0, 750, VAR_MAX); // time before powerslides end
+GVAR(0, impulseslip, 0, 250, VAR_MAX); // time before floor friction kicks back in
+GVAR(0, impulseslide, 0, 1000, VAR_MAX); // time before powerslides end
 GVAR(0, impulsedelay, 0, 250, VAR_MAX); // minimum time between boosts
-GVAR(0, impulsedashdelay, 0, 750, VAR_MAX); // minimum time between dashes/powerslides
+GVAR(0, impulsedashdelay, 0, 1000, VAR_MAX); // minimum time between dashes/powerslides
 GVAR(0, impulsekickdelay, 0, 350, VAR_MAX); // minimum time between wall kicks/climbs
 GFVAR(0, impulsevaultmin, FVAR_NONZERO, 0.25f, FVAR_MAX); // minimum percentage of height for vault
 GFVAR(0, impulsevaultmax, FVAR_NONZERO, 1.f, FVAR_MAX); // maximum percentage of height for vault
@@ -395,14 +395,14 @@ GVAR(0, impulsecostscale, 0, 0, 1); // whether the cost scales depend on the amo
 GVAR(0, impulseskate, 0, 1000, VAR_MAX); // length of time a run along a wall can last
 GFVAR(0, impulsepacing, 0, 0, FVAR_MAX); // pacing impulse meter depletion
 GFVAR(0, impulsejet, 0, 0.5f, FVAR_MAX); // jetpack impulse meter depletion
-GFVAR(0, impulseregen, 0, 4.f, FVAR_MAX); // impulse regen multiplier
+GFVAR(0, impulseregen, 0, 4, FVAR_MAX); // impulse regen multiplier
 GFVAR(0, impulseregencrouch, 0, 2, FVAR_MAX); // impulse regen crouch modifier
 GFVAR(0, impulseregenpacing, 0, 0.75f, FVAR_MAX); // impulse regen pacing modifier
 GFVAR(0, impulseregenjet, 0, 1.5f, FVAR_MAX); // impulse regen jetpack modifier
 GFVAR(0, impulseregenmove, 0, 1, FVAR_MAX); // impulse regen moving modifier
 GFVAR(0, impulseregeninair, 0, 0.75f, FVAR_MAX); // impulse regen in-air modifier
 GFVAR(0, impulseregenslide, 0, 0, FVAR_MAX); // impulse regen sliding modifier
-GVAR(0, impulseregendelay, 0, 250, VAR_MAX); // delay before impulse regens
+GVAR(0, impulseregendelay, 0, 350, VAR_MAX); // delay before impulse regens
 GVAR(0, impulseregenjetdelay, -1, -1, VAR_MAX); // delay before impulse regens after jetting, -1 = must touch ground
 
 GFVAR(0, inairspread, 0, 2, FVAR_MAX);
@@ -411,8 +411,8 @@ GFVAR(0, impulsespread, 0, 1, FVAR_MAX);
 GFVAR(0, stillspread, 0, 0, FVAR_MAX);
 
 GVAR(0, quakefade, 0, 250, VAR_MAX);
-GVAR(0, quakewobble, 1, 19, VAR_MAX);
-GVAR(0, quakelimit, 0, 250, VAR_MAX);
+GVAR(0, quakewobble, 1, 18, VAR_MAX);
+GVAR(0, quakelimit, 0, 200, VAR_MAX);
 
 GVAR(0, zoomlock, 0, 0, 4); // 0 = unrestricted, 1 = must be on floor, 2 = also must not be moving, 3 = also must be on flat floor, 4 = must also be crouched
 GVAR(0, zoomlocktime, 0, 500, VAR_MAX); // time before zoomlock kicks in when in the air
@@ -423,7 +423,6 @@ GVAR(0, zoomtime, 1, 100, VAR_MAX);
 GFVAR(0, radialscale, 0, 1, FVAR_MAX);
 GFVAR(0, radiallimited, 0, 0.75f, FVAR_MAX);
 GFVAR(0, damagescale, 0, 1, FVAR_MAX);
-GVAR(0, criticalchance, 0, 100, VAR_MAX);
 GVAR(0, weaponswitchdelay, 0, 500, VAR_MAX);
 GVAR(0, weaponinterrupts, 0, W_S_INTERRUPT, W_S_ALL); // what weapon states can have their delay interrupted
 
