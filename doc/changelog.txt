@@ -22,13 +22,13 @@ Weapons:
  * Sword range halved, attack speed decreased
  * Shotgun firing rate decreased
  * SMG secondary now sticks to geometry and explodes radially after a short
-   delay, secondary firing rate decreased, primary spread reduced, ricochet
-   speed increased
+   delay, ricochet speed, clip size, particle lifetime and
+   firing rate increased, reload speed, and stun decreased
  * Plasma primary damage, projectile speed, stun, particle size and reload
-   speed increased, firing rate decreased, clip size halved
- * Flamer clip size decreased, primary explosion radius decreased, secondary
-   explosion radius increased, secondary damage decreased, secondary firing
-   rate decreased
+   speed increased, firing rate decreased, clip size decreased
+ * Flamer primary explosion radius decreased, secondary explosion radius
+   increased, secondary firing rate decreased, projectile size and speed
+   increased, damage decreased
  * Rifle explosion size, hitpush, and firing rate decreased, primary damage,
    recoil, clip size, accuracy and particle speed increased
  * Grenade firing rate increased
