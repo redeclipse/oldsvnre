@@ -80,6 +80,8 @@ Maps:
  * Ghost, updated (retextured, new lighting)
  * Isolation, removed
  * Live Fire, new map (added from map update 3)
+ * Forge, updated (retextured)
+ * Bloodlust, new map
 
 Interface & Menus:
  * Overall reduced font sizes
