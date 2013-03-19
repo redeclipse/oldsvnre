@@ -593,9 +593,9 @@ namespace hud
                                     {
                                         if(game::focus->dominating.find(o) >= 0) g.text("", 0, dominatedtex, TEAM(sg.team, colour));
                                         else if(game::focus->dominated.find(o) >= 0) g.text("", 0, dominatingtex, TEAM(sg.team, colour));
-                                        else g.space(1);
+                                        else g.strut(1);
                                     }
-                                    else g.space(1);
+                                    else g.strut(1);
                                 });
                             }));
                         });

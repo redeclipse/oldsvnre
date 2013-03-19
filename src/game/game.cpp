@@ -177,7 +177,6 @@ namespace game
 
     VAR(IDF_PERSIST, eventiconfade, 500, 7000, VAR_MAX);
     VAR(IDF_PERSIST, eventiconshort, 500, 3500, VAR_MAX);
-    VAR(IDF_PERSIST, eventiconcrit, 500, 1000, VAR_MAX);
 
     VAR(IDF_PERSIST, showobituaries, 0, 4, 5); // 0 = off, 1 = only me, 2 = 1 + announcements, 3 = 2 + but dying bots, 4 = 3 + but bot vs bot, 5 = all
     VAR(IDF_PERSIST, showobitdists, 0, 1, 1);
@@ -191,8 +190,6 @@ namespace game
     VAR(IDF_PERSIST, damagemergeshock, 0, 250, VAR_MAX);
     VAR(IDF_PERSIST, playdamagetones, 0, 1, 3);
     VAR(IDF_PERSIST, damagetonevol, -1, -1, 255);
-    VAR(IDF_PERSIST, playcrittones, 0, 2, 3);
-    VAR(IDF_PERSIST, crittonevol, -1, -1, 255);
     VAR(IDF_PERSIST, playreloadnotify, 0, 3, 15);
     VAR(IDF_PERSIST, reloadnotifyvol, -1, -1, 255);
 
@@ -1114,7 +1111,7 @@ namespace game
 
     struct damagemerge
     {
-        enum { CRIT = 1<<0, BURN = 1<<1, BLEED = 1<<2, SHOCK = 1<<3 };
+        enum { BURN = 1<<0, BLEED = 1<<1, SHOCK = 1<<2 };
 
         gameent *d, *actor;
         int weap, damage, flags, millis;
@@ -1131,28 +1128,20 @@ namespace game
 
         void play()
         {
-            if(flags&CRIT)
+            if(playdamagetones >= (actor == focus ? 1 : (d == focus ? 2 : 3)))
             {
-                if(playcrittones >= (actor == focus ? 1 : (d == focus ? 2 : 3)))
-                    playsound(S_CRITICAL, d->o, d, actor == focus ? SND_FORCED : SND_DIRECT, crittonevol);
+                const int dmgsnd[8] = { 0, 10, 25, 50, 75, 100, 150, 200 };
+                int snd = -1;
+                if(flags&BURN) snd = S_BURNED;
+                else if(flags&BLEED) snd = S_BLEED;
+                else if(flags&SHOCK) snd = S_SHOCK;
+                else loopirev(8) if(damage >= dmgsnd[i]) { snd = S_DAMAGE+i; break; }
+                if(snd >= 0) playsound(snd, d->o, d, actor == focus ? SND_FORCED : SND_DIRECT, damagetonevol);
             }
-            else
+            if(aboveheaddamage)
             {
-                if(playdamagetones >= (actor == focus ? 1 : (d == focus ? 2 : 3)))
-                {
-                    const int dmgsnd[8] = { 0, 10, 25, 50, 75, 100, 150, 200 };
-                    int snd = -1;
-                    if(flags&BURN) snd = S_BURNED;
-                    else if(flags&BLEED) snd = S_BLEED;
-                    else if(flags&SHOCK) snd = S_SHOCK;
-                    else loopirev(8) if(damage >= dmgsnd[i]) { snd = S_DAMAGE+i; break; }
-                    if(snd >= 0) playsound(snd, d->o, d, actor == focus ? SND_FORCED : SND_DIRECT, damagetonevol);
-                }
-                if(aboveheaddamage)
-                {
-                    defformatstring(ds)("<sub>\fr+%d", damage);
-                    part_textcopy(d->abovehead(), ds, d != focus ? PART_TEXT : PART_TEXT_ONTOP, eventiconfade, 0xFFFFFF, 4, 1, -10, 0, d);
-                }
+                defformatstring(ds)("<sub>\fr+%d", damage);
+                part_textcopy(d->abovehead(), ds, d != focus ? PART_TEXT : PART_TEXT_ONTOP, eventiconfade, 0xFFFFFF, 4, 1, -10, 0, d);
             }
         }
     };
@@ -1178,7 +1167,7 @@ namespace game
             if(damagemerges[i].flags&damagemerge::BURN) delay = damagemergeburn;
             else if(damagemerges[i].flags&damagemerge::BLEED) delay = damagemergebleed;
             else if(damagemerges[i].flags&damagemerge::SHOCK) delay = damagemergeshock;
-            if(damagemerges[i].flags&damagemerge::CRIT || totalmillis-damagemerges[i].millis >= delay)
+            if(totalmillis-damagemerges[i].millis >= delay)
             {
                 damagemerges[i].play();
                 damagemerges.remove(i--);
@@ -1276,12 +1265,6 @@ namespace game
             actor->totaldamage += damage;
         }
         hiteffect(weap, flags, damage, d, actor, dir, actor == player1 || actor->ai);
-        if(flags&HIT_CRIT)
-        {
-            pushdamagemerge(d, actor, weap, damage, damagemerge::CRIT);
-            d->addicon(eventicon::CRITICAL, lastmillis, eventiconcrit, 0);
-            actor->addicon(eventicon::CRITICAL, lastmillis, eventiconcrit, 1);
-        }
     }
 
     void killed(int weap, int flags, int damage, gameent *d, gameent *actor, vector<gameent *> &log, int style, int material)
@@ -2506,7 +2489,7 @@ namespace game
     float calcroll(gameent *d)
     {
         bool thirdperson = d != focus || thirdpersonview(true);
-        float r = thirdperson ? 0 : d->roll, wobble = float(rnd(quakewobble)-quakewobble/2)*(float(min(d->quake, quakelimit))/1000.f);
+        float r = thirdperson ? 0 : d->roll, wobble = float(rnd(quakewobble+1)-quakewobble/2)*(float(min(d->quake, quakelimit))/1000.f);
         switch(d->state)
         {
             case CS_SPECTATOR: case CS_WAITING: r = wobble*0.5f; break;
@@ -3026,9 +3009,8 @@ namespace game
         }
         if(aboveheadicons && d->state != CS_EDITING && d->state != CS_SPECTATOR) loopv(d->icons)
         {
-            if(d->icons[i].type == eventicon::AFFINITY && !(aboveheadicons&2)) break;
-            if(d->icons[i].type == eventicon::WEAPON && !(aboveheadicons&4)) break;
-            if(d->icons[i].type == eventicon::CRITICAL && d->icons[i].value) continue;
+            if(d->icons[i].type == eventicon::AFFINITY && !(aboveheadicons&2)) continue;
+            if(d->icons[i].type == eventicon::WEAPON && !(aboveheadicons&4)) continue;
             int millis = lastmillis-d->icons[i].millis;
             if(millis <= d->icons[i].fade)
             {

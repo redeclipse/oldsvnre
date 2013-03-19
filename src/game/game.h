@@ -32,7 +32,7 @@ enum
     S_SPLASH1, S_SPLASH2, S_UNDERWATER, S_SPLOSH, S_DEBRIS, S_BURNLAVA, S_BURNING,
     S_EXTINGUISH, S_SHELL, S_ITEMUSE, S_ITEMSPAWN,
     S_REGEN, S_DAMAGE, S_DAMAGE2, S_DAMAGE3, S_DAMAGE4, S_DAMAGE5, S_DAMAGE6, S_DAMAGE7, S_DAMAGE8,
-    S_BURNED, S_BLEED, S_SHOCK, S_CRITICAL, S_RESPAWN, S_CHAT, S_ERROR, S_ALARM, S_CATCH,
+    S_BURNED, S_BLEED, S_SHOCK, S_RESPAWN, S_CHAT, S_ERROR, S_ALARM, S_CATCH,
     S_V_FLAGSECURED, S_V_FLAGOVERTHROWN, S_V_FLAGPICKUP, S_V_FLAGDROP, S_V_FLAGRETURN, S_V_FLAGSCORE, S_V_FLAGRESET,
     S_V_BOMBSTART, S_V_BOMBDUEL, S_V_BOMBPICKUP, S_V_BOMBSCORE, S_V_BOMBRESET,
     S_V_NOTIFY, S_V_FIGHT, S_V_CHECKPOINT, S_V_OVERTIME, S_V_ONEMINUTE, S_V_HEADSHOT,
@@ -915,7 +915,7 @@ extern const char * const animnames[];
 
 struct eventicon
 {
-    enum { SPREE = 0, MULTIKILL, HEADSHOT, CRITICAL, DOMINATE, REVENGE, FIRSTBLOOD, BREAKER, WEAPON, AFFINITY, TOTAL, SORTED = WEAPON, VERBOSE = WEAPON };
+    enum { SPREE = 0, MULTIKILL, HEADSHOT, DOMINATE, REVENGE, FIRSTBLOOD, BREAKER, WEAPON, AFFINITY, TOTAL, SORTED = WEAPON, VERBOSE = WEAPON };
     int type, millis, fade, length, value;
 };
 
@@ -1291,7 +1291,7 @@ struct gameent : dynent, gamestate
             {
                 switch(icons[i].type)
                 {
-                    case eventicon::CRITICAL: case eventicon::WEAPON:
+                    case eventicon::WEAPON:
                     {
                         if(icons[i].value != value) continue;
                         break;
@@ -1543,7 +1543,7 @@ namespace weapons
 namespace hud
 {
     extern char *chattex, *insigniatex, *playertex, *deadtex, *waitingtex, *spectatortex, *editingtex, *dominatingtex, *dominatedtex, *inputtex, *bliptex, *flagtex, *bombtex, *arrowtex, *alerttex, *questiontex, *flagdroptex, *flagtakentex, *bombdroptex, *bombtakentex, *attacktex,
-                *inventorytex, *indicatortex, *crosshairtex, *hithairtex, *spree1tex, *spree2tex, *spree3tex, *spree4tex, *multi1tex, *multi2tex, *multi3tex, *headshottex, *criticaltex, *dominatetex, *revengetex, *firstbloodtex, *breakertex;
+                *inventorytex, *indicatortex, *crosshairtex, *hithairtex, *spree1tex, *spree2tex, *spree3tex, *spree4tex, *multi1tex, *multi2tex, *multi3tex, *headshottex, *dominatetex, *revengetex, *firstbloodtex, *breakertex;
     extern int hudwidth, hudheight, hudsize, lastteam, lastnewgame, damageresidue, damageresiduefade, shownotices, radarstyle, radaraffinitynames, inventorygame, inventoryscore, inventoryscorebg;
     extern float noticescale, inventoryblend, inventoryskew, radaraffinityblend, radarblipblend, radaraffinitysize, inventoryglow, inventoryscoresize, inventoryscoreshrink, inventoryscoreshrinkmax;
     extern vector<int> teamkills;

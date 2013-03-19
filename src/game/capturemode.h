@@ -45,7 +45,7 @@ struct captureservmode : capturestate, servmode
 
     void dodamage(clientinfo *target, clientinfo *actor, int &damage, int &hurt, int &weap, int &flags, int &material, const ivec &hitpush)
     {
-        //if(weaptype[weap].melee || flags&HIT_CRIT) dropaffinity(target, target->state.o, vec(ci->state.vel).add(ci->state.falling));
+        //if(weaptype[weap].melee) dropaffinity(target, target->state.o, vec(ci->state.vel).add(ci->state.falling));
     }
 
     void died(clientinfo *ci, clientinfo *actor)

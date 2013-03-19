@@ -429,7 +429,6 @@ namespace hud
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, multi2tex, "textures/rewards/triple", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, multi3tex, "textures/rewards/multi", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, headshottex, "textures/rewards/headshot", 3);
-    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, criticaltex, "textures/rewards/critical", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, dominatetex, "textures/rewards/dominate", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, revengetex, "textures/rewards/revenge", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, firstbloodtex, "textures/rewards/firstblood", 3);
@@ -1431,12 +1430,12 @@ namespace hud
             if(m_capture(game::gamemode)) capture::drawnotices(hudwidth, hudheight, tx, ty, tf/255.f);
             else if(m_defend(game::gamemode)) defend::drawnotices(hudwidth, hudheight, tx, ty, tf/255.f);
             else if(m_bomber(game::gamemode)) bomber::drawnotices(hudwidth, hudheight, tx, ty, tf/255.f);
-            else if(m_gauntlet(game::gamemode) && game::focus->state == CS_ALIVE && game::focus->lastbuff && hud::shownotices >= 3)
+            else if(m_gauntlet(game::gamemode) && game::focus->state == CS_ALIVE && game::focus->lastbuff && shownotices >= 3)
             {
                 pushfont("reduced");
                 if(m_regen(game::gamemode, game::mutators) && gauntletregenbuff && gauntletregenextra)
-                    ty += draw_textx("Buffing: \fs\fo%d%%\fS damage, \fs\fg%d%%\fS shield, +\fs\fy%d\fS regen", tx, ty, 255, 255, 255, tf, TEXT_CENTERED, -1, -1, int(gauntletbuffdamage*100), int(gauntletbuffshield*100), gauntletregenextra)*hud::noticescale;
-                else ty += draw_textx("Buffing: \fs\fo%d%%\fS damage, \fs\fg%d%%\fS shield", tx, ty, 255, 255, 255, tf, TEXT_CENTERED, -1, -1, int(gauntletbuffdamage*100), int(gauntletbuffshield*100))*hud::noticescale;
+                    ty += draw_textx("Buffing: \fs\fo%d%%\fS damage, \fs\fg%d%%\fS shield, +\fs\fy%d\fS regen", tx, ty, 255, 255, 255, tf, TEXT_CENTERED, -1, -1, int(gauntletbuffdamage*100), int(gauntletbuffshield*100), gauntletregenextra)*noticescale;
+                else ty += draw_textx("Buffing: \fs\fo%d%%\fS damage, \fs\fg%d%%\fS shield", tx, ty, 255, 255, 255, tf, TEXT_CENTERED, -1, -1, int(gauntletbuffdamage*100), int(gauntletbuffshield*100))*noticescale;
                 popfont();
             }
         }
@@ -2026,8 +2025,19 @@ namespace hud
         if(chkcond(radaraffinity, !game::tvmode())) // 3
         {
             if(m_capture(game::gamemode)) capture::drawblips(w, h, blend*radarblend);
-            else if(m_defend(game::gamemode)) defend::drawblips(w, h, blend);
+            else if(m_defend(game::gamemode)) defend::drawblips(w, h, blend*radarblend);
             else if(m_bomber(game::gamemode)) bomber::drawblips(w, h, blend*radarblend);
+            else if(m_gauntlet(game::gamemode))
+            {
+                int numents = entities::lastenttype[CHECKPOINT];
+                loopi(numents) if(entities::ents[i]->type == CHECKPOINT && (entities::ents[i]->attrs[6] == CP_LAST || entities::ents[i]->attrs[6] == CP_FINISH))
+                {
+                    vec dir = vec(entities::ents[i]->o).sub(camera1->o), colour = vec::hexcolor(TEAM(T_ALPHA, colour));
+                    if(radaraffinitynames > 0) drawblip(arrowtex, 3, w, h, radaraffinitysize*1.25f, blend*radaraffinityblend, -1-radarstyle, dir, colour, "little", "goal");
+                    else drawblip(arrowtex, 3, w, h, radaraffinitysize*1.25f, blend*radaraffinityblend, -1-radarstyle, dir, colour);
+                }
+            }
+
         }
         if(chkcond(radarplayers, radarplayerfilter != 3 || m_duke(game::gamemode, game::mutators) || m_edit(game::gamemode))) // 4
         {
@@ -2280,7 +2290,6 @@ namespace hud
                 break;
             }
             case eventicon::HEADSHOT: return headshottex; break;
-            case eventicon::CRITICAL: return criticaltex; break;
             case eventicon::DOMINATE: return dominatetex; break;
             case eventicon::REVENGE: return revengetex; break;
             case eventicon::FIRSTBLOOD: return firstbloodtex; break;
@@ -2950,9 +2959,8 @@ namespace hud
             int ty = int(((hudheight/2)-int(hudheight/2*eventoffset)-(to*noticescale))/eventscale), tx = int((hudwidth/2)/eventscale);
             loopv(game::focus->icons)
             {
-                if(game::focus->icons[i].type == eventicon::AFFINITY && !(showevents&2)) break;
-                if(game::focus->icons[i].type == eventicon::WEAPON && !(showevents&4)) break;
-                if(game::focus->icons[i].type == eventicon::CRITICAL && !game::focus->icons[i].value) continue;
+                if(game::focus->icons[i].type == eventicon::AFFINITY && !(showevents&2)) continue;
+                if(game::focus->icons[i].type == eventicon::WEAPON && !(showevents&4)) continue;
                 int millis = lastmillis-game::focus->icons[i].millis;
                 if(millis <= game::focus->icons[i].fade)
                 {
