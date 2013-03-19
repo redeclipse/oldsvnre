@@ -712,7 +712,6 @@ namespace capture
         if(st.flags.inrange(b.target) && d->aitype == AI_BOT)
         {
             capturestate::flag &f = st.flags[b.target];
-            b.idle = -1;
             if(f.team != ai::owner(d))
             {
                 if(f.owner)

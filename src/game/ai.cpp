@@ -357,7 +357,7 @@ namespace ai
         if(aistyle[d->aitype].canmove)
         {
             vec feet = d->feetpos();
-            float dist = feet.squaredist(pos), fardist = guard*4;
+            float dist = feet.squaredist(pos);
             if(walk == 2 || b.override || (walk && dist <= guard*guard) || !makeroute(d, b, pos))
             { // run away and back to keep ourselves busy
                 if(!b.override && randomnode(d, b, pos, guard, wander))
@@ -372,7 +372,6 @@ namespace ai
                     return false;
                 }
             }
-            if(walk && dist >= fardist*fardist) b.idle = -1;
         }
         b.override = false;
         return true;
@@ -380,13 +379,16 @@ namespace ai
 
     bool defense(gameent *d, aistate &b, const vec &pos, float guard, float wander, int walk)
     {
-        bool hasenemy = enemy(d, b, pos, wander, weaptype[d->weapselect].melee ? 1 : 0, false);
-        if(!aistyle[d->aitype].canmove) { b.idle = hasenemy ? 2 : 1; return true; }
-        else if(!walk)
+        if(!aistyle[d->aitype].canmove)
+        {
+            b.idle = enemy(d, b, pos, wander, weaptype[d->weapselect].melee ? 1 : 0, false) ? 2 : 1;
+            return true;
+        }
+        if(!walk)
         {
             if(pos.squaredist(d->feetpos()) <= guard*guard)
             {
-                b.idle = hasenemy ? 2 : 1;
+                b.idle = enemy(d, b, pos, wander, weaptype[d->weapselect].melee ? 1 : 0, false) ? 2 : 1;
                 return true;
             }
             walk++;
@@ -824,7 +826,6 @@ namespace ai
                             //float guard = enttype[e.type].radius;
                             //if(d->feetpos().squaredist(e.o) <= guard*guard)
                             //    b.idle = enemy(d, b, e.o, guard*4, weaptype[d->weapselect].melee ? 1 : 0, false) ? 2 : 1;
-                            //else b.idle = -1;
                             break;
                         }
                         default: break;
@@ -850,7 +851,6 @@ namespace ai
                             //float guard = enttype[e.type].radius;
                             //if(d->feetpos().squaredist(e.o) <= guard*guard)
                             //    b.idle = enemy(d, b, e.o, guard*4, weaptype[d->weapselect].melee ? 1 : 0, false) ? 2 : 1;
-                            //else b.idle = -1;
                             break;
                         }
                         default: break;
@@ -910,10 +910,7 @@ namespace ai
                     {
                         vec dp = d->headpos(), ep = getaimpos(d, e, alt);
                         if(cansee(d, dp, ep, d->aitype >= AI_START) || (e->clientnum == d->ai->enemy && d->ai->enemyseen && lastmillis-d->ai->enemyseen <= (d->skill*10)+1000))
-                        {
-                            b.idle = -1;
                             return 1;
-                        }
                         return 0;
                     }
                 }
@@ -1104,7 +1101,7 @@ namespace ai
         {
             int seed = (111-d->skill)*(d->onladder || d->inliquid ? 3 : 5);
             d->ai->jumpseed = lastmillis+seed+rnd(seed);
-            seed *= 100; if(b.idle) seed *= 10;
+            seed *= b.idle == 1 ? 1000 : 100;
             d->ai->jumprand = lastmillis+seed+rnd(seed);
         }
         if(!sequenced && !d->onladder && airtime)
@@ -1132,14 +1129,13 @@ namespace ai
 
     int process(gameent *d, aistate &b)
     {
-        int result = 0, stupify = d->skill <= 10+rnd(15) ? rnd(d->skill*1000) : 0, skmod = 101-d->skill;
-        float frame = d->skill <= 100 ? float(lastmillis-d->ai->lastrun)/float(max(skmod,1)*10) : 1;
+        int result = 0, skmod = max(101-d->skill, 1);
+        float frame = d->skill <= 100 ? float(lastmillis-d->ai->lastrun)/float(skmod*10) : 1;
         if(!aistyle[d->aitype].canstrafe && d->skill <= 100) frame *= 2;
         vec dp = d->headpos();
 
-        bool idle = b.idle == 1 || (stupify && stupify <= skmod);
         d->action[AC_SPECIAL] = d->ai->dontmove = false;
-        if(idle || !aistyle[d->aitype].canmove)
+        if(b.idle == 1 || !aistyle[d->aitype].canmove)
         {
             d->ai->dontmove = true;
             d->ai->spot = vec(0, 0, 0);
@@ -1151,7 +1147,6 @@ namespace ai
             {
                 d->ai->targyaw += 90+rnd(180);
                 d->ai->lastturn = lastmillis;
-                //if(m_checkpoint(game::gamemode)) d->ai->dontmove = idle = true;
             }
             d->ai->targpitch = 0;
             vec dir(d->ai->targyaw, d->ai->targpitch);
@@ -1189,7 +1184,7 @@ namespace ai
                 bool insight = cansee(d, dp, ep), hasseen = d->ai->enemyseen && lastmillis-d->ai->enemyseen <= (d->skill*10)+3000,
                     quick = d->ai->enemyseen && lastmillis-d->ai->enemyseen <= (W2(d->weapselect, fullauto, alt) ? W2(d->weapselect, attackdelay, alt)*3 : skmod)+30;
                 if(insight) d->ai->enemyseen = lastmillis;
-                if(idle || insight || hasseen || quick)
+                if(b.idle || insight || hasseen || quick)
                 {
                     float sskew = insight || d->skill > 100 ? 1.5f : (hasseen ? 1.f : 0.5f);
                     if(insight && lockon(d, e, aistyle[d->aitype].canstrafe ? 32 : 16, weaptype[d->weapselect].melee))
@@ -1258,8 +1253,8 @@ namespace ai
             if(physics::allowimpulse(d, IM_A_SPRINT))
             {
                 if(!impulsemeter || impulsepacing == 0 || impulseregenpacing > 0) wantsrun = true;
-                else if(b.idle == -1 && !d->ai->dontmove)
-                    wantsrun = (d->action[AC_PACING] || !d->actiontime[AC_PACING] || lastmillis-d->actiontime[AC_PACING] > PHYSMILLIS*2);
+                //else if(b.idle == -1 && !d->ai->dontmove)
+                //    wantsrun = (d->action[AC_PACING] || !d->actiontime[AC_PACING] || lastmillis-d->actiontime[AC_PACING] > PHYSMILLIS*2);
             }
             if(d->action[AC_PACING] != wantsrun)
                 if((d->action[AC_PACING] = !d->action[AC_PACING]) == true) d->actiontime[AC_PACING] = lastmillis;
@@ -1317,7 +1312,7 @@ namespace ai
         bool haswaited = d->weapwaited(d->weapselect, lastmillis, (1<<W_S_RELOAD));
         if(d->aitype == AI_BOT)
         {
-            if(b.idle && busy <= 1 && d->carry(sweap, 1) > 1 && d->weapstate[d->weapselect] != W_S_WAIT)
+            if(b.idle == 1 && busy <= 1 && d->carry(sweap, 1) > 1 && d->weapstate[d->weapselect] != W_S_WAIT)
             {
                 loopirev(W_ITEM) if(i != d->ai->weappref && d->candrop(i, sweap, lastmillis, G(weaponinterrupts)))
                 {
