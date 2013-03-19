@@ -592,6 +592,8 @@ namespace server
                     {
                         if(x%2) x++;
                         x = x/2;
+                        if(m_coop(gamemode, mutators) && ci->state.aitype == AI_BOT)
+                            x = int(x*G(coopbalance));
                     }
                     int slots = x;
                     loopv(playing) if(playing[i] && ci->team == playing[i]->team) slots--;
@@ -651,9 +653,11 @@ namespace server
                     {
                         if(x%2) x++;
                         x = x/2;
+                        if(m_coop(gamemode, mutators) && ci->state.aitype == AI_BOT)
+                            x = int(x*G(coopbalance));
                     }
                     int alive = 0;
-                    loopv(playing) if(playing[i])
+                    loopv(playing)
                     {
                         if(playing[i]->state.state != CS_DEAD && playing[i]->state.state != CS_ALIVE)
                         {
@@ -666,19 +670,29 @@ namespace server
                         if(spawnq.find(playing[i]) >= 0) spawnq.removeobj(playing[i]);
                         if(ci->team == playing[i]->team) alive++;
                     }
-                    if(alive >= x) return false;
+                    if(alive >= x)
+                    {
+                        if(ci->state.aitype == AI_NONE) loopv(playing)
+                        { // kill off bots for the human
+                            if(playing[i]->state.aitype != AI_BOT || ci->team != playing[i]->team)
+                                continue;
+                            queue(playing[i--]);
+                            if(--alive < x) break;
+                        }
+                        if(alive >= x) return false;
+                    }
                     if(G(maxalivequeue))
                     {
-                        loopv(spawnq) if(spawnq[i] && spawnq[i]->team == ci->team)
+                        if(ci->state.aitype == AI_BOT) loopv(spawnq) if(spawnq[i]->team == ci->team)
                         {
-                            if(spawnq[i] != ci && (ci->state.state >= 0 || spawnq[i]->state.aitype == AI_NONE)) return false;
+                            if(spawnq[i] != ci && spawnq[i]->state.aitype == AI_NONE) return false;
                             break;
                         }
                         // at this point is where it decides this player is spawning, so tell everyone else their position
                         if(x-alive == 1)
                         {
                             int wait = 0;
-                            loopv(spawnq) if(spawnq[i] && spawnq[i] != ci && spawnq[i]->team == ci->team && spawnq[i]->state.aitype == AI_NONE)
+                            loopv(spawnq) if(spawnq[i] != ci && spawnq[i]->team == ci->team && spawnq[i]->state.aitype == AI_NONE)
                             {
                                 wait++;
                                 if(allowbroadcast(spawnq[i]->clientnum))
@@ -1711,7 +1725,7 @@ namespace server
             if(!m_edit(gamemode))
             {
                 if(!cplayers) cplayers = totalspawns ? totalspawns : 1;
-                int np = G(numplayers) ? G(numplayers) : cplayers, mp = G(maxplayers) ? G(maxplayers) : np*3/2;
+                int np = G(numplayers) ? G(numplayers) : cplayers, mp = G(maxplayers) ? G(maxplayers) : np*5/2;
                 if(m_fight(gamemode) && m_team(gamemode, mutators))
                 {
                     int offt = np%numt, offq = mp%numt;
