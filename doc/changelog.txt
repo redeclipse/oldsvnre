@@ -1,6 +1,5 @@
 = Red Eclipse 1.4 =
 Gameplay:
- * Increased overall AI skill
  * Radar now always tracks players who are dominating you, and shows everyone
    else if you are last alive in duel/survivor
  * New thirdperson style with camera position to the side (adjust with
@@ -9,6 +8,10 @@ Gameplay:
  * Disabled half-impulses when the impulse meter is close to empty (back to 1.1
    behaviour, toggle with /impulsecostrelax)
  * Added reward for ending killing sprees
+ * Removed critical hits
+ * Impulse slide duration increased, maintained speed decreased
+ * Impulse regeneration start delay increased
+ * Explosion shaking effect reduced
 
 Weapons:
  * Weapons no longer reset gravity acceleration (reduces in-air pinning)
@@ -17,13 +20,15 @@ Weapons:
    pickup-based (like grenade)
  * Melee now only activates if player is airborne or dashing/sliding, and only
    in a short window of time
- * Pistol projectile speed decreased, secondary spread increased, primary
-   damage decreased
+ * Pistol secondary changed to fire single particles, primary firing rate,
+   secondary damage, secondary stun, secondary hitpush, secondary particle
+   lifetime and secondary accuracy increased, particle speed and secondary
+   firing rate decreased
  * Sword range halved, attack speed decreased
  * Shotgun firing rate decreased
  * SMG secondary now sticks to geometry and explodes radially after a short
-   delay, ricochet speed, clip size, particle lifetime and
-   firing rate increased, reload speed, and stun decreased
+   delay, ricochet speed, clip size, particle lifetime, and secondary damage
+   increased, reload speed, stun and primary damage decreased
  * Plasma primary damage, projectile speed, stun, particle size and reload
    speed increased, firing rate decreased, clip size decreased
  * Flamer primary explosion radius decreased, secondary explosion radius
