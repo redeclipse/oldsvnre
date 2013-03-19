@@ -778,7 +778,6 @@ namespace bomber
         {
             bomberstate::flag &f = st.flags[b.target];
             if(!entities::ents.inrange(f.ent) || !f.enabled) return false;
-            b.idle = -1;
             if(isbomberaffinity(f))
             {
                 if(f.owner)
