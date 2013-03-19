@@ -12,7 +12,7 @@ Gameplay:
 
 Weapons:
  * Weapons no longer reset gravity acceleration (reduces in-air pinning)
- * Projectiles now pass through teleporters
+ * Projectiles now pass through teleporters and interact with pushers
  * Mines, new weapon, primary proximity mine, secondary tripwire mine,
    pickup-based (like grenade)
  * Melee now only activates if player is airborne or dashing/sliding, and only
