@@ -81,7 +81,7 @@ namespace game
     FVAR(IDF_PERSIST, firstpersonbodyside, -10, 0, 10);
     FVAR(IDF_PERSIST, firstpersonbodypitch, -1, 1, 1);
 
-    FVAR(IDF_PERSIST, firstpersonspine, 0, 3.25f, 20);
+    FVAR(IDF_PERSIST, firstpersonspine, 0, 0.45f, 1);
     FVAR(IDF_PERSIST, firstpersonpitchmin, 0, 90, 90);
     FVAR(IDF_PERSIST, firstpersonpitchmax, 0, 45, 90);
     FVAR(IDF_PERSIST, firstpersonpitchscale, -1, 1, 1);
@@ -2145,10 +2145,11 @@ namespace game
         c.o = pos;
         if(firstpersonspine > 0)
         {
-            to.z -= firstpersonspine;
+            float spineoff = firstpersonspine*d->zradius*0.5f;
+            to.z -= spineoff;
             float lean = clamp(pitch, -firstpersonpitchmin, firstpersonpitchmax);
             if(firstpersonpitchscale >= 0) lean *= firstpersonpitchscale;
-            to.add(vec(yaw*RAD, (lean+90)*RAD).mul(firstpersonspine));
+            to.add(vec(yaw*RAD, (lean+90)*RAD).mul(spineoff));
         }
         if(firstpersonbob && !intermission && d->state == CS_ALIVE)
         {
