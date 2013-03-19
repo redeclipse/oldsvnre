@@ -56,7 +56,7 @@ Files: game/fps/maps/ares* game/fps/maps/canals* game/fps/maps/conflict*
 Copyright: 2011-2013, Ulukai <jonathan.denil@gmail.com>
 License: CC-BY-SA-3.0
 
-Files: game/fps/maps/isolation* game/fps/maps/keystone2k*
+Files: game/fps/maps/keystone2k* game/fps/maps/livefire*
 Copyright: 2012-2013, John_III <snaginneb@yahoo.com>
 License: CC-BY-SA-3.0
 
@@ -82,12 +82,16 @@ Copyright: 2012-2013, Quinton Reeves, Ulukai <jonathan.denil@gmail.com>
 License: CC-BY-SA-3.0+
 
 Files: game/fps/maps/cyanide*
-Copyright: 2013  Ricky Thomson "unixfreak" <punkalert@gmail.com>
+Copyright: 2013 Ricky Thomson "unixfreak" <punkalert@gmail.com>
 License: CC-BY-SA-3.0
 
 Files: game/fps/maps/steelrat*
 Copyright: 2012 Kirill "TristamK" Kolesnikov <tristamk@bk.ru>
 Copyright: 2012-2013 D.a.M.i.E.n. <daymeenn@gmail.com>
+
+Files: game/fps/maps/venus*
+Copyright: 2011-2013, Red Eclipse Team
+           2013, Ulukai <jonathan.denil@gmail.com>
 
 Files: data/misc/light2*
 Copyright: 2009 Georges "TRaK" Grondin <drognin@gmail.com>
