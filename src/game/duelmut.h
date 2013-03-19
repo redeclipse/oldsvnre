@@ -309,7 +309,7 @@ struct duelservmode : servmode
         duelround = duelwins = 0;
         duelwinner = -1;
         duelcheck = dueldeath = -1;
-        dueltime = gamemillis+G(duellimit);
+        dueltime = gamemillis+G(duelwarmup);
         allowed.shrink(0);
         playing.shrink(0);
         duelqueue.shrink(0);

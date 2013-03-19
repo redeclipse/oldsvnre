@@ -133,7 +133,7 @@ GVAR(IDF_ADMIN, smallmapmax, 0, 6, VAR_MAX); // maximum number of players for a 
 GVAR(IDF_ADMIN, mediummapmax, 0, 12, VAR_MAX); // maximum number of players for a medium map
 
 namespace server { extern void resetgamevars(bool flush); }
-GICOMMAND(0, resetvars, "", (), server::resetgamevars(true), return);
+GICOMMAND(0, resetvars, "", (), server::resetgamevars(true), );
 GICOMMAND(IDF_ADMIN, resetconfig, "", (), rehash(true), );
 
 GFVAR(0, maxalive, 0, 1, FVAR_MAX); // only allow this*maxplayers to be alive at once
@@ -222,6 +222,7 @@ GVAR(0, intermlimit, 0, 15000, VAR_MAX); // .. before vote menu comes up
 GVAR(0, votelimit, 0, 45000, VAR_MAX); // .. before vote passes by default
 GVAR(0, duelreset, 0, 1, 1); // reset winner in duel
 GVAR(0, duelclear, 0, 1, 1); // clear items in duel
+GVAR(0, duelwarmup, 0, 15000, VAR_MAX); // .. before duel starts playing initially
 GVAR(0, duellimit, 0, 5000, VAR_MAX); // .. before duel goes to next round
 GVAR(0, duelcycle, 0, 2, 3); // determines if players are force-cycled after a certain number of wins (bit: 0 = off, 1 = non-team games, 2 = team games)
 GVAR(0, duelcycles, 0, 3, VAR_MAX); // maximum wins in a row before force-cycling (0 = num team/total players)
@@ -321,8 +322,8 @@ GVAR(0, gauntletregenbuff, 0, 1, 1); // 0 = off, 1 = modify regeneration when bu
 GVAR(0, gauntletregendelay, 0, 1000, VAR_MAX); // regen this often when buffed
 GVAR(0, gauntletregenextra, 0, 2, VAR_MAX); // add this to regen when buffed
 
-GVAR(IDF_ADMIN, aiinitdelay, 0, 10000, VAR_MAX);
-GVAR(IDF_ADMIN, ailongdelay, 0, 30000, VAR_MAX);
+GVAR(IDF_ADMIN, aiinitdelay, 0, 5000, VAR_MAX);
+GVAR(IDF_ADMIN, ailongdelay, 0, 10000, VAR_MAX);
 GVAR(IDF_ADMIN, airefreshdelay, 0, 1000, VAR_MAX);
 GVAR(0, botbalance, -1, -1, VAR_MAX); // -1 = always use numplayers, 0 = don't balance, 1 or more = fill only with this*numteams
 GVAR(0, botskillmin, 1, 75, 101);
