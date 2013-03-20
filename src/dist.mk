@@ -73,8 +73,7 @@ DOC_FILES:= \
 	doc/irc.txt \
 	doc/license.txt \
 	doc/man/cube2font* \
-	doc/man/$(APPCLIENT)* \
-	doc/man/$(APPSERVER)* \
+	doc/man/$(APPNAME)* \
 	doc/trademark.txt
 
 DISTFILES:= \
