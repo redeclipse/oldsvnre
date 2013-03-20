@@ -2,7 +2,7 @@
 namespace aiman
 {
     int oldbotskillmin = -1, oldbotskillmax = -1, oldcoopskillmin = -1, oldcoopskillmax = -1, oldenemyskillmin = -1, oldenemyskillmax = -1,
-        oldbotbalance = -2, oldbotlimit = -1, oldbotoffset = 0, oldenemylimit = -1;
+        oldbotbalance = -2, oldnumplayers = -1, oldbotlimit = -1, oldbotoffset = 0, oldenemylimit = -1;
     float oldcoopbalance = -1, oldcoopmultibalance = -1;
 
     clientinfo *findaiclient(clientinfo *exclude = NULL)
@@ -353,6 +353,7 @@ namespace aiman
                     checkold(botlimit);
                     checkold(botoffset);
                     checkold(enemylimit);
+                    checkold(numplayers);
                 }
                 if(dorefresh)
                 {
