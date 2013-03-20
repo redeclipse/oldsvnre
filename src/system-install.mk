@@ -72,6 +72,7 @@ system-install-client: client
 system-install-server: server
 	install -d $(libexecdir)/$(appname)
 	install -d $(gamesbindir)
+	install -d $(datadir)/$(appname)
 	install -m755 $(appserver) \
 		$(libexecdir)/$(appname)/$(appname)-server
 	install -m755 install/nix/$(appsrcname)-server.am \
@@ -81,6 +82,8 @@ system-install-server: server
 		-e 's,@DOCDIR@,$(patsubst $(DESTDIR)%,%,$(docdir)),g' \
 		-e 's,@APPNAME@,$(appname),g' \
 		-i $(gamesbindir)/$(appname)-server
+	install -m644 ../$(appgamedir)/version.cfg \
+		$(datadir)/$(appname)/version.cfg
 
 system-install-data:
 	install -d $(datadir)/$(appname)
