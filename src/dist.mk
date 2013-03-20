@@ -36,7 +36,10 @@ SRC_FILES:= \
 	src/dist.mk \
 	src/dpiaware.manifest \
 	src/system-install.mk \
-	src/$(APPNAME).* \
+	src/$(APPNAME).cbp \
+	src/$(APPNAME).ico \
+	src/$(APPNAME).mk \
+	src/$(APPNAME).rc \
 	src/install/nix/$(APPNAME)* \
 	src/install/win/*
 
@@ -82,7 +85,7 @@ DISTFILES:= \
 	data \
 	game/$(APPSHORTNAME) \
 	$(DOC_FILES) \
-	$(shell cd ../ && find $(SRC_DIRS) -not -iname *.lo -not -iname *.gch -not -iname *.o) \
+	$(shell cd ../ && find $(SRC_DIRS) -not -iname *.lo -not -iname *.gch -not -iname *.o -not -iname *.res) \
 	$(SRC_FILES) \
 	$(SRC_XCODE)
 
