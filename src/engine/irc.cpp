@@ -897,7 +897,6 @@ bool ircnetgui(guient *g, ircnet *n, bool tab)
 static const char *ircstates[IRC_MAX] = { "\froffline", "\foconnecting", "\fynegotiating", "\fgonline" };
 bool ircgui(guient *g, const char *s)
 {
-    g->allowautotab(false);
     g->strut(94);
     if(s && *s)
     {

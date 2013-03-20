@@ -546,9 +546,7 @@ struct guient
     virtual void pushlist(bool merge = false) {}
     virtual int poplist() { return 0; }
 
-    virtual void allowautotab(bool on) = 0;
     virtual void allowhitfx(bool on) = 0;
-
     virtual bool visible() = 0;
     virtual bool shouldtab() { return false; }
     virtual void tab(const char *name = NULL, int color = 0xFFFFFF, bool front = false) = 0;
