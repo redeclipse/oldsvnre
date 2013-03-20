@@ -34,8 +34,9 @@ Weapons:
  * Flamer primary explosion radius decreased, secondary explosion radius
    increased, secondary firing rate decreased, projectile size and speed
    increased, damage decreased
- * Rifle explosion size, hitpush, and firing rate decreased, primary damage,
-   recoil, clip size, accuracy and particle speed increased
+ * Rifle explosion size, hitpush, particle size, reload speed and secondary
+   firing rate decreased, primary damage, recoil, clip size, and accuracy
+   increased
  * Grenade firing rate increased
  * Rocket direct damage increased, flak damage reduced, firing rate decreased
 
@@ -87,6 +88,7 @@ Maps:
  * Live Fire, new map (added from map update 3)
  * Forge, updated (retextured)
  * Bloodlust, new map
+ * Tranquility, removed
 
 Interface & Menus:
  * Overall reduced font sizes
