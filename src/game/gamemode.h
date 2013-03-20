@@ -304,14 +304,14 @@ extern mutstypes mutstype[];
 #define m_armour(a,b,c)     (m_insta(a,b) ? 0 : G(spawnarmour))
 #endif
 #define m_maxhealth(a,b,c)  (int(m_health(a, b, c)*(m_vampire(a,b) ? G(maxhealthvampire) : G(maxhealth))))
-#define m_balance(a)        (m_trial(a) ? 0 : (m_gauntlet(a) ? 1 : (G(balancemaps) >= 0 ? G(balancemaps) : G(mapbalance))))
+#define m_balance(a,b)      (m_team(a, b) && !m_trial(a) && m_fight(a) && (m_gauntlet(a) || ((G(balancemaps) >= 0 ? G(balancemaps) : G(mapbalance)) >= (m_affinity(a) ? 1 : 2))))
 #define m_balreset(a)       (m_capture(a) || m_bomber(a) || m_gauntlet(a))
+#define m_jet(a,b)          (PHYS(gravity) == 0 || m_jetpack(a, b))
 
 #define w_reload(w1,w2)     (w1 != W_MELEE ? (isweap(w2) ? (w1 == w2 ? -1 : W(w1, reloads)) : (w1 < 0-w2 ? -1 : W(w1, reloads))) : 0)
 #define w_carry(w1,w2)      (w1 > W_MELEE && (isweap(w2) ? w1 != w2 : w1 >= 0-w2) && (isweap(w1) && W(w1, carried)))
 #define w_attr(a,b,w1,w2)   (m_edit(a) ? w1 : ((w1 >= W_OFFSET && w1 != w2) ? w1 : (w2 == W_GRENADE ? W_MINE : W_GRENADE)))
 #define w_spawn(weap)       int(ceilf(G(itemspawntime)*W(weap, frequency)))
-#define m_jet(a,b)          (PHYS(gravity) == 0 || m_jetpack(a, b))
 
 #define mapshrink(a,b,c,d) if((a) && (b) && (c) && *(c)) \
 { \

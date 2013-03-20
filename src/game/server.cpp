@@ -631,14 +631,14 @@ namespace server
             if(ci->state.aitype >= AI_START) return true;
             else if(tryspawn)
             {
-                if(m_balance(gamemode) && G(balancenospawn) && nextbalance && nextbalance >= gamemillis) return false;
+                if(m_balance(gamemode, mutators) && G(balancenospawn) && nextbalance && nextbalance >= gamemillis) return false;
                 if(m_loadout(gamemode, mutators) && !chkloadweap(ci)) return false;
                 if(spawnqueue(true) && spawnq.find(ci) < 0 && playing.find(ci) < 0) queue(ci);
                 return true;
             }
             else
             {
-                if(m_balance(gamemode) && G(balancenospawn) && nextbalance && nextbalance >= gamemillis) return false;
+                if(m_balance(gamemode, mutators) && G(balancenospawn) && nextbalance && nextbalance >= gamemillis) return false;
                 if(m_loadout(gamemode, mutators) && !chkloadweap(ci, false)) return false;
                 int delay = ci->state.aitype >= AI_START && ci->state.lastdeath ? G(enemyspawntime) : m_delay(gamemode, mutators);
                 if(delay && ci->state.respawnwait(gamemillis, delay)) return false;
@@ -1359,8 +1359,7 @@ namespace server
     void checklimits()
     {
         if(!m_fight(gamemode)) return;
-        int balance = m_balance(gamemode),
-            limit = inovertime ? max(G(overtimelimit), 1) : G(timelimit);
+        int limit = inovertime ? max(G(overtimelimit), 1) : G(timelimit);
         bool newlimit = limit != oldtimelimit, newtimer = gamemillis-curtime>0 && gamemillis/1000!=(gamemillis-curtime)/1000,
              iterate = newlimit || newtimer, wasinovertime = inovertime;
         if(iterate)
@@ -1381,7 +1380,7 @@ namespace server
                 bool wantsoneminute = true;
                 if(!timeremaining)
                 {
-                    if(!inovertime && !balance && G(overtimeallow) && wantsovertime())
+                    if(!inovertime && !m_balance(gamemode, mutators) && G(overtimeallow) && wantsovertime())
                     {
                         limit = oldtimelimit = G(overtimelimit);
                         if(limit)
@@ -1419,7 +1418,7 @@ namespace server
             startintermission();
             return; // bail
         }
-        if(!balance && G(pointlimit) && m_teamscore(gamemode))
+        if(!m_balance(gamemode, mutators) && G(pointlimit) && m_teamscore(gamemode))
         {
             if(m_team(gamemode, mutators))
             {
@@ -1446,12 +1445,12 @@ namespace server
                 }
             }
         }
-        if(iterate && balance && m_team(gamemode, mutators) && gamelimit > 0)
+        if(iterate && m_balance(gamemode, mutators) && m_team(gamemode, mutators) && gamelimit > 0)
         {
             int numt = numteams(gamemode, mutators),
                 delpart = min(gamelimit/(numt*2), G(balancedelay)), timetotal = gamelimit-(delpart*numt),
-                balpart = (timetotal/numt)+(delpart*curbalance), balance = gamemillis/balpart;
-            if(balance != curbalance)
+                balpart = (timetotal/numt)+(delpart*curbalance), baliter = gamemillis/balpart;
+            if(baliter != curbalance)
             {
                 if(!nextbalance)
                 {
@@ -1466,7 +1465,7 @@ namespace server
                 if(gamemillis >= nextbalance)
                 {
                     int oldbalance = curbalance;
-                    curbalance = balance;
+                    curbalance = baliter;
                     if(smode) smode->balance(oldbalance);
                     mutate(smuts, mut->balance(oldbalance));
                     static vector<clientinfo *> assign[T_TOTAL];
