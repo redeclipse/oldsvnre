@@ -1171,28 +1171,27 @@ namespace server
     {
         if(!m_game(mode)) mode = G_DEATHMATCH;
         static string mtname; mtname[0] = 0;
-        loopi(G_M_NUM) if(muts&(1<<mutstype[i].type))
+        int mutid = -1;
+        loopi(G_M_NUM) if(muts == (1<<mutstype[i].type)) mutid = i;
+        if(mutid < 0) return "";
+        if(type == 4 || type == 5)
         {
-            if(type == 4 || type == 5)
-            {
-                if(m_capture(mode) && m_gsp3(mode, muts)) break;
-                else if(m_bomber(mode) && (m_gsp1(mode, muts) || m_gsp2(mode, muts))) break;
-                else if(m_gauntlet(mode) && m_gsp1(mode, muts)) break;
-            }
-            if(type == 1 || type == 3 || type == 4)
-            {
-                const char *n = i >= G_M_GSP ? gametype[mode].gsp[i-G_M_GSP] : mutstype[i].name;
-                if(!n || !*n) { mtname[0] = 0; break; }
-                concatstring(mtname, n);
-            }
-            if(type == 3 || type == 4) concatstring(mtname, ": ");
-            if(type == 2 || type == 3 || type == 4 || type == 5)
-            {
-                const char *n = i >= G_M_GSP ? gametype[mode].gsd[i-G_M_GSP] : mutstype[i].desc;
-                if(!n || !*n) { mtname[0] = 0; break; }
-                concatstring(mtname, n);
-            }
-            break;
+            if(m_capture(mode) && m_gsp3(mode, muts)) return "";
+            else if(m_bomber(mode) && (m_gsp1(mode, muts) || m_gsp2(mode, muts))) return "";
+            else if(m_gauntlet(mode) && m_gsp1(mode, muts)) return "";
+        }
+        if(type == 1 || type == 3 || type == 4)
+        {
+            const char *n = mutid >= G_M_GSP ? gametype[mode].gsp[mutid-G_M_GSP] : mutstype[mutid].name;
+            if(!n || !*n) return "";
+            concatstring(mtname, n);
+        }
+        if(type == 3 || type == 4) concatstring(mtname, ": ");
+        if(type == 2 || type == 3 || type == 4 || type == 5)
+        {
+            const char *n = mutid >= G_M_GSP ? gametype[mode].gsd[mutid-G_M_GSP] : mutstype[mutid].desc;
+            if(!n || !*n) return "";
+            concatstring(mtname, n);
         }
         return mtname;
     }
