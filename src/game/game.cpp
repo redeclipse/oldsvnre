@@ -1749,7 +1749,7 @@ namespace game
                 msg.put(weap, strlen(weap));
             }
             if(!value.empty()) setsvar("favloadweaps", value.getbuf(), true);
-            if(d == game::player1 && !msg.empty() && echo) conoutft(CON_SELF, "weapon selection is now: %s", msg.getbuf());
+            if(d == player1 && !msg.empty() && echo) conoutft(CON_SELF, "weapon selection is now: %s", msg.getbuf());
         }
         else conoutft(CON_MESG, "\foweapon selection is not currently available");
     }
@@ -1878,22 +1878,45 @@ namespace game
     const char *colourname(gameent *d, char *name, bool icon, bool dupname)
     {
         if(!name) name = d->name;
-        static string colored; colored[0] = 0;
+        static string colored; colored[0] = 0; string colortmp;
         concatstring(colored, "\fs");
         if(icon)
         {
-            defformatstring(cicon)("\f[%d]\f($priv%stex)", findcolour(d), hud::privname(d->privilege, d->aitype));
-            concatstring(colored, cicon);
+            formatstring(colortmp)("\f[%d]\f($priv%stex)", findcolour(d), hud::privname(d->privilege, d->aitype));
+            concatstring(colored, colortmp);
         }
-        defformatstring(cname)("\f[%d]%s", TEAM(d->team, colour), name);
-        concatstring(colored, cname);
+        formatstring(colortmp)("\f[%d]%s", TEAM(d->team, colour), name);
+        concatstring(colored, colortmp);
         if(!name[0] || (d->aitype < AI_START && dupname && duplicatename(d, name)))
         {
-            defformatstring(s)("%s[%d]", name[0] ? " " : "", d->clientnum);
-            concatstring(colored, s);
+            formatstring(colortmp)("%s[%d]", name[0] ? " " : "", d->clientnum);
+            concatstring(colored, colortmp);
         }
         concatstring(colored, "\fS");
         return colored;
+    }
+
+    const char *teamtexnamex(int team)
+    {
+        const char *teamtexs[T_MAX] = { "teamtex", "teamalphatex", "teamomegatex", "teamkappatex", "teamsigmatex", "teamtex" };
+        return teamtexs[clamp(team, 0, T_MAX-1)];
+    }
+
+    const char *colourteam(int team, bool icon)
+    {
+        if(team < 0 || team > T_MAX) team = T_NEUTRAL;
+        static string teamed; teamed[0] = 0; string teamtmp;
+        concatstring(teamed, "\fs");
+        formatstring(teamtmp)("\f[%d]", TEAM(team, colour));
+        concatstring(teamed, teamtmp);
+        if(icon)
+        {
+            formatstring(teamtmp)("\f($%s)", teamtexnamex(team));
+            concatstring(teamed, teamtmp);
+        }
+        concatstring(teamed, TEAM(team, name));
+        concatstring(teamed, "\fS");
+        return teamed;
     }
 
     void suicide(gameent *d, int flags)
@@ -2631,7 +2654,7 @@ namespace game
                 if(player1->state == CS_ALIVE) weapons::shoot(player1, worldpos);
             }
             otherplayers();
-            if(needloadout(game::player1) && !menuactive()) showgui("loadout", -1);
+            if(needloadout(player1) && !menuactive()) showgui("loadout", -1);
         }
         else if(!menuactive()) showgui("main", -1);
 

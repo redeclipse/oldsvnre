@@ -435,7 +435,7 @@ namespace client
             }
             else conoutft(CON_INFO, "\frcan only change teams when actually playing in team games");
         }
-        else conoutft(CON_INFO, "\fgyour team is: \fs\f[%d]%s\fS", TEAM(game::player1->team, colour), TEAM(game::player1->team, name));
+        else conoutft(CON_INFO, "\fgyour team is: %s", game::colourteam(game::player1->team));
     }
     ICOMMAND(0, team, "s", (char *s), switchteam(s));
 
@@ -869,7 +869,7 @@ namespace client
         defformatstring(m)("%s", game::colourname(d));
         if(flags&SAY_TEAM)
         {
-            defformatstring(t)(" (\fs\f[%d]%s\fS)", TEAM(d->team, colour), TEAM(d->team, name));
+            defformatstring(t)(" (to team %s)", game::colourteam(d->team));
             concatstring(m, t);
         }
         if(flags&SAY_ACTION) formatstring(s)("\fv* %s %s", m, text);
@@ -2379,7 +2379,7 @@ namespace client
                     if(w->team != tn)
                     {
                         if(m_team(game::gamemode, game::mutators) && w->aitype == AI_NONE && showteamchange >= (w->team != T_NEUTRAL && tn != T_NEUTRAL ? 1 : 2))
-                            conoutft(CON_EVENT, "\fa%s is now on team \fs\f[%d]\f(%s)%s", game::colourname(w), TEAM(tn, colour), hud::teamtexname(tn), TEAM(tn, name));
+                            conoutft(CON_EVENT, "\fa%s is now on team %s", game::colourname(w), game::colourteam(tn));
                         w->team = tn;
                         if(w == game::focus) hud::lastteam = 0;
                     }
