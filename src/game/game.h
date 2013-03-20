@@ -1651,7 +1651,7 @@ namespace game
 
 namespace entities
 {
-    extern int showentdescs;
+    extern int showentdescs, simpleitems;
     extern vector<extentity *> ents;
     extern int lastenttype[MAXENTTYPES], lastusetype[EU_MAX];
     extern bool execitem(int n, dynent *d);
