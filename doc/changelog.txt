@@ -22,23 +22,22 @@ Weapons:
    in a short window of time
  * Pistol secondary changed to fire single particles, firing rate,
    secondary damage, secondary stun, secondary hitpush, secondary
-   particle lifetime and secondary accuracy increased, particle speed and
+   particle lifetime and secondary accuracy increased; particle speed and
    secondary firing rate decreased
  * Sword range halved, attack speed decreased
  * Shotgun firing rate decreased
  * SMG secondary now sticks to geometry and explodes radially after a short
    delay, ricochet speed, clip size, particle lifetime, and secondary damage
-   increased, reload speed, stun and primary damage decreased
+   increased; reload speed, stun and primary damage decreased
  * Plasma primary damage, projectile speed, stun, particle size and reload
-   speed increased, firing rate decreased, clip size decreased
- * Flamer primary explosion radius decreased, secondary explosion radius
-   increased, secondary firing rate decreased, projectile size and speed
-   increased, damage decreased
- * Rifle explosion size, hitpush, particle size, reload speed and secondary
-   firing rate decreased, primary damage, recoil, clip size, and accuracy
-   increased
+   speed increased; firing rate and clip size decreased
+ * Flamer projectile size, projectile speed and secondary explosion redius
+   increased; damage, primary explosion radius and secondary firing rate
+   decreased
+ * Rifle damage, recoil, clip size, and accuracy increased; explosion size,
+   hitpush, particle size, reload speed and secondary firing rate decreased
  * Grenade firing rate increased
- * Rocket direct damage increased, flak damage reduced, firing rate decreased
+ * Rocket direct damage increased; flak damage and firing rate decreased
 
 Modes & Mutators:
  * Reduced number of bots in coop to 3/2 of humans
