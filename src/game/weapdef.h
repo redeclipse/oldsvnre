@@ -157,7 +157,6 @@
 
     #define W(weap,name)         (*sv_weap_stat_##name[weap])
     #define W2(weap,name,second) (*sv_weap_stat_##name[weap][second?1:0])
-    #define W2(weap,name,second) (*sv_weap_stat_##name[weap][second?1:0])
     #define WSTR(a,weap,attr)    defformatstring(a)("sv_%s%s", weaptype[weap].name, #attr)
 #else
 #ifdef GAMEWORLD
