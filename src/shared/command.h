@@ -332,7 +332,7 @@ extern void checksleep(int millis);
 extern void clearsleep(bool clearworlds = true);
 
 extern char *logtimeformat, *filetimeformat;
-extern char *gettime(time_t ctime = 0, char *format = NULL);
+extern const char *gettime(time_t ctime = 0, const char *format = NULL);
 
 // nasty macros for registering script functions, abuses globals to avoid excessive infrastructure
 #define KEYWORD(flags, name, type) static bool __dummy_##name = addkeyword(type, #name, flags)
