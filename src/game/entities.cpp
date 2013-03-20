@@ -16,6 +16,11 @@ namespace entities
     VAR(IDF_PERSIST, showentdist, 0, 256, VAR_MAX);
     FVAR(IDF_PERSIST, showentsize, 0, 2, FVAR_MAX);
 
+    VAR(IDF_PERSIST, simpleitems, 0, 0, 2); // 0 = items are models, 1 = items are icons, 2 = items are off and only halos appear
+    FVAR(IDF_PERSIST, simpleitemsize, 0, 5, 6);
+    FVAR(IDF_PERSIST, simpleitemblend, 0, 1, 1);
+    FVAR(IDF_PERSIST, simpleitemhalo, 0, 0.5f, 1);
+
     vector<extentity *> &getents() { return ents; }
     int lastent(int type) { return type >= 0 && type < MAXENTTYPES ? lastenttype[type] : 0; }
     int numattrs(int type) { return type >= 0 && type < MAXENTTYPES ? enttype[type].numattrs : 0; }
@@ -2107,7 +2112,7 @@ namespace entities
             loopi(numents)
             {
                 gameentity &e = *(gameentity *)ents[i];
-                if(e.type <= NOTUSED || e.type >= MAXENTTYPES) continue;
+                if(e.type <= NOTUSED || e.type >= MAXENTTYPES || (enttype[e.type].usetype == EU_ITEM && simpleitems)) continue;
                 bool active = enttype[e.type].usetype == EU_ITEM && (e.spawned || (e.lastemit && lastmillis-e.lastemit < 500));
                 if((m_edit(game::gamemode) && rendermainview) || active)
                 {
@@ -2200,10 +2205,16 @@ namespace entities
         float fluc = interval >= 500 ? (1500-interval)/1000.f : (500+interval)/1000.f;
         if(enttype[e.type].usetype == EU_ITEM && (active || isedit))
         {
-            float radius = max(((e.type == WEAPON ? weaptype[attr].halo : enttype[e.type].radius*0.5f)+(fluc*0.5f))*skew, 0.125f);
+            float blend = fluc*skew, radius = max(((e.type == WEAPON ? weaptype[attr].halo : enttype[e.type].radius*0.5f)+(fluc*0.5f))*skew, 0.125f);
+            if(simpleitems == 1)
+            {
+                part_icon(o, textureload(hud::itemtex(e.type, attr), 3), simpleitemsize*skew, simpleitemblend*skew, 0, 0, 1, colour);
+                if(radius < simpleitemsize*skew) radius = simpleitemsize*skew;
+                blend *= simpleitemhalo;
+            }
             vec offset = vec(o).sub(camera1->o).rescale(radius/2);
             offset.z = max(offset.z, -1.0f);
-            part_create(PART_HINT_BOLD_SOFT, 1, offset.add(o), colour, radius, fluc*skew);
+            part_create(PART_HINT_BOLD_SOFT, 1, offset.add(o), colour, radius, blend);
         }
         if(isedit ? (showentinfo&(hasent ? 1 : 2)) : (enttype[e.type].usetype == EU_ITEM && active && showentdescs >= 3))
         {
