@@ -180,7 +180,7 @@ namespace hud
                 {
                     int anc = sg.players.find(game::player1) >= 0 ? S_V_YOUWIN : (game::player1->state != CS_SPECTATOR ? S_V_YOULOSE : -1);
                     if(m_defend(game::gamemode) && sg.total == INT_MAX)
-                        game::announcef(anc, CON_MESG, NULL, true, "\fwteam \fs\f[%d]%s\fS secured all flags", TEAM(sg.team, colour), TEAM(sg.team, name));
+                        game::announcef(anc, CON_MESG, NULL, true, "\fwteam %s secured all flags", game::colourteam(sg.team));
                     else
                     {
                         if(numgroups > 1 && sg.total == groups[1]->total)
@@ -190,14 +190,14 @@ namespace hud
                             {
                                 if(sg.total == groups[i]->total)
                                 {
-                                    defformatstring(tw)("\fw\fs\f[%d]%s\fS, ", TEAM(groups[i]->team, colour), TEAM(groups[i]->team, name));
+                                    defformatstring(tw)("%s, ", game::colourteam(groups[i]->team));
                                     concatstring(winner, tw);
                                 }
                                 else break;
                             }
-                            game::announcef(S_V_DRAW, CON_MESG, NULL, true, "\fw\fs\f[%d]%s\fS tied %swith a total score of: \fs\fc%s\fS", TEAM(sg.team, colour), TEAM(sg.team, name), winner, m_laptime(game::gamemode, game::mutators) ? timestr(sg.total) : intstr(sg.total));
+                            game::announcef(S_V_DRAW, CON_MESG, NULL, true, "\fw%s tied %swith a total score of: \fs\fc%s\fS", game::colourteam(sg.team), winner, m_laptime(game::gamemode, game::mutators) ? timestr(sg.total) : intstr(sg.total));
                         }
-                        else game::announcef(anc, CON_MESG, NULL, true, "\fwteam \fs\f[%d]%s\fS won the match with a total score of: \fs\fc%s\fS", TEAM(sg.team, colour), TEAM(sg.team, name), m_laptime(game::gamemode, game::mutators) ? timestr(sg.total) : intstr(sg.total));
+                        else game::announcef(anc, CON_MESG, NULL, true, "\fwteam %s won the match with a total score of: \fs\fc%s\fS", game::colourteam(sg.team), m_laptime(game::gamemode, game::mutators) ? timestr(sg.total) : intstr(sg.total));
                     }
                 }
                 else
@@ -367,7 +367,7 @@ namespace hud
                                     else g.textf("%s", 0xFFFFFF, NULL, 0, gametype[game::gamemode].desc);
                                 });
                                 if(m_team(game::gamemode, game::mutators))
-                                    uicenterlist(g, g.textf("Playing for team \fs\f[%d]\f(%s)%s\fS", 0xFFFFFF, NULL, 0, TEAM(game::player1->team, colour), teamtexname(game::player1->team), TEAM(game::player1->team, name)));
+                                    uicenterlist(g, g.textf("Playing for team %s", 0xFFFFFF, NULL, 0, game::colourteam(game::player1->team)));
                             });
                         }
                         else if(game::player1->state == CS_SPECTATOR)

@@ -1054,22 +1054,45 @@ namespace server
     const char *colourname(clientinfo *ci, char *name = NULL, bool icon = true, bool dupname = true)
     {
         if(!name) name = ci->name;
-        static string colored; colored[0] = 0;
+        static string colored; colored[0] = 0; string colortmp;
         concatstring(colored, "\fs");
         if(icon)
         {
-            defformatstring(cicon)("\f[%d]\f($priv%stex)", findcolour(ci), privnamex(ci->privilege, ci->state.aitype));
-            concatstring(colored, cicon);
+            formatstring(colortmp)("\f[%d]\f($priv%stex)", findcolour(ci), privnamex(ci->privilege, ci->state.aitype));
+            concatstring(colored, colortmp);
         }
-        defformatstring(cname)("\f[%d]%s", TEAM(ci->team, colour), name);
-        concatstring(colored, cname);
+        formatstring(colortmp)("\f[%d]%s", TEAM(ci->team, colour), name);
+        concatstring(colored, colortmp);
         if(!name[0] || (ci->state.aitype < AI_START && dupname && duplicatename(ci, name)))
         {
-            defformatstring(s)("%s[%d]", name[0] ? " " : "", ci->clientnum);
-            concatstring(colored, s);
+            formatstring(colortmp)("%s[%d]", name[0] ? " " : "", ci->clientnum);
+            concatstring(colored, colortmp);
         }
         concatstring(colored, "\fS");
         return colored;
+    }
+
+    const char *teamtexnamex(int team)
+    {
+        const char *teamtexs[T_MAX] = { "teamtex", "teamalphatex", "teamomegatex", "teamkappatex", "teamsigmatex", "teamtex" };
+        return teamtexs[clamp(team, 0, T_MAX-1)];
+    }
+
+    const char *colourteam(int team, bool icon = true)
+    {
+        if(team < 0 || team > T_MAX) team = T_NEUTRAL;
+        static string teamed; teamed[0] = 0; string teamtmp;
+        concatstring(teamed, "\fs");
+        formatstring(teamtmp)("\f[%d]", TEAM(team, colour));
+        concatstring(teamed, teamtmp);
+        if(icon)
+        {
+            formatstring(teamtmp)("\f($%s)", teamtexnamex(team));
+            concatstring(teamed, teamtmp);
+        }
+        concatstring(teamed, TEAM(team, name));
+        concatstring(teamed, "\fS");
+        return teamed;
     }
 
     bool haspriv(clientinfo *ci, int flag, const char *msg = NULL)
@@ -5186,7 +5209,7 @@ namespace server
                     string output;
                     copystring(output, text, G(messagelength));
                     if(flags&SAY_TEAM && !m_team(gamemode, mutators)) flags &= ~SAY_TEAM;
-                    sendf(-1, -1, "ri3s", N_TEXT, cp->clientnum, flags, output); // sent to nagative chan for recordpacket
+                    sendf(-1, -1, "ri3s", N_TEXT, cp->clientnum, flags, output); // sent to negative chan for recordpacket
                     loopv(clients)
                     {
                         clientinfo *t = clients[i];
@@ -5196,7 +5219,7 @@ namespace server
                     defformatstring(m)("%s", colourname(cp));
                     if(flags&SAY_TEAM)
                     {
-                        defformatstring(t)(" (\fs\f[%d]%s\fS)", TEAM(cp->team, colour), TEAM(cp->team, name));
+                        defformatstring(t)(" (to team %s)", colourteam(cp->team));
                         concatstring(m, t);
                     }
                     if(flags&SAY_ACTION) relayf(0, "\fv* %s %s", m, output);

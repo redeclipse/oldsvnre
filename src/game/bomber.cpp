@@ -334,7 +334,7 @@ namespace bomber
                     part_explosion(above, enttype[AFFINITY].radius*trans, PART_SHOCKWAVE, 1, TEAM(f.team, colour), 1.f, trans*0.25f);
                     part_explosion(above, enttype[AFFINITY].radius/3*trans, PART_SHOCKBALL, 1, TEAM(f.team, colour), 1.f, trans*0.5f);
                     above.z += enttype[AFFINITY].radius*trans+2.5f;
-                    defformatstring(info)("<super>%s base", TEAM(f.team, name));
+                    defformatstring(info)("<super>%s base", game::colourteam(f.team));
                     part_textcopy(above, info, PART_TEXT, 1, TEAM(f.team, colour), 2, 1);
                     above.z += 2.5f;
                     part_icon(above, textureload(hud::teamtexname(f.team), 3), 2, 1, 0, 0, 1, TEAM(f.team, colour));
@@ -501,7 +501,8 @@ namespace bomber
         entities::execlink(NULL, f.ent, false);
         entities::execlink(NULL, g.ent, false);
         hud::teamscore(d->team).total = score;
-        game::announcef(S_V_BOMBSCORE, CON_INFO, d, true, "\fa%s destroyed the \fs\f[%d]%s\fS base for team \fs\f[%d]%s\fS (score: \fs\fc%d\fS, time taken: \fs\fc%s\fS)", game::colourname(d), TEAM(g.team, colour), TEAM(g.team, name), TEAM(d->team, colour), TEAM(d->team, name), score, timestr(lastmillis-f.inittime));
+        defformatstring(gteam)("%s", game::colourteam(g.team));
+        game::announcef(S_V_BOMBSCORE, CON_INFO, d, true, "\fa%s destroyed the %s base for team %s (score: \fs\fc%d\fS, time taken: \fs\fc%s\fS)", game::colourname(d), gteam, game::colourteam(d->team), score, timestr(lastmillis-f.inittime));
         st.returnaffinity(relay, lastmillis, false);
     }
 

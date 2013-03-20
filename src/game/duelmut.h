@@ -215,7 +215,7 @@ struct duelservmode : servmode
                         {
                             if(!cleanup)
                             {
-                                defformatstring(end)("\fyteam \fs\f[%d]%s\fS are the winners", TEAM(alive[0]->team, colour), TEAM(alive[0]->team, name));
+                                defformatstring(end)("\fyteam %s are the winners", colourteam(alive[0]->team));
                                 bool teampoints = true;
                                 loopv(clients) if(playing.find(clients[i]) >= 0)
                                 {

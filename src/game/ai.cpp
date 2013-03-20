@@ -69,7 +69,7 @@ namespace ai
 
     bool targetable(gameent *d, gameent *e, bool solid)
     {
-        if(e && d != e && !passive() && e->state == CS_ALIVE && (!solid || physics::issolid(e, d)))
+        if(d && e && d != e && !passive() && e->state == CS_ALIVE && (!solid || physics::issolid(e, d)))
         {
             int dt = owner(d), et = owner(e);
             if(dt == T_ENEMY && et == T_ENEMY) return false;
@@ -440,7 +440,7 @@ namespace ai
             if(targets.empty())
             {
                 gameent *e = NULL;
-                loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && e != d)
+                loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) != NULL && e != d)
                 {
                     targcache &c = targets.add();
                     c.d = e;

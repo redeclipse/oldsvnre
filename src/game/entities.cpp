@@ -144,7 +144,7 @@ namespace entities
                 {
                     if(valteam(attr[0], T_FIRST))
                     {
-                        defformatstring(str)("team %s", TEAM(attr[0], name));
+                        defformatstring(str)("team %s", game::colourteam(attr[0]));
                         addentinfo(str);
                     }
                 }
