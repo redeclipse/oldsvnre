@@ -41,7 +41,7 @@ namespace client
     extern void connectattempt(const char *name, int port, const char *password, const ENetAddress &address);
     extern void connectfail();
     extern int state();
-    extern int otherclients();
+    extern int otherclients(bool nospec = false);
     extern int servercompare(serverinfo *a, serverinfo *b);
 }
 
