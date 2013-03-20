@@ -124,7 +124,7 @@ namespace client
         if(!isignored(d->clientnum))
         {
             SEARCHBINDCACHE(votekey)("showgui maps 2", 0);
-            conoutft(CON_EVENT, "%s suggests: \fs\fy%s\fS on map \fs\fo%s\fS, press \fs\fc%s\fS to vote", game::colourname(d), server::gamename(mode, muts), text, votekey);
+            conoutft(CON_EVENT, "%s suggests: \fs\fy%s\fS on \fs\fo%s\fS, press \fs\fc%s\fS to vote", game::colourname(d), server::gamename(mode, muts), text, votekey);
         }
     }
     ICOMMAND(0, fakevote, "sii", (char *s, int *m, int *n), vote(game::player1, s, *m, *n));
