@@ -182,6 +182,7 @@ namespace physics
     {
         if(d != e)
         {
+            if(d->aitype >= AI_START && e && e->aitype >= AI_START && ai::owner(d) == ai::owner(e)) return true;
             switch(m_ghost(game::gamemode))
             {
                 case 2: if(e && ai::owner(d) == ai::owner(e)) return true; break;
