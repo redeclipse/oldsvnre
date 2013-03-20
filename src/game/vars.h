@@ -343,12 +343,15 @@ GVAR(0, coopskillmax, 1, 85, 101);
 GVAR(0, enemybalance, 1, 1, 3);
 GVAR(0, enemyskillmin, 1, 65, 101);
 GVAR(0, enemyskillmax, 1, 80, 101);
+GVAR(0, enemylimit, 0, 32, VAR_MAX);
 GVAR(0, enemyspawntime, 1, 30000, VAR_MAX); // when enemies respawn
 GVAR(0, enemyspawndelay, 0, 1000, VAR_MAX); // after map start enemies first spawn
 GVAR(0, enemyspawnstyle, 0, 1, 3); // 0 = all at once, 1 = staggered, 2 = random, 3 = randomise between both
 GFVAR(0, enemyspeed, 0, 1, FVAR_MAX);
 GFVAR(0, enemyscale, FVAR_NONZERO, 1, FVAR_MAX);
 GFVAR(0, enemystrength, FVAR_NONZERO, 1, FVAR_MAX); // scale enemy health values by this much
+GFVAR(0, enemyspawndistmin, 0, 32, FVAR_MAX);
+GFVAR(0, enemyspawndistmax, 0, 512, FVAR_MAX);
 
 GFVAR(0, movespeed, FVAR_NONZERO, 100, FVAR_MAX); // speed
 GFVAR(0, movecrawl, 0, 0.6f, FVAR_MAX); // crawl modifier
