@@ -31,9 +31,9 @@ struct flare
 VAR(IDF_PERSIST, flarelights, 0, 3, 15); // 0 = off, &1 = defined suns, &2 = defined lights, &4 = all suns, &8 = all lights
 VAR(IDF_PERSIST, flarecutoff, 0, 1000, VAR_MAX);
 VAR(IDF_PERSIST, flaresize, 1, 100, VAR_MAX);
-VAR(IDF_PERSIST, flaresundist, 1, 8192, VAR_MAX);
+VAR(IDF_PERSIST, flaresundist, 1, 4096, VAR_MAX);
 VAR(IDF_PERSIST, flareshine, 1, 50, VAR_MAX);
-FVAR(IDF_PERSIST, flareblend, 0, 0.75f, 1);
+FVAR(IDF_PERSIST, flareblend, 0, 0.5f, 1);
 FVAR(IDF_PERSIST, flareadjust, 0, 0.7f, 1);
 
 struct flarerenderer : partrenderer
