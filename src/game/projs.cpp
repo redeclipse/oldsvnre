@@ -193,7 +193,8 @@ namespace projs
         bool push = WF(WK(proj.flags), proj.weap, wavepush, WS(proj.flags)) > 1, radiated = false;
         float maxdist = push ? radius*WF(WK(proj.flags), proj.weap, wavepush, WS(proj.flags)) : radius;
         #define radialpush(xx,yx,yy,yz1,yz2,zz) \
-            if(!proj.o.reject(xx, maxdist+max(yx, yy))) \
+            if(!proj.o.reject(xx, max(yx, yy))) zz = 0; \
+            else if(!proj.o.reject(xx, maxdist+max(yx, yy))) \
             { \
                 vec bottom(xx), top(xx); bottom.z -= yz1; top.z += yz2; \
                 zz = closestpointcylinder(proj.o, bottom, top, max(yx, yy)).dist(proj.o); \
