@@ -2158,7 +2158,7 @@ namespace server
             endmatch();
             if(best)
             {
-                srvoutf(-3, "vote passed: \fs\fy%s\fS on map \fs\fo%s\fS", gamename(best->mode, best->muts), best->map);
+                srvoutf(-3, "vote passed: \fs\fy%s\fS on \fs\fo%s\fS", gamename(best->mode, best->muts), best->map);
                 sendf(-1, 1, "risi3", N_MAPCHANGE, best->map, 0, best->mode, best->muts);
                 changemap(best->map, best->mode, best->muts);
             }
@@ -2167,7 +2167,7 @@ namespace server
                 int mode = G(rotatemode) ? -1 : gamemode, muts = G(rotatemuts) ? -1 : mutators;
                 changemode(mode, muts);
                 const char *map = choosemap(smapname, mode, muts);
-                srvoutf(-3, "server chooses: \fs\fy%s\fS on map \fs\fo%s\fS", gamename(mode, muts), map);
+                srvoutf(-3, "server chooses: \fs\fy%s\fS on \fs\fo%s\fS", gamename(mode, muts), map);
                 sendf(-1, 1, "risi3", N_MAPCHANGE, map, 0, mode, muts);
                 changemap(map, mode, muts);
             }
@@ -2269,13 +2269,13 @@ namespace server
         if(hasveto)
         {
             endmatch();
-            srvoutf(-3, "%s forced: \fs\fy%s\fS on map \fs\fo%s\fS", colourname(ci), gamename(ci->modevote, ci->mutsvote), ci->mapvote);
+            srvoutf(-3, "%s forced: \fs\fy%s\fS on \fs\fo%s\fS", colourname(ci), gamename(ci->modevote, ci->mutsvote), ci->mapvote);
             sendf(-1, 1, "risi3", N_MAPCHANGE, ci->mapvote, 0, ci->modevote, ci->mutsvote);
             changemap(ci->mapvote, ci->modevote, ci->mutsvote);
             return;
         }
         sendf(-1, 1, "ri2si2", N_MAPVOTE, ci->clientnum, ci->mapvote, ci->modevote, ci->mutsvote);
-        relayf(3, "%s suggests: \fs\fy%s\fS on map \fs\fo%s\fS", colourname(ci), gamename(ci->modevote, ci->mutsvote), ci->mapvote);
+        relayf(3, "%s suggests: \fs\fy%s\fS on \fs\fo%s\fS", colourname(ci), gamename(ci->modevote, ci->mutsvote), ci->mapvote);
         checkvotes();
     }
 
