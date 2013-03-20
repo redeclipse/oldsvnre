@@ -17,10 +17,10 @@ namespace client
 
     int maxmsglen() { return G(messagelength); }
 
-    int otherclients()
+    int otherclients(bool nospec)
     {
         int n = 0; // ai don't count
-        loopv(game::players) if(game::players[i] && game::players[i]->aitype == AI_NONE) n++;
+        loopv(game::players) if(game::players[i] && game::players[i]->aitype == AI_NONE && (!nospec || game::players[i]->state != CS_SPECTATOR)) n++;
         return n;
     }
 

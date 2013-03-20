@@ -1459,7 +1459,7 @@ namespace server
                     {
                         nextbalance = NZT(gamemillis+delpart);
                         int secs = delpart/1000;
-                        ancmsgft(-1, S_V_BALWARN, CON_EVENT, "\fy\fs\fcteams\fS will be \fs\fzygreassigned\fS in \fs\fzyc%d\fS %s%s", secs, secs != 1 ? "seconds" : "second", !m_gauntlet(gamemode) ? " for map balance" : "");
+                        ancmsgft(-1, S_V_BALWARN, CON_EVENT, "\fzoyWARNING: \fy\fs\fcteams\fS will be \fs\fzygreassigned\fS in \fs\fzyc%d\fS %s%s", secs, secs != 1 ? "seconds" : "second", !m_gauntlet(gamemode) ? " for map symmetry" : "");
                     }
                     else nextbalance = NZT(gamemillis);
                 }
@@ -1484,7 +1484,7 @@ namespace server
                         cs.total = scores[tot];
                         sendf(-1, 1, "ri3", N_SCORE, cs.team, cs.total);
                     }
-                    ancmsgft(-1, S_V_BALALERT, CON_EVENT, "\fy\fs\fcteams\fS have %sbeen \fs\fzygreassigned\fS%s", delpart > 0 ? "now " : "", !m_gauntlet(gamemode) ? " for map balance" : "");
+                    ancmsgft(-1, S_V_BALALERT, CON_EVENT, "\fzoyALERT: \fy\fs\fcteams\fS have %sbeen \fs\fzygreassigned\fS%s", delpart > 0 ? "now " : "", !m_gauntlet(gamemode) ? " for map symmetry" : "");
                     if(smode) smode->layout();
                     mutate(smuts, mut->layout());
                     nextbalance = -1;
