@@ -673,7 +673,7 @@ static struct applymenu : menu
     void gui(guient &g, bool firstpass)
     {
         if(menustack.empty()) return;
-        g.start(menustart, menuscale, &menutab, true);
+        g.start(menustart, menuscale, NULL, true);
         g.text("the following settings have changed:", 0xFFFFFF, "info");
         loopv(needsapply) g.text(needsapply[i].desc, 0xFFFFFF, "info");
         g.separator();
