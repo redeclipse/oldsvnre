@@ -2,7 +2,7 @@
 namespace aiman
 {
     int oldbotskillmin = -1, oldbotskillmax = -1, oldcoopskillmin = -1, oldcoopskillmax = -1, oldenemyskillmin = -1, oldenemyskillmax = -1,
-        oldbotbalance = -2, oldbotlimit = -1, oldbotoffset = 0;
+        oldbotbalance = -2, oldbotlimit = -1, oldbotoffset = 0, oldenemylimit = -1;
     float oldcoopbalance = -1, oldcoopmultibalance = -1;
 
     clientinfo *findaiclient(clientinfo *exclude = NULL)
@@ -42,10 +42,11 @@ namespace aiman
 
     bool addai(int type, int ent, int skill)
     {
-        int numbots = 0;
+        int numbots = 0, numenemies = 0;
         loopv(clients)
         {
             if(type == AI_BOT && numbots >= G(botlimit)) return false;
+            if(type >= AI_START && numenemies >= G(enemylimit)) return false;
             if(clients[i]->state.aitype == type)
             {
                 clientinfo *ci = clients[i];
@@ -61,9 +62,11 @@ namespace aiman
                     return true;
                 }
                 if(type == AI_BOT) numbots++;
+                if(type >= AI_START) numenemies++;
             }
         }
         if(type == AI_BOT && numbots >= G(botlimit)) return false;
+        if(type >= AI_START && numenemies >= G(enemylimit)) return false;
         int cn = addclient(ST_REMOTE);
         if(cn >= 0)
         {
@@ -204,7 +207,7 @@ namespace aiman
 
     void checksetup()
     {
-        int m = 100, n = 1, numbots = 0;
+        int m = 100, n = 1, numbots = 0, numenemies = 0;
         loopv(clients) if(clients[i]->state.aitype > AI_NONE && clients[i]->state.ownernum >= 0)
         {
             clientinfo *ci = clients[i];
@@ -215,6 +218,7 @@ namespace aiman
                 if(!ci->state.aireinit) ci->state.aireinit = 1;
             }
             if(ci->state.aitype == AI_BOT && ++numbots >= G(botlimit)) shiftai(ci, NULL);
+            if(ci->state.aitype >= AI_START && ++numenemies >= G(enemylimit)) shiftai(ci, NULL);
         }
 
         int balance = 0, people = numclients(-1, true, -1), numt = numteams(gamemode, mutators);
@@ -275,41 +279,37 @@ namespace aiman
         else clearai(1);
     }
 
-    const float MAXSPAWNDIST = 512.f;
-    const float MINSPAWNDIST = 64.f;
     void checkenemies()
     {
         if(m_enemies(gamemode, mutators))
         {
             loopvj(sents) if(sents[j].type == ACTOR && sents[j].attrs[0] >= 0 && sents[j].attrs[0] < AI_TOTAL && gamemillis >= sents[j].millis && (sents[j].attrs[5] == triggerid || !sents[j].attrs[5]) && m_check(sents[j].attrs[3], sents[j].attrs[4], gamemode, mutators))
             {
-#ifdef CAMPAIGN
-                bool allow = !m_campaign(gamemode);
-                if(!allow)
+                bool allow = true;
+                loopv(clients) if(clients[i]->state.aitype < AI_START)
                 {
-                    loopv(clients) if(clients[i]->state.aitype < AI_START)
+                    float dist = clients[i]->state.o.dist(sents[j].o);
+                    if(dist > G(enemyspawndistmax) || dist < G(enemyspawndistmin))
                     {
-                        float dist = clients[i]->state.o.dist(sents[j].o);
-                        if(dist <= MAXSPAWNDIST) allow = true;
-                        else if(allow && dist <= MINSPAWNDIST)
-                        {
-                            allow = false;
-                            break;
-                        }
+                        allow = false;
+                        break;
                     }
                 }
-#else
-                bool allow = true;
-#endif
-                int count = 0;
-                loopvrev(clients) if(clients[i]->state.aientity == j)
+                if(!allow) continue;
+                int count = 0, numenemies = 0;
+                loopvrev(clients) if(clients[i]->state.aitype >= AI_START)
                 {
-                    count++;
-                    if(!allow || count > G(enemybalance)) deleteai(clients[i]);
+                    if(clients[i]->state.aientity == j && ++count > G(enemybalance))
+                    {
+                        deleteai(clients[i]);
+                        count--;
+                        continue;
+                    }
+                    numenemies++;
                 }
-                if(allow && count < G(enemybalance))
+                if(numenemies < G(enemylimit) && count < G(enemybalance))
                 {
-                    int amt = G(enemybalance)-count;
+                    int amt = min(G(enemybalance)-count, G(enemylimit)-numenemies);
                     loopk(amt) addai(sents[j].attrs[0]+AI_START, j);
                 }
             }
@@ -352,6 +352,7 @@ namespace aiman
                     }
                     checkold(botlimit);
                     checkold(botoffset);
+                    checkold(enemylimit);
                 }
                 if(dorefresh)
                 {
