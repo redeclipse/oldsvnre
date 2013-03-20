@@ -20,10 +20,10 @@ Weapons:
    pickup-based (like grenade)
  * Melee now only activates if player is airborne or dashing/sliding, and only
    in a short window of time
- * Pistol secondary changed to fire single particles, primary firing rate,
-   secondary damage, secondary stun, secondary hitpush, secondary particle
-   lifetime and secondary accuracy increased, particle speed and secondary
-   firing rate decreased
+ * Pistol secondary changed to fire single particles, firing rate,
+   secondary damage, secondary stun, secondary hitpush, secondary
+   particle lifetime and secondary accuracy increased, particle speed and
+   secondary firing rate decreased
  * Sword range halved, attack speed decreased
  * Shotgun firing rate decreased
  * SMG secondary now sticks to geometry and explodes radially after a short
@@ -113,6 +113,7 @@ Interface & Menus:
    crosshair location
  * Added sliders to set player(over|under)tone in extra tab of profile menu
  * Bots now have names
+ * Updated options menu, added more user interface options
 
 Modding & Mapmaking:
  * Added support for up to 4 types of water, lava, and glass
