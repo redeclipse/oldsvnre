@@ -207,14 +207,6 @@ void guistayopen(uint *contents)
     shouldclearmenu = oldclearmenu;
 }
 
-void guinoautotab(uint *contents)
-{
-    if(!cgui) return;
-    cgui->allowautotab(false);
-    execute(contents);
-    cgui->allowautotab(true);
-}
-
 void guinohitfx(uint *contents)
 {
     if(!cgui) return;
@@ -588,7 +580,6 @@ COMMANDN(0, cleargui, cleargui_, "i");
 ICOMMAND(0, showgui, "si", (const char *s, int *n), showgui(s, *n));
 COMMAND(0, guishowtitle, "i");
 COMMAND(0, guistayopen, "e");
-COMMAND(0, guinoautotab, "e");
 COMMAND(0, guinohitfx, "e");
 
 ICOMMAND(0, guicount, "", (), intret(menustack.length()));

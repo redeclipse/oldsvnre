@@ -13,7 +13,6 @@ static int fieldmode = FIELDSHOW;
 static bool fieldsactive = false;
 
 VAR(IDF_PERSIST, guishadow, 0, 2, 8);
-VAR(IDF_PERSIST, guiautotab, 6, 16, 40);
 VAR(IDF_PERSIST, guiclicktab, 0, 1, 1);
 VAR(IDF_PERSIST, guiblend, 1, 255, 255);
 VAR(IDF_PERSIST, guilinesize, 1, 36, 128);
@@ -33,55 +32,13 @@ struct gui : guient
     static vector<list> lists;
     static float hitx, hity;
     static int curdepth, curlist, xsize, ysize, curx, cury, fontdepth, mergelist, mergedepth;
-    static bool shouldautotab, hitfx;
+    static bool hitfx;
 
     static void reset() { lists.shrink(0); mergelist = mergedepth = -1; }
 
     static int ty, tx, tpos, *tcurrent, tcolor; //tracking tab size and position since uses different layout method...
 
-    void allowautotab(bool on) { shouldautotab = on; }
     void allowhitfx(bool on) { hitfx = on; }
-
-    void autotab()
-    {
-        if(tcurrent)
-        {
-            if(layoutpass && !tpos) tcurrent = NULL; //disable tabs because you didn't start with one
-            if(shouldautotab && !curdepth && (layoutpass ? 0 : cury) + ysize > guiautotab*guibound[1]) tab(NULL, tcolor, false);
-        }
-    }
-
-    bool shouldtab()
-    {
-        if(tcurrent && shouldautotab)
-        {
-            if(layoutpass)
-            {
-                int space = guiautotab*guibound[1] - ysize;
-                if(space < 0) return true;
-                int l = lists[curlist].parent;
-                while(l >= 0)
-                {
-                    space -= lists[l].h;
-                    if(space < 0) return true;
-                    l = lists[l].parent;
-                }
-            }
-            else
-            {
-                int space = guiautotab*guibound[1] - cury;
-                if(ysize > space) return true;
-                int l = lists[curlist].parent;
-                while(l >= 0)
-                {
-                    if(lists[l].h > space) return true;
-                    l = lists[l].parent;
-                }
-            }
-        }
-        return false;
-    }
-
     static inline bool visibletab() { return !tcurrent || tpos == *tcurrent; }
     bool visible() { return !layoutpass && visibletab(); }
 
@@ -224,11 +181,11 @@ struct gui : guient
         return 0;
     }
 
-    int text  (const char *text, int color, const char *icon, int icolor) { autotab(); return button_(text, color, icon, icolor, false, false); }
-    int button(const char *text, int color, const char *icon, int icolor, bool faded) { autotab(); return button_(text, color, icon, icolor, true, faded); }
-    int title (const char *text, int color, const char *icon, int icolor) { autotab(); return button_(text, color, icon, icolor, false, false, "emphasis"); }
+    int text  (const char *text, int color, const char *icon, int icolor) { return button_(text, color, icon, icolor, false, false); }
+    int button(const char *text, int color, const char *icon, int icolor, bool faded) { return button_(text, color, icon, icolor, true, faded); }
+    int title (const char *text, int color, const char *icon, int icolor) { return button_(text, color, icon, icolor, false, false, "emphasis"); }
 
-    void separator() { autotab(); line_(guisepsize); }
+    void separator() { line_(guisepsize); }
 
     //use to set min size (useful when you have progress bars)
     void strut(float size) { layout(isvertical() ? int(size*guibound[0]) : 0, isvertical() ? 0 : int(size*guibound[1])); }
@@ -294,7 +251,6 @@ struct gui : guient
 
     int image(Texture *t, float scale, bool overlaid, int icolor)
     {
-        autotab();
         if(scale == 0) scale = 1;
         int size = (int)(scale*2*guibound[1])-guishadow;
         if(visible()) icon_(t, overlaid, curx, cury, size, ishit(size+guishadow, size+guishadow), icolor);
@@ -303,7 +259,6 @@ struct gui : guient
 
     int texture(VSlot &vslot, float scale, bool overlaid)
     {
-        autotab();
         if(scale==0) scale = 1;
         int size = (int)(scale*2*guibound[1])-guishadow;
         if(visible()) previewslot(vslot, overlaid, curx, cury, size, ishit(size+guishadow, size+guishadow));
@@ -312,7 +267,6 @@ struct gui : guient
 
     int playerpreview(int model, int color, int team, int weap, const char *vanity, float sizescale, bool overlaid, float scale, float blend)
     {
-        autotab();
         if(sizescale==0) sizescale = 1;
         int size = (int)(sizescale*2*guibound[1])-guishadow;
         if(visible())
@@ -355,7 +309,6 @@ struct gui : guient
 
     int modelpreview(const char *name, int anim, float sizescale, bool overlaid, float scale, float blend)
     {
-        autotab();
         if(sizescale==0) sizescale = 1;
         int size = (int)(sizescale*2*guibound[1])-guishadow;
         if(visible())
@@ -410,7 +363,6 @@ struct gui : guient
 
     int slice(Texture *t, float scale, float start, float end, const char *text)
     {
-        autotab();
         if(scale == 0) scale = 1;
         int size = (int)(scale*2*guibound[1]);
         if(t!=notexture && visible()) slice_(t, curx, cury, size, start, end, text);
@@ -419,7 +371,6 @@ struct gui : guient
 
     void progress(float percent, float scale)
     {
-        autotab();
         Texture *t = textureload(hud::progresstex, 3, true, false);
         if(scale == 0) scale = 1;
         int size = (int)(scale*2*guibound[1]), part = size*2/3;
@@ -431,7 +382,6 @@ struct gui : guient
 
     void slider(int &val, int vmin, int vmax, int color, const char *label, bool reverse, bool scroll)
     {
-        autotab();
         int x = curx;
         int y = cury;
         int space = line_(guilinesize, 1.0f, ishorizontal() ? guibound[0]*3 : guibound[1]);
@@ -994,7 +944,7 @@ TVARN(IDF_PERSIST|IDF_PRELOAD, guislidertex, "textures/guislider", gui::sliderte
 
 vector<gui::list> gui::lists;
 float gui::basescale, gui::maxscale = 1, gui::hitx, gui::hity;
-bool gui::passthrough, gui::shouldautotab = true, gui::hitfx = true;
+bool gui::passthrough, gui::hitfx = true;
 int gui::curdepth, gui::fontdepth, gui::curlist, gui::xsize, gui::ysize, gui::curx, gui::cury, gui::mergelist, gui::mergedepth;
 int gui::ty, gui::tx, gui::tpos, *gui::tcurrent, gui::tcolor;
 static vector<gui> guis;
