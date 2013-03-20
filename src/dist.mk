@@ -26,18 +26,19 @@ SRC_DIRS= \
 	src/enet \
 	src/engine \
 	src/game \
-	src/install \
 	src/include \
 	src/lib \
 	src/scripts \
 	src/shared
 
-SRC_FILES= \
+SRC_FILES:= \
 	src/core.mk \
 	src/dist.mk \
 	src/dpiaware.manifest \
 	src/system-install.mk \
-	src/$(APPNAME).*
+	src/$(APPNAME).* \
+	src/install/nix/$(APPNAME)* \
+	src/install/win/*
 
 SRC_XCODE:= \
 	src/xcode/*.h \
@@ -62,12 +63,26 @@ BIN_FILES:= \
 	bin/x86/$(APPSERVER)* \
 	$(OSX_APP)
 
+DOC_FILES:= \
+	doc/all-licenses.txt \
+	doc/cc-by-sa.txt \
+	doc/changelog.txt \
+	doc/cube2font.txt \
+	doc/examples \
+	doc/guidelines.txt \
+	doc/irc.txt \
+	doc/license.txt \
+	doc/man/cube2font* \
+	doc/man/$(APPCLIENT)* \
+	doc/man/$(APPSERVER)* \
+	doc/trademark.txt
+
 DISTFILES:= \
 	$(FILES) \
 	$(BIN_FILES) \
 	data \
 	game/$(APPSHORTNAME) \
-	doc \
+	$(DOC_FILES) \
 	$(shell cd ../ && find $(SRC_DIRS) -not -iname *.lo -not -iname *.gch -not -iname *.o) \
 	$(SRC_FILES) \
 	$(SRC_XCODE)
