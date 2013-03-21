@@ -8,6 +8,13 @@ override CXXFLAGS+= -Wall -fsigned-char -fno-exceptions -fno-rtti
 
 PLATFORM= $(shell uname -s)
 PLATFORM_SUFFIX=_native
+PLATFORM_BIN=
+
+ifneq (,$(PLATFORM_BIN))
+INSTDIR=../bin/$(PLATFORM_BIN)/
+else
+INSTDIR=../bin/
+endif
 
 TOOLSET_PREFIX=
 ifneq (,$(findstring CROSS,$(PLATFORM)))
@@ -208,12 +215,12 @@ ifneq (,$(STRIP))
 endif
 
 install-client: client
-	install -d ../bin
-	install -m 755 $(APPCLIENT) ../bin/$(APPCLIENT)$(PLATFORM_SUFFIX)
+	install -d $(INSTDIR)
+	install -m 755 $(APPCLIENT) $(INSTDIR)$(APPCLIENT)$(PLATFORM_SUFFIX)
 
 install-server: server
-	install -d ../bin
-	install -m 755 $(APPSERVER) ../bin/$(APPSERVER)$(PLATFORM_SUFFIX)
+	install -d $(INSTDIR)
+	install -m 755 $(APPSERVER) $(INSTDIR)$(APPSERVER)$(PLATFORM_SUFFIX)
 
 shared/cube2font.o: shared/cube2font.c
 	$(CXX) $(CXXFLAGS) -c -o $@ $< `freetype-config --cflags`
