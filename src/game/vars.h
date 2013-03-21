@@ -225,7 +225,7 @@ GVAR(0, duelclear, 0, 1, 1); // clear items in duel
 GVAR(0, duelwarmup, 0, 15000, VAR_MAX); // .. before duel starts playing initially
 GVAR(0, duellimit, 0, 5000, VAR_MAX); // .. before duel goes to next round
 GVAR(0, duelcycle, 0, 2, 3); // determines if players are force-cycled after a certain number of wins (bit: 0 = off, 1 = non-team games, 2 = team games)
-GVAR(0, duelcycles, 0, 3, VAR_MAX); // maximum wins in a row before force-cycling (0 = num team/total players)
+GVAR(0, duelcycles, 0, 2, VAR_MAX); // maximum wins in a row before force-cycling (0 = num team/total players)
 
 GVAR(0, selfdamage, 0, 1, 1); // 0 = off, 1 = either hurt self or use teamdamage rules
 GFVAR(0, selfdamagescale, FVAR_MIN, 1, FVAR_MAX); // 0 = off, anything else = scale for damage

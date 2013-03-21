@@ -128,7 +128,6 @@ struct duelservmode : servmode
     void scoreaffinity(clientinfo *ci, bool win)
     {
         if(!m_affinity(gamemode) || dueltime >= 0 || duelround <= 0) return;
-        respawns.shrink(0);
         loopv(clients) if(clients[i] != ci && clients[i]->state.aitype < AI_START && clients[i]->state.state == CS_ALIVE)
             if(playing.find(clients[i]) < 0 || (win ? clients[i]->team != ci->team : clients[i]->team == ci->team)) queue(clients[i]);
     }
@@ -238,7 +237,7 @@ struct duelservmode : servmode
                 allowed.remove(i);
                 cleanup = true;
             }
-            if(allowed.empty() && respawns.empty())
+            if(allowed.empty())
             {
                 if(m_survivor(gamemode, mutators) && m_team(gamemode, mutators) && !alive.empty())
                 {
@@ -276,6 +275,7 @@ struct duelservmode : servmode
                 {
                     case 0:
                     {
+                        if(m_affinity(gamemode) && !playing.empty()) break; // this should not happen
                         if(!cleanup)
                         {
                             defformatstring(end)("\fyeveryone died, \fzoyepic fail");
@@ -290,42 +290,47 @@ struct duelservmode : servmode
                     }
                     case 1:
                     {
-                        if(dueldeath < 0) dueldeath = gamemillis+DEATHMILLIS;
-                        else if(gamemillis >= dueldeath)
+                        if(!m_affinity(gamemode))
                         {
-                            if(!cleanup)
+                            if(dueldeath < 0)
                             {
-                                string end, hp; hp[0] = 0;
-                                if(!m_affinity(gamemode))
-                                {
-                                    if(!m_insta(gamemode, mutators) && !m_vampire(gamemode, mutators) && alive[0]->state.health == m_health(gamemode, mutators, alive[0]->state.model))
-                                        formatstring(hp)(" with a \fs\fcflawless victory\fS");
-                                    else formatstring(hp)(" with \fs\fc%d\fS health left", alive[0]->state.health);
-                                }
-                                if(duelwinner != alive[0]->clientnum)
-                                {
-                                    duelwinner = alive[0]->clientnum;
-                                    duelwins = 1;
-                                    formatstring(end)("\fy%s was the winner%s", colourname(alive[0]), hp);
-                                }
-                                else
-                                {
-                                    duelwins++;
-                                    formatstring(end)("\fy%s was the winner%s (\fs\fc%d\fS in a row)", colourname(alive[0]), hp, duelwins);
-                                }
-                                loopv(clients) if(playing.find(clients[i]) >= 0)
-                                {
-                                    if(clients[i] == alive[0])
-                                    {
-                                        ancmsgft(clients[i]->clientnum, S_V_YOUWIN, CON_INFO, end);
-                                        if(!m_affinity(gamemode)) givepoints(clients[i], 1);
-                                    }
-                                    else ancmsgft(clients[i]->clientnum, S_V_YOULOSE, CON_INFO, end);
-                                }
-                                else ancmsgft(clients[i]->clientnum, S_V_NOTIFY, CON_INFO, end);
+                                dueldeath = gamemillis+DEATHMILLIS;
+                                break;
                             }
-                            clear();
+                            else if(gamemillis < dueldeath) break;
                         }
+                        if(!cleanup)
+                        {
+                            string end, hp; hp[0] = 0;
+                            if(!m_affinity(gamemode))
+                            {
+                                if(!m_insta(gamemode, mutators) && !m_vampire(gamemode, mutators) && alive[0]->state.health == m_health(gamemode, mutators, alive[0]->state.model))
+                                    formatstring(hp)(" with a \fs\fcflawless victory\fS");
+                                else formatstring(hp)(" with \fs\fc%d\fS health left", alive[0]->state.health);
+                            }
+                            if(duelwinner != alive[0]->clientnum)
+                            {
+                                duelwinner = alive[0]->clientnum;
+                                duelwins = 1;
+                                formatstring(end)("\fy%s was the winner%s", colourname(alive[0]), hp);
+                            }
+                            else
+                            {
+                                duelwins++;
+                                formatstring(end)("\fy%s was the winner%s (\fs\fc%d\fS in a row)", colourname(alive[0]), hp, duelwins);
+                            }
+                            loopv(clients) if(playing.find(clients[i]) >= 0)
+                            {
+                                if(clients[i] == alive[0])
+                                {
+                                    ancmsgft(clients[i]->clientnum, S_V_YOUWIN, CON_INFO, end);
+                                    if(!m_affinity(gamemode)) givepoints(clients[i], 1);
+                                }
+                                else ancmsgft(clients[i]->clientnum, S_V_YOULOSE, CON_INFO, end);
+                            }
+                            else ancmsgft(clients[i]->clientnum, S_V_NOTIFY, CON_INFO, end);
+                        }
+                        clear();
                         break;
                     }
                     default: break;
