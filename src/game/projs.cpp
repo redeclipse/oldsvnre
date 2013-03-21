@@ -274,7 +274,12 @@ namespace projs
             {
                 if(expl > 0)
                 {
-                    if(drill) radialeffect((dynent *)d, proj, HIT_EXPLODE, expl); // only if we're drilling
+                    if(drill)
+                    {
+                        gameent *oldstick = proj.stick;
+                        radialeffect((dynent *)d, proj, HIT_EXPLODE, expl); // only if we're drilling
+                        proj.stick = oldstick;
+                    }
                 }
                 else if(gameent::is(d))
                 {
@@ -1837,18 +1842,23 @@ namespace projs
 
     void escaped(projent &proj, const vec &pos, const vec &dir)
     {
-        if(!proj.owner || !(proj.projcollide&COLLIDE_OWNER) || proj.lastbounce) proj.escaped = true;
-        else if(proj.spawntime && lastmillis-proj.spawntime >= (proj.projtype == PRJ_SHOT ? W2(proj.weap, escapedelay, WS(proj.flags)) : PHYSMILLIS))
+        if(!proj.owner || !(proj.projcollide&COLLIDE_OWNER) || proj.lastbounce || !proj.spawntime) proj.escaped = true;
+        else
         {
-            if(proj.projcollide&COLLIDE_TRACE)
+            int delay = proj.projtype == PRJ_SHOT ? W2(proj.weap, escapedelay, WS(proj.flags)) : PHYSMILLIS;
+            if(lastmillis-proj.spawntime >= delay)
             {
-                vec to = vec(pos).add(dir);
-                float x1 = floor(min(pos.x, to.x)), y1 = floor(min(pos.y, to.y)),
-                      x2 = ceil(max(pos.x, to.x)), y2 = ceil(max(pos.y, to.y)),
-                      maxdist = dir.magnitude(), dist = 1e16f;
-                if(physics::xtracecollide(&proj, pos, to, x1, x2, y1, y2, maxdist, dist, proj.owner) || dist > maxdist) proj.escaped = true;
+                if(proj.spawntime && lastmillis-proj.spawntime >= delay*2) proj.escaped = true;
+                else if(proj.projcollide&COLLIDE_TRACE)
+                {
+                    vec to = vec(pos).add(dir);
+                    float x1 = floor(min(pos.x, to.x)), y1 = floor(min(pos.y, to.y)),
+                          x2 = ceil(max(pos.x, to.x)), y2 = ceil(max(pos.y, to.y)),
+                          maxdist = dir.magnitude(), dist = 1e16f;
+                    if(physics::xtracecollide(&proj, pos, to, x1, x2, y1, y2, maxdist, dist, proj.owner) || dist > maxdist) proj.escaped = true;
+                }
+                else if(physics::xcollide(&proj, dir, proj.owner)) proj.escaped = true;
             }
-            else if(physics::xcollide(&proj, dir, proj.owner)) proj.escaped = true;
         }
     }
 
@@ -2215,12 +2225,14 @@ namespace projs
                         if(stuckdelay && stuckdelay > stucktime) dist *= stucktime/float(stuckdelay);
                         if(dist <= 1e-6f) proxim = 0;
                         int numdyns = game::numdynents();
+                        gameent *oldstick = proj.stick;
+                        proj.stick = NULL;
                         loopj(numdyns)
                         {
                             dynent *f = game::iterdynents(j);
                             if(!f || f->state != CS_ALIVE || !physics::issolid(f, &proj, true, false)) continue;
                             if(radial && radialeffect(f, proj, HIT_BURN, expl)) proj.lastradial = lastmillis;
-                            if(proxim == 1 && !proj.beenused && f != proj.stick)
+                            if(proxim == 1 && !proj.beenused && f != oldstick)
                             {
                                 if(f->center().dist(proj.o) <= dist)
                                 {
@@ -2244,6 +2256,7 @@ namespace projs
                                 }
                             }
                         }
+                        proj.stick = oldstick;
                     }
                 }
                 if(proj.state == CS_DEAD)
@@ -2252,12 +2265,15 @@ namespace projs
                     if(!proj.limited && expl > 0)
                     {
                         int numdyns = game::numdynents(true);
+                        gameent *oldstick = proj.stick;
+                        proj.stick = NULL;
                         loopj(numdyns)
                         {
                             dynent *f = game::iterdynents(j, true);
                             if(!f || f->state != CS_ALIVE || !physics::issolid(f, &proj, false, false)) continue;
                             radialeffect(f, proj, HIT_EXPLODE, expl);
                         }
+                        proj.stick = oldstick;
                     }
                 }
                 if(!hits.empty())
