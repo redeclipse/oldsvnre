@@ -134,6 +134,7 @@ dist-tar-all: ../$(tarname-all)
 	# Use links with tar dereference to change directory paths
 	ln -s ../../../$</data/ ../$(tmpdir-osx)/$(dirname-osx)/Contents/Resources/data
 	ln -s ../../../$</doc/ ../$(tmpdir-osx)/$(dirname-osx)/Contents/Resources/doc
+	ln -s ../../../$</game/ ../$(tmpdir-osx)/$(dirname-osx)/Contents/Resources/game
 	ln -s ../../../$</src/ ../$(tmpdir-osx)/$(dirname-osx)/Contents/Resources/src
 ifeq ($(APPNAME),redeclipse)
 	ln -s ../../../$</readme.txt ../$(tmpdir-osx)/$(dirname-osx)/Contents/Resources/readme.txt
