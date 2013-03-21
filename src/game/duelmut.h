@@ -86,8 +86,12 @@ struct duelservmode : servmode
                 }
                 if(!alive)
                 {
-                    loopv(mates) if(allowed.find(mates[i]) < 0) allowed.add(mates[i]);
-                    duelcheck = gamemillis+5000;
+                    loopv(mates)
+                    {
+                        if(allowed.find(mates[i]) < 0) allowed.add(mates[i]);
+                        if(mates[i]->state.state == CS_DEAD) waiting(mates[i], DROP_RESET);
+                    }
+                    duelcheck = gamemillis+1000;
                     return true;
                 }
                 return false; // only respawn when all dead
@@ -95,7 +99,7 @@ struct duelservmode : servmode
             int delay = m_xdelay(gamemode, mutators);
             if(delay && ci->state.respawnwait(gamemillis, delay)) return false;
             if(allowed.find(ci) < 0) allowed.add(ci);
-            duelcheck = gamemillis+5000;
+            duelcheck = gamemillis+1000;
             return true; // overrides it
         }
         if(tryspawn && dueltime < 0 && dueldeath < 0) queue(ci);
@@ -127,9 +131,34 @@ struct duelservmode : servmode
 
     void scoreaffinity(clientinfo *ci, bool win)
     {
-        if(!m_affinity(gamemode) || dueltime >= 0 || duelround <= 0) return;
-        loopv(clients) if(clients[i] != ci && clients[i]->state.aitype < AI_START && clients[i]->state.state == CS_ALIVE)
-            if(playing.find(clients[i]) < 0 || (win ? clients[i]->team != ci->team : clients[i]->team == ci->team)) queue(clients[i]);
+        if(!m_affinity(gamemode) || dueltime >= 0 || duelround <= 0 || !win) return;
+        respawns.shrink(0);
+        loopv(clients) if(clients[i]->state.aitype < AI_START) switch(clients[i]->state.state)
+        {
+            case CS_ALIVE:
+                if(playing.find(clients[i]) < 0 || clients[i]->team != ci->team) queue(clients[i], false);
+                break;
+            case CS_DEAD:
+                if(playing.find(clients[i]) < 0 || clients[i]->team != ci->team)
+                {
+                    queue(clients[i], false);
+                    break;
+                }
+                if(allowed.find(clients[i]) < 0) allowed.add(clients[i]);
+                waiting(clients[i], DROP_RESET);
+                duelcheck = gamemillis+1000;
+                break;
+            case CS_WAITING:
+                if(playing.find(clients[i]) < 0 || clients[i]->team != ci->team)
+                {
+                    queue(clients[i], false);
+                    break;
+                }
+                if(allowed.find(clients[i]) < 0) allowed.add(clients[i]);
+                duelcheck = gamemillis+1000;
+                break;
+            default: break;
+        }
     }
 
     void clear()
@@ -237,7 +266,7 @@ struct duelservmode : servmode
                 allowed.remove(i);
                 cleanup = true;
             }
-            if(allowed.empty())
+            if(allowed.empty() && (!m_affinity(gamemode) || respawns.empty()))
             {
                 if(m_survivor(gamemode, mutators) && m_team(gamemode, mutators) && !alive.empty())
                 {
