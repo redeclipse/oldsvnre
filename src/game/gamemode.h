@@ -304,7 +304,7 @@ extern mutstypes mutstype[];
 #define m_armour(a,b,c)     (m_insta(a,b) ? 0 : G(spawnarmour))
 #endif
 #define m_maxhealth(a,b,c)  (int(m_health(a, b, c)*(m_vampire(a,b) ? G(maxhealthvampire) : G(maxhealth))))
-#define m_balance(a,b)      (m_team(a, b) && !m_trial(a) && m_fight(a) && (m_gauntlet(a) || ((G(balancemaps) >= 0 ? G(balancemaps) : G(mapbalance)) >= (m_affinity(a) ? 1 : 2))))
+#define m_balance(a,b)      (m_team(a, b) && !m_trial(a) && m_fight(a) && !m_duke(a, b) && (m_gauntlet(a) || ((G(balancemaps) >= 0 ? G(balancemaps) : G(mapbalance)) >= (m_affinity(a) ? 1 : 2))))
 #define m_balreset(a)       (m_capture(a) || m_bomber(a) || m_gauntlet(a))
 #define m_jet(a,b)          (PHYS(gravity) == 0 || m_jetpack(a, b))
 

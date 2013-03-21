@@ -255,12 +255,12 @@ struct defendservmode : defendstate, servmode
         modified.setsize(0);
         loopv(flags)
         {
-            if(flags[i].owner >= T_FIRST && flags[i].owner <= T_LAST)
+            if(isteam(gamemode, mutators, flags[i].owner, T_FIRST))
                 owners[flags[i].owner-T_FIRST].add(i);
-            if(flags[i].enemy >= T_FIRST && flags[i].enemy <= T_LAST)
+            if(isteam(gamemode, mutators, flags[i].enemy, T_FIRST))
                 enemies[flags[i].enemy-T_FIRST].add(i);
         }
-        loopk(T_TOTAL)
+        loopk(numteams(gamemode, mutators))
         {
             int from = mapbals[oldbalance][k], fromt = from-T_FIRST, to = mapbals[curbalance][k];
             loopv(owners[fromt])
