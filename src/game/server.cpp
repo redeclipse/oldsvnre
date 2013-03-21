@@ -1381,7 +1381,7 @@ namespace server
     void checklimits()
     {
         if(!m_fight(gamemode)) return;
-        int limit = inovertime ? max(G(overtimelimit), 1) : G(timelimit);
+        int limit = inovertime ? max(G(overtimelimit), 1) : G(timelimit), numt = numteams(gamemode, mutators);
         bool newlimit = limit != oldtimelimit, newtimer = gamemillis-curtime>0 && gamemillis/1000!=(gamemillis-curtime)/1000,
              iterate = newlimit || newtimer, wasinovertime = inovertime;
         if(iterate)
@@ -1445,7 +1445,7 @@ namespace server
             if(m_team(gamemode, mutators))
             {
                 int best = -1;
-                loopi(numteams(gamemode, mutators)) if(best < 0 || teamscore(i+T_FIRST).total > teamscore(best).total)
+                loopi(numt) if(best < 0 || teamscore(i+T_FIRST).total > teamscore(best).total)
                     best = i+T_FIRST;
                 if(best >= 0 && teamscore(best).total >= G(pointlimit))
                 {
@@ -1467,36 +1467,34 @@ namespace server
                 }
             }
         }
-        if(iterate && m_balance(gamemode, mutators) && m_team(gamemode, mutators) && gamelimit > 0)
+        if(iterate && m_balance(gamemode, mutators) && gamelimit > 0 && curbalance < (numt-1))
         {
-            int numt = numteams(gamemode, mutators),
-                delpart = min(gamelimit/(numt*2), G(balancedelay)), timetotal = gamelimit-(delpart*numt),
-                balpart = (timetotal/numt)+(delpart*curbalance), baliter = gamemillis/balpart;
-            if(baliter != curbalance)
+            int delpart = min(gamelimit/(numt*2), G(balancedelay)), balpart = (gamelimit/numt*(curbalance+1))-delpart;
+            if(gamemillis >= balpart)
             {
                 if(!nextbalance)
                 {
-                    if(delpart > 0)
+                    nextbalance = NZT(gamemillis+delpart);
+                    if(delpart >= 1000)
                     {
-                        nextbalance = NZT(gamemillis+delpart);
                         int secs = delpart/1000;
-                        ancmsgft(-1, S_V_BALWARN, CON_EVENT, "\fzoyWARNING: \fy\fs\fcteams\fS will be \fs\fzygreassigned\fS in \fs\fzyc%d\fS %s%s", secs, secs != 1 ? "seconds" : "second", !m_gauntlet(gamemode) ? " for map symmetry" : "");
+                        ancmsgft(-1, S_V_BALWARN, CON_EVENT, "\fy\fs\fzoyWARNING\fS: \fs\fcteams\fS will be \fs\fcreassigned\fS in \fs\fc%d\fS %s%s", secs, secs != 1 ? "seconds" : "second", !m_gauntlet(gamemode) ? " for map symmetry" : "");
                     }
-                    else nextbalance = NZT(gamemillis);
                 }
                 if(gamemillis >= nextbalance)
                 {
                     int oldbalance = curbalance;
-                    curbalance = baliter;
+                    if(++curbalance >= numt) curbalance = 0; // safety first
+                    nextbalance = 0;
                     if(smode) smode->balance(oldbalance);
                     mutate(smuts, mut->balance(oldbalance));
                     static vector<clientinfo *> assign[T_TOTAL];
                     loopk(T_TOTAL) assign[k].setsize(0);
-                    loopv(clients) if(clients[i]->team >= T_FIRST && clients[i]->team <= T_LAST)
+                    loopv(clients) if(isteam(gamemode, mutators, clients[i]->team, T_FIRST))
                         assign[clients[i]->team-T_FIRST].add(clients[i]);
                     int scores[T_TOTAL] = {0}, flags = (m_balreset(gamemode) ? TT_DEFAULT : 0)|TT_INFO;
-                    loopk(T_TOTAL) scores[k] = teamscore(k+T_FIRST).total;
-                    loopk(T_TOTAL)
+                    loopk(numt) scores[k] = teamscore(k+T_FIRST).total;
+                    loopk(numt)
                     {
                         int from = mapbals[oldbalance][k], fromt = from-T_FIRST,
                             to = mapbals[curbalance][k], tot = to-T_FIRST;
@@ -1505,10 +1503,9 @@ namespace server
                         cs.total = scores[tot];
                         sendf(-1, 1, "ri3", N_SCORE, cs.team, cs.total);
                     }
-                    ancmsgft(-1, S_V_BALALERT, CON_EVENT, "\fzoyALERT: \fy\fs\fcteams\fS have %sbeen \fs\fzygreassigned\fS%s", delpart > 0 ? "now " : "", !m_gauntlet(gamemode) ? " for map symmetry" : "");
+                    ancmsgft(-1, S_V_BALALERT, CON_EVENT, "\fy\fs\fzoyALERT\fS: \fs\fcteams\fS have %sbeen \fs\fcreassigned\fS%s", delpart > 0 ? "now " : "", !m_gauntlet(gamemode) ? " for map symmetry" : "");
                     if(smode) smode->layout();
                     mutate(smuts, mut->layout());
-                    nextbalance = -1;
                 }
             }
         }
@@ -3516,7 +3513,7 @@ namespace server
                             srvoutf(-3, "\fs\fckicked\fS %s: team killing is not permitted", colourname(actor));
                             actor->kicked = updatecontrols = true;
                         }
-                        else srvmsgft(actor->clientnum, CON_CHAT, "\fs\fzoyWARNING:\fS team killing is not permitted, action will be taken if you continue");
+                        else srvmsgft(actor->clientnum, CON_CHAT, "\fy\fs\fzoyWARNING\fS: team killing is not permitted, action will be taken if you continue");
                     }
                 }
             }
