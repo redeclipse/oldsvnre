@@ -6,6 +6,15 @@ struct duelservmode : servmode
 
     duelservmode() {}
 
+    bool checkready(clientinfo *ci)
+    {
+        if(ci->state.aitype < AI_START)
+        {
+            if(m_loadout(gamemode, mutators) && !chkloadweap(ci, false)) return false;
+        }
+        return true;
+    }
+
     void position(clientinfo *ci, int n)
     {
         if(m_survivor(gamemode, mutators))
@@ -62,7 +71,33 @@ struct duelservmode : servmode
 
     bool canspawn(clientinfo *ci, bool tryspawn = false)
     {
-        if(allowed.find(ci) >= 0 || ci->state.aitype >= AI_START || (m_affinity(gamemode) && respawns.find(ci) >= 0)) return true;
+        if(!checkready(ci)) return false;
+        if(allowed.find(ci) >= 0 || ci->state.aitype >= AI_START) return true;
+        if(m_affinity(gamemode) && respawns.find(ci) >= 0)
+        {
+            if(m_survivor(gamemode, mutators))
+            {
+                int alive = 0;
+                vector<clientinfo *> mates;
+                loopv(clients) if(clients[i]->state.aitype < AI_START && clients[i]->team == ci->team)
+                { // includes ci
+                    if(clients[i]->state.state == CS_ALIVE) alive++;
+                    mates.add(clients[i]);
+                }
+                if(!alive)
+                {
+                    loopv(mates) if(allowed.find(mates[i]) < 0) allowed.add(mates[i]);
+                    duelcheck = gamemillis+5000;
+                    return true;
+                }
+                return false; // only respawn when all dead
+            }
+            int delay = m_xdelay(gamemode, mutators);
+            if(delay && ci->state.respawnwait(gamemillis, delay)) return false;
+            if(allowed.find(ci) < 0) allowed.add(ci);
+            duelcheck = gamemillis+5000;
+            return true; // overrides it
+        }
         if(tryspawn && dueltime < 0 && dueldeath < 0) queue(ci);
         return false; // you spawn when we want you to buddy
     }
@@ -142,6 +177,7 @@ struct duelservmode : servmode
                 {
                     if(m_duel(gamemode, mutators) && playing.length() >= wants) break;
                     clientinfo *ci = duelqueue[i];
+                    if(!checkready(ci)) continue; // they are not ready yet.
                     if(ci->state.state != CS_ALIVE)
                     {
                         if(ci->state.state != CS_WAITING) waiting(ci, DROP_RESET);
