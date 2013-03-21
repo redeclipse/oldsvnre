@@ -161,13 +161,7 @@ namespace projs
             float size = hflags&HIT_WAVE ? radial*WF(WK(proj.flags), proj.weap, wavepush, WS(proj.flags)) : radial;
             int damage = calcdamage(proj.owner, d, proj.weap, hflags, radial, size, dist, scale);
             if(damage) game::hiteffect(proj.weap, hflags, damage, d, proj.owner, dir, false);
-            else
-            {
-                if(proj.owner == game::player1)
-                    conoutft(CON_CHAT, "QUIN DEBUG: projectile %d [%d:%d] hit %s but did zero damage [%.2f (%.2f), %.2f, %.2f]",
-                        proj.id, proj.weap, hflags, game::colourname(d), radial, size, dist, scale);
-                return;
-            }
+            else return;
         }
         hitmsg &h = hits.add();
         h.flags = flags;

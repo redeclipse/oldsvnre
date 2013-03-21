@@ -207,7 +207,7 @@ namespace physics
             projent *p = (projent *)e;
             if(gameent::is(d))
             {
-                if(p->stick == d || isghost((gameent *)d, p->owner)) return false;
+                if(isghost((gameent *)d, p->owner)) return false;
                 if(impact && (p->hit == d || !(p->projcollide&COLLIDE_PLAYER))) return false;
                 if(p->owner == d && (!(p->projcollide&COLLIDE_OWNER) || (esc && !p->escaped))) return false;
             }
