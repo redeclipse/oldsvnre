@@ -138,13 +138,15 @@ too.
 
 * Riidom Li - Models
 * RaZgRiZ - Textures and Cubescript maintenance
-* ZeroKnight - Documentation, Testing and Support
+* Alex "ZeroKnight" George - Documentation, Testing and Support
 * Kirill "TristamK" Kolesnikov - Maps
 * "Raiden" - Maps
 * Matt "greasepirate" Kalt - Maps
 * Ricky Thomson "unixfreak" - Maps
 * "Korsi" - Maps
 * "4rson" - Maps and Support
+* Ruben "TheLastProject" van Os - Testing and Support
+* Joseph "ballist1c" Calabria - Maps
 
 == Supporters ==
 
