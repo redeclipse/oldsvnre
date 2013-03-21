@@ -115,6 +115,7 @@ Interface & Menus:
  * Added sliders to set player(over|under)tone in extra tab of profile menu
  * Bots now have names
  * Updated options menu, added more user interface options
+ * Simple item icons available via /simpleitems 1
 
 Modding & Mapmaking:
  * Added support for up to 4 types of water, lava, and glass
