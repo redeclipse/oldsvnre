@@ -1615,7 +1615,7 @@ namespace game
     extern gameent *intersectclosest(vec &from, vec &to, gameent *at);
     extern void clientdisconnected(int cn, int reason = DISC_NONE);
     extern const char *colourname(gameent *d, char *name = NULL, bool icon = true, bool dupname = true);
-    extern const char *colourteam(int team, bool icon = true);
+    extern const char *colourteam(int team, const char *icon = "");
     extern int findcolour(gameent *d, bool tone = true, bool mix = false);
     extern int getcolour(gameent *d, int level = 0);
     extern void errorsnd(gameent *d);

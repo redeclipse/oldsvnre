@@ -334,7 +334,7 @@ namespace bomber
                     part_explosion(above, enttype[AFFINITY].radius*trans, PART_SHOCKWAVE, 1, TEAM(f.team, colour), 1.f, trans*0.25f);
                     part_explosion(above, enttype[AFFINITY].radius/3*trans, PART_SHOCKBALL, 1, TEAM(f.team, colour), 1.f, trans*0.5f);
                     above.z += enttype[AFFINITY].radius*trans+2.5f;
-                    defformatstring(info)("<super>%s base", game::colourteam(f.team));
+                    defformatstring(info)("<super>%s base", TEAM(f.team, name));
                     part_textcopy(above, info, PART_TEXT, 1, TEAM(f.team, colour), 2, 1);
                     above.z += 2.5f;
                     part_icon(above, textureload(hud::teamtexname(f.team), 3), 2, 1, 0, 0, 1, TEAM(f.team, colour));
@@ -501,7 +501,7 @@ namespace bomber
         entities::execlink(NULL, f.ent, false);
         entities::execlink(NULL, g.ent, false);
         hud::teamscore(d->team).total = score;
-        defformatstring(gteam)("%s", game::colourteam(g.team));
+        defformatstring(gteam)("%s", game::colourteam(g.team, "bombtex"));
         game::announcef(S_V_BOMBSCORE, CON_INFO, d, true, "\fa%s destroyed the %s base for team %s (score: \fs\fc%d\fS, time taken: \fs\fc%s\fS)", game::colourname(d), gteam, game::colourteam(d->team), score, timestr(lastmillis-f.inittime));
         st.returnaffinity(relay, lastmillis, false);
     }
@@ -516,7 +516,7 @@ namespace bomber
         if(!f.droptime)
         {
             affinityeffect(i, d->team, d->feetpos(), f.pos(true, true), 1, "TAKEN");
-            game::announcef(S_V_BOMBPICKUP, CON_INFO, d, true, "\fa%s picked up the \fs\fwbomb\fS", game::colourname(d));
+            game::announcef(S_V_BOMBPICKUP, CON_INFO, d, true, "\fa%s picked up the \fs\fzwv\f($bombtex)bomb\fS", game::colourname(d));
             entities::execlink(NULL, f.ent, false);
         }
         st.takeaffinity(i, d, lastmillis);

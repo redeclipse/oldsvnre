@@ -1902,16 +1902,16 @@ namespace game
         return teamtexs[clamp(team, 0, T_MAX-1)];
     }
 
-    const char *colourteam(int team, bool icon)
+    const char *colourteam(int team, const char *icon)
     {
         if(team < 0 || team > T_MAX) team = T_NEUTRAL;
         static string teamed; teamed[0] = 0; string teamtmp;
         concatstring(teamed, "\fs");
         formatstring(teamtmp)("\f[%d]", TEAM(team, colour));
         concatstring(teamed, teamtmp);
-        if(icon)
+        if(icon != NULL)
         {
-            formatstring(teamtmp)("\f($%s)", teamtexnamex(team));
+            formatstring(teamtmp)("\f($%s)", *icon ? icon : teamtexnamex(team));
             concatstring(teamed, teamtmp);
         }
         concatstring(teamed, TEAM(team, name));
