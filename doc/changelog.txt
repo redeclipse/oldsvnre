@@ -6,7 +6,7 @@ Gameplay:
    /thirdpersondist and /thirdpersonside)
  * New default firstperson style with visible legs
  * Disabled half-impulses when the impulse meter is close to empty (back to 1.1
-   behaviour, toggle with /impulsecostrelax)
+   behaviour)
  * Added reward for ending killing sprees
  * Removed critical hits
  * Impulse slide duration increased, maintained speed decreased
@@ -31,7 +31,7 @@ Weapons:
    increased; reload speed, stun and primary damage decreased
  * Plasma primary damage, projectile speed, stun, particle size and reload
    speed increased; firing rate and clip size decreased
- * Flamer projectile size, projectile speed and secondary explosion redius
+ * Flamer projectile size, projectile speed and secondary explosion radius
    increased; damage, primary explosion radius and secondary firing rate
    decreased
  * Rifle damage, recoil, clip size, and accuracy increased; explosion size,
@@ -49,7 +49,7 @@ Modes & Mutators:
    'classic' mutator)
  * Removed ballistic mutator
  * Added kaboom mutator (only grenades and mines with reloading ammo, rockets
-   spawn at normal mine & grenade spawns)
+   spawn as normal)
  * Added gauntlet mode (one team tries to run to the other side of a map, other
    team tries to hinder, switches at half-time)
  * Time-trial now spawns with weapons for movement tricks, collisions and
@@ -97,7 +97,6 @@ Interface & Menus:
  * Revamped score screen
  * Added ALT+ENTER/CMD+ENTER fullscreen toggle, and ALT+F4/CMD+Q for closing
    the window
- * Added ability to enable automatic demo recording each match (/demoautorec 1)
  * Added "reset selection" button for mutators
  * Added variables to control death/kill message content
    (/obit{verbose,styles})
@@ -105,10 +104,9 @@ Interface & Menus:
  * IRC improvements, fixed disconnecting properly
  * Demos and screenshots are now stored in "demos" and "screenshots"
    subdirectories in the homedir, using "<date><time>[.<number>]" for filename
- * Incomplete demos discarded by default (/demokeep 1 to enable)
  * Added inline tab completion for commands and inline help descriptions
  * Added ammo bars in weapon inventory
- * Carried flags & similar are now 50% trasparent in third person view
+ * Carried flags & similar are now 50% transparent in third person view
  * Revamped clip display with variable clip sizes
  * Added new "circle bar" showing health, impulse and ammo simultaneously at
    crosshair location
@@ -132,17 +130,16 @@ Modding & Mapmaking:
  * Added 'weaponinterrupts' server variable which allows control over which
    weapon states may be interrupted by the player
  * Renamed frag/flak weapon vars for clarity: 'frag' events create 'flak'
- * Added new residual style 'shock' which stuns, possib to combine multiple
-   residual effects
- * Renamed 'numplayers'->'mapplayers'
- * Added 'mapbalance' for unsymmetrical maps to swap teams at specified
+ * Added new residual style 'shock' which stuns, now possible to combine
+   multiple residual effects
+ * Added 'mapbalance' for asymmetrical maps to swap teams at specified
    intervals
- * Added extra obituary message vars for the new lava/water+death variantions
+ * Added extra obituary message vars for the new lava/water+death variations
    (obit<type>[234]), and for falling out of the level (obitfall)
 
 Data Assets:
  * Renamed 'blarg' directory to 'misc' for random textures
- * Added a few light textuers in 'misc' (used in starlibido)
+ * Added a few light textures in 'misc' (used in starlibido)
  * Added 19 new skyboxes ('elyvisions' and 'mayhem' directories)
  * Removed texture kurt/rock01
  * Added 121 new textures from philipk's 'pk01' and 'pk02' sets
@@ -156,6 +153,8 @@ Data Assets:
  * Added headless model for headshots
 
 Multiplayer & Servers:
+ * Added ability to enable automatic demo recording each match (/demoautorec 1)
+ * Incomplete demos discarded by default (/demokeep 1 to enable)
  * Implemented short-term map history to prevent players voting on the same
    maps
  * Added vetolock variable to determine who may force match votes
