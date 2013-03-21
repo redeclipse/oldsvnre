@@ -1752,8 +1752,8 @@ namespace server
                     if(offq) mp += numt-offq;
                 }
                 if(mp < np) mp = np;
-                if(np != G(numplayers)) setmod(sv_numplayers, np);
-                if(mp != G(maxplayers)) setmod(sv_maxplayers, mp);
+                setmod(sv_numplayers, np);
+                setmod(sv_maxplayers, mp);
             }
         }
     }
