@@ -10,7 +10,7 @@ Gameplay:
  * Added reward for ending killing sprees
  * Removed critical hits
  * Impulse slide duration increased, maintained speed decreased
- * Impulse regeneration start delay increased
+ * Impulse regeneration now delayed longer, but once started is faster
  * Explosion shaking effect reduced
 
 Weapons:
