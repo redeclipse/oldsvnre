@@ -822,7 +822,7 @@ bool mmcollide(physent *d, const vec &dir, octaentities &oc)               // co
         switch(d->collidetype)
         {
             case COLLIDE_ELLIPSE:
-                if(roll) rotatebb(center, radius, 0, pitch, roll);
+                if(pitch || roll) rotatebb(center, radius, 0, pitch, roll);
                 if(m->ellipsecollide)
                 {
                     if(!ellipsecollide(d, dir, e.o, center, yaw, radius.x, radius.y, radius.z, radius.z)) return false;
