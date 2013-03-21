@@ -398,10 +398,10 @@ GVAR(0, impulsecostscale, 0, 0, 1); // whether the cost scales depend on the amo
 GVAR(0, impulseskate, 0, 1000, VAR_MAX); // length of time a run along a wall can last
 GFVAR(0, impulsepacing, 0, 0, FVAR_MAX); // pacing impulse meter depletion
 GFVAR(0, impulsejet, 0, 0.5f, FVAR_MAX); // jetpack impulse meter depletion
-GFVAR(0, impulseregen, 0, 4, FVAR_MAX); // impulse regen multiplier
-GFVAR(0, impulseregencrouch, 0, 2, FVAR_MAX); // impulse regen crouch modifier
+GFVAR(0, impulseregen, 0, 5, FVAR_MAX); // impulse regen multiplier
+GFVAR(0, impulseregencrouch, 0, 2.5f, FVAR_MAX); // impulse regen crouch modifier
 GFVAR(0, impulseregenpacing, 0, 0.75f, FVAR_MAX); // impulse regen pacing modifier
-GFVAR(0, impulseregenjet, 0, 1.5f, FVAR_MAX); // impulse regen jetpack modifier
+GFVAR(0, impulseregenjet, 0, 2, FVAR_MAX); // impulse regen jetpack modifier
 GFVAR(0, impulseregenmove, 0, 1, FVAR_MAX); // impulse regen moving modifier
 GFVAR(0, impulseregeninair, 0, 0.75f, FVAR_MAX); // impulse regen in-air modifier
 GFVAR(0, impulseregenslide, 0, 0, FVAR_MAX); // impulse regen sliding modifier
