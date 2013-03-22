@@ -1,6 +1,6 @@
 = Red Eclipse =
 
-* A Free and Open Source First Person Shooter
+* A Free, Casual Arena Shooter; released as Open Source
 * Available for Windows, GNU/Linux and BSD
 * Parkour, impulse boosts, dashing, and other tricks
 * Favourite gamemodes with an array of mutators and variables
