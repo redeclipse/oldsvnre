@@ -1,7 +1,7 @@
 = Red Eclipse =
 
 * A Free and Open Source First Person Shooter
-* Available for Windows, Linux/BSD and Mac OSX
+* Available for Windows, GNU/Linux and BSD
 * Parkour, impulse boosts, dashing, and other tricks
 * Favourite gamemodes with an array of mutators and variables
 * Builtin editor lets you create your own maps cooperatively online
@@ -9,18 +9,17 @@
 
 = About =
 
-Red Eclipse is a single-player and multi-player first-person ego-shooter,
-built as a total conversion of Cube Engine 2, which lends itself toward a
-balanced gameplay, completely at the control of map makers, while
-maintaining a general theme of agility in a variety of environments.
-For more information, please see our Wiki or Forum.
+Red Eclipse is a fun-filled new take on the casual first person arena
+shooter, built as a total conversion of Cube Engine 2, which lends itself
+toward a balanced gameplay, with a general theme of agility in a variety
+of environments. For more information, please see our Wiki or Forum.
 
 Wiki: http://www.redeclipse.net/wiki
 Forum: http://www.redeclipse.net/forum
 
 The project is a Free and Open Source game, built on Cube Engine 2 using SDL
 and OpenGL which allows it to be ported to many platforms; you can download
-a package for Windows, Linux/BSD, Mac OSX, or grab a development copy from
+a package for Windows, GNU/Linux, BSD, or grab a development copy from
 our Subversion repository and live on the bleeding edge.
 
 Download: http://www.redeclipse.net/download
