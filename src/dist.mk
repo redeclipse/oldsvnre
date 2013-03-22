@@ -9,7 +9,7 @@ dirname-win=$(dirname)-win
 tmpdir-osx:=$(shell cd ../ && DIR=$$(mktemp -d $(dirname)-osx_XXXXX); rmdir $$DIR; echo $$DIR)
 exename=$(appname)_$(appversion)_win.exe
 
-tarname=$(appname)_$(appversion)_nix_bsd.tar
+tarname=$(appname)_$(appversion)_nix.tar
 tarname-all=$(appname)_$(appversion)_all.tar
 tarname-osx=$(appname)_$(appversion)_osx.tar
 
