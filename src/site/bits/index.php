@@ -139,7 +139,7 @@
             <div id="video">
                 <div id="main">
                     <h1>Red Eclipse</h1><h2>&nbsp;&nbsp;a Free, Casual Arena Shooter</h2>
-                    <h3>Available for Windows, GNU/Linux and BSD</h3>
+                    <h3>Available for Windows, GNU/Linux, BSD, and OSX</h3>
                     <h3>Parkour, impulse boosts, dashing, and other tricks</h3>
                     <h3>Favourite gamemodes with an array of mutators and variables</h3>
                     <h3>Builtin editor lets you create your own maps cooperatively online</h3>
@@ -183,7 +183,7 @@
             <div class="endblock">&nbsp;</div>
             <div class="leftcol">
                 <p>Red Eclipse is a fun-filled new take on the casual first person arena shooter, built as a total conversion of <a href="http://www.cubeengine.com/">Cube Engine 2</a>, which lends itself toward a balanced gameplay, with a general theme of agility in a variety of environments. For more information, please see our <a href="/wiki">Wiki</a> or <a href="/forum">Forums</a>.</p>
-                <p>The project is a <i>Free and Open Source</i> game, built on <a href="http://www.cubeengine.com/">Cube Engine 2</a> using <a href="http://libsdl.org/">SDL</a> and <a href="http://opengl.org/">OpenGL</a> which allows it to be ported to many platforms; you can <a href="/download">download a package</a> for <i>Windows, GNU/Linux and BSD</i>, or grab a development copy from our <a href="/devel">Subversion</a> repository and live on the bleeding edge.</p>
+                <p>The project is a <i>Free and Open Source</i> game, built on <a href="http://www.cubeengine.com/">Cube Engine 2</a> using <a href="http://libsdl.org/">SDL</a> and <a href="http://opengl.org/">OpenGL</a> which allows it to be ported to many platforms; you can <a href="/download">download a package</a> for <i>Windows, GNU/Linux, BSD, and OSX</i>, or grab a development copy from our <a href="/devel">Subversion</a> repository and live on the bleeding edge.</p>
             </div>
             <div class="vbar">&nbsp;</div>
             <div class="leftcol">
