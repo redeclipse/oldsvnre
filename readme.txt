@@ -75,77 +75,65 @@ too.
 * Lee "Eihrul" Salzman - Lead Programmer / Advisor
     - Cube 2 Backports, Support, Speed Improvements, Encouragement
 
-* Kevin "Hirato" Meyer - Timmy
+* Kevin "Hirato" Meyer
     - Development Assistance, Design and Testing
 
-* Joshua L. "Verbalshadow" Blocher - Artist
+* Joshua L. "Verbalshadow" Blocher
     - Some source artwork, Design and Testing
 
-* Kurt "Kurtis84" Kessler - Artist
-    - Textures, Design and Testing
-
-* Rémi "LuckystrikeRx" Clouet d'Orval - Artist
+* Rémi "LuckystrikeRx" Clouet d'Orval
     - Maps, Textures, Models, Weapons, Design and Testing, Website, Trailer
 
-* Jonathan "W!ck3d" Roels - Artist
+* Jonathan "W!ck3d" Roels
     - Maps, Textures, Design and Testing
 
-* Derek "Favorito" Ponicki - Artist
+* Derek "Favorito" Ponicki
     - Maps, Textures, Design and Testing
 
-* Jeroen "appleflap" Boukens - Collaborator
+* Jeroen "appleflap" Boukens
     - Textures, Design and Testing
 
-* Martin "arand" Werner - Collaborator
+* Martin "arand" Werner
     - Documentation, Legal Drafting, Cross-Distribution Support,
         Open Source Compliance Checks, and much more.
 
-* Mike "mikeplus64" Ledger - Artist
+* Mike "mikeplus64" Ledger
     - Maps, Models, Weapons, Textures, HUD, Design and Testing
 
-* Derek "JoJo" Stegall - Artist
+* Derek "JoJo" Stegall
     - Maps, Models, Textures, HUD, Sound FX, Design and Testing
 
-* Jonathan "Ulukai" De Nil - Artist
-    - Maps, Testing, Support
-
-* Jeff "Architect" Cope - Collaborator
+* Jeff "Architect" Cope
     - Design and Testing
 
-* Slawek "VibrantWave" Blauciak - Artist
-    - Ambient Sounds
+* Jonathan "Ulukai" De Nil
+    - Maps, Testing, Support
 
-* "SkiingPenguins" - Artist
-    - Skyboxes
+* Ruben "TheLastProject" van Os
+    - Design, Testing and Support
 
-* "Fleeky" - Artist
-    - Models
-
-* "fluxord" - Artist
-    - Crosshairs
-
-* Stefan Norman and Peter McInerney - Hosting
+* Stefan Norman and Peter McInerney
     - Master and Game server hosting
-
-* "John_III" - Artist
-    - Maps and Models
-
-* "D.a.M.i.E.n" - Artist
-   - Maps and Textures
 
 == Contributors ==
 
-* Riidom Li - Models
-* RaZgRiZ - Textures and Cubescript maintenance
-* Alex "ZeroKnight" George - Documentation, Testing and Support
-* Kirill "TristamK" Kolesnikov - Maps
-* "Raiden" - Maps
+* Alex "ZeroKnight" George - Design, Testing and Support
+* Joseph "ballist1c" Calabria - Maps
+* "John_III" - Maps and Models
+* "D.a.M.i.E.n" - Maps and Textures
 * Matt "greasepirate" Kalt - Maps
 * Ricky Thomson "unixfreak" - Maps
+* "Raiden" - Maps
 * "Korsi" - Maps
 * "4rson" - Maps and Support
-* Ruben "TheLastProject" van Os - Testing and Support
-* Joseph "ballist1c" Calabria - Maps
+* Slawek "VibrantWave" Blauciak - Ambient Sounds
+* "SkiingPenguins" - Skyboxes
+* "Fleeky" - Models
+* "fluxord" - Crosshairs
+* Kurt "Kurtis84" Kessler - Textures
+* Riidom Li - Models
+* RaZgRiZ - Textures and Cubescript maintenance
+* Kirill "TristamK" Kolesnikov - Maps
 
 == Supporters ==
 
