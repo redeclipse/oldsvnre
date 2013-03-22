@@ -112,6 +112,9 @@ too.
 * Ruben "TheLastProject" van Os
     - Design, Testing and Support
 
+* Jacinta "cinta" Hall
+    - Design, Testing, Support, and making babies.
+
 * Stefan Norman and Peter McInerney
     - Master and Game server hosting
 
