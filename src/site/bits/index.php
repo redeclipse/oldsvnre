@@ -1,7 +1,7 @@
 <?php
-    $app['releasever'] = "v1.3.1 (Galactic Edition)";
-    $app['releasedate'] = "1st September 2012";
-    $app['releasefile'] = "redeclipse_1.3";
+    $app['releasever'] = "v1.4 (Elara Edition)";
+    $app['releasedate'] = "22nd March 2013";
+    $app['releasefile'] = "redeclipse_1.4";
     $app['background'] = "/bits/background_01.jpg";
     $app['youtubevid'] = "mjHVb3z72tM";
     $app['screenshots'] = 16;
@@ -139,7 +139,7 @@
             <div id="video">
                 <div id="main">
                     <h1>Red Eclipse</h1><h2>&nbsp;&nbsp;&nbsp;&nbsp;a Free and Open Source FPS</h2>
-                    <h3>Available for Windows, Linux/BSD and Mac OSX</h3>
+                    <h3>Available for Windows, GNU/Linux and BSD</h3>
                     <h3>Parkour, impulse boosts, dashing, and other tricks</h3>
                     <h3>Favourite gamemodes with an array of mutators and variables</h3>
                     <h3>Builtin editor lets you create your own maps cooperatively online</h3>
@@ -183,7 +183,7 @@
             <div class="endblock">&nbsp;</div>
             <div class="leftcol">
                 <p>Red Eclipse is a single-player and multi-player first-person ego-shooter, built as a total conversion of <a href="http://www.cubeengine.com/">Cube Engine 2</a>, which lends itself toward a balanced gameplay, completely at the control of map makers, while maintaining a general theme of agility in a variety of environments. For more information, please see our <a href="/wiki">Wiki</a> or <a href="/forum">Forums</a>.</p>
-                <p>The project is a <i>Free and Open Source</i> game, built on <a href="http://www.cubeengine.com/">Cube Engine 2</a> using <a href="http://libsdl.org/">SDL</a> and <a href="http://opengl.org/">OpenGL</a> which allows it to be ported to many platforms; you can <a href="/download">download a package</a> for <i>Windows, Linux/BSD, Mac OSX</i>, or grab a development copy from our <a href="/devel">Subversion</a> repository and live on the bleeding edge.</p>
+                <p>The project is a <i>Free and Open Source</i> game, built on <a href="http://www.cubeengine.com/">Cube Engine 2</a> using <a href="http://libsdl.org/">SDL</a> and <a href="http://opengl.org/">OpenGL</a> which allows it to be ported to many platforms; you can <a href="/download">download a package</a> for <i>Windows, GNU/Linux and BSD</i>, or grab a development copy from our <a href="/devel">Subversion</a> repository and live on the bleeding edge.</p>
             </div>
             <div class="vbar">&nbsp;</div>
             <div class="leftcol">
