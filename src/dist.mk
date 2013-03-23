@@ -6,7 +6,7 @@ dirname=$(appname)-$(appversion)
 dirname-osx=$(appname).app
 dirname-win=$(dirname)-win
 
-tmpdir-osx:=$(shell cd ../ && DIR=$$(mktemp -d $(dirname)-osx_XXXXX); rmdir $$DIR; echo $$DIR)
+tmpdir-osx:=$(shell cd ../ && DIR=$$(mktemp -d $(dirname)-osx_XXXXXX); rmdir $$DIR; echo $$DIR)
 exename=$(appname)_$(appversion)_win.exe
 
 tarname=$(appname)_$(appversion)_nix.tar
