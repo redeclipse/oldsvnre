@@ -88,8 +88,10 @@ DISTFILES:= \
 
 ../$(dirname):
 	rm -rf $@
-	# Transform relative to src/ dir
-	tar -cf - $(DISTFILES:%=../%) | (mkdir $@/; cd $@/ ; tar -xpf -)
+	# exclude VCS and transform relative to src/ dir
+	tar --exclude='.svn' --exclude='*.git' --exclude='*.hg' \
+		--exclude='*.bzr' \
+		-cf - $(DISTFILES:%=../%) | (mkdir $@/; cd $@/ ; tar -xpf -)
 	# create dedicated Makefile
 	echo "APPNAME=$(APPNAME)" >$@/src/Makefile
 ifneq ($(APPNAME),$(appname))
