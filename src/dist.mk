@@ -132,12 +132,12 @@ dist-tar-all: ../$(tarname-all)
 	mkdir ../$(tmpdir-osx)/$(dirname-osx)/Contents
 	mkdir ../$(tmpdir-osx)/$(dirname-osx)/Contents/Resources
 	# Use links with tar dereference to change directory paths
-	ln -s ../../../$</data/ ../$(tmpdir-osx)/$(dirname-osx)/Contents/Resources/data
-	ln -s ../../../$</doc/ ../$(tmpdir-osx)/$(dirname-osx)/Contents/Resources/doc
-	ln -s ../../../$</game/ ../$(tmpdir-osx)/$(dirname-osx)/Contents/Resources/game
-	ln -s ../../../$</src/ ../$(tmpdir-osx)/$(dirname-osx)/Contents/Resources/src
+	ln -s ../$</data/ ../$(tmpdir-osx)/$(dirname-osx)/data
+	ln -s ../$</doc/ ../$(tmpdir-osx)/$(dirname-osx)/doc
+	ln -s ../$</game/ ../$(tmpdir-osx)/$(dirname-osx)/game
+	ln -s ../$</src/ ../$(tmpdir-osx)/$(dirname-osx)/src
 ifeq ($(APPNAME),redeclipse)
-	ln -s ../../../$</readme.txt ../$(tmpdir-osx)/$(dirname-osx)/Contents/Resources/readme.txt
+	ln -s ../$</readme.txt ../$(tmpdir-osx)/$(dirname-osx)/readme.txt
 endif
 	tar \
 		-hrf $@ -C ../$(tmpdir-osx) $(dirname-osx)
