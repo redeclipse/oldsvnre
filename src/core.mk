@@ -41,6 +41,7 @@ STRIP_TEMP:=$(STRIP)
 override STRIP=$(TOOLSET_PREFIX)$(STRIP_TEMP)
 
 MV=mv
+MKDIR=mkdir -p
 
 ifneq (,$(findstring MINGW,$(PLATFORM)))
 WINDRES=windres
@@ -215,11 +216,11 @@ ifneq (,$(STRIP))
 endif
 
 install-client: client
-	install -d $(INSTDIR)
+	$(MKDIR) $(INSTDIR)
 	install -m 755 $(APPCLIENT) $(INSTDIR)$(APPCLIENT)$(PLATFORM_SUFFIX)
 
 install-server: server
-	install -d $(INSTDIR)
+	$(MKDIR) $(INSTDIR)
 	install -m 755 $(APPSERVER) $(INSTDIR)$(APPSERVER)$(PLATFORM_SUFFIX)
 
 shared/cube2font.o: shared/cube2font.c
@@ -229,8 +230,8 @@ cube2font: shared/cube2font.o
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o cube2font shared/cube2font.o `freetype-config --libs` -lz
 
 install-cube2font: cube2font
-	install -d ../bin
-	install -m 755 cube2font ../bin/cube2font
+	$(MKDIR) $(INSTDIR)
+	install -m 755 cube2font $(INSTDIR)/cube2font
 endif
 
 install: install-client install-server
