@@ -59,11 +59,16 @@ system-install-client: client
 	install -m755 $(appclient) $(libexecdir)/$(appname)/$(appname)
 	install -m755 install/nix/$(appsrcname).am \
 		$(gamesbindir)/$(appname)
-	sed -e 's,@LIBEXECDIR@,$(patsubst $(DESTDIR)%,%,$(libexecdir)),g' \
-		-e 's,@DATADIR@,$(patsubst $(DESTDIR)%,%,$(datadir)),g' \
-		-e 's,@DOCDIR@,$(patsubst $(DESTDIR)%,%,$(docdir)),g' \
-		-e 's,@APPNAME@,$(appname),g' \
-		-i $(gamesbindir)/$(appname)
+	printf "\
+	g,@LIBEXECDIR@,\
+	s,@LIBEXECDIR@,$(patsubst $(DESTDIR)%,%,$(libexecdir)),g\n\
+	g,@DATADIR@,\
+	s,@DATADIR@,$(patsubst $(DESTDIR)%,%,$(datadir)),g\n\
+	g,@DOCDIR@,\
+	s,@DOCDIR@,$(patsubst $(DESTDIR)%,%,$(docdir)),g\n\
+	g,@APPNAME@,\
+	s,@APPNAME@,$(appname),g\n\
+	w\n" | ed -s $(gamesbindir)/$(appname)
 	ln -s $(patsubst $(DESTDIR)%,%,$(datadir))/$(appname)/data \
 		$(libexecdir)/$(appname)/data
 	ln -s $(patsubst $(DESTDIR)%,%,$(datadir))/$(appname)/game \
@@ -77,11 +82,16 @@ system-install-server: server
 		$(libexecdir)/$(appname)/$(appname)-server
 	install -m755 install/nix/$(appsrcname)-server.am \
 		$(gamesbindir)/$(appname)-server
-	sed -e 's,@LIBEXECDIR@,$(patsubst $(DESTDIR)%,%,$(libexecdir)),g' \
-		-e 's,@DATADIR@,$(patsubst $(DESTDIR)%,%,$(datadir)),g' \
-		-e 's,@DOCDIR@,$(patsubst $(DESTDIR)%,%,$(docdir)),g' \
-		-e 's,@APPNAME@,$(appname),g' \
-		-i $(gamesbindir)/$(appname)-server
+	printf "\
+	g,@LIBEXECDIR@,\
+	s,@LIBEXECDIR@,$(patsubst $(DESTDIR)%,%,$(libexecdir)),g\n\
+	g,@DATADIR@,\
+	s,@DATADIR@,$(patsubst $(DESTDIR)%,%,$(datadir)),g\n\
+	g,@DOCDIR@,\
+	s,@DOCDIR@,$(patsubst $(DESTDIR)%,%,$(docdir)),g\n\
+	g,@APPNAME@,\
+	s,@APPNAME@,$(appname),g\n\
+	w\n" | ed -s $(gamesbindir)/$(appname)-server
 	install -m644 ../$(appgamedir)/version.cfg \
 		$(datadir)/$(appname)/version.cfg
 
