@@ -168,7 +168,7 @@ License: CC-BY-3.0
 
 Files: data/mayhem/*
 Copyright: Mayhem
-License: CC-BY-SA (version unclear, probably not 3.0)
+License: CC-BY-SA-3.0
 
 Files: data/philipk/
 Copyright: Philip Klevestav <philipk@philipk.net>
