@@ -529,14 +529,24 @@ namespace entities
                 gameent *f = (gameent *)d;
                 if(game::allowmove(f))
                 {
-                    int sweap = m_weapon(game::gamemode, game::mutators), attr = e.type == WEAPON ? w_attr(game::gamemode, game::mutators, e.attrs[0], sweap) : e.attrs[0];
-                    if(f->canuse(e.type, attr, e.attrs, sweap, lastmillis, G(weaponinterrupts)))
+                    int interrupts = G(weaponinterrupts), sweap = m_weapon(game::gamemode, game::mutators), attr = e.type == WEAPON ? w_attr(game::gamemode, game::mutators, e.attrs[0], sweap) : e.attrs[0];
+                    interrupts &= ~(1<<W_S_RELOAD);
+                    if(!f->canuse(e.type, attr, e.attrs, sweap, lastmillis, interrupts))
                     {
-                        client::addmsg(N_ITEMUSE, "ri3", f->clientnum, lastmillis-game::maptime, n);
-                        f->setweapstate(f->weapselect, W_S_WAIT, weaponswitchdelay, lastmillis);
-                        f->action[AC_USE] = false;
-                        return false;
+                        if(!f->canuse(e.type, attr, e.attrs, sweap, lastmillis, (1<<W_S_RELOAD))) return true;
+                        else if(!isweap(f->weapselect) || f->weapload[f->weapselect] <= 0) return true;
+                        else
+                        {
+                            int offset = f->weapload[f->weapselect];
+                            f->ammo[f->weapselect] = max(f->ammo[f->weapselect]-offset, 0);
+                            f->reloads[f->weapselect] = max(f->reloads[f->weapselect]-1, 0);
+                            f->weapload[f->weapselect] = -f->weapload[f->weapselect];
+                        }
                     }
+                    client::addmsg(N_ITEMUSE, "ri3", f->clientnum, lastmillis-game::maptime, n);
+                    f->setweapstate(f->weapselect, W_S_WAIT, weaponswitchdelay, lastmillis);
+                    f->action[AC_USE] = false;
+                    return false;
                 }
                 return true;
             } break;

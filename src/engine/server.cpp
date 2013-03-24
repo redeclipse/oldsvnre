@@ -1264,6 +1264,7 @@ void setupserver()
 
 void initgame()
 {
+    conoutf("identity: %s v%s-%s %d bit (%s)", versionname, versionstring, CUR_PLATFORM, CUR_ARCH, versionrelease);
     server::start();
     loopv(gameargs)
     {

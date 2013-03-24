@@ -1748,8 +1748,12 @@ namespace game
                 defformatstring(weap)("%s\fs\f[%d]\f(%s)%s\fS", pre, colour, tex, name);
                 msg.put(weap, strlen(weap));
             }
-            if(!value.empty()) setsvar("favloadweaps", value.getbuf(), true);
-            if(d == player1 && !msg.empty() && echo) conoutft(CON_SELF, "weapon selection is now: %s", msg.getbuf());
+            msg.add('\0');
+            value.add('\0');
+            const char *msgstr = msg.getbuf(), *valstr = value.getbuf();
+            if(valstr && *valstr) setsvar("favloadweaps", value.getbuf(), true);
+            if(d == player1 && echo && msgstr && *msgstr)
+                conoutft(CON_SELF, "weapon selection is now: %s", msgstr);
         }
         else conoutft(CON_MESG, "\foweapon selection is not currently available");
     }
@@ -2039,7 +2043,7 @@ namespace game
         if(input != inputmouse || (view != inputview || mode != inputmode || focus != lastfocus))
         {
             if(input != inputmouse) resetcursor();
-            else resetcamera(focus != lastfocus);
+            else resetcamera(true);
             inputmouse = input;
             inputview = view;
             inputmode = mode;

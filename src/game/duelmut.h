@@ -235,12 +235,18 @@ struct duelservmode : servmode
                     mutate(smuts, mut->layout());
                     loopv(duelqueue) position(duelqueue[i], i);
                     duelround++;
-                    string fight;
+                    string fight; fight[0] = 0;
                     if(m_duel(gamemode, mutators))
                     {
-                        defformatstring(namea)("%s", colourname(playing[0]));
-                        defformatstring(nameb)("%s", colourname(playing[1]));
-                        formatstring(fight)("\fyduel between %s and %s, round \fs\fr#%d\fS", namea, nameb, duelround);
+                        string names; names[0] = 0;
+                        int cnt = min(wants, 4);
+                        loopi(cnt)
+                        {
+                            concatstring(names, colourname(playing[i]));
+                            if(i == cnt-2) concatstring(names, " and ");
+                            else concatstring(names, ", ");
+                        }
+                        formatstring(fight)("\fyduel between %s, round \fs\fr#%d\fS", names, duelround);
                     }
                     else if(m_survivor(gamemode, mutators))
                         formatstring(fight)("\fysurvivor, round \fs\fr#%d\fS", duelround);
