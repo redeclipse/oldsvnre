@@ -141,7 +141,7 @@
                     <h1>Red Eclipse</h1><h2>&nbsp;&nbsp;a Free, Casual Arena Shooter</h2>
                     <h3>Available for Windows, GNU/Linux, BSD, and OSX</h3>
                     <h3>Parkour, impulse boosts, dashing, and other tricks</h3>
-                    <h3>Favourite gamemodes with an array of mutators and variables</h3>
+                    <h3>Favourite game modes with an array of mutators and variables</h3>
                     <h3>Builtin editor lets you create your own maps cooperatively online</h3>
                     <a href="/download" id="button">Free Download<br /><em><?php echo $app['releasever']; ?><br /> released <i><?php echo $app['releasedate']; ?></i></em></a>	 
                     <p id="digidist">or use <a href="/desura">Desura</a>, a free digital distribution application for Windows/Linux</p>
