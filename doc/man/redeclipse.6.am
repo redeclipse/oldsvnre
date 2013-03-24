@@ -28,7 +28,6 @@
 
 '\" General options
 .OP \-x\fR'command(s)'
-.OP \-k\fR{0|1}
 .OP \-v\fR{0..4}
 .OP \-\-help
 
@@ -176,12 +175,6 @@ This configuration is stored in init.cfg
 .B \-x\fR'\fIcommand1\fR; \fIcommand2\fR; \fI...\fR'
 .
 Executes a list of commands once Red Eclipse has started up.
-
-.TP
-.BR \-k {0|1}
-Enables or disables kid mode, which reduces blood and death effects somewhat. 1 enables reduced gore, defaults to 0.
-.IP
-This configuration is stored in init.cfg
 
 .TP
 .BR \-v {0..4}
