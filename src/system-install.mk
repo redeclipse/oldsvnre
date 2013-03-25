@@ -94,6 +94,8 @@ system-install-server: server
 	w\n" | ed -s $(gamesbindir)/$(appname)-server
 	install -m644 ../$(appgamedir)/version.cfg \
 		$(datadir)/$(appname)/version.cfg
+	ln -s $(patsubst $(DESTDIR)%,%,$(datadir))/$(appname)/version.cfg \
+		$(libexecdir)/$(appname)/version.cfg
 
 system-install-data:
 	$(MKDIR) $(datadir)/$(appname)/game
