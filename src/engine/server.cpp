@@ -1408,11 +1408,13 @@ void setlocations(bool wanthome)
         chdir(dir);
     }
 #endif
+#ifndef STANDALONE
     loopi(3) if(!fileexists(findfile("data/config/keymap.cfg", "r"), "r"))
-    {
+    { // standalone solution to this is: pebkac
         if(i != 2) chdir("..");
         else fatal("could not find data directory");
     }
+#endif
     addpackagedir("data");
     defformatstring(gamedata)("game/%s", server::gameid());
     addpackagedir(gamedata);
