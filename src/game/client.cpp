@@ -247,7 +247,7 @@ namespace client
         setsvar("accountname", name);
         setsvar("accountpass", key);
     });
-    ICOMMAND(0, hasauthkey, "", (), intret(accountname[0] && accountpass[0] ? 1 : 0));
+    ICOMMAND(0, hasauthkey, "i", (int *n), intret(accountname[0] && accountpass[0] && (!*n || authconnect) ? 1 : 0));
 
     void writegamevars(const char *name, bool all = false, bool server = false)
     {
