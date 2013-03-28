@@ -46,8 +46,8 @@ namespace game
     {
         if(connected() && maptime > 0 && !intermission) musicdone(true);
     }
-    VARF(IDF_PERSIST, musictype, 0, 1, 5, stopmapmusic()); // 0 = no in-game music, 1 = map music (or random if none), 2 = always random, 3 = map music (silence if none), 4-5 = same as 1-2 but pick new tracks when done
-    VARF(IDF_PERSIST, musicedit, -1, 0, 5, stopmapmusic()); // same as above for editmode, -1 = use musictype
+    VARF(IDF_PERSIST, musictype, 0, 1, 6, stopmapmusic()); // 0 = no in-game music, 1 = map music (or random if none), 2 = always random, 3 = map music (silence if none), 4-5 = same as 1-2 but pick new tracks when done, 6 = always use theme song
+    VARF(IDF_PERSIST, musicedit, -1, 0, 6, stopmapmusic()); // same as above for editmode, -1 = use musictype
     SVARF(IDF_PERSIST, musicdir, "sounds/music", stopmapmusic());
     SVARF(IDF_WORLD, mapmusic, "", stopmapmusic());
 
@@ -2590,33 +2590,37 @@ namespace game
     {
         if(connected())
         {
+            int type = m_edit(gamemode) && musicedit >= 0 ? musicedit : musictype;
             if(!maptime) { maptime = -1; return; } // skip the first loop
             else if(maptime < 0)
             {
                 maptime = NZT(lastmillis);
-                musicdone(false);
+                if(type != 6) musicdone(false);
                 RUNWORLD("on_start");
                 return;
             }
             else if(!nosound && mastervol && musicvol)
             {
-                int type = m_edit(gamemode) && musicedit >= 0 ? musicedit : musictype;
                 if(type && !playingmusic())
                 {
-                    defformatstring(musicfile)("%s", mapmusic);
-                    if(*musicdir && (type == 2 || type == 5 || ((type == 1 || type == 4) && (!*musicfile || !fileexists(findfile(musicfile, "r"), "r")))))
+                    if(type == 6) smartmusic(true, false);
+                    else
                     {
-                        vector<char *> files;
-                        listfiles(musicdir, NULL, files);
-                        while(!files.empty())
+                        defformatstring(musicfile)("%s", mapmusic);
+                        if(*musicdir && (type == 2 || type == 5 || ((type == 1 || type == 4) && (!*musicfile || !fileexists(findfile(musicfile, "r"), "r")))))
                         {
-                            int r = rnd(files.length());
-                            formatstring(musicfile)("%s/%s", musicdir, files[r]);
-                            if(files[r][0] != '.' && playmusic(musicfile, type >= 4 ? "music" : NULL)) break;
-                            else files.remove(r);
+                            vector<char *> files;
+                            listfiles(musicdir, NULL, files);
+                            while(!files.empty())
+                            {
+                                int r = rnd(files.length());
+                                formatstring(musicfile)("%s/%s", musicdir, files[r]);
+                                if(files[r][0] != '.' && playmusic(musicfile, type >= 4 ? "music" : NULL)) break;
+                                else files.remove(r);
+                            }
                         }
+                        else if(*musicfile) playmusic(musicfile, type >= 4 ? "music" : NULL);
                     }
-                    else if(*musicfile) playmusic(musicfile, type >= 4 ? "music" : NULL);
                 }
             }
         }
