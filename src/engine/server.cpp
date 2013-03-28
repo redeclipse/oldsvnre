@@ -218,8 +218,10 @@ static void writelogv(FILE *file, const char *fmt, va_list args)
 #ifdef STANDALONE
 void localservertoclient(int chan, ENetPacket *packet) {}
 VAR(0, servertype, 1, 3, 3); // 1: private, 2: public, 3: dedicated
+VAR(0, standalone, 1, 1, -1);
 #else
 VARF(0, servertype, 0, 0, 3, changeservertype()); // 0: local only, 1: private, 2: public, 3: dedicated
+VAR(0, standalone, 1, 0, -1);
 #endif
 VAR(0, serveruprate, 0, 0, VAR_MAX);
 VAR(0, serverport, 1, SERVER_PORT, VAR_MAX);
