@@ -254,8 +254,8 @@ namespace hud
             gameent *e = game::getclient(d->ownernum);
             if(e)
             {
-                concatstring(hoststr, game::colourname(e));
-                concatstring(hoststr, ":");
+                concatstring(hoststr, game::colourname(e, NULL, false, false));
+                concatstring(hoststr, " ");
             }
             defformatstring(owner)("[%d]", d->ownernum);
             concatstring(hoststr, owner);
@@ -435,9 +435,9 @@ namespace hud
                     }
                 });
             }
-            namepad = max((namepad-text_width("name"))/float(guibound[0]), 0.25f);
-            if(hashandle) handlepad = max((handlepad-guibound[0])/float(guibound[0]), 0.25f);
-            if(hashost) hostpad = max((hostpad-guibound[0])/float(guibound[0]), 0.25f);
+            namepad = max((namepad-text_width("name"))/(guibound[0]*2.f), 0.25f)*1.25f;
+            if(hashandle) handlepad = max((handlepad-guibound[0])/(guibound[0]*2.f), 0.25f)*1.25f;
+            if(hashost) hostpad = max((hostpad-guibound[0])/(guibound[0]*2.f), 0.25f)*1.25f;
             loopk(numgroups)
             {
                 if((k%2)==0)
@@ -637,6 +637,7 @@ namespace hud
                     if((i%count)==0)
                     {
                         g.pushlist();
+                        g.spring();
                         pushed = true;
                     }
                     uicenterlist(g, uicenterlist(g, uipad(g, 0.25f, {
@@ -649,6 +650,7 @@ namespace hud
                     })));
                     if(!((i+1)%count) && pushed)
                     {
+                        g.spring();
                         g.poplist();
                         pushed = false;
                     }
