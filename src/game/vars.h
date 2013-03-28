@@ -132,9 +132,14 @@ GFVAR(IDF_ADMIN, votethreshold, 0, 0.5f, 1); // auto-pass votes when this many a
 GVAR(IDF_ADMIN, smallmapmax, 0, 6, VAR_MAX); // maximum number of players for a small map
 GVAR(IDF_ADMIN, mediummapmax, 0, 12, VAR_MAX); // maximum number of players for a medium map
 
-namespace server { extern void resetgamevars(bool flush); }
-GICOMMAND(0, resetvars, "", (), server::resetgamevars(true), );
-GICOMMAND(IDF_ADMIN, resetconfig, "", (), rehash(true), );
+namespace server
+{
+    extern void resetgamevars(bool flush, bool all);
+    extern void savegamevars();
+}
+GICOMMAND(0, resetvars, "", (), server::resetgamevars(true, false); result("success"), );
+GICOMMAND(0, savevars, "", (), server::savegamevars(); result("success"), );
+GICOMMAND(IDF_ADMIN, resetconfig, "", (), rehash(true); result("success"), );
 
 GFVAR(0, maxalive, 0, 1, FVAR_MAX); // only allow this*maxplayers to be alive at once
 GVAR(0, maxalivequeue, 0, 1, 1); // if number of players exceeds this amount, use a queue system

@@ -6,8 +6,8 @@
 #include <shlobj.h>
 #endif
 
-bool versioning = false;
 VAR(0, version, 1, 0, -1);
+VAR(0, versioning, 1, 0, -1);
 VAR(0, versionmajor, 0, 0, VAR_MAX);
 VAR(0, versionminor, 0, 0, VAR_MAX);
 VAR(0, versionpatch, 0, 0, VAR_MAX);
@@ -1418,7 +1418,7 @@ void setlocations(bool wanthome)
     addpackagedir("data");
     defformatstring(gamedata)("game/%s", server::gameid());
     addpackagedir(gamedata);
-    execfile("version.cfg", false, EXEC_VERSION);
+    execfile("version.cfg", false, EXEC_VERSION|EXEC_BUILTIN);
     if(wanthome)
     {
 #if defined(WIN32)

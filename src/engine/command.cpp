@@ -514,7 +514,11 @@ void setvar(const char *name, int i, bool dofunc, bool def)
 {
     GETVAR(id, ID_VAR, name, );
     *id->storage.i = clamp(i, id->minval, id->maxval);
-    if(def || versioning) id->def.i = i;
+    if(def || versioning)
+    {
+        id->def.i = i;
+        if(versioning == 2) id->bin.i = i;
+    }
     if(dofunc) id->changed();
 #ifndef STANDALONE
     if(versioning && id->flags&IDF_SERVER) setvar(&id->name[3], i, dofunc, def);
@@ -524,7 +528,11 @@ void setfvar(const char *name, float f, bool dofunc, bool def)
 {
     GETVAR(id, ID_FVAR, name, );
     *id->storage.f = clamp(f, id->minvalf, id->maxvalf);
-    if(def || versioning) id->def.f = f;
+    if(def || versioning)
+    {
+        id->def.f = f;
+        if(versioning == 2) id->bin.f = f;
+    }
     if(dofunc) id->changed();
 #ifndef STANDALONE
     if(versioning && id->flags&IDF_SERVER) setfvar(&id->name[3], f, dofunc, def);
@@ -539,6 +547,11 @@ void setsvar(const char *name, const char *str, bool dofunc, bool def)
     {
         delete[] id->def.s;
         id->def.s = newstring(str);
+        if(versioning == 2)
+        {
+            delete[] id->bin.s;
+            id->bin.s = newstring(str);
+        }
     }
     if(dofunc) id->changed();
 #ifndef STANDALONE
@@ -612,15 +625,15 @@ float getfvarmax(const char *name)
     }
     return 0;
 }
-int getvardef(const char *name)
+int getvardef(const char *name, bool rb)
 {
     ident *id = getident(name);
     if(!id) return 0;
     switch(id->type)
     {
-        case ID_VAR: return id->def.i;
-        case ID_FVAR: return int(id->def.f);
-        case ID_SVAR: return atoi(id->def.s);
+        case ID_VAR: return (rb ? id->bin : id->def).i;
+        case ID_FVAR: return int((rb ? id->bin : id->def).f);
+        case ID_SVAR: return atoi((rb ? id->bin : id->def).s);
         case ID_ALIAS: return id->getint();
         default: break;
     }
@@ -685,7 +698,11 @@ void setvarchecked(ident *id, int val)
                 id->name, id->minval, id->maxval);
         }
         *id->storage.i = val;
-        if(versioning) id->def.i = val;
+        if(versioning)
+        {
+            id->def.i = val;
+            if(versioning == 2) id->bin.i = val;
+        }
         id->changed();                                             // call trigger function if available
 #ifndef STANDALONE
         client::editvar(id, interactive && !(identflags&IDF_WORLD));
@@ -708,7 +725,11 @@ void setfvarchecked(ident *id, float val)
             debugcode("\frvalid range for %s is %s..%s", id->name, floatstr(id->minvalf), floatstr(id->maxvalf));
         }
         *id->storage.f = val;
-        if(versioning) id->def.f = val;
+        if(versioning)
+        {
+            id->def.f = val;
+            if(versioning == 2) id->bin.f = val;
+        }
         id->changed();
 #ifndef STANDALONE
         client::editvar(id, interactive && !(identflags&IDF_WORLD));
@@ -731,6 +752,11 @@ void setsvarchecked(ident *id, const char *val)
         {
             delete[] id->def.s;
             id->def.s = newstring(val);
+            if(versioning == 2)
+            {
+                delete[] id->bin.s;
+                id->bin.s = newstring(val);
+            }
         }
         id->changed();
 #ifndef STANDALONE
@@ -2240,9 +2266,9 @@ bool execfile(const char *cfgfile, bool msg, int flags)
         return false;
     }
     int oldflags = identflags;
-    bool oldversion = versioning;
+    int oldversion = versioning;
     if(flags&EXEC_NOWORLD) identflags &= ~IDF_WORLD;
-    if(flags&EXEC_VERSION) versioning = true;
+    if(flags&EXEC_VERSION) versioning = flags&EXEC_BUILTIN ? 2 : 1;
     const char *oldsourcefile = sourcefile, *oldsourcestr = sourcestr;
     sourcefile = cfgfile;
     sourcestr = buf;

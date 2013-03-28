@@ -105,7 +105,7 @@ WPVARM(0, aiskew, 0, VAR_MAX,
 );
 WPVARM(0, attackdelay, 1, VAR_MAX,
     500,        100,        600,        600,        100,        125,        350,        750,        750,        1000,       1500,
-    1000,       200,        1000,       1125,       400,        1000,       1500,       1250,       750,        1000,       1500
+    1000,       200,        750,        1125,       400,        1000,       1500,       1250,       750,        1000,       1500
 );
 WPVAR(0, carried, 0, 1,
     0,          0,          1,          1,          1,          1,          1,          1,          0,          0,          1
@@ -128,7 +128,7 @@ WPVARK(0, collide, 0, VAR_MAX,
     BOUNCE_GEOM|IMPACT_PLAYER|COLLIDE_TRACE|IMPACT_SHOTS|DRILL_PLAYER,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE|COLLIDE_OWNER,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE|COLLIDE_OWNER|STICK_GEOM,
-    IMPACT_GEOM|IMPACT_PLAYER|COLLIDE_OWNER|STICK_GEOM|STICK_PLAYER,
+    IMPACT_GEOM|IMPACT_PLAYER|COLLIDE_OWNER|STICK_GEOM,
     IMPACT_GEOM|IMPACT_SHOTS|COLLIDE_OWNER|STICK_GEOM,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER|COLLIDE_TRACE|DRILL_GEOM|DRILL_PLAYER,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER|STICK_GEOM|STICK_PLAYER|COLLIDE_PROJ,
@@ -167,10 +167,10 @@ WPVARM(0, cooked, 0, VAR_MAX,
     0,          0,          0,          0,          0,          1,          33,         0,          8,          8,          8
 );
 WPVARK(0, damage, VAR_MIN, VAR_MAX,
-    30,         25,         25,         15,         18,         4,          22,         45,         150,        150,        200,
-    40,         40,         50,         4,          4,          4,          10,         150,        150,        150,        200,
-    25,         25,         25,         15,         18,         4,          22,         10,         150,        150,        200,
-    10,         40,         50,         8,          10,         4,          10,         10,         150,        150,        200
+    30,         25,         30,         15,         18,         4,          22,         45,         150,        150,        200,
+    40,         40,         60,         4,          4,          4,          10,         150,        150,        150,        200,
+    25,         25,         30,         15,         18,         4,          22,         10,         150,        150,        200,
+    10,         40,         60,         8,          10,         4,          10,         10,         150,        150,        200
 );
 WPFVARK(0, delta, 0, FVAR_MAX,
     10.0f,      10.0f,      10.0f,      10.0f,      10.0f,      10.0f,      10.0f,      10.0f,      10.0f,      10.0f,      10.0f,
