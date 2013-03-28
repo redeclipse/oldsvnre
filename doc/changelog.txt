@@ -1,3 +1,24 @@
+= Red Eclipse Development version =
+Weapons:
+ * Sword damage and secondary attack speed increased
+
+Data Assets:
+ * Stratocaster vanity item
+ * New chiptune music
+ * New massaging object
+
+Core & Install:
+ * Fixed desktop entry icon field
+
+Additional fixed bugs:
+ * #510 - server dependency on data
+ * #509 - Users with account info are denied access to password-protected
+   servers
+ * #505 - Picking up an item instantly completes reload cycle
+ * #506 - Garbled output when selecting weapon loadout
+ * #449 - Ability to make current settings default (/savevars)
+
+
 = Red Eclipse 1.4 =
 Gameplay:
  * Radar now always tracks players who are dominating you, and shows everyone
