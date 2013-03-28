@@ -2731,21 +2731,21 @@ namespace server
             case ID_VAR:
             {
                 int ret = parseint(arg);
-                if(*id->storage.i == id->def.i) { if(ret != id->def.i) numgamemods++; }
-                else if(ret == id->def.i) numgamemods--;
+                if(*id->storage.i == id->bin.i) { if(ret != id->bin.i) numgamemods++; }
+                else if(ret == id->bin.i) numgamemods--;
                 break;
             }
             case ID_FVAR:
             {
                 int ret = parsefloat(arg);
-                if(*id->storage.f == id->def.f) { if(ret != id->def.f) numgamemods++; }
-                else if(ret == id->def.f) numgamemods--;
+                if(*id->storage.f == id->bin.f) { if(ret != id->bin.f) numgamemods++; }
+                else if(ret == id->bin.f) numgamemods--;
                 break;
             }
             case ID_SVAR:
             {
-                if(!strcmp(*id->storage.s, id->def.s)) { if(strcmp(arg, id->def.s)) numgamemods++; }
-                else if(!strcmp(arg, id->def.s)) numgamemods--;
+                if(!strcmp(*id->storage.s, id->bin.s)) { if(strcmp(arg, id->bin.s)) numgamemods++; }
+                else if(!strcmp(arg, id->bin.s)) numgamemods--;
                 break;
             }
             default: break;
@@ -2800,13 +2800,13 @@ namespace server
                                     "\frvalid range for %s is %d..%d", id->name, id->minval, id->maxval);
                         return true;
                     }
-                    checkvar(id, arg);
-                    *id->storage.i = ret;
                     if(versioning)
                     {
                         id->def.i = ret;
                         if(versioning == 2) id->bin.i = ret;
                     }
+                    checkvar(id, arg);
+                    *id->storage.i = ret;
                     id->changed();
 #ifndef STANDALONE
                     if(versioning) setvar(&id->name[3], ret, true);
@@ -2832,13 +2832,13 @@ namespace server
                         conoutft(CON_MESG, "\frvalid range for %s is %s..%s", id->name, floatstr(id->minvalf), floatstr(id->maxvalf));
                         return true;
                     }
-                    checkvar(id, arg);
-                    *id->storage.f = ret;
                     if(versioning)
                     {
                         id->def.f = ret;
                         if(versioning == 2) id->bin.f = ret;
                     }
+                    checkvar(id, arg);
+                    *id->storage.f = ret;
                     id->changed();
 #ifndef STANDALONE
                     if(versioning) setfvar(&id->name[3], ret, true);
@@ -2858,9 +2858,6 @@ namespace server
                         conoutft(CON_MESG, "\frcannot override variable: %s", id->name);
                         return true;
                     }
-                    checkvar(id, arg);
-                    delete[] *id->storage.s;
-                    *id->storage.s = newstring(arg);
                     if(versioning)
                     {
                         delete[] id->def.s;
@@ -2871,6 +2868,9 @@ namespace server
                             id->bin.s = newstring(arg);
                         }
                     }
+                    checkvar(id, arg);
+                    delete[] *id->storage.s;
+                    *id->storage.s = newstring(arg);
                     id->changed();
 #ifndef STANDALONE
                     if(versioning) setsvar(&id->name[3], arg, true);
