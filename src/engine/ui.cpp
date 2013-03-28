@@ -842,12 +842,12 @@ struct gui : guient
 
     void adjustscale()
     {
-        int w = xsize + guibound[0]*4, h = ysize + guibound[1]*2;
+        int w = xsize + guibound[0]*8, h = ysize + guibound[1]*6;
         float aspect = forceaspect ? 1.0f/forceaspect : float(screen->h)/float(screen->w), fit = 1.0f;
         if(w*aspect*basescale>1.0f) fit = 1.0f/(w*aspect*basescale);
         if(h*basescale*fit>maxscale) fit *= maxscale/(h*basescale*fit);
         uiscale = vec(aspect*uiscale.x*fit, uiscale.y*fit, 1);
-        uiorigin = vec(0.5f - ((w-xsize)/2 - guibound[0])*uiscale.x, 0.5f + (0.5f*h-guibound[1])*uiscale.y, 0);
+        uiorigin = vec(0.5f - ((w-xsize)/2 - (guibound[0]*4))*uiscale.x, 0.5f + (0.5f*h-(guibound[1]*2))*uiscale.y, 0);
         //uiorigin = vec(0.5f - (guibound[0]*2)*uiscale.x, 0.5f + (h-guibound[1]*2)*uiscale.y, 0);
     }
 
