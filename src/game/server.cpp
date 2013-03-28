@@ -846,11 +846,11 @@ namespace server
     }
 
     int numgamevars = 0, numgamemods = 0;
-    void resetgamevars(bool flush)
+    void resetgamevars(bool flush, bool all)
     {
         numgamevars = numgamemods = 0;
         enumerate(idents, ident, id, {
-            if(id.flags&IDF_SERVER && !(id.flags&IDF_READONLY)) // reset vars
+            if(id.flags&IDF_SERVER && !(id.flags&IDF_READONLY) && (all || !(id.flags&IDF_WORLD))) // reset vars
             {
                 const char *val = NULL;
                 numgamevars++;
@@ -877,6 +877,24 @@ namespace server
                     default: break;
                 }
                 if(flush && val) sendf(-1, 1, "ri2sis", N_COMMAND, -1, &id.name[3], strlen(val), val);
+            }
+        });
+    }
+
+    void savegamevars()
+    {
+        enumerate(idents, ident, id, {
+            if(id.flags&IDF_SERVER && !(id.flags&IDF_READONLY) && !(id.flags&IDF_WORLD)) switch(id.type)
+            {
+                case ID_VAR: id.def.i = *id.storage.i; break;
+                case ID_FVAR: id.def.f = *id.storage.f; break;
+                case ID_SVAR:
+                {
+                    delete[] id.def.s;
+                    id.def.s = newstring(*id.storage.s);
+                    break;
+                }
+                default: break;
             }
         });
     }
@@ -936,7 +954,7 @@ namespace server
         if(G(resetbansonend)) resetbans();
         if(G(resetmutesonend)) resetmutes();
         if(G(resetlimitsonend)) resetlimits();
-        if(G(resetvarsonend) || init) resetgamevars(true);
+        if(G(resetvarsonend) || init) resetgamevars(true, true);
         changemap();
     }
 
@@ -2120,7 +2138,7 @@ namespace server
         checkdemorecord(true);
         setmod(sv_botoffset, 0);
         if(G(resetmmonend) >= 2) { mastermode = MM_OPEN; resetallows(); }
-        if(G(resetvarsonend) >= 2) resetgamevars(true);
+        if(G(resetvarsonend) >= 2) resetgamevars(true, false);
         if(G(resetbansonend) >= 2) resetbans();
         if(G(resetmutesonend) >= 2) resetmutes();
         if(G(resetlimitsonend) >= 2) resetlimits();
@@ -2784,7 +2802,11 @@ namespace server
                     }
                     checkvar(id, arg);
                     *id->storage.i = ret;
-                    if(versioning) id->def.i = ret;
+                    if(versioning)
+                    {
+                        id->def.i = ret;
+                        if(versioning == 2) id->bin.i = ret;
+                    }
                     id->changed();
 #ifndef STANDALONE
                     if(versioning) setvar(&id->name[3], ret, true);
@@ -2812,7 +2834,11 @@ namespace server
                     }
                     checkvar(id, arg);
                     *id->storage.f = ret;
-                    if(versioning) id->def.f = ret;
+                    if(versioning)
+                    {
+                        id->def.f = ret;
+                        if(versioning == 2) id->bin.f = ret;
+                    }
                     id->changed();
 #ifndef STANDALONE
                     if(versioning) setfvar(&id->name[3], ret, true);
@@ -2839,6 +2865,11 @@ namespace server
                     {
                         delete[] id->def.s;
                         id->def.s = newstring(arg);
+                        if(versioning == 2)
+                        {
+                            delete[] id->bin.s;
+                            id->bin.s = newstring(arg);
+                        }
                     }
                     id->changed();
 #ifndef STANDALONE

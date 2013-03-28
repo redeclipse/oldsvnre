@@ -126,7 +126,8 @@ struct ident
         uint argmask;         // ID_COMMAND
     };
     identfun fun; // ID_VAR, ID_FVAR, ID_SVAR, ID_COMMAND
-    identval def;
+    identval def; // declared-default (by *init.cfg)
+    identval bin; // builtin-default (hard coded or version.cfg)
     int flags, index;
     char *desc, *usage;
 
@@ -134,15 +135,15 @@ struct ident
     // ID_VAR
     ident(int t, const char *n, int m, int c, int x, int *s, void *f = NULL, int flags = IDF_COMPLETE)
         : type(t), name(n), minval(m), maxval(x), fun((identfun)f), flags(flags | (m > x ? IDF_READONLY : 0)), desc(NULL), usage(NULL)
-    { def.i = c; storage.i = s; }
+    { def.i = c; bin.i = c; storage.i = s; }
     // ID_FVAR
     ident(int t, const char *n, float m, float c, float x, float *s, void *f = NULL, int flags = IDF_COMPLETE)
         : type(t), name(n), minvalf(m), maxvalf(x), fun((identfun)f), flags(flags | (m > x ? IDF_READONLY : 0)), desc(NULL), usage(NULL)
-    { def.f = c; storage.f = s; }
+    { def.f = c; bin.f = c; storage.f = s; }
     // ID_SVAR
     ident(int t, const char *n, char *c, char **s, void *f = NULL, int flags = IDF_COMPLETE)
         : type(t), name(n), fun((identfun)f), flags(flags), desc(NULL), usage(NULL)
-    { def.s = c; storage.s = s; }
+    { def.s = c; bin.s = newstring(c); storage.s = s; }
     // ID_ALIAS
     ident(int t, const char *n, char *a, int flags)
         : type(t), name(n), valtype(VAL_STR), code(NULL), stack(NULL), flags(flags), desc(NULL), usage(NULL)
@@ -283,7 +284,7 @@ extern void touchvar(const char *name);
 extern int getvar(const char *name);
 extern int getvarmin(const char *name);
 extern int getvarmax(const char *name);
-extern int getvardef(const char *name);
+extern int getvardef(const char *name, bool rb = false);
 extern float getfvarmin(const char *name);
 extern float getfvarmax(const char *name);
 extern bool identexists(const char *name);
@@ -306,7 +307,7 @@ extern int execute(const char *p);
 extern int execute(const char *p, bool nonworld);
 extern bool executebool(const uint *code);
 extern bool executebool(const char *p);
-enum { EXEC_NOWORLD = 1<<0, EXEC_VERSION = 1<<1 };
+enum { EXEC_NOWORLD = 1<<0, EXEC_VERSION = 1<<1, EXEC_BUILTIN = 1<<2 };
 extern bool execfile(const char *cfgfile, bool msg = true, int flags = 0);
 extern void alias(const char *name, const char *action);
 extern void alias(const char *name, tagval &v);
