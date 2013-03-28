@@ -598,6 +598,24 @@ namespace hud
         return UI::active(pass);
     }
 
+    bool hastkwarn(gameent *d)
+    {
+        return teamkillwarn && m_team(game::gamemode, game::mutators) && numteamkills() >= teamkillwarn;
+    }
+
+    bool hasteaminfo(gameent *d)
+    {
+        if(game::focus->state == CS_ALIVE && !lastteam) lastteam = totalmillis;
+        return teamnotices >= 2 && totalmillis-lastteam <= teamnoticedelay;
+    }
+
+    bool hasteamnotice(gameent *d)
+    {
+        if(d->state == CS_ALIVE && m_fight(game::gamemode) && shownotices && d == game::player1 && teamnotices)
+            return hastkwarn(d) || hasteaminfo(d);
+        return false;
+    }
+
     bool keypress(int code, bool isdown, int cooked)
     {
         if(curcompass) return keycmenu(code, isdown, cooked);
@@ -1131,6 +1149,7 @@ namespace hud
         int cx = int(hudwidth*cursorx), cy = int(hudheight*cursory);
         if(index != POINTER_GUI)
         {
+            if(hasteamnotice(game::focus)) return;
             drawpointertex(getpointer(index, game::focus->weapselect), cx-cs/2, cy-cs/2, cs, c.r, c.g, c.b, fade*hudblend);
             if(index > POINTER_GUI)
             {
@@ -2935,26 +2954,22 @@ namespace hud
     void drawevents(float blend)
     {
         int to = 0;
-        if(game::focus->state == CS_ALIVE && m_fight(game::gamemode) && shownotices && game::focus == game::player1 && teamnotices)
+        if(hasteamnotice(game::focus))
         {
             glPushMatrix();
             glScalef(noticescale, noticescale, 1);
             pushfont("huge");
-            int ty = int(((hudheight/2)-int(hudheight/2*eventoffset))/noticescale), tx = int((hudwidth/2)/noticescale),
+            int ty = int(((hudheight/2)-(FONTH/2))/noticescale), tx = int((hudwidth/2)/noticescale),
                 tf = int(255*hudblend*noticeblend), tr = 255, tg = 255, tb = 255,
                 tw = int((hudwidth-(int(hudsize*gapsize)*2+int(hudsize*inventorysize)*2))/noticescale);
             if(noticestone) skewcolour(tr, tg, tb, noticestone);
-            if(teamkillwarn && m_team(game::gamemode, game::mutators) && numteamkills() >= teamkillwarn)
+            if(hastkwarn(game::focus))
                 to += draw_textx("\fzryDo NOT shoot team mates", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
-            if(teamnotices >= 2)
+            if(hasteaminfo(game::focus))
             {
-                if(game::focus->state == CS_ALIVE && !lastteam) lastteam = totalmillis;
-                if(totalmillis-lastteam <= teamnoticedelay)
-                {
-                    if(m_trial(game::gamemode)) to += draw_textx("Time Trial", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
-                    else if(!m_team(game::gamemode, game::mutators)) to += draw_textx("Free-for-all %s", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, -1, m_bomber(game::gamemode) ? "Bomber-ball" : "Deathmatch");
-                    else to += draw_textx("You are on team %s", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, game::colourteam(game::focus->team));
-                }
+                if(m_trial(game::gamemode)) to += draw_textx("Time Trial", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
+                else if(!m_team(game::gamemode, game::mutators)) to += draw_textx("Free-for-all %s", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, -1, m_bomber(game::gamemode) ? "Bomber-ball" : "Deathmatch");
+                else to += draw_textx("You are on team %s", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, game::colourteam(game::focus->team));
             }
             popfont();
             glPopMatrix();
