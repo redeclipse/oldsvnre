@@ -1070,7 +1070,7 @@ void shrinkmap()
     conoutf("shrunk map to size %d", worldscale);
 }
 
-ICOMMAND(0, newmap, "is", (int *i), if(emptymap(*i, false)) game::newmap(::max(*i, 0)));
+ICOMMAND(0, newmap, "is", (int *i, char *n), if(emptymap(*i, false, n)) game::newmap(::max(*i, 0)));
 ICOMMAND(0, mapenlarge, "", (), if(enlargemap(false)) game::newmap(-1));
 COMMAND(0, shrinkmap, "");
 ICOMMAND(0, mapsize, "", (void),
