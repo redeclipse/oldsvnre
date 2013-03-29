@@ -1243,7 +1243,6 @@ namespace game
                         float hit = WF(WK(flags), weap, hitpush, WS(flags))*amt;
                         if(hit != 0)
                         {
-                            conoutft(CON_SELF, "%s: %d %.2f %.2f %.2f", colourname(d), damage, scale, amt, hit);
                             d->vel.add(vec(dir).mul(hit));
                             d->quake = min(d->quake+max(int(hit), 1), quakelimit);
                         }
