@@ -202,7 +202,7 @@ namespace projs
         if(gameent::is(d))
         {
             gameent *e = (gameent *)d;
-            if(aistyle[e->aitype].hitbox)
+            if(e->wantshitbox())
             {
                 float rdist[3] = { -1, -1, -1 };
                 radialpush(e->legs, e->lrad.x, e->lrad.y, e->lrad.z, e->lrad.z, rdist[0]);
@@ -224,9 +224,9 @@ namespace projs
                         hitpush(e, proj, flag|flags, radius, rdist[i], proj.curscale);
                         radiated = true;
                     }
-                    else if(WF(WK(proj.flags), proj.weap, wavepush, WS(proj.flags)) > 1 && rdist[i] <= maxdist)
+                    else if(push && rdist[i] <= maxdist)
                     {
-                        hitpush(e, proj, flag|HIT_WAVE, radius, rdist[i], proj.curscale);
+                        hitpush(e, proj, flag|HIT_WAVE, maxdist, rdist[i], proj.curscale);
                         radiated = true;
                     }
                 }
@@ -242,9 +242,9 @@ namespace projs
                         hitpush(e, proj, (m_expert(game::gamemode, game::mutators) ? HIT_WHIPLASH : HIT_TORSO)|flags, radius, dist, proj.curscale);
                         radiated = true;
                     }
-                    else if(WF(WK(proj.flags), proj.weap, wavepush, WS(proj.flags)) > 1 && dist <= maxdist)
+                    else if(push && dist <= maxdist)
                     {
-                        hitpush(e, proj, (m_expert(game::gamemode, game::mutators) ? HIT_WHIPLASH : HIT_TORSO)|HIT_WAVE, radius, dist, proj.curscale);
+                        hitpush(e, proj, (m_expert(game::gamemode, game::mutators) ? HIT_WHIPLASH : HIT_TORSO)|HIT_WAVE, maxdist, dist, proj.curscale);
                         radiated = true;
                     }
                 }
