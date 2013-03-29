@@ -260,7 +260,7 @@ namespace client
         loopv(ids)
         {
             ident &id = *ids[i];
-            if(id.flags&IDF_CLIENT) switch(id.type)
+            if(id.flags&IDF_CLIENT && !(id.flags&IDF_READONLY) && !(id.flags&IDF_WORLD)) switch(id.type)
             {
                 case ID_VAR:
                     if(*id.storage.i == id.def.i)
