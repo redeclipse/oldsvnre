@@ -3123,6 +3123,7 @@ namespace hud
             hudheight = int(ceil(hudsize/aspect));
         }
         else hudwidth = hudheight = hudsize;
+#if 0
         if(!hasinput(true))
         {
             int wait = client::waiting();
@@ -3142,5 +3143,6 @@ namespace hud
             else if(forceprogress) forceprogress = progressing = false;
         }
         else if(forceprogress) forceprogress = progressing = false;
+#endif
     }
 }
