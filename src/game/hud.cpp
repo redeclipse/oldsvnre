@@ -2953,7 +2953,6 @@ namespace hud
 
     void drawevents(float blend)
     {
-        int to = 0;
         if(hasteamnotice(game::focus))
         {
             glPushMatrix();
@@ -2964,12 +2963,12 @@ namespace hud
                 tw = int((hudwidth-(int(hudsize*gapsize)*2+int(hudsize*inventorysize)*2))/noticescale);
             if(noticestone) skewcolour(tr, tg, tb, noticestone);
             if(hastkwarn(game::focus))
-                to += draw_textx("\fzryDo NOT shoot team mates", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
+                draw_textx("\fzryDo NOT shoot team mates", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
             if(hasteaminfo(game::focus))
             {
-                if(m_trial(game::gamemode)) to += draw_textx("Time Trial", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
-                else if(!m_team(game::gamemode, game::mutators)) to += draw_textx("Free-for-all %s", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, -1, m_bomber(game::gamemode) ? "Bomber-ball" : "Deathmatch");
-                else to += draw_textx("You are on team %s", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, game::colourteam(game::focus->team));
+                if(m_trial(game::gamemode)) draw_textx("Time Trial", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
+                else if(!m_team(game::gamemode, game::mutators)) draw_textx("Free-for-all %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1, m_bomber(game::gamemode) ? "Bomber-ball" : "Deathmatch");
+                else draw_textx("You are on team %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, game::colourteam(game::focus->team));
             }
             popfont();
             glPopMatrix();
@@ -2979,7 +2978,7 @@ namespace hud
             glPushMatrix();
             glScalef(eventscale, eventscale, 1);
             pushfont("emphasis");
-            int ty = int(((hudheight/2)-int(hudheight/2*eventoffset)-(to*noticescale))/eventscale), tx = int((hudwidth/2)/eventscale);
+            int ty = int(((hudheight/2)-(hudheight/2*eventoffset))/eventscale), tx = int((hudwidth/2)/eventscale);
             loopv(game::focus->icons)
             {
                 if(game::focus->icons[i].type == eventicon::AFFINITY && !(showevents&2)) continue;
