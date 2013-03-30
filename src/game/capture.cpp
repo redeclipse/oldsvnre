@@ -11,7 +11,7 @@ namespace capture
 
     bool dropaffinity(gameent *d)
     {
-        if(m_capture(game::gamemode) && carryaffinity(d) && d->action[AC_AFFINITY])
+        if(carryaffinity(d) && d->action[AC_AFFINITY])
         {
             vec o = d->feetpos(1), inertia = vec(d->vel).add(d->falling);
             client::addmsg(N_DROPAFFIN, "ri8", d->clientnum, -1, int(o.x*DMF), int(o.y*DMF), int(o.z*DMF), int(inertia.x*DMF), int(inertia.y*DMF), int(inertia.z*DMF));
@@ -99,6 +99,7 @@ namespace capture
             loopv(st.flags)
             {
                 capturestate::flag &f = st.flags[i];
+                if(!entities::ents.inrange(f.ent)) continue;
                 if(f.owner == game::focus) hasflags.add(i);
                 else if(f.team == game::focus->team)
                 {
@@ -486,13 +487,15 @@ namespace capture
                 }
             }
             if(f.pickuptime && lastmillis-f.pickuptime <= 1000) continue;
-            if(f.team == d->team && !m_gsp3(game::gamemode, game::mutators) && (m_gsp2(game::gamemode, game::mutators) || !f.droptime)) continue;
+            if(f.team == d->team && (m_gsp2(game::gamemode, game::mutators) || (!f.droptime && (m_gsp1(game::gamemode, game::mutators) || !d->action[AC_AFFINITY])))) continue;
             if(f.lastowner == d && f.droptime && (capturepickupdelay < 0 || lastmillis-f.droptime <= capturepickupdelay))
                 continue;
             if(o.dist(f.pos()) <= enttype[AFFINITY].radius*2/3)
             {
                 client::addmsg(N_TAKEAFFIN, "ri2", d->clientnum, i);
                 f.pickuptime = lastmillis;
+                d->action[AC_AFFINITY] = false;
+                d->actiontime[AC_AFFINITY] = 0;
             }
         }
         dropaffinity(d);
