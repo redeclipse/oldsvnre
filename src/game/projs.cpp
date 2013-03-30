@@ -1592,8 +1592,11 @@ namespace projs
                             }
                             else expl = WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags));
                             part_create(PART_SMOKE_LERP_SOFT, projtraillength*(type != W_ROCKET ? 3 : 4), proj.o, 0x333333, expl*0.75f, 0.5f, -15);
-                            int debris = rnd(type != W_ROCKET ? 5 : 10)+5, amt = int((rnd(debris)+debris+1)*game::debrisscale);
-                            loopi(amt) create(proj.o, vec(proj.o).add(proj.vel), true, proj.owner, PRJ_DEBRIS, rnd(game::debrisfade)+game::debrisfade, 0, rnd(501), rnd(101)+50, 0, proj.weap, 0, proj.flags);
+                            if(!m_kaboom(game::gamemode, game::mutators))
+                            {
+                                int debris = rnd(type != W_ROCKET ? 5 : 10)+5, amt = int((rnd(debris)+debris+1)*game::debrisscale);
+                                loopi(amt) create(proj.o, vec(proj.o).add(proj.vel), true, proj.owner, PRJ_DEBRIS, rnd(game::debrisfade)+game::debrisfade, 0, rnd(501), rnd(101)+50, 0, proj.weap, 0, proj.flags);
+                            }
                             adddecal(DECAL_ENERGY, proj.o, proj.norm, expl*0.75f, bvec::fromcolor(FWCOL(P, explcol, proj)));
                         }
                         if(type != W_FLAMER || WK(proj.flags) || W2(proj.weap, fragweap, WS(proj.flags))%W_MAX != W_FLAMER)
