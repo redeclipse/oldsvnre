@@ -325,7 +325,7 @@ extern mutstypes mutstype[];
 }
 #define mapcull(a,b,c,d,e,f) \
 { \
-    mapshrink(m_multi(b, c) && (m_capture(b) || (m_bomber(b) && !m_gsp2(b, c))), a, G(multimaps), false) \
+    mapshrink(m_multi(b, c) && (m_capture(b) || (m_bomber(b) && !m_gsp1(b, c))), a, G(multimaps), false) \
     mapshrink(m_duel(b, c), a, G(duelmaps), false) \
     mapshrink(m_jetpack(b, c), a, G(jetpackmaps), false) \
     if(d > 0 && e >= 2 && m_fight(b) && !m_duel(b, c)) \
@@ -341,8 +341,8 @@ extern mutstypes mutstype[];
 { \
     if(m_campaign(b)) a = newstring(G(campaignmaps)); \
     else if(m_capture(b)) a = newstring(G(capturemaps)); \
-    else if(m_defend(b)) a = newstring(m_gsp3(b, c) ? G(kingmaps) : G(defendmaps)); \
-    else if(m_bomber(b)) a = newstring(m_gsp2(b, c) ? G(holdmaps) : G(bombermaps)); \
+    else if(m_defend(b)) a = newstring(m_gsp2(b, c) ? G(kingmaps) : G(defendmaps)); \
+    else if(m_bomber(b)) a = newstring(m_gsp1(b, c) ? G(holdmaps) : G(bombermaps)); \
     else if(m_trial(b)) a = newstring(G(trialmaps)); \
     else if(m_gauntlet(b)) a = newstring(G(gauntletmaps)); \
     else if(m_fight(b)) a = newstring(G(mainmaps)); \
@@ -354,8 +354,8 @@ extern mutstypes mutstype[];
 #define maplist(a,b,c,d,e,f) \
 { \
     if(m_capture(b)) a = newstring(G(capturemaps)); \
-    else if(m_defend(b)) a = newstring(m_gsp3(b, c) ? G(kingmaps) : G(defendmaps)); \
-    else if(m_bomber(b)) a = newstring(m_gsp2(b, c) ? G(holdmaps) : G(bombermaps)); \
+    else if(m_defend(b)) a = newstring(m_gsp2(b, c) ? G(kingmaps) : G(defendmaps)); \
+    else if(m_bomber(b)) a = newstring(m_gsp1(b, c) ? G(holdmaps) : G(bombermaps)); \
     else if(m_trial(b)) a = newstring(G(trialmaps)); \
     else if(m_gauntlet(b)) a = newstring(G(gauntletmaps)); \
     else if(m_fight(b)) a = newstring(G(mainmaps)); \

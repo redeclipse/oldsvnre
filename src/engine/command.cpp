@@ -401,7 +401,8 @@ void resetvar(char *name)
 {
     ident *id = idents.access(name);
     if(!id) return;
-    if(id->flags&IDF_READONLY) debugcode("\frvariable %s is read-only", id->name);
+    if(id->flags&IDF_READONLY || id->flags&IDF_CLIENT || id->flags&IDF_SERVER) debugcode("\frvariable %s is read-only", id->name);
+    else if(id->flags&IDF_WORLD) debugcode("\frvariable %s is only directly modifiable in editmode", id->name);
     else clearoverride(*id);
 }
 
