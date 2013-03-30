@@ -260,7 +260,7 @@ GFVAR(0, capturerepulsion, 0, 16, FVAR_MAX);
 GFVAR(0, capturerepelspeed, 0, 25, FVAR_MAX);
 GFVAR(0, capturethreshold, 0, 0, FVAR_MAX); // if someone 'warps' more than this distance, auto-drop
 GVAR(0, capturebuffing, 0, 5, 15); // buffed; 0 = off, &1 = when guarding/secured, &2 = when carrying enemy, &4 = also defending secured, &8 = also defending enemy carrier
-GVAR(0, capturebuffdelay, 0, 1000, VAR_MAX); // buffed for this long after leaving
+GVAR(0, capturebuffdelay, 0, 3000, VAR_MAX); // buffed for this long after leaving
 GFVAR(0, capturebuffarea, FVAR_NONZERO, 96, FVAR_MAX); // radius in which buffing occurs
 GFVAR(0, capturebuffdamage, 1, 1.5f, FVAR_MAX); // multiply outgoing damage by this much when buffed
 GFVAR(0, capturebuffshield, 1, 1.5f, FVAR_MAX); // divide incoming damage by this much when buffed
@@ -276,7 +276,7 @@ GVAR(0, defendking, 1, 25, VAR_MAX); // points needed to occupy in king of the h
 GVAR(0, defendflags, 0, 3, 3); // 0 = init all (neutral), 1 = init neutral and team only, 2 = init team only, 3 = init all (team + neutral + converted)
 GVAR(0, defendbuffing, 0, 1, 7); // buffed; 0 = off, &1 = when guarding, &2 = when securing, &4 = even when enemies are present
 GFVAR(0, defendbuffoccupy, 0, 0.5f, 1); // for defendbuffing&4, must be occupied this much before passing
-GVAR(0, defendbuffdelay, 0, 1000, VAR_MAX); // buffed for this long after leaving
+GVAR(0, defendbuffdelay, 0, 1500, VAR_MAX); // buffed for this long after leaving
 GFVAR(0, defendbuffarea, FVAR_NONZERO, 64, FVAR_MAX); // radius in which buffing occurs
 GFVAR(0, defendbuffdamage, 1, 1.5f, FVAR_MAX); // multiply outgoing damage by this much when buffed
 GFVAR(0, defendbuffshield, 1, 1.5f, FVAR_MAX); // divide incoming damage by this much when buffed
@@ -310,7 +310,7 @@ GFVAR(0, bomberweight, FVAR_MIN, 200, FVAR_MAX);
 GFVAR(0, bomberminspeed, 0, 50, FVAR_MAX);
 GFVAR(0, bomberthreshold, 0, 0, FVAR_MAX); // if someone 'warps' more than this distance, auto-drop
 GVAR(0, bomberbuffing, 0, 1, 3); // buffed; 0 = off, &1 = when guarding, &2 = when securing
-GVAR(0, bomberbuffdelay, 0, 1000, VAR_MAX); // buffed for this long after leaving
+GVAR(0, bomberbuffdelay, 0, 3000, VAR_MAX); // buffed for this long after leaving
 GFVAR(0, bomberbuffarea, FVAR_NONZERO, 128, FVAR_MAX); // multiply affinity radius by this much for buff
 GFVAR(0, bomberbuffdamage, 1, 1.5f, FVAR_MAX); // multiply outgoing damage by this much when buffed
 GFVAR(0, bomberbuffshield, 1, 1.5f, FVAR_MAX); // divide incoming damage by this much when buffed
