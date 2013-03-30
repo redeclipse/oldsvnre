@@ -1794,7 +1794,8 @@ namespace server
                 }
                 else if(m_fight(gamemode) && m_team(gamemode, mutators) && !m_trial(gamemode) && !spawns[ci->team].ents.empty())
                     team = ci->team;
-                switch(rotate)
+                if(m_gauntlet(gamemode) && team == T_ALPHA) spawns[team].current = 0;
+                else switch(rotate)
                 {
                     case 2:
                     { // random
