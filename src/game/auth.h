@@ -270,6 +270,13 @@ namespace auth
         else if(!strcmp(w[0], "failauth")) authfailed((uint)(atoi(w[1])));
         else if(!strcmp(w[0], "succauth")) authsucceeded((uint)(atoi(w[1])), w[2], w[3]);
         else if(!strcmp(w[0], "chalauth")) authchallenged((uint)(atoi(w[1])), w[2]);
+        else if(!strcmp(w[0], "sync"))
+        {
+            int oldversion = versioning;
+            versioning = 2;
+            if(servcmd(2, w[1], w[2])) conoutf("master server variable synced: %s", w[1]);
+            versioning = oldversion;
+        }
         else loopj(ipinfo::MAXTYPES) if(!strcmp(w[0], ipinfotypes[j]))
         {
             ipinfo &p = control.add();
