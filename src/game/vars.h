@@ -178,10 +178,10 @@ GVAR(0, spawnarmour, 0, 0, VAR_MAX);
 #endif
 
 GFVAR(0, maxhealth, 0, 1.5f, FVAR_MAX);
-GFVAR(0, maxhealthvampire, 0, 2.0f, FVAR_MAX);
+GFVAR(0, maxhealthvampire, 0, 3.0f, FVAR_MAX);
 
 GFVAR(0, actorscale, FVAR_NONZERO, 1, FVAR_MAX);
-GFVAR(0, maxresizescale, 1, 2.5f, FVAR_MAX);
+GFVAR(0, maxresizescale, 1, 3.0f, FVAR_MAX);
 GFVAR(0, minresizescale, FVAR_NONZERO, 0.25f, 1);
 GFVAR(0, instaresizeamt, FVAR_NONZERO, 0.25f, 1); // each kill adds this much size in insta-resize
 
