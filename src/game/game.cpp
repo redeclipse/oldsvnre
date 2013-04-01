@@ -58,8 +58,8 @@ namespace game
     VAR(IDF_PERSIST, thirdpersonfov, 90, 120, 150);
     FVAR(IDF_PERSIST, thirdpersonblend, 0, 1, 1);
     VAR(IDF_PERSIST, thirdpersoninterp, 0, 100, VAR_MAX);
-    FVAR(IDF_PERSIST, thirdpersondist, FVAR_NONZERO, 14, 100);
-    FVAR(IDF_PERSIST, thirdpersonside, FVAR_MIN, 14, 10);
+    FVAR(IDF_PERSIST, thirdpersondist, FVAR_NONZERO, 14, 20);
+    FVAR(IDF_PERSIST, thirdpersonside, FVAR_MIN, 14, 20);
     VAR(IDF_PERSIST, thirdpersoncursor, 0, 2, 2);
     FVAR(IDF_PERSIST, thirdpersoncursorx, 0, 0.5f, 1);
     FVAR(IDF_PERSIST, thirdpersoncursory, 0, 0.5f, 1);
