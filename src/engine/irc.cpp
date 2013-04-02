@@ -51,7 +51,8 @@ void ircprintf(ircnet *n, int relay, const char *target, const char *msg, ...)
 void ircestablish(ircnet *n)
 {
     if(!n) return;
-    n->lastattempt = clocktime;
+    n->lastattempt = n->lastactivity = clocktime;
+    n->lastping = 0;
     if(n->address.host == ENET_HOST_ANY)
     {
         ircprintf(n, 4, NULL, "looking up %s:[%d]...", n->serv, n->port);
@@ -235,7 +236,7 @@ void ircnewnet(int type, const char *name, const char *serv, int port, const cha
     n.state = IRC_NEW;
     n.sock = ENET_SOCKET_NULL;
     n.port = port;
-    n.lastattempt = 0;
+    n.lastattempt = n.lastactivity = n.lastping = 0;
     #ifndef STANDALONE
     n.updated = IRCUP_NEW;
     #endif
@@ -683,6 +684,7 @@ void ircdiscon(ircnet *n, const char *msg = NULL)
     n->state = IRC_DISC;
     n->sock = ENET_SOCKET_NULL;
     n->lastattempt = clocktime;
+    n->lastactivity = n->lastping = 0;
 }
 
 void irccleanup()
@@ -749,14 +751,31 @@ void ircslice()
                 }
                 case IRC_CONN:
                 {
-                    if(n->state == IRC_CONN && clocktime-n->lastattempt >= 60) ircdiscon(n, "connection attempt timed out");
+                    if(n->state == IRC_CONN && (!n->lastattempt || clocktime-n->lastattempt >= 60))
+                        ircdiscon(n, "connection attempt timed out");
+                    if(!n->lastactivity)
+                    {
+                        n->lastactivity = clocktime;
+                        n->lastping = 0;
+                    }
+                    else if(clocktime-n->lastactivity >= 120)
+                    {
+                        if(!n->lastping) ircsend(n, "PING %d", clocktime);
+                        else if(clocktime-n->lastping >= 120) ircdiscon(n, "connection timed out");
+                    }
                     else switch(ircrecv(n))
                     {
                         case -3: ircdiscon(n, "read error"); break;
                         case -2: ircdiscon(n, "connection reset"); break;
                         case -1: ircdiscon(n, "invalid connection"); break;
                         case 0: break;
-                        default: ircparse(n); break;
+                        default:
+                        {
+                            ircparse(n);
+                            n->lastactivity = clocktime;
+                            n->lastping = 0;
+                            break;
+                        }
                     }
                     break;
                 }
