@@ -40,8 +40,8 @@ Section "Start Menu Shortcuts"
   
   SetOutPath "$INSTDIR"
   
-  CreateShortCut "$INSTDIR\Red Eclipse.lnk"                "$INSTDIR\redeclipse.bat" "" "$INSTDIR\bin\x86\reclient.exe" 0 SW_SHOWMINIMIZED
-  CreateShortCut "$SMPROGRAMS\Red Eclipse\Red Eclipse.lnk" "$INSTDIR\redeclipse.bat" "" "$INSTDIR\bin\x86\reclient.exe" 0 SW_SHOWMINIMIZED
+  CreateShortCut "$INSTDIR\Red Eclipse.lnk"                "$INSTDIR\redeclipse.bat" "" "$INSTDIR\bin\x86\redeclipse.exe" 0 SW_SHOWMINIMIZED
+  CreateShortCut "$SMPROGRAMS\Red Eclipse\Red Eclipse.lnk" "$INSTDIR\redeclipse.bat" "" "$INSTDIR\bin\x86\redeclipse.exe" 0 SW_SHOWMINIMIZED
   CreateShortCut "$SMPROGRAMS\Red Eclipse\Uninstall.lnk"   "$INSTDIR\uninstall.exe"   "" "$INSTDIR\uninstall.exe" 0
   
 SectionEnd
