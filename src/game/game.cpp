@@ -143,6 +143,19 @@ namespace game
     VAR(IDF_PERSIST, spectvfirstperson, 0, 0, 2); // 0 = aim in direction followed player is facing, 1 = aim in direction determined by spectv when dead, 2 = always aim in direction
     VAR(IDF_PERSIST, spectvthirdperson, 0, 2, 2); // 0 = aim in direction followed player is facing, 1 = aim in direction determined by spectv when dead, 2 = always aim in direction
 
+    VAR(0, spectvfollow, -1, -1, VAR_MAX); // attempts to always keep this client in view
+    VAR(IDF_PERSIST, spectvfollowtime, 1000, 10000, VAR_MAX);
+    VAR(IDF_PERSIST, spectvfollowmintime, 1000, 1000, VAR_MAX);
+    VAR(IDF_PERSIST, spectvfollowmaxtime, 0, 20000, VAR_MAX);
+    VAR(IDF_PERSIST, spectvfollowspeed, 1, 500, VAR_MAX);
+    VAR(IDF_PERSIST, spectvfollowyawspeed, 1, 500, VAR_MAX);
+    VAR(IDF_PERSIST, spectvfollowpitchspeed, 1, 350, VAR_MAX);
+    FVAR(IDF_PERSIST, spectvfollowrotate, FVAR_MIN, 0, FVAR_MAX); // rotate style, < 0 = absolute angle, 0 = scaled, > 0 = scaled with max angle
+    FVAR(IDF_PERSIST, spectvfollowyawscale, FVAR_MIN, 1, 1000);
+    FVAR(IDF_PERSIST, spectvfollowpitchscale, FVAR_MIN, 1, 1000);
+    FVAR(IDF_PERSIST, spectvfollowyawthresh, 0, 0, 360);
+    FVAR(IDF_PERSIST, spectvfollowpitchthresh, 0, 0, 180);
+
     VAR(IDF_PERSIST, deathcamstyle, 0, 2, 2); // 0 = no follow, 1 = follow attacker, 2 = follow self
     VAR(IDF_PERSIST, deathcamspeed, 0, 500, VAR_MAX);
 
@@ -356,8 +369,9 @@ namespace game
     }
 #endif
 
-    bool allowspec(gameent *d, int level)
+    bool allowspec(gameent *d, int level, int cn = -1)
     {
+        if(cn >= 0) return d->clientnum == cn; // override
         if(d->state == CS_SPECTATOR || ((d->state == CS_DEAD || d->state == CS_WAITING) && !d->lastdeath)) return false;
         switch(level)
         {
@@ -2272,7 +2286,7 @@ namespace game
     {
         float foglevel = float(fog*2/3);
         c->reset();
-        if(!force && c->player && !allowspec(c->player, spectvdead)) return false;
+        if(!force && c->player && !allowspec(c->player, spectvdead, spectvfollow)) return false;
         bool aim = !c->player || spectvaiming(c->player);
         float yaw = c->player ? c->player->yaw : camera1->yaw, pitch = c->player ? c->player->pitch : camera1->pitch;
         fixrange(yaw, pitch);
@@ -2288,7 +2302,7 @@ namespace game
                     case cament::ENTITY: continue;
                     case cament::PLAYER:
                     {
-                        if(!cam->player || c->player == cam->player || !allowspec(cam->player, spectvdead)) continue;
+                        if(!cam->player || c->player == cam->player || !allowspec(cam->player, spectvdead, spectvfollow)) continue;
                         break;
                     }
                     default: break;
@@ -2364,12 +2378,13 @@ namespace game
         }
         if(cameras.empty()) return false;
         cament *cam = cameras[0];
-        bool forced = !tvmode(false, false), renew = !lastcamera;
+        bool forced = !tvmode(false, false), renew = !lastcamera, found = spectvfollow < 0;
         float amt = 0;
         loopv(cameras)
         {
             if(cameras[i]->type == cament::PLAYER && (cameras[i]->player || ((cameras[i]->player = getclient(cameras[i]->id)) != NULL)))
             {
+                if(!found && cameras[i]->id == spectvfollow && cameras[i]->player->state != CS_SPECTATOR) found = true;
                 cameras[i]->o = cameras[i]->player->headpos();
                 if(forced && cameras[i]->player == focus) cam = cameras[i];
             }
@@ -2378,7 +2393,9 @@ namespace game
             else if(m_defend(gamemode)) defend::updatecam(cameras[i]);
             else if(m_bomber(gamemode)) bomber::updatecam(cameras[i]);
         }
+        if(!found) spectvfollow = -1;
         camrefresh(cam);
+        #define stvf(z) (spectvfollow >= 0 ? spectvfollow##z : spectv##z)
         if(forced)
         {
             camupdate(cam, amt, renew, true);
@@ -2391,9 +2408,9 @@ namespace game
         else
         {
             int lasttype = cam->type, lastid = cam->id, millis = lasttvchg ? lastmillis-lasttvchg : 0;
-            if(millis) amt = float(millis)/float(spectvmaxtime);
-            bool updated = camupdate(cam, amt, renew), override = !lasttvchg || millis >= spectvmintime,
-                 reset = (spectvmaxtime && millis >= spectvmaxtime) || !lasttvcam || lastmillis-lasttvcam >= spectvtime;
+            if(millis) amt = float(millis)/float(stvf(maxtime));
+            bool updated = camupdate(cam, amt, renew), override = !lasttvchg || millis >= stvf(mintime),
+                 reset = (stvf(maxtime) && millis >= stvf(maxtime)) || !lasttvcam || lastmillis-lasttvcam >= stvf(time);
             if(reset || (!updated && override))
             {
                 cam->ignore = true;
@@ -2450,9 +2467,9 @@ namespace game
             fixrange(yaw, pitch);
             if(!renew)
             {
-                float speed = curtime/float(chase ? followtvspeed : spectvspeed);
+                float speed = curtime/float(chase ? followtvspeed : stvf(speed));
                 #define SCALEAXIS(x) \
-                    float x##scale = 1, adj##x = camera1->x, off##x = x, x##thresh = chase ? followtv##x##thresh : spectv##x##thresh; \
+                    float x##scale = 1, adj##x = camera1->x, off##x = x, x##thresh = chase ? followtv##x##thresh : stvf(x##thresh); \
                     if(adj##x < x - 180.0f) adj##x += 360.0f; \
                     if(adj##x > x + 180.0f) adj##x -= 360.0f; \
                     off##x -= adj##x; \
@@ -2463,14 +2480,14 @@ namespace game
                     } \
                     else if(cam->last##x##time) \
                     { \
-                        int offtime = lastmillis-cam->last##x##time, x##speed = chase ? followtv##x##speed : spectv##x##speed; \
+                        int offtime = lastmillis-cam->last##x##time, x##speed = chase ? followtv##x##speed : stvf(x##speed); \
                         if(offtime <= x##speed) x##scale = offtime/float(x##speed); \
                     } \
                     cam->last##x = off##x; \
-                    float x##speed = speed*(chase ? followtv##x##scale : spectv##x##scale)*x##scale;
+                    float x##speed = speed*(chase ? followtv##x##scale : stvf(x##scale))*x##scale;
                 SCALEAXIS(yaw);
                 SCALEAXIS(pitch);
-                scaleyawpitch(camera1->yaw, camera1->pitch, yaw, pitch, yawspeed, pitchspeed, (chase ? followtvrotate : spectvrotate));
+                scaleyawpitch(camera1->yaw, camera1->pitch, yaw, pitch, yawspeed, pitchspeed, (chase ? followtvrotate : stvf(rotate)));
             }
             else
             {
