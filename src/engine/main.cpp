@@ -938,7 +938,7 @@ int main(int argc, char **argv)
     par |= SDL_INIT_TIMER|SDL_INIT_VIDEO|SDL_INIT_NOPARACHUTE;
     if(SDL_Init(par) < 0) fatal("Unable to initialize SDL: %s", SDL_GetError());
 
-    conoutf("loading video mode..");
+    conoutf("loading video..");
     const SDL_VideoInfo *video = SDL_GetVideoInfo();
     if(video)
     {
@@ -948,7 +948,6 @@ int main(int argc, char **argv)
     int usedcolorbits = 0, useddepthbits = 0, usedfsaa = 0;
     setupscreen(usedcolorbits, useddepthbits, usedfsaa);
 
-    conoutf("loading video misc..");
     showcursor(false);
     setscreensaver(false);
     keyrepeat(false);
