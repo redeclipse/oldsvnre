@@ -1594,7 +1594,7 @@ namespace game
                     if(showobitdists >= (isme ? 1 : 2)) { defformatstring(obitx)(" \fs\fo@\fy%.2f\fom\fS", actor->o.dist(d->o)/8.f); concatstring(obit, obitx); }
                     if(showobithpleft >= (isme ? 1 : 2)) { defformatstring(obitx)(" (\fs\fy+\fc%d\fyhp\fS)", actor->health); concatstring(obit, obitx); }
                 }
-                else announcef(anc, target, d, false, "\fw%s", obit);
+                announcef(anc, target, d, false, "\fw%s", obit);
             }
             else if(anc >= 0) announce(anc, d);
             if(anc >= 0 && d != actor) announce(anc, actor);
