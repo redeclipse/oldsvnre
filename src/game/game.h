@@ -1581,7 +1581,7 @@ namespace game
 {
     extern int gamemode, mutators, nextmode, nextmuts, timeremaining, maptime, lastzoom, lasttvcam, lasttvchg, spectvtime, waittvtime,
             bloodfade, bloodsize, bloodsparks, debrisfade, eventiconfade, eventiconshort,
-            announcefilter, dynlighteffects, aboveheadnames, followthirdperson,
+            announcefilter, dynlighteffects, aboveheadnames, followthirdperson, nogore,
 #ifndef MEK
             forceplayermodel,
 #endif

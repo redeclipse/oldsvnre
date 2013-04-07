@@ -143,7 +143,9 @@ namespace game
     VAR(IDF_PERSIST, spectvfirstperson, 0, 0, 2); // 0 = aim in direction followed player is facing, 1 = aim in direction determined by spectv when dead, 2 = always aim in direction
     VAR(IDF_PERSIST, spectvthirdperson, 0, 2, 2); // 0 = aim in direction followed player is facing, 1 = aim in direction determined by spectv when dead, 2 = always aim in direction
 
-    VAR(0, spectvfollow, -1, -1, VAR_MAX); // attempts to always keep this client in view
+    int spectvfollowing = -1;
+    VARF(0, spectvfollow, -1, -1, VAR_MAX, spectvfollowing = spectvfollow); // attempts to always keep this client in view
+    VAR(0, spectvfollowself, 0, 1, 2); // if we are not spectating, spectv should show us; 0 = off, 1 = not duel/survivor, 2 = always
     VAR(IDF_PERSIST, spectvfollowtime, 1000, 10000, VAR_MAX);
     VAR(IDF_PERSIST, spectvfollowmintime, 1000, 1000, VAR_MAX);
     VAR(IDF_PERSIST, spectvfollowmaxtime, 0, 20000, VAR_MAX);
@@ -192,7 +194,8 @@ namespace game
     VAR(IDF_PERSIST, eventiconshort, 500, 3500, VAR_MAX);
 
     VAR(IDF_PERSIST, showobituaries, 0, 4, 5); // 0 = off, 1 = only me, 2 = 1 + announcements, 3 = 2 + but dying bots, 4 = 3 + but bot vs bot, 5 = all
-    VAR(IDF_PERSIST, showobitdists, 0, 1, 1);
+    VAR(IDF_PERSIST, showobitdists, 0, 2, 2); // 0 = off, 1 = self only, 2 = all
+    VAR(IDF_PERSIST, showobithpleft, 0, 1, 2); // 0 = off, 1 = self only, 2 = all
     VAR(IDF_PERSIST, obitannounce, 0, 2, 2); // 0 = off, 1 = only focus, 2 = everyone
     VAR(IDF_PERSIST, obitverbose, 0, 2, 2); // 0 = extremely simple, 1 = simplified per-weapon, 2 = regular messages
     VAR(IDF_PERSIST, obitstyles, 0, 1, 1); // 0 = no obituary styles, 1 = show sprees/dominations/etc
@@ -230,6 +233,8 @@ namespace game
     FVAR(IDF_PERSIST, playerlightmix, 0, 0.75f, 100);
     FVAR(IDF_PERSIST, playertonemix, 0, 0.25f, 1);
     FVAR(IDF_PERSIST, playerblend, 0, 1, 1);
+
+    VAR(IDF_PERSIST, nogore, 0 , 0, 2); // turns off all gore, 0 = off, 1 = replace, 2 = remove
 #ifndef MEK
     VAR(IDF_PERSIST, forceplayermodel, -1, -1, PLAYERTYPES-1);
 #endif
@@ -1201,9 +1206,9 @@ namespace game
                 if(aistyle[d->aitype].living)
                 {
                     vec p = d->headpos(-d->height/4);
-                    if(bloodscale > 0)
+                    if(!nogore && bloodscale > 0)
                         part_splash(PART_BLOOD, int(clamp(damage/2, 2, 10)*bloodscale)*(bleeding ? 2 : 1), bloodfade, p, 0x229999, (rnd(bloodsize/2)+(bloodsize/2))/10.f, 1, 100, DECAL_BLOOD, int(d->radius), 10);
-                    if(bloodscale <= 0 || bloodsparks)
+                    if(nogore != 2 && (bloodscale <= 0 || bloodsparks))
                         part_splash(PART_PLASMA, int(clamp(damage/2, 2, 10))*(bleeding ? 2: 1), bloodfade, p, 0x882222, 1, 0.5f, 50, DECAL_STAIN, int(d->radius));
                 }
                 if(d != actor)
@@ -1583,8 +1588,13 @@ namespace game
                     case 5: default: show = true; break;
                 }
                 int target = show ? (isme ? CON_SELF : CON_INFO) : -1;
-                if(showobitdists && d != actor) announcef(anc, target, d, false, "\fw%s \fs[\fo@\fy%.2f\fom\fS]", d->obit, actor->o.dist(d->o)/8.f);
-                else announcef(anc, target, d, false, "\fw%s", d->obit);
+                defformatstring(obit)("%s", d->obit);
+                if(d != actor)
+                {
+                    if(showobitdists >= (isme ? 1 : 2)) { defformatstring(obitx)(" \fs\fo@\fy%.2f\fom\fS", actor->o.dist(d->o)/8.f); concatstring(obit, obitx); }
+                    if(showobithpleft >= (isme ? 1 : 2)) { defformatstring(obitx)(" (\fs\fy+\fc%d\fyhp\fS)", actor->health); concatstring(obit, obitx); }
+                }
+                else announcef(anc, target, d, false, "\fw%s", obit);
             }
             else if(anc >= 0) announce(anc, d);
             if(anc >= 0 && d != actor) announce(anc, actor);
@@ -1592,7 +1602,7 @@ namespace game
         vec pos = d->wantshitbox() ? d->head : d->headpos();
         pos.z -= d->zradius*0.125f;
 #ifdef VANITY
-        if(vanitymodels && d->headless && headlessmodels && *d->vanity)
+        if(vanitymodels && d->headless && !nogore && headlessmodels && *d->vanity)
         {
             if(d->vitems.empty()) vanitybuild(d);
             int found[VANITYMAX] = {0};
@@ -1606,11 +1616,11 @@ namespace game
             }
         }
 #endif
-        if(aistyle[d->aitype].living && gibscale > 0)
+        if(aistyle[d->aitype].living && nogore != 2 && gibscale > 0)
         {
             int gib = clamp(max(damage, 10)/10, 1, 20), amt = int((rnd(gib)+gib)*gibscale);
             if(d->obliterated) amt *= 2;
-            loopi(amt) projs::create(pos, pos, true, d, PRJ_GIBS, rnd(gibfade)+gibfade, 0, rnd(500)+1, rnd(50)+10);
+            loopi(amt) projs::create(pos, pos, true, d, nogore ? PRJ_DEBRIS : PRJ_GIBS, rnd(gibfade)+gibfade, 0, rnd(500)+1, rnd(50)+10);
         }
         if(m_team(gamemode, mutators) && d->team == actor->team && d != actor && actor == player1 && isweap(weap) && WF(WK(flags), weap, teampenalty, WS(flags)))
         {
@@ -2286,7 +2296,7 @@ namespace game
     {
         float foglevel = float(fog*2/3);
         c->reset();
-        if(!force && c->player && !allowspec(c->player, spectvdead, spectvfollow)) return false;
+        if(!force && c->player && !allowspec(c->player, spectvdead, spectvfollowing)) return false;
         bool aim = !c->player || spectvaiming(c->player);
         float yaw = c->player ? c->player->yaw : camera1->yaw, pitch = c->player ? c->player->pitch : camera1->pitch;
         fixrange(yaw, pitch);
@@ -2302,7 +2312,7 @@ namespace game
                     case cament::ENTITY: continue;
                     case cament::PLAYER:
                     {
-                        if(!cam->player || c->player == cam->player || !allowspec(cam->player, spectvdead, spectvfollow)) continue;
+                        if(!cam->player || c->player == cam->player || !allowspec(cam->player, spectvdead, spectvfollowing)) continue;
                         break;
                     }
                     default: break;
@@ -2350,6 +2360,10 @@ namespace game
     bool cameratv()
     {
         if(!tvmode(false)) return false;
+        if(spectvfollow >= 0) spectvfollowing = spectvfollow;
+        else if(spectvfollowself >= (m_duke(gamemode, mutators) ? 2 : 1) && player1->state != CS_SPECTATOR)
+            spectvfollowing = player1->clientnum;
+        else spectvfollowing = -1;
         if(cameras.empty())
         {
             loopv(entities::ents)
@@ -2378,13 +2392,13 @@ namespace game
         }
         if(cameras.empty()) return false;
         cament *cam = cameras[0];
-        bool forced = !tvmode(false, false), renew = !lastcamera, found = spectvfollow < 0;
+        bool forced = !tvmode(false, false), renew = !lastcamera, found = spectvfollowing < 0;
         float amt = 0;
         loopv(cameras)
         {
             if(cameras[i]->type == cament::PLAYER && (cameras[i]->player || ((cameras[i]->player = getclient(cameras[i]->id)) != NULL)))
             {
-                if(!found && cameras[i]->id == spectvfollow && cameras[i]->player->state != CS_SPECTATOR) found = true;
+                if(!found && cameras[i]->id == spectvfollowing && cameras[i]->player->state != CS_SPECTATOR) found = true;
                 cameras[i]->o = cameras[i]->player->headpos();
                 if(forced && cameras[i]->player == focus) cam = cameras[i];
             }
@@ -2393,9 +2407,9 @@ namespace game
             else if(m_defend(gamemode)) defend::updatecam(cameras[i]);
             else if(m_bomber(gamemode)) bomber::updatecam(cameras[i]);
         }
-        if(!found) spectvfollow = -1;
+        if(!found) spectvfollow = spectvfollowing = -1;
         camrefresh(cam);
-        #define stvf(z) (spectvfollow >= 0 ? spectvfollow##z : spectv##z)
+        #define stvf(z) (spectvfollowing >= 0 ? spectvfollow##z : spectv##z)
         if(forced)
         {
             camupdate(cam, amt, renew, true);
@@ -2815,7 +2829,7 @@ namespace game
         if(d->aitype >= AI_START) mdl = aistyle[d->aitype%AI_MAX].playermodel[third];
         else mdl = playertypes[d->model%PLAYERTYPES][third];
 #else
-        int idx = third == 1 && d->headless && headlessmodels ? 3 : third;
+        int idx = third == 1 && d->headless && !nogore && headlessmodels ? 3 : third;
         const char *mdl = playertypes[forceplayermodel >= 0 ? forceplayermodel : 0][idx];
         if(d->aitype >= AI_START && d->aitype != AI_GRUNT) mdl = aistyle[d->aitype%AI_MAX].playermodel[idx];
         else if(forceplayermodel < 0) mdl = playertypes[d->model%PLAYERTYPES][idx];
@@ -3208,7 +3222,7 @@ namespace game
         modelattach a[1+VANITYMAX+12];
         if(vanitymodels && third && *d->vanity)
         {
-            int idx = third == 1 && (d->state == CS_DEAD || d->state == CS_WAITING) && d->headless && headlessmodels ? 3 : third;
+            int idx = third == 1 && (d->state == CS_DEAD || d->state == CS_WAITING) && d->headless && !nogore && headlessmodels ? 3 : third;
             if(d->vitems.empty())
             {
                 vector<char *> vanitylist;
