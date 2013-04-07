@@ -1912,7 +1912,7 @@ namespace hud
                 {
                     if(killer && d->state == CS_ALIVE)
                     {
-                        drawblip(tex, 1, w, h, size*(i ? radarplayersize : radarplayerhintsize), fade*(i ? radarplayerblend : radarplayerhintblend), style, d->o, colour[i], "tiny", "%s (%d)", game::colourname(d), d->health);
+                        drawblip(tex, 1, w, h, size*(i ? radarplayersize : radarplayerhintsize), fade*(i ? radarplayerblend : radarplayerhintblend), style, d->o, colour[i], "tiny", "%s (\fs\fc%d\fS)", game::colourname(d), d->health);
                         continue;
                     }
                     if(force || self || chkcond(radarplayernames, !game::tvmode()))

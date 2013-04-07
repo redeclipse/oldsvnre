@@ -1551,6 +1551,8 @@ namespace game
                 }
             }
         }
+        if(showobitdists >= (isme ? 1 : 2)) { defformatstring(obitx)(" \fs\fo@\fy%.2f\fom\fS", actor->o.dist(d->o)/8.f); concatstring(d->obit, obitx); }
+        if(showobithpleft >= (isme ? 1 : 2)) { defformatstring(obitx)(" (\fs\fc%d\fS)", actor->health); concatstring(d->obit, obitx); }
         if(!log.empty())
         {
             if(obitverbose == 2 || obitstyles) concatstring(d->obit, rnd(2) ? ", assisted by" : ", helped by");
@@ -1588,13 +1590,7 @@ namespace game
                     case 5: default: show = true; break;
                 }
                 int target = show ? (isme ? CON_SELF : CON_INFO) : -1;
-                defformatstring(obit)("%s", d->obit);
-                if(d != actor)
-                {
-                    if(showobitdists >= (isme ? 1 : 2)) { defformatstring(obitx)(" \fs\fo@\fy%.2f\fom\fS", actor->o.dist(d->o)/8.f); concatstring(obit, obitx); }
-                    if(showobithpleft >= (isme ? 1 : 2)) { defformatstring(obitx)(" (\fs\fy+\fc%d\fyhp\fS)", actor->health); concatstring(obit, obitx); }
-                }
-                announcef(anc, target, d, false, "\fw%s", obit);
+                announcef(anc, target, d, false, "\fw%s", d->obit);
             }
             else if(anc >= 0) announce(anc, d);
             if(anc >= 0 && d != actor) announce(anc, actor);
