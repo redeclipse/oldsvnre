@@ -637,7 +637,8 @@ namespace projs
             }
             case PRJ_GIBS:
             {
-                if(game::bloodscale > 0)
+                if(game::nogore == 2) break;
+                if(game::nogore || game::bloodscale > 0)
                 {
                     adddecal(DECAL_BLOOD, proj.o, proj.norm, proj.radius*clamp(proj.vel.magnitude()/2, 1.f, 4.f), bvec(125, 255, 255));
                     int mag = int(proj.vel.magnitude()), vol = int(ceilf(clamp(mag*2, 10, 255)*proj.curscale));
@@ -787,7 +788,15 @@ namespace projs
             }
             case PRJ_GIBS:
             {
-                if(game::bloodscale > 0)
+                if(game::nogore == 2)
+                {
+                    proj.lifemillis = proj.lifetime = 1;
+                    proj.lifespan = 1.f;
+                    proj.state = CS_DEAD;
+                    proj.escaped = true;
+                    return;
+                }
+                if(!game::nogore || game::bloodscale > 0)
                 {
                     proj.collidetype = COLLIDE_AABB;
                     proj.height = proj.aboveeye = proj.radius = proj.xradius = proj.yradius = 0.5f;
@@ -1494,7 +1503,7 @@ namespace projs
             }
             case PRJ_GIBS: case PRJ_DEBRIS:
             {
-                if(proj.projtype == PRJ_GIBS && game::bloodscale > 0)
+                if(proj.projtype == PRJ_GIBS && !game::nogore && game::bloodscale > 0)
                 {
                     if(proj.movement >= 1 && lastmillis-proj.lasteffect >= 1000 && proj.lifetime >= min(proj.lifemillis, proj.fadetime))
                     {
@@ -1592,7 +1601,7 @@ namespace projs
                             }
                             else expl = WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags));
                             part_create(PART_SMOKE_LERP_SOFT, projtraillength*(type != W_ROCKET ? 3 : 4), proj.o, 0x333333, expl*0.75f, 0.5f, -15);
-                            if(!m_kaboom(game::gamemode, game::mutators))
+                            if(!m_kaboom(game::gamemode, game::mutators) && game::nogore != 2 && game::debrisscale > 0)
                             {
                                 int debris = rnd(type != W_ROCKET ? 5 : 10)+5, amt = int((rnd(debris)+debris+1)*game::debrisscale);
                                 loopi(amt) create(proj.o, vec(proj.o).add(proj.vel), true, proj.owner, PRJ_DEBRIS, rnd(game::debrisfade)+game::debrisfade, 0, rnd(501), rnd(101)+50, 0, proj.weap, 0, proj.flags);

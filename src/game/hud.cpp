@@ -654,7 +654,7 @@ namespace hud
     void damage(int n, const vec &loc, gameent *actor, int weap, int flags)
     {
         damageresidue = clamp(damageresidue+(n*(flags&HIT_BLEED ? 3 : 1)), 0, 200);
-        vec colour = wr_burns(weap, flags) ? vec(1.f, 0.35f, 0.0625f) : (game::bloodscale <= 0 ? vec(1, 0.25f, 1) : vec(1.f, 0, 0)),
+        vec colour = wr_burns(weap, flags) ? vec(1.f, 0.35f, 0.0625f) : (game::nogore || game::bloodscale <= 0 ? vec(1, 0.25f, 1) : vec(1.f, 0, 0)),
             dir = vec(loc).sub(camera1->o).normalize();
         loopv(damagelocs)
         {
@@ -2867,7 +2867,7 @@ namespace hud
             if(showdamage && !third)
             {
                 if(burntime && game::focus->state == CS_ALIVE) drawfire(w, h, os, fade);
-                if(game::bloodscale > 0) drawdamage(w, h, os, fade);
+                drawdamage(w, h, os, fade);
             }
             if(teamhurttime && m_team(game::gamemode, game::mutators) && game::focus == game::player1 && game::player1->lastteamhit >= 0 && lastmillis-game::player1->lastteamhit <= teamhurttime)
             {
