@@ -531,7 +531,7 @@ namespace client
     ICOMMAND(0, isdeveloper, "i", (int *cn), intret(haspriv(game::getclient(*cn), PRIV_DEVELOPER) ? 1 : 0));
     ICOMMAND(0, iscreator, "i", (int *cn), intret(haspriv(game::getclient(*cn), PRIV_CREATOR) ? 1 : 0));
 
-    ICOMMAND(0, getclientpriv, "i", (int *cn, int *priv), intret(haspriv(game::getclient(*cn), *priv) ? 1 : 0));
+    ICOMMAND(0, getclientpriv, "ii", (int *cn, int *priv), intret(haspriv(game::getclient(*cn), *priv) ? 1 : 0));
 
     const char *getclienthandle(int cn)
     {
