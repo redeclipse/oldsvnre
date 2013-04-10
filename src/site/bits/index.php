@@ -3,7 +3,7 @@
     $app['releasedate'] = "22nd March 2013";
     $app['releasefile'] = "redeclipse_1.4";
     $app['background'] = "/bits/background_01.jpg";
-    $app['youtubevid'] = "mjHVb3z72tM";
+    $app['youtubevid'] = "oJRZHjyj7Zg";
     $app['screenshots'] = 16;
 
     $app['banner'] = "<b>New Release:</b> ". $app['releasedate'] ." <i>". $app['releasever'] ."</i>";
@@ -22,9 +22,9 @@
 
     $app['targets']['project'] = array('name' => 'Project', 'url' => 'http://sourceforge.net/projects/redeclipse/', 'alturl' => '', 'nav' => -1, 'redir' => 1);
     $app['targets']['devel'] = array('name' => 'Devel', 'url' => 'http://sourceforge.net/apps/trac/redeclipse/', 'alturl' => 'http://sourceforge.net/apps/trac/redeclipse/', 'nav' => -1, 'redir' => 1);
-    $app['targets']['svn'] = array('name' => 'SVN', 'url' => 'http://sourceforge.net/apps/trac/redeclipse/browser', 'alturl' => 'http://sourceforge.net/apps/trac/redeclipse/changeset/', 'nav' => -1, 'redir' => 1);
+    $app['targets']['svn'] = array('name' => 'SVN', 'url' => 'http://sourceforge.net/apps/trac/redeclipse/timeline', 'alturl' => 'http://sourceforge.net/apps/trac/redeclipse/changeset/', 'nav' => -1, 'redir' => 1);
     $app['targets']['ticket'] = array('name' => 'Tickets', 'url' => 'http://sourceforge.net/apps/trac/redeclipse/report/1', 'alturl' => 'http://sourceforge.net/apps/trac/redeclipse/ticket/', 'nav' => -1, 'redir' => 1);
-    $app['targets']['old'] = array('name' => 'Historical SVN', 'url' => 'http://sourceforge.net/apps/trac/bloodfrontier/browser', 'alturl' => 'http://sourceforge.net/apps/trac/bloodfrontier/changeset/', 'nav' => -1, 'redir' => 1);
+    $app['targets']['old'] = array('name' => 'Historical SVN', 'url' => 'http://sourceforge.net/apps/trac/bloodfrontier/timeline', 'alturl' => 'http://sourceforge.net/apps/trac/bloodfrontier/changeset/', 'nav' => -1, 'redir' => 1);
 
     $app['targets']['facebook'] = array('name' => 'Facebook', 'url' => 'http://www.facebook.com/redeclipse.net', 'nav' => 0, 'redir' => 1);
     $app['targets']['youtube'] = array('name' => 'Youtube', 'url' => 'http://www.youtube.com/results?search_query=%22Red%20Eclipse%22', 'alturl' => 'http://www.youtube.com/results?search_query=%22Red%20Eclipse%22+', 'nav' => 0, 'redir' => 1);
@@ -40,6 +40,7 @@
     $app['targets']['install'] = array('name' => 'Install', 'url' => 'http://sourceforge.net/apps/mediawiki/redeclipse/index.php?title=How_to_install', 'nav' => -1, 'redir' => 1);
     $app['targets']['license'] = array('name' => 'License', 'url' => 'http://sourceforge.net/apps/trac/redeclipse/browser/doc/license.txt', 'nav' => -1, 'redir' => 1);
     $app['targets']['readme'] = array('name' => 'Credits', 'url' => 'http://sourceforge.net/apps/trac/redeclipse/browser/readme.txt', 'nav' => -1, 'redir' => 1);
+    $app['targets']['repo'] = array('name' => 'Repo', 'url' => 'http://sourceforge.net/apps/trac/redeclipse/browser', 'alturl' => 'http://sourceforge.net/apps/trac/redeclipse/browser/', 'nav' => 1, 'redir' => 1);
 
     function checkarg($arg = "", $def = "") {
         return isset($_GET[$arg]) && $_GET[$arg] != "" ? $_GET[$arg] : $def;
