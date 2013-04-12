@@ -1555,8 +1555,11 @@ namespace game
                 }
             }
         }
-        if(showobitdists >= (isme ? 1 : 2)) { defformatstring(obitx)(" \fs\fo@\fy%.2f\fom\fS", actor->o.dist(d->o)/8.f); concatstring(d->obit, obitx); }
-        if(showobithpleft >= (isme ? 1 : 2)) { defformatstring(obitx)(" (\fs\fc%d\fS)", actor->health); concatstring(d->obit, obitx); }
+        if(d != actor)
+        {
+            if(showobitdists >= (d != player1 ? 2 : 1)) { defformatstring(obitx)(" \fs\fo@\fy%.2f\fom\fS", actor->o.dist(d->o)/8.f); concatstring(d->obit, obitx); }
+            if(showobithpleft >= (d != player1 ? 2 : 1)) { defformatstring(obitx)(" (\fs\fc%d\fS)", actor->health); concatstring(d->obit, obitx); }
+        }
         if(!log.empty())
         {
             if(obitverbose == 2 || obitstyles) concatstring(d->obit, rnd(2) ? ", assisted by" : ", helped by");
@@ -1568,6 +1571,7 @@ namespace game
                 else concatstring(d->obit, log.length() > 1 && i == log.length()-1 ? " + " : (i ? " + " : " "));
                 if(log[i]->aitype >= AI_START) concatstring(d->obit, "a ");
                 concatstring(d->obit, colourname(log[i]));
+                if(showobithpleft >= (d != player1 ? 2 : 1)) { defformatstring(obitx)(" (\fs\fc%d\fS)", log[i]->health); concatstring(d->obit, obitx); }
             }
         }
         if(d != actor)

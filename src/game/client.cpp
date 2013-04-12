@@ -8,6 +8,8 @@ namespace client
     string connectpass = "";
     int needclipboard = -1;
 
+    SVAR(IDF_PERSIST, demolist, "");
+
     VAR(IDF_PERSIST, showpresence, 0, 1, 2); // 0 = never show join/leave, 1 = show only during game, 2 = show when connecting/disconnecting
     VAR(IDF_PERSIST, showteamchange, 0, 1, 2); // 0 = never show, 1 = show only when switching between, 2 = show when entering match too
     VAR(IDF_PERSIST, showservervariables, 0, 0, 1); // determines if variables set by the server are printed to the console
@@ -2276,14 +2278,38 @@ namespace client
 
                 case N_DEMOPLAYBACK:
                 {
-                    int on = getint(p);
-                    if(on) game::player1->state = CS_SPECTATOR;
-                    else
-                    {
-                        loopv(game::players) if(game::players[i]) game::clientdisconnected(i);
-                    }
-                    demoplayback = on!=0;
+                    bool wasdemopb = demoplayback;
+                    demoplayback = getint(p)!=0;
+                    if(demoplayback) game::player1->state = CS_SPECTATOR;
+                    else loopv(game::players) if(game::players[i]) game::clientdisconnected(i);
                     game::player1->clientnum = getint(p);
+                    if(!demoplayback && wasdemopb)
+                    {
+                        string demofile;
+                        demofile[0] = 0;
+                        vector<char *> files;
+                        if(*demolist)
+                        {
+                            int r = rnd(listlen(demolist)), len = 0;
+                            const char *elem = indexlist(demolist, r, len);
+                            if(len > 0) copystring(demofile, elem, len+1);
+                        }
+                        if(!*demofile)
+                        {
+                            listfiles("demos", "dmo", files);
+                            while(!files.empty())
+                            {
+                                int r = rnd(files.length());
+                                if(files[r][0] != '.')
+                                {
+                                    copystring(demofile, files[r]);
+                                    break;
+                                }
+                                else files.remove(r);
+                            }
+                        }
+                        if(*demofile) addmsg(N_MAPVOTE, "rsi2", demofile, G_DEMO, 0);
+                    }
                     break;
                 }
 
