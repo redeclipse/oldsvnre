@@ -86,7 +86,7 @@ namespace hud
     VAR(IDF_PERSIST, noticetime, 0, 5000, VAR_MAX);
     VAR(IDF_PERSIST, obitnotices, 0, 2, 2);
     VAR(IDF_PERSIST, teamnotices, 0, 2, 2);
-    VAR(IDF_PERSIST, teamnoticedelay, 0, 5000, VAR_MAX);
+    VAR(IDF_PERSIST, teamnoticedelay, 0, 2500, VAR_MAX);
 
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, teamtex, "<grey>textures/team", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, teamalphatex, "<grey>textures/teamalpha", 3);
@@ -213,7 +213,7 @@ namespace hud
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, circlebartex, "textures/hud/circlebar", 3);
 
     VAR(IDF_PERSIST, showinventory, 0, 1, 1);
-    VAR(IDF_PERSIST, inventoryammo, 0, 1, 3);
+    VAR(IDF_PERSIST, inventoryammo, 0, 3, 3);
     VAR(IDF_PERSIST, inventoryammobar, 0, 2, 2);
     VAR(IDF_PERSIST, inventoryhidemelee, 0, 1, 1);
     VAR(IDF_PERSIST, inventorygame, 0, 2, 2);

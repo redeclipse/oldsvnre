@@ -28,23 +28,23 @@ namespace projs
 
     FVAR(IDF_PERSIST, gibselasticity, -10000, 0.35f, 10000);
     FVAR(IDF_PERSIST, gibsrelativity, -10000, 0.95f, 10000);
-    FVAR(IDF_PERSIST, gibswaterfric, 0, 2, 10000);
+    FVAR(IDF_PERSIST, gibsliquidcoast, 0, 2, 10000);
     FVAR(IDF_PERSIST, gibsweight, -10000, 150, 10000);
 
 #ifdef VANITY
     FVAR(IDF_PERSIST, vanityelasticity, -10000, 0.5f, 10000);
     FVAR(IDF_PERSIST, vanityrelativity, -10000, 0.95f, 10000);
-    FVAR(IDF_PERSIST, vanitywaterfric, 0, 2, 10000);
+    FVAR(IDF_PERSIST, vanityliquidcoast, 0, 2, 10000);
     FVAR(IDF_PERSIST, vanityweight, -10000, 100, 10000);
 #endif
 
     FVAR(IDF_PERSIST, debriselasticity, -10000, 0.6f, 10000);
-    FVAR(IDF_PERSIST, debriswaterfric, 0, 1.7f, 10000);
+    FVAR(IDF_PERSIST, debrisliquidcoast, 0, 1.7f, 10000);
     FVAR(IDF_PERSIST, debrisweight, -10000, 165, 10000);
 
     FVAR(IDF_PERSIST, ejectelasticity, -10000, 0.35f, 10000);
     FVAR(IDF_PERSIST, ejectrelativity, -10000, 1, 10000);
-    FVAR(IDF_PERSIST, ejectwaterfric, 0, 1.75f, 10000);
+    FVAR(IDF_PERSIST, ejectliquidcoast, 0, 1.75f, 10000);
     FVAR(IDF_PERSIST, ejectweight, -10000, 180, 10000);
 
     VAR(IDF_PERSIST, projtrails, 0, 1, 1);
@@ -772,7 +772,7 @@ namespace projs
                 proj.elasticity = WF(WK(proj.flags), proj.weap, elasticity, WS(proj.flags));
                 proj.reflectivity = WF(WK(proj.flags), proj.weap, reflectivity, WS(proj.flags));
                 proj.relativity = W2(proj.weap, relativity, WS(proj.flags));
-                proj.waterfric = WF(WK(proj.flags), proj.weap, waterfric, WS(proj.flags));
+                proj.liquidcoast = WF(WK(proj.flags), proj.weap, liquidcoast, WS(proj.flags));
                 proj.weight = WF(WK(proj.flags), proj.weap, weight, WS(proj.flags));
                 proj.projcollide = WF(WK(proj.flags), proj.weap, collide, WS(proj.flags));
                 proj.minspeed = WF(WK(proj.flags), proj.weap, minspeed, WS(proj.flags));
@@ -826,7 +826,7 @@ namespace projs
                     proj.reflectivity = 0.f;
                     proj.elasticity = gibselasticity;
                     proj.relativity = gibsrelativity;
-                    proj.waterfric = gibswaterfric;
+                    proj.liquidcoast = gibsliquidcoast;
                     proj.weight = gibsweight*proj.lifesize;
                     proj.vel.add(vec(rnd(21)-10, rnd(21)-10, proj.owner && proj.owner->headless ? rnd(61)+10 : rnd(21)-10));
                     proj.projcollide = BOUNCE_GEOM|BOUNCE_PLAYER;
@@ -851,7 +851,7 @@ namespace projs
                 }
                 proj.relativity = proj.reflectivity = 0.f;
                 proj.elasticity = debriselasticity;
-                proj.waterfric = debriswaterfric;
+                proj.liquidcoast = debrisliquidcoast;
                 proj.weight = debrisweight*proj.lifesize;
                 proj.vel.add(vec(rnd(101)-50, rnd(101)-50, rnd(151)-50)).mul(2);
                 proj.projcollide = BOUNCE_GEOM|BOUNCE_PLAYER|COLLIDE_OWNER;
@@ -880,7 +880,7 @@ namespace projs
                 proj.reflectivity = 0.f;
                 proj.elasticity = ejectelasticity;
                 proj.relativity = ejectrelativity;
-                proj.waterfric = ejectwaterfric;
+                proj.liquidcoast = ejectliquidcoast;
                 proj.weight = (ejectweight+(proj.speed*2))*proj.lifesize; // so they fall better in relation to their speed
                 proj.projcollide = BOUNCE_GEOM;
                 proj.escaped = true;
@@ -900,7 +900,7 @@ namespace projs
                 proj.reflectivity = 0.f;
                 proj.elasticity = itemelasticity;
                 proj.relativity = itemrelativity;
-                proj.waterfric = itemwaterfric;
+                proj.liquidcoast = itemliquidcoast;
                 proj.weight = itemweight;
                 proj.projcollide = itemcollide;
                 proj.minspeed = itemminspeed;
@@ -937,7 +937,7 @@ namespace projs
                         proj.elasticity = bomberelasticity;
                         proj.weight = bomberweight;
                         proj.relativity = bomberrelativity;
-                        proj.waterfric = bomberwaterfric;
+                        proj.liquidcoast = bomberliquidcoast;
                         proj.minspeed = bomberminspeed;
                         break;
                     case G_CAPTURE: default:
@@ -948,7 +948,7 @@ namespace projs
                         proj.elasticity = captureelasticity;
                         proj.weight = captureweight;
                         proj.relativity = capturerelativity;
-                        proj.waterfric = capturewaterfric;
+                        proj.liquidcoast = captureliquidcoast;
                         proj.minspeed = captureminspeed;
                         break;
                 }
@@ -979,7 +979,7 @@ namespace projs
                 proj.reflectivity = 0.f;
                 proj.elasticity = vanityelasticity;
                 proj.relativity = vanityrelativity;
-                proj.waterfric = vanitywaterfric;
+                proj.liquidcoast = vanityliquidcoast;
                 proj.weight = vanityweight;
 #endif
                 proj.vel.add(vec(rnd(21)-10, rnd(21)-10, rnd(61)+10));
@@ -1878,7 +1878,7 @@ namespace projs
     {
         vec dir(proj.vel), pos(proj.o);
         int mat = lookupmaterial(vec(proj.o.x, proj.o.y, proj.o.z + (proj.aboveeye - proj.height)/2));
-        if(isliquid(mat&MATF_VOLUME) && proj.waterfric > 0) dir.div(proj.waterfric);
+        if(isliquid(mat&MATF_VOLUME) && proj.liquidcoast > 0) dir.div(proj.liquidcoast);
         dir.mul(secs);
 
         if(!proj.escaped && proj.owner) escaped(proj, pos, dir);

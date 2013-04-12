@@ -2287,7 +2287,6 @@ namespace client
                     {
                         string demofile;
                         demofile[0] = 0;
-                        vector<char *> files;
                         if(*demolist)
                         {
                             int r = rnd(listlen(demolist)), len = 0;
@@ -2296,6 +2295,7 @@ namespace client
                         }
                         if(!*demofile)
                         {
+                            vector<char *> files;
                             listfiles("demos", "dmo", files);
                             while(!files.empty())
                             {
