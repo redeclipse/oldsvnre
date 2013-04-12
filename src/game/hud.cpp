@@ -1217,6 +1217,21 @@ namespace hud
         return false;
     }
 
+    const char *specviewname()
+    {
+        if(showname()) return game::colourname(game::focus);
+        if(game::tvmode())
+        {
+            if(game::spectvfollow >= 0)
+            {
+                gameent *d = game::getclient(game::spectvfollow);
+                if(d) return game::colourname(d);
+            }
+            return "SpecTV";
+        }
+        return "Spectating";
+    }
+
     void drawnotices()
     {
         glPushMatrix();
@@ -1247,7 +1262,7 @@ namespace hud
             ty += draw_textx("Please await instructions from a moderator", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw);
         }
         else if(game::player1->state == CS_SPECTATOR)
-            ty += draw_textx("[ %s ]", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, showname() ? game::colourname(game::focus) : (game::tvmode() ? "SpecTV" : "Spectating"));
+            ty += draw_textx("[ %s ]", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, specviewname());
         else if(game::player1->state == CS_WAITING && showname())
             ty += draw_textx("[ %s ]", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, game::colourname(game::focus));
 

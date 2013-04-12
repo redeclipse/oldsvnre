@@ -65,11 +65,6 @@ namespace game
     FVAR(IDF_PERSIST, thirdpersoncursory, 0, 0.5f, 1);
 
     VARF(0, follow, -1, -1, VAR_MAX, followswitch(0));
-    void resetfollow()
-    {
-        focus = player1;
-        follow = -1;
-    }
 
     VAR(IDF_PERSIST, firstpersonmodel, 0, 2, 2);
     VAR(IDF_PERSIST, firstpersonfov, 90, 100, 150);
@@ -244,6 +239,13 @@ namespace game
     VAR(IDF_PERSIST, headlessmodels, 0, 1, 1);
     VAR(IDF_PERSIST, autoloadweap, 0, 0, 1); // 0 = off, 1 = auto-set loadout weapons
     SVAR(IDF_PERSIST, favloadweaps, "");
+
+    void resetfollow()
+    {
+        if(!tvmode()) follow = -1;
+        else spectvfollow = -1;
+        focus = player1;
+    }
 
     bool needname(gameent *d)
     {
@@ -619,18 +621,20 @@ namespace game
 
     bool followswitch(int n, bool other)
     {
-        if(!tvmode(true, false) && player1->state >= CS_SPECTATOR)
+        if(player1->state >= CS_SPECTATOR)
         {
+            bool istv = tvmode(true, false);
+            int *f = istv ? &spectvfollow : &follow;
             #define checkfollow \
-                if(follow >= players.length()) follow = -1; \
-                else if(follow < -1) follow = players.length()-1;
+                if(*f >= players.length()) *f = -1; \
+                else if(*f < -1) *f = players.length()-1;
             #define addfollow \
             { \
-                follow += clamp(n, -1, 1); \
+                *f += clamp(n, -1, 1); \
                 checkfollow; \
-                if(follow == -1) \
+                if(*f == -1) \
                 { \
-                    if(other) follow += clamp(n, -1, 1); \
+                    if(other) *f += clamp(n, -1, 1); \
                     else \
                     { \
                         resetfollow(); \
@@ -643,11 +647,11 @@ namespace game
             if(!n) n = 1;
             loopi(players.length())
             {
-                if(!players.inrange(follow)) addfollow
+                if(!players.inrange(*f)) addfollow
                 else
                 {
-                    gameent *d = players[follow];
-                    if(!d || d->aitype >= AI_START || !allowspec(d, followdead)) addfollow
+                    gameent *d = players[*f];
+                    if(!d || d->aitype >= AI_START || !allowspec(d, istv ? spectvdead : followdead)) addfollow
                     else
                     {
                         focus = d;
@@ -2427,12 +2431,17 @@ namespace game
                 cam->resetlast();
             }
         }
-        else
+        else loopk(spectvfollowing >= 0 ? 2 : 1)
         {
             int lasttype = cam->type, lastid = cam->id, millis = lasttvchg ? lastmillis-lasttvchg : 0;
             if(millis) amt = float(millis)/float(stvf(maxtime));
             bool updated = camupdate(cam, amt, renew), override = !lasttvchg || millis >= stvf(mintime),
                  reset = (stvf(maxtime) && millis >= stvf(maxtime)) || !lasttvcam || lastmillis-lasttvcam >= stvf(time);
+            if(spectvfollowing >= 0 && !reset && !updated && !override)
+            {
+                spectvfollowing = -1;
+                continue;
+            }
             if(reset || (!updated && override))
             {
                 cam->ignore = true;
@@ -2480,6 +2489,7 @@ namespace game
                     }
                 }
             }
+            break;
         }
         bool chase = cam->player && (forced || spectvaiming(cam->player));
         if(!cam->player || chase)
