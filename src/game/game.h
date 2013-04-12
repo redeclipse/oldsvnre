@@ -1384,7 +1384,7 @@ struct projent : dynent
     float movement, distance, lifespan, lifesize, minspeed;
     bool local, limited, escaped, child;
     int projtype, projcollide, interacts;
-    float elasticity, reflectivity, relativity, waterfric;
+    float elasticity, reflectivity, relativity, liquidcoast;
     int schan, id, weap, value, flags, hitflags;
     entitylight light;
     gameent *owner, *target, *stick;
