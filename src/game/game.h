@@ -1585,7 +1585,7 @@ namespace game
 #ifndef MEK
             forceplayermodel,
 #endif
-            playerovertone, playerundertone, playerdisplaytone, playereffecttone;
+            playerovertone, playerundertone, playerdisplaytone, playereffecttone, follow, spectvfollow, spectvfollowing;
     extern float bloodscale, debrisscale, aboveitemiconsize;
     extern bool intermission, zooming;
     extern vec swaypush, swaydir;
