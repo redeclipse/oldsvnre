@@ -2639,6 +2639,12 @@ namespace game
     {
         if(connected())
         {
+            if(!curtime || !client::isready)
+            {
+                gets2c();
+                if(player1->clientnum >= 0) client::c2sinfo();
+                return;
+            }
             int type = m_edit(gamemode) && musicedit >= 0 ? musicedit : musictype;
             if(!maptime) { maptime = -1; return; } // skip the first loop
             else if(maptime < 0)
@@ -2673,13 +2679,6 @@ namespace game
                 }
             }
         }
-        if(!curtime)
-        {
-            gets2c();
-            if(player1->clientnum >= 0) client::c2sinfo();
-            return;
-        }
-
         if(needname(player1) && !menuactive()) showgui("profile", -1);
         if(connected())
         {
