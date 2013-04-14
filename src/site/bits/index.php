@@ -4,7 +4,7 @@
     $app['releasefile'] = "redeclipse_1.4";
     $app['background'] = "/bits/background_01.jpg";
     $app['youtubevid'] = "oJRZHjyj7Zg";
-    $app['screenshots'] = 16;
+    $app['screenshots'] = 84;
 
     $app['banner'] = "<b>New Release:</b> ". $app['releasedate'] ." <i>". $app['releasever'] ."</i>";
     $app['bannerurl'] = "/download";
@@ -169,7 +169,7 @@
                                 echo "<li>";
                                 $c = false;
                             }
-                            $k = $i < 10 ? "0".$i."" : "".$i."";
+                            $k = $i < 10 ? "00".$i."" : "0".$i."";
                             echo "<a href=\"/bits/images/".$k.".jpg\"><img src=\"/bits/thumbs/".$k.".jpg\" width=\"184\" height=\"138\" border=\"0\" alt=\"Screenshot ".$k."\" /></a>";
                             if ($j == 4) {
                                 echo "</li>";
