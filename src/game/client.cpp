@@ -302,6 +302,8 @@ namespace client
     bool messagereliable = false;
 
     VAR(IDF_PERSIST, colourchat, 0, 1, 1);
+    SVAR(IDF_PERSIST, filterwords, "");
+
     VAR(IDF_PERSIST, showlaptimes, 0, 2, 3); // 0 = off, 1 = only player, 2 = +humans, 3 = +bots
 
     const char *defaultserversort()
@@ -867,13 +869,14 @@ namespace client
     void saytext(gameent *d, int flags, char *text)
     {
         filtertext(text, text, true, colourchat ? false : true);
-        mkstring(s);
+        if(*filterwords) filterword(text, filterwords);
         defformatstring(m)("%s", game::colourname(d));
         if(flags&SAY_TEAM)
         {
             defformatstring(t)(" (to team %s)", game::colourteam(d->team));
             concatstring(m, t);
         }
+        string s;
         if(flags&SAY_ACTION) formatstring(s)("\fv* %s %s", m, text);
         else formatstring(s)("\fw<%s> %s", m, text);
 
@@ -899,7 +902,7 @@ namespace client
             copystring(output, text, messagelength);
             if(flags&SAY_TEAM && !m_team(game::gamemode, game::mutators))
                 flags &= ~SAY_TEAM;
-            saytext(game::player1, flags, output);
+            saytext(game::player1, flags, output); // TODO: don't print before sending
             addmsg(N_TEXT, "ri2s", game::player1->clientnum, flags, output);
         }
     }

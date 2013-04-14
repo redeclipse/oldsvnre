@@ -5237,6 +5237,7 @@ namespace server
                     }
                     string output;
                     copystring(output, text, G(messagelength));
+                    if(*(G(censorwords))) filterword(output, G(censorwords));
                     if(flags&SAY_TEAM && !m_team(gamemode, mutators)) flags &= ~SAY_TEAM;
                     sendf(-1, -1, "ri3s", N_TEXT, cp->clientnum, flags, output); // sent to negative chan for recordpacket
                     loopv(clients)
