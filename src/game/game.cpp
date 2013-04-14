@@ -2368,7 +2368,8 @@ namespace game
     bool cameratv()
     {
         if(!tvmode(false)) return false;
-        if(player1->state != CS_SPECTATOR && spectvfollowself >= (m_duke(gamemode, mutators) ? 2 : 1))
+        if(intermission) spectvfollowing = -1;
+        else if(player1->state != CS_SPECTATOR && spectvfollowself >= (m_duke(gamemode, mutators) ? 2 : 1))
             spectvfollowing = player1->clientnum;
         else spectvfollowing = spectvfollow;
         if(cameras.empty())
@@ -2654,28 +2655,25 @@ namespace game
                 RUNWORLD("on_start");
                 return;
             }
-            else if(!nosound && mastervol && musicvol)
+            else if(!nosound && mastervol && musicvol && type && !playingmusic())
             {
-                if(type && !playingmusic())
+                if(type == 6) smartmusic(true, false);
+                else
                 {
-                    if(type == 6) smartmusic(true, false);
-                    else
+                    defformatstring(musicfile)("%s", mapmusic);
+                    if(*musicdir && (type == 2 || type == 5 || ((type == 1 || type == 4) && (!*musicfile || !fileexists(findfile(musicfile, "r"), "r")))))
                     {
-                        defformatstring(musicfile)("%s", mapmusic);
-                        if(*musicdir && (type == 2 || type == 5 || ((type == 1 || type == 4) && (!*musicfile || !fileexists(findfile(musicfile, "r"), "r")))))
+                        vector<char *> files;
+                        listfiles(musicdir, NULL, files);
+                        while(!files.empty())
                         {
-                            vector<char *> files;
-                            listfiles(musicdir, NULL, files);
-                            while(!files.empty())
-                            {
-                                int r = rnd(files.length());
-                                formatstring(musicfile)("%s/%s", musicdir, files[r]);
-                                if(files[r][0] != '.' && playmusic(musicfile, type >= 4 ? "music" : NULL)) break;
-                                else files.remove(r);
-                            }
+                            int r = rnd(files.length());
+                            formatstring(musicfile)("%s/%s", musicdir, files[r]);
+                            if(files[r][0] != '.' && playmusic(musicfile, type >= 4 ? "music" : NULL)) break;
+                            else files.remove(r);
                         }
-                        else if(*musicfile) playmusic(musicfile, type >= 4 ? "music" : NULL);
                     }
+                    else if(*musicfile) playmusic(musicfile, type >= 4 ? "music" : NULL);
                 }
             }
         }
