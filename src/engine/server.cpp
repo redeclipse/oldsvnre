@@ -233,6 +233,39 @@ uint totalsecs = 0;
 const char *load = NULL;
 vector<char *> gameargs;
 
+bool filterword(char *src, const char *list)
+{
+    bool filtered = false;
+    int len = listlen(list);
+    loopi(len)
+    {
+        char *word = indexlist(list, i);
+        if(word)
+        {
+            if(*word)
+            {
+                char *t = src;
+                int count = strlen(word);
+                while((t = strstr(t, word)) != NULL)
+                {
+                    loopj(count) if(*t) *t++ = '*';
+                    filtered = true;
+                }
+            }
+            delete[] word;
+        }
+    }
+    return filtered;
+}
+
+ICOMMAND(0, filterword, "ss", (char *s, char *t),
+{
+    char *d = newstring(s);
+    filtertext(d, d, t);
+    stringret(d);
+});
+
+
 bool filtertext(char *dst, const char *src, bool newline, bool colour, bool whitespace, int len)
 {
     bool filtered = false;
@@ -272,6 +305,7 @@ bool filtertext(char *dst, const char *src, bool newline, bool colour, bool whit
     *dst = '\0';
     return filtered;
 }
+
 ICOMMAND(0, filter, "siiiN", (char *s, int *a, int *b, int *c, int *numargs),
 {
     char *d = newstring(s);

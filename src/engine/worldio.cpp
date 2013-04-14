@@ -33,7 +33,7 @@ void fixmaptitle()
         {
             if(*t)
             {
-                loopi(4) if(*author) author += 1;
+                loopi(4) if(*author) author++;
                 if(*author) setsvar("mapauthor", author, true);
                 setsvar("maptitle", t, false);
             }

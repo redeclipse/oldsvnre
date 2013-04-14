@@ -404,6 +404,7 @@ extern void flushserver(bool force);
 extern int getservermtu();
 extern int getnumclients();
 extern uint getclientip(int n);
+extern bool filterword(char *src, const char *list);
 extern bool filtertext(char *dst, const char *src, bool newline = true, bool colour = true, bool whitespace = true, int len = sizeof(string)-1);
 extern void disconnect_client(int n, int reason);
 extern void kicknonlocalclients(int reason);
