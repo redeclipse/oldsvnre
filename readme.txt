@@ -163,3 +163,4 @@ too.
 * Christopher "Dratz-_C" Dratz
 * Petri Lukkarinen
 * Anup "DOS_WARRIOR" Debnath
+* Joshua "JDWhyte" Dwight
