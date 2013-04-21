@@ -1,14 +1,47 @@
 = Red Eclipse Development version =
+Gameplay:
+
 Weapons:
  * Sword damage and secondary attack speed increased
+ * Decrease pistol firing rate to disable benefits of auto-fire scripts
+
+Modes & Mutators:
+ * Updated king-dtf rotation for balance
+ * Disable debris in kaboom
+ * Always pick one spawn for alpha team in gauntlet
+ * Resize more in resize
+ * Steal more life in vampire
+ * Increased buffing timeout tolerances when defending affinities
+ * Enable interactions with affinities
+
+Maps:
+ * Steel Rat, added to trial rotation
+ * Abuse, new map (added from mapversion r4)
+
+Interface & Menus:
+ * Added /spectvfollow for aiming camera to certain player whilst
+   maintaining normal spectv camera selections
+ * Updated edit menu
+ * Added variables for showing distance and health left when killed
+   (/showobitdists /showobithpleft)
+ * Added /nogore variable for disabling gore effects
+
+Modding & Mapmaking:
 
 Data Assets:
- * Stratocaster vanity item
+ * New vanity items (Stratocaster, foxears, crown)
  * New chiptune music
  * New massaging object
+ * New wakawaka sound
+
+Multiplayer & Servers:
+ * Distributed Master Servers
+ * Show time since last server ping reply
+ * Added chat filter
 
 Core & Install:
  * Fixed desktop entry icon field
+ * Improve irc connection stability
 
 Additional fixed bugs:
  * #510 - server dependency on data
@@ -17,6 +50,8 @@ Additional fixed bugs:
  * #505 - Picking up an item instantly completes reload cycle
  * #506 - Garbled output when selecting weapon loadout
  * #449 - Ability to make current settings default (/savevars)
+ * #520 - Start menu icon has the wrong .exe selected
+ * #524 - redeclipse.net shortlink for files on trac
 
 
 = Red Eclipse 1.4 =
