@@ -4,6 +4,8 @@ Gameplay:
 Weapons:
  * Sword damage and secondary attack speed increased
  * Decrease pistol firing rate to disable benefits of auto-fire scripts
+ * Flamer secondary now explodes instead of sticks on direct hit
+   (reduces overall damage)
 
 Modes & Mutators:
  * Updated king-dtf rotation for balance
