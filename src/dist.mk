@@ -1,6 +1,6 @@
 appname=$(APPNAME)
-appnamefull:=$(shell sed -n 's/versionname *"\([^"]*\)"/\1/p' ../game/$(APPSHORTNAME)/version.cfg)
-appversion:=$(shell sed -n 's/versionstring *"\([^"]*\)"/\1/p' ../game/$(APPSHORTNAME)/version.cfg)
+appnamefull:=$(shell sed -n 's/versionname *"\([^"]*\)"/\1/p' ../game/$(APPSHORTNAME)/version.cfg || echo "App Name")
+appversion:=$(shell sed -n 's/versionstring *"\([^"]*\)"/\1/p' ../game/$(APPSHORTNAME)/version.cfg || echo "0.0")
 
 dirname=$(appname)-$(appversion)
 dirname-osx=$(appname).app
@@ -32,6 +32,7 @@ SRC_DIRS= \
 	src/shared
 
 SRC_FILES:= \
+	$(shell cd ../ && find $(SRC_DIRS) -not -iname *.lo -not -iname *.gch -not -iname *.o || echo "") \
 	src/core.mk \
 	src/dist.mk \
 	src/dpiaware.manifest \
@@ -82,7 +83,6 @@ DISTFILES:= \
 	data \
 	game/$(APPSHORTNAME) \
 	$(DOC_FILES) \
-	$(shell cd ../ && find $(SRC_DIRS) -not -iname *.lo -not -iname *.gch -not -iname *.o) \
 	$(SRC_FILES) \
 	$(SRC_XCODE)
 
