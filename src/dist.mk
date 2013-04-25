@@ -1,12 +1,11 @@
 appname=$(APPNAME)
-appnamefull:=$(shell sed -n 's/versionname *"\([^"]*\)"/\1/p' ../game/$(APPSHORTNAME)/version.cfg || echo "App Name")
-appversion:=$(shell sed -n 's/versionstring *"\([^"]*\)"/\1/p' ../game/$(APPSHORTNAME)/version.cfg || echo "0.0")
+appnamefull=$(shell sed -n 's/versionname *"\([^"]*\)"/\1/p' ../game/$(APPSHORTNAME)/version.cfg)
+appversion=$(shell sed -n 's/versionstring *"\([^"]*\)"/\1/p' ../game/$(APPSHORTNAME)/version.cfg)
 
 dirname=$(appname)-$(appversion)
 dirname-osx=$(appname).app
 dirname-win=$(dirname)-win
 
-tmpdir-osx:=$(shell cd ../ && echo "$$(mktemp -du $(dirname)-osx_XXXXXX)")
 exename=$(appname)_$(appversion)_win.exe
 
 tarname=$(appname)_$(appversion)_nix.tar
@@ -31,7 +30,7 @@ SRC_DIRS= \
 	src/scripts \
 	src/shared
 
-SRC_FILES:= \
+SRC_FILES= \
 	$(shell cd ../ && find $(SRC_DIRS) -not -iname *.lo -not -iname *.gch -not -iname *.o || echo "") \
 	src/core.mk \
 	src/dist.mk \
@@ -41,7 +40,7 @@ SRC_FILES:= \
 	src/install/nix/$(APPNAME)* \
 	src/install/win/*
 
-SRC_XCODE:= \
+SRC_XCODE= \
 	src/xcode/*.h \
 	src/xcode/*.m \
 	src/xcode/*.mm \
@@ -53,7 +52,7 @@ ifeq ($(APPNAME),redeclipse)
 OSX_APP=bin/$(APPNAME).app
 endif
 
-BIN_FILES:= \
+BIN_FILES= \
 	bin/amd64/*.txt \
 	bin/amd64/*.dll \
 	bin/amd64/$(APPCLIENT)* \
@@ -64,7 +63,7 @@ BIN_FILES:= \
 	bin/x86/$(APPSERVER)* \
 	$(OSX_APP)
 
-DOC_FILES:= \
+DOC_FILES= \
 	doc/all-licenses.txt \
 	doc/cc-by-sa.txt \
 	doc/changelog.txt \
@@ -127,23 +126,21 @@ dist-tar-all: ../$(tarname-all)
 
 ../$(tarname-osx): ../$(dirname)
 	tar -cf $@ -C $</bin $(dirname-osx)
-	if [ -z $(tmpdir-osx) ]; then exit 1; fi
-	rm -rf ../$(tmpdir-osx)/
-	mkdir ../$(tmpdir-osx)
-	mkdir ../$(tmpdir-osx)/$(dirname-osx)
-	mkdir ../$(tmpdir-osx)/$(dirname-osx)/Contents
-	mkdir ../$(tmpdir-osx)/$(dirname-osx)/Contents/Resources
+	mkdir tmpdir-osx
+	mkdir tmpdir-osx/$(dirname-osx)
+	mkdir tmpdir-osx/$(dirname-osx)/Contents
+	mkdir tmpdir-osx/$(dirname-osx)/Contents/Resources
 	# Use links with tar dereference to change directory paths
-	ln -s ../$</data/ ../$(tmpdir-osx)/$(dirname-osx)/data
-	ln -s ../$</doc/ ../$(tmpdir-osx)/$(dirname-osx)/doc
-	ln -s ../$</game/ ../$(tmpdir-osx)/$(dirname-osx)/game
-	ln -s ../$</src/ ../$(tmpdir-osx)/$(dirname-osx)/src
+	ln -s ../$</data/ tmpdir-osx/$(dirname-osx)/data
+	ln -s ../$</doc/ tmpdir-osx/$(dirname-osx)/doc
+	ln -s ../$</game/ tmpdir-osx/$(dirname-osx)/game
+	ln -s ../$</src/ tmpdir-osx/$(dirname-osx)/src
 ifeq ($(APPNAME),redeclipse)
-	ln -s ../$</readme.txt ../$(tmpdir-osx)/$(dirname-osx)/readme.txt
+	ln -s ../$</readme.txt tmpdir-osx/$(dirname-osx)/readme.txt
 endif
 	tar \
-		-hrf $@ -C ../$(tmpdir-osx) $(dirname-osx)
-	rm -rf ../$(tmpdir-osx)/
+		-hrf $@ -C tmpdir-osx $(dirname-osx)
+	rm -rf tmpdir-osx/
 
 dist-tar-osx: ../$(tarname-osx)
 

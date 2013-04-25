@@ -1,7 +1,7 @@
 appname=$(APPNAME)
-appnamefull:=$(shell sed -n 's/versionname *"\([^"]*\)"/\1/p' ../game/$(APPSHORTNAME)/version.cfg || echo "App Name")
+appnamefull=$(shell sed -n 's/versionname *"\([^"]*\)"/\1/p' ../game/$(APPSHORTNAME)/version.cfg)
 appsrcname=$(APPNAME)
-cappname:=$(shell echo $(appname) | tr '[:lower:]' '[:upper:]')# Captial appname
+cappname=$(shell echo $(appname) | tr '[:lower:]' '[:upper:]')# Captial appname
 appclient=$(APPCLIENT)
 appserver=$(APPSERVER)
 appgamedir=game/$(APPSHORTNAME)
