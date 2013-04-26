@@ -4,7 +4,8 @@
 # "$2" is output file
 
 DIR="$(cd "$(dirname "$0")" && pwd)"
-CFG_FILES="$DIR/../../data/*.cfg"
+CFG_FILES="$DIR/../../data/config/*.cfg"
+CFG_FILES2="$DIR/../../data/config/*/*.cfg"
 
 source "$DIR"/wiki-common
 
@@ -16,7 +17,7 @@ for i in $(grep "^setdesc" "$1" | sort)
 do
     ALI="$(format_name "$i")"
 
-    CFG_DEF="$(grep -hr "^$ALI *=.*" $CFG_FILES)"
+    CFG_DEF="$(grep -hr "^$ALI *=.*" $(find $CFG_FILES $CFG_FILES2))"
     if [ -z "$CFG_DEF" ]; then continue; fi
 
     DESC="$(format_desc "$i")"
