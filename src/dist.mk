@@ -309,10 +309,10 @@ wiki-contributors: ../doc/wiki-contributors.txt
 wiki-guidelines: ../doc/wiki-guidelines.txt
 
 ../doc/wiki-%.txt: ../data/config/usage.cfg scripts/wiki-common
-	scripts/generate-wiki-$* $< $@
+	scripts/wiki-$* $< $@
 
 ../doc/wiki-all-vars-commands.txt: ../doc/wiki-game-vars.txt ../doc/wiki-engine-vars.txt ../doc/wiki-weapon-vars.txt ../doc/wiki-commands.txt ../doc/wiki-aliases.txt
-	scripts/generate-wiki-all-vars-commands $^ $@
+	scripts/wiki-all-vars-commands $^ $@
 
 wiki-game-vars: ../doc/wiki-game-vars.txt
 
