@@ -288,23 +288,23 @@ dist-clean: dist-mostlyclean
 	rm -f ../$(exename)*
 
 ../doc/cube2font.txt: ../doc/man/cube2font.1
-	scripts/generate-cube2font-txt $< $@
+	scripts/cube2font-txt $< $@
 
 cube2font-txt: ../doc/cube2font.txt
 
 ../doc/examples/servinit.cfg: ../data/config/usage.cfg install-server
-	scripts/update-servinit-defaults $@
-	scripts/update-servinit-comments $< $@
+	scripts/servinit-defaults $@
+	scripts/servinit-comments $< $@
 
 update-servinit: ../doc/examples/servinit.cfg
 
 ../doc/wiki-contributors.txt: ../readme.txt
-	scripts/generate-wiki-contributors $< $@
+	scripts/wiki-contributors $< $@
 
 wiki-contributors: ../doc/wiki-contributors.txt
 
 ../doc/wiki-guidelines.txt: ../doc/guidelines.txt
-	scripts/generate-wiki-guidelines $< $@
+	scripts/wiki-guidelines $< $@
 
 wiki-guidelines: ../doc/wiki-guidelines.txt
 
