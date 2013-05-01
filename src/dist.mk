@@ -76,7 +76,7 @@ DOC_FILES= \
 	doc/man/$(APPNAME)* \
 	doc/trademark.txt
 
-DISTFILES:= \
+DISTFILES= \
 	$(FILES) \
 	$(BIN_FILES) \
 	data \
