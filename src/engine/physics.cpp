@@ -790,10 +790,10 @@ void rotatebb(vec &center, vec &radius, int yaw, int pitch, int roll)
 }
 
 template<class E, class M>
-static inline bool mmcollide(physent *d, const vec &dir, const extentity &e, const vec &center, const vec &radius, float yaw, float roll)
+static inline bool mmcollide(physent *d, const vec &dir, const extentity &e, const vec &center, const vec &radius, float yaw, float pitch, float roll)
 {
     E entvol(d);
-    M mdlvol(e.o, center, radius, yaw, roll);
+    M mdlvol(e.o, center, radius, yaw, pitch, roll);
     vec cp(0, 0, 0);
     if(mpr::collide(entvol, mdlvol, NULL, NULL, &cp))
     {
@@ -832,9 +832,9 @@ bool mmcollide(physent *d, const vec &dir, octaentities &oc)               // co
             case COLLIDE_OBB:
                 if(m->ellipsecollide)
                 {
-                    if(!mmcollide<mpr::EntOBB, mpr::ModelEllipse>(d, dir, e, center, radius, yaw, roll)) return false;
+                    if(!mmcollide<mpr::EntOBB, mpr::ModelEllipse>(d, dir, e, center, radius, yaw, pitch, roll)) return false;
                 }
-                else if(!mmcollide<mpr::EntOBB, mpr::ModelOBB>(d, dir, e, center, radius, yaw, roll)) return false;
+                else if(!mmcollide<mpr::EntOBB, mpr::ModelOBB>(d, dir, e, center, radius, yaw, pitch, roll)) return false;
                 break;
             case COLLIDE_AABB:
             default:
