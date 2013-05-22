@@ -164,7 +164,7 @@ struct duelservmode : servmode
     void clear()
     {
         duelcheck = dueldeath = -1;
-        dueltime = gamemillis+G(duellimit);
+        dueltime = gamemillis+G(duelcooloff);
         bool reset = false;
         if(m_duel(gamemode, mutators) && G(duelcycle)&(m_team(gamemode, mutators) ? 2 : 1) && duelwinner >= 0 && duelwins > 0)
         {
@@ -195,7 +195,7 @@ struct duelservmode : servmode
 
     void update()
     {
-        if(interm || !hasgameinfo || numclients(-1, true, AI_BOT) <= 1) return;
+        if(interm || !hasgameinfo || gamewait || numclients(-1, true, AI_BOT) <= 1) return;
         if(dueltime >= 0)
         {
             if(gamemillis >= dueltime && !duelqueue.empty())
@@ -382,10 +382,9 @@ struct duelservmode : servmode
 
     void reset(bool empty)
     {
-        duelround = duelwins = 0;
+        duelround = duelwins = dueltime = 0;
         duelwinner = -1;
         duelcheck = dueldeath = -1;
-        dueltime = gamemillis+G(duelwarmup);
         allowed.shrink(0);
         playing.shrink(0);
         duelqueue.shrink(0);
