@@ -327,7 +327,7 @@ namespace aiman
     {
         if(!m_demo(gamemode) && numclients())
         {
-            if(hasgameinfo && !interm)
+            if(hasgameinfo && !interm && !gamewait)
             {
                 if(!dorefresh)
                 {

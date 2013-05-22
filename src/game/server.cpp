@@ -376,7 +376,7 @@ namespace server
     bool hasgameinfo = false;
     int gamemode = G_EDITMODE, mutators = 0, gamemillis = 0, gamelimit = 0;
     string smapname;
-    int interm = 0, timeremaining = -1, oldtimelimit = -1;
+    int interm = 0, timeremaining = -1, oldtimelimit = -1, gamewait = 0, lastwaitinfo = 0;
     bool maprequest = false, inovertime = false;
     enet_uint32 lastsend = 0;
     int mastermode = MM_OPEN;
@@ -567,7 +567,7 @@ namespace server
 
         bool spawnqueue(bool all = false, bool needinfo = true)
         {
-            return m_fight(gamemode) && !m_duke(gamemode, mutators) && G(maxalive) > 0 && (!needinfo || hasgameinfo) && (!all || G(maxalivequeue)) && numclients() > 1;
+            return m_fight(gamemode) && !m_duke(gamemode, mutators) && G(maxalive) > 0 && (!needinfo || (hasgameinfo && !gamewait)) && (!all || G(maxalivequeue)) && numclients() > 1;
         }
 
         void queue(clientinfo *ci, bool msg = true, bool wait = true, bool top = false)
@@ -644,7 +644,7 @@ namespace server
                 if(delay && ci->state.respawnwait(gamemillis, delay)) return false;
                 if(spawnqueue() && playing.find(ci) < 0)
                 {
-                    if(!hasgameinfo) return false;
+                    if(!hasgameinfo || gamewait) return false;
                     if(G(maxalivequeue) && spawnq.find(ci) < 0) queue(ci);
                     int x = max(int(G(maxalive)*G(maxplayers)), max(int(numclients()*G(maxalivethreshold)), G(maxaliveminimum)));
                     if(m_team(gamemode, mutators))
@@ -1838,7 +1838,7 @@ namespace server
         setupitems(true);
         setupspawns(true);
         hasgameinfo = true;
-        aiman::dorefresh = numclients() >= 2 ? (m_duke(gamemode, mutators) || m_bomber(gamemode) ? G(ailongdelay) : G(aiinitdelay)) : G(airefreshdelay);
+        aiman::dorefresh = max(aiman::dorefresh, G(airefreshdelay));
     }
 
     void sendspawn(clientinfo *ci)
@@ -2024,7 +2024,7 @@ namespace server
 
     void readdemo()
     {
-        if(!demoplayback || paused) return;
+        if(!demoplayback || paused || (G(waitforplayers) && gamewait)) return;
         while(gamemillis>=nextplayback)
         {
             int chan, len;
@@ -2571,6 +2571,7 @@ namespace server
         oldtimelimit = G(timelimit);
         timeremaining = G(timelimit) ? G(timelimit)*60 : -1;
         gamelimit = G(timelimit) ? timeremaining*1000 : 0;
+        gamewait = G(waitforplayers) && numclients() ? totalmillis : 0;
         inovertime = false;
         sents.shrink(0);
         scores.shrink(0);
@@ -2580,7 +2581,7 @@ namespace server
         if(smode) smode->reset(false);
         mutate(smuts, mut->reset(false));
         aiman::clearai();
-        aiman::dorefresh = 0;
+        aiman::dorefresh = max(aiman::dorefresh, G(airefreshdelay));
 
         const char *reqmap = name && *name ? name : pickmap(smapname, gamemode, mutators);
 #ifdef STANDALONE // interferes with savemap on clients, in which case we can just use the auto-request
@@ -4255,11 +4256,27 @@ namespace server
             updatecontrols = false;
         }
 
+        if(gamewait)
+        {
+            if(interm || !G(waitforplayers) || totalmillis-gamewait >= G(waitforplayers) || !numclients()) gamewait = 0;
+            else
+            {
+                int numwait = 0;
+                loopv(clients) if(!clients[i]->ready) numwait++;
+                if(!numwait) gamewait = lastwaitinfo = 0;
+                else if(G(waitforplayerannounce) && numclients() > 1 && (!lastwaitinfo || totalmillis-lastwaitinfo >= G(waitforplayerannounce)))
+                {
+                    if(numwait != numclients())
+                        srvoutf(-3, "\fawaiting for \fs\fc%d\fS %s to be ready..", numwait, numwait != 1 ? "players" : "player");
+                    lastwaitinfo = totalmillis;
+                }
+            }
+        }
         if(numclients())
         {
-            if(!paused) gamemillis += curtime;
+            if(!paused && !gamewait) gamemillis += curtime;
             if(m_demo(gamemode)) readdemo();
-            else if(!paused && !interm)
+            else if(!paused && !gamewait && !interm)
             {
                 processevents();
                 checkents();
