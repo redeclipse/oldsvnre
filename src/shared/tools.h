@@ -78,8 +78,8 @@ static inline T clamp(T a, T b, T c)
     return max(b, min(a, c));
 }
 
-#define rnd(x) ((int)(randomMT()&0xFFFFFF)%(x))
-#define rndscale(x) (float((randomMT()&0xFFFFFF)*double(x)/double(0xFFFFFF)))
+#define rnd(x) ((int)(randomMT()&0x7FFFFFFF)%(x))
+#define rndscale(x) (float((randomMT()&0x7FFFFFFF)*double(x)/double(0x7FFFFFFF)))
 #define detrnd(s, x) ((int)(((((uint)(s))*1103515245+12345)>>16)%(x)))
 #define isnumeric(c) (isdigit(c) || c == '+' || c == '-')
 
