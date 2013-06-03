@@ -672,6 +672,8 @@ const char *getalias(const char *name)
     return i && i->type==ID_ALIAS && (i->index >= MAXARGS || aliasstack->usedargs&(1<<i->index)) ? i->getstr() : "";
 }
 
+ICOMMAND(0, getalias, "s", (char *s), result(getalias(s)));
+
 #ifndef STANDALONE
 #define WORLDVAR \
     if(!(identflags&IDF_WORLD) && !editmode && id->flags&IDF_WORLD && !(id->flags&IDF_REWRITE)) \
@@ -2282,6 +2284,7 @@ bool execfile(const char *cfgfile, bool msg, int flags)
     if(verbose >= 2) conoutf("\faloaded script %s", cfgfile);
     return true;
 }
+ICOMMAND(0, exec, "si", (char *file, int *n), execfile(file, true, *n));
 
 const char *escapestring(const char *s)
 {
@@ -2303,6 +2306,15 @@ const char *escapestring(const char *s)
     buf.put("\"\0", 2);
     return buf.getbuf();
 }
+
+ICOMMAND(0, escape, "s", (char *s), result(escapestring(s)));
+ICOMMAND(0, unescape, "s", (char *s),
+{
+    int len = strlen(s);
+    char *d = newstring(len);
+    d[unescapestring(d, s, &s[len])] = '\0';
+    stringret(d);
+});
 
 const char *escapeid(const char *s)
 {
@@ -2450,11 +2462,13 @@ void concat(tagval *v, int n)
 {
     commandret->setstr(conc(v, n, true));
 }
+COMMAND(0, concat, "V");
 
 void concatword(tagval *v, int n)
 {
     commandret->setstr(conc(v, n, false));
 }
+COMMAND(0, concatword, "V");
 
 void result(tagval &v)
 {
@@ -2471,6 +2485,12 @@ void result(const char *s)
 {
     commandret->setstr(newstring(s));
 }
+
+ICOMMAND(0, result, "t", (tagval *v),
+{
+    *commandret = *v;
+    v->type = VAL_NULL;
+});
 
 void format(tagval *args, int numargs)
 {
@@ -2495,6 +2515,7 @@ void format(tagval *args, int numargs)
     s.add('\0');
     result(s.getbuf());
 }
+COMMAND(format, "V");
 
 ICOMMAND(0, result, "t", (tagval *v),
 {
@@ -2573,6 +2594,7 @@ int listlen(const char *s)
     while(parselist(s)) n++;
     return n;
 }
+ICOMMAND(0, listlen, "s", (char *s), intret(listlen(s)));
 
 const char *indexlist(const char *s, int pos, int &len)
 {
@@ -2596,12 +2618,14 @@ void at(tagval *args, int numargs)
     }
     commandret->setstr(newstring(start, end-start));
 }
+COMMAND(0, at, "si1V");
 
 void substr(char *s, int *start, int *count, int *numargs)
 {
     int len = strlen(s), offset = clamp(*start, 0, len);
     commandret->setstr(newstring(&s[offset], *numargs >= 3 ? clamp(*count, 0, len - offset) : len - offset));
 }
+COMMAND(0, substr, "siiN");
 
 void sublist(const char *s, int *skip, int *count, int *numargs)
 {
@@ -2612,22 +2636,8 @@ void sublist(const char *s, int *skip, int *count, int *numargs)
     if(len > 0 && parselist(s, start, end, list, qend)) while(--len > 0 && parselist(s, start, end, qstart, qend));
     commandret->setstr(newstring(list, qend - list));
 }
+COMMAND(0, sublist, "siiN");
 
-void getalias_(char *s)
-{
-    result(getalias(s));
-}
-
-ICOMMAND(0, exec, "si", (char *file, int *n), execfile(file, true, *n));
-COMMAND(0, at, "si1V");
-ICOMMAND(0, escape, "s", (char *s), result(escapestring(s)));
-ICOMMAND(0, unescape, "s", (char *s),
-{
-    int len = strlen(s);
-    char *d = newstring(len);
-    d[unescapestring(d, s, &s[len])] = '\0';
-    stringret(d);
-});
 ICOMMAND(0, stripcolors, "s", (char *s),
 {
     int len = strlen(s);
@@ -2635,11 +2645,6 @@ ICOMMAND(0, stripcolors, "s", (char *s),
     filtertext(d, s, false, true, true, len);
     stringret(d);
 });
-COMMAND(0, substr, "siiN");
-COMMAND(0, sublist, "siiN");
-ICOMMAND(0, listlen, "s", (char *s), intret(listlen(s)));
-ICOMMAND(0, indexof, "ss", (char *list, char *elem), intret(listincludes(list, elem, strlen(elem))));
-COMMANDN(0, getalias, getalias_, "s");
 
 void looplist(ident *id, const char *list, const uint *body, bool search)
 {
@@ -2668,6 +2673,48 @@ void looplist(ident *id, const char *list, const uint *body, bool search)
     if(search) intret(-1);
     if(n) poparg(*id);
 }
+ICOMMAND(0, listfind, "rse", (ident *id, char *list, uint *body), looplist(id, list, body, true));
+ICOMMAND(0, looplist, "rse", (ident *id, char *list, uint *body), looplist(id, list, body, false));
+
+void looplistconc(ident *id, const char *list, const uint *body, bool space)
+{
+    if(id->type!=ID_ALIAS) return;
+    identstack stack;
+    vector<char> r;
+    int n = 0;
+    for(const char *s = list, *start, *end; parselist(s, start, end);)
+    {
+        char *val = newstring(start, end-start);
+        if(n++)
+        {
+            if(id->valtype == VAL_STR) delete[] id->val.s;
+            else id->valtype = VAL_STR;
+            cleancode(*id);
+            id->val.s = val;
+
+            if(space) r.add(' ');
+        }
+        else
+        {
+            tagval t;
+            t.setstr(val);
+            pusharg(*id, t, stack);
+            id->flags &= ~IDF_UNKNOWN;
+        }
+
+        tagval v;
+        executeret(body, v);
+        const char *vstr = v.getstr();
+        int len = strlen(vstr);
+        r.put(vstr, len);
+        freearg(v);
+    }
+    if(n) poparg(*id);
+    r.add('\0');
+    commandret->setstr(newstring(r.getbuf(), r.length()-1));
+}
+ICOMMAND(0, looplistconcat, "rse", (ident *id, char *list, uint *body), looplistconc(id, list, body, true));
+ICOMMAND(0, looplistconcatword, "rse", (ident *id, char *list, uint *body), looplistconc(id, list, body, false));
 
 void prettylist(const char *s, const char *conj)
 {
@@ -2703,6 +2750,7 @@ int listincludes(const char *list, const char *needle, int needlelen)
     }
     return -1;
 }
+ICOMMAND(0, indexof, "ss", (char *list, char *elem), intret(listincludes(list, elem, strlen(elem))));
 
 char *listdel(const char *s, const char *del)
 {
@@ -2718,6 +2766,7 @@ char *listdel(const char *s, const char *del)
     p.add('\0');
     return newstring(p.getbuf(), p.length()-1);
 }
+ICOMMAND(0, listdel, "ss", (char *list, char *del), commandret->setstr(listdel(list, del)));
 
 char *shrinklist(const char *list, const char *limit, int failover, bool invert)
 {
@@ -2744,6 +2793,7 @@ char *shrinklist(const char *list, const char *limit, int failover, bool invert)
     p.add('\0');
     return newstring(p.getbuf(), p.length()-1);
 }
+ICOMMAND(0, shrinklist, "ssii", (char *s, char *t, int *n, int *v), commandret->setstr(shrinklist(s, t, *n, *v!=0)));
 
 void listsplice(const char *s, const char *vals, int *skip, int *count, int *numargs)
 {
@@ -2772,10 +2822,6 @@ void listsplice(const char *s, const char *vals, int *skip, int *count, int *num
 }
 COMMAND(0, listsplice, "ssiiN");
 
-ICOMMAND(0, listdel, "ss", (char *list, char *del), commandret->setstr(listdel(list, del)));
-ICOMMAND(0, shrinklist, "ssii", (char *s, char *t, int *n, int *v), commandret->setstr(shrinklist(s, t, *n, *v!=0)));
-ICOMMAND(0, listfind, "rse", (ident *id, char *list, uint *body), looplist(id, list, body, true));
-ICOMMAND(0, looplist, "rse", (ident *id, char *list, uint *body), looplist(id, list, body, false));
 ICOMMAND(0, loopfiles, "rsse", (ident *id, char *dir, char *ext, uint *body),
 {
     if(id->type!=ID_ALIAS) return;
