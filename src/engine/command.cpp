@@ -2515,16 +2515,6 @@ void format(tagval *args, int numargs)
     s.add('\0');
     result(s.getbuf());
 }
-COMMAND(format, "V");
-
-ICOMMAND(0, result, "t", (tagval *v),
-{
-    *commandret = *v;
-    v->type = VAL_NULL;
-});
-
-COMMAND(0, concat, "V");
-COMMAND(0, concatword, "V");
 COMMAND(0, format, "V");
 
 static const char *liststart = NULL, *listend = NULL, *listquotestart = NULL, *listquoteend = NULL;
