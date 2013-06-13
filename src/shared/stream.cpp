@@ -423,6 +423,7 @@ const char *findfile(const char *filename, const char *mode)
         formatstring(s)("%s%s", packagedirs[i].name, filename); path(s);
         if(fileexists(s, mode)) return s;
     }
+    if(mode[0]=='e') return NULL;
     copystring(s, filename); path(s);
     return s;
 }

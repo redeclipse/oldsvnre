@@ -2873,6 +2873,8 @@ ICOMMAND(0, loopfiles, "rsse", (ident *id, char *dir, char *ext, uint *body),
     if(files.length()) poparg(*id);
 });
 
+ICOMMAND(findfile, "s", (char *name), intret(findfile(name, "e") ? 1 : 0)); 
+
 struct sortitem
 {
     const char *str, *quotestart, *quoteend;
