@@ -1293,7 +1293,7 @@ void regularsplash(int type, int color, float radius, int num, int fade, const v
 
 bool canaddparticles()
 {
-    return !renderedgame && !shadowmapping;
+    return !renderedgame && !shadowmapping && !minimized;
 }
 
 void regular_part_create(int type, int fade, const vec &p, int color, float size, float blend, int grav, int collide, physent *pl, int delay)
