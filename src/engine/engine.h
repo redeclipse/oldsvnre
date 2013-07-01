@@ -611,6 +611,9 @@ enum
     CHANGE_SOUND = 1<<1
 };
 extern bool initwarning(const char *desc, int level = INIT_RESET, int type = CHANGE_GFX, bool force = false);
+
+extern bool minimized;
+
 extern void resetcursor(bool warp = true, bool reset = true);
 extern int compresslevel, imageformat;
 
