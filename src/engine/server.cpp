@@ -1441,13 +1441,13 @@ void setlocations(bool wanthome)
     if(dir && *dir)
     {
         conoutf("attempting to use resources in: %s", dir);
-        chdir(dir);
+        (void)chdir(dir);
     }
 #endif
 #ifndef STANDALONE
     loopi(3) if(!fileexists(findfile("data/config/keymap.cfg", "r"), "r"))
     { // standalone solution to this is: pebkac
-        if(i != 2) chdir("..");
+        if(i != 2) (void)chdir("..");
         else fatal("could not find data directory");
     }
 #endif
