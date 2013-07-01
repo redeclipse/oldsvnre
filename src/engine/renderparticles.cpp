@@ -1731,6 +1731,8 @@ void makeparticles(extentity &e) { makeparticle(e.o, e.attrs); }
 
 void updateparticles()
 {
+    if(minimized) return;
+
     if(lastmillis-lastemitframe >= emitmillis)
     {
         emit = true;
