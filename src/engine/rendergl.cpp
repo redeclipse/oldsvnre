@@ -1184,7 +1184,6 @@ bool deferdrawtextures = false;
 
 void drawtextures()
 {
-    extern bool minimized;
     if(minimized) { deferdrawtextures = true; return; }
     deferdrawtextures = false;
     genenvmaps();
