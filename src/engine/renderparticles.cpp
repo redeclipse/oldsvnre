@@ -22,7 +22,7 @@ static bool emit = false;
 
 static bool emit_particles()
 {
-    if(reflecting || refracting) return false;
+    if(reflecting || refracting || minimized) return false;
     return emit;
 }
 
