@@ -14,15 +14,15 @@ VAR(IDF_PERSIST, particletext, 0, 1, 1);
 VAR(IDF_PERSIST, particleglare, 0, 1, 100);
 VAR(0, debugparticles, 0, 0, 1);
 
-// Check emit_particles() to limit the rate that paricles can be emitted for models/sparklies
+// Check canemitparticles() to limit the rate that paricles can be emitted for models/sparklies
 // Automatically stops particles being emitted when paused or in reflective drawing
 VAR(IDF_PERSIST, emitmillis, 1, 15, VAR_MAX);
 static int lastemitframe = 0;
 static bool emit = false;
 
-static bool emit_particles()
+static bool canemitparticles()
 {
-    if(reflecting || refracting || minimized) return false;
+    if(reflecting || refracting) return false;
     return emit;
 }
 
@@ -1264,7 +1264,7 @@ void create(int type, int color, int fade, const vec &p, float size, float blend
 
 void regularcreate(int type, int color, int fade, const vec &p, float size, float blend, int grav, int collide, physent *pl, int delay)
 {
-    if(!emit_particles() || (delay > 0 && rnd(delay) != 0)) return;
+    if(!canemitparticles() || (delay > 0 && rnd(delay) != 0)) return;
     create(type, color, fade, p, size, blend, grav, collide, pl);
 }
 
@@ -1287,7 +1287,7 @@ void splash(int type, int color, float radius, int num, int fade, const vec &p, 
 
 void regularsplash(int type, int color, float radius, int num, int fade, const vec &p, float size, float blend, int grav, int collide, float vel, int delay)
 {
-    if(!emit_particles() || (delay > 0 && rnd(delay) != 0)) return;
+    if(!canemitparticles() || (delay > 0 && rnd(delay) != 0)) return;
     splash(type, color, radius, num, fade, p, size, blend, grav, collide, vel);
 }
 
@@ -1369,7 +1369,7 @@ void part_explosion(const vec &dest, float maxsize, int type, int fade, int colo
 
 void regular_part_explosion(const vec &dest, float maxsize, int type, int fade, int color, float size, float blend, int grav, int collide)
 {
-    if(!canaddparticles() || !emit_particles()) return;
+    if(!canaddparticles() || !canemitparticles()) return;
     part_explosion(dest, maxsize, type, fade, color, size, blend, grav, collide);
 }
 
@@ -1509,7 +1509,7 @@ static inline vec offsetvec(vec o, int dir, int dist)
  */
 void regularshape(int type, float radius, int color, int dir, int num, int fade, const vec &p, float size, float blend, int grav, int collide, float vel)
 {
-    if(!emit_particles()) return;
+    if(!canemitparticles()) return;
 
     int basetype = parts[type]->type&0xFF;
     bool flare = (basetype == PT_TAPE) || (basetype == PT_LIGHTNING),
@@ -1607,7 +1607,7 @@ void regularshape(int type, float radius, int color, int dir, int num, int fade,
 
 void regularflame(int type, const vec &p, float radius, float height, int color, int density, int fade, float size, float blend, int grav, int collide, float vel)
 {
-    if(!emit_particles()) return;
+    if(!canemitparticles()) return;
 
     float s = size*min(radius, height);
     vec v(0, 0, min(1.0f, height)*vel);
@@ -1731,7 +1731,7 @@ void makeparticles(extentity &e) { makeparticle(e.o, e.attrs); }
 
 void updateparticles()
 {
-    if(minimized) return;
+    if(minimized) { emit = false; return; }
 
     if(lastmillis-lastemitframe >= emitmillis)
     {
