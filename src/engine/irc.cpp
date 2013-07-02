@@ -913,7 +913,7 @@ bool ircnetgui(guient *g, ircnet *n, bool tab)
     return true;
 }
 
-static const char *ircstates[IRC_MAX] = { "\froffline", "\foconnecting", "\fynegotiating", "\fgonline" };
+static const char * const ircstates[IRC_MAX] = { "\froffline", "\foconnecting", "\fynegotiating", "\fgonline" };
 bool ircgui(guient *g, const char *s)
 {
     g->strut(94);

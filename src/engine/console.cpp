@@ -686,7 +686,7 @@ static inline bool sortbinds(keym *x, keym *y)
 
 void writebinds(stream *f)
 {
-    static const char *cmds[4] = { "bind", "specbind", "editbind", "waitbind" };
+    static const char * const cmds[4] = { "bind", "specbind", "editbind", "waitbind" };
     vector<keym *> binds;
     enumerate(keyms, keym, km, binds.add(&km));
     binds.sort(sortbinds);
