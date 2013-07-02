@@ -1322,7 +1322,7 @@ namespace game
             else if(flags&HIT_LOST) concatstring(d->obit, *obitfall ? obitfall : "fell to their death");
             else if(flags && isweap(weap) && !burning && !bleeding && !shocking)
             {
-                static const char *suicidenames[W_MAX][2] = {
+                static const char * const suicidenames[W_MAX][2] = {
                     { "hit themself", "hit themself" },
                     { "ate a bullet", "shot themself" },
                     { "created too much torsional stress", "cut themself" },
@@ -1354,7 +1354,7 @@ namespace game
             else if(shocking) concatstring(d->obit, "given a terminal dose of shock therapy by");
             else if(isweap(weap))
             {
-                static const char *obitnames[5][W_MAX][2] = {
+                static const char * const obitnames[5][W_MAX][2] = {
                     {
                         { "punched by", "punched by" },
                         { "pierced by", "pierced by" },
