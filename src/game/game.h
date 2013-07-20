@@ -198,14 +198,14 @@ enttypes enttype[] = {
 #ifdef MEK
     {
         HEALTH,         2,          59,     24,     EU_ITEM,    4,          1,
-            0, 0, 0,
+            0, 0,
             (1<<ENT_PLAYER)|(1<<ENT_AI),
             false,  true,   true,      false,      false,
                 "health",       { "type",   "modes",    "muts",     "id" }
     },
     {
         ARMOUR,         2,          59,     24,     EU_ITEM,    4,          1,
-            0, 0, 0,
+            0, 0,
             (1<<ENT_PLAYER)|(1<<ENT_AI),
             false,  true,   true,      false,      false,
                 "armour",       { "type",   "modes",    "muts",     "id" }

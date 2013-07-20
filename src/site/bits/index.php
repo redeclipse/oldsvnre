@@ -31,8 +31,13 @@
     $app['targets']['desura'] = array('name' => 'Desura', 'url' => 'http://www.desura.com/games/red-eclipse', 'nav' => 0, 'redir' => 1);
 
     $app['targets']['google'] = array('name' => 'Google', 'url' => 'http://www.google.com/search?q=%22Red%20Eclipse%22', 'alturl' => 'http://www.google.com/search?q=%22Red%20Eclipse%22+', 'nav' => -1, 'redir' => 1);
-    $app['targets']['aur'] = array('name' => 'AUR', 'url' => 'http://aur.archlinux.org/packages.php?ID=47449', 'nav' => -1, 'redir' => 1);
+
+    $app['targets']['arch'] = array('name' => 'Arch', 'url' => 'http://aur.archlinux.org/packages.php?ID=47449', 'nav' => -1, 'redir' => 1);
     $app['targets']['chakra'] = array('name' => 'Chakra', 'url' => 'http://www.chakra-project.org/packages/index.php?act=search&subdir=&sortby=date&order=descending&searchpattern=redeclipse', 'nav' => -1, 'redir' => 1);
+    $app['targets']['slackware'] = array('name' => 'Slackware', 'url' => 'http://slackbuilds.org/repository/14.0/games/redeclipse/', 'nav' => -1, 'redir' => 1);
+    $app['targets']['gentoo'] = array('name' => 'Gentoo', 'url' => 'http://git.overlays.gentoo.org/gitweb/?p=proj/gamerlay.git;a=tree;f=games-fps/redeclipse;h=3487897cbfb5a353ed5dae6add04d888b6cf8ae7;hb=HEAD', 'nav' => -1, 'redir' => 1);
+    
+    $app['platforms'] = array('windows' => 0, 'linux' => 0, 'macosx' => 0, 'arch' => 1, 'chakra' => 1, 'slackware' => 1, 'gentoo' => 1);
 
     $app['targets']['guidelines'] = array('name' => 'Guidelines', 'url' => 'http://sourceforge.net/apps/mediawiki/redeclipse/index.php?title=Multiplayer_Guidelines', 'nav' => -1, 'redir' => 1);
     $app['targets']['faq'] = array('name' => 'FAQ', 'url' => 'http://sourceforge.net/apps/mediawiki/redeclipse/index.php?title=FAQ_for_Red_Eclipse', 'nav' => -1, 'redir' => 1);
@@ -145,9 +150,25 @@
                     <h3>Favourite game modes with an array of mutators and variables</h3>
                     <h3>Builtin editor lets you create your own maps cooperatively online</h3>
                     <a href="/download" id="button">Free Download<br /><em><?php echo $app['releasever']; ?><br /> released <i><?php echo $app['releasedate']; ?></i></em></a>	 
-                    <p id="digidist">or use <a href="/desura">Desura</a>, a free digital distribution application for Windows/Linux</p>
-                    <p id="mirror">and find Linux packages on <a href="/aur">AUR</a>, and <a href="/chakra">Chakra</a></p>
-                    <p id="svn">get the <a href="/devel">development version</a> and live on the bleeding edge</p>
+                    <p id="digidist">also available on <a href="/desura">Desura</a>, for Windows/Linux</p>
+                    <p id="mirror">and 3<sup>rd</sup> party packages for:
+<?php                   $m = 0;
+                        foreach ($app['platforms'] as $key => $targ) {
+                            if ($key != "" && $targ == 1) {
+                                if ($m == 1) {
+                                    echo ", ";
+                                    $m = 0;
+                                }
+                                echo "<a href=\"". $app['targets'][$key]['url'] ."\">". $app['targets'][$key]['name'] ."</a>";
+                                $m = 1;
+                            }
+                        }
+                        if ($m == 1) {
+                            echo ".";
+                            $m = 0;
+                        } ?>
+                    </p>
+                    <p id="svn">or, get the <a href="/devel">development version</a> and live on the bleeding edge</p>
                 </div>
                 <div id="player">
                     <object width="500" height="308" type="application/x-shockwave-flash" data="http://www.youtube.com/v/<?php echo $app['youtubevid']; ?>&amp;color1=0x000000&amp;color2=0x000000&amp;border=0&amp;fs=1&amp;egm=0&amp;showsearch=0&amp;showinfo=0&amp;ap=%2526fmt%3D18">
