@@ -241,15 +241,16 @@ namespace auth
         sendf(ci->clientnum, 1, "riis", N_AUTHCHAL, id, val);
     }
 
-    void answerchallenge(clientinfo *ci, uint id, char *val)
+    bool answerchallenge(clientinfo *ci, uint id, char *val)
     {
-        if(ci->authreq != id) return;
+        if(ci->authreq != id) return false;
         for(char *s = val; *s; s++)
         {
             if(!isxdigit(*s)) { *s = '\0'; break; }
         }
         requestmasterf("confauth %u %s\n", id, val);
         lastactivity = totalmillis;
+        return true;
     }
 
     void processinput(const char *p)

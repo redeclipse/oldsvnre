@@ -4433,7 +4433,7 @@ namespace server
         // only allow edit messages in coop-edit mode
         if(type >= N_EDITENT && type <= N_NEWMAP && (!m_edit(gamemode) || !ci || ci->state.state == CS_SPECTATOR)) return -1;
         // server only messages
-        static const int servtypes[] = { N_SERVERINIT, N_CLIENTINIT, N_WELCOME, N_NEWGAME, N_MAPCHANGE, N_SERVMSG, N_DAMAGE, N_SHOTFX, N_DIED, N_POINTS, N_SPAWNSTATE, N_ITEMACC, N_ITEMSPAWN, N_TICK, N_DISCONNECT, N_CURRENTPRIV, N_PONG, N_RESUME, N_SCORE, N_ANNOUNCE, N_SENDDEMOLIST, N_SENDDEMO, N_DEMOPLAYBACK, N_REGEN, N_CLIENT, N_AUTHCHAL };
+        static const int servtypes[] = { N_CONNECT, N_SERVERINIT, N_CLIENTINIT, N_WELCOME, N_NEWGAME, N_MAPCHANGE, N_SERVMSG, N_DAMAGE, N_SHOTFX, N_DIED, N_POINTS, N_SPAWNSTATE, N_ITEMACC, N_ITEMSPAWN, N_TICK, N_DISCONNECT, N_CURRENTPRIV, N_PONG, N_RESUME, N_SCORE, N_ANNOUNCE, N_SENDDEMOLIST, N_SENDDEMO, N_DEMOPLAYBACK, N_REGEN, N_CLIENT, N_AUTHCHAL };
         if(ci)
         {
             loopi(sizeof(servtypes)/sizeof(int)) if(type == servtypes[i]) return -1;
@@ -4702,7 +4702,11 @@ namespace server
                 {
                     uint id = (uint)getint(p);
                     getstring(text, p);
-                    auth::answerchallenge(ci, id, text);
+                    if(!auth::answerchallenge(ci, id, text))
+                    {
+                        disconnect_client(sender, ci->connectauth);
+                        return;
+                    }
                     break;
                 }
 
