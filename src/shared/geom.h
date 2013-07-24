@@ -148,7 +148,7 @@ struct vec
         return vec(((color>>16)&0xFF)*(1.0f/255.0f), ((color>>8)&0xFF)*(1.0f/255.0f), (color&0xFF)*(1.0f/255.0f));
     }
 
-    int tohexcolor() { return ((int(r*255)&0xFF)<<16)|((int(g*255)&0xFF)>>8)|(int(b*255)&0xFF); }
+    int tohexcolor() { return (int(::clamp(r, 0.0f, 1.0f)*255)<<16)|(int(::clamp(g, 0.0f, 1.0f)*255)<<8)|int(::clamp(b, 0.0f, 1.0f)*255); }
 };
 
 static inline bool htcmp(const vec &x, const vec &y)
