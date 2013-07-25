@@ -326,6 +326,13 @@ extern void alias(const char *name, const char *action);
 extern void alias(const char *name, tagval &v);
 extern void worldalias(const char *name, const char *action);
 extern const char *getalias(const char *name);
+extern void loopiter(ident *id, identstack &stack, tagval &v);
+extern void loopend(ident *id, identstack &stack);
+
+#define loopstart(id, stack) if((id)->type != ID_ALIAS) return; identstack stack;
+static inline void loopiter(ident *id, identstack &stack, int i) { tagval v; v.setint(i); loopiter(id, stack, v); }
+static inline void loopiter(ident *id, identstack &stack, float f) { tagval v; v.setfloat(f); loopiter(id, stack, v); }
+static inline void loopiter(ident *id, identstack &stack, const char *s) { tagval v; v.setstr(newstring(s)); loopiter(id, stack, v); }
 
 extern int identflags;
 extern bool interactive;
