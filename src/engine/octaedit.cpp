@@ -63,7 +63,7 @@ void boxsgrid(int orient, vec o, vec s, int g)
     xtraverts += 2*int(xs+ys);
 }
 
-selinfo sel, lastsel;
+selinfo sel, lastsel, savedsel;
 
 int orient = 0;
 int gridsize = 8;
@@ -86,12 +86,16 @@ VARF(0, dragging, 0, 0, 1,
     sel.orient = orient;
 );
 
-VARF(0, moving, 0, 0, 1,
-    if(!moving) return;
-    vec v(cur.v); v.add(1);
-    moving = pointinsel(sel, v);
-    if(moving) havesel = false; // tell cursorupdate to create handle
-);
+int moving = 0;
+ICOMMAND(0, moving, "b", (int *n),
+{
+    if(*n >= 0)
+    {
+        if(!*n || (moving<=1 && !pointinsel(sel, cur.tovec().add(1)))) moving = 0;
+        else if(!moving) moving = 1;
+    }
+    intret(moving);
+});
 
 VARF(0, gridpower, 0, 3, 12,
 {
@@ -179,6 +183,11 @@ COMMAND(0, cancelsel, "");
 COMMAND(0, reorient, "");
 COMMAND(0, selextend, "");
 
+ICOMMAND(0, selmoved, "", (), { if(noedit(true)) return; intret(sel.o != savedsel.o ? 1 : 0); });
+ICOMMAND(0, selsave, "", (), { if(noedit(true)) return; savedsel = sel; });
+ICOMMAND(0, selrestore, "", (), { if(noedit(true)) return; sel = savedsel; });
+ICOMMAND(0, selswap, "", (), { if(noedit(true)) return; swap(sel, savedsel); });
+
 ///////// selection support /////////////
 
 cube &blockcube(int x, int y, int z, const block3 &b, int rgrid) // looks up a world cube, based on coordinates mapped by the block
@@ -248,25 +257,19 @@ void updateselection()
     sel.s.z = abs(lastcur.z-cur.z)/sel.grid+1;
 }
 
-void editmoveplane(const vec &o, const vec &ray, int d, float off, vec &handle, vec &dest, bool first)
+bool editmoveplane(const vec &o, const vec &ray, int d, float off, vec &handle, vec &dest, bool first)
 {
     plane pl(d, off);
     float dist = 0.0f;
-
     physent *player = (physent *)game::focusedent(true);
     if(!player) player = camera1;
-    if(pl.rayintersect(player->o, ray, dist))
-    {
-        dest = ray;
-        dest.mul(dist);
-        dest.add(player->o);
-        if(first)
-        {
-            handle = dest;
-            handle.sub(o);
-        }
-        dest.sub(handle);
-    }
+    if(!pl.rayintersect(player->o, ray, dist))
+        return false;
+
+    dest = vec(ray).mul(dist).add(player->o);
+    if(first) handle = vec(dest).sub(o);
+    dest.sub(handle);
+    return true;
 }
 
 inline bool isheightmap(int orient, int d, bool empty, cube *c);
@@ -296,19 +299,20 @@ void rendereditcursor()
 
     if(moving)
     {
-        ivec e;
-        static vec v, handle;
-        editmoveplane(sel.o.tovec(), ray, od, sel.o[D[od]]+odc*sel.grid*sel.s[D[od]], handle, v, !havesel);
-        if(!havesel)
+        static vec dest, handle;
+        if(editmoveplane(sel.o.tovec(), camdir, od, sel.o[D[od]]+odc*sel.grid*sel.s[D[od]], handle, dest, moving==1))
         {
-            v.add(handle);
-            (e = handle).mask(~(sel.grid-1));
-            v.sub(handle = e.tovec());
-            havesel = true;
+            if(moving==1)
+            {
+                dest.add(handle);
+                handle = ivec(handle).mask(~(sel.grid-1)).tovec();
+                dest.sub(handle);
+                moving = 2;
+            }
+            ivec o = ivec(dest).mask(~(sel.grid-1));
+            sel.o[R[od]] = o[R[od]];
+            sel.o[C[od]] = o[C[od]];
         }
-        (e = v).mask(~(sel.grid-1));
-        sel.o[R[od]] = e[R[od]];
-        sel.o[C[od]] = e[C[od]];
     }
     else if(entmoving)
     {
@@ -460,7 +464,7 @@ void rendereditcursor()
     }
 
     // selections
-    if(havesel)
+    if(havesel || moving)
     {
         d = dimension(sel.orient);
         glColor3ub(120, 120, 120);  // grid
