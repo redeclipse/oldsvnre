@@ -112,11 +112,14 @@ VARF(0, hmapedit, 0, 0, 1, horient = sel.orient);
 
 void forcenextundo() { lastsel.orient = -1; }
 
+extern void hmapcancel();
+
 void cubecancel()
 {
     havesel = false;
     moving = dragging = hmapedit = passthroughsel = 0;
     forcenextundo();
+    hmapcancel();
 }
 
 void cancelsel()
@@ -1175,7 +1178,8 @@ vector<int> htextures;
 
 COMMAND(0, clearbrush, "");
 COMMAND(0, brushvert, "iii");
-ICOMMAND(0, hmapcancel, "", (), htextures.setsize(0); );
+void hmapcancel() { htextures.setsize(0); }
+COMMAND(0, hmapcancel, "");
 ICOMMAND(0, hmapselect, "", (),
     int t = lookupcube(cur.x, cur.y, cur.z).texture[orient];
     int i = htextures.find(t);
@@ -1185,21 +1189,12 @@ ICOMMAND(0, hmapselect, "", (),
         htextures.remove(i);
 );
 
-inline bool ishtexture(int t)
-{
-    loopv(htextures)
-        if(t == htextures[i])
-            return false;
-    return true;
-}
-
-VAR(0, bypassheightmapcheck, 0, 0, 1);    // temp
-
 inline bool isheightmap(int o, int d, bool empty, cube *c)
 {
     return havesel ||
            (empty && isempty(*c)) ||
-           ishtexture(c->texture[o]);
+           htextures.empty() ||
+           htextures.find(c->texture[o]) >= 0;
 }
 
 namespace hmap
