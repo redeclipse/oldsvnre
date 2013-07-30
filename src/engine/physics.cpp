@@ -1191,7 +1191,7 @@ bool collide(physent *d, const vec &dir, float cutoff, bool playercol)
     hitflags = HITFLAG_NONE;
     wall.x = wall.y = wall.z = 0;
     ivec bo(int(d->o.x-d->radius), int(d->o.y-d->radius), int(d->o.z-d->height)),
-         bs(int(d->o.x+d->radius), int(d->o.y+d->radius), int(d->o.z++d->aboveeye));
+         bs(int(d->o.x+d->radius), int(d->o.y+d->radius), int(d->o.z+d->aboveeye));
     bs.add(1);  // guard space for rounding errors
     if(!octacollide(d, dir, cutoff, bo, bs)) return false;//, worldroot, ivec(0, 0, 0), hdr.worldsize>>1)) return false; // collide with world
     return !playercol || plcollide(d, dir);
