@@ -998,11 +998,11 @@ namespace game
                 }
                 d->o.z += d->zradius;
                 d->height = d->zradius;
-                if(!collide(d, vec(0, 0, 1), 0, false) || inside)
+                if(collide(d, vec(0, 0, 1), 0, false) || collideinside)
                 {
                     d->o.z -= d->zradius-zrad;
                     d->height = zrad;
-                    if(collide(d, vec(0, 0, 1), 0, false) && !inside) crouching = true;
+                    if(!collide(d, vec(0, 0, 1), 0, false) && !collideinside) crouching = true;
                 }
                 d->o = old;
                 d->height = offset;
@@ -2152,7 +2152,6 @@ namespace game
             {
                 physent::reset();
                 type = ENT_CAMERA;
-                collidetype = COLLIDE_AABB;
                 state = CS_ALIVE;
                 height = zradius = radius = xradius = yradius = 2;
             }
@@ -2177,7 +2176,6 @@ namespace game
             {
                 physent::reset();
                 type = ENT_CAMERA;
-                collidetype = COLLIDE_AABB;
                 state = CS_ALIVE;
                 height = zradius = radius = xradius = yradius = 2;
             }
@@ -2551,7 +2549,6 @@ namespace game
         {
             camera1->reset();
             camera1->type = ENT_CAMERA;
-            camera1->collidetype = COLLIDE_AABB;
             camera1->state = CS_ALIVE;
             camera1->height = camera1->zradius = camera1->radius = camera1->xradius = camera1->yradius = 2;
         }
