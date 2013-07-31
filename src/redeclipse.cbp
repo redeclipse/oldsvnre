@@ -234,7 +234,7 @@
 				<Option object_output=".objs/redeclipse-amd64" />
 				<Option deps_output=".deps/redeclipse-amd64" />
 				<Option type="0" />
-				<Option compiler="gnu_gcc_compiler_for_amd64" />
+				<Option compiler="gcc" />
 				<Option parameters="-hhome -r -df0 -dw800 -dh600 -glog.txt" />
 				<Option projectCompilerOptionsRelation="1" />
 				<Option projectLinkerOptionsRelation="1" />
@@ -282,7 +282,7 @@
 				<Option object_output=".objs/redeclipse-amd64-dbg" />
 				<Option deps_output=".deps/redeclipse-amd64-dbg" />
 				<Option type="0" />
-				<Option compiler="gnu_gcc_compiler_for_amd64" />
+				<Option compiler="gcc" />
 				<Option parameters="-hhome -r -df0 -dw800 -dh600 -glog.txt" />
 				<Option projectCompilerOptionsRelation="1" />
 				<Option projectLinkerOptionsRelation="1" />
@@ -327,7 +327,7 @@
 				<Option object_output=".objs/redeclipse-amd64-prof" />
 				<Option deps_output=".deps/redeclipse-amd64-prof" />
 				<Option type="0" />
-				<Option compiler="gnu_gcc_compiler_for_amd64" />
+				<Option compiler="gcc" />
 				<Option parameters="-hhome -r -df0 -dw800 -dh600 -glog.txt" />
 				<Option projectCompilerOptionsRelation="1" />
 				<Option projectLinkerOptionsRelation="1" />
@@ -373,7 +373,7 @@
 				<Option object_output=".objs/redeclipse_server-amd64" />
 				<Option deps_output=".deps/redeclipse_server-amd64" />
 				<Option type="0" />
-				<Option compiler="gnu_gcc_compiler_for_amd64" />
+				<Option compiler="gcc" />
 				<Option projectCompilerOptionsRelation="1" />
 				<Option projectLinkerOptionsRelation="1" />
 				<Option projectIncludeDirsRelation="1" />
@@ -417,7 +417,7 @@
 				<Option object_output=".objs/redeclipse_server-amd64-dbg" />
 				<Option deps_output=".deps/redeclipse_server-amd64-dbg" />
 				<Option type="0" />
-				<Option compiler="gnu_gcc_compiler_for_amd64" />
+				<Option compiler="gcc" />
 				<Option projectCompilerOptionsRelation="1" />
 				<Option projectLinkerOptionsRelation="1" />
 				<Option projectIncludeDirsRelation="1" />
@@ -680,7 +680,7 @@
 				<Option object_output=".objs/mekclient-amd64" />
 				<Option deps_output=".deps/mekclient-amd64" />
 				<Option type="0" />
-				<Option compiler="gnu_gcc_compiler_for_amd64" />
+				<Option compiler="gcc" />
 				<Option parameters="-hhome -r -df0 -dw800 -dh600 -glog.txt" />
 				<Option projectCompilerOptionsRelation="1" />
 				<Option projectLinkerOptionsRelation="1" />
@@ -728,7 +728,7 @@
 				<Option object_output=".objs/mekclient-amd64-dbg" />
 				<Option deps_output=".deps/mekclient-amd64-dbg" />
 				<Option type="0" />
-				<Option compiler="gnu_gcc_compiler_for_amd64" />
+				<Option compiler="gcc" />
 				<Option parameters="-hhome -r -df0 -dw800 -dh600 -glog.txt" />
 				<Option projectCompilerOptionsRelation="1" />
 				<Option projectLinkerOptionsRelation="1" />
@@ -773,7 +773,7 @@
 				<Option object_output=".objs/mekclient-amd64-prof" />
 				<Option deps_output=".deps/mekclient-amd64-prof" />
 				<Option type="0" />
-				<Option compiler="gnu_gcc_compiler_for_amd64" />
+				<Option compiler="gcc" />
 				<Option parameters="-hhome -r -df0 -dw800 -dh600 -glog.txt" />
 				<Option projectCompilerOptionsRelation="1" />
 				<Option projectLinkerOptionsRelation="1" />
@@ -819,7 +819,7 @@
 				<Option object_output=".objs/mekserver-amd64" />
 				<Option deps_output=".deps/mekserver-amd64" />
 				<Option type="0" />
-				<Option compiler="gnu_gcc_compiler_for_amd64" />
+				<Option compiler="gcc" />
 				<Option projectCompilerOptionsRelation="1" />
 				<Option projectLinkerOptionsRelation="1" />
 				<Option projectIncludeDirsRelation="1" />
@@ -863,7 +863,7 @@
 				<Option object_output=".objs/mekserver-amd64-dbg" />
 				<Option deps_output=".deps/mekserver-amd64-dbg" />
 				<Option type="0" />
-				<Option compiler="gnu_gcc_compiler_for_amd64" />
+				<Option compiler="gcc" />
 				<Option projectCompilerOptionsRelation="1" />
 				<Option projectLinkerOptionsRelation="1" />
 				<Option projectIncludeDirsRelation="1" />
@@ -984,12 +984,12 @@
 			<Add alias="ALL" targets="redeclipse-x86;redeclipse_server-x86;redeclipse-amd64;redeclipse_server-amd64;mekclient-x86;mekserver-x86;mekclient-amd64;mekserver-amd64;" />
 			<Add alias="ALL-amd64" targets="redeclipse-amd64;redeclipse_server-amd64;mekclient-amd64;mekserver-amd64;" />
 			<Add alias="ALL-x86" targets="redeclipse-x86;redeclipse_server-x86;mekclient-x86;mekserver-x86;" />
-			<Add alias="REDECLIPSE" targets="redeclipse-x86;redeclipse_server-x86;redeclipse-amd64;redeclipse_server-amd64;" />
-			<Add alias="REDECLIPSE-amd64" targets="redeclipse-amd64;redeclipse_server-amd64;" />
-			<Add alias="REDECLIPSE-x86" targets="redeclipse-x86;redeclipse_server-x86;" />
 			<Add alias="MEKARCADE" targets="mekclient-x86;mekserver-x86;mekclient-amd64;mekserver-amd64;" />
 			<Add alias="MEKARCADE-amd64" targets="mekclient-amd64;mekserver-amd64;" />
 			<Add alias="MEKARCADE-x86" targets="mekclient-x86;mekserver-x86;" />
+			<Add alias="REDECLIPSE" targets="redeclipse-x86;redeclipse_server-x86;redeclipse-amd64;redeclipse_server-amd64;" />
+			<Add alias="REDECLIPSE-amd64" targets="redeclipse-amd64;redeclipse_server-amd64;" />
+			<Add alias="REDECLIPSE-x86" targets="redeclipse-x86;redeclipse_server-x86;" />
 			<Add alias="TOOLS" targets="cube2font;genkey;" />
 		</VirtualTargets>
 		<Unit filename="dpiaware.manifest">
