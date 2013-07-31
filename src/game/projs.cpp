@@ -400,7 +400,7 @@ namespace projs
             if(!fwd.iszero()) loopi(max(int(proj.radius), 100))
             {
                 proj.o.sub(fwd);
-                if(collide(&proj, dir, 0.f, proj.projcollide&COLLIDE_DYNENT) && !inside && !hitplayer) break;
+                if(!collide(&proj, dir, 0.f, proj.projcollide&COLLIDE_DYNENT) && !collideinside && !hitplayer) break;
             }
             if(d)
             {
@@ -798,7 +798,6 @@ namespace projs
                 }
                 if(!game::nogore || game::bloodscale > 0)
                 {
-                    proj.collidetype = COLLIDE_AABB;
                     proj.height = proj.aboveeye = proj.radius = proj.xradius = proj.yradius = 0.5f;
                     proj.lifesize = 1.5f-(rnd(100)/100.f);
                     if(proj.owner)
@@ -839,7 +838,6 @@ namespace projs
             }
             case PRJ_DEBRIS:
             {
-                proj.collidetype = COLLIDE_AABB;
                 proj.height = proj.aboveeye = proj.radius = proj.xradius = proj.yradius = 0.5f;
                 proj.lifesize = 1.5f-(rnd(100)/100.f);
                 switch(rnd(4))
@@ -956,7 +954,6 @@ namespace projs
             }
             case PRJ_VANITY:
             {
-                proj.collidetype = COLLIDE_AABB;
                 proj.height = proj.aboveeye = proj.radius = proj.xradius = proj.yradius = 1;
                 if(proj.owner)
                 {
@@ -1797,7 +1794,7 @@ namespace projs
                     loopi(WF(WK(proj.flags), proj.weap, drill, WS(proj.flags)))
                     {
                         proj.o.add(vec(dir).normalize());
-                        if(collide(&proj, dir, 0.f, proj.projcollide&COLLIDE_DYNENT) && !inside && !hitplayer) return 1;
+                        if(!collide(&proj, dir, 0.f, proj.projcollide&COLLIDE_DYNENT) && !collideinside && !hitplayer) return 1;
                     }
                     proj.o = orig; // continues below
                 }
@@ -1827,8 +1824,8 @@ namespace projs
         if(!ret) return 0;
         if(!skip && proj.interacts && checkitems(proj)) return -1;
         if(proj.projtype == PRJ_SHOT) updatetaper(proj, proj.distance+proj.o.dist(oldpos));
-        if(ret == 1 && (!collide(&proj, dir, 0.f, proj.projcollide&COLLIDE_DYNENT) || inside))
-            ret = impact(proj, dir, hitplayer, hitflags, wall);
+        if(ret == 1 && (collide(&proj, dir, 0.f, proj.projcollide&COLLIDE_DYNENT) || collideinside))
+            ret = impact(proj, dir, hitplayer, hitflags, collidewall);
         return ret;
     }
 
@@ -1867,9 +1864,9 @@ namespace projs
                     float x1 = floor(min(pos.x, to.x)), y1 = floor(min(pos.y, to.y)),
                           x2 = ceil(max(pos.x, to.x)), y2 = ceil(max(pos.y, to.y)),
                           maxdist = dir.magnitude(), dist = 1e16f;
-                    if(physics::xtracecollide(&proj, pos, to, x1, x2, y1, y2, maxdist, dist, proj.owner) || dist > maxdist) proj.escaped = true;
+                    if(!physics::xtracecollide(&proj, pos, to, x1, x2, y1, y2, maxdist, dist, proj.owner) || dist > maxdist) proj.escaped = true;
                 }
-                else if(physics::xcollide(&proj, dir, proj.owner)) proj.escaped = true;
+                else if(!physics::xcollide(&proj, dir, proj.owner)) proj.escaped = true;
             }
         }
     }

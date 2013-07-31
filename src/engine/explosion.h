@@ -415,7 +415,6 @@ struct explosionrenderer : sharedlistrenderer
             explosionent()
             {
                 type = ENT_CAMERA;
-                collidetype = COLLIDE_AABB;
             }
         } e;
 
@@ -431,7 +430,7 @@ struct explosionrenderer : sharedlistrenderer
 
             e.o = p->o;
             e.radius = e.xradius = e.yradius = e.height = e.aboveeye = psize;
-            if(::collide(&e, vec(0, 0, 0), 0, false)) continue;
+            if(!::collide(&e, vec(0, 0, 0), 0, false)) continue;
 
             if(depthfxscissor==2 && !depthfxtex.addscissorbox(p->o, psize)) continue;
 

@@ -483,10 +483,10 @@ namespace physics
             checkdir.mul(0.1f);
             checkdir.z += maxstep + 0.1f;
             d->o.add(checkdir);
-            if(!collide(d))
+            if(collide(d))
             {
                 d->o = old;
-                if(collide(d, vec(0, 0, -1), slopez)) return false;
+                if(!collide(d, vec(0, 0, -1), slopez)) return false;
                 cansmooth = false;
             }
         }
@@ -499,21 +499,21 @@ namespace physics
             d->o = old;
             d->o.add(checkdir);
             int scale = 2;
-            if(!collide(d, checkdir))
+            if(collide(d, checkdir))
             {
-                if(collide(d, vec(0, 0, -1), slopez))
+                if(!collide(d, vec(0, 0, -1), slopez))
                 {
                     d->o = old;
                     return false;
                 }
                 d->o.add(checkdir);
-                if(!collide(d, vec(0, 0, -1), slopez)) scale = 1;
+                if(collide(d, vec(0, 0, -1), slopez)) scale = 1;
             }
             if(scale != 1)
             {
                 d->o = old;
                 d->o.sub(checkdir.mul(vec(2, 2, 1)));
-                if(collide(d, vec(0, 0, -1), slopez)) scale = 1;
+                if(!collide(d, vec(0, 0, -1), slopez)) scale = 1;
             }
 
             d->o = old;
@@ -531,7 +531,7 @@ namespace physics
                 d->o.add(smoothdir.mul(force));
                 float margin = (maxstep + 0.1f)*ceil(force);
                 d->o.z += margin;
-                if(collide(d, smoothdir))
+                if(!collide(d, smoothdir))
                 {
                     d->o.z -= margin;
                     if(d->physstate == PHYS_FALL || d->floor != floor)
@@ -549,7 +549,7 @@ namespace physics
         /* try stepping up */
         d->o = old;
         d->o.z += dir.magnitude()*force;
-        if(collide(d, vec(0, 0, 1)))
+        if(!collide(d, vec(0, 0, 1)))
         {
             if(d->physstate == PHYS_FALL || d->floor != floor)
             {
@@ -574,12 +574,12 @@ namespace physics
         vec old(d->o);
         d->o.add(vec(stepdir).mul(stairheight/fabs(stepdir.z))).z -= stairheight;
         d->zmargin = -stairheight;
-        if(!collide(d, vec(0, 0, -1), slopez))
+        if(collide(d, vec(0, 0, -1), slopez))
         {
             d->o = old;
             d->o.add(vec(stepdir).mul(step));
             d->zmargin = 0;
-            if(collide(d, vec(0, 0, -1)))
+            if(!collide(d, vec(0, 0, -1)))
             {
                 vec stepfloor(stepdir);
                 stepfloor.mul(-stepfloor.z).z += 1;
@@ -590,10 +590,10 @@ namespace physics
                     vec stepped(d->o);
                     d->o.z -= 0.5f;
                     d->zmargin = -0.5f;
-                    if(!collide(d, stepdir) && wall == d->floor)
+                    if(collide(d, stepdir) && collidewall == d->floor)
                     {
                         d->o = old;
-                        if(!init) { d->o.x += dir.x; d->o.y += dir.y; if(dir.z <= 0 || !collide(d, dir)) d->o.z += dir.z; }
+                        if(!init) { d->o.x += dir.x; d->o.y += dir.y; if(dir.z <= 0 || collide(d, dir)) d->o.z += dir.z; }
                         d->zmargin = 0;
                         d->physstate = PHYS_STEP_DOWN;
                         return true;
@@ -623,7 +623,7 @@ namespace physics
         vec old(d->o);
         d->o.z -= stairheight;
         d->zmargin = -stairheight;
-        if(collide(d, vec(0, 0, -1), slopez))
+        if(!collide(d, vec(0, 0, -1), slopez))
         {
             d->o = old;
             d->zmargin = 0;
@@ -676,9 +676,9 @@ namespace physics
             floor = vec(0, 0, 1);
             found = true;
         }
-        else if(d->physstate != PHYS_FALL && !collide(d, vec(0, 0, -1), d->physstate == PHYS_SLOPE || d->physstate == PHYS_STEP_DOWN ? slopez : floorz))
+        else if(d->physstate != PHYS_FALL && collide(d, vec(0, 0, -1), d->physstate == PHYS_SLOPE || d->physstate == PHYS_STEP_DOWN ? slopez : floorz))
         {
-            floor = wall;
+            floor = collidewall;
             found = true;
         }
         else if(collided && obstacle.z >= slopez)
@@ -689,17 +689,17 @@ namespace physics
         }
         else if(d->physstate == PHYS_STEP_UP || d->physstate == PHYS_SLIDE)
         {
-            if(!collide(d, vec(0, 0, -1)) && wall.z > 0.0f)
+            if(collide(d, vec(0, 0, -1)) && collidewall.z > 0.0f)
             {
-                floor = wall;
+                floor = collidewall;
                 if(floor.z >= slopez) found = true;
             }
         }
         else if(d->physstate >= PHYS_SLOPE && d->floor.z < 1.0f)
         {
-            if(!collide(d, vec(d->floor).neg(), 0.95f) || !collide(d, vec(0, 0, -1)))
+            if(collide(d, vec(d->floor).neg(), 0.95f) || !collide(d, vec(0, 0, -1)))
             {
-                floor = wall;
+                floor = collidewall;
                 if(floor.z >= slopez && floor.z < 1.0f) found = true;
             }
         }
@@ -716,24 +716,24 @@ namespace physics
     {
         vec old(d->o), obstacle; d->o.add(dir);
         bool collided = false, slidecollide = false;
-        if(!collide(d, dir))
+        if(collide(d, dir))
         {
-            obstacle = wall;
+            obstacle = collidewall;
             /* check to see if there is an obstacle that would prevent this one from being used as a floor */
-            if((gameent::is(d)) && ((wall.z>=slopez && dir.z<0) || (wall.z<=-slopez && dir.z>0)) && (dir.x || dir.y) && !collide(d, vec(dir.x, dir.y, 0)))
+            if((gameent::is(d)) && ((collidewall.z>=slopez && dir.z<0) || (collidewall.z<=-slopez && dir.z>0)) && (dir.x || dir.y) && collide(d, vec(dir.x, dir.y, 0)))
             {
-                if(wall.dot(dir) >= 0) slidecollide = true;
-                obstacle = wall;
+                if(collidewall.dot(dir) >= 0) slidecollide = true;
+                obstacle = collidewall;
             }
 
             d->o = old;
             d->o.z -= stairheight;
             d->zmargin = -stairheight;
-            if(d->physstate == PHYS_SLOPE || d->physstate == PHYS_FLOOR  || (!collide(d, vec(0, 0, -1), slopez) && (d->physstate == PHYS_STEP_UP || d->physstate == PHYS_STEP_DOWN || wall.z >= floorz)))
+            if(d->physstate == PHYS_SLOPE || d->physstate == PHYS_FLOOR  || (collide(d, vec(0, 0, -1), slopez) && (d->physstate == PHYS_STEP_UP || d->physstate == PHYS_STEP_DOWN || collidewall.z >= floorz)))
             {
                 d->o = old;
                 d->zmargin = 0;
-                if(trystepup(d, dir, obstacle, stairheight, d->physstate == PHYS_SLOPE || d->physstate == PHYS_FLOOR ? d->floor : vec(wall)))
+                if(trystepup(d, dir, obstacle, stairheight, d->physstate == PHYS_SLOPE || d->physstate == PHYS_FLOOR ? d->floor : vec(collidewall)))
                     return true;
             }
             else
@@ -745,10 +745,10 @@ namespace physics
         }
         else if(d->physstate == PHYS_STEP_UP)
         {
-            if(!collide(d, vec(0, 0, -1), slopez))
+            if(collide(d, vec(0, 0, -1), slopez))
             {
                 d->o = old;
-                if(trystepup(d, dir, vec(0, 0, 1), stairheight, vec(wall))) return true;
+                if(trystepup(d, dir, vec(0, 0, 1), stairheight, vec(collidewall))) return true;
                 d->o.add(dir);
             }
         }
@@ -958,7 +958,7 @@ namespace physics
                 d->o.add(dir.normalize());
                 bool collided = collide(d, dir);
                 d->o = oldpos;
-                if(!collided && hitplayer && gameent::is(hitplayer))
+                if(collided && hitplayer && gameent::is(hitplayer))
                 {
                     d->action[AC_SPECIAL] = false;
                     d->resetjump();
@@ -994,8 +994,8 @@ namespace physics
                 d->o.add(dir);
                 bool collided = collide(d, dir);
                 d->o = oldpos;
-                if(collided || hitplayer || wall.iszero()) continue;
-                vec face = vec(wall).normalize();
+                if(!collided || hitplayer || collidewall.iszero()) continue;
+                vec face = vec(collidewall).normalize();
                 if(fabs(face.z) <= impulseparkournorm)
                 {
                     bool cankick = d->action[AC_SPECIAL] && canimpulse(d, IM_A_PARKOUR, true), parkour = cankick && !onfloor && !d->onladder;
@@ -1011,16 +1011,16 @@ namespace physics
                         if(onfloor)
                         {
                             d->o.z += space*m;
-                            if(!collide(d, dir))
+                            if(collide(d, dir))
                             {
                                 d->o.z += space*n-space*m;
-                                if(collide(d, dir) || hitplayer) vault = true;
+                                if(!collide(d, dir) || hitplayer) vault = true;
                             }
                         }
                         else
                         {
                             d->o.z += space*n;
-                            if(collide(d, dir) || hitplayer) vault = true;
+                            if(!collide(d, dir) || hitplayer) vault = true;
                         }
                         d->o = oldpos;
                     }
@@ -1370,7 +1370,7 @@ namespace physics
         {
             vec oldpos(pl->o);
             pl->o.add(d);
-            if(!collide(pl, vec(0, 0, 0), 0, false))
+            if(collide(pl, vec(0, 0, 0), 0, false))
             {
                 pl->o = oldpos;
                 return false;
@@ -1444,27 +1444,27 @@ namespace physics
             case PHYS_FLOOR:
             case PHYS_STEP_DOWN:
                 d->o.z -= 0.15f;
-                if(!collide(d, vec(0, 0, -1), d->physstate == PHYS_SLOPE || d->physstate == PHYS_STEP_DOWN ? slopez : floorz))
+                if(collide(d, vec(0, 0, -1), d->physstate == PHYS_SLOPE || d->physstate == PHYS_STEP_DOWN ? slopez : floorz))
                 {
-                    d->floor = wall;
+                    d->floor = collidewall;
                     foundfloor = true;
                 }
                 break;
 
             case PHYS_STEP_UP:
                 d->o.z -= stairheight+0.15f;
-                if(!collide(d, vec(0, 0, -1), slopez))
+                if(collide(d, vec(0, 0, -1), slopez))
                 {
-                    d->floor = wall;
+                    d->floor = collidewall;
                     foundfloor = true;
                 }
                 break;
 
             case PHYS_SLIDE:
                 d->o.z -= 0.15f;
-                if(!collide(d, vec(0, 0, -1)) && wall.z < slopez)
+                if(collide(d, vec(0, 0, -1)) && collidewall.z < slopez)
                 {
-                    d->floor = wall;
+                    d->floor = collidewall;
                     foundfloor = true;
                 }
                 break;
@@ -1488,15 +1488,15 @@ namespace physics
                     hitflags |= HITFLAG_TORSO;
                 if(!d->o.reject(e->head, d->radius+max(e->hrad.x, e->hrad.y)) && !ellipsecollide(d, dir, e->head, vec(0, 0, 0), e->yaw, e->hrad.x, e->hrad.y, e->hrad.z, e->hrad.z))
                     hitflags |= HITFLAG_HEAD;
-                return hitflags == HITFLAG_NONE;
+                return hitflags != HITFLAG_NONE;
             }
         }
-        if(!plcollide(d, dir, o))
+        if(plcollide(d, dir, o))
         {
             hitflags |= HITFLAG_TORSO;
-            return false;
+            return true;
         }
-        return true;
+        return false;
     }
 
     bool xtracecollide(physent *d, const vec &from, const vec &to, float x1, float x2, float y1, float y2, float maxdist, float &dist, physent *o)
@@ -1523,17 +1523,17 @@ namespace physics
                     vec bottom(e->head), top(e->head); bottom.z -= e->hrad.z; top.z += e->hrad.z; float d = 1e16f;
                     if(linecylinderintersect(from, to, bottom, top, max(e->hrad.x, e->hrad.y), d)) { hitflags |= HITFLAG_HEAD; bestdist = min(bestdist, d); }
                 }
-                if(hitflags == HITFLAG_NONE) return true;
+                if(hitflags == HITFLAG_NONE) return false;
                 dist = bestdist*from.dist(to);
-                return false;
+                return true;
             }
         }
         if(o->o.x+o->radius >= x1 && o->o.y+o->radius >= y1 && o->o.x-o->radius <= x2 && o->o.y-o->radius <= y2 && intersect(o, from, to, dist))
         {
             hitflags |= HITFLAG_TORSO;
-            return false;
+            return true;
         }
-        return true;
+        return false;
     }
 
     void complexboundbox(physent *d)
@@ -1568,7 +1568,7 @@ namespace physics
             loopi(x) \
             { \
                 if(i) { y; } \
-                if(insideworld(d->o) && collide(d) && !inside && (!avoidplayers || !hitplayer)) \
+                if(insideworld(d->o) && !collide(d) && !collideinside && (!avoidplayers || !hitplayer)) \
                 { \
                     d->resetinterp(); \
                     return true; \
@@ -1646,7 +1646,6 @@ namespace physics
                 physent::reset();
                 radius = xradius = yradius = height = aboveeye = 1;
                 type = ENT_DUMMY;
-                collidetype = COLLIDE_AABB;
                 vel = vec(0, 0, -1);
             }
         } d;

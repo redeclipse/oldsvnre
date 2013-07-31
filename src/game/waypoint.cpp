@@ -399,7 +399,7 @@ namespace ai
                             d->o = vec(above).add(vec(0, 0, d->height));
                             bool col = collide(d, vec(0, 0, 1));
                             d->o = old;
-                            if(col)
+                            if(!col)
                             {
                                 pos = above;
                                 return n;

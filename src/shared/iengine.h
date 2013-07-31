@@ -346,7 +346,6 @@ extern void clearmapcrc();
 
 // physics
 extern bool ellipsecollide(physent *d, const vec &dir, const vec &o, const vec &center, float yaw, float xr, float yr, float hi, float lo);
-extern bool rectcollide(physent *d, const vec &dir, const vec &o, float xr, float yr,  float hi, float lo, uchar visible = 0xFF);
 extern bool collide(physent *d, const vec &dir = vec(0, 0, 0), float cutoff = 0, bool playercol = true);
 extern bool plcollide(physent *d, const vec &dir = vec(0, 0, 0));
 extern bool plcollide(physent *d, const vec &dir, physent *o);
@@ -618,11 +617,10 @@ extern ENetHost *serverhost;
 
 // world
 
-extern bool inside;
+extern bool collideinside;
 extern physent *hitplayer;
 extern int hitflags;
-extern vec wall, hitsurface;
-extern float walldistance;
+extern vec collidewall, hitsurface;
 
 enum { HITFLAG_NONE = 0, HITFLAG_LEGS = 1<<0, HITFLAG_TORSO = 1<<1, HITFLAG_HEAD = 1<<2, HITFLAG_FULL = 1<<4 };
 
