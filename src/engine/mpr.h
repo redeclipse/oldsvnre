@@ -188,8 +188,8 @@ namespace mpr
         Model(const vec &ent, const vec &center, const vec &radius, int yaw, int pitch, int roll) : o(ent), radius(radius)
         {
             orient.identity();
-            if(pitch) orient.rotate_around_x(sincosmod360(pitch));
-            if(roll) orient.rotate_around_y(sincosmod360(roll));
+            if(pitch) orient.rotate_around_y(sincosmod360(pitch));
+            if(roll) orient.rotate_around_x(sincosmod360(roll));
             if(yaw) orient.rotate_around_z(sincosmod360(-yaw));
             o.add(orient.transposedtransform(center));
         }
