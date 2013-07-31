@@ -683,7 +683,7 @@ namespace hud
         }
         vec c = vec::hexcolor(colour);
         int size = int(s*skew); size += int(size*inventoryglow);
-        if(m_laptime(game::gamemode, game::mutators)) drawitem(icon, x, y+size, s, inventoryscorebg!=0, 0, false, c.r, c.g, c.b, fade, skew, "huge", "%s%s", col, timestr(score));
+        if(m_laptime(game::gamemode, game::mutators)) drawitem(icon, x, y+size, s, inventoryscorebg!=0, 0, false, c.r, c.g, c.b, fade, skew, "huge", "%s%s", col, score ? timestr(score) : "dnf");
         else if(m_defend(game::gamemode) && score == INT_MAX)
             drawitem(icon, x, y+size, s, inventoryscorebg!=0, 0, false, c.r, c.g, c.b, fade, skew, "huge", "%sWIN", col);
         else drawitem(icon, x, y+size, s, inventoryscorebg!=0, 0, false, c.r, c.g, c.b, fade, skew, "huge", "%s%d", col, score);
@@ -714,7 +714,7 @@ namespace hud
                     gameent *d = sg.players[j];
                     if((d != game::focus) == !i) continue;
                     float sk = numout && inventoryscoreshrink > 0 ? 1.f-min(numout*inventoryscoreshrink, inventoryscoreshrinkmax) : 1;
-                    sy += drawscoreitem(playertex, game::getcolour(d, game::playerdisplaytone), x, y+sy, s, sk*inventoryscoresize, blend*inventoryblend, j, d->points, game::colourname(d));
+                    sy += drawscoreitem(playertex, game::getcolour(d, game::playerdisplaytone), x, y+sy, s, sk*inventoryscoresize, blend*inventoryblend, j, m_laptime(game::gamemode, game::mutators) ? d->cptime : d->points, game::colourname(d));
                     if(++numout >= inventoryscore) return sy;
                 }
             }
@@ -730,20 +730,36 @@ namespace hud
             scoregroup &sg = *groups[0];
             if(m_laptime(game::gamemode, game::mutators))
             {
-                pushfont("reduced");
                 if(m_team(game::gamemode, game::mutators))
                 {
-                    if(sg.total) sy += draw_textx("best: \fg%s", x, y, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, timestr(sg.total));
+                    if(sg.total)
+                    {
+                        pushfont("reduced");
+                        sy += draw_textx("by %s", x+FONTW*2, y, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, game::colourteam(sg.team));
+                        popfont();
+                        sy += draw_textx("\fg%s", x, y, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, timestr(sg.total));
+                    }
                 }
                 else if(!sg.players.empty())
                 {
-                    if(sg.players[0]->cptime) sy += draw_textx("best: \fg%s", x, y, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, timestr(sg.players[0]->cptime));
+                    if(sg.players[0]->cptime)
+                    {
+                        pushfont("reduced");
+                        sy += draw_textx("by %s", x+FONTW*2, y, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, game::colourname(sg.players[0]));
+                        popfont();
+                        sy += draw_textx("\fg%s", x, y, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, timestr(sg.players[0]->cptime));
+                    }
                 }
-                popfont();
             }
             else if(m_team(game::gamemode, game::mutators))
             {
-                if(sg.total) sy += draw_textx("best: \fg%d", x, y, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, sg.total);
+                if(sg.total)
+                {
+                    pushfont("reduced");
+                    sy += draw_textx("by %s", x+FONTW*2, y, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, game::colourteam(sg.team));
+                    popfont();
+                    sy += draw_textx("\fg%d", x, y, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, sg.total);
+                }
             }
         }
         return sy;
