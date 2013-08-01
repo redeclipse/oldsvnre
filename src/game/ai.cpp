@@ -1560,7 +1560,7 @@ namespace ai
             mapmodelinfo *mmi = getmminfo(entities::ents[i]->attrs[0]);
             if(!mmi) continue;
             vec center, radius;
-            mmi->m->collisionbox(0, center, radius);
+            mmi->m->collisionbox(center, radius);
             if(entities::ents[i]->attrs[5]) { center.mul(entities::ents[i]->attrs[5]/100.f); radius.mul(entities::ents[i]->attrs[5]/100.f); }
             if(!mmi->m->ellipsecollide) rotatebb(center, radius, int(entities::ents[i]->attrs[1]), int(entities::ents[i]->attrs[2]));
             float limit = WAYPOINTRADIUS+(max(radius.x, max(radius.y, radius.z))*mmi->m->height);

@@ -242,7 +242,7 @@ COMMAND(0, mdlshadow, "i");
 void mdlbb(float *rad, float *h, float *height)
 {
     checkmdl;
-    loadingmodel->collideradius = *rad;
+    loadingmodel->collidexyradius = *rad;
     loadingmodel->collideheight = *h;
     loadingmodel->height = *height;
 }
@@ -636,7 +636,7 @@ void endmodelbatches()
         if(b.flags&(MDL_SHADOW|MDL_DYNSHADOW))
         {
             vec center, bbradius;
-            b.m->boundbox(0/*frame*/, center, bbradius); // FIXME
+            b.m->boundbox(center, bbradius);
             loopvj(b.batched)
             {
                 batchedmodel &bm = b.batched[j];
@@ -804,7 +804,7 @@ void rendermodel(entitylight *light, const char *mdl, int anim, const vec &o, fl
          doOQ = flags&MDL_CULL_QUERY && hasOQ && oqfrags && oqdynent;
     if(flags&(MDL_CULL_VFC|MDL_CULL_DIST|MDL_CULL_OCCLUDED|MDL_CULL_QUERY|MDL_SHADOW|MDL_DYNSHADOW))
     {
-        m->boundbox(0/*frame*/, center, bbradius); // FIXME
+        m->boundbox(center, bbradius);
         radius = bbradius.magnitude();
         if(d && d->ragdoll)
         {
@@ -896,8 +896,8 @@ void rendermodel(entitylight *light, const char *mdl, int anim, const vec &o, fl
         else
         {
             vec center, radius;
-            if(showboundingbox==1) m->collisionbox(0, center, radius);
-            else m->boundbox(0, center, radius);
+            if(showboundingbox==1) m->collisionbox(center, radius);
+            else m->boundbox(center, radius);
             center.mul(size);
             radius.mul(size);
             glTranslatef(o.x, o.y, o.z);
@@ -1030,7 +1030,7 @@ void abovemodel(vec &o, const char *mdl)
 {
     model *m = loadmodel(mdl);
     if(!m) return;
-    o.z += m->above(0/*frame*/);
+    o.z += m->above();
 }
 
 bool matchanim(const char *name, const char *pattern)
@@ -1092,7 +1092,7 @@ void setbbfrommodel(dynent *d, const char *mdl, float size)
     model *m = loadmodel(mdl);
     if(!m) return;
     vec center, radius;
-    m->collisionbox(0, center, radius);
+    m->collisionbox(center, radius);
     if(d->type==ENT_INANIMATE && !m->ellipsecollide)
         d->collidetype = COLLIDE_OBB;
     d->xradius  = (radius.x + fabs(center.x))*size;

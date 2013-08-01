@@ -5,12 +5,12 @@
 mapz hdr;
 int worldscale;
 
-VAR(0, octaentsize, 0, 128, 1024);
+VAR(0, octaentsize, 0, 64, 1024);
 VAR(0, entselradius, 0, 2, 10);
 
 static inline void mmboundbox(const entity &e, model *m, vec &center, vec &radius)
 {
-    m->boundbox(0, center, radius);
+    m->boundbox(center, radius);
     if(e.attrs[5])
     {
        float scale = max(e.attrs[5]/100.0f, 1e-3f);
@@ -22,7 +22,7 @@ static inline void mmboundbox(const entity &e, model *m, vec &center, vec &radiu
 
 static inline void mmcollisionbox(const entity &e, model *m, vec &center, vec &radius)
 {
-    m->collisionbox(0, center, radius);
+    m->collisionbox(center, radius);
     if(e.attrs[5])
     {
        float scale = max(e.attrs[5]/100.0f, 1e-3f);
@@ -172,7 +172,7 @@ static bool modifyoctaent(int flags, int id, extentity &e)
     }
     else
     {
-        int leafsize = octaentsize, limit = max(r.x, max(r.y, r.z));
+        int leafsize = octaentsize, limit = max(r.x - o.x, max(r.y - o.y, r.z - o.z));
         while(leafsize < limit) leafsize *= 2;
         int diff = ~(leafsize-1) & ((o.x^r.x)|(o.y^r.y)|(o.z^r.z));
         if(diff && (limit > octaentsize/2 || diff < leafsize*2)) leafsize *= 2;

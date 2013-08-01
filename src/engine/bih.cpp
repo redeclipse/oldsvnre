@@ -283,14 +283,8 @@ BIH::BIH(vector<tri> *t)
 
 bool mmintersect(const extentity &e, const vec &o, const vec &ray, float maxdist, int mode, float &dist)
 {
-    extern vector<mapmodelinfo> mapmodels;
-    if(!mapmodels.inrange(e.attrs[0])) return false;
-    model *m = mapmodels[e.attrs[0]].m;
-    if(!m)
-    {
-        m = loadmodel(NULL, e.attrs[0]);
-        if(!m) return false;
-    }
+    model *m = loadmapmodel(e.attrs[0]);
+    if(!m) return false;
     if(mode&RAY_SHADOW)
     {
         if(!m->shadow || e.attrs[6]&MMT_NOSHADOW) return false;
