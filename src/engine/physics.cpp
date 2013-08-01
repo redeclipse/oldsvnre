@@ -164,7 +164,7 @@ static float disttoent(octaentities *oc, const vec &o, const vec &ray, float rad
     }
 
     entintersect(RAY_POLY, mapmodels, {
-        if((mode&RAY_ENTS)!=RAY_ENTS) mapmodelskip;
+        if((mode&RAY_ENTS)!=RAY_ENTS) mapmodelskip
         else if(!entities::cansee(n)) continue;
         if(!mmintersect(e, o, ray, radius, mode, f)) continue;
     });
@@ -868,7 +868,7 @@ bool mmcollide(physent *d, const vec &dir, float cutoff, octaentities &oc) // co
         float rejectradius = m->collisionbox(center, radius), scale = e.attrs[5]  ? max(e.attrs[5]/100.0f, 1e-3f) : 1;
         center.mul(scale);
         if(d->o.reject(vec(e.o).add(center), d->radius + rejectradius*scale)) continue;
-    
+
         radius.mul(scale);
         int yaw = e.attrs[1], pitch = e.attrs[2], roll = e.attrs[3];
         switch(d->collidetype)
