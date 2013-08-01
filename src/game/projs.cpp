@@ -702,7 +702,7 @@ namespace projs
         if(proj.mdl && *proj.mdl && ((m = loadmodel(proj.mdl)) != NULL))
         {
             vec center, radius;
-            m->boundbox(0, center, radius);
+            m->boundbox(center, radius);
             center.mul(size*proj.curscale);
             radius.mul(size*proj.curscale);
             rotatebb(center, radius, proj.yaw, proj.pitch, proj.roll);

@@ -664,6 +664,17 @@ extern void preloadmodel(const char *name);
 extern void flushpreloadedmodels(bool msg = true);
 extern void preloadusedmapmodels(bool msg = false, bool bih = false);
 
+static inline model *loadmapmodel(int n)
+{
+    extern vector<mapmodelinfo> mapmodels;
+    if(mapmodels.inrange(n))
+    {
+        model *m = mapmodels[n].m;
+        return m ? m : loadmodel(NULL, n);
+    }
+    return NULL;
+}
+
 // renderparticles
 extern void particleinit();
 extern void clearparticles();

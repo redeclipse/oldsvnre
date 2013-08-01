@@ -868,11 +868,15 @@ bool mmcollide(physent *d, const vec &dir, float cutoff, octaentities &oc) // co
     {
         extentity &e = *ents[oc.mapmodels[i]];
         mapmodelskip;
-        model *m = loadmodel(NULL, e.attrs[0]);
+        model *m = loadmapmodel(e.attrs[0]);
         if(!m || !m->collide) continue;
+
         vec center, radius;
-        m->collisionbox(0, center, radius);
-        if(e.attrs[5]) { float scale = max(e.attrs[5]/100.f, 1e-3f); center.mul(scale); radius.mul(scale); }
+        float rejectradius = m->collisionbox(center, radius), scale = e.attrs[5]  ? max(e.attrs[5]/100.0f, 1e-3f) : 1;
+        center.mul(scale);
+        if(d->o.reject(vec(e.o).add(center), d->radius + rejectradius*scale)) continue;
+    
+        radius.mul(scale);
         int yaw = e.attrs[1], pitch = e.attrs[2], roll = e.attrs[3];
         switch(d->collidetype)
         {
