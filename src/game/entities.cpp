@@ -408,9 +408,9 @@ namespace entities
     {
         ivec bo = vec(pos).sub(vec(xyrad, xyrad, zrad)).sub(1),
              br = vec(xyrad, xyrad, zrad).add(1).mul(2);
-        int diff = (bo.x^(bo.x+br.x)) | (bo.y^(bo.y+br.y)) | (bo.z^(bo.z+br.z)) | octaentsize,
+        int diff = (bo.x^br.x) | (bo.y^br.y) | (bo.z^br.z) | octaentsize,
             scale = worldscale-1;
-        if(diff&~((1<<scale)-1) || uint(bo.x|bo.y|bo.z|(bo.x+br.x)|(bo.y+br.y)|(bo.z+br.z)) >= uint(hdr.worldsize))
+        if(diff&~((1<<scale)-1) || uint(bo.x|bo.y|bo.z|br.x|br.y|br.z) >= uint(hdr.worldsize))
         {
             collateents(worldroot, ivec(0, 0, 0), 1<<scale, bo, br, pos, xyrad, zrad, alive, actitems);
             return;
