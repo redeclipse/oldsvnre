@@ -1482,11 +1482,11 @@ namespace physics
             gameent *e = (gameent *)o;
             if(e->wantshitbox())
             {
-                if(!d->o.reject(e->legs, d->radius+max(e->lrad.x, e->lrad.y)) && !ellipsecollide(d, dir, e->legs, vec(0, 0, 0), e->yaw, e->lrad.x, e->lrad.y, e->lrad.z, e->lrad.z))
+                if(!d->o.reject(e->legs, d->radius+max(e->lrad.x, e->lrad.y)) && ellipsecollide(d, dir, e->legs, vec(0, 0, 0), e->yaw, e->lrad.x, e->lrad.y, e->lrad.z, e->lrad.z))
                     hitflags |= HITFLAG_LEGS;
-                if(!d->o.reject(e->torso, d->radius+max(e->trad.x, e->trad.y)) && !ellipsecollide(d, dir, e->torso, vec(0, 0, 0), e->yaw, e->trad.x, e->trad.y, e->trad.z, e->trad.z))
+                if(!d->o.reject(e->torso, d->radius+max(e->trad.x, e->trad.y)) && ellipsecollide(d, dir, e->torso, vec(0, 0, 0), e->yaw, e->trad.x, e->trad.y, e->trad.z, e->trad.z))
                     hitflags |= HITFLAG_TORSO;
-                if(!d->o.reject(e->head, d->radius+max(e->hrad.x, e->hrad.y)) && !ellipsecollide(d, dir, e->head, vec(0, 0, 0), e->yaw, e->hrad.x, e->hrad.y, e->hrad.z, e->hrad.z))
+                if(!d->o.reject(e->head, d->radius+max(e->hrad.x, e->hrad.y)) && ellipsecollide(d, dir, e->head, vec(0, 0, 0), e->yaw, e->hrad.x, e->hrad.y, e->hrad.z, e->hrad.z))
                     hitflags |= HITFLAG_HEAD;
                 return hitflags != HITFLAG_NONE;
             }
