@@ -3419,7 +3419,7 @@ namespace server
                 if(!m_campaign(gamemode))
 #endif
                 {
-                    if(!firstblood && !m_duel(gamemode, mutators) && actor->state.aitype == AI_NONE && target->state.aitype < AI_START)
+                    if(!firstblood && !m_duel(gamemode, mutators) && ((actor->state.aitype == AI_NONE && target->state.aitype < AI_START) || (actor->state.aitype < AI_START && target->state.aitype == AI_NONE)))
                     {
                         firstblood = true;
                         style |= FRAG_FIRSTBLOOD;
@@ -3453,7 +3453,7 @@ namespace server
                             {
                                 style |= type;
                                 actor->state.rewards[0] |= type;
-                                pointvalue *= (G(multikillpoints) ? offset+1 : 1)*G(multikillbonus);
+                                pointvalue += (G(multikillbonus) ? offset+1 : 1)*G(multikillpoints);
                                 //loopv(actor->state.fragmillis) actor->state.fragmillis[i] = lastmillis;
                             }
                         }

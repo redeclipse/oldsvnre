@@ -460,8 +460,8 @@ GVAR(0, headshotpoints, 0, 1, VAR_MAX);
 
 GVAR(0, assistkilldelay, 0, 5000, VAR_MAX);
 GVAR(0, multikilldelay, 0, 5000, VAR_MAX);
-GVAR(0, multikillpoints, 0, 1, 1);
-GVAR(0, multikillbonus, 0, 1, VAR_MAX);
+GVAR(0, multikillpoints, 0, 1, VAR_MAX);
+GVAR(0, multikillbonus, 0, 0, 1); // if bonus is on, then points are multiplied by the current kill mutliplier (x2, x3, x4)
 GVAR(0, spreecount, 0, 5, VAR_MAX);
 GVAR(0, spreepoints, 0, 1, VAR_MAX);
 GVAR(0, spreebreaker, 0, 1, VAR_MAX);
