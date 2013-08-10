@@ -150,7 +150,7 @@ struct physent                                  // base entity type, can be affe
     vec abovehead(float offset = 1) const { return vec(o).add(vec(0, 0, aboveeye+offset)); }
     vec feetpos(float offset = 0) const { return vec(o).add(vec(0, 0, offset-height)); }
     vec headpos(float offset = 0) const { return vec(o).add(vec(0, 0, offset)); }
-    vec center() const { return vec(o).sub(vec(0, 0, height/2)); }
+    vec center() const { return vec(o).sub(vec(0, 0, height*0.5f)); }
 };
 
 enum
