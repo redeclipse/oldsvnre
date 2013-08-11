@@ -289,7 +289,7 @@ namespace aiman
                 loopv(clients) if(clients[i]->state.aitype < AI_START)
                 {
                     float dist = clients[i]->state.o.dist(sents[j].o);
-                    if(dist > G(enemyspawndistmax) || dist < G(enemyspawndistmin))
+                    if((G(enemyspawndistmax) > 0 && dist > G(enemyspawndistmax)) || (G(enemyspawndistmin) > 0 && dist < G(enemyspawndistmin)))
                     {
                         allow = false;
                         break;
@@ -299,11 +299,15 @@ namespace aiman
                 int count = 0, numenemies = 0;
                 loopvrev(clients) if(clients[i]->state.aitype >= AI_START)
                 {
-                    if(clients[i]->state.aientity == j && ++count > G(enemybalance))
+                    if(clients[i]->state.aientity == j)
                     {
-                        deleteai(clients[i]);
-                        count--;
-                        continue;
+                        count++;
+                        if(count > G(enemybalance))
+                        {
+                            deleteai(clients[i]);
+                            count--;
+                            continue;
+                        }
                     }
                     numenemies++;
                 }
