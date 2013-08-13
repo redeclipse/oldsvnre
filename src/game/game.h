@@ -73,7 +73,7 @@ enum { TELE_NOAFFIN = 0, TELE_MAX };
 
 struct enttypes
 {
-    int type,           priority, links,    radius, usetype,    numattrs,   modesattr,
+    int type,           priority, links,    radius, usetype,    numattrs,   modesattr,  idattr,
             canlink, reclink, canuse;
     bool    noisy,  syncs,  resyncs,    syncpos,    synckin;
     const char *name,           *attrs[11];
@@ -81,25 +81,25 @@ struct enttypes
 #ifdef GAMESERVER
 enttypes enttype[] = {
     {
-        NOTUSED,        -1,         0,      0,      EU_NONE,    0,          -1,
+        NOTUSED,        -1,         0,      0,      EU_NONE,    0,          -1,         -1,
             0, 0, 0,
             true,   false,  false,      false,      false,
                 "none",         { "" }
     },
     {
-        LIGHT,          1,          59,     0,      EU_NONE,    5,          -1,
+        LIGHT,          1,          59,     0,      EU_NONE,    5,          -1,         -1,
             (1<<LIGHTFX), (1<<LIGHTFX), 0,
             false,  false,  false,      false,      false,
                 "light",        { "radius", "red",      "green",    "blue",     "flare"  }
     },
     {
-        MAPMODEL,       1,          58,     0,      EU_NONE,    10,         -1,
+        MAPMODEL,       1,          58,     0,      EU_NONE,    10,         -1,         -1,
             (1<<TRIGGER), (1<<TRIGGER), 0,
             false,  false,  false,      false,      false,
                 "mapmodel",     { "type",   "yaw",      "pitch",    "roll",     "blend",    "scale",    "flags",    "colour",   "palette",  "palindex" }
     },
     {
-        PLAYERSTART,    1,          59,     0,      EU_NONE,    6,          3,
+        PLAYERSTART,    1,          59,     0,      EU_NONE,    6,          3,          5,
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             0,
@@ -107,13 +107,13 @@ enttypes enttype[] = {
                 "playerstart",  { "team",   "yaw",      "pitch",    "modes",    "muts",     "id" }
     },
     {
-        ENVMAP,         1,          0,      0,      EU_NONE,    3,          -1,
+        ENVMAP,         1,          0,      0,      EU_NONE,    3,          -1,         -1,
             0, 0, 0,
             false,  false,  false,      false,      false,
                 "envmap",       { "radius", "size", "blur" }
     },
     {
-        PARTICLES,      1,          59,     0,      EU_NONE,    11,         -1,
+        PARTICLES,      1,          59,     0,      EU_NONE,    11,         -1,         -1,
             (1<<TELEPORT)|(1<<TRIGGER)|(1<<PUSHER)|(1<<PLAYERSTART)|(1<<AFFINITY)|(1<<CHECKPOINT),
             (1<<TRIGGER)|(1<<PUSHER)|(1<<PLAYERSTART)|(1<<AFFINITY)|(1<<CHECKPOINT),
             0,
@@ -121,7 +121,7 @@ enttypes enttype[] = {
                 "particles",    { "type",   "a",        "b",        "c",        "d",        "e",        "f",        "g",        "i",        "j",        "k" }
     },
     {
-        MAPSOUND,       1,          58,     0,      EU_NONE,    5,          -1,
+        MAPSOUND,       1,          58,     0,      EU_NONE,    5,          -1,         -1,
             (1<<TELEPORT)|(1<<TRIGGER)|(1<<PUSHER)|(1<<PLAYERSTART)|(1<<AFFINITY)|(1<<CHECKPOINT),
             (1<<TRIGGER)|(1<<PUSHER)|(1<<PLAYERSTART)|(1<<AFFINITY)|(1<<CHECKPOINT),
             0,
@@ -129,7 +129,7 @@ enttypes enttype[] = {
                 "sound",        { "type",   "maxrad",   "minrad",   "volume",   "flags" }
     },
     {
-        LIGHTFX,        1,          1,      0,      EU_NONE,    5,          -1,
+        LIGHTFX,        1,          1,      0,      EU_NONE,    5,          -1,         -1,
             (1<<LIGHT)|(1<<TELEPORT)|(1<<TRIGGER)|(1<<PUSHER)|(1<<PLAYERSTART)|(1<<AFFINITY)|(1<<CHECKPOINT),
             (1<<LIGHT)|(1<<TRIGGER)|(1<<PUSHER)|(1<<PLAYERSTART)|(1<<AFFINITY)|(1<<CHECKPOINT),
             0,
@@ -137,20 +137,20 @@ enttypes enttype[] = {
                 "lightfx",      { "type",   "mod",      "min",      "max",      "flags" }
     },
     {
-        SUNLIGHT,       1,          160,    0,      EU_NONE,    7,          -1,
+        SUNLIGHT,       1,          160,    0,      EU_NONE,    7,          -1,         -1,
             0, 0, 0,
             false,  false,  false,      false,      false,
                 "sunlight",     { "yaw",    "pitch",    "red",      "green",    "blue",     "offset",   "flare" }
     },
     {
-        WEAPON,         2,          59,     24,     EU_ITEM,    5,          2,
+        WEAPON,         2,          59,     24,     EU_ITEM,    5,          2,          4,
             0, 0,
             (1<<ENT_PLAYER)|(1<<ENT_AI),
             false,  true,   true,      false,      false,
                 "weapon",       { "type",   "flags",    "modes",    "muts",     "id" }
     },
     {
-        TELEPORT,       1,          50,     12,     EU_AUTO,    9,          -1,
+        TELEPORT,       1,          50,     12,     EU_AUTO,    9,          -1,         -1,
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX)|(1<<TELEPORT),
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             (1<<ENT_PLAYER)|(1<<ENT_AI)|(1<<ENT_PROJ),
@@ -158,13 +158,13 @@ enttypes enttype[] = {
                 "teleport",     { "yaw",    "pitch",    "push",     "radius",   "colour",   "type",     "palette",  "palindex", "flags" }
     },
     {
-        ACTOR,          1,          59,     0,      EU_NONE,    10,         3,
+        ACTOR,          1,          59,     0,      EU_NONE,    10,         3,          5,
             (1<<AFFINITY), 0, 0,
             false,  true,   false,      true,       false,
                 "actor",        { "type",   "yaw",      "pitch",    "modes",    "muts",     "id",       "weap",     "health",   "speed",    "scale" }
     },
     {
-        TRIGGER,        1,          58,     16,     EU_AUTO,    7,          5,
+        TRIGGER,        1,          58,     16,     EU_AUTO,    7,          5,          0,
             (1<<MAPMODEL)|(1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             (1<<MAPMODEL)|(1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             (1<<ENT_PLAYER)|(1<<ENT_AI),
@@ -172,7 +172,7 @@ enttypes enttype[] = {
                 "trigger",      { "id",     "type",     "action",   "radius",   "state",    "modes",    "muts" }
     },
     {
-        PUSHER,         1,          58,     12,     EU_AUTO,    6,          -1,
+        PUSHER,         1,          58,     12,     EU_AUTO,    6,          -1,         -1,
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             (1<<ENT_PLAYER)|(1<<ENT_AI)|(1<<ENT_PROJ),
@@ -180,7 +180,7 @@ enttypes enttype[] = {
                 "pusher",       { "yaw",    "pitch",    "force",    "maxrad",   "minrad",   "type" }
     },
     {
-        AFFINITY,       1,          48,     32,     EU_NONE,    7,          3,
+        AFFINITY,       1,          48,     32,     EU_NONE,    7,          3,          5,
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             0,
@@ -188,7 +188,7 @@ enttypes enttype[] = {
                 "affinity",     { "team",   "yaw",      "pitch",    "modes",    "muts",     "id" }
     },
     {
-        CHECKPOINT,     1,          48,     16,     EU_AUTO,    7,          3,
+        CHECKPOINT,     1,          48,     16,     EU_AUTO,    7,          3,          5,
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             (1<<ENT_PLAYER)|(1<<ENT_AI),
@@ -197,14 +197,14 @@ enttypes enttype[] = {
     },
 #ifdef MEK
     {
-        HEALTH,         2,          59,     24,     EU_ITEM,    4,          1,
+        HEALTH,         2,          59,     24,     EU_ITEM,    4,          1,          3,
             0, 0,
             (1<<ENT_PLAYER)|(1<<ENT_AI),
             false,  true,   true,      false,      false,
                 "health",       { "type",   "modes",    "muts",     "id" }
     },
     {
-        ARMOUR,         2,          59,     24,     EU_ITEM,    4,          1,
+        ARMOUR,         2,          59,     24,     EU_ITEM,    4,          1,          3,
             0, 0,
             (1<<ENT_PLAYER)|(1<<ENT_AI),
             false,  true,   true,      false,      false,
@@ -212,13 +212,13 @@ enttypes enttype[] = {
     }
 #else
     {
-        DUMMY1,         1,          48,     0,      EU_NONE,    4,          -1,
+        DUMMY1,         1,          48,     0,      EU_NONE,    4,          -1,         -1,
             0, 0, 0,
             true,   false,  false,      false,      false,
                 "dummy1",       { "" }
     },
     {
-        DUMMY2,         0,          1,      16,     EU_NONE,    2,          -1,
+        DUMMY2,         0,          1,      16,     EU_NONE,    2,          -1,         -1,
             0, 0, 0,
             true,   false,  false,      false,      false,
                 "dummy2",     { "" }

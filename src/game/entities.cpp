@@ -1005,6 +1005,8 @@ namespace entities
                 break;
             default: break;
         }
+        if(enttype[e.type].idattr >= 0 && (e.attrs[enttype[e.type].idattr] < 0 || e.attrs[enttype[e.type].idattr] > TRIGGERIDS))
+            e.attrs[enttype[e.type].idattr] = 0;
     }
 
     const char *findname(int type)
