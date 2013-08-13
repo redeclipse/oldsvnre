@@ -80,8 +80,8 @@ namespace hud
         }
         else if(m_gauntlet(game::gamemode))
         {
-            if((a->cplaps && !b->cplaps) || (a->cplaps && b->cplaps && a->cplaps > b->cplaps)) return true;
-            if((b->cplaps && !a->cplaps) || (a->cplaps && b->cplaps && b->cplaps > a->cplaps)) return false;
+            if(a->cplaps > b->cplaps) return true;
+            if(b->cplaps > a->cplaps) return false;
         }
         if(a->points > b->points) return true;
         if(a->points < b->points) return false;
@@ -99,8 +99,8 @@ namespace hud
         else if(!y->team) return true;
         if(m_laptime(game::gamemode, game::mutators))
         {
-            if(x->total < y->total) return true;
-            if(x->total > y->total) return false;
+            if((x->total && !y->total) || (x->total && y->total && x->total < y->total)) return true;
+            if((y->total && !x->total) || (x->total && y->total && x->total > y->total)) return false;
         }
         else
         {
