@@ -118,7 +118,7 @@ too.
 * Stefan Norman and Peter McInerney
     - Master and Game server hosting
 
-== Contributors ==
+== Contributors and Supporters ==
 
 * Alex "ZeroKnight" George - Design, Testing and Support
 * Joseph "ballist1c" Calabria - Maps
@@ -137,9 +137,6 @@ too.
 * Riidom Li - Models
 * RaZgRiZ - Textures and Cubescript maintenance
 * Kirill "TristamK" Kolesnikov - Maps
-
-== Supporters ==
-
 * "w00p|dazza"
 * Corey "c0rdawg" Maher
 * Rob "Lloir" Shannon
@@ -166,3 +163,8 @@ too.
 * Joshua "JDWhyte" Dwight
 * "FaTony"
 * Adam "lycanfox" Hobson
+* Sébastien "sinma" Chauvel
+* Ludwig "Sniper-goth" Boscolo
+* "Boognish"
+* "bonifarz"
+* Viktor "Unnamed" Hahn
