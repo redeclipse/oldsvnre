@@ -755,8 +755,9 @@ extern void newentity(const vec &v, int type, const attrvector &attrs);
 enum { MN_BACK = 0, MN_INPUT, MN_MAX };
 
 // console
+#define MAXCONLINES 1000
 struct cline { char *cref; int type, reftime, outtime; };
-extern vector<cline> conlines;
+extern reversequeue<cline, MAXCONLINES> conlines;
 extern void conline(int type, const char *sf, int n);
 
 // rendergl
