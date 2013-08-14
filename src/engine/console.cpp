@@ -2,7 +2,8 @@
 
 #include "engine.h"
 
-vector<cline> conlines;
+reversequeue<cline, MAXCONLINES> conlines;
+
 int commandmillis = -1;
 string commandbuf;
 char *commandaction = NULL, *commandicon = NULL;
@@ -11,11 +12,11 @@ int commandflags = 0, commandpos = -1, commandcolour = 0;
 
 void conline(int type, const char *sf, int n)
 {
-    cline cl;
+    char *buf = conlines.length() > MAXCONLINES ? conlines.remove().cref : newstring("");
+    cline &cl = conlines.add();
     cl.type = type;
-    cl.cref = conlines.length() > MAXSTRLEN ? conlines.pop().cref : newstringbuf("");
+    cl.cref = buf;
     cl.reftime = cl.outtime = totalmillis;
-    conlines.insert(n, cl);
 
     int c = 0;
     #define addcref(d) { cl.cref[c] = d; c++; }
