@@ -594,6 +594,7 @@ int connectwithtimeout(ENetSocket sock, const char *hostname, ENetAddress &remot
 static ENetSocket mastersock = ENET_SOCKET_NULL;
 ENetAddress masteraddress = { ENET_HOST_ANY, ENET_PORT_ANY };
 static ENetAddress serveraddress = { ENET_HOST_ANY, ENET_PORT_ANY };
+static int masterconnecting = 0, masterconnected = 0;
 static vector<char> masterout, masterin;
 static int masteroutpos = 0, masterinpos = 0;
 
@@ -601,7 +602,7 @@ void disconnectmaster()
 {
     if(mastersock != ENET_SOCKET_NULL)
     {
-        server::disconnectedmaster();
+        server::masterdisconnected();
         enet_socket_destroy(mastersock);
         mastersock = ENET_SOCKET_NULL;
         if(servertype >= 2) conoutf("disconnected from master server");
@@ -613,6 +614,7 @@ void disconnectmaster()
 
     masteraddress.host = ENET_HOST_ANY;
     masteraddress.port = ENET_PORT_ANY;
+    masterconnecting = masterconnected = 0;
 }
 
 VARF(0, servermasterport, 1, MASTER_PORT, INT_MAX-1, disconnectmaster());
@@ -639,13 +641,14 @@ ENetSocket connectmaster(bool reuse)
         enet_socket_destroy(sock);
         sock = ENET_SOCKET_NULL;
     }
+    if(sock != ENET_SOCKET_NULL) enet_socket_set_option(sock, ENET_SOCKOPT_NONBLOCK, 1);
     if(sock == ENET_SOCKET_NULL || connectwithtimeout(sock, servermaster, masteraddress) < 0)
     {
         conoutf(sock==ENET_SOCKET_NULL ? "\frcould not open socket to connect to master server" : "\frcould not connect to master server");
         return ENET_SOCKET_NULL;
     }
 
-    enet_socket_set_option(sock, ENET_SOCKOPT_NONBLOCK, 1);
+    masterconnecting = totalmillis ? totalmillis : 1;
     if(reuse) mastersock = sock;
     return sock;
 }
@@ -660,6 +663,8 @@ bool requestmaster(const char *req)
     //    mastersock = connectmaster();
         if(mastersock == ENET_SOCKET_NULL) return false;
     //}
+    if(masterout.length() >= 4096) return false;
+
     masterout.put(req, strlen(req));
     return true;
 }
@@ -700,7 +705,8 @@ void processmasterinput()
 
 void flushmasteroutput()
 {
-    if(masterout.empty()) return;
+    if(masterconnecting && totalmillis - masterconnecting >= 60000) disconnectmaster();
+    if(masterout.empty() || !masterconnected) return;
 
     ENetBuffer buf;
     buf.data = &masterout[masteroutpos];
@@ -747,23 +753,25 @@ void sendqueryreply(ucharbuf &p)
 
 void checkserversockets()        // reply all server info requests
 {
-    static ENetSocketSet sockset;
+    static ENetSocketSet readset, writeset;
     ENetSocket maxsock = ENET_SOCKET_NULL;
-#define CHECKSOCKET(sock) \
+#define CHECKSOCKET(sock, write) \
     if(sock != ENET_SOCKET_NULL) \
     { \
         if(maxsock == ENET_SOCKET_NULL) \
         { \
-            ENET_SOCKETSET_EMPTY(sockset); \
+            ENET_SOCKETSET_EMPTY(readset); \
+            ENET_SOCKETSET_EMPTY(writeset); \
             maxsock = sock; \
         }  \
         else maxsock = max(maxsock, sock); \
-        ENET_SOCKETSET_ADD(sockset, sock); \
+        ENET_SOCKETSET_ADD(readset, sock); \
+        if(write) ENET_SOCKETSET_ADD(writeset, sock); \
     }
-    CHECKSOCKET(pongsock);
-    CHECKSOCKET(mastersock);
-    CHECKSOCKET(lansock);
-    if(maxsock == ENET_SOCKET_NULL || enet_socketset_select(maxsock, &sockset, NULL, 0) <= 0) return;
+    CHECKSOCKET(pongsock, false);
+    CHECKSOCKET(mastersock, true);
+    CHECKSOCKET(lansock, false);
+    if(maxsock == ENET_SOCKET_NULL || enet_socketset_select(maxsock, &readset, &writeset, 0) <= 0) return;
 
     if(serverhost)
     {
@@ -772,7 +780,7 @@ void checkserversockets()        // reply all server info requests
         loopi(2)
         {
             ENetSocket sock = i ? lansock : pongsock;
-            if(sock == ENET_SOCKET_NULL || !ENET_SOCKETSET_CHECK(sockset, sock)) continue;
+            if(sock == ENET_SOCKET_NULL || !ENET_SOCKETSET_CHECK(readset, sock)) continue;
 
             buf.data = pong;
             buf.dataLength = sizeof(pong);
@@ -783,7 +791,12 @@ void checkserversockets()        // reply all server info requests
             server::queryreply(req, p);
         }
     }
-    if(mastersock != ENET_SOCKET_NULL && ENET_SOCKETSET_CHECK(sockset, mastersock)) flushmasterinput();
+
+    if(mastersock != ENET_SOCKET_NULL)
+    {
+        if(!masterconnected && ENET_SOCKETSET_CHECK(writeset, mastersock)) { masterconnecting = 0; masterconnected = totalmillis ? totalmillis : 1; server::masterconnected(); }
+        if(ENET_SOCKETSET_CHECK(readset, mastersock)) flushmasterinput();
+    }
 }
 
 void serverslice(uint timeout)  // main server update, called from main loop in sp, or from below in dedicated server
