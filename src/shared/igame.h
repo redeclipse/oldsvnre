@@ -153,6 +153,7 @@ namespace server
     extern void changemap(const char *name = NULL, int mode = -1, int muts = -1);
     extern bool canload(const char *type);
     extern bool rewritecommand(ident *id, tagval *args, int numargs);
-    extern void disconnectedmaster();
     extern void processmasterinput(const char *cmd, int cmdlen, const char *args);
+    extern void masterconnected();
+    extern void masterdisconnected();
 }

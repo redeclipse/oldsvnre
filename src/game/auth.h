@@ -174,9 +174,8 @@ namespace auth
         return DISC_NONE;
     }
 
-    void authfailed(uint id)
+    void authfailed(clientinfo *ci)
     {
-        clientinfo *ci = findauth(id);
         if(!ci) return;
         ci->authreq = ci->authname[0] = 0;
         srvmsgftforce(ci->clientnum, CON_EVENT, "\foauthority request failed, please check your credentials");
@@ -187,6 +186,11 @@ namespace auth
             if(disc) { disconnect_client(ci->clientnum, disc); return; }
             connected(ci);
         }
+    }
+
+    void authfailed(uint id)
+    {
+        authfailed(findauth(id));
     }
 
     void authsucceeded(uint id, const char *name, const char *flags)
@@ -321,14 +325,34 @@ namespace auth
         }
         if(!quickcheck && totalmillis-lastactivity > 30*60*1000) regserver();
     }
-}
-
-void disconnectedmaster()
-{
-    auth::quickcheck = false;
+    
+    void masterconnected()
+    {
+    }
+    
+    void masterdisconnected()
+    {
+        quickcheck = false;
+        loopvrev(clients)
+        {
+            clientinfo *ci = clients[i];    
+            if(ci->authreq) authfailed(ci);
+        }
+    }
 }
 
 void processmasterinput(const char *cmd, int cmdlen, const char *args)
 {
     auth::processinput(cmd);
 }
+
+void masterconnected()
+{
+    auth::masterconnected();
+}
+
+void masterdisconnected()
+{
+    auth::masterdisconnected();
+} 
+
