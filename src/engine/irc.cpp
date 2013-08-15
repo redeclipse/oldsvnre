@@ -72,7 +72,8 @@ void ircestablish(ircnet *n)
         ircprintf(n, 4, NULL, "failed to bind connection socket: %s", n->ip);
         address.host = ENET_HOST_ANY;
     }
-    if(n->sock == ENET_SOCKET_NULL || connectwithtimeout(n->sock, n->serv, n->address) < 0)
+    if(n->sock != ENET_SOCKET_NULL) enet_socket_set_option(n->sock, ENET_SOCKOPT_NONBLOCK, 1);
+    if(n->sock == ENET_SOCKET_NULL || connectwithtimeout(n->sock, n->serv, n->address, true) < 0)
     {
         ircprintf(n, 4, NULL, n->sock == ENET_SOCKET_NULL ? "could not open socket to %s:[%d]" : "could not connect to %s:[%d]", n->serv, n->port);
         if(n->sock != ENET_SOCKET_NULL)

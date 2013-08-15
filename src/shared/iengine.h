@@ -411,7 +411,7 @@ extern bool hasnonlocalclients();
 extern bool haslocalclients();
 extern void sendqueryreply(ucharbuf &p);
 extern bool resolverwait(const char *name, ENetAddress *address);
-extern int connectwithtimeout(ENetSocket sock, const char *hostname, ENetAddress &address);
+extern int connectwithtimeout(ENetSocket sock, const char *hostname, ENetAddress &address, bool force = false);
 extern bool connectedmaster();
 extern ENetSocket connectmaster(bool reuse = true);
 extern void disconnectmaster();
