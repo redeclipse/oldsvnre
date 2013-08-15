@@ -12,7 +12,7 @@ int commandflags = 0, commandpos = -1, commandcolour = 0;
 
 void conline(int type, const char *sf, int n)
 {
-    char *buf = conlines.length() >= MAXCONLINES ? conlines.remove().cref : newstring("");
+    char *buf = conlines.length() >= MAXCONLINES ? conlines.remove().cref : newstringbuf("");
     cline &cl = conlines.add();
     cl.type = type;
     cl.cref = buf;
