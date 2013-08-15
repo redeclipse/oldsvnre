@@ -25,7 +25,7 @@ extern "C"
 
 #define ENET_VERSION_MAJOR 1
 #define ENET_VERSION_MINOR 3
-#define ENET_VERSION_PATCH 8
+#define ENET_VERSION_PATCH 9
 #define ENET_VERSION_CREATE(major, minor, patch) (((major)<<16) | ((minor)<<8) | (patch))
 #define ENET_VERSION_GET_MAJOR(version) (((version)>>16)&0xFF)
 #define ENET_VERSION_GET_MINOR(version) (((version)>>8)&0xFF)
@@ -60,7 +60,8 @@ typedef enum _ENetSocketOption
    ENET_SOCKOPT_SNDBUF    = 4,
    ENET_SOCKOPT_REUSEADDR = 5,
    ENET_SOCKOPT_RCVTIMEO  = 6,
-   ENET_SOCKOPT_SNDTIMEO  = 7
+   ENET_SOCKOPT_SNDTIMEO  = 7,
+   ENET_SOCKOPT_ERROR     = 8
 } ENetSocketOption;
 
 typedef enum _ENetSocketShutdown
@@ -491,6 +492,7 @@ ENET_API int        enet_socket_send (ENetSocket, const ENetAddress *, const ENe
 ENET_API int        enet_socket_receive (ENetSocket, ENetAddress *, ENetBuffer *, size_t);
 ENET_API int        enet_socket_wait (ENetSocket, enet_uint32 *, enet_uint32);
 ENET_API int        enet_socket_set_option (ENetSocket, ENetSocketOption, int);
+ENET_API int        enet_socket_get_option (ENetSocket, ENetSocketOption, int *);
 ENET_API int        enet_socket_shutdown (ENetSocket, ENetSocketShutdown);
 ENET_API void       enet_socket_destroy (ENetSocket);
 ENET_API int        enet_socketset_select (ENetSocket, ENetSocketSet *, ENetSocketSet *, enet_uint32);
