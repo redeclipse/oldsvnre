@@ -73,7 +73,7 @@ void ircestablish(ircnet *n)
         address.host = ENET_HOST_ANY;
     }
     if(n->sock != ENET_SOCKET_NULL) enet_socket_set_option(n->sock, ENET_SOCKOPT_NONBLOCK, 1);
-    if(n->sock == ENET_SOCKET_NULL || connectwithtimeout(n->sock, n->serv, n->address, true) < 0)
+    if(n->sock == ENET_SOCKET_NULL || enet_socket_connect(n->sock, &n->address) < 0)
     {
         ircprintf(n, 4, NULL, n->sock == ENET_SOCKET_NULL ? "could not open socket to %s:[%d]" : "could not connect to %s:[%d]", n->serv, n->port);
         if(n->sock != ENET_SOCKET_NULL)
@@ -84,7 +84,7 @@ void ircestablish(ircnet *n)
         n->state = IRC_DISC;
         return;
     }
-    n->state = IRC_ATTEMPT;
+    n->state = IRC_WAIT;
     ircprintf(n, 4, NULL, "connecting to %s:[%d]...", n->serv, n->port);
 }
 
@@ -679,7 +679,8 @@ void ircparse(ircnet *n)
 void ircdiscon(ircnet *n, const char *msg = NULL)
 {
     if(!n) return;
-    if(msg) ircprintf(n, 4, NULL, "disconnected from %s (%s:[%d]): %s", n->name, n->serv, n->port, msg);
+    if(n->state == IRC_WAIT) ircprintf(n, 4, NULL, "could not connect to %s:[%d]", n->serv, n->port);
+    else if(msg) ircprintf(n, 4, NULL, "disconnected from %s (%s:[%d]): %s", n->name, n->serv, n->port, msg);
     else ircprintf(n, 4, NULL, "disconnected from %s (%s:[%d])", n->name, n->serv, n->port);
     enet_socket_destroy(n->sock);
     n->state = IRC_DISC;
@@ -695,6 +696,46 @@ void irccleanup()
         ircnet *n = ircnets[i];
         ircsend(n, "QUIT :%s, %s", versionname, versionurl);
         ircdiscon(n, "shutdown");
+    }
+}
+
+bool ircaddsocks(ENetSocket &maxsock, ENetSocketSet &readset, ENetSocketSet &writeset)
+{
+    int numsocks = 0;
+    loopv(ircnets)
+    {
+        ircnet *n = ircnets[i];
+        if(n->sock != ENET_SOCKET_NULL && n->state == IRC_WAIT)
+        {
+            if(maxsock == ENET_SOCKET_NULL)
+            {
+                ENET_SOCKETSET_EMPTY(readset);
+                ENET_SOCKETSET_EMPTY(writeset);
+                maxsock = n->sock;
+            }
+            else maxsock = max(maxsock, n->sock); 
+            ENET_SOCKETSET_ADD(readset, n->sock);
+            ENET_SOCKETSET_ADD(writeset, n->sock);
+            numsocks++;
+        }
+    }        
+    return numsocks > 0;
+}
+
+void ircchecksocks(ENetSocketSet &readset, ENetSocketSet &writeset)
+{
+    loopv(ircnets)
+    {
+        ircnet *n = ircnets[i];
+        if(n->sock != ENET_SOCKET_NULL && n->state == IRC_WAIT)
+        {
+            if(ENET_SOCKETSET_CHECK(readset, n->sock) || ENET_SOCKETSET_CHECK(writeset, n->sock))
+            {
+                int error = 0;
+                if(enet_socket_get_option(n->sock, ENET_SOCKOPT_ERROR, &error) < 0 || error) ircdiscon(n);
+                else n->state = IRC_ATTEMPT;
+            }
+        }
     }
 }
 
@@ -725,6 +766,11 @@ void ircslice()
         {
             switch(n->state)
             {
+                case IRC_WAIT:
+                {
+                    if(!n->lastattempt || clocktime-n->lastattempt >= 60) ircdiscon(n);
+                    break;
+                }
                 case IRC_ATTEMPT:
                 {
                     if(*n->passkey) ircsend(n, "PASS %s", n->passkey);

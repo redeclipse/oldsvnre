@@ -54,7 +54,7 @@ struct ircchan
     }
 };
 enum { IRCT_NONE = 0, IRCT_CLIENT, IRCT_RELAY, IRCT_MAX };
-enum { IRC_NEW = 0, IRC_DISC, IRC_ATTEMPT, IRC_CONN, IRC_ONLINE, IRC_MAX };
+enum { IRC_NEW = 0, IRC_DISC, IRC_WAIT, IRC_ATTEMPT, IRC_CONN, IRC_ONLINE, IRC_MAX };
 struct ircnet
 {
     int type, state, port, lastattempt, lastactivity, lastping, inputcarry, inputlen;
@@ -99,6 +99,7 @@ extern bool ircjoin(ircnet *n, ircchan *c);
 extern bool ircenterchan(ircnet *n, const char *name);
 extern bool ircnewchan(int type, const char *name, const char *channel, const char *friendly = "", const char *passkey = "", int relay = 0);
 extern void ircparse(ircnet *n);
-extern void ircdiscon(ircnet *n);
 extern void irccleanup();
+extern bool ircaddsocks(ENetSocket &maxsock, ENetSocketSet &readset, ENetSocketSet &writeset);
+extern void ircchecksocks(ENetSocketSet &readset, ENetSocketSet &writeset);
 extern void ircslice();
