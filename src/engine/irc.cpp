@@ -194,8 +194,7 @@ int ircrecv(ircnet *n)
     if(!n) return -1;
     if(n->sock == ENET_SOCKET_NULL) return -2;
     int total = 0;
-    enet_uint32 events = ENET_SOCKET_WAIT_RECEIVE;
-    while(enet_socket_wait(n->sock, &events, 0) >= 0 && events)
+    for(;;)
     {
         ENetBuffer buf;
         buf.data = n->input + n->inputlen;
@@ -699,42 +698,60 @@ void irccleanup()
     }
 }
 
-bool ircaddsocks(ENetSocket &maxsock, ENetSocketSet &readset, ENetSocketSet &writeset)
+bool ircaddsockets(ENetSocket &maxsock, ENetSocketSet &readset, ENetSocketSet &writeset)
 {
     int numsocks = 0;
     loopv(ircnets)
     {
         ircnet *n = ircnets[i];
-        if(n->sock != ENET_SOCKET_NULL && n->state == IRC_WAIT)
+        if(n->sock != ENET_SOCKET_NULL && n->state > IRC_DISC) switch(n->state)
         {
-            if(maxsock == ENET_SOCKET_NULL)
-            {
-                ENET_SOCKETSET_EMPTY(readset);
-                ENET_SOCKETSET_EMPTY(writeset);
-                maxsock = n->sock;
-            }
-            else maxsock = max(maxsock, n->sock); 
-            ENET_SOCKETSET_ADD(readset, n->sock);
-            ENET_SOCKETSET_ADD(writeset, n->sock);
-            numsocks++;
+            case IRC_WAIT:
+                ENET_SOCKETSET_ADD(writeset, n->sock);
+                // fall-through
+            case IRC_ONLINE:
+            case IRC_CONN:
+                maxsock == ENET_SOCKET_NULL ? maxsock : max(maxsock, n->sock); 
+                ENET_SOCKETSET_ADD(readset, n->sock);
+                numsocks++;
+                break;
         }
     }        
     return numsocks > 0;
 }
 
-void ircchecksocks(ENetSocketSet &readset, ENetSocketSet &writeset)
+void ircchecksockets(ENetSocketSet &readset, ENetSocketSet &writeset)
 {
     loopv(ircnets)
     {
         ircnet *n = ircnets[i];
-        if(n->sock != ENET_SOCKET_NULL && n->state == IRC_WAIT)
+        if(n->sock != ENET_SOCKET_NULL && n->state > IRC_DISC) switch(n->state)
         {
-            if(ENET_SOCKETSET_CHECK(readset, n->sock) || ENET_SOCKETSET_CHECK(writeset, n->sock))
-            {
-                int error = 0;
-                if(enet_socket_get_option(n->sock, ENET_SOCKOPT_ERROR, &error) < 0 || error) ircdiscon(n);
-                else n->state = IRC_ATTEMPT;
-            }
+            case IRC_WAIT:
+                if(ENET_SOCKETSET_CHECK(readset, n->sock) || ENET_SOCKETSET_CHECK(writeset, n->sock))
+                {
+                    int error = 0;
+                    if(enet_socket_get_option(n->sock, ENET_SOCKOPT_ERROR, &error) < 0 || error) ircdiscon(n);
+                    else n->state = IRC_ATTEMPT;
+                }
+                break;
+            case IRC_ONLINE:
+            case IRC_CONN:
+                if(ENET_SOCKETSET_CHECK(readset, n->sock)) switch(ircrecv(n))
+                {
+                    case -3: ircdiscon(n, "read error"); break;
+                    case -2: ircdiscon(n, "connection reset"); break;
+                    case -1: ircdiscon(n, "invalid connection"); break;
+                    case 0: break;
+                    default:
+                    {
+                        ircparse(n);
+                        n->lastactivity = clocktime;
+                        n->lastping = 0;
+                        break;
+                    }
+                }
+                break;
         }
     }
 }
@@ -809,20 +826,6 @@ void ircslice()
                     {
                         if(!n->lastping) ircsend(n, "PING %d", clocktime);
                         else if(clocktime-n->lastping >= 120) ircdiscon(n, "connection timed out");
-                    }
-                    else switch(ircrecv(n))
-                    {
-                        case -3: ircdiscon(n, "read error"); break;
-                        case -2: ircdiscon(n, "connection reset"); break;
-                        case -1: ircdiscon(n, "invalid connection"); break;
-                        case 0: break;
-                        default:
-                        {
-                            ircparse(n);
-                            n->lastactivity = clocktime;
-                            n->lastping = 0;
-                            break;
-                        }
                     }
                     break;
                 }
