@@ -184,7 +184,7 @@ bool resolverwait(const char *name, ENetAddress *address)
 
 #define CONNLIMIT 20000
 
-int connectwithtimeout(ENetSocket sock, const char *hostname, ENetAddress &address)
+int connectwithtimeout(ENetSocket sock, const char *hostname, const ENetAddress &address)
 {
     defformatstring(text)("connecting to %s:[%d]...", hostname != NULL ? hostname : "local server", address.port);
     progress(0, text);
@@ -212,7 +212,6 @@ int connectwithtimeout(ENetSocket sock, const char *hostname, ENetAddress &addre
         if(interceptkey(SDLK_ESCAPE)) break;
     }
 
-    enet_socket_destroy(sock);
     return -1;
 }
 

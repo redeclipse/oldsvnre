@@ -583,11 +583,9 @@ bool resolverwait(const char *name, ENetAddress *address)
     return enet_address_set_host(address, name) >= 0;
 }
 
-int connectwithtimeout(ENetSocket sock, const char *hostname, ENetAddress &remoteaddress)
+int connectwithtimeout(ENetSocket sock, const char *hostname, const ENetAddress &remoteaddress)
 {
-    int result = enet_socket_connect(sock, &remoteaddress);
-    if(result < 0) enet_socket_destroy(sock);
-    return result;
+    return enet_socket_connect(sock, &remoteaddress);
 }
 #endif
 
@@ -624,7 +622,6 @@ ENetSocket connectmaster(bool reuse)
 {
     if(reuse && mastersock != ENET_SOCKET_NULL) return mastersock;
     if(!servermaster[0]) return ENET_SOCKET_NULL;
-
     if(masteraddress.host == ENET_HOST_ANY)
     {
         if(servertype >= 2) conoutf("\falooking up %s:[%d]...", servermaster, servermasterport);
@@ -641,23 +638,19 @@ ENetSocket connectmaster(bool reuse)
         conoutf("\frcould not open master server socket");
         return ENET_SOCKET_NULL;
     }
-    if(reuse)
-    {
-        if(serveraddress.host == ENET_HOST_ANY || !enet_socket_bind(sock, &serveraddress))
-        {
-            enet_socket_set_option(sock, ENET_SOCKOPT_NONBLOCK, 1);
-            if(!enet_socket_connect(sock, &masteraddress))
-            {
-                masterconnecting = totalmillis ? totalmillis : 1;
-                mastersock = sock;
-                return sock;
-            }
-        }
-    }
-    else if(!connectwithtimeout(sock, servermaster, masteraddress))
+    if(!reuse || serveraddress.host == ENET_HOST_ANY || !enet_socket_bind(sock, &serveraddress))
     {
         enet_socket_set_option(sock, ENET_SOCKOPT_NONBLOCK, 1);
-        return sock;
+        if(!reuse) 
+        {
+            if(!connectwithtimeout(sock, servermaster, masteraddress)) return sock;
+        }
+        else if(!enet_socket_connect(sock, &masteraddress))
+        {
+            masterconnecting = totalmillis ? totalmillis : 1;
+            mastersock = sock;
+            return sock;
+        }
     }
     enet_socket_destroy(sock);
     conoutf("\frcould not connect to master server");
