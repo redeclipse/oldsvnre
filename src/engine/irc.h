@@ -100,6 +100,6 @@ extern bool ircenterchan(ircnet *n, const char *name);
 extern bool ircnewchan(int type, const char *name, const char *channel, const char *friendly = "", const char *passkey = "", int relay = 0);
 extern void ircparse(ircnet *n);
 extern void irccleanup();
-extern bool ircaddsocks(ENetSocket &maxsock, ENetSocketSet &readset, ENetSocketSet &writeset);
-extern void ircchecksocks(ENetSocketSet &readset, ENetSocketSet &writeset);
+extern bool ircaddsockets(ENetSocket &maxsock, ENetSocketSet &readset, ENetSocketSet &writeset);
+extern void ircchecksockets(ENetSocketSet &readset, ENetSocketSet &writeset);
 extern void ircslice();

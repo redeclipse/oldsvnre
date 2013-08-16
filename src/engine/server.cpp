@@ -769,24 +769,20 @@ void sendqueryreply(ucharbuf &p)
 void checkserversockets()        // reply all server info requests
 {
     static ENetSocketSet readset, writeset;
+    ENET_SOCKETSET_EMPTY(readset);
+    ENET_SOCKETSET_EMPTY(writeset);
     ENetSocket maxsock = ENET_SOCKET_NULL;
-#define CHECKSOCKET(sock, write) \
+#define ADDSOCKET(sock, write) \
     if(sock != ENET_SOCKET_NULL) \
     { \
-        if(maxsock == ENET_SOCKET_NULL) \
-        { \
-            ENET_SOCKETSET_EMPTY(readset); \
-            ENET_SOCKETSET_EMPTY(writeset); \
-            maxsock = sock; \
-        }  \
-        else maxsock = max(maxsock, sock); \
+        maxsock = maxsock == ENET_SOCKET_NULL ? sock : max(maxsock, sock); \
         ENET_SOCKETSET_ADD(readset, sock); \
         if(write) ENET_SOCKETSET_ADD(writeset, sock); \
     }
-    CHECKSOCKET(pongsock, false);
-    CHECKSOCKET(mastersock, true);
-    CHECKSOCKET(lansock, false);
-    bool ircsocks = ircaddsocks(maxsock, readset, writeset);
+    ADDSOCKET(pongsock, false);
+    ADDSOCKET(mastersock, true);
+    ADDSOCKET(lansock, false);
+    bool ircsocks = ircaddsockets(maxsock, readset, writeset);
     if(maxsock == ENET_SOCKET_NULL || enet_socketset_select(maxsock, &readset, &writeset, 0) <= 0) return;
 
     if(serverhost)
@@ -827,7 +823,7 @@ void checkserversockets()        // reply all server info requests
         if(mastersock != ENET_SOCKET_NULL && ENET_SOCKETSET_CHECK(readset, mastersock)) flushmasterinput();
     }
 
-    if(ircsocks) ircchecksocks(readset, writeset);
+    if(ircsocks) ircchecksockets(readset, writeset);
 }
 
 void serverslice(uint timeout)  // main server update, called from main loop in sp, or from below in dedicated server
