@@ -1671,12 +1671,6 @@ namespace entities
     extern void render();
     extern void update();
 }
-#elif defined(GAMESERVER)
-namespace client
-{
-    extern const char *getname();
-    extern bool sendcmd(int nargs, const char *cmd, const char *arg);
-}
 #endif
 #include "capture.h"
 #include "defend.h"
