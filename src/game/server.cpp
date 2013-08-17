@@ -4326,7 +4326,7 @@ namespace server
                 if(smode) smode->leavegame(ci, true);
                 mutate(smuts, mut->leavegame(ci, true));
                 ci->state.timeplayed += lastmillis-ci->state.lasttimeplayed;
-                if(m_teamscore(gamemode) && m_team(gamemode, mutators) && G(teamkillrestore) && !interm && ci->state.aitype == AI_NONE)
+                if(m_teamscore(gamemode) && m_team(gamemode, mutators) && !m_nopoints(gamemode, mutators) && G(teamkillrestore) && !interm && ci->state.aitype == AI_NONE)
                 {
                     int restorepoints[T_MAX] = {0};
                     loopv(ci->state.teamkills) restorepoints[ci->state.teamkills[i].team] += ci->state.teamkills[i].points;
@@ -4658,7 +4658,7 @@ namespace server
         ci->state.lasttimeplayed = lastmillis;
 
         sendwelcome(ci);
-        if(m_teamscore(gamemode) && m_team(gamemode, mutators) && G(teamkillrestore) && !interm && ci->state.aitype == AI_NONE)
+        if(m_teamscore(gamemode) && m_team(gamemode, mutators) && !m_nopoints(gamemode, mutators) && G(teamkillrestore) && !interm && ci->state.aitype == AI_NONE)
         {
             int restorepoints[T_MAX] = {0};
             loopv(ci->state.teamkills) restorepoints[ci->state.teamkills[i].team] += ci->state.teamkills[i].points;
