@@ -12,7 +12,7 @@ struct captureservmode : capturestate, servmode
 
     void dropaffinity(clientinfo *ci, const vec &o, const vec &inertia = vec(0, 0, 0), int target = -1)
     {
-        if(!hasflaginfo || ci->state.aitype >= AI_START) return;
+        if(!canplay(hasflaginfo) || ci->state.aitype >= AI_START) return;
         int numflags = 0, iterflags = 0;
         loopv(flags) if(flags[i].owner == ci->clientnum) numflags++;
         vec dir = inertia, olddir = dir, v = o; v.z += 1;
@@ -39,7 +39,7 @@ struct captureservmode : capturestate, servmode
 
     void leavegame(clientinfo *ci, bool disconnecting = false)
     {
-        if(!hasflaginfo) return;
+        if(!canplay(hasflaginfo)) return;
         dropaffinity(ci, ci->state.o, vec(ci->state.vel).add(ci->state.falling));
     }
 
@@ -50,7 +50,7 @@ struct captureservmode : capturestate, servmode
 
     void died(clientinfo *ci, clientinfo *actor)
     {
-        if(!hasflaginfo) return;
+        if(!canplay(hasflaginfo)) return;
         dropaffinity(ci, ci->state.o, vec(ci->state.vel).add(ci->state.falling));
     }
 
@@ -63,7 +63,7 @@ struct captureservmode : capturestate, servmode
 
     void moved(clientinfo *ci, const vec &oldpos, const vec &newpos)
     {
-        if(!hasflaginfo || ci->state.aitype >= AI_START) return;
+        if(!canplay(hasflaginfo) || ci->state.aitype >= AI_START) return;
         if(G(capturethreshold) > 0 && oldpos.dist(newpos) >= G(capturethreshold))
             dropaffinity(ci, oldpos, vec(ci->state.vel).add(ci->state.falling));
         if(!m_gsp3(gamemode, mutators)) loopv(flags) if(flags[i].owner == ci->clientnum)
@@ -94,7 +94,7 @@ struct captureservmode : capturestate, servmode
 
     void takeaffinity(clientinfo *ci, int i)
     {
-        if(!hasflaginfo || !flags.inrange(i) || ci->state.state!=CS_ALIVE || !ci->team || ci->state.aitype >= AI_START) return;
+        if(!canplay(hasflaginfo) || !flags.inrange(i) || ci->state.state!=CS_ALIVE || !ci->team || ci->state.aitype >= AI_START) return;
         flag &f = flags[i];
         if(f.owner >= 0 || (f.team == ci->team && (m_gsp2(gamemode, mutators) || (m_gsp1(gamemode, mutators) && !f.droptime)))) return;
         if(f.lastowner == ci->clientnum && f.droptime && (G(capturepickupdelay) < 0 || lastmillis-f.droptime <= G(capturepickupdelay))) return;
@@ -114,7 +114,7 @@ struct captureservmode : capturestate, servmode
 
     void resetaffinity(clientinfo *ci, int i)
     {
-        if(!hasflaginfo || !flags.inrange(i) || ci->state.ownernum >= 0) return;
+        if(!canplay(hasflaginfo) || !flags.inrange(i) || ci->state.ownernum >= 0) return;
         flag &f = flags[i];
         if(f.owner >= 0 || !f.droptime || f.votes.find(ci->clientnum) >= 0) return;
         f.votes.add(ci->clientnum);
@@ -127,7 +127,7 @@ struct captureservmode : capturestate, servmode
 
     void layout()
     {
-        if(!hasflaginfo) return;
+        if(!canplay(hasflaginfo)) return;
         loopv(flags) if(flags[i].owner >= 0 || flags[i].droptime)
         {
             capturestate::returnaffinity(i, gamemillis);
@@ -137,7 +137,7 @@ struct captureservmode : capturestate, servmode
 
     void update()
     {
-        if(!hasflaginfo) return;
+        if(!canplay(hasflaginfo)) return;
         loopv(flags)
         {
             flag &f = flags[i];
@@ -208,7 +208,7 @@ struct captureservmode : capturestate, servmode
 
     void regen(clientinfo *ci, int &total, int &amt, int &delay)
     {
-        if(!hasflaginfo || !G(captureregenbuff) || !ci->state.lastbuff) return;
+        if(!canplay(hasflaginfo) || !G(captureregenbuff) || !ci->state.lastbuff) return;
         if(G(maxhealth)) total = max(m_maxhealth(gamemode, mutators, ci->state.model), total);
         if(ci->state.lastregen && G(captureregendelay)) delay = G(captureregendelay);
         if(G(captureregenextra)) amt += G(captureregenextra);
@@ -216,7 +216,7 @@ struct captureservmode : capturestate, servmode
 
     void checkclient(clientinfo *ci)
     {
-        if(!hasflaginfo || ci->state.state != CS_ALIVE || m_insta(gamemode, mutators)) return;
+        if(!canplay(hasflaginfo) || ci->state.state != CS_ALIVE || m_insta(gamemode, mutators)) return;
         #define capturebuffx(a) (G(capturebuffing)&a && owner && owner->team == ci->team && ci->state.o.dist(owner->state.o) <= G(capturebuffarea))
         #define capturebuff1    (G(capturebuffing)&1 && f.team == ci->team && (owner ? (owner->clientnum == ci->clientnum || capturebuffx(4)): (!f.droptime || m_gsp2(gamemode, mutators)) && ci->state.o.dist(f.droptime ? f.droploc : f.spawnloc) <= G(capturebuffarea)))
         #define capturebuff2    (G(capturebuffing)&2 && f.team != ci->team && owner && (owner->clientnum == ci->clientnum || capturebuffx(8)))

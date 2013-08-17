@@ -154,37 +154,37 @@ struct defendservmode : defendstate, servmode
 
     void entergame(clientinfo *ci)
     {
-        if(!hasflaginfo || ci->state.state!=CS_ALIVE || ci->state.aitype >= AI_START) return;
+        if(!canplay(hasflaginfo) || ci->state.state!=CS_ALIVE || ci->state.aitype >= AI_START) return;
         enteraffinity(ci->team, ci->state.o);
     }
 
     void spawned(clientinfo *ci)
     {
-        if(!hasflaginfo || ci->state.aitype >= AI_START) return;
+        if(!canplay(hasflaginfo) || ci->state.aitype >= AI_START) return;
         enteraffinity(ci->team, ci->state.o);
     }
 
     void leavegame(clientinfo *ci, bool disconnecting = false)
     {
-        if(!hasflaginfo || ci->state.state!=CS_ALIVE || ci->state.aitype >= AI_START) return;
+        if(!canplay(hasflaginfo) || ci->state.state!=CS_ALIVE || ci->state.aitype >= AI_START) return;
         leaveaffinity(ci->team, ci->state.o);
     }
 
     void died(clientinfo *ci, clientinfo *actor)
     {
-        if(!hasflaginfo || ci->state.aitype >= AI_START) return;
+        if(!canplay(hasflaginfo) || ci->state.aitype >= AI_START) return;
         leaveaffinity(ci->team, ci->state.o);
     }
 
     void moved(clientinfo *ci, const vec &oldpos, const vec &newpos)
     {
-        if(!hasflaginfo || ci->state.aitype >= AI_START) return;
+        if(!canplay(hasflaginfo) || ci->state.aitype >= AI_START) return;
         moveaffinity(ci->team, oldpos, newpos);
     }
 
     void regen(clientinfo *ci, int &total, int &amt, int &delay)
     {
-        if(!hasflaginfo || !G(defendregenbuff) || !ci->state.lastbuff) return;
+        if(!canplay(hasflaginfo) || !G(defendregenbuff) || !ci->state.lastbuff) return;
         if(G(maxhealth)) total = max(m_maxhealth(gamemode, mutators, ci->state.model), total);
         if(ci->state.lastregen && G(defendregendelay)) delay = G(defendregendelay);
         if(G(defendregenextra)) amt += G(defendregenextra);
@@ -192,7 +192,7 @@ struct defendservmode : defendstate, servmode
 
     void checkclient(clientinfo *ci)
     {
-        if(!hasflaginfo || ci->state.state != CS_ALIVE || m_insta(gamemode, mutators)) return;
+        if(!canplay(hasflaginfo) || ci->state.state != CS_ALIVE || m_insta(gamemode, mutators)) return;
         #define defendbuff4 (G(defendbuffing)&4 && b.occupied(defendinstant, defendcount) >= G(defendbuffoccupy))
         #define defendbuff1 (G(defendbuffing)&1 && b.owner == ci->team && (!b.enemy || defendbuff4))
         #define defendbuff2 (G(defendbuffing)&2 && b.owner == T_NEUTRAL && (b.enemy == ci->team || defendbuff4))
