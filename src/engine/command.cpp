@@ -675,11 +675,15 @@ const char *getalias(const char *name)
 ICOMMAND(0, getalias, "s", (char *s), result(getalias(s)));
 
 #ifndef STANDALONE
-#define WORLDVAR \
-    if(!(identflags&IDF_WORLD) && !editmode && id->flags&IDF_WORLD && !(id->flags&IDF_REWRITE)) \
+#define CHECKVAR(argstr) \
+    if(!versioning) \
     { \
-        debugcode("\frcannot set world variable %s outside editmode", id->name); \
-        return; \
+        if(!(identflags&IDF_WORLD) && !editmode && id->flags&IDF_WORLD && !(id->flags&IDF_REWRITE)) \
+        { \
+            debugcode("\frcannot set world variable %s outside editmode", id->name); \
+            return; \
+        } \
+        if(id->flags&IDF_CLIENT && client::sendcmd(2, id->name, argstr)) return; \
     }
 #endif
 
@@ -689,7 +693,7 @@ void setvarchecked(ident *id, int val)
     else
     {
 #ifndef STANDALONE
-        WORLDVAR
+        CHECKVAR(intstr(val))
 #endif
         if(val<id->minval || val>id->maxval)
         {
@@ -720,7 +724,7 @@ void setfvarchecked(ident *id, float val)
     else
     {
 #ifndef STANDALONE
-        WORLDVAR
+        CHECKVAR(floatstr(val))
 #endif
         if(val<id->minvalf || val>id->maxvalf)
         {
@@ -747,7 +751,7 @@ void setsvarchecked(ident *id, const char *val)
     else
     {
 #ifndef STANDALONE
-        WORLDVAR
+        CHECKVAR(val)
 #endif
         delete[] *id->storage.s;
         *id->storage.s = newstring(val);
@@ -2915,7 +2919,7 @@ ICOMMAND(0, loopfiles, "rsse", (ident *id, char *dir, char *ext, uint *body),
 //        bool redundant = false;
 //        loopj(i) if(!strcmp(files[j], file)) { redundant = true; break; }
 //        if(redundant) delete[] files.removeunordered(i);
-//    } 
+//    }
     loopv(files)
     {
         char *file = files[i];
@@ -2937,7 +2941,7 @@ ICOMMAND(0, loopfiles, "rsse", (ident *id, char *dir, char *ext, uint *body),
     if(files.length()) poparg(*id);
 });
 
-ICOMMAND(0, findfile, "s", (char *name), intret(findfile(name, "e") ? 1 : 0)); 
+ICOMMAND(0, findfile, "s", (char *name), intret(findfile(name, "e") ? 1 : 0));
 
 struct sortitem
 {
