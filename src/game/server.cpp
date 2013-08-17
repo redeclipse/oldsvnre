@@ -4280,9 +4280,9 @@ namespace server
         }
         if(numclients())
         {
-            if(canplay(paused)) gamemillis += curtime;
+            if(canplay(!paused)) gamemillis += curtime;
             if(m_demo(gamemode)) readdemo();
-            else if(canplay(paused))
+            else if(canplay(!paused))
             {
                 processevents();
                 checkents();
