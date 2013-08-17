@@ -360,28 +360,32 @@ namespace physics
     float movevelocity(physent *d, bool floating)
     {
         physent *pl = d->type == ENT_CAMERA ? game::player1 : d;
-        float vel = pl->speed*pl->speedscale;
+        float vel = pl->speed;
         if(floating) vel *= floatspeed/100.0f;
-        else if(gameent::is(pl))
+        else
         {
-            gameent *e = (gameent *)pl;
-            vel *= movespeed/100.f*(1.f-clamp(e->stunned(lastmillis), 0.f, 1.f));
-            if((!e->airmillis && !sliding(e) && iscrouching(e)) || (e == game::player1 && game::inzoom()))
-                vel *= movecrawl;
-            if(e->move >= 0) vel *= e->strafe ? movestrafe : movestraight;
-            switch(e->physstate)
+            vel *= pl->speedscale;
+            if(gameent::is(pl))
             {
-                case PHYS_FALL: if(PHYS(gravity) > 0) vel *= moveinair; break;
-                case PHYS_STEP_DOWN: vel *= movestepdown; break;
-                case PHYS_STEP_UP: vel *= movestepup; break;
-                default: break;
-            }
-            if(pacing(e, false)) vel *= movepacing;
-            if(jetpack(e)) vel *= movejet;
-            if(carryaffinity(e))
-            {
-                if(m_capture(game::gamemode)) vel *= capturecarryspeed;
-                else if(m_bomber(game::gamemode)) vel *= bombercarryspeed;
+                gameent *e = (gameent *)pl;
+                vel *= movespeed/100.f*(1.f-clamp(e->stunned(lastmillis), 0.f, 1.f));
+                if((!e->airmillis && !sliding(e) && iscrouching(e)) || (e == game::player1 && game::inzoom()))
+                    vel *= movecrawl;
+                if(e->move >= 0) vel *= e->strafe ? movestrafe : movestraight;
+                switch(e->physstate)
+                {
+                    case PHYS_FALL: if(PHYS(gravity) > 0) vel *= moveinair; break;
+                    case PHYS_STEP_DOWN: vel *= movestepdown; break;
+                    case PHYS_STEP_UP: vel *= movestepup; break;
+                    default: break;
+                }
+                if(pacing(e, false)) vel *= movepacing;
+                if(jetpack(e)) vel *= movejet;
+                if(carryaffinity(e))
+                {
+                    if(m_capture(game::gamemode)) vel *= capturecarryspeed;
+                    else if(m_bomber(game::gamemode)) vel *= bombercarryspeed;
+                }
             }
         }
         return vel;
