@@ -80,8 +80,7 @@ struct defendservmode : defendstate, servmode
             {
                 if(!m_gsp2(gamemode, mutators) || b.owners)
                 {
-                    b.securetime += t;
-                    int score = b.securetime/G(defendinterval) - (b.securetime-t)/G(defendinterval);
+                    int score = G(defendpoints)*t;
                     if(score) addscore(i, b.owner, score);
                 }
                 sendaffinity(i);

@@ -272,8 +272,8 @@ namespace capture
                     part_icon(lac, textureload(hud::progresstex, 3), 3, 1, 0, 0, 1, pcolour, (lastmillis%1000)/1000.f, 0.1f);
                     part_icon(lac, textureload(hud::progresstex, 3), 2, 0.25f, 0, 0, 1, pcolour);
                     part_icon(lac, textureload(hud::progresstex, 3), 2, 1, 0, 0, 1, pcolour, 0, wait);
-                    lac.z += 0.5f;
-                    defformatstring(str)("<huge>%d%%", int(wait*100.f)); part_textcopy(lac, str, PART_TEXT, 1, 0xFFFFFF, 2, 1);
+                    //lac.z += 0.5f;
+                    //defformatstring(str)("<huge>%d%%", int(wait*100.f)); part_textcopy(lac, str, PART_TEXT, 1, 0xFFFFFF, 2, 1);
                     lac.z += 2.5f;
                 }
             }
@@ -291,8 +291,8 @@ namespace capture
                 part_icon(loc, textureload(hud::progresstex, 3), 3, 1, 0, 0, 1, pcolour, (lastmillis%1000)/1000.f, 0.1f);
                 part_icon(loc, textureload(hud::progresstex, 3), 2, 0.25f, 0, 0, 1, pcolour);
                 part_icon(loc, textureload(hud::progresstex, 3), 2, 1, 0, 0, 1, pcolour, 0, wait);
-                loc.z += 1.f;
-                defformatstring(str)("<huge>%d%%", int(wait*100.f)); part_textcopy(loc, str, PART_TEXT, 1, 0xFFFFFF, 2, 1);
+                //loc.z += 1.f;
+                //defformatstring(str)("<huge>%d%%", int(wait*100.f)); part_textcopy(loc, str, PART_TEXT, 1, 0xFFFFFF, 2, 1);
                 loc.z += 1.5f;
             }
         }
