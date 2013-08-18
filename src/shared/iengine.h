@@ -409,6 +409,7 @@ extern void disconnect_client(int n, int reason);
 extern void kicknonlocalclients(int reason);
 extern bool hasnonlocalclients();
 extern bool haslocalclients();
+extern void limitdupclients();
 extern void sendqueryreply(ucharbuf &p);
 extern bool resolverwait(const char *name, ENetAddress *address);
 extern int connectwithtimeout(ENetSocket sock, const char *hostname, const ENetAddress &address);
