@@ -384,12 +384,6 @@ namespace server
     stream *mapdata[SENDMAP_MAX] = { NULL };
     vector<clientinfo *> clients, connects;
 
-    bool canplay(bool chk = true)
-    {
-        if(!chk || !hasgameinfo || gamewait || !timeremaining || interm) return false;
-        return true;
-    }
-
     struct demofile
     {
         string info;
@@ -409,6 +403,13 @@ namespace server
         triggergrp() { reset(); }
         void reset(int n = 0) { id = n; ents.shrink(0); }
     } triggers[TRIGGERIDS+1];
+
+    bool canplay(bool chk = true)
+    {
+        if(!demoplayback)
+            if(!chk || !hasgameinfo || gamewait || !timeremaining || interm) return false;
+        return true;
+    }
 
     struct servmode
     {
