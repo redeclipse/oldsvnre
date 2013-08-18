@@ -740,7 +740,7 @@ extern void replacetexcube(cube &c, int oldtex, int newtex);
 extern void loadsky(char *basename);
 
 // main
-extern void setcaption(const char *text);
+extern void setcaption(const char *text = "", const char *text2 = "");
 extern int grabinput, colorpos, curfps, bestfps, worstfps, bestfpsdiff, worstfpsdiff, maxfps;
 
 // editing
@@ -809,7 +809,7 @@ extern uchar shouldsaveblendmap();
 namespace recorder
 {
     extern void stop();
-    extern void capture();
+    extern void capture(bool overlay = true);
     extern void cleanup();
 }
 #endif // STANDALONE
