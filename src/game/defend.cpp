@@ -90,13 +90,7 @@ namespace defend
                 part_icon(above, textureload(hud::progresstex, 3), 2, 1, 0, 0, 1, TEAM(b.enemy, colour), 0, occupy);
                 part_icon(above, textureload(hud::progresstex, 3), 2, 0.25f, 0, 0, 1, TEAM(b.owner, colour), occupy, 1-occupy);
             }
-            else
-            {
-                part_icon(above, textureload(hud::progresstex, 3), 3, 1, 0, 0, 1, TEAM(b.owner, colour));
-                part_icon(above, textureload(hud::progresstex, 3), 2, 1, 0, 0, 1, TEAM(b.owner, colour));
-            }
-            //above.z += 1.f;
-            //defformatstring(str)("<huge>%d%%", int(occupy*100.f)); part_textcopy(above, str);
+            else part_icon(above, textureload(hud::teamtexname(b.owner), 3), 3, 1, 0, 0, 1, TEAM(b.owner, colour));
         }
     }
 
