@@ -747,8 +747,8 @@ namespace game
             case 1: // teams
             {
                 int team = index;
-                if(team < 0 || team >= T_MAX+T_TOTAL || (!m_team(gamemode, mutators) && !m_edit(gamemode) && team >= T_FIRST && team <= T_MULTI))
-                    team = T_NEUTRAL; // abstract team coloured levels to neutral
+                if(!m_team(gamemode, mutators) && !m_edit(gamemode) && team >= T_FIRST && team <= T_MULTI) team = T_NEUTRAL;
+                if(team < 0 || team >= T_MAX+(m_multi(gamemode, mutators) ? T_ALL : T_COUNT)) team = T_NEUTRAL; // abstract team coloured levels to neutral
                 else if(team >= T_MAX) team = (team%T_MAX)+T_FIRST; // force team colour palette
                 return vec::hexcolor(TEAM(team, colour));
                 break;
