@@ -95,8 +95,8 @@ namespace defend
                 part_icon(above, textureload(hud::progresstex, 3), 3, 1, 0, 0, 1, TEAM(b.owner, colour));
                 part_icon(above, textureload(hud::progresstex, 3), 2, 1, 0, 0, 1, TEAM(b.owner, colour));
             }
-            above.z += 1.f;
-            defformatstring(str)("<huge>%d%%", int(occupy*100.f)); part_textcopy(above, str);
+            //above.z += 1.f;
+            //defformatstring(str)("<huge>%d%%", int(occupy*100.f)); part_textcopy(above, str);
         }
     }
 

@@ -19,7 +19,7 @@ struct defendstate
         bool hasflag;
         int lasthad;
 #endif
-        int owners, enemies, converted, securetime;
+        int owners, enemies, converted;
 
         flag()
         {
@@ -41,7 +41,6 @@ struct defendstate
         {
             noenemy();
             owner = kinship;
-            securetime = -1;
             owners = 0;
 #ifndef GAMESERVER
             hasflag = false;
@@ -99,7 +98,7 @@ struct defendstate
             }
             else if(converted<(!instant && owner ? 2 : 1)*occupy) return -1;
             if(!instant && owner) { owner = T_NEUTRAL; converted = 0; enemy = team; return 0; }
-            else { owner = team; securetime = 0; owners = enemies; noenemy(); return 1; }
+            else { owner = team; owners = enemies; noenemy(); return 1; }
         }
 
         float occupied(bool instant, float amt)

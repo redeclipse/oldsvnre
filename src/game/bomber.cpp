@@ -325,8 +325,8 @@ namespace bomber
                         part_icon(above, textureload(hud::progresstex, 3), 3*trans, 1, 0, 0, 1, pcolour, (lastmillis%1000)/1000.f, 0.1f);
                         part_icon(above, textureload(hud::progresstex, 3), 2*trans, 0.25f, 0, 0, 1, pcolour);
                         part_icon(above, textureload(hud::progresstex, 3), 2*trans, 1, 0, 0, 1, pcolour, 0, wait);
-                        above.z += 1.f;
-                        defformatstring(str)("<huge>%d%%", int(wait*100.f)); part_textcopy(above, str, PART_TEXT, 1, pcolour, 2, 1);
+                        //above.z += 1.f;
+                        //defformatstring(str)("<huge>%d%%", int(wait*100.f)); part_textcopy(above, str, PART_TEXT, 1, pcolour, 2, 1);
                     }
                 }
                 else if(!m_gsp1(game::gamemode, game::mutators))

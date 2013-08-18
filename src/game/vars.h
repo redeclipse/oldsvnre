@@ -273,9 +273,9 @@ GVAR(0, captureregenextra, 0, 2, VAR_MAX); // add this to regen when buffed
 
 GVAR(0, defendlimit, 0, 0, VAR_MAX); // finish when score is this or more
 GVAR(0, defendpoints, 0, 1, VAR_MAX); // points added to score
-GVAR(0, defendinterval, 0, 50, VAR_MAX);
-GVAR(0, defendoccupy, 1, 100, VAR_MAX); // points needed to occupy in regular games
-GVAR(0, defendking, 1, 25, VAR_MAX); // points needed to occupy in king of the hill
+GVAR(0, defendinterval, 0, 1000, VAR_MAX);
+GVAR(0, defendoccupy, 1, 10, VAR_MAX); // points needed to occupy in regular games
+GVAR(0, defendking, 1, 5, VAR_MAX); // points needed to occupy in king of the hill
 GVAR(0, defendflags, 0, 3, 3); // 0 = init all (neutral), 1 = init neutral and team only, 2 = init team only, 3 = init all (team + neutral + converted)
 GVAR(0, defendbuffing, 0, 1, 7); // buffed; 0 = off, &1 = when guarding, &2 = when securing, &4 = even when enemies are present
 GFVAR(0, defendbuffoccupy, 0, 0.5f, 1); // for defendbuffing&4, must be occupied this much before passing
