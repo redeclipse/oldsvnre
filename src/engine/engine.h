@@ -607,7 +607,7 @@ extern int compresslevel, imageformat;
 extern void pushevent(const SDL_Event &e);
 extern bool interceptkey(int sym, int mod = 0);
 extern void getfps(int &fps, int &bestdiff, int &worstdiff);
-extern void swapbuffers();
+extern void swapbuffers(bool overlay = true);
 extern int getclockmillis();
 
 // menu

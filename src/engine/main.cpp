@@ -655,9 +655,9 @@ void checkinput()
     }
 }
 
-void swapbuffers()
+void swapbuffers(bool overlay)
 {
-    recorder::capture();
+    recorder::capture(overlay);
     SDL_GL_SwapBuffers();
 }
 
@@ -831,7 +831,7 @@ void progress(float bar1, const char *text1, float bar2, const char *text2)
     }
 
     progressing = true;
-    loopi(2) { drawnoview(); swapbuffers(); }
+    loopi(2) { drawnoview(); swapbuffers(false); }
     progressing = false;
 }
 
