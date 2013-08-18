@@ -22,6 +22,7 @@ GFVAR(0, liquidextinguishscale, 0, 1, FVAR_MAX);
 
 GVAR(IDF_ADMIN, serverdebug, 0, 0, 3);
 GVAR(IDF_ADMIN, serverclients, 1, 16, MAXCLIENTS);
+GVAR(IDF_ADMIN, serverdupclients, 0, 0, MAXCLIENTS);
 GVAR(IDF_ADMIN, serveropen, 0, 3, 3);
 GSVAR(IDF_ADMIN, serverdesc, "");
 GSVAR(IDF_ADMIN, servermotd, "");
