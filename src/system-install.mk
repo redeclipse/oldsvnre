@@ -164,6 +164,7 @@ system-uninstall-client:
 	@rm -fv $(libexecdir)/$(appname)/$(appname)
 	@rm -fv $(libexecdir)/$(appname)/data
 	@rm -fv $(libexecdir)/$(appname)/game
+	@rm -fv	$(libexecdir)/$(appname)/version.cfg
 	@rm -fv $(gamesbindir)/$(appname)
 
 system-uninstall-server:
@@ -173,6 +174,7 @@ system-uninstall-server:
 system-uninstall-data:
 	rm -rf $(datadir)/$(appname)/data
 	rm -rf $(datadir)/$(appname)/game
+	rm -fv $(datadir)/$(appname)/version.cfg
 
 system-uninstall-docs:
 	@rm -rfv $(docdir)/$(appname)/examples
