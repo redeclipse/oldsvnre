@@ -367,14 +367,6 @@ int addclient(int type)
     return c->num;
 }
 
-bool checkdupclients(ENetPeer *peer)
-{
-    int dups = server::dupclients();
-    if(dups <= 0) return false;
-    loopv(clients) if(clients[i]->type == ST_TCPIP && clients[i]->peer->address.host == peer->address.host) dups--;
-    return dups <= 0;
-}
-
 void cleanupserversockets()
 {
     if(serverhost) enet_host_destroy(serverhost);
@@ -861,11 +853,6 @@ void serverslice(uint timeout)  // main server update, called from main loop in 
         {
             case ENET_EVENT_TYPE_CONNECT:
             {
-                if(checkdupclients(event.peer))
-                {
-                    enet_peer_disconnect_now(event.peer, DISC_MAXCLIENTS);
-                    break;
-                }
                 int cn = addclient(ST_TCPIP);
                 clientdata &c = *clients[cn];
                 c.peer = event.peer;
@@ -1262,6 +1249,13 @@ void serverloop()
     exit(EXIT_SUCCESS);
 }
 
+void limitdupclients()
+{
+    if(!serverhost) return;
+    int dupclients = server::dupclients();
+    serverhost->duplicatePeers = dupclients ? dupclients : serverhost->peerCount;
+}
+
 int setupserversockets()
 {
     if(!servertype || (serverhost && pongsock != ENET_SOCKET_NULL)) return servertype;
@@ -1285,6 +1279,7 @@ int setupserversockets()
             return servertype;
         }
         loopi(server::reserveclients()) serverhost->peers[i].data = NULL;
+        limitdupclients();
     }
 
     if(pongsock == ENET_SOCKET_NULL)
