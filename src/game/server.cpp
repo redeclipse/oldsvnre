@@ -988,6 +988,7 @@ namespace server
 
     int numchannels() { return 3; }
     int reserveclients() { return G(serverclients)+4; }
+    int dupclients() { return G(serverdupclients); }
 
     bool hasclient(clientinfo *ci, clientinfo *cp = NULL)
     {
