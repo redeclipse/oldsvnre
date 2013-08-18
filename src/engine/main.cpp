@@ -36,13 +36,14 @@ void showcursor(bool show)
 #endif
 }
 
-void setcaption(const char *text)
+void setcaption(const char *text, const char *text2)
 {
-    static string caption = "";
-    defformatstring(newcaption)("%s v%s-%s %d bit (%s)%s%s", versionname, versionstring, CUR_PLATFORM, CUR_ARCH, versionrelease, text ? ": " : "", text ? text : "");
-    if(strcmp(caption, newcaption))
+    static string prevtext = "", prevtext2 = "";
+    if(strcmp(text, prevtext) || strcmp(text2, prevtext2))
     {
-        copystring(caption, newcaption);
+        copystring(prevtext, text);
+        copystring(prevtext2, text2);
+        defformatstring(caption)("%s v%s-%s %d bit (%s)%s%s%s%s", versionname, versionstring, CUR_PLATFORM, CUR_ARCH, versionrelease, text[0] ? ": " : "", text, text2[0] ? " - " : "", text2);
         SDL_WM_SetCaption(caption, NULL);
     }
 }
@@ -1053,8 +1054,7 @@ int main(int argc, char **argv)
                 swapbuffers();
                 inbetweenframes = true;
             }
-            defformatstring(cap)("%s - %s", game::gametitle(), game::gametext());
-            setcaption(cap);
+            setcaption(game::gametitle(), game::gametext());
         }
     }
 
