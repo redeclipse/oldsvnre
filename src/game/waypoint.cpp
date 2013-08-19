@@ -814,5 +814,27 @@ namespace ai
         }
     }
     COMMAND(0, delselwaypoints, "");
+
+    void moveselwaypoints(vec &offset)
+    {
+        if(noedit(true)) return;
+        vec o = sel.o.tovec().sub(0.1f), s = sel.s.tovec().mul(sel.grid).add(o).add(0.1f);
+        int moved = 0;
+        for(int i = 1; i < waypoints.length(); i++)
+        {
+            waypoint &w = waypoints[i];
+            if(w.o.x >= o.x && w.o.x <= s.x && w.o.y >= o.y && w.o.y <= s.y && w.o.z >= o.z && w.o.z <= s.z)
+            {
+                w.o.add(offset);
+                moved++;
+            }
+        }
+        if(moved)
+        {
+            player1->lastnode = -1;
+            clearwpcache();
+        }
+    }
+    ICOMMAND(0, moveselwaypoints, "fff", (float *x, float *y, float *z), vec v(*x, *y, *z); moveselwaypoints(v));
 }
 
