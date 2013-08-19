@@ -118,6 +118,7 @@ namespace hud
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, inventorytex, "<grey>textures/hud/inventory", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, inventorybartex, "<grey>textures/hud/inventorybar", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, flagtex, "<grey>textures/hud/flag", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, pointtex, "<grey>textures/hud/point", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, bombtex, "<grey>textures/hud/bomb", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, arrowtex, "<grey>textures/hud/arrow", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, alerttex, "<grey>textures/hud/alert", 3);
@@ -2340,6 +2341,7 @@ namespace hud
             case eventicon::AFFINITY:
             {
                 if(m_bomber(game::gamemode)) return bombtex;
+                if(m_defend(game::gamemode)) return pointtex;
                 return flagtex;
             }
         }
