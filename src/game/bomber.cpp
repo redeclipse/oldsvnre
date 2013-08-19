@@ -127,7 +127,7 @@ namespace bomber
                 area = 3;
                 if(isbombertarg(f, game::focus->team) && !hasbombs.empty()) size *= 1.25f;
             }
-            hud::drawblip(isbomberaffinity(f) ? hud::bombtex : (isbombertarg(f, game::focus->team) ? hud::arrowtex : hud::flagtex), area, w, h, size, blend*hud::radaraffinityblend, (isbombertarg(f, game::focus->team) ? -1-hud::radarstyle : hud::radarstyle), (isbombertarg(f, game::focus->team) ? dir : pos), colour);
+            hud::drawblip(isbomberaffinity(f) ? hud::bombtex : (isbombertarg(f, game::focus->team) ? hud::arrowtex : hud::pointtex), area, w, h, size, blend*hud::radaraffinityblend, (isbombertarg(f, game::focus->team) ? -1-hud::radarstyle : hud::radarstyle), (isbombertarg(f, game::focus->team) ? dir : pos), colour);
         }
     }
 
@@ -291,7 +291,7 @@ namespace bomber
             bomberstate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent) || !f.enabled || (f.owner == game::focus && !game::thirdpersonview(true) && rendernormally)) continue;
             vec above(f.pos(true, true));
-            float trans = isbomberaffinity(f) ? 1.f : 0.5f;
+            float trans = 1;
             if(!isbomberaffinity(f) || !f.interptime) // || (!f.droptime && !f.owner))
             {
                 int millis = lastmillis-f.displaytime;
@@ -314,26 +314,24 @@ namespace bomber
                         flashcolour(effect.r, effect.g, effect.b, 1.f, 0.f, 0.f, amt);
                     }
                     light->material[0] = bvec::fromcolor(effect);
-                    if(f.owner == game::focus && game::thirdpersonview(true)) trans *= 0.5f;
+                    if(f.owner == game::focus && game::thirdpersonview(true)) trans *= 0.25f;
                     rendermodel(light, "props/ball", ANIM_MAPMODEL|ANIM_LOOP, above, yaw, pitch, roll, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_LIGHTFX, NULL, NULL, 0, 0, trans, size);
                     float fluc = interval >= 500 ? (1500-interval)/1000.f : (500+interval)/1000.f;
                     int pcolour = (int(light->material[0].x)<<16)|(int(light->material[0].y)<<8)|int(light->material[0].z);
                     part_create(PART_HINT_SOFT, 1, above, pcolour, enttype[AFFINITY].radius/4*trans+(2*fluc), fluc*trans);
                     if(!game::intermission && f.droptime)
                     {
-                        above.z += enttype[AFFINITY].radius/4*trans+2.5f;
-                        part_icon(above, textureload(hud::progresstex, 3), 3*trans, 1, 0, 0, 1, pcolour, (lastmillis%1000)/1000.f, 0.1f);
-                        part_icon(above, textureload(hud::progresstex, 3), 2*trans, 0.25f, 0, 0, 1, pcolour);
-                        part_icon(above, textureload(hud::progresstex, 3), 2*trans, 1, 0, 0, 1, pcolour, 0, wait);
-                        //above.z += 1.f;
-                        //defformatstring(str)("<huge>%d%%", int(wait*100.f)); part_textcopy(above, str, PART_TEXT, 1, pcolour, 2, 1);
+                        above.z += enttype[AFFINITY].radius/3*trans+2.5f;
+                        part_icon(above, textureload(hud::progresstex, 3), 4*trans, 1, 0, 0, 1, pcolour, (lastmillis%1000)/1000.f, 0.1f);
+                        part_icon(above, textureload(hud::progresstex, 3), 3*trans, 0.25f, 0, 0, 1, pcolour);
+                        part_icon(above, textureload(hud::progresstex, 3), 3*trans, 1, 0, 0, 1, pcolour, 0, wait);
                     }
                 }
                 else if(!m_gsp1(game::gamemode, game::mutators))
                 {
-                    part_explosion(above, enttype[AFFINITY].radius*trans, PART_SHOCKWAVE, 1, TEAM(f.team, colour), 1.f, trans*0.25f);
-                    part_explosion(above, enttype[AFFINITY].radius/3*trans, PART_SHOCKBALL, 1, TEAM(f.team, colour), 1.f, trans*0.5f);
-                    above.z += enttype[AFFINITY].radius*trans+2.5f;
+                    //part_explosion(above, (enttype[AFFINITY].radius/4+1)*trans, PART_SHOCKWAVE, 1, TEAM(f.team, colour), 1.f, trans*0.1f);
+                    part_explosion(above, enttype[AFFINITY].radius/3*trans, PART_SHOCKBALL, 1, TEAM(f.team, colour), 1.f, trans*0.25f);
+                    above.z += enttype[AFFINITY].radius/3*trans;
                     defformatstring(info)("<super>%s base", TEAM(f.team, name));
                     part_textcopy(above, info, PART_TEXT, 1, TEAM(f.team, colour), 2, 1);
                     above.z += 2.5f;
