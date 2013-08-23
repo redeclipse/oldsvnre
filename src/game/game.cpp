@@ -746,14 +746,14 @@ namespace game
             }
             case 1: // teams
             {
-                int team = index%T_MAX;
+                int team = index%T_ALL;
                 if(index < 0) team = T_NEUTRAL;
-                else if(!m_edit(gamemode) && team != T_ENEMY && index < T_MAX)
+                else if(!m_edit(gamemode) && index < T_ALL)
                 {
                     if(!m_team(gamemode, mutators) || team > (m_multi(gamemode, mutators) ? T_MULTI : T_LAST))
                         team = T_NEUTRAL; // abstract team coloured levels to neutral
-                    return vec::hexcolor(TEAM(team, colour));
                 }
+                return vec::hexcolor(TEAM(team, colour));
                 break;
             }
             case 2: // weapons
