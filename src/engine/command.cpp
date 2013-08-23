@@ -683,7 +683,7 @@ ICOMMAND(0, getalias, "s", (char *s), result(getalias(s)));
             debugcode("\frcannot set world variable %s outside editmode", id->name); \
             return; \
         } \
-        if(id->flags&IDF_CLIENT && client::sendcmd(2, id->name, argstr)) return; \
+        if(id->flags&IDF_CLIENT && (!(id->flags&IDF_WORLD) || !(identflags&IDF_WORLD)) && client::sendcmd(2, id->name, argstr)) return; \
     }
 #endif
 
