@@ -1842,8 +1842,7 @@ namespace client
                         if(needclipboard >= 0) needclipboard++;
                         game::specreset(d);
                     }
-                    break;
-                }
+                    break;}
 
                 case N_DISCONNECT:
                 {

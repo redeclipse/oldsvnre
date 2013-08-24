@@ -337,7 +337,7 @@ namespace server
 
         void reset()
         {
-            ping = 0;
+            ping = lastplayerinfo = 0;
             name[0] = handle[0] = 0;
             privilege = PRIV_NONE;
             connected = ready = local = online = wantsmap = failedmap = connectauth = kicked = false;
@@ -3120,6 +3120,13 @@ namespace server
         sendpacket(-1, 1, p.finalize(), ci->clientnum);
     }
 
+    void sendinitclientself(clientinfo *ci)
+    {
+        packetbuf p(MAXTRANS, ENET_PACKET_FLAG_RELIABLE);
+        putinitclient(ci, p);
+        sendpacket(ci->clientnum, 1, p.finalize(), ci->clientnum);
+    }
+
     void welcomeinitclient(packetbuf &p, int exclude = -1)
     {
         loopv(clients)
@@ -5340,7 +5347,7 @@ namespace server
                         else if(totalmillis-ci->lastplayerinfo < G(setinfowait)) allow = false;
                         if(!allow)
                         {
-                            sendf(ci->clientnum, 1, "si2s", ci->name, ci->state.colour, ci->state.model, ci->state.vanity);
+                            sendinitclientself(ci);
                             break;
                         }
                     }
