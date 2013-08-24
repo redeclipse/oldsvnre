@@ -286,7 +286,7 @@ namespace server
 
     struct clientinfo
     {
-        int clientnum, connectmillis, sessionid, overflow, ping, team, lastteam;
+        int clientnum, connectmillis, sessionid, overflow, ping, team, lastteam, lastplayerinfo;
         string name, handle, mapvote;
         int modevote, mutsvote, lastvote;
         int privilege;
@@ -5331,6 +5331,11 @@ namespace server
 
                 case N_SETPLAYERINFO:
                 {
+                    if(ci->lastplayerinfo && totalmillis-ci->lastplayerinfo < G(setinfowait))
+                    {
+                        sendf(ci->clientnum, 1, "si2s", ci->name, ci->state.colour, ci->state.model, ci->state.vanity);
+                        break;
+                    }
                     QUEUE_MSG;
                     defformatstring(oldname)("%s", colourname(ci));
                     getstring(text, p);
@@ -5347,6 +5352,7 @@ namespace server
                     ci->state.model = max(getint(p), 0);
                     getstring(text, p);
                     ci->state.setvanity(text);
+                    ci->lastplayerinfo = totalmillis;
                     QUEUE_STR(ci->name);
                     QUEUE_INT(ci->state.colour);
                     QUEUE_INT(ci->state.model);
