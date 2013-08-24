@@ -34,6 +34,9 @@ GVAR(IDF_ADMIN, messagelock, 0, PRIV_NONE, PRIV_CREATOR);
 GVAR(IDF_ADMIN, messagelength, 32, 128, MAXSTRLEN-1);
 GSVAR(IDF_ADMIN, censorwords, "");
 
+GVAR(IDF_ADMIN, setinfolock, 0, PRIV_NONE, PRIV_CREATOR);
+GVAR(IDF_ADMIN, setinfowait, 0, 10000, VAR_MAX);
+
 GVAR(IDF_ADMIN, demolock, 0, PRIV_OPERATOR, PRIV_CREATOR);
 GVAR(IDF_ADMIN, democount, 1, 5, VAR_MAX);
 GVAR(IDF_ADMIN, demomaxsize, 1, 16, VAR_MAX);
@@ -71,8 +74,6 @@ GVAR(IDF_ADMIN, resetmutesonend, 0, 1, 2); // reset mutes on end (1: just when e
 GVAR(IDF_ADMIN, resetlimitsonend, 0, 1, 2); // reset limits on end (1: just when empty, 2: when matches end)
 GVAR(IDF_ADMIN, resetvarsonend, 0, 1, 2); // reset variables on end (1: just when empty, 2: when matches end)
 GVAR(IDF_ADMIN, resetmmonend, 0, 2, 2); // reset mastermode on end (1: just when empty, 2: when matches end)
-
-GVAR(IDF_ADMIN, setinfowait, 0, 10000, VAR_MAX);
 
 GVARF(0, gamespeed, 1, 100, 10000, timescale = sv_gamespeed, timescale = gamespeed);
 GVAR(IDF_ADMIN, gamespeedlock, 0, PRIV_ADMINISTRATOR, PRIV_CREATOR);
