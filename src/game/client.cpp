@@ -4,7 +4,7 @@ namespace client
 {
     bool sendplayerinfo = false, sendcrcinfo = false, sendgameinfo = false, isready = false, remote = false,
         demoplayback = false, needsmap = false, gettingmap = false;
-    int lastping = 0, sessionid = 0;
+    int lastping = 0, sessionid = 0, lastplayerinfo = 0;
     string connectpass = "";
     int needclipboard = -1;
 
@@ -1381,10 +1381,11 @@ namespace client
     void sendmessages()
     {
         packetbuf p(MAXTRANS);
-        if(sendplayerinfo)
+        if(sendplayerinfo && (!lastplayerinfo || totalmillis-lastplayerinfo >= setinfowait))
         {
             p.reliable();
             sendplayerinfo = false;
+            lastplayerinfo = totalmillis ? totalmillis : 1;
             putint(p, N_SETPLAYERINFO);
             sendstring(game::player1->name, p);
             putint(p, game::player1->colour);
