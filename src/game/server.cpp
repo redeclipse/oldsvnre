@@ -5262,7 +5262,7 @@ namespace server
                     uint ip = getclientip(cp->clientnum);
                     if(!ip || !checkipinfo(control, ipinfo::ALLOW, ip))
                     {
-                        if(!haspriv(ci, G(messagelock), "send messages on this server")) break;
+                        if(!haspriv(cp, G(messagelock), "send messages on this server")) break;
                         if(ip && checkipinfo(control, ipinfo::MUTE, ip) && !haspriv(cp, G(mutelock), "send messages while muted")) break;
                     }
                     if(G(floodlock))
@@ -5331,10 +5331,18 @@ namespace server
 
                 case N_SETPLAYERINFO:
                 {
-                    if(ci->lastplayerinfo && totalmillis-ci->lastplayerinfo < G(setinfowait))
+                    uint ip = getclientip(ci->clientnum);
+                    if(ci->lastplayerinfo && (!ip || !checkipinfo(control, ipinfo::ALLOW, ip)))
                     {
-                        sendf(ci->clientnum, 1, "si2s", ci->name, ci->state.colour, ci->state.model, ci->state.vanity);
-                        break;
+                        bool allow = true;
+                        if(!haspriv(ci, G(setinfolock), "change player info on this server")) allow = false;
+                        else if(ip && checkipinfo(control, ipinfo::MUTE, ip) && !haspriv(ci, G(mutelock), "change player info while muted")) allow = false;
+                        else if(totalmillis-ci->lastplayerinfo < G(setinfowait)) allow = false;
+                        if(!allow)
+                        {
+                            sendf(ci->clientnum, 1, "si2s", ci->name, ci->state.colour, ci->state.model, ci->state.vanity);
+                            break;
+                        }
                     }
                     QUEUE_MSG;
                     defformatstring(oldname)("%s", colourname(ci));
