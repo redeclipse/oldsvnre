@@ -168,3 +168,4 @@ too.
 * "Boognish"
 * "bonifarz"
 * Viktor "Unnamed" Hahn
+* Mikhail "Agustis" Kashin
