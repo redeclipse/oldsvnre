@@ -2273,8 +2273,7 @@ VAR(IDF_PERSIST, thumbheight, 0, 6, 1000);
 VAR(IDF_PERSIST, thumbtime, 0, 25, 1000);
 FVAR(IDF_PERSIST, thumbsize, 0, 2, 25);
 
-static int lastthumbnail = 0;
-extern bool layoutpass;
+static int lastthumbnail, guilayoutpass;
 struct texturegui : guicb
 {
     bool menuon;
@@ -2287,7 +2286,7 @@ struct texturegui : guicb
         extern VSlot dummyvslot;
         int curtex = menutex, numpages = max((texmru.length() + thumbwidth*thumbheight - 1)/(thumbwidth*thumbheight), 1)-1;
         if(autopreviewtexgui && texmru.inrange(rolltex)) curtex = rolltex;
-        if(!layoutpass) rolltex = -1;
+        if(!guilayoutpass) rolltex = -1;
         if(menupage > numpages) menupage = numpages;
         else if(menupage < 0) menupage = 0;
         g.start(menustart, menuscale, NULL, true);

@@ -2,7 +2,7 @@
 
 int uimillis = -1;
 
-bool layoutpass = false;
+VAR(IDF_READONLY, guilayoutpass, 1, 0, -1);
 static bool actionon = false;
 int mouseaction[2] = {0}, guibound[2] = {0};
 
@@ -40,7 +40,7 @@ struct gui : guient
 
     void allowhitfx(bool on) { hitfx = on; }
     static inline bool visibletab() { return !tcurrent || tpos == *tcurrent; }
-    bool visible() { return !layoutpass && visibletab(); }
+    bool visible() { return !guilayoutpass && visibletab(); }
 
     //tab is always at top of page
     void tab(const char *name, int color, bool front)
@@ -50,7 +50,7 @@ struct gui : guient
         if(front && tcurrent && *tcurrent != tpos) *tcurrent = tpos;
         if(!hastitle)
         {
-            if(layoutpass)
+            if(guilayoutpass)
             {
                 ty = max(ty, ysize);
                 ysize = 0;
@@ -64,7 +64,7 @@ struct gui : guient
         bool vis = visibletab();
         gui::pushfont(vis ? "super" : "default");
         int w = text_width(tabtitle);
-        if(layoutpass)
+        if(guilayoutpass)
         {
             ty = max(ty, ysize);
             ysize = 0;
@@ -108,7 +108,7 @@ struct gui : guient
 
     void pushlist(bool merge)
     {
-        if(layoutpass)
+        if(guilayoutpass)
         {
             if(curlist>=0)
             {
@@ -144,7 +144,7 @@ struct gui : guient
             }
         }
         curdepth++;
-        if(!layoutpass && visible() && ishit(xsize, ysize)) loopi(2) lists[curlist].mouse[i] = mouseaction[i]|GUI_ROLLOVER;
+        if(!guilayoutpass && visible() && ishit(xsize, ysize)) loopi(2) lists[curlist].mouse[i] = mouseaction[i]|GUI_ROLLOVER;
         if(merge)
         {
             mergelist = curlist;
@@ -156,7 +156,7 @@ struct gui : guient
     {
         if(!lists.inrange(curlist)) return 0;
         list &l = lists[curlist];
-        if(layoutpass)
+        if(guilayoutpass)
         {
             l.w = xsize;
             l.h = ysize;
@@ -171,7 +171,7 @@ struct gui : guient
             list &p = lists[curlist];
             xsize = p.w;
             ysize = p.h;
-            if(!layoutpass && p.springs > 0)
+            if(!guilayoutpass && p.springs > 0)
             {
                 list &s = lists[p.parent];
                 if(ishorizontal()) xsize = s.w; else ysize = s.h;
@@ -199,7 +199,7 @@ struct gui : guient
     {
         if(curlist < 0) return;
         list &l = lists[curlist];
-        if(layoutpass) { if(l.parent >= 0) l.springs += weight; return; }
+        if(guilayoutpass) { if(l.parent >= 0) l.springs += weight; return; }
         int nextspring = min(l.curspring + weight, l.springs);
         if(nextspring <= l.curspring) return;
         if(ishorizontal())
@@ -217,7 +217,7 @@ struct gui : guient
 
     int layout(int w, int h)
     {
-        if(layoutpass)
+        if(guilayoutpass)
         {
             if(ishorizontal())
             {
@@ -453,7 +453,7 @@ struct gui : guient
     {
         if(font && *font) gui::pushfont(font);
         editor *e = useeditor(name, initmode, false, initval, parent); // generate a new editor if necessary
-        if(layoutpass)
+        if(guilayoutpass)
         {
             if(initval && e->mode==EDITORFOCUSED && (e!=currentfocus() || fieldmode == FIELDSHOW))
             {
@@ -559,7 +559,7 @@ struct gui : guient
         xtraverts += 4;
     }
 
-    void rect_(float x, float y, float w, float h, int usetc) 
+    void rect_(float x, float y, float w, float h, int usetc)
     {
         glBegin(GL_TRIANGLE_STRIP);
         static const GLfloat tc[5][2] = {{0, 0}, {1, 0}, {1, 1}, {0, 1}, {0, 0}};
@@ -854,7 +854,7 @@ struct gui : guient
     {
         initscale *= 0.025f;
         basescale = initscale;
-        if(layoutpass)
+        if(guilayoutpass)
             uiscale.x = uiscale.y = uiscale.z = guiscaletime ? min(basescale*(totalmillis-starttime)/float(guiscaletime), basescale) : basescale;
         needsinput = allowinput;
         hastitle = wantstitle;
@@ -866,7 +866,7 @@ struct gui : guient
         tcurrent = tab;
         tcolor = 0xFFFFFF;
         pushlist(false);
-        if(layoutpass) nextlist = curlist;
+        if(guilayoutpass) nextlist = curlist;
         else
         {
             if(tcurrent && !*tcurrent) tcurrent = NULL;
@@ -911,7 +911,7 @@ struct gui : guient
 
     void end()
     {
-        if(layoutpass)
+        if(guilayoutpass)
         {
             xsize = max(tx, xsize);
             ysize = max(ty, ysize);
@@ -1088,10 +1088,10 @@ namespace UI
 
         if(!guis.empty())
         {
-            layoutpass = true;
+            guilayoutpass = 1;
             //loopv(guis) guis[i].cb->gui(guis[i], true);
             guis.last().cb->gui(guis.last(), true);
-            layoutpass = false;
+            guilayoutpass = 0;
 
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

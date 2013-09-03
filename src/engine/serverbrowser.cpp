@@ -455,8 +455,22 @@ void retrieveservers(vector<char> &data)
     enet_socket_destroy(sock);
 }
 
+void sortservers()
+{
+    if(!sortedservers)
+    {
+        servers.sort(serverinfocompare);
+        sortedservers = true;
+    }
+}
+COMMAND(0, sortservers, "");
+
+VAR(IDF_PERSIST, autosortservers, 0, 1, 1);
+VAR(0, pausesortservers, 0, 0, 1);
+
 void updatefrommaster()
 {
+    pausesortservers = 0;
     vector<char> data;
     retrieveservers(data);
     if(data.length() && data[0])
@@ -472,23 +486,11 @@ void updatefrommaster()
 }
 COMMAND(0, updatefrommaster, "");
 
-void sortservers()
-{
-    if(!sortedservers)
-    {
-        servers.sort(serverinfocompare);
-        sortedservers = true;
-    }
-}
-COMMAND(0, sortservers, "");
-
-VAR(IDF_PERSIST, autosortservers, 0, 1, 1);
-
 void updateservers()
 {
     if(!reqmaster) updatefrommaster();
     refreshservers();
-    if(autosortservers) sortservers();
+    if(autosortservers && !pausesortservers) sortservers();
     intret(servers.length());
 }
 COMMAND(0, updateservers, "");
