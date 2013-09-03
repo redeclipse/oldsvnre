@@ -641,7 +641,7 @@ struct VSlot
             if(glowcolor->palette || glowcolor->palindex) c.mul(game::getpalette(glowcolor->palette, glowcolor->palindex));
             return c.clamp(0.0f, 1.0f);
         }
-        return vec(1, 1, 1);
+        return glowcolor->palette || glowcolor->palindex ? game::getpalette(glowcolor->palette, glowcolor->palindex) : vec(1, 1, 1);
     }
     vec getpulseglowcolor() const
     {

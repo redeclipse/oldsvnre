@@ -510,7 +510,7 @@ void guikeyfield(char *var, int *maxlength, char *onchange, int *colour, int *fo
 
 //use text<action> to do more...
 
-void guibody(uint *contents, char *action, char *altact)
+void guibody(uint *contents, char *action, char *altact, uint *onhover)
 {
     if(!cgui) return;
     cgui->pushlist(action[0] ? true : false);
@@ -527,6 +527,7 @@ void guibody(uint *contents, char *action, char *altact)
             if(shouldclearmenu) clearlater = true;
         }
     }
+    else if(ret&GUI_ROLLOVER && onhover) execute(onhover);
 }
 
 void guilist(uint *contents)
@@ -585,7 +586,7 @@ COMMAND(0, guinohitfx, "e");
 ICOMMAND(0, guicount, "", (), intret(menustack.length()));
 
 COMMAND(0, guilist, "e");
-COMMAND(0, guibody, "ess");
+COMMAND(0, guibody, "esse");
 COMMAND(0, guititle, "s");
 COMMAND(0, guibar, "");
 COMMAND(0, guibackground, "ii");
