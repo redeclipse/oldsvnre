@@ -85,7 +85,7 @@ namespace defend
             above.z += 3.f;
             if(b.enemy)
             {
-                part_icon(above, textureload(hud::progresstex, 3), 3, 1, 0, 0, 1, colour, (lastmillis%1000)/1000.f, 0.1f);
+                part_icon(above, textureload(hud::progringtex, 3), 3, 1, 0, 0, 1, colour, (lastmillis%1000)/1000.f, 0.1f);
                 part_icon(above, textureload(hud::progresstex, 3), 2, 1, 0, 0, 1, TEAM(b.enemy, colour), 0, occupy);
                 part_icon(above, textureload(hud::progresstex, 3), 2, 0.25f, 0, 0, 1, TEAM(b.owner, colour), occupy, 1-occupy);
             }

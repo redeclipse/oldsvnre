@@ -49,7 +49,7 @@ namespace client
 
 namespace hud
 {
-    extern char *progresstex;
+    extern char *progresstex, *progringtex;
     extern bool hasinput(bool pass = false, bool focus = true);
     extern bool keypress(int code, bool isdown, int cooked);
     extern void drawhud(bool noview = false);

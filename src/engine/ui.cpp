@@ -371,12 +371,11 @@ struct gui : guient
 
     void progress(float percent, float scale)
     {
-        Texture *t = textureload(hud::progresstex, 3, true, false);
         if(scale == 0) scale = 1;
         int size = (int)(scale*2*guibound[1]), part = size*2/3;
-        slice_(t, curx+part/8, cury+part/8, part, 0, percent);
+        slice_(textureload(hud::progresstex, 3, true, false), curx+part/8, cury+part/8, part, 0, percent);
         string s; if(percent > 0) formatstring(s)("\fg%d%%", int(percent*100)); else formatstring(s)("\fg...");
-        slice_(t, curx, cury, size, (SDL_GetTicks()%1000)/1000.f, 0.1f, s);
+        slice_(textureload(hud::progringtex, 3, true, false), curx, cury, size, (SDL_GetTicks()%1000)/1000.f, 0.1f, s);
         layout(size, size);
     }
 

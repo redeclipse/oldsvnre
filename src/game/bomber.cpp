@@ -322,7 +322,7 @@ namespace bomber
                     if(!game::intermission && f.droptime)
                     {
                         above.z += enttype[AFFINITY].radius/3*trans+2.5f;
-                        part_icon(above, textureload(hud::progresstex, 3), 4*trans, 1, 0, 0, 1, pcolour, (lastmillis%1000)/1000.f, 0.1f);
+                        part_icon(above, textureload(hud::progringtex, 3), 4*trans, 1, 0, 0, 1, pcolour, (lastmillis%1000)/1000.f, 0.1f);
                         part_icon(above, textureload(hud::progresstex, 3), 3*trans, 0.25f, 0, 0, 1, pcolour);
                         part_icon(above, textureload(hud::progresstex, 3), 3*trans, 1, 0, 0, 1, pcolour, 0, wait);
                     }
