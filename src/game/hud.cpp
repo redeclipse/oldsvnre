@@ -2112,13 +2112,14 @@ namespace hud
     {
         if(skew <= 0.f) return 0;
         float q = clamp(skew, 0.f, 1.f), cr = r*q, cg = g*q, cb = b*q, s = size*skew, cs = s/2, cx = left ? x+cs : x-cs, cy = y-cs;
+        glColor4f(cr, cg, cb, fade);
         settexture(progringtex, 3);
         drawslice((SDL_GetTicks()%1000)/1000.f, 0.1f, cx, cy, cs);
         settexture(progresstex, 3);
         glColor4f(cr, cg, cb, fade*0.25f);
-        drawslice(0, 1, cx, cy, cs*2/3);
+        drawslice(0, 1, cx, cy, cs);
         glColor4f(cr, cg, cb, fade);
-        drawslice(start, length, cx, cy, cs*2/3);
+        drawslice(start, length, cx, cy, cs);
         if(text && *text)
         {
             glPushMatrix();

@@ -1710,8 +1710,8 @@ void makeparticle(const vec &o, attrvector &attr)
         {
             float length = clamp(attr[1], 0, 100)/100.f;
             int colour = partcolour(attr[2], attr[4], attr[5]);
-            part_icon(o, textureload(hud::progresstex, 3), 2, 1, 0, 0, 1, colour, 0, length);
             part_icon(o, textureload(hud::progringtex, 3), 3, 1, 0, 0, 1, colour, (totalmillis%1000)/1000.f, 0.1f);
+            part_icon(o, textureload(hud::progresstex, 3), 3, 1, 0, 0, 1, colour, 0, length);
             break;
         }
         case 32: //lens flares - plain/sparkle/sun/sparklesun <red> <green> <blue>
