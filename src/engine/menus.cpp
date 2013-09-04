@@ -527,7 +527,7 @@ void guibody(uint *contents, char *action, char *altact, uint *onhover)
             if(shouldclearmenu) clearlater = true;
         }
     }
-    else if(ret&GUI_ROLLOVER && onhover) execute(onhover);
+    else if(ret&GUI_ROLLOVER) execute(onhover);
 }
 
 void guilist(uint *contents)

@@ -269,7 +269,7 @@ namespace capture
                 if(!game::intermission && (f.droptime || (m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team)))
                 {
                     float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(capturedelay), 0.f, 1.f) : clamp((lastmillis-f.taketime)/float(captureprotectdelay), 0.f, 1.f);
-                    part_icon(lac, textureload(hud::progresstex, 3), 3, 1, 0, 0, 1, pcolour, (lastmillis%1000)/1000.f, 0.1f);
+                    part_icon(lac, textureload(hud::progringtex, 3), 3, 1, 0, 0, 1, pcolour, (lastmillis%1000)/1000.f, 0.1f);
                     part_icon(lac, textureload(hud::progresstex, 3), 2, 0.25f, 0, 0, 1, pcolour);
                     part_icon(lac, textureload(hud::progresstex, 3), 2, 1, 0, 0, 1, pcolour, 0, wait);
                     //lac.z += 0.5f;
@@ -288,7 +288,7 @@ namespace capture
             loc.z += 2.5f;
             if(!game::intermission && (f.droptime || (m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team)))
             {
-                part_icon(loc, textureload(hud::progresstex, 3), 3, 1, 0, 0, 1, pcolour, (lastmillis%1000)/1000.f, 0.1f);
+                part_icon(loc, textureload(hud::progringtex, 3), 3, 1, 0, 0, 1, pcolour, (lastmillis%1000)/1000.f, 0.1f);
                 part_icon(loc, textureload(hud::progresstex, 3), 2, 0.25f, 0, 0, 1, pcolour);
                 part_icon(loc, textureload(hud::progresstex, 3), 2, 1, 0, 0, 1, pcolour, 0, wait);
                 //loc.z += 1.f;
