@@ -3,7 +3,7 @@
 namespace client
 {
     bool sendplayerinfo = false, sendcrcinfo = false, sendgameinfo = false, isready = false, remote = false,
-        demoplayback = false, needsmap = false, gettingmap = false;
+        demoplayback = false, needsmap = false, gettingmap = false, waitplayers = false;
     int lastping = 0, sessionid = 0, lastplayerinfo = 0;
     string connectpass = "";
     int needclipboard = -1;
@@ -1464,7 +1464,11 @@ namespace client
     {
         if(!d) { static gameent dummy; d = &dummy; }
         if(d == game::player1 || d->ai) getint(p);
-        else d->state = getint(p);
+        else
+        {
+            d->state = getint(p);
+            if(d->state == CS_ALIVE && waitplayers) waitplayers = false;
+        }
         d->points = getint(p);
         d->frags = getint(p);
         d->deaths = getint(p);
