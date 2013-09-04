@@ -1282,7 +1282,8 @@ namespace hud
                 SEARCHBINDCACHE(attackkey)("primary", 0);
                 if(delay || m_duke(game::gamemode, game::mutators) || (m_fight(game::gamemode) && maxalive > 0))
                 {
-                    if(target->state == CS_WAITING && m_duke(game::gamemode, game::mutators)) ty += draw_textx("Queued for new round", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw);
+                    if(target->state == CS_WAITING && client::waitplayers) ty += draw_textx("Waiting for players", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw);
+                    else if(target->state == CS_WAITING && m_duke(game::gamemode, game::mutators)) ty += draw_textx("Queued for new round", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw);
                     else if(delay) ty += draw_textx("%s: Down for \fs\fy%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, target == game::player1 && target->state == CS_WAITING ? "Please Wait" : "Fragged", timestr(delay, -1));
                     else if(target == game::player1 && target->state == CS_WAITING && m_fight(game::gamemode) && maxalive > 0 && maxalivequeue)
                     {

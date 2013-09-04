@@ -315,7 +315,8 @@ namespace hud
                             if(delay || m_duke(game::gamemode, game::mutators) || (m_fight(game::gamemode) && maxalive > 0))
                             {
                                 uicenterlist(g, uifont(g, "reduced", {
-                                    if(m_duke(game::gamemode, game::mutators)) g.textf("Queued for new round", 0xFFFFFF, NULL, 0);
+                                    if(client::waitplayers) g.textf("Waiting for players", 0xFFFFFF, NULL, 0);
+                                    else if(m_duke(game::gamemode, game::mutators)) g.textf("Queued for new round", 0xFFFFFF, NULL, 0);
                                     else if(delay) g.textf("%s: Down for \fs\fy%s\fS", 0xFFFFFF, NULL, 0, game::player1->state == CS_WAITING ? "Please Wait" : "Fragged", timestr(delay, -1));
                                     else if(game::player1->state == CS_WAITING && m_fight(game::gamemode) && maxalive > 0 && maxalivequeue)
                                     {

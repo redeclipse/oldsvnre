@@ -686,6 +686,7 @@ namespace game
 
     void respawned(gameent *d, bool local, int ent)
     { // remote clients wait until first position update to process this
+        if(client::waitplayers) client::waitplayers = false;
         if(local)
         {
             d->state = CS_ALIVE;
@@ -1807,8 +1808,7 @@ namespace game
         resetworld();
         resetcursor();
         if(*name)
-        {
-            conoutft(CON_MESG, "\fs%s\fS by \fs%s\fS \fs[\fa%s\fS]", *maptitle ? maptitle : "Untitled", *mapauthor ? mapauthor : "Unknown", server::gamename(gamemode, mutators));
+        {conoutft(CON_MESG, "\fs%s\fS by \fs%s\fS \fs[\fa%s\fS]", *maptitle ? maptitle : "Untitled", *mapauthor ? mapauthor : "Unknown", server::gamename(gamemode, mutators));
             preload();
         }
         // reset perma-state
@@ -1822,7 +1822,7 @@ namespace game
         specreset();
         resetsway();
         resetcamera();
-        if(!empty) client::sendgameinfo = client::sendcrcinfo = client::sendplayerinfo = true;
+        if(!empty) client::sendgameinfo = client::sendcrcinfo = client::sendplayerinfo = client::waitplayers = true;
         copystring(clientmap, reqname ? reqname : (name ? name : ""));
     }
 
