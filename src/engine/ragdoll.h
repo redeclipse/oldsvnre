@@ -1,3 +1,8 @@
+VAR(0, ragdolltimestepmin, 1, 5, 50);
+VAR(0, ragdolltimestepmax, 1, 10, 50);
+FVAR(0, ragdollrotfric, 0, 0.85f, 1);
+FVAR(0, ragdollrotfricstop, 0, 0.1f, 1);
+
 struct ragdollskel
 {
     struct vert
@@ -215,7 +220,6 @@ struct ragdolldata
 
     void init(dynent *d)
     {
-        extern int ragdolltimestepmin;
         float ts = ragdolltimestepmin/1000.0f;
         loopv(skel->verts) (verts[i].oldpos = verts[i].pos).sub(vec(d->vel).add(d->falling).mul(ts));
         timestep = ts;
@@ -237,6 +241,7 @@ struct ragdolldata
     void applyrotfriction(float ts);
     void tryunstick(float speed);
     void warppos(const vec &vel, const vec &offset);
+    void twitch(float vel);
 
     static inline bool collidevert(const vec &pos, const vec &dir, float radius)
     {
@@ -333,11 +338,6 @@ void ragdolldata::constrainrot()
     }
 }
 
-VAR(0, ragdolltimestepmin, 1, 5, 50);
-VAR(0, ragdolltimestepmax, 1, 10, 50);
-FVAR(0, ragdollrotfric, 0, 0.85f, 1);
-FVAR(0, ragdollrotfricstop, 0, 0.1f, 1);
-
 void ragdolldata::calcrotfriction()
 {
     loopv(skel->rotfrictions)
@@ -405,7 +405,6 @@ void ragdolldata::tryunstick(float speed)
 
 void ragdolldata::warppos(const vec &vel, const vec &offset)
 {
-    extern int ragdolltimestepmin;
     float ts = ragdolltimestepmin/1000.0f;
     vec frame = vec(vel).mul(ts);
     loopv(skel->verts)
@@ -413,6 +412,17 @@ void ragdolldata::warppos(const vec &vel, const vec &offset)
         vert &v = verts[i];
         v.oldpos = v.pos.add(offset);
         v.oldpos.sub(frame);
+    }
+    collidemillis = 0;
+}
+
+void ragdolldata::twitch(float vel)
+{
+    float ts = ragdolltimestepmin/1000.0f;
+    loopv(skel->verts)
+    {
+        vert &v = verts[i];
+        v.oldpos.add(vec(rnd(201)-100, rnd(201)-100, rnd(201)-100).div(100.f).normalize().mul(vel).mul(ts));
     }
     collidemillis = 0;
 }
@@ -562,6 +572,12 @@ void warpragdoll(dynent *d, const vec &vel, const vec &offset)
 {
     if(!d->ragdoll) return;
     d->ragdoll->warppos(vel, offset);
+}
+
+void twitchragdoll(dynent *d, float vel)
+{
+    if(!d->ragdoll) return;
+    d->ragdoll->twitch(vel);
 }
 
 vec rdabove(dynent *d, float offset)

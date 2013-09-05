@@ -686,7 +686,7 @@ namespace game
 
     void respawned(gameent *d, bool local, int ent)
     { // remote clients wait until first position update to process this
-        if(client::waitplayers) client::waitplayers = false;
+        if(maptime > 0 && client::waitplayers) client::waitplayers = false;
         if(local)
         {
             d->state = CS_ALIVE;
@@ -3396,10 +3396,11 @@ namespace game
                 float pc = shocktime-millis < shockdelay ? (shocktime-millis)/float(shockdelay) : 0.5f+(float(millis%shockdelay)/float(shockdelay*4));
                 loopi(10+rnd(20))
                 {
-                    vec from = vec(origin).add(vec((rnd(201)-100)/100.f, (rnd(201)-100)/100.f, (rnd(201)-100)/100.f).normalize().mul(vec(d->xradius, d->yradius, d->height).mul(0.35f*pc))),
-                        to = vec(origin).add(vec((rnd(201)-100)/100.f, (rnd(201)-100)/100.f, (rnd(201)-100)/100.f).normalize().mul(d->height*pc*rnd(100)/80.f));
+                    vec from = vec(origin).add(vec(rnd(201)-100, rnd(201)-100, rnd(201)-100).div(100.f).normalize().mul(vec(d->xradius, d->yradius, d->height).mul(0.35f*pc))),
+                        to = vec(origin).add(vec(rnd(201)-100, rnd(201)-100, rnd(201)-100).div(100.f).normalize().mul(d->height*pc*rnd(100)/80.f));
                     part_flare(from, to, 1, PART_LIGHTNING_FLARE, colour, 0.1f+pc, 0.25f+pc*0.5f);
                 }
+                if(d->ragdoll) twitchragdoll(d, d->height*pc*rnd(100)/80.f);
             }
         }
     }
