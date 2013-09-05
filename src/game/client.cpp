@@ -992,6 +992,7 @@ namespace client
         game::nextmuts = game::mutators;
         game::timeremaining = -1;
         game::maptime = 0;
+        waitplayers = true;
         hud::resetscores();
         mapvotes.shrink(0);
         if(editmode) toggleedit();
@@ -1467,7 +1468,7 @@ namespace client
         else
         {
             d->state = getint(p);
-            if(d->state == CS_ALIVE && waitplayers) waitplayers = false;
+            if(game::maptime > 0 && d->state == CS_ALIVE && waitplayers) waitplayers = false;
         }
         d->points = getint(p);
         d->frags = getint(p);
