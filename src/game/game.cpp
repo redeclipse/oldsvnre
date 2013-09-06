@@ -728,7 +728,7 @@ namespace game
 
     vec getpalette(int palette, int index)
     { // colour palette abstractions for textures, etc.
-        switch(palette)
+        if(palette >= 0 && index >= 0) switch(palette)
         {
             case 0: // misc
             {
@@ -748,8 +748,7 @@ namespace game
             case 1: // teams
             {
                 int team = index%T_ALL;
-                if(index < 0) team = T_NEUTRAL;
-                else if(!m_edit(gamemode) && index < T_ALL)
+                if(!m_edit(gamemode) && index < T_ALL)
                 {
                     if(!m_team(gamemode, mutators) || team > (m_multi(gamemode, mutators) ? T_MULTI : T_LAST))
                         team = T_NEUTRAL; // abstract team coloured levels to neutral
@@ -759,10 +758,8 @@ namespace game
             }
             case 2: // weapons
             {
-                int weap = index;
-                if(weap < 0 || weap >= W_MAX*2-1) weap = -1;
-                else if(weap >= W_MAX) weap = w_attr(gamemode, mutators, weap%W_MAX, m_weapon(gamemode, mutators));
-                else
+                int weap = index%W_MAX;
+                if(!m_edit(gamemode) && index < W_MAX)
                 {
                     weap = w_attr(gamemode, mutators, weap, m_weapon(gamemode, mutators));
                     if(!isweap(weap) || (m_loadout(gamemode, mutators) && weap < W_ITEM) || !m_check(W(weap, modes), W(weap, muts), gamemode, mutators))
