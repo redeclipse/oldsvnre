@@ -62,10 +62,12 @@ namespace defend
         {
             defendstate::flag &b = st.flags[i];
             if(!entities::ents.inrange(b.ent)) continue;
-            float occupy = b.occupied(defendinstant, defendcount);
-            int colour = (skewcolour(b.owner, b.enemy, occupy)).tohexcolor();
-            //part_explosion(b.o, enttype[AFFINITY].radius/4+1, PART_SHOCKWAVE, 1, colour, 1.f, 0.1f);
-            part_explosion(b.o, enttype[AFFINITY].radius/3, PART_SHOCKBALL, 1, colour, 1.f, 0.25f);
+            float occupy = b.occupied(defendinstant, defendcount), blend = clamp(camera1->o.dist(b.o)/enttype[AFFINITY].radius, 0.f, 1.f);
+            entitylight *light = &entities::ents[b.ent]->light;
+            vec effect = skewcolour(b.owner, b.enemy, occupy);
+            int colour = effect.tohexcolor();
+            light->material[0] = bvec::fromcolor(effect);
+            rendermodel(light, "props/point", ANIM_MAPMODEL|ANIM_LOOP, b.render, entities::ents[b.ent]->attrs[1], entities::ents[b.ent]->attrs[2], 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, 1);
             if(b.enemy && b.owner)
             {
                 defformatstring(bowner)("%s", game::colourteam(b.owner));
@@ -77,19 +79,20 @@ namespace defend
                 formatstring(b.info)("%s", game::colourteam(defend));
             }
             vec above = b.o;
-            above.z += enttype[AFFINITY].radius/3;
+            part_explosion(above, 3, PART_SHOCKBALL, 1, colour, 1, 0.5f*blend);
+            above.z += 4;
             defformatstring(name)("<huge>point %s", b.name);
-            part_textcopy(above, name);
-            above.z += 2.f;
-            part_text(above, b.info);
-            above.z += 3.f;
+            part_textcopy(above, name, PART_TEXT, 1, 0xFFFFFF, 2, blend);
+            above.z += 1;
+            part_text(above, b.info, PART_TEXT, 1, 0xFFFFFF, 2, blend);
+            above.z += 3;
             if(b.enemy)
             {
-                part_icon(above, textureload(hud::progringtex, 3), 4, 1, 0, 0, 1, colour, (lastmillis%1000)/1000.f, 0.1f);
-                part_icon(above, textureload(hud::progresstex, 3), 4, 1, 0, 0, 1, TEAM(b.enemy, colour), 0, occupy);
-                part_icon(above, textureload(hud::progresstex, 3), 4, 0.25f, 0, 0, 1, TEAM(b.owner, colour), occupy, 1-occupy);
+                part_icon(above, textureload(hud::progringtex, 3), 4, blend, 0, 0, 1, colour, (lastmillis%1000)/1000.f, 0.1f);
+                part_icon(above, textureload(hud::progresstex, 3), 4, blend, 0, 0, 1, TEAM(b.enemy, colour), 0, occupy);
+                part_icon(above, textureload(hud::progresstex, 3), 4, 0.25f*blend, 0, 0, 1, TEAM(b.owner, colour), occupy, 1-occupy);
             }
-            else part_icon(above, textureload(hud::teamtexname(b.owner), 3), 3, 1, 0, 0, 1, TEAM(b.owner, colour));
+            else part_icon(above, textureload(hud::teamtexname(b.owner), 3), 3, blend, 0, 0, 1, TEAM(b.owner, colour));
         }
     }
 
@@ -112,8 +115,9 @@ namespace defend
             defendstate::flag &f = st.flags[i];
             float occupy = f.occupied(defendinstant, defendcount);
             vec colour = skewcolour(f.owner, f.enemy, occupy), dir = vec(f.o).sub(camera1->o);
-            const char *tex = f.hasflag ? hud::arrowtex : (f.owner == game::focus->team && f.enemy ? hud::attacktex : hud::pointtex);
-            float size = hud::radaraffinitysize*(f.hasflag ? 1.25f : 1);
+            bool attack = f.owner == game::focus->team && f.enemy;
+            const char *tex = f.hasflag ? hud::arrowtex : (attack ? hud::attacktex : hud::pointtex);
+            float size = hud::radaraffinitysize*(f.hasflag ? 1.5f : (attack ? 0.75f : 1.f));
             if(hud::radaraffinitynames >= (f.hasflag ? 1 : 2))
             {
                 bool overthrow = f.owner && f.enemy == game::focus->team;
@@ -222,7 +226,8 @@ namespace defend
                 case 0: team = T_NEUTRAL; break;
             }
             defendstate::flag &b = st.flags.add();
-            b.o = e->o;
+            b.o = b.render = e->o;
+            physics::droptofloor(b.render);
             defformatstring(alias)("point_%d", e->attrs[4]);
             const char *name = getalias(alias);
             if(name[0]) copystring(b.name, name);

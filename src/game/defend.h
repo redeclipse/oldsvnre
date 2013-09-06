@@ -18,6 +18,7 @@ struct defendstate
         string info;
         bool hasflag;
         int lasthad;
+        vec render;
 #endif
         int owners, enemies, converted;
 
@@ -122,6 +123,10 @@ struct defendstate
     {
         flag &b = flags.add();
         b.o = o;
+#ifndef GAMESERVER
+        b.render = o;
+        physics::droptofloor(b.render);
+#endif
         b.kinship = team;
         b.reset();
         b.ent = ent;
@@ -136,6 +141,10 @@ struct defendstate
         b.reset();
         b.ent = ent;
         b.o = o;
+#ifndef GAMESERVER
+        b.render = o;
+        physics::droptofloor(b.render);
+#endif
         b.owner = owner;
         b.enemy = enemy;
         b.converted = converted;

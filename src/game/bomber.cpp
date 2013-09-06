@@ -330,12 +330,13 @@ namespace bomber
                 else if(!m_gsp1(game::gamemode, game::mutators))
                 {
                     //part_explosion(above, (enttype[AFFINITY].radius/4+1)*trans, PART_SHOCKWAVE, 1, TEAM(f.team, colour), 1.f, trans*0.1f);
-                    part_explosion(above, enttype[AFFINITY].radius/3*trans, PART_SHOCKBALL, 1, TEAM(f.team, colour), 1.f, trans*0.25f);
+                    float blend = clamp(camera1->o.dist(above)/enttype[AFFINITY].radius, 0.f, 1.f);
+                    part_explosion(above, enttype[AFFINITY].radius/3*trans, PART_SHOCKBALL, 1, TEAM(f.team, colour), 1.f, trans*blend*0.25f);
                     above.z += enttype[AFFINITY].radius/3*trans;
                     defformatstring(info)("<super>%s base", TEAM(f.team, name));
-                    part_textcopy(above, info, PART_TEXT, 1, TEAM(f.team, colour), 2, 1);
+                    part_textcopy(above, info, PART_TEXT, 1, TEAM(f.team, colour), 2, trans*blend);
                     above.z += 2.5f;
-                    part_icon(above, textureload(hud::teamtexname(f.team), 3), 2, 1, 0, 0, 1, TEAM(f.team, colour));
+                    part_icon(above, textureload(hud::teamtexname(f.team), 3), 2, trans*blend, 0, 0, 1, TEAM(f.team, colour));
                 }
             }
         }
