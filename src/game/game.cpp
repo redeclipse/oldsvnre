@@ -239,6 +239,7 @@ namespace game
     VAR(IDF_PERSIST, headlessmodels, 0, 1, 1);
     VAR(IDF_PERSIST, autoloadweap, 0, 0, 1); // 0 = off, 1 = auto-set loadout weapons
     SVAR(IDF_PERSIST, favloadweaps, "");
+    FVAR(IDF_PERSIST, twitchspeed, 0, 20, FVAR_MAX);
 
     void resetfollow()
     {
@@ -3397,7 +3398,7 @@ namespace game
                         to = vec(origin).add(vec(rnd(201)-100, rnd(201)-100, rnd(201)-100).div(100.f).normalize().mul(d->height*pc*rnd(100)/80.f));
                     part_flare(from, to, 1, PART_LIGHTNING_FLARE, colour, 0.1f+pc, 0.25f+pc*0.5f);
                 }
-                if(d->ragdoll) twitchragdoll(d, d->height*pc*rnd(100)/80.f);
+                if(d->ragdoll && twitchspeed > 0) twitchragdoll(d, twitchspeed*pc*rnd(100)/80.f);
             }
         }
     }
