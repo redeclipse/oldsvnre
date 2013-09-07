@@ -992,7 +992,7 @@ namespace client
         game::nextmuts = game::mutators;
         game::timeremaining = -1;
         game::maptime = 0;
-        waitplayers = true;
+        if(m_fight(game::gamemode)) waitplayers = true;
         hud::resetscores();
         mapvotes.shrink(0);
         if(editmode) toggleedit();

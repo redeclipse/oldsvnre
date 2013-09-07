@@ -1820,7 +1820,8 @@ namespace game
         specreset();
         resetsway();
         resetcamera();
-        if(!empty) client::sendgameinfo = client::sendcrcinfo = client::sendplayerinfo = client::waitplayers = true;
+        if(!empty) client::sendgameinfo = client::sendcrcinfo = client::sendplayerinfo = true;
+        if(m_fight(gamemode)) client::waitplayers = true;
         copystring(clientmap, reqname ? reqname : (name ? name : ""));
     }
 
