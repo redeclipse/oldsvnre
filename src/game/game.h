@@ -1430,17 +1430,16 @@ struct projent : dynent
 
 struct cament
 {
-    enum { DISTMIN = 8, DISTMAX = 512, TRACKMAX = 8 };
     enum { ENTITY = 0, PLAYER, AFFINITY, MAX };
 
     int type, id, inview[MAX], lastyawtime, lastpitchtime;
     vec o, dir;
-    float dist, mindist, maxdist, lastyaw, lastpitch;
+    float dist, lastyaw, lastpitch;
     gameent *player;
     bool ignore;
     cament *moveto;
 
-    cament() : type(-1), id(-1), mindist(DISTMIN), maxdist(DISTMAX), player(NULL), ignore(false), moveto(NULL)
+    cament() : type(-1), id(-1), player(NULL), ignore(false), moveto(NULL)
     {
         reset();
         resetlast();
