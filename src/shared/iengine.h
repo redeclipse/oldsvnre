@@ -148,6 +148,7 @@ enum
     TEXT_SHADOW         = 1<<0,
     TEXT_NO_INDENT      = 1<<1,
     TEXT_UPWARD         = 1<<2,
+    TEXT_BALLOON        = 1<<3,
 
     TEXT_ALIGN          = 3<<8,
     TEXT_LEFT_JUSTIFY   = 0<<8,
@@ -156,7 +157,11 @@ enum
 
     TEXT_LEFT_UP        = TEXT_UPWARD|TEXT_LEFT_JUSTIFY,
     TEXT_CENTER_UP      = TEXT_UPWARD|TEXT_CENTERED,
-    TEXT_RIGHT_UP       = TEXT_UPWARD|TEXT_RIGHT_JUSTIFY
+    TEXT_RIGHT_UP       = TEXT_UPWARD|TEXT_RIGHT_JUSTIFY,
+
+    TEXT_LEFT_BAL       = TEXT_BALLOON|TEXT_LEFT_JUSTIFY,
+    TEXT_CENTER_BAL     = TEXT_BALLOON|TEXT_CENTERED,
+    TEXT_RIGHT_BAL      = TEXT_BALLOON|TEXT_RIGHT_JUSTIFY
 };
 
 extern bool setfont(const char *name);
