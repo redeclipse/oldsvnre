@@ -129,6 +129,8 @@ namespace game
     VAR(IDF_PERSIST, spectvspeed, 1, 1000, VAR_MAX);
     VAR(IDF_PERSIST, spectvyawspeed, 1, 1000, VAR_MAX);
     VAR(IDF_PERSIST, spectvpitchspeed, 1, 750, VAR_MAX);
+    FVAR(IDF_PERSIST, spectvmindist, 0, 0, FVAR_MAX);
+    FVAR(IDF_PERSIST, spectvmaxdist, 0, 128, FVAR_MAX);
     FVAR(IDF_PERSIST, spectvrotate, FVAR_MIN, 45, FVAR_MAX); // rotate style, < 0 = absolute angle, 0 = scaled, > 0 = scaled with max angle
     FVAR(IDF_PERSIST, spectvyawscale, FVAR_MIN, 1, 1000);
     FVAR(IDF_PERSIST, spectvpitchscale, FVAR_MIN, 1, 1000);
@@ -2331,8 +2333,8 @@ namespace game
                     vectoyawpitch(vec(cam->o).sub(from).normalize(), yaw, pitch);
                     fixrange(yaw, pitch);
                 }
-                float dist = from.dist(cam->o), fogdist = min(c->maxdist, foglevel);
-                if(dist >= c->mindist && getsight(from, yaw, pitch, cam->o, trg, fogdist, curfov, fovy))
+                float dist = from.dist(cam->o), fogdist = min(spectvmaxdist, foglevel);
+                if(dist >= spectvmindist && getsight(from, yaw, pitch, cam->o, trg, fogdist, curfov, fovy))
                 {
                     c->inview[cam->type]++;
                     dir.add(cam->o);
