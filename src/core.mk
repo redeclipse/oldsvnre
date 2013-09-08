@@ -9,11 +9,12 @@ override CXXFLAGS+= -Wall -fsigned-char -fno-exceptions -fno-rtti
 PLATFORM= $(shell uname -s)
 PLATFORM_SUFFIX=_native
 PLATFORM_BIN=
+BIN_SUFFIX=
 
 ifneq (,$(PLATFORM_BIN))
-INSTDIR=../bin/$(PLATFORM_BIN)/
+INSTDIR=../bin/$(PLATFORM_BIN)
 else
-INSTDIR=../bin/
+INSTDIR=../bin
 endif
 
 TOOLSET_PREFIX=
@@ -45,6 +46,8 @@ CP=cp
 MKDIR=mkdir -p
 
 ifneq (,$(findstring MINGW,$(PLATFORM)))
+BIN_SUFFIX=.exe
+PLATFORM_SUFFIX=
 WINDRES=windres
 WINDRES_TEMP:=$(WINDRES)
 override WINDRES=$(TOOLSET_PREFIX)$(WINDRES_TEMP)
@@ -178,10 +181,10 @@ clean-enet: enet/Makefile
 	$(MAKE) -C enet/ clean
 
 clean-client:
-	@rm -fv $(CLIENT_PCH) $(CLIENT_OBJS) $(APPCLIENT)
+	@rm -fv $(CLIENT_PCH) $(CLIENT_OBJS) $(APPCLIENT)$(BIN_SUFFIX)
 
 clean-server:
-	@rm -fv $(SERVER_OBJS) $(APPSERVER)
+	@rm -fv $(SERVER_OBJS) $(APPSERVER)$(BIN_SUFFIX)
 
 clean: clean-client clean-server
 
@@ -199,45 +202,36 @@ $(filter game/%,$(CLIENT_OBJS)): $(filter game/%,$(CLIENT_PCH))
 
 $(SERVER_OBJS): CXXFLAGS += $(SERVER_INCLUDES)
 
-ifneq (,$(findstring MINGW,$(PLATFORM)))
-client: $(CLIENT_OBJS)
+$(APPCLIENT).exe: $(CLIENT_OBJS)
 	$(WINDRES) -i $(APPNAME).rc -J rc -o $(APPNAME).res -O coff
-	$(CXX) $(CXXFLAGS) -o $(WINBIN)/$(APPCLIENT).exe $(APPNAME).res $(CLIENT_OBJS) $(CLIENT_LIBS)
+	$(CXX) $(CXXFLAGS) -o $@ $(APPNAME).res $(CLIENT_OBJS) $(CLIENT_LIBS)
 
-server: $(SERVER_OBJS)
+$(APPSERVER).exe: $(SERVER_OBJS)
 	$(WINDRES) -i $(APPNAME).rc -J rc -o $(APPNAME).res -O coff
-	$(CXX) $(CXXFLAGS) -o $(WINBIN)/$(APPSERVER).exe $(APPNAME).res $(SERVER_OBJS) $(SERVER_LIBS)
+	$(CXX) $(CXXFLAGS) -o $@ $(APPNAME).res $(SERVER_OBJS) $(SERVER_LIBS)
 
-install-client: client
-ifneq (,$(STRIP))
-	$(STRIP) $(INSTDIR)/$(APPCLIENT).exe
-endif
+$(APPCLIENT): $(LIBENET) $(CLIENT_OBJS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $(CLIENT_OBJS) $(CLIENT_LIBS)
 
-install-server: server
-ifneq (,$(STRIP))
-	$(STRIP) $(INSTDIR)/$(APPSERVER).exe
-endif
-else
-client: $(LIBENET) $(CLIENT_OBJS)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $(APPCLIENT) $(CLIENT_OBJS) $(CLIENT_LIBS)
-ifneq (,$(STRIP))
-	$(STRIP) $(APPCLIENT)
-endif
+$(APPSERVER): $(LIBENET) $(SERVER_OBJS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $(SERVER_OBJS) $(SERVER_LIBS)
 
-server: $(LIBENET) $(SERVER_OBJS)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $(APPSERVER) $(SERVER_OBJS) $(SERVER_LIBS)
-ifneq (,$(STRIP))
-	$(STRIP) $(APPSERVER)
-endif
+client: $(APPCLIENT)$(BIN_SUFFIX)
 
-install-client: client
+server: $(APPSERVER)$(BIN_SUFFIX)
+
+$(INSTDIR)/%$(PLATFORM_SUFFIX)$(BIN_SUFFIX): %$(BIN_SUFFIX)
 	$(MKDIR) $(INSTDIR)
-	install -m 755 $(APPCLIENT) $(INSTDIR)$(APPCLIENT)$(PLATFORM_SUFFIX)
+	$(CP) $< $@
+ifneq (,$(STRIP))
+	$(STRIP) $@
+endif
 
-install-server: server
-	$(MKDIR) $(INSTDIR)
-	install -m 755 $(APPSERVER) $(INSTDIR)$(APPSERVER)$(PLATFORM_SUFFIX)
+install-client: $(INSTDIR)/$(APPCLIENT)$(PLATFORM_SUFFIX)$(BIN_SUFFIX)
 
+install-server: $(INSTDIR)/$(APPSERVER)$(PLATFORM_SUFFIX)$(BIN_SUFFIX)
+
+ifeq (,$(findstring MINGW,$(PLATFORM)))
 shared/cube2font.o: shared/cube2font.c
 	$(CXX) $(CXXFLAGS) -c -o $@ $< `freetype-config --cflags`
 
