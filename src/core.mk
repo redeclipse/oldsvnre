@@ -155,13 +155,21 @@ SERVER_OBJS= \
 	engine/server-standalone.o \
 	game/server-standalone.o
 
+LIBENET= enet/.libs/libenet.a
+
+TEMP_INCLUDES:=$(INCLUDES)
+include enet/Makefile.am
+INCLUDES=$(TEMP_INCLUDES)
+
 default: all
 
 enet/Makefile: enet/configure
 	cd enet; ./configure --enable-shared=no --enable-static=yes
 
-libenet: enet/Makefile
+$(LIBENET): enet/Makefile $(enetinclude_HEADERS:%=enet/%) $(libenet_la_SOURCES:%=enet/%)
 	$(MAKE) -C enet/ all
+
+libenet: $(LIBENET)
 
 clean-enet: enet/Makefile
 	$(MAKE) -C enet/ clean
@@ -207,13 +215,13 @@ ifneq (,$(STRIP))
 	$(STRIP) $(WINBIN)/$(APPSERVER).exe
 endif
 else
-client: libenet $(CLIENT_OBJS)
+client: $(LIBENET) $(CLIENT_OBJS)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $(APPCLIENT) $(CLIENT_OBJS) $(CLIENT_LIBS)
 ifneq (,$(STRIP))
 	$(STRIP) $(APPCLIENT)
 endif
 
-server: libenet $(SERVER_OBJS)
+server: $(LIBENET) $(SERVER_OBJS)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $(APPSERVER) $(SERVER_OBJS) $(SERVER_LIBS)
 ifneq (,$(STRIP))
 	$(STRIP) $(APPSERVER)
