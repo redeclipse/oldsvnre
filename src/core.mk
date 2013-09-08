@@ -239,11 +239,11 @@ shared/cube2font.o: shared/cube2font.c
 	$(CXX) $(CXXFLAGS) -c -o $@ $< `freetype-config --cflags`
 
 cube2font: shared/cube2font.o
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o cube2font shared/cube2font.o `freetype-config --libs` -lz
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $< `freetype-config --libs` -lz
 
 install-cube2font: cube2font
 	$(MKDIR) $(INSTDIR)
-	install -m 755 cube2font $(INSTDIR)/cube2font
+	install -m 755 $< $(INSTDIR)/$<
 endif
 
 install: install-client install-server
