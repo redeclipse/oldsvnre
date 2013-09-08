@@ -696,7 +696,7 @@ namespace hud
         if(inventoryscoreinfo&2)
         {
             const char *pls[10] = { "th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th" };
-            formatstring(q)("\n\fs%s%d %s\fS", col, pos+1, pls[(pos+1)%10]);
+            formatstring(q)(" \fs%s%d%s\fS", col, pos+1, pls[(pos+1)%10]);
             concatstring(str, q);
         }
         if(inventoryscoreinfo&1)
