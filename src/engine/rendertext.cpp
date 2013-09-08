@@ -548,7 +548,8 @@ int draw_textx(const char *fstr, int left, int top, int r, int g, int b, int a, 
         case TEXT_RIGHT_JUSTIFY: left -= width; break;
         default: break;
     }
-    if(flags&TEXT_UPWARD) top -= height;
+    if(flags&TEXT_BALLOON) top -= height/2;
+    else if(flags&TEXT_UPWARD) top -= height;
     if(flags&TEXT_SHADOW) draw_text(str, left-2, top-2, 0, 0, 0, a, flags, cursor, maxwidth);
     return draw_text(str, left, top, r, g, b, a, flags, cursor, maxwidth);
 }

@@ -122,6 +122,9 @@ namespace hud
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, pointtex, "<grey>textures/hud/point", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, bombtex, "<grey>textures/hud/bomb", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, arrowtex, "<grey>textures/hud/arrow", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, arrowrighttex, "<grey><rotate:1>textures/hud/arrow", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, arrowdowntex, "<grey><rotate:2>textures/hud/arrow", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, arrowlefttex, "<grey><rotate:3>textures/hud/arrow", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, alerttex, "<grey>textures/hud/alert", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, flagdroptex, "<grey>textures/hud/flagdrop", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, flagtakentex, "<grey>textures/hud/flagtaken", 3);
@@ -221,12 +224,13 @@ namespace hud
     VAR(IDF_PERSIST, inventorygame, 0, 2, 2);
     VAR(IDF_PERSIST, inventoryscore, 0, 1, VAR_MAX);
     VAR(IDF_PERSIST, inventoryscorebg, 0, 0, 1);
+    VAR(IDF_PERSIST, inventoryscoreinfo, 0, 3, 3); // 0 = normal readout, &1 = offset, &2 = position
     VAR(IDF_PERSIST, inventoryweapids, 0, 2, 2);
     VAR(IDF_PERSIST, inventorycolour, 0, 2, 2);
     VAR(IDF_PERSIST, inventoryflash, 0, 0, 1);
     FVAR(IDF_PERSIST, inventorysize, 0, 0.06f, 1000);
     FVAR(IDF_PERSIST, inventoryskew, 1e-4f, 0.65f, 1000);
-    FVAR(IDF_PERSIST, inventoryscoresize, 0, 0.65f, 1);
+    FVAR(IDF_PERSIST, inventoryscoresize, 0, 0.75f, 1);
     FVAR(IDF_PERSIST, inventoryscoreshrink, 0, 0.15f, 1);
     FVAR(IDF_PERSIST, inventoryscoreshrinkmax, 0, 0.45f, 1);
     FVAR(IDF_PERSIST, inventoryblend, 0, 1, 1);
@@ -2236,7 +2240,7 @@ namespace hud
             if(font && *font) pushfont(font);
             int ox = int(cw*inventorytextoffsetx), oy = int(cs*inventorytextoffsety),
                 tx = int((left ? (cx+cw-ox) : (cx-cw+ox))/skew),
-                ty = int((cy-cs+cs/2-(FONTH/2*skew)+oy)/skew), tj = left ? TEXT_LEFT_JUSTIFY : TEXT_RIGHT_JUSTIFY;
+                ty = int((cy-cs/2+oy)/skew), tj = left ? TEXT_LEFT_BAL : TEXT_RIGHT_BAL;
             defvformatstring(str, text, text);
             draw_textx("%s", tx, ty, 255, 255, 255, int(255*fade), tj|TEXT_NO_INDENT, -1, -1, str);
             if(font && *font) popfont();
