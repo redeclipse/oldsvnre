@@ -157,7 +157,7 @@ SERVER_OBJS= \
 
 default: all
 
-enet/Makefile:
+enet/Makefile: enet/configure
 	cd enet; ./configure --enable-shared=no --enable-static=yes
 
 libenet: enet/Makefile
