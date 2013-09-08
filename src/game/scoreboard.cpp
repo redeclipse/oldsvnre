@@ -690,20 +690,20 @@ namespace hud
         vec c = vec::hexcolor(colour);
         int size = int(s*skew);
         string str, q;
-        if(m_laptime(game::gamemode, game::mutators)) { formatstring(str)("[ \fs%s%s\fS ]", col, score ? timestr(score) : "dnf"); }
-        else if(m_defend(game::gamemode) && score == INT_MAX) { formatstring(str)("[ \fs%sWIN\fS ]", col); }
-        else { formatstring(str)("[ \fs%s%d\fS ]", col, score); }
+        if(m_laptime(game::gamemode, game::mutators)) { formatstring(str)("[\fs%s%s\fS]", col, score ? timestr(score) : "dnf"); }
+        else if(m_defend(game::gamemode) && score == INT_MAX) { formatstring(str)("[\fs%sWIN\fS]", col); }
+        else { formatstring(str)("[\fs%s%d\fS]", col, score); }
+        if(inventoryscoreinfo&1)
+        {
+            if(m_laptime(game::gamemode, game::mutators))
+                { formatstring(q)(" \fs%s\f(%s)\fS%s", offset ? (offset < 0 ? "\fg" : "\fr") : "\fy", offset ? (offset < 0 ? arrowtex : arrowdowntex) : arrowrighttex, offset ? timestr(offset < 0 ? 0-offset : offset) : "dnf"); }
+            else { formatstring(q)(" \fs%s\f(%s)\fS%d", offset ? (offset > 0 ? "\fg" : "\fr") : "\fy", offset ? (offset > 0 ? arrowtex : arrowdowntex) : arrowrighttex, offset < 0 ? 0-offset : offset); }
+            concatstring(str, q);
+        }
         if(inventoryscoreinfo&2)
         {
             const char *pls[10] = { "th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th" };
             formatstring(q)(" \fs%s%d%s\fS", col, pos+1, pls[(pos+1)%10]);
-            concatstring(str, q);
-        }
-        if(inventoryscoreinfo&1)
-        {
-            if(m_laptime(game::gamemode, game::mutators))
-                { formatstring(q)("\n\fs%s\f(%s)\fS %s", offset ? (offset < 0 ? "\fg" : "\fr") : "\fy", offset ? (offset < 0 ? arrowtex : arrowdowntex) : arrowrighttex, offset ? timestr(offset < 0 ? 0-offset : offset) : "dnf"); }
-            else { formatstring(q)("\n\fs%s\f(%s)\fS %d", offset ? (offset > 0 ? "\fg" : "\fr") : "\fy", offset ? (offset > 0 ? arrowtex : arrowdowntex) : arrowrighttex, offset < 0 ? 0-offset : offset); }
             concatstring(str, q);
         }
         drawitem(icon, x, y+size, s, inventoryscorebg!=0, 0, false, c.r, c.g, c.b, fade, skew, "default", "%s", str);
