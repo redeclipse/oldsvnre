@@ -105,6 +105,7 @@ endif
 	$(MAKE) -C $@/src clean
 	-$(MAKE) -C $@/src/enet distclean
 	rm -rf $@/src/enet/autom4te.cache/
+	rm -f $@/data/misc/largeandincharge.png
 
 distdir: ../$(dirname)
 

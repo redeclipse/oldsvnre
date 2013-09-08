@@ -100,6 +100,7 @@ system-install-server: server
 system-install-data:
 	$(MKDIR) $(datadir)/$(appname)/game
 	cp -r ../data $(datadir)/$(appname)/data
+	rm -f $(datadir)/$(appname)/data/misc/largeandincharge.png
 	cp -r ../$(appgamedir) $(datadir)/$(appname)/game
 
 system-install-docs: $(MANPAGES)

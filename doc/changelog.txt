@@ -33,7 +33,6 @@ Modding & Mapmaking:
 Data Assets:
  * New vanity items (Stratocaster, foxears, crown)
  * New chiptune music
- * New massaging object
  * New wakawaka sound
 
 Multiplayer & Servers:
