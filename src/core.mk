@@ -50,11 +50,13 @@ override WINDRES=$(TOOLSET_PREFIX)$(WINDRES_TEMP)
 ifneq (,$(findstring 64,$(PLATFORM)))
 WINLIB=lib/amd64
 WINBIN=../bin/amd64
+INSTDIR=../bin/amd64
 override CXX+= -m64
 override WINDRES+= -F pe-x86-64
 else
 WINLIB=lib/x86
 WINBIN=../bin/x86
+INSTDIR=../bin/x86
 override CXX+= -m32
 override WINDRES+= -F pe-i386
 endif
@@ -174,13 +176,13 @@ libenet: $(LIBENET)
 clean-enet: enet/Makefile
 	$(MAKE) -C enet/ clean
 
-clean: clean-client clean-server
-
 clean-client:
 	@rm -fv $(CLIENT_PCH) $(CLIENT_OBJS) $(APPCLIENT)
 
 clean-server:
 	@rm -fv $(SERVER_OBJS) $(APPSERVER)
+
+clean: clean-client clean-server
 
 %.h.gch: %.h
 	$(CXX) $(CXXFLAGS) -o $(subst .h.gch,.tmp.h.gch,$@) $(subst .h.gch,.h,$@)
@@ -207,12 +209,12 @@ server: $(SERVER_OBJS)
 
 install-client: client
 ifneq (,$(STRIP))
-	$(STRIP) $(WINBIN)/$(APPCLIENT).exe
+	$(STRIP) $(INSTDIR)/$(APPCLIENT).exe
 endif
 
 install-server: server
 ifneq (,$(STRIP))
-	$(STRIP) $(WINBIN)/$(APPSERVER).exe
+	$(STRIP) $(INSTDIR)/$(APPSERVER).exe
 endif
 else
 client: $(LIBENET) $(CLIENT_OBJS)
