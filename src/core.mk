@@ -41,6 +41,7 @@ STRIP_TEMP:=$(STRIP)
 override STRIP=$(TOOLSET_PREFIX)$(STRIP_TEMP)
 
 MV=mv
+CP=cp
 MKDIR=mkdir -p
 
 ifneq (,$(findstring MINGW,$(PLATFORM)))
