@@ -740,20 +740,20 @@ namespace hud
                 {
                     if(sg.total)
                     {
-                        pushfont("reduced");
+                        pushfont("little");
                         sy += draw_textx("by %s", x+FONTW*2, y, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, game::colourteam(sg.team));
                         popfont();
-                        sy += draw_textx("\fg%s", x, y, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, timestr(sg.total));
+                        sy += draw_textx("\fg%s", x, y+sy, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, timestr(sg.total));
                     }
                 }
                 else if(!sg.players.empty())
                 {
                     if(sg.players[0]->cptime)
                     {
-                        pushfont("reduced");
+                        pushfont("little");
                         sy += draw_textx("by %s", x+FONTW*2, y, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, game::colourname(sg.players[0]));
                         popfont();
-                        sy += draw_textx("\fg%s", x, y, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, timestr(sg.players[0]->cptime));
+                        sy += draw_textx("\fg%s", x, y+sy, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, timestr(sg.players[0]->cptime));
                     }
                 }
             }
@@ -761,10 +761,10 @@ namespace hud
             {
                 if(sg.total)
                 {
-                    pushfont("reduced");
+                    pushfont("little");
                     sy += draw_textx("by %s", x+FONTW*2, y, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, game::colourteam(sg.team));
                     popfont();
-                    sy += draw_textx("\fg%d", x, y, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, sg.total);
+                    sy += draw_textx("\fg%d", x, y+sy, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, sg.total);
                 }
             }
         }
