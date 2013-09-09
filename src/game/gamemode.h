@@ -81,7 +81,7 @@ gametypes gametype[] = {
             0, 0, 0
         },
         "deathmatch", "dm", { "", "", "" },
-        "shoot to kill and earn points by fragging", { "", "", "" },
+        "shoot to kill and increase score by fragging", { "", "", "" },
     },
     {
         G_CAPTURE, 0, 0,
@@ -92,7 +92,7 @@ gametypes gametype[] = {
             (1<<G_M_MULTI)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_DUEL)|(1<<G_M_SURVIVOR)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP3)
         },
         "capture-the-flag", "capture", { "quick", "defend", "protect" },
-        "take the enemy flag and return it to the base", { "dropped flags instantly return to base", "dropped flags must be defended until they reset", "protect the flag and hold the enemy flag to score" },
+        "take the enemy flag and return it to the base to score", { "dropped flags instantly return to base", "dropped flags must be defended until they reset", "protect the flag and hold the enemy flag to score" },
     },
     {
         G_DEFEND, 0, 0,
@@ -102,8 +102,8 @@ gametypes gametype[] = {
             (1<<G_M_MULTI)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1)|(1<<G_M_GSP2),
             0
         },
-        "defend-the-flag", "defend", { "quick", "king", "" },
-        "defend the flags to earn points", { "flags secure quicker than normal", "king of the hill with one flag", ""},
+        "defend-and-control", "defend", { "quick", "king", "" },
+        "defend control points to score", { "control points secure quicker than normal", "remain king of the hill to score", ""},
     },
     {
         G_BOMBER, (1<<G_F_GSP), 0,
@@ -114,7 +114,7 @@ gametypes gametype[] = {
             0
         },
         "bomber-ball", "bomber", { "hold", "touchdown", "" },
-        "carry or throw the bomb into the enemy goal to score", { "hold the bomb as long as possible to score points", "carry the bomb into the enemy goal to score", "" },
+        "carry or throw the bomb into the enemy goal to score", { "hold the bomb as long as possible to score", "carry the bomb into the enemy goal to score", "" },
     },
     {
         G_TRIAL, 0, 0,
@@ -366,12 +366,12 @@ extern mutstypes mutstype[];
 #endif
 #ifdef GAMESERVER
 #ifdef CAMPAIGN
-SVAR(0, modename, "demo editing campaign deathmatch capture-the-flag defend-the-flag bomber-ball time-trial gauntlet");
+SVAR(0, modename, "demo editing campaign deathmatch capture-the-flag defend-and-control bomber-ball time-trial gauntlet");
 SVAR(0, modeidxname, "demo editing campaign deathmatch capture defend bomber trial gauntlet");
 VAR(0, modeidxcampaign, 1, G_CAMPAIGN, -1);
 VAR(0, modebitcampaign, 1, (1<<G_CAMPAIGN), -1);
 #else
-SVAR(0, modename, "demo editing deathmatch capture-the-flag defend-the-flag bomber-ball time-trial gauntlet");
+SVAR(0, modename, "demo editing deathmatch capture-the-flag defend-and-control bomber-ball time-trial gauntlet");
 SVAR(0, modeidxname, "demo editing deathmatch capture defend bomber trial gauntlet");
 #endif
 VAR(0, modeidxdemo, 1, G_DEMO, -1);

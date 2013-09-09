@@ -1,7 +1,7 @@
 // WARNING: Before modifying this file, please read our Guidelines
 // This file can be found in the distribution under: ./docs/guidelines.txt
 // Or at: http://www.redeclipse.net/wiki/Multiplayer_Guidelines
-// 
+//
 // The Red Eclipse Team provides the play.redeclipse.net master server for the
 // benefit of the Red Eclipse Community. We impose a general set of guidelines
 // for any server/user which connects to the play.redeclipse.net master server.
@@ -1232,6 +1232,7 @@ namespace server
         if(type == 2 || type == 3 || type == 4 || type == 5)
         {
             if((type == 4 || type == 5) && m_capture(mode) && m_gsp3(mode, muts)) concatstring(mdname, gametype[mode].gsd[2]);
+            else if((type == 4 || type == 5) && m_defend(mode) && m_gsp2(mode, muts)) concatstring(mdname, gametype[mode].gsd[1]);
             else if((type == 4 || type == 5) && m_bomber(mode) && m_gsp1(mode, muts)) concatstring(mdname, gametype[mode].gsd[0]);
             else if((type == 4 || type == 5) && m_bomber(mode) && m_gsp2(mode, muts)) concatstring(mdname, gametype[mode].gsd[1]);
             else if((type == 4 || type == 5) && m_gauntlet(mode) && m_gsp1(mode, muts)) concatstring(mdname, gametype[mode].gsd[0]);
@@ -1251,6 +1252,7 @@ namespace server
         if(type == 4 || type == 5)
         {
             if(m_capture(mode) && m_gsp3(mode, muts)) return "";
+            else if(m_defend(mode) && m_gsp2(mode, muts)) return "";
             else if(m_bomber(mode) && (m_gsp1(mode, muts) || m_gsp2(mode, muts))) return "";
             else if(m_gauntlet(mode) && m_gsp1(mode, muts)) return "";
         }
