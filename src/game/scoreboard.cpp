@@ -696,7 +696,7 @@ namespace hud
         if(inventoryscoreinfo&1)
         {
             if(m_laptime(game::gamemode, game::mutators))
-                { formatstring(q)("%s\fs%s\f(%s)\fS%s", inventoryscorebreak&1 ? "\n" : " ", offset ? (offset < 0 ? "\f[0x00FF00]" : "\f[0xFF0000]") : "\f[0xFFFF00]", offset ? (offset < 0 ? arrowtex : arrowdowntex) : arrowrighttex, offset ? timestr(offset < 0 ? 0-offset : offset) : "dnf"); }
+                { formatstring(q)("%s\fs%s\f(%s)\fS%s", inventoryscorebreak&1 ? "\n" : " ", offset ? (offset < 0 ? "\f[0x00FF00]" : "\f[0xFF0000]") : "\f[0xFFFF00]", offset ? (offset < 0 ? arrowtex : arrowdowntex) : arrowrighttex, timestr(offset < 0 ? 0-offset : offset)); }
             else { formatstring(q)("%s\fs%s\f(%s)\fS%d", inventoryscorebreak&1 ? "\n" : " ", offset ? (offset > 0 ? "\f[0x00FF00]" : "\f[0xFF0000]") : "\f[0xFFFF00]", offset ? (offset > 0 ? arrowtex : arrowdowntex) : arrowrighttex, offset < 0 ? 0-offset : offset); }
             concatstring(str, q);
         }
@@ -761,7 +761,7 @@ namespace hud
                         pushfont("little");
                         sy += draw_textx("by %s", x+FONTW*2, y, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, game::colourteam(sg.team));
                         popfont();
-                        sy += draw_textx("\fg%s", x, y+sy, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, timestr(sg.total));
+                        sy += draw_textx("\fg%s", x, y-sy, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, timestr(sg.total));
                     }
                 }
                 else if(!sg.players.empty())
@@ -771,7 +771,7 @@ namespace hud
                         pushfont("little");
                         sy += draw_textx("by %s", x+FONTW*2, y, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, game::colourname(sg.players[0]));
                         popfont();
-                        sy += draw_textx("\fg%s", x, y+sy, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, timestr(sg.players[0]->cptime));
+                        sy += draw_textx("\fg%s", x, y-sy, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, timestr(sg.players[0]->cptime));
                     }
                 }
             }
@@ -782,7 +782,7 @@ namespace hud
                     pushfont("little");
                     sy += draw_textx("by %s", x+FONTW*2, y, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, game::colourteam(sg.team));
                     popfont();
-                    sy += draw_textx("\fg%d", x, y+sy, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, sg.total);
+                    sy += draw_textx("\fg%d", x, y-sy, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, sg.total);
                 }
             }
         }
