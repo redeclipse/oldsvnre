@@ -641,7 +641,7 @@ ENetSocket connectmaster(bool reuse)
     if(!reuse || serveraddress.host == ENET_HOST_ANY || !enet_socket_bind(sock, &serveraddress))
     {
         enet_socket_set_option(sock, ENET_SOCKOPT_NONBLOCK, 1);
-        if(!reuse) 
+        if(!reuse)
         {
             if(!connectwithtimeout(sock, servermaster, masteraddress)) return sock;
         }
@@ -1537,17 +1537,11 @@ void writecfg()
     loopv(ids)
     {
         ident &id = *ids[i];
-        bool saved = false;
         if(id.flags&IDF_PERSIST) switch(id.type)
         {
-            case ID_VAR: if(*id.storage.i != id.def.i) { found = saved = true; f->printf((id.flags&IDF_HEX && *id.storage.i >= 0 ? (id.maxval==0xFFFFFF ? "%s 0x%.6X" : "%s 0x%X") : "%s %d"), escapeid(id), *id.storage.i); } break;
-            case ID_FVAR: if(*id.storage.f != id.def.f) { found = saved = true; f->printf("%s %s", escapeid(id), floatstr(*id.storage.f)); } break;
-            case ID_SVAR: if(strcmp(*id.storage.s, id.def.s)) { found = saved = true; f->printf("%s %s", escapeid(id), escapestring(*id.storage.s)); } break;
-        }
-        if(saved)
-        {
-            if(!(id.flags&IDF_COMPLETE)) f->printf("; setcomplete %s 0", escapeid(id));
-            f->printf("\n");
+            case ID_VAR: if(*id.storage.i != id.def.i) { found = true; f->printf((id.flags&IDF_HEX && *id.storage.i >= 0 ? (id.maxval==0xFFFFFF ? "%s 0x%.6X\n" : "%s 0x%X\n") : "%s %d\n"), escapeid(id), *id.storage.i); } break;
+            case ID_FVAR: if(*id.storage.f != id.def.f) { found = true; f->printf("%s %s\n", escapeid(id), floatstr(*id.storage.f)); } break;
+            case ID_SVAR: if(strcmp(*id.storage.s, id.def.s)) { found = true; f->printf("%s %s\n", escapeid(id), escapestring(*id.storage.s)); } break;
         }
     }
     if(found) f->printf("\n");
@@ -1555,26 +1549,16 @@ void writecfg()
     loopv(ids)
     {
         ident &id = *ids[i];
-        bool saved = false;
         if(id.flags&IDF_PERSIST) switch(id.type)
         {
             case ID_ALIAS:
             {
                 const char *str = id.getstr();
-                //if(str[0])
-                {
-                    found = saved = true;
-                    if(validateblock(str)) f->printf("%s = [%s]", escapeid(id), str);
-                    else f->printf("%s = %s", escapeid(id), escapestring(str));
-                }
+                found = true;
+                if(validateblock(str)) f->printf("%s = [%s]\n", escapeid(id), str);
+                else f->printf("%s = %s\n", escapeid(id), escapestring(str));
             }
             break;
-        }
-        if(saved)
-        {
-            f->printf("; setpersist \"%s\" 1", id.name);
-            if(id.flags&IDF_COMPLETE) f->printf("; setcomplete \"%s\" 1", id.name);
-            f->printf("\n");
         }
     }
     if(found) f->printf("\n");
