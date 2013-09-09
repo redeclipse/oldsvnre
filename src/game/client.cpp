@@ -459,7 +459,7 @@ namespace client
         game::player1->pitch = camera1->pitch;
         game::player1->resetinterp();
         game::resetstate();
-        game::resetfollow();
+        game::specreset();
         physics::entinmap(game::player1, true); // find spawn closest to current floating pos
         projs::remove(game::player1);
         if(m_edit(game::gamemode)) addmsg(N_EDITMODE, "ri", edit ? 1 : 0);
@@ -2357,7 +2357,7 @@ namespace client
                     int sn = getint(p), val = getint(p);
                     gameent *s = game::newclient(sn);
                     if(!s) break;
-                    if(s == game::player1) game::resetfollow();
+                    if(s == game::player1) game::specreset();
                     if(val != 0)
                     {
                         if(s == game::player1 && editmode) toggleedit();

@@ -103,9 +103,9 @@ namespace game
     VAR(IDF_PERSIST, specfov, 1, 120, 179);
 
     VAR(IDF_PERSIST, followmode, 0, 1, 1); // 0 = never, 1 = tv
-    VARF(IDF_PERSIST, specmode, 0, 1, 1, resetfollow()); // 0 = float, 1 = tv
-    VARF(IDF_PERSIST, waitmode, 0, 1, 1, resetfollow()); // 0 = float, 1 = tv
-    VARF(IDF_PERSIST, intermmode, 0, 1, 1, resetfollow()); // 0 = float, 1 = tv
+    VARF(IDF_PERSIST, specmode, 0, 1, 1, specreset()); // 0 = float, 1 = tv
+    VARF(IDF_PERSIST, waitmode, 0, 1, 1, specreset()); // 0 = float, 1 = tv
+    VARF(IDF_PERSIST, intermmode, 0, 1, 1, specreset()); // 0 = float, 1 = tv
 
     VAR(IDF_PERSIST, followdead, 0, 1, 2); // 0 = never, 1 = in all but duel/survivor, 2 = always
     VAR(IDF_PERSIST, followthirdperson, 0, 1, 1);
@@ -242,13 +242,6 @@ namespace game
     VAR(IDF_PERSIST, autoloadweap, 0, 0, 1); // 0 = off, 1 = auto-set loadout weapons
     SVAR(IDF_PERSIST, favloadweaps, "");
     FVAR(IDF_PERSIST, twitchspeed, 0, 20, FVAR_MAX);
-
-    void resetfollow()
-    {
-        if(!tvmode()) follow = -1;
-        else spectvfollow = -1;
-        focus = player1;
-    }
 
     bool needname(gameent *d)
     {
@@ -546,6 +539,13 @@ namespace game
     }
     ICOMMAND(0, announce, "iiisN", (int *idx, int *targ, int *cn, int *forced, char *s, int *numargs), (*numargs >= 5 ? announcef(*numargs >= 1 ? *idx : -1, *numargs >= 2 ? *targ : CON_MESG, *numargs >= 3 ? getclient(*cn) : NULL, *numargs >= 4 ? *forced!=0 : false, "\fw%s", s) : announcef(*numargs >= 1 ? *idx : -1, *numargs >= 2 ? *targ : CON_MESG, *numargs >= 3 ? getclient(*cn) : NULL, *numargs >= 4 ? *forced!=0 : false, NULL)));
 
+    void resetfollow()
+    {
+        if(!tvmode()) follow = -1;
+        else spectvfollow = -1;
+        focus = player1;
+    }
+
     void specreset(gameent *d, bool clear)
     {
         if(d)
@@ -607,7 +607,7 @@ namespace game
         if(tvmode(true, true))
         {
             if(!tvmode(true, false)) followmode = 0;
-            else { specmode = 0; resetfollow(); }
+            else { specmode = 0; specreset(); }
         }
         else if(focus != player1) followmode = 1;
         else specmode = 1;
@@ -616,7 +616,7 @@ namespace game
         if(tvmode(true, true))
         {
             if(!tvmode(true, false)) followmode = 0;
-            else { waitmode = 0; resetfollow(); }
+            else { waitmode = 0; specreset(); }
         }
         else if(focus != player1) followmode = 1;
         else waitmode = 1;
@@ -640,7 +640,7 @@ namespace game
                     if(other) *f += clamp(n, -1, 1); \
                     else \
                     { \
-                        resetfollow(); \
+                        specreset(); \
                         return true; \
                     } \
                     checkfollow; \
@@ -662,7 +662,7 @@ namespace game
                     }
                 }
             }
-            resetfollow();
+            specreset();
         }
         return false;
     }
@@ -698,7 +698,7 @@ namespace game
         }
         d->setscale(rescale(d), 0, true, gamemode, mutators);
 
-        if(d == player1) resetfollow();
+        if(d == player1) specreset();
         if(d == focus) resetcamera();
 
         if(d->aitype < AI_START)
@@ -2557,7 +2557,7 @@ namespace game
             camera1->state = CS_ALIVE;
             camera1->height = camera1->zradius = camera1->radius = camera1->xradius = camera1->yradius = 2;
         }
-        if(player1->state < CS_SPECTATOR && focus != player1) resetfollow();
+        if(player1->state < CS_SPECTATOR && focus != player1) specreset();
         if(tvmode() || player1->state < CS_SPECTATOR)
         {
             camera1->vel = vec(0, 0, 0);
@@ -2627,7 +2627,7 @@ namespace game
 
     void resetworld()
     {
-        resetfollow();
+        specreset();
         hud::showscores(false);
         cleargui();
     }
