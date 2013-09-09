@@ -174,7 +174,7 @@ namespace game
 
     VAR(IDF_PERSIST, aboveheadnames, 0, 1, 1);
     VAR(IDF_PERSIST, aboveheadstatus, 0, 1, 1);
-    VAR(IDF_PERSIST, aboveheadteam, 0, 1, 2);
+    VAR(IDF_PERSIST, aboveheadteam, 0, 3, 3);
     VAR(IDF_PERSIST, aboveheaddamage, 0, 0, 1);
     VAR(IDF_PERSIST, aboveheadicons, 0, 5, 7);
     FVAR(IDF_PERSIST, aboveheadblend, 0.f, 1, 1.f);
@@ -230,6 +230,11 @@ namespace game
     FVAR(IDF_PERSIST, playerlightmix, 0, 0.75f, 100);
     FVAR(IDF_PERSIST, playertonemix, 0, 0.25f, 1);
     FVAR(IDF_PERSIST, playerblend, 0, 1, 1);
+
+    VAR(IDF_PERSIST, playerhint, 0, 3, 3);
+    VAR(IDF_PERSIST, playerhinttone, -1, CTONE_TEAM, CTONE_MAX-1);
+    FVAR(IDF_PERSIST, playerhintblend, 0, 0.1f, 1);
+    FVAR(IDF_PERSIST, playerhintsize, 0, 1.1f, 2);
 
     VAR(IDF_PERSIST, nogore, 0 , 0, 2); // turns off all gore, 0 = off, 1 = replace, 2 = remove
 #ifndef MEK
@@ -3070,7 +3075,7 @@ namespace game
             else if(d->state == CS_ALIVE)
             {
                 if(d->conopen) t = textureload(hud::chattex, 3);
-                else if(m_team(gamemode, mutators) && (hud::numteamkills() >= teamkillwarn || aboveheadteam > (d->team != focus->team ? 1 : 0)))
+                else if(m_team(gamemode, mutators) && (hud::numteamkills() >= teamkillwarn || aboveheadteam&(d->team != focus->team ? 2 : 1)))
                     t = textureload(hud::teamtexname(d->team), 3);
                 else if(!m_team(gamemode, mutators) || d->team != focus->team)
                 {
@@ -3307,6 +3312,13 @@ namespace game
         if(rendernormally)
         {
             float blend = opacity(d, thirdpersonview(true));
+            if(d != focus && playerhint&(d->team != focus->team ? 2 : 1))
+            {
+                float radius = d->height*playerhintsize;
+                vec o = d->center(), offset = vec(o).sub(camera1->o).rescale(radius/2);
+                offset.z = max(offset.z, -1.0f);
+                part_create(PART_HINT_BOLD_SOFT, 1, offset.add(o), getcolour(d, playerhinttone), radius, blend*playerhintblend);
+            }
             if(d->state == CS_ALIVE)
             {
                 float minz = d == focus && !third && firstpersonbodyfeet >= 0 && d->wantshitbox() ? camera1->o.z-firstpersonbodyfeet : 0.f;
