@@ -704,7 +704,7 @@ namespace capture
                     }
                 }
             }
-            return ai::defense(d, b, f.pos(), f.owner ? ai::CLOSEDIST : float(enttype[AFFINITY].radius), f.owner ? ai::ALERTMIN : float(enttype[AFFINITY].radius*walk*16), walk);
+            return ai::defense(d, b, f.pos(), enttype[AFFINITY].radius, enttype[AFFINITY].radius*walk*8, walk);
         }
         return false;
     }
