@@ -368,6 +368,8 @@ namespace hud
                                         g.textf("%s", 0xFFFFFF, NULL, 0, gametype[game::gamemode].gsd[1]);
                                     else if(m_capture(game::gamemode) && m_gsp3(game::gamemode, game::mutators)) // protect capture
                                         g.textf("%s", 0xFFFFFF, NULL, 0, gametype[game::gamemode].gsd[2]);
+                                    else if(m_defend(game::gamemode) && m_gsp2(game::gamemode, game::mutators)) // protect capture
+                                        g.textf("%s", 0xFFFFFF, NULL, 0, gametype[game::gamemode].gsd[1]);
                                     else if(m_gauntlet(game::gamemode) && m_gsp1(game::gamemode, game::mutators)) // timed gauntlet
                                         g.textf("%s", 0xFFFFFF, NULL, 0, gametype[game::gamemode].gsd[0]);
                                     else g.textf("%s", 0xFFFFFF, NULL, 0, gametype[game::gamemode].desc);
