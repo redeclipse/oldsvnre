@@ -3078,11 +3078,18 @@ namespace game
                 if(d->conopen) t = textureload(hud::chattex, 3);
                 else if(m_team(gamemode, mutators) && (hud::numteamkills() >= teamkillwarn || aboveheadteam&(d->team != focus->team ? 2 : 1)))
                     t = textureload(hud::teamtexname(d->team), 3);
-                else if(!m_team(gamemode, mutators) || d->team != focus->team)
+                if(!m_team(gamemode, mutators) || d->team != focus->team)
                 {
-                    if(d->dominating.find(focus) >= 0) t = textureload(hud::dominatingtex, 3);
-                    else if(d->dominated.find(focus) >= 0) t = textureload(hud::dominatedtex, 3);
-                    colour = pulsecols[PULSE_DISCO][clamp((lastmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)];
+                    if(d->dominating.find(focus) >= 0)
+                    {
+                        t = textureload(hud::dominatingtex, 3);
+                        colour = pulsecols[PULSE_DISCO][clamp((lastmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)];
+                    }
+                    else if(d->dominated.find(focus) >= 0)
+                    {
+                        t = textureload(hud::dominatedtex, 3);
+                        colour = pulsecols[PULSE_DISCO][clamp((lastmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)];
+                    }
                 }
             }
             if(t && t != notexture)
