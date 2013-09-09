@@ -696,14 +696,14 @@ namespace hud
         if(inventoryscoreinfo&1)
         {
             if(m_laptime(game::gamemode, game::mutators))
-                { formatstring(q)("%s\fs%s\f(%s)\fS%s", inventoryscorebreak&1 ? "\n" : " ", offset ? (offset < 0 ? "\f[0x00FF00]" : "\f[0xFF0000]") : "\f[0xFFFF00]", offset ? (offset < 0 ? arrowtex : arrowdowntex) : arrowrighttex, timestr(offset < 0 ? 0-offset : offset)); }
+                { formatstring(q)("\n\fs%s\f(%s)\fS%s", offset ? (offset < 0 ? "\f[0x00FF00]" : "\f[0xFF0000]") : "\f[0xFFFF00]", offset ? (offset < 0 ? arrowtex : arrowdowntex) : arrowrighttex, timestr(offset < 0 ? 0-offset : offset)); }
             else { formatstring(q)("%s\fs%s\f(%s)\fS%d", inventoryscorebreak&1 ? "\n" : " ", offset ? (offset > 0 ? "\f[0x00FF00]" : "\f[0xFF0000]") : "\f[0xFFFF00]", offset ? (offset > 0 ? arrowtex : arrowdowntex) : arrowrighttex, offset < 0 ? 0-offset : offset); }
             concatstring(str, q);
         }
         if(inventoryscoreinfo&2)
         {
             const char *pls[10] = { "th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th" };
-            formatstring(q)("%s\fs%s%d%s%s\fS", inventoryscorebreak&2 ? "\n" : " ", col, pos+1, pls[(pos+1)%10], inventoryscoreinfo&1 && !(inventoryscorebreak&1) && inventoryscorebreak&2 ? " place" : "");
+            formatstring(q)("%s\fs%s%d%s%s\fS", inventoryscorebreak&2 || m_laptime(game::gamemode, game::mutators) ? "\n" : " ", col, pos+1, pls[(pos+1)%10], m_laptime(game::gamemode, game::mutators) || (inventoryscoreinfo&1 && !(inventoryscorebreak&1) && inventoryscorebreak&2) ? " place" : "");
             concatstring(str, q);
         }
         drawitem(icon, x, y+size, s, inventoryscorebg!=0, 0, false, c.r, c.g, c.b, fade, skew, "default", "%s", str);
