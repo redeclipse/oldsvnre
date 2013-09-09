@@ -381,14 +381,14 @@ namespace ai
     {
         if(!aistyle[d->aitype].canmove)
         {
-            b.idle = enemy(d, b, pos, wander, weaptype[d->weapselect].melee ? 1 : 0, false) ? 2 : 1;
+            b.idle = enemy(d, b, pos, FARDIST, weaptype[d->weapselect].melee ? 1 : 0, false) ? 2 : 1;
             return true;
         }
         if(!walk)
         {
             if(pos.squaredist(d->feetpos()) <= guard*guard)
             {
-                b.idle = enemy(d, b, pos, wander, weaptype[d->weapselect].melee ? 1 : 0, false) ? 2 : 1;
+                b.idle = enemy(d, b, pos, FARDIST, weaptype[d->weapselect].melee ? 1 : 0, false) ? 2 : 1;
                 return true;
             }
             walk++;
@@ -608,10 +608,13 @@ namespace ai
         }
         else if(entities::ents.inrange(d->aientity)) loopv(entities::ents[d->aientity]->links)
         {
+            int t = entities::ents[d->aientity]->links[i];
+            if(!entities::ents.inrange(t)) continue;
             interest &n = interests.add();
             n.state = AI_S_DEFEND;
-            n.target = n.node = entities::ents[d->aientity]->links[i];
-            n.targtype = AI_T_NODE;
+            n.target = t;
+            n.node = closestwaypoint(entities::ents[t]->o, CLOSEDIST, true);
+            n.targtype = AI_T_ENTITY;
             n.score = -1;
             n.tolerance = 1;
         }
@@ -743,7 +746,7 @@ namespace ai
         if(target(d, b, 4, true)) return 1;
         if(aistyle[d->aitype].canmove && randomnode(d, b, CLOSEDIST, 1e16f))
         {
-            d->ai->switchstate(b, AI_S_INTEREST, AI_T_NODE, d->ai->route[0]);
+            d->ai->switchstate(b, rnd(3) ? AI_S_INTEREST : AI_S_DEFEND, AI_T_NODE, d->ai->route[0]);
             return 1;
         }
         return 0; // but don't pop the state
@@ -1249,15 +1252,10 @@ namespace ai
         if(aistyle[d->aitype].canjump && (!d->ai->dontmove || b.idle)) jumpto(d, b, d->ai->spot, locked);
         if(d->aitype == AI_BOT || d->aitype == AI_GRUNT)
         {
-            bool wantsrun = false;
-            if(physics::allowimpulse(d, IM_A_SPRINT))
-            {
-                if(!impulsemeter || impulsepacing == 0 || impulseregenpacing > 0) wantsrun = true;
-                //else if(b.idle == -1 && !d->ai->dontmove)
-                //    wantsrun = (d->action[AC_PACING] || !d->actiontime[AC_PACING] || lastmillis-d->actiontime[AC_PACING] > PHYSMILLIS*2);
-            }
-            if(d->action[AC_PACING] != wantsrun)
+            if(d->action[AC_PACING] != (physics::allowimpulse(d, IM_A_SPRINT) && (!impulsemeter || impulsepacing == 0 || impulseregenpacing > 0)))
                 if((d->action[AC_PACING] = !d->action[AC_PACING]) == true) d->actiontime[AC_PACING] = lastmillis;
+            if(d->action[AC_CROUCH] != d->ai->dontmove)
+                if((d->action[AC_CROUCH] = !d->action[AC_CROUCH]) == true) d->actiontime[AC_CROUCH] = lastmillis;
         }
 
         if(d->ai->dontmove || (d->aitype >= AI_START && lastmillis-d->lastpain <= PHYSMILLIS/3)) d->move = d->strafe = 0;

@@ -71,16 +71,17 @@ namespace defend
             if(b.enemy && b.owner)
             {
                 defformatstring(bowner)("%s", game::colourteam(b.owner));
-                formatstring(b.info)("point %s - %s vs. %s", b.name, bowner, game::colourteam(b.enemy));
+                formatstring(b.info)("%s - %s v %s", b.name, bowner, game::colourteam(b.enemy));
             }
             else
             {
                 int defend = b.owner ? b.owner : b.enemy;
-                formatstring(b.info)("point %s - %s", b.name, game::colourteam(defend));
+                formatstring(b.info)("%s - %s", b.name, game::colourteam(defend));
             }
             vec above = b.o;
+            if(b.render.z >= above.z-1) above.z += (b.render.z-(above.z-1))+2;
             part_explosion(above, 3, PART_SHOCKBALL, 1, colour, 1, 0.5f*blend);
-            above.z += 5;
+            above.z += 4;
             part_text(above, b.info, PART_TEXT, 1, 0xFFFFFF, 2, blend);
             above.z += 3;
             if(b.enemy)
@@ -143,7 +144,7 @@ namespace defend
                 pushfont("emphasis");
                 float occupy = !f.owner || f.enemy ? clamp(f.converted/float((!defendinstant && f.owner ? 2 : 1) * defendcount), 0.f, 1.f) : 1.f;
                 bool overthrow = f.owner && f.enemy == game::focus->team;
-                ty += draw_textx("%s point %s \fs\f[%d]\f(%s)\f(%s)\fS \fs%s%d%%\fS", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, overthrow ? "Overthrow" : "Secure", f.name, TEAM(f.owner, colour), hud::teamtexname(f.owner), hud::pointtex, overthrow ? "\fy" : (occupy < 1.f ? "\fc" : "\fg"), int(occupy*100.f))*hud::noticescale;
+                ty += draw_textx("%s %s \fs\f[%d]\f(%s)\f(%s)\fS \fs%s%d%%\fS", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, overthrow ? "Overthrow" : "Secure", f.name, TEAM(f.owner, colour), hud::teamtexname(f.owner), hud::pointtex, overthrow ? "\fy" : (occupy < 1.f ? "\fc" : "\fg"), int(occupy*100.f))*hud::noticescale;
                 popfont();
                 break;
             }
@@ -224,6 +225,7 @@ namespace defend
             }
             defendstate::flag &b = st.flags.add();
             b.o = b.render = e->o;
+            b.render.z += 2;
             physics::droptofloor(b.render);
             defformatstring(alias)("point_%d", e->attrs[4]);
             const char *name = getalias(alias);
@@ -316,7 +318,7 @@ namespace defend
                     int numdyns = game::numdynents();
                     loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && e->type == ENT_PLAYER && insideaffinity(b, e))
                         if((d = e) == game::focus) break;
-                    game::announcef(S_V_FLAGSECURED, CON_SELF, d, true, "\fateam %s secured control point \fw%s", game::colourteam(owner), b.name);
+                    game::announcef(S_V_FLAGSECURED, CON_SELF, d, true, "\fateam %s secured \fw%s", game::colourteam(owner), b.name);
                     part_textcopy(vec(b.o).add(vec(0, 0, enttype[AFFINITY].radius)), "<super>\fzZeSECURED", PART_TEXT, game::eventiconfade, TEAM(owner, colour), 3, 1, -10);
                     if(game::dynlighteffects) adddynlight(b.o, enttype[AFFINITY].radius*2, vec::hexcolor(TEAM(owner, colour)).mul(2.f), 500, 250);
                     entities::execlink(NULL, b.ent, false);
@@ -328,7 +330,7 @@ namespace defend
                 int numdyns = game::numdynents();
                 loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && e->type == ENT_PLAYER && insideaffinity(b, e))
                     if((d = e) == game::focus) break;
-                game::announcef(S_V_FLAGOVERTHROWN, CON_SELF, d, true, "\fateam %s overthrew control point \fw%s", game::colourteam(enemy), b.name);
+                game::announcef(S_V_FLAGOVERTHROWN, CON_SELF, d, true, "\fateam %s overthrew \fw%s", game::colourteam(enemy), b.name);
                 part_textcopy(vec(b.o).add(vec(0, 0, enttype[AFFINITY].radius)), "<super>\fzZeOVERTHROWN", PART_TEXT, game::eventiconfade, TEAM(enemy, colour), 3, 1, -10);
                 if(game::dynlighteffects) adddynlight(b.o, enttype[AFFINITY].radius*2, vec::hexcolor(TEAM(enemy, colour)).mul(2.f), 500, 250);
                 entities::execlink(NULL, b.ent, false);
@@ -426,7 +428,7 @@ namespace defend
                 }
                 else walk = 1;
             }
-            return ai::defense(d, b, f.o, !f.enemy || m_gsp2(game::gamemode, game::mutators) ? ai::CLOSEDIST : float(enttype[AFFINITY].radius), !f.enemy || m_gsp2(game::gamemode, game::mutators) ? ai::CLOSEDIST : float(enttype[AFFINITY].radius*walk*8), walk);
+            return ai::defense(d, b, f.o, enttype[AFFINITY].radius, enttype[AFFINITY].radius*walk*8, m_gsp2(game::gamemode, game::mutators) ? 0 : walk);
         }
         return false;
     }

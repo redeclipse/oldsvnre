@@ -125,6 +125,7 @@ struct defendstate
         b.o = o;
 #ifndef GAMESERVER
         b.render = o;
+        b.render.z += 2;
         physics::droptofloor(b.render);
 #endif
         b.kinship = team;
@@ -143,6 +144,7 @@ struct defendstate
         b.o = o;
 #ifndef GAMESERVER
         b.render = o;
+        b.render.z += 2;
         physics::droptofloor(b.render);
 #endif
         b.owner = owner;
