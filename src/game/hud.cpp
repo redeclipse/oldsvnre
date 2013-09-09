@@ -76,6 +76,8 @@ namespace hud
     FVAR(IDF_PERSIST, selfconblend, 0, 1, 1);
     FVAR(IDF_PERSIST, fullconblend, 0, 1, 1);
 
+    VAR(IDF_PERSIST, capslockwarn, 0, 1, 1);
+
     FVAR(IDF_PERSIST, noticeoffset, -1, 0.3f, 1);
     FVAR(IDF_PERSIST, noticeblend, 0, 1, 1);
     FVAR(IDF_PERSIST, noticescale, 1e-4f, 1, 1000);
@@ -1639,6 +1641,8 @@ namespace hud
                 drawtexture(tx, ty+tz, th, tw);
                 int cp = commandpos >= 0 ? commandpos : strlen(commandbuf);//, fp = completesize && completeoffset >= 0 ? min(pos, completeoffset+completesize) : -1;
                 tz += draw_textx("%s", tq+tr, ty+tz, 255, 255, 255, int(255*fullconblend*fade), concenter ? TEXT_CENTERED : TEXT_LEFT_JUSTIFY, cp, tt, commandbuf);
+                if(capslockwarn && (SDL_GetModState()&KMOD_CAPS) == KMOD_CAPS)
+                    tz += draw_textx("\fs\fzoy^\fS CapsLock is \fs\fcON\fS", tq+tr, ty+tz, 255, 255, 255, int(255*fullconblend*fade), concenter ? TEXT_CENTERED : TEXT_LEFT_JUSTIFY, -1, tt);
                 popfont();
                 if(commandbuf[0] == '/' && commandbuf[1])
                 {
