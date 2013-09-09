@@ -235,6 +235,7 @@ namespace game
     VAR(IDF_PERSIST, playerhinttone, -1, CTONE_TEAM, CTONE_MAX-1);
     FVAR(IDF_PERSIST, playerhintblend, 0, 0.1f, 1);
     FVAR(IDF_PERSIST, playerhintsize, 0, 1.1f, 2);
+    FVAR(IDF_PERSIST, playerhintfade, 0, 64, FVAR_MAX);
 
     VAR(IDF_PERSIST, nogore, 0 , 0, 2); // turns off all gore, 0 = off, 1 = replace, 2 = remove
 #ifndef MEK
@@ -3314,10 +3315,12 @@ namespace game
             float blend = opacity(d, thirdpersonview(true));
             if(d != focus && playerhint&(d->team != focus->team ? 2 : 1))
             {
-                float radius = d->height*playerhintsize;
+                float radius = d->height*playerhintsize, fade = blend*playerhintblend;
                 vec o = d->center(), offset = vec(o).sub(camera1->o).rescale(radius/2);
                 offset.z = max(offset.z, -1.0f);
-                part_create(PART_HINT_BOLD_SOFT, 1, offset.add(o), getcolour(d, playerhinttone), radius, blend*playerhintblend);
+                float dist = camera1->o.dist(o);
+                if(playerhintfade > 0 && dist < playerhintfade) fade *= dist/playerhintfade;
+                part_create(PART_HINT_BOLD_SOFT, 1, offset.add(o), getcolour(d, playerhinttone), radius, fade);
             }
             if(d->state == CS_ALIVE)
             {
