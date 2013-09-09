@@ -705,7 +705,7 @@ namespace hud
         if(inventoryscoreinfo&2)
         {
             const char *pls[10] = { "th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th" };
-            formatstring(q)("%s\fs%s%d%s%s\fS", inventoryscorebreak&2 || m_laptime(game::gamemode, game::mutators) ? "\n" : " ", col, pos+1, pls[(pos+1)%10], m_laptime(game::gamemode, game::mutators) || (inventoryscoreinfo&1 && !(inventoryscorebreak&1) && inventoryscorebreak&2) ? " place" : "");
+            formatstring(q)("%s\f(%s)\fs%s%d%s%s\fS", inventoryscorebreak&2 || m_laptime(game::gamemode, game::mutators) ? "\n" : " ", icon, col, pos+1, pls[(pos+1)%10], m_laptime(game::gamemode, game::mutators) || (inventoryscoreinfo&1 && !(inventoryscorebreak&1) && inventoryscorebreak&2) ? " place" : "");
             concatstring(str, q);
         }
         drawitem(icon, x, y+size, s, inventoryscorebg!=0, 0, false, c.r, c.g, c.b, fade, skew, "default", "%s", str);
