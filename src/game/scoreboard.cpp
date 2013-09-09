@@ -680,30 +680,30 @@ namespace hud
 
     int drawscoreitem(const char *icon, int colour, int x, int y, int s, float skew, float fade, int pos, int score, int offset, const char *name, const char *ext = NULL)
     {
-        const char *col = "\fa";
+        const char *col = "\fr";
         switch(pos)
         {
             case 0: col = "\fg"; break;
-            case 1: col = "\fc"; break;
-            case 2: col = "\fy"; break;
+            case 1: col = "\fy"; break;
+            case 2: col = "\fo"; break;
         }
         vec c = vec::hexcolor(colour);
         int size = int(s*skew);
         string str, q;
-        if(m_laptime(game::gamemode, game::mutators)) { formatstring(str)("[\fs%s%s\fS]", col, score ? timestr(score) : "dnf"); }
-        else if(m_defend(game::gamemode) && score == INT_MAX) { formatstring(str)("[\fs%sWIN\fS]", col); }
-        else { formatstring(str)("[\fs%s%d\fS]", col, score); }
+        if(m_laptime(game::gamemode, game::mutators)) { formatstring(str)("[ \fs%s%s\fS ]", col, score ? timestr(score) : "dnf"); }
+        else if(m_defend(game::gamemode) && score == INT_MAX) { formatstring(str)("[ \fs%sWIN\fS ]", col); }
+        else { formatstring(str)("[ \fs%s%d\fS ]", col, score); }
         if(inventoryscoreinfo&1)
         {
             if(m_laptime(game::gamemode, game::mutators))
-                { formatstring(q)(" \fs%s\f(%s)\fS%s", offset ? (offset < 0 ? "\fg" : "\fr") : "\fy", offset ? (offset < 0 ? arrowtex : arrowdowntex) : arrowrighttex, offset ? timestr(offset < 0 ? 0-offset : offset) : "dnf"); }
-            else { formatstring(q)(" \fs%s\f(%s)\fS%d", offset ? (offset > 0 ? "\fg" : "\fr") : "\fy", offset ? (offset > 0 ? arrowtex : arrowdowntex) : arrowrighttex, offset < 0 ? 0-offset : offset); }
+                { formatstring(q)("%s\fs%s\f(%s)\fS%s", inventoryscorebreak&1 ? "\n" : " ", offset ? (offset < 0 ? "\f[0x00FF00]" : "\f[0xFF0000]") : "\f[0xFFFF00]", offset ? (offset < 0 ? arrowtex : arrowdowntex) : arrowrighttex, offset ? timestr(offset < 0 ? 0-offset : offset) : "dnf"); }
+            else { formatstring(q)("%s\fs%s\f(%s)\fS%d", inventoryscorebreak&1 ? "\n" : " ", offset ? (offset > 0 ? "\f[0x00FF00]" : "\f[0xFF0000]") : "\f[0xFFFF00]", offset ? (offset > 0 ? arrowtex : arrowdowntex) : arrowrighttex, offset < 0 ? 0-offset : offset); }
             concatstring(str, q);
         }
         if(inventoryscoreinfo&2)
         {
             const char *pls[10] = { "th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th" };
-            formatstring(q)(" \fs%s%d%s\fS", col, pos+1, pls[(pos+1)%10]);
+            formatstring(q)("%s\fs%s%d%s%s\fS", inventoryscorebreak&2 ? "\n" : " ", col, pos+1, pls[(pos+1)%10], inventoryscoreinfo&1 && !(inventoryscorebreak&1) && inventoryscorebreak&2 ? " place" : "");
             concatstring(str, q);
         }
         drawitem(icon, x, y+size, s, inventoryscorebg!=0, 0, false, c.r, c.g, c.b, fade, skew, "default", "%s", str);

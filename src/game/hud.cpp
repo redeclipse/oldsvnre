@@ -225,6 +225,7 @@ namespace hud
     VAR(IDF_PERSIST, inventoryscore, 0, 1, VAR_MAX);
     VAR(IDF_PERSIST, inventoryscorebg, 0, 0, 1);
     VAR(IDF_PERSIST, inventoryscoreinfo, 0, 3, 3); // 0 = normal readout, &1 = offset, &2 = position
+    VAR(IDF_PERSIST, inventoryscorebreak, 0, 2, 3); // 0 = none, &1 = break for offset, &2 = break for position
     VAR(IDF_PERSIST, inventoryweapids, 0, 2, 2);
     VAR(IDF_PERSIST, inventorycolour, 0, 2, 2);
     VAR(IDF_PERSIST, inventoryflash, 0, 0, 1);
