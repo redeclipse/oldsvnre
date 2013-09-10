@@ -247,7 +247,7 @@ namespace hud
 
     const char *scorehost(gameent *d)
     {
-        if(d->aitype > AI_NONE)
+        if(d->actortype > A_PLAYER)
         {
             static string hoststr;
             hoststr[0] = 0;
@@ -425,7 +425,7 @@ namespace hud
             {
                 scoregroup &sg = *groups[k];
                 loopscoregroup({
-                    if(scorebotinfo && o->aitype > AI_NONE) hasbots = true;
+                    if(scorebotinfo && o->actortype > A_PLAYER) hasbots = true;
                     namepad = max(namepad, (float)text_width(game::colourname(o, NULL, false, true)));
                     if(scorehandles && o->handle[0])
                     {
@@ -473,7 +473,7 @@ namespace hud
                     uilist(g, {
                         uicenterlist(g, uipad(g, 0.25f, g.strut(1)));
                         loopscoregroup(uicenterlist(g, {
-                            uipad(g, 0.25f, uicenterlist(g, g.textf("\f[%d]\f($priv%stex)", 0xFFFFFF, NULL, 0, game::findcolour(o), hud::privname(o->privilege, o->aitype))));
+                            uipad(g, 0.25f, uicenterlist(g, g.textf("\f[%d]\f($priv%stex)", 0xFFFFFF, NULL, 0, game::findcolour(o), hud::privname(o->privilege, o->actortype))));
                         }));
                     });
 
@@ -565,7 +565,7 @@ namespace hud
                             uicenterlist(g, uipad(g, 1, g.text("sk", 0xFFFFFF)));
                             loopscoregroup(uicenterlist(g, {
                                 uipad(g, 0.5f, {
-                                    if(o->aitype > AI_NONE) g.textf("%d", 0xFFFFFF, NULL, 0, o->skill);
+                                    if(o->actortype > A_PLAYER) g.textf("%d", 0xFFFFFF, NULL, 0, o->skill);
                                     else g.strut(1);
                                 });
                             }));

@@ -64,13 +64,13 @@ namespace projs
     FVAR(IDF_PERSIST, muzzlefade, 0, 0.5f, 1);
 
     #define muzzlechk(a,b) (a == 3 || (a == 2 && game::thirdpersonview(true)) || (a == 1 && b != game::focus))
-    int calcdamage(gameent *actor, gameent *target, int weap, int &flags, float radial, float size, float dist, float scale)
+    int calcdamage(gameent *v, gameent *target, int weap, int &flags, float radial, float size, float dist, float scale)
     {
         int nodamage = 0; flags &= ~HIT_SFLAGS;
-        if(actor->aitype < AI_START)
+        if(v->actortype < A_ENEMY)
         {
-            if(actor == target && !selfdamage) nodamage++;
-            else if(physics::isghost(target, actor)) nodamage++;
+            if(v == target && !selfdamage) nodamage++;
+            else if(physics::isghost(target, v)) nodamage++;
             if(m_expert(game::gamemode, game::mutators) && !hithead(flags)) nodamage++;
         }
 
@@ -87,22 +87,22 @@ namespace projs
         {
             if(m_capture(game::gamemode) && capturebuffdelay)
             {
-                if(actor->lastbuff) skew *= capturebuffdamage;
+                if(v->lastbuff) skew *= capturebuffdamage;
                 if(target->lastbuff) skew /= capturebuffshield;
             }
             else if(m_defend(game::gamemode) && defendbuffdelay)
             {
-                if(actor->lastbuff) skew *= defendbuffdamage;
+                if(v->lastbuff) skew *= defendbuffdamage;
                 if(target->lastbuff) skew /= defendbuffshield;
             }
             else if(m_bomber(game::gamemode) && bomberbuffdelay)
             {
-                if(actor->lastbuff) skew *= bomberbuffdamage;
+                if(v->lastbuff) skew *= bomberbuffdamage;
                 if(target->lastbuff) skew /= bomberbuffshield;
             }
             else if(m_gauntlet(game::gamemode) && gauntletbuffdelay)
             {
-                if(actor->lastbuff) skew *= gauntletbuffdamage;
+                if(v->lastbuff) skew *= gauntletbuffdamage;
                 if(target->lastbuff) skew /= gauntletbuffshield;
             }
         }
@@ -113,7 +113,7 @@ namespace projs
             else if(flags&HIT_LEGS) skew *= WF(WK(flags), weap, legdamage, WS(flags));
             else skew = 0;
         }
-        if(actor == target)
+        if(v == target)
         {
             float modify = WF(WK(flags), weap, selfdamage, WS(flags))*G(selfdamagescale);
             if(modify != 0) skew *= modify;
@@ -123,7 +123,7 @@ namespace projs
                 flags |= HIT_WAVE;
             }
         }
-        else if(m_team(game::gamemode, game::mutators) && actor->team == target->team)
+        else if(m_team(game::gamemode, game::mutators) && v->team == target->team)
         {
             float modify = WF(WK(flags), weap, teamdamage, WS(flags))*G(teamdamagescale);
             if(modify != 0) skew *= modify;
@@ -1187,7 +1187,7 @@ namespace projs
         if(ejectfade && weaptype[weap].eject && *weaptype[weap].eprj) loopi(clamp(sub, 1, W2(weap, sub, WS(flags))))
             create(from, from, local, d, PRJ_EJECT, rnd(ejectfade)+ejectfade, 0, delay, rnd(weaptype[weap].espeed)+weaptype[weap].espeed, 0, weap, -1, flags);
 
-        if(d->aitype >= AI_BOT && d->skill <= 100 && (!W2(weap, fullauto, WS(flags)) || attackdelay >= PHYSMILLIS))
+        if(d->actortype >= A_BOT && d->skill <= 100 && (!W2(weap, fullauto, WS(flags)) || attackdelay >= PHYSMILLIS))
             attackdelay += int(ceilf(attackdelay*(10.f/d->skill)));
         d->setweapstate(weap, WS(flags) ? W_S_SECONDARY : W_S_PRIMARY, attackdelay, lastmillis);
         d->ammo[weap] = max(d->ammo[weap]-sub-offset, 0);
@@ -1197,7 +1197,7 @@ namespace projs
             d->reloads[weap] = max(d->reloads[weap]-1, 0);
             d->weapload[weap] = -offset;
         }
-        if(d->aitype < AI_START || aistyle[d->aitype].canmove)
+        if(d->actortype < A_ENEMY || actor[d->actortype].canmove)
         {
             vec kick;
             vecfromyawpitch(d->yaw, d->pitch, 1, 0, kick);

@@ -661,7 +661,7 @@ namespace hud
         return clamp(amt, motionblurmin, motionblurmax)*scale;
     }
 
-    void damage(int n, const vec &loc, gameent *actor, int weap, int flags)
+    void damage(int n, const vec &loc, gameent *v, int weap, int flags)
     {
         damageresidue = clamp(damageresidue+(n*(flags&HIT_BLEED ? 3 : 1)), 0, 200);
         vec colour = wr_burns(weap, flags) ? vec(1.f, 0.35f, 0.0625f) : (game::nogore || game::bloodscale <= 0 ? vec(1, 0.25f, 1) : vec(1.f, 0, 0)),
@@ -669,14 +669,14 @@ namespace hud
         loopv(damagelocs)
         {
             damageloc &d = damagelocs[i];
-            if(actor->clientnum != d.attacker) continue;
+            if(v->clientnum != d.attacker) continue;
             if(lastmillis-d.outtime > radardamagemerge) continue;
             if(d.colour != colour) continue;
             d.damage += n;
             d.dir = dir;
             return; // accumulate
         }
-        damagelocs.add(damageloc(actor->clientnum, lastmillis, n, dir, colour));
+        damagelocs.add(damageloc(v->clientnum, lastmillis, n, dir, colour));
     }
 
     void drawquad(float x, float y, float w, float h, float tx1, float ty1, float tx2, float ty2, bool flipx, bool flipy)
@@ -1870,7 +1870,7 @@ namespace hud
         if(radarplayerkill && (game::focus->state == CS_DEAD || game::focus->state == CS_WAITING) && game::focus->lastdeath)
         {
             if(d->clientnum == game::focus->lastattacker)
-                killer = (radarplayerkill >= 2 || d->aitype == AI_NONE) && (d->state == CS_ALIVE || d->state == CS_DEAD || d->state == CS_WAITING);
+                killer = (radarplayerkill >= 2 || d->actortype == A_PLAYER) && (d->state == CS_ALIVE || d->state == CS_DEAD || d->state == CS_WAITING);
             if(d == game::focus) self = lastmillis-game::focus->lastdeath <= m_delay(game::gamemode, game::mutators);
         }
         if(d == game::focus && !self) return;
@@ -1920,7 +1920,7 @@ namespace hud
                 int millis = d->lastdeath ? lastmillis-d->lastdeath : 0;
                 if(millis > 0)
                 {
-                    int len = min(d->aitype >= AI_START ? (aistyle[d->aitype].living ? min(ai::aideadfade, enemyspawntime ? enemyspawntime : INT_MAX-1) : 500) : m_delay(game::gamemode, game::mutators), 2500);
+                    int len = min(d->actortype >= A_ENEMY ? (actor[d->actortype].living ? min(ai::aideadfade, enemyspawntime ? enemyspawntime : INT_MAX-1) : 500) : m_delay(game::gamemode, game::mutators), 2500);
                     if(len > 0) fade *= clamp(float(len-millis)/float(len), 0.f, 1.f);
                     else return;
                 }
@@ -2100,10 +2100,10 @@ namespace hud
             int numdyns = game::numdynents(), style = radarstyle != 2 ? radarstyle : 1, others[T_MAX] = {0};
             if(radarplayerduke && game::focus->state == CS_ALIVE && m_survivor(game::gamemode, game::mutators))
             {
-                loopi(numdyns) if((d = (gameent *)game::iterdynents(i)) && d->state == CS_ALIVE && d->aitype < AI_START)
+                loopi(numdyns) if((d = (gameent *)game::iterdynents(i)) && d->state == CS_ALIVE && d->actortype < A_ENEMY)
                     others[d->team]++;
             }
-            loopi(numdyns) if((d = (gameent *)game::iterdynents(i)) && d->state != CS_SPECTATOR && d->aitype < AI_START)
+            loopi(numdyns) if((d = (gameent *)game::iterdynents(i)) && d->state != CS_SPECTATOR && d->actortype < A_ENEMY)
             {
                 bool force = false;
                 if(radarplayerduke && game::focus->state == CS_ALIVE)
@@ -2284,16 +2284,16 @@ namespace hud
         return teamtexs[clamp(team, 0, T_MAX-1)];
     }
 
-    const char *privname(int priv, int aitype)
+    const char *privname(int priv, int actortype)
     {
-        if(aitype != AI_NONE) return "bot";
+        if(actortype != A_PLAYER) return "bot";
         const char *privnames[PRIV_MAX] = { "none", "player", "supporter", "moderator", "operator", "administrator", "developer", "creator" };
         return privnames[clamp(priv, 0, PRIV_MAX-1)];
     }
 
-    const char *privtex(int priv, int aitype)
+    const char *privtex(int priv, int actortype)
     {
-        if(aitype > AI_NONE) return privbottex;
+        if(actortype > A_PLAYER) return privbottex;
         const char *privtexs[PRIV_MAX] = { privnonetex, privplayertex, privsupportertex, privmoderatortex, privoperatortex, privadministratortex, privdevelopertex, privcreatortex };
         return privtexs[clamp(priv, 0, PRIV_MAX-1)];
     }
@@ -2550,7 +2550,7 @@ namespace hud
                 sy += draw_textx("speed", x+width/2, y-sy, 255, 255, 255, int(fade*255), TEXT_CENTER_UP, -1, -1);
                 popfont();
             }
-            if(game::focus->aitype < AI_START && physics::allowimpulse(game::focus) && impulsemeter && impulsecost && inventoryimpulse)
+            if(game::focus->actortype < A_ENEMY && physics::allowimpulse(game::focus) && impulsemeter && impulsecost && inventoryimpulse)
             {
                 float fade = blend*inventoryimpulseblend;
                 float amt = 1-clamp(float(game::focus->impulse[IM_METER])/float(impulsemeter), 0.f, 1.f);

@@ -12,7 +12,7 @@ struct captureservmode : capturestate, servmode
 
     void dropaffinity(clientinfo *ci, const vec &o, const vec &inertia = vec(0, 0, 0), int target = -1)
     {
-        if(!canplay(hasflaginfo) || ci->state.aitype >= AI_START) return;
+        if(!canplay(hasflaginfo) || ci->state.actortype >= A_ENEMY) return;
         int numflags = 0, iterflags = 0;
         loopv(flags) if(flags[i].owner == ci->clientnum) numflags++;
         vec dir = inertia, olddir = dir, v = o; v.z += 1;
@@ -43,12 +43,12 @@ struct captureservmode : capturestate, servmode
         dropaffinity(ci, ci->state.o, vec(ci->state.vel).add(ci->state.falling));
     }
 
-    void dodamage(clientinfo *target, clientinfo *actor, int &damage, int &hurt, int &weap, int &flags, int &material, const ivec &hitpush)
+    void dodamage(clientinfo *m, clientinfo *v, int &damage, int &hurt, int &weap, int &flags, int &material, const ivec &hitpush)
     {
-        //if(weaptype[weap].melee) dropaffinity(target, target->state.o, vec(ci->state.vel).add(ci->state.falling));
+        //if(weaptype[weap].melee) dropaffinity(m, m->state.o, vec(ci->state.vel).add(ci->state.falling));
     }
 
-    void died(clientinfo *ci, clientinfo *actor)
+    void died(clientinfo *ci, clientinfo *v)
     {
         if(!canplay(hasflaginfo)) return;
         dropaffinity(ci, ci->state.o, vec(ci->state.vel).add(ci->state.falling));
@@ -63,7 +63,7 @@ struct captureservmode : capturestate, servmode
 
     void moved(clientinfo *ci, const vec &oldpos, const vec &newpos)
     {
-        if(!canplay(hasflaginfo) || ci->state.aitype >= AI_START) return;
+        if(!canplay(hasflaginfo) || ci->state.actortype >= A_ENEMY) return;
         if(G(capturethreshold) > 0 && oldpos.dist(newpos) >= G(capturethreshold))
             dropaffinity(ci, oldpos, vec(ci->state.vel).add(ci->state.falling));
         if(!m_gsp3(gamemode, mutators)) loopv(flags) if(flags[i].owner == ci->clientnum)
@@ -94,7 +94,7 @@ struct captureservmode : capturestate, servmode
 
     void takeaffinity(clientinfo *ci, int i)
     {
-        if(!canplay(hasflaginfo) || !flags.inrange(i) || ci->state.state!=CS_ALIVE || !ci->team || ci->state.aitype >= AI_START) return;
+        if(!canplay(hasflaginfo) || !flags.inrange(i) || ci->state.state!=CS_ALIVE || !ci->team || ci->state.actortype >= A_ENEMY) return;
         flag &f = flags[i];
         if(f.owner >= 0 || (f.team == ci->team && (m_gsp2(gamemode, mutators) || (m_gsp1(gamemode, mutators) && !f.droptime)))) return;
         if(f.lastowner == ci->clientnum && f.droptime && (G(capturepickupdelay) < 0 || lastmillis-f.droptime <= G(capturepickupdelay))) return;
@@ -271,11 +271,11 @@ struct captureservmode : capturestate, servmode
         }
     }
 
-    int points(clientinfo *victim, clientinfo *actor)
+    int points(clientinfo *m, clientinfo *v)
     {
-        bool isteam = victim==actor || victim->team == actor->team;
-        int p = isteam ? -1 : 1, v = p;
-        loopv(flags) if(flags[i].owner == victim->clientnum) p += v;
+        bool isteam = m==v || m->team == v->team;
+        int p = isteam ? -1 : 1, q = p;
+        loopv(flags) if(flags[i].owner == m->clientnum) p += q;
         return p;
     }
 } capturemode;

@@ -447,12 +447,12 @@ namespace server
         virtual void moved(clientinfo *ci, const vec &oldpos, const vec &newpos) {}
         virtual bool canspawn(clientinfo *ci, bool tryspawn = false) { return true; }
         virtual void spawned(clientinfo *ci) {}
-        virtual int points(clientinfo *victim, clientinfo *actor)
+        virtual int points(clientinfo *m, clientinfo *v)
         {
-            if(victim==actor || victim->team == actor->team) return -1;
+            if(m==v || m->team == v->team) return -1;
             return 1;
         }
-        virtual void died(clientinfo *victim, clientinfo *actor = NULL) {}
+        virtual void died(clientinfo *m, clientinfo *v = NULL) {}
         virtual void changeteam(clientinfo *ci, int oldteam, int newteam) {}
         virtual void initclient(clientinfo *ci, packetbuf &p, bool connecting) {}
         virtual void update() {}
@@ -461,8 +461,8 @@ namespace server
         virtual void balance(int oldbalance) {}
         virtual void intermission() {}
         virtual bool wantsovertime() { return false; }
-        virtual bool damage(clientinfo *target, clientinfo *actor, int damage, int weap, int flags, int material, const ivec &hitpush = ivec(0, 0, 0)) { return true; }
-        virtual void dodamage(clientinfo *target, clientinfo *actor, int &damage, int &hurt, int &weap, int &flags, int &material, const ivec &hitpush = ivec(0, 0, 0)) { }
+        virtual bool damage(clientinfo *m, clientinfo *v, int damage, int weap, int flags, int material, const ivec &hitpush = ivec(0, 0, 0)) { return true; }
+        virtual void dodamage(clientinfo *m, clientinfo *v, int &damage, int &hurt, int &weap, int &flags, int &material, const ivec &hitpush = ivec(0, 0, 0)) { }
         virtual void regen(clientinfo *ci, int &total, int &amt, int &delay) {}
         virtual void checkclient(clientinfo *ci) {}
         virtual void scoreaffinity(clientinfo *ci, bool win = true) {}
@@ -502,7 +502,7 @@ namespace server
             }
             if(!isweap(ci->state.loadweap[j]))
             {
-                if(ci->state.aitype != AI_NONE) ci->state.loadweap[j] = 0;
+                if(ci->state.actortype != A_PLAYER) ci->state.loadweap[j] = 0;
                 else
                 {
                     if(request)
@@ -576,16 +576,16 @@ namespace server
     struct vampireservmode : servmode
     {
         vampireservmode() {}
-        void dodamage(clientinfo *target, clientinfo *actor, int &damage, int &hurt, int &weap, int &flags, int &material, const ivec &hitpush = ivec(0, 0, 0))
+        void dodamage(clientinfo *m, clientinfo *v, int &damage, int &hurt, int &weap, int &flags, int &material, const ivec &hitpush = ivec(0, 0, 0))
         {
-            if(actor != target && (!m_team(gamemode, mutators) || actor->team != target->team) && actor->state.state == CS_ALIVE && hurt > 0)
+            if(v != m && (!m_team(gamemode, mutators) || v->team != m->team) && v->state.state == CS_ALIVE && hurt > 0)
             {
-                int rgn = actor->state.health, heal = min(actor->state.health+hurt, m_maxhealth(gamemode, mutators, actor->state.model)), eff = heal-rgn;
+                int rgn = v->state.health, heal = min(v->state.health+hurt, m_maxhealth(gamemode, mutators, v->state.model)), eff = heal-rgn;
                 if(eff)
                 {
-                    actor->state.health = heal;
-                    actor->state.lastregen = gamemillis;
-                    sendf(-1, 1, "ri5", N_REGEN, actor->clientnum, actor->state.health, eff, actor->state.armour);
+                    v->state.health = heal;
+                    v->state.lastregen = gamemillis;
+                    sendf(-1, 1, "ri5", N_REGEN, v->clientnum, v->state.health, eff, v->state.armour);
                 }
             }
         }
@@ -604,7 +604,7 @@ namespace server
 
         void queue(clientinfo *ci, bool msg = true, bool wait = true, bool top = false)
         {
-            if(spawnqueue(true) && ci->online && ci->state.state != CS_SPECTATOR && ci->state.state != CS_EDITING && ci->state.aitype < AI_START)
+            if(spawnqueue(true) && ci->online && ci->state.state != CS_SPECTATOR && ci->state.state != CS_EDITING && ci->state.actortype < A_ENEMY)
             {
                 int n = spawnq.find(ci);
                 playing.removeobj(ci);
@@ -622,7 +622,7 @@ namespace server
                     {
                         if(x%2) x++;
                         x = x/2;
-                        if(m_coop(gamemode, mutators) && ci->state.aitype == AI_BOT)
+                        if(m_coop(gamemode, mutators) && ci->state.actortype == A_BOT)
                             x = int(x*G(coopbalance));
                     }
                     int slots = x;
@@ -630,7 +630,7 @@ namespace server
                     if(!slots)
                     {
                         int wait = 0;
-                        loopv(spawnq) if(spawnq[i] && spawnq[i]->team == ci->team && spawnq[i]->state.aitype == AI_NONE)
+                        loopv(spawnq) if(spawnq[i] && spawnq[i]->team == ci->team && spawnq[i]->state.actortype == A_PLAYER)
                         {
                             wait++;
                             if(spawnq[i] == ci)
@@ -660,7 +660,7 @@ namespace server
 
         bool canspawn(clientinfo *ci, bool tryspawn = false)
         {
-            if(ci->state.aitype >= AI_START) return true;
+            if(ci->state.actortype >= A_ENEMY) return true;
             else if(tryspawn)
             {
                 if(m_balance(gamemode, mutators) && G(balancenospawn) && nextbalance && nextbalance >= gamemillis) return false;
@@ -672,7 +672,7 @@ namespace server
             {
                 if(m_balance(gamemode, mutators) && G(balancenospawn) && nextbalance && nextbalance >= gamemillis) return false;
                 if(m_loadout(gamemode, mutators) && !chkloadweap(ci, false)) return false;
-                int delay = ci->state.aitype >= AI_START && ci->state.lastdeath ? G(enemyspawntime) : m_delay(gamemode, mutators);
+                int delay = ci->state.actortype >= A_ENEMY && ci->state.lastdeath ? G(enemyspawntime) : m_delay(gamemode, mutators);
                 if(delay && ci->state.respawnwait(gamemillis, delay)) return false;
                 if(spawnqueue() && playing.find(ci) < 0)
                 {
@@ -683,7 +683,7 @@ namespace server
                     {
                         if(x%2) x++;
                         x = x/2;
-                        if(m_coop(gamemode, mutators) && ci->state.aitype == AI_BOT)
+                        if(m_coop(gamemode, mutators) && ci->state.actortype == A_BOT)
                             x = int(x*G(coopbalance));
                     }
                     int alive = 0;
@@ -702,9 +702,9 @@ namespace server
                     }
                     if(alive >= x)
                     {
-                        if(ci->state.aitype == AI_NONE) loopv(playing)
+                        if(ci->state.actortype == A_PLAYER) loopv(playing)
                         { // kill off bots for the human
-                            if(playing[i]->state.aitype != AI_BOT || ci->team != playing[i]->team)
+                            if(playing[i]->state.actortype != A_BOT || ci->team != playing[i]->team)
                                 continue;
                             queue(playing[i--]);
                             if(--alive < x) break;
@@ -713,16 +713,16 @@ namespace server
                     }
                     if(G(maxalivequeue))
                     {
-                        if(ci->state.aitype == AI_BOT) loopv(spawnq) if(spawnq[i]->team == ci->team)
+                        if(ci->state.actortype == A_BOT) loopv(spawnq) if(spawnq[i]->team == ci->team)
                         {
-                            if(spawnq[i] != ci && spawnq[i]->state.aitype == AI_NONE) return false;
+                            if(spawnq[i] != ci && spawnq[i]->state.actortype == A_PLAYER) return false;
                             break;
                         }
                         // at this point is where it decides this player is spawning, so tell everyone else their position
                         if(x-alive == 1)
                         {
                             int wait = 0;
-                            loopv(spawnq) if(spawnq[i] != ci && spawnq[i]->team == ci->team && spawnq[i]->state.aitype == AI_NONE)
+                            loopv(spawnq) if(spawnq[i] != ci && spawnq[i]->team == ci->team && spawnq[i]->state.actortype == A_PLAYER)
                             {
                                 wait++;
                                 if(allowbroadcast(spawnq[i]->clientnum))
@@ -1024,14 +1024,14 @@ namespace server
     int peerowner(int n)
     {
         clientinfo *ci = (clientinfo *)getinfo(n);
-        if(ci && ci->state.aitype > AI_NONE) return ci->state.ownernum;
+        if(ci && ci->state.actortype > A_PLAYER) return ci->state.ownernum;
         return n;
     }
 
     bool allowbroadcast(int n)
     {
         clientinfo *ci = (clientinfo *)getinfo(n);
-        return ci && ci->connected && ci->state.aitype == AI_NONE;
+        return ci && ci->connected && ci->state.actortype == A_PLAYER;
     }
 
     const char *mastermodename(int type)
@@ -1047,9 +1047,9 @@ namespace server
         }
     }
 
-    const char *privname(int type, bool prefix = false, int aitype = AI_NONE)
+    const char *privname(int type, bool prefix = false, int actortype = A_PLAYER)
     {
-        if(aitype != AI_NONE) return prefix ? "a bot" : "bot";
+        if(actortype != A_PLAYER) return prefix ? "a bot" : "bot";
         switch(type)
         {
             case PRIV_CREATOR: return prefix ? "a creator" : "creator";
@@ -1064,14 +1064,14 @@ namespace server
         }
     }
 
-    int numclients(int exclude, bool nospec, int aitype)
+    int numclients(int exclude, bool nospec, int actortype)
     {
         int n = 0;
         loopv(clients)
         {
             if(clients[i]->clientnum >= 0 && clients[i]->name[0] && clients[i]->clientnum != exclude &&
                 (!nospec || clients[i]->state.state != CS_SPECTATOR) &&
-                    (clients[i]->state.aitype == AI_NONE || (aitype > AI_NONE && clients[i]->state.aitype <= aitype && clients[i]->state.ownernum >= 0)))
+                    (clients[i]->state.actortype == A_PLAYER || (actortype > A_PLAYER && clients[i]->state.actortype <= actortype && clients[i]->state.ownernum >= 0)))
                         n++;
         }
         return n;
@@ -1088,16 +1088,16 @@ namespace server
     {
         if(tone)
         {
-            int col = ci->state.aitype < AI_START ? ci->state.colour : 0;
+            int col = ci->state.actortype < A_ENEMY ? ci->state.colour : 0;
             if(!col && isweap(ci->state.weapselect)) col = W(ci->state.weapselect, colour);
             if(col) return col;
         }
         return TEAM(ci->team, colour);
     }
 
-    const char *privnamex(int priv, int aitype)
+    const char *privnamex(int priv, int actortype)
     {
-        if(aitype != AI_NONE) return "bot";
+        if(actortype != A_PLAYER) return "bot";
         const char *privnames[PRIV_MAX] = { "none", "player", "supporter", "moderator", "operator", "administrator", "developer", "creator" };
         return privnames[clamp(priv, 0, PRIV_MAX-1)];
     }
@@ -1109,12 +1109,12 @@ namespace server
         concatstring(colored, "\fs");
         if(icon)
         {
-            formatstring(colortmp)("\f[%d]\f($priv%stex)", findcolour(ci), privnamex(ci->privilege, ci->state.aitype));
+            formatstring(colortmp)("\f[%d]\f($priv%stex)", findcolour(ci), privnamex(ci->privilege, ci->state.actortype));
             concatstring(colored, colortmp);
         }
         formatstring(colortmp)("\f[%d]%s", TEAM(ci->team, colour), name);
         concatstring(colored, colortmp);
-        if(!name[0] || (ci->state.aitype < AI_START && dupname && duplicatename(ci, name)))
+        if(!name[0] || (ci->state.actortype < A_ENEMY && dupname && duplicatename(ci, name)))
         {
             formatstring(colortmp)("%s[%d]", name[0] ? " " : "", ci->clientnum);
             concatstring(colored, colortmp);
@@ -1417,7 +1417,7 @@ namespace server
         else
         {
             int best = -1;
-            loopv(clients) if(clients[i]->state.aitype < AI_START)
+            loopv(clients) if(clients[i]->state.actortype < A_ENEMY)
             {
                 if(best < 0 || clients[i]->state.points > clients[best]->state.points)
                 {
@@ -1510,7 +1510,7 @@ namespace server
             else
             {
                 int best = -1;
-                loopv(clients) if(clients[i]->state.aitype < AI_START && (best < 0 || clients[i]->state.points > clients[best]->state.points))
+                loopv(clients) if(clients[i]->state.actortype < A_ENEMY && (best < 0 || clients[i]->state.points > clients[best]->state.points))
                     best = i;
                 if(best >= 0 && clients[best]->state.points >= G(pointlimit))
                 {
@@ -1616,12 +1616,12 @@ namespace server
 
     void setupitems(bool update)
     {
-        static vector<int> items, actors;
-        items.setsize(0); actors.setsize(0);
+        static vector<int> items, enemies;
+        items.setsize(0); enemies.setsize(0);
         int sweap = m_weapon(gamemode, mutators);
         loopv(sents)
         {
-            if(sents[i].type == ACTOR && sents[i].attrs[0] >= 0 && sents[i].attrs[0] < AI_TOTAL && (sents[i].attrs[5] == triggerid || !sents[i].attrs[5]) && m_check(sents[i].attrs[3], sents[i].attrs[4], gamemode, mutators))
+            if(sents[i].type == ACTOR && sents[i].attrs[0] >= 0 && sents[i].attrs[0] < A_TOTAL && (sents[i].attrs[5] == triggerid || !sents[i].attrs[5]) && m_check(sents[i].attrs[3], sents[i].attrs[4], gamemode, mutators))
             {
 #ifdef CAMPAIGN
                 sents[i].millis += m_campaign(gamemode) ? 50 : G(enemyspawndelay);
@@ -1630,7 +1630,7 @@ namespace server
 #endif
                 switch(G(enemyspawnstyle) == 3 ? rnd(2)+1 : G(enemyspawnstyle))
                 {
-                    case 1: actors.add(i); break;
+                    case 1: enemies.add(i); break;
                     case 2: sents[i].millis += (G(enemyspawntime)+rnd(G(enemyspawntime)))/2; break;
                     default: break;
                 }
@@ -1656,14 +1656,14 @@ namespace server
             sortrandomly(items);
             loopv(items) sents[items[i]].millis += G(itemspawndelay)*i;
         }
-        if(!actors.empty())
+        if(!enemies.empty())
         {
-            sortrandomly(actors);
-            loopv(actors)
+            sortrandomly(enemies);
+            loopv(enemies)
 #ifdef CAMPAIGN
-                sents[actors[i]].millis += (m_campaign(gamemode) ? 50 : G(enemyspawndelay))*i;
+                sents[enemies[i]].millis += (m_campaign(gamemode) ? 50 : G(enemyspawndelay))*i;
 #else
-                sents[actors[i]].millis += G(enemyspawndelay)*i;
+                sents[enemies[i]].millis += G(enemyspawndelay)*i;
 #endif
         }
     }
@@ -1810,7 +1810,7 @@ namespace server
 
     int pickspawn(clientinfo *ci)
     {
-        if(ci->state.aitype >= AI_START) return ci->state.aientity;
+        if(ci->state.actortype >= A_ENEMY) return ci->state.spawnpoint;
         else
         {
             if(m_checkpoint(gamemode) && !m_gauntlet(gamemode) && !ci->state.cpnodes.empty())
@@ -1880,14 +1880,14 @@ namespace server
     {
         servstate &gs = ci->state;
         int weap = -1, health = 0;
-        if(ci->state.aitype >= AI_START)
+        if(ci->state.actortype >= A_ENEMY)
         {
-            bool hasent = sents.inrange(ci->state.aientity) && sents[ci->state.aientity].type == ACTOR;
+            bool hasent = sents.inrange(ci->state.spawnpoint) && sents[ci->state.spawnpoint].type == ACTOR;
             if(m_insta(gamemode, mutators) && !m_loadout(gamemode, mutators)) weap = m_weapon(gamemode, mutators);
-            else weap = hasent && sents[ci->state.aientity].attrs[6] > 0 ? sents[ci->state.aientity].attrs[6]-1 : aistyle[ci->state.aitype].weap;
+            else weap = hasent && sents[ci->state.spawnpoint].attrs[6] > 0 ? sents[ci->state.spawnpoint].attrs[6]-1 : actor[ci->state.actortype].weap;
             if(!m_insta(gamemode, mutators))
             {
-                int heal = hasent && sents[ci->state.aientity].attrs[7] > 0 ? sents[ci->state.aientity].attrs[7] : aistyle[ci->state.aitype].health,
+                int heal = hasent && sents[ci->state.spawnpoint].attrs[7] > 0 ? sents[ci->state.spawnpoint].attrs[7] : actor[ci->state.actortype].health,
                     amt = heal/2+rnd(heal);
                 health = G(enemystrength) != 1 ? max(int(amt*G(enemystrength)), 1) : amt;
             }
@@ -2189,7 +2189,7 @@ namespace server
         loopv(clients)
         {
             clientinfo *oi = clients[i];
-            if(oi->state.aitype > AI_NONE) continue;
+            if(oi->state.actortype > A_PLAYER) continue;
             maxvotes++;
             if(!oi->mapvote[0]) continue;
             votecount *vc = NULL;
@@ -2273,7 +2273,7 @@ namespace server
         loopv(clients)
         {
             clientinfo *oi = clients[i];
-            if(oi->state.aitype > AI_NONE || !oi->mapvote[0] || ci == oi) continue;
+            if(oi->state.actortype > A_PLAYER || !oi->mapvote[0] || ci == oi) continue;
             if(!strcmp(oi->mapvote, reqmap) && oi->modevote == reqmode && oi->mutsvote == reqmuts)
             {
                 hasvote = true;
@@ -2427,7 +2427,7 @@ namespace server
                 if(smode) smode->entergame(ci);
                 mutate(smuts, mut->entergame(ci));
             }
-            if(ci->state.aitype == AI_NONE) aiman::dorefresh = max(aiman::dorefresh, G(airefreshdelay)); // get the ai to reorganise
+            if(ci->state.actortype == A_PLAYER) aiman::dorefresh = max(aiman::dorefresh, G(airefreshdelay)); // get the ai to reorganise
         }
         if(flags&TT_INFO) sendf(-1, 1, "ri3", N_SETTEAM, ci->clientnum, ci->team);
     }
@@ -2451,7 +2451,7 @@ namespace server
         if(isteam(gamemode, mutators, team, first))
         {
             if(!m_coop(gamemode, mutators)) return true;
-            else if(ci->state.aitype > AI_NONE) return team != mapbals[curbalance][0];
+            else if(ci->state.actortype > A_PLAYER) return team != mapbals[curbalance][0];
             else return team == mapbals[curbalance][0];
         }
         return false;
@@ -2459,10 +2459,10 @@ namespace server
 
     int chooseteam(clientinfo *ci, int suggest = -1)
     {
-        if(ci->state.aitype >= AI_START) return T_ENEMY;
+        if(ci->state.actortype >= A_ENEMY) return T_ENEMY;
         else if(m_fight(gamemode) && m_team(gamemode, mutators) && ci->state.state != CS_SPECTATOR && ci->state.state != CS_EDITING)
         {
-            bool human = ci->state.aitype == AI_NONE;
+            bool human = ci->state.actortype == A_PLAYER;
             int team = -1, bal = human ? G(teambalance) : 1;
             if(human)
             {
@@ -2487,8 +2487,8 @@ namespace server
                 {
                     clientinfo *cp = clients[i];
                     if(!cp->team || cp == ci || cp->state.state == CS_SPECTATOR) continue;
-                    if((cp->state.aitype > AI_NONE && cp->state.ownernum < 0) || cp->state.aitype >= AI_START) continue;
-                    if(ci->state.aitype > AI_NONE || (ci->state.aitype == AI_NONE && cp->state.aitype == AI_NONE))
+                    if((cp->state.actortype > A_PLAYER && cp->state.ownernum < 0) || cp->state.actortype >= A_ENEMY) continue;
+                    if(ci->state.actortype > A_PLAYER || (ci->state.actortype == A_PLAYER && cp->state.actortype == A_PLAYER))
                     { // remember: ai just balance teams
                         cp->state.timeplayed += lastmillis-cp->state.lasttimeplayed;
                         cp->state.lasttimeplayed = lastmillis;
@@ -2536,7 +2536,7 @@ namespace server
 
     void spectator(clientinfo *ci, bool quarantine = false, int sender = -1)
     {
-        if(!ci || ci->state.aitype > AI_NONE) return;
+        if(!ci || ci->state.actortype > A_PLAYER) return;
         ci->state.state = CS_SPECTATOR;
         ci->state.quarantine = quarantine;
         sendf(sender, 1, "ri3", N_SPECTATOR, ci->clientnum, quarantine ? 2 : 1);
@@ -2547,7 +2547,7 @@ namespace server
 
     //bool crclocked(clientinfo *ci)
     //{
-    //    if(m_play(gamemode) && G(mapcrclock) && ci->state.aitype == AI_NONE && (!ci->clientmap[0] || ci->mapcrc <= 0 || ci->warned) && !haspriv(ci, G(mapcrclock)))
+    //    if(m_play(gamemode) && G(mapcrclock) && ci->state.actortype == A_PLAYER && (!ci->clientmap[0] || ci->mapcrc <= 0 || ci->warned) && !haspriv(ci, G(mapcrclock)))
     //        return true;
     //    return false;
     //}
@@ -2562,7 +2562,7 @@ namespace server
             {
                 if(ci->state.quarantine) return false;
                 uint ip = getclientip(ci->clientnum);
-                if(ci->state.aitype == AI_NONE && mastermode >= MM_LOCKED && ci->state.state == CS_SPECTATOR && ip && !checkipinfo(control, ipinfo::ALLOW, ip))
+                if(ci->state.actortype == A_PLAYER && mastermode >= MM_LOCKED && ci->state.state == CS_SPECTATOR && ip && !checkipinfo(control, ipinfo::ALLOW, ip))
                     return false;
                 if(ci->state.state == CS_ALIVE || ci->state.state == CS_WAITING) return false;
                 if(ci->state.lastdeath && gamemillis-ci->state.lastdeath <= DEATHMILLIS) return false;
@@ -2577,12 +2577,12 @@ namespace server
                 //if(crclocked(ci)) return false;
                 break;
             }
-            case ALST_SPEC: return ci->state.aitype == AI_NONE; // spec
+            case ALST_SPEC: return ci->state.actortype == A_PLAYER; // spec
             case ALST_WALK: if(ci->state.quarantine || ci->state.state != CS_EDITING) return false;
             case ALST_EDIT: // edit on/off
             {
                 uint ip = getclientip(ci->clientnum);
-                if(ci->state.quarantine || ci->state.aitype != AI_NONE || !m_edit(gamemode) || (mastermode >= MM_LOCKED && ci->state.state == CS_SPECTATOR && ip && !checkipinfo(control, ipinfo::ALLOW, ip))) return false;
+                if(ci->state.quarantine || ci->state.actortype != A_PLAYER || !m_edit(gamemode) || (mastermode >= MM_LOCKED && ci->state.state == CS_SPECTATOR && ip && !checkipinfo(control, ipinfo::ALLOW, ip))) return false;
                 break;
             }
             default: break;
@@ -2723,7 +2723,7 @@ namespace server
         loopv(clients)
         {
             clientinfo *ci = clients[i];
-            if(ci->state.aitype > AI_NONE) continue;
+            if(ci->state.actortype > A_PLAYER) continue;
             total++;
             if(!ci->clientmap[0])
             {
@@ -2743,7 +2743,7 @@ namespace server
         loopv(clients)
         {
             clientinfo *ci = clients[i];
-            if(ci->state.aitype > AI_NONE || ci->clientmap[0] || ci->mapcrc >= 0 || (req < 0 && ci->warned)) continue;
+            if(ci->state.actortype > A_PLAYER || ci->clientmap[0] || ci->mapcrc >= 0 || (req < 0 && ci->warned)) continue;
             srvmsgf(req, "\fy\fs%s\fS has modified map \"%s\"", colourname(ci), smapname);
             if(req < 0) ci->warned = true;
         }
@@ -2754,7 +2754,7 @@ namespace server
             if(i || info.matches <= crcs[i+1].matches) loopvj(clients)
             {
                 clientinfo *ci = clients[j];
-                if(ci->state.aitype > AI_NONE || !ci->clientmap[0] || ci->mapcrc != info.crc || (req < 0 && ci->warned)) continue;
+                if(ci->state.actortype > A_PLAYER || !ci->clientmap[0] || ci->mapcrc != info.crc || (req < 0 && ci->warned)) continue;
                 srvmsgf(req, "\fy\fs%s\fS has modified map \"%s\"", colourname(ci), smapname);
                 if(req < 0) ci->warned = true;
             }
@@ -3078,7 +3078,7 @@ namespace server
         loopv(clients)
         {
             clientinfo *cs = clients[i];
-            if(cs->state.aitype > AI_NONE || !cs->name[0] || !cs->online || cs->wantsmap) continue;
+            if(cs->state.actortype > A_PLAYER || !cs->name[0] || !cs->online || cs->wantsmap) continue;
             if(!best || cs->state.timeplayed > best->state.timeplayed) best = cs;
         }
         return best;
@@ -3108,15 +3108,15 @@ namespace server
 
     void putinitclient(clientinfo *ci, packetbuf &p)
     {
-        if(ci->state.aitype > AI_NONE)
+        if(ci->state.actortype > A_PLAYER)
         {
             if(ci->state.ownernum >= 0)
             {
                 putint(p, N_INITAI);
                 putint(p, ci->clientnum);
                 putint(p, ci->state.ownernum);
-                putint(p, ci->state.aitype);
-                putint(p, ci->state.aientity);
+                putint(p, ci->state.actortype);
+                putint(p, ci->state.spawnpoint);
                 putint(p, ci->state.skill);
                 sendstring(ci->name, p);
                 putint(p, ci->team);
@@ -3291,7 +3291,7 @@ namespace server
             loopv(clients)
             {
                 clientinfo *oi = clients[i];
-                if(oi->state.aitype > AI_NONE || (ci && oi->clientnum == ci->clientnum)) continue;
+                if(oi->state.actortype > A_PLAYER || (ci && oi->clientnum == ci->clientnum)) continue;
                 if(oi->mapvote[0])
                 {
                     putint(p, N_MAPVOTE);
@@ -3327,30 +3327,30 @@ namespace server
 
     void clearevent(clientinfo *ci) { delete ci->events.remove(0); }
 
-    void addhistory(clientinfo *target, clientinfo *actor, int millis)
+    void addhistory(clientinfo *m, clientinfo *v, int millis)
     {
         bool found = false;
-        loopv(target->state.damagelog) if (target->state.damagelog[i].clientnum == actor->clientnum)
+        loopv(m->state.damagelog) if (m->state.damagelog[i].clientnum == v->clientnum)
         {
-            target->state.damagelog[i].millis = millis;
+            m->state.damagelog[i].millis = millis;
             found = true;
             break;
         }
-        if(!found) target->state.damagelog.add(dmghist(actor->clientnum, millis));
+        if(!found) m->state.damagelog.add(dmghist(v->clientnum, millis));
     }
 
-    void gethistory(clientinfo *target, clientinfo *actor, int millis, vector<int> &log, bool clear = false, int points = 0)
+    void gethistory(clientinfo *m, clientinfo *v, int millis, vector<int> &log, bool clear = false, int points = 0)
     {
-        loopv(target->state.damagelog) if(target->state.damagelog[i].clientnum != actor->clientnum && millis-target->state.damagelog[i].millis <= G(assistkilldelay))
+        loopv(m->state.damagelog) if(m->state.damagelog[i].clientnum != v->clientnum && millis-m->state.damagelog[i].millis <= G(assistkilldelay))
         {
-            clientinfo *assist = (clientinfo *)getinfo(target->state.damagelog[i].clientnum);
+            clientinfo *assist = (clientinfo *)getinfo(m->state.damagelog[i].clientnum);
             if(assist)
             {
                 log.add(assist->clientnum);
                 if(points && !m_nopoints(gamemode, mutators)) givepoints(assist, points);
             }
         }
-        if(clear) target->state.damagelog.shrink(0);
+        if(clear) m->state.damagelog.shrink(0);
     }
 
     bool isghost(clientinfo *d, clientinfo *e)
@@ -3365,7 +3365,7 @@ namespace server
             }
             if(m_team(gamemode, mutators)) switch(G(teamdamage))
             {
-                case 1: if(d->state.aitype > AI_NONE || (e && e->state.aitype == AI_NONE)) break;
+                case 1: if(d->state.actortype > A_PLAYER || (e && e->state.actortype == A_PLAYER)) break;
                 case 0: if(e && d->team == e->team) return true; break;
                 case 2: default: break;
             }
@@ -3373,18 +3373,18 @@ namespace server
         return false;
     }
 
-    void dodamage(clientinfo *target, clientinfo *actor, int damage, int weap, int flags, int material, const ivec &hitpush = ivec(0, 0, 0))
+    void dodamage(clientinfo *m, clientinfo *v, int damage, int weap, int flags, int material, const ivec &hitpush = ivec(0, 0, 0))
     {
         int realdamage = damage, realflags = flags, nodamage = 0, hurt = 0;
         realflags &= ~HIT_SFLAGS;
         if(realflags&HIT_MATERIAL && (material&MATF_VOLUME) == MAT_LAVA) realflags |= HIT_BURN;
 
-        if(smode && !smode->damage(target, actor, realdamage, weap, realflags, material, hitpush)) { nodamage++; }
-        mutate(smuts, if(!mut->damage(target, actor, realdamage, weap, realflags, material, hitpush)) { nodamage++; });
-        if(actor->state.aitype < AI_START)
+        if(smode && !smode->damage(m, v, realdamage, weap, realflags, material, hitpush)) { nodamage++; }
+        mutate(smuts, if(!mut->damage(m, v, realdamage, weap, realflags, material, hitpush)) { nodamage++; });
+        if(v->state.actortype < A_ENEMY)
         {
-            if(actor == target && !G(selfdamage)) nodamage++;
-            else if(isghost(target, actor)) nodamage++;
+            if(v == m && !G(selfdamage)) nodamage++;
+            else if(isghost(m, v)) nodamage++;
             if(m_expert(gamemode, mutators) && !hithead(flags)) nodamage++;
         }
 
@@ -3395,73 +3395,73 @@ namespace server
         }
         else
         {
-            if(realdamage >= 0 && target->state.armour > 0)
+            if(realdamage >= 0 && m->state.armour > 0)
             {
                 int absorb = realdamage/2; // armour absorbs half until depleted
-                if(target->state.armour < absorb) absorb = target->state.armour;
-                target->state.armour -= absorb;
+                if(m->state.armour < absorb) absorb = m->state.armour;
+                m->state.armour -= absorb;
                 realdamage -= absorb;
             }
-            hurt = min(target->state.health, realdamage);
-            target->state.health = min(target->state.health-realdamage, m_maxhealth(gamemode, mutators, target->state.model));
-            if(target->state.health <= m_health(gamemode, mutators, target->state.model)) target->state.lastregen = 0;
-            target->state.lastpain = gamemillis;
-            actor->state.damage += realdamage;
-            if(target->state.health <= 0) realflags |= HIT_KILL;
+            hurt = min(m->state.health, realdamage);
+            m->state.health = min(m->state.health-realdamage, m_maxhealth(gamemode, mutators, m->state.model));
+            if(m->state.health <= m_health(gamemode, mutators, m->state.model)) m->state.lastregen = 0;
+            m->state.lastpain = gamemillis;
+            v->state.damage += realdamage;
+            if(m->state.health <= 0) realflags |= HIT_KILL;
             if(wr_burning(weap, flags))
             {
-                target->state.lastres[WR_BURN] = target->state.lastrestime[WR_BURN] = gamemillis;
-                target->state.lastresowner[WR_BURN] = actor->clientnum;
+                m->state.lastres[WR_BURN] = m->state.lastrestime[WR_BURN] = gamemillis;
+                m->state.lastresowner[WR_BURN] = v->clientnum;
             }
             if(wr_bleeding(weap, flags))
             {
-                target->state.lastres[WR_BLEED] = target->state.lastrestime[WR_BLEED] = gamemillis;
-                target->state.lastresowner[WR_BLEED] = actor->clientnum;
+                m->state.lastres[WR_BLEED] = m->state.lastrestime[WR_BLEED] = gamemillis;
+                m->state.lastresowner[WR_BLEED] = v->clientnum;
             }
             if(wr_shocking(weap, flags))
             {
-                target->state.lastres[WR_SHOCK] = target->state.lastrestime[WR_SHOCK] = gamemillis;
-                target->state.lastresowner[WR_SHOCK] = actor->clientnum;
+                m->state.lastres[WR_SHOCK] = m->state.lastrestime[WR_SHOCK] = gamemillis;
+                m->state.lastresowner[WR_SHOCK] = v->clientnum;
             }
         }
-        if(smode) smode->dodamage(target, actor, realdamage, hurt, weap, realflags, material, hitpush);
-        mutate(smuts, mut->dodamage(target, actor, realdamage, hurt, weap, realflags, material, hitpush));
-        if(target != actor && (!m_team(gamemode, mutators) || target->team != actor->team))
-            addhistory(target, actor, gamemillis);
-        sendf(-1, 1, "ri8i3", N_DAMAGE, target->clientnum, actor->clientnum, weap, realflags, realdamage, target->state.health, target->state.armour, hitpush.x, hitpush.y, hitpush.z);
+        if(smode) smode->dodamage(m, v, realdamage, hurt, weap, realflags, material, hitpush);
+        mutate(smuts, mut->dodamage(m, v, realdamage, hurt, weap, realflags, material, hitpush));
+        if(m != v && (!m_team(gamemode, mutators) || m->team != v->team))
+            addhistory(m, v, gamemillis);
+        sendf(-1, 1, "ri8i3", N_DAMAGE, m->clientnum, v->clientnum, weap, realflags, realdamage, m->state.health, m->state.armour, hitpush.x, hitpush.y, hitpush.z);
         if(realflags&HIT_KILL)
         {
             int fragvalue = 1;
-            if(target != actor && (!m_team(gamemode, mutators) || target->team != actor->team)) actor->state.frags++;
+            if(m != v && (!m_team(gamemode, mutators) || m->team != v->team)) v->state.frags++;
             else fragvalue = -fragvalue;
 #ifdef CAMPAIGN
-            bool isai = target->state.aitype >= AI_START && !m_campaign(gamemode),
+            bool isai = m->state.actortype >= A_ENEMY && !m_campaign(gamemode),
 #else
-            bool isai = target->state.aitype >= AI_START,
+            bool isai = m->state.actortype >= A_ENEMY,
 #endif
                  isteamkill = false;
-            int pointvalue = (smode && !isai ? smode->points(target, actor) : fragvalue), style = FRAG_NONE;
+            int pointvalue = (smode && !isai ? smode->points(m, v) : fragvalue), style = FRAG_NONE;
             pointvalue *= isai ? G(enemybonus) : G(fragbonus);
-            if(realdamage >= (realflags&HIT_EXPLODE ? m_health(gamemode, mutators, target->state.model)/2 : m_health(gamemode, mutators, target->state.model)))
+            if(realdamage >= (realflags&HIT_EXPLODE ? m_health(gamemode, mutators, m->state.model)/2 : m_health(gamemode, mutators, m->state.model)))
                 style = FRAG_OBLITERATE;
-            target->state.spree = 0;
-            if(m_team(gamemode, mutators) && actor->team == target->team)
+            m->state.spree = 0;
+            if(m_team(gamemode, mutators) && v->team == m->team)
             {
-                actor->state.spree = 0;
-                if(actor->state.aitype < AI_START && isweap(weap) && WF(WK(flags), weap, teampenalty, WS(flags)))
+                v->state.spree = 0;
+                if(v->state.actortype < A_ENEMY && isweap(weap) && WF(WK(flags), weap, teampenalty, WS(flags)))
                 {
                     pointvalue *= G(teamkillpenalty);
-                    if(actor != target) isteamkill = true;
+                    if(v != m) isteamkill = true;
                 }
                 if(flags&HIT_HEAD) style |= FRAG_HEADSHOT;
             }
-            else if(actor != target && actor->state.aitype < AI_START)
+            else if(v != m && v->state.actortype < A_ENEMY)
             {
 #ifdef CAMPAIGN
                 if(!m_campaign(gamemode))
 #endif
                 {
-                    if(!firstblood && !m_duel(gamemode, mutators) && ((actor->state.aitype == AI_NONE && target->state.aitype < AI_START) || (actor->state.aitype < AI_START && target->state.aitype == AI_NONE)))
+                    if(!firstblood && !m_duel(gamemode, mutators) && ((v->state.actortype == A_PLAYER && m->state.actortype < A_ENEMY) || (v->state.actortype < A_ENEMY && m->state.actortype == A_PLAYER)))
                     {
                         firstblood = true;
                         style |= FRAG_FIRSTBLOOD;
@@ -3473,58 +3473,58 @@ namespace server
                     style |= FRAG_HEADSHOT;
                     pointvalue += G(headshotpoints);
                 }
-                if(m_fight(gamemode) && target->state.aitype < AI_START)
+                if(m_fight(gamemode) && m->state.actortype < A_ENEMY)
                 {
                     int logs = 0;
-                    actor->state.spree++;
-                    actor->state.fraglog.add(target->clientnum);
+                    v->state.spree++;
+                    v->state.fraglog.add(m->clientnum);
                     if(G(multikilldelay))
                     {
                         logs = 0;
-                        loopv(actor->state.fragmillis)
+                        loopv(v->state.fragmillis)
                         {
-                            if(lastmillis-actor->state.fragmillis[i] > G(multikilldelay)) actor->state.fragmillis.remove(i--);
+                            if(lastmillis-v->state.fragmillis[i] > G(multikilldelay)) v->state.fragmillis.remove(i--);
                             else logs++;
                         }
-                        if(!logs) actor->state.rewards[0] &= ~FRAG_MULTI;
-                        actor->state.fragmillis.add(lastmillis); logs++;
+                        if(!logs) v->state.rewards[0] &= ~FRAG_MULTI;
+                        v->state.fragmillis.add(lastmillis); logs++;
                         if(logs >= 2)
                         {
                             int offset = clamp(logs-2, 0, 2), type = 1<<(FRAG_MKILL+offset); // double, triple, multi..
-                            if(!(actor->state.rewards[0]&type))
+                            if(!(v->state.rewards[0]&type))
                             {
                                 style |= type;
-                                actor->state.rewards[0] |= type;
+                                v->state.rewards[0] |= type;
                                 pointvalue += (G(multikillbonus) ? offset+1 : 1)*G(multikillpoints);
-                                //loopv(actor->state.fragmillis) actor->state.fragmillis[i] = lastmillis;
+                                //loopv(v->state.fragmillis) v->state.fragmillis[i] = lastmillis;
                             }
                         }
                     }
-                    loopj(FRAG_SPREES) if(target->state.rewards[1]&(1<<(FRAG_SPREE+j)))
+                    loopj(FRAG_SPREES) if(m->state.rewards[1]&(1<<(FRAG_SPREE+j)))
                     {
                         style |= FRAG_BREAKER;
                         pointvalue += G(spreebreaker);
                         break;
                     }
-                    if(actor->state.spree <= G(spreecount)*FRAG_SPREES && !(actor->state.spree%G(spreecount)))
+                    if(v->state.spree <= G(spreecount)*FRAG_SPREES && !(v->state.spree%G(spreecount)))
                     {
-                        int offset = clamp((actor->state.spree/G(spreecount)), 1, int(FRAG_SPREES))-1, type = 1<<(FRAG_SPREE+offset);
-                        if(!(actor->state.rewards[0]&type))
+                        int offset = clamp((v->state.spree/G(spreecount)), 1, int(FRAG_SPREES))-1, type = 1<<(FRAG_SPREE+offset);
+                        if(!(v->state.rewards[0]&type))
                         {
                             style |= type;
-                            loopj(2) actor->state.rewards[j] |= type;
+                            loopj(2) v->state.rewards[j] |= type;
                             pointvalue += G(spreepoints);
                         }
                     }
                     logs = 0;
-                    loopv(target->state.fraglog) if(target->state.fraglog[i] == actor->clientnum) { logs++; target->state.fraglog.remove(i--); }
+                    loopv(m->state.fraglog) if(m->state.fraglog[i] == v->clientnum) { logs++; m->state.fraglog.remove(i--); }
                     if(logs >= G(dominatecount))
                     {
                         style |= FRAG_REVENGE;
                         pointvalue += G(revengepoints);
                     }
                     logs = 0;
-                    loopv(actor->state.fraglog) if(actor->state.fraglog[i] == target->clientnum) logs++;
+                    loopv(v->state.fraglog) if(v->state.fraglog[i] == m->clientnum) logs++;
                     if(logs == G(dominatecount))
                     {
                         style |= FRAG_DOMINATE;
@@ -3532,63 +3532,63 @@ namespace server
                     }
                 }
             }
-            if(m_checkpoint(gamemode) && (m_gauntlet(gamemode) || target->state.cpnodes.length() == 1))
+            if(m_checkpoint(gamemode) && (m_gauntlet(gamemode) || m->state.cpnodes.length() == 1))
             {  // reset if hasn't reached another checkpoint yet
-                target->state.cpmillis = 0;
-                target->state.cpnodes.shrink(0);
-                sendf(-1, 1, "ri3", N_CHECKPOINT, target->clientnum, -1);
+                m->state.cpmillis = 0;
+                m->state.cpnodes.shrink(0);
+                sendf(-1, 1, "ri3", N_CHECKPOINT, m->clientnum, -1);
             }
             if(pointvalue && !m_nopoints(gamemode, mutators))
             {
-                if(actor != target && actor->state.aitype >= AI_START && target->state.aitype < AI_START)
+                if(v != m && v->state.actortype >= A_ENEMY && m->state.actortype < A_ENEMY)
                 {
                     pointvalue = -pointvalue;
-                    givepoints(target, pointvalue);
+                    givepoints(m, pointvalue);
                 }
-                else if(actor->state.aitype < AI_START) givepoints(actor, pointvalue);
+                else if(v->state.actortype < A_ENEMY) givepoints(v, pointvalue);
             }
-            target->state.deaths++;
-            target->state.rewards[1] = 0;
-            dropitems(target, aistyle[target->state.aitype].living ? DROP_DEATH : DROP_EXPIRE);
+            m->state.deaths++;
+            m->state.rewards[1] = 0;
+            dropitems(m, actor[m->state.actortype].living ? DROP_DEATH : DROP_EXPIRE);
             static vector<int> dmglog;
             dmglog.setsize(0);
-            gethistory(target, actor, gamemillis, dmglog, true, 1);
-            sendf(-1, 1, "ri9i3v", N_DIED, target->clientnum, target->state.deaths, actor->clientnum, actor->state.frags, actor->state.spree, style, weap, realflags, realdamage, material, dmglog.length(), dmglog.length(), dmglog.getbuf());
-            target->position.setsize(0);
-            if(smode) smode->died(target, actor);
-            mutate(smuts, mut->died(target, actor));
-            target->state.state = CS_DEAD; // don't issue respawn yet until DEATHMILLIS has elapsed
-            target->state.lastdeath = gamemillis;
-            if(isteamkill && actor->state.aitype == AI_NONE) // don't punish the idiot bots
+            gethistory(m, v, gamemillis, dmglog, true, 1);
+            sendf(-1, 1, "ri9i3v", N_DIED, m->clientnum, m->state.deaths, v->clientnum, v->state.frags, v->state.spree, style, weap, realflags, realdamage, material, dmglog.length(), dmglog.length(), dmglog.getbuf());
+            m->position.setsize(0);
+            if(smode) smode->died(m, v);
+            mutate(smuts, mut->died(m, v));
+            m->state.state = CS_DEAD; // don't issue respawn yet until DEATHMILLIS has elapsed
+            m->state.lastdeath = gamemillis;
+            if(isteamkill && v->state.actortype == A_PLAYER) // don't punish the idiot bots
             {
-                actor->state.teamkills.add(teamkill(totalmillis, actor->team, -pointvalue));
-                if(G(teamkilllock) && !haspriv(actor, G(teamkilllock)))
+                v->state.teamkills.add(teamkill(totalmillis, v->team, -pointvalue));
+                if(G(teamkilllock) && !haspriv(v, G(teamkilllock)))
                 {
                     int numkills = 0;
-                    if(!G(teamkilltime)) numkills = actor->state.teamkills.length();
-                    else loopv(actor->state.teamkills)
-                        if(totalmillis-actor->state.teamkills[i].millis <= G(teamkilltime)*1000*60) numkills++;
+                    if(!G(teamkilltime)) numkills = v->state.teamkills.length();
+                    else loopv(v->state.teamkills)
+                        if(totalmillis-v->state.teamkills[i].millis <= G(teamkilltime)*1000*60) numkills++;
                     if(numkills >= G(teamkillwarn) && numkills%G(teamkillwarn) == 0)
                     {
-                        uint ip = getclientip(actor->clientnum);
-                        actor->state.warnings[WARN_TEAMKILL][0]++;
-                        actor->state.warnings[WARN_TEAMKILL][1] = totalmillis ? totalmillis : 1;
-                        if(ip && G(teamkillban) && actor->state.warnings[WARN_TEAMKILL][0] >= G(teamkillban) && !haspriv(actor, PRIV_MODERATOR) && !checkipinfo(control, ipinfo::ALLOW, ip))
+                        uint ip = getclientip(v->clientnum);
+                        v->state.warnings[WARN_TEAMKILL][0]++;
+                        v->state.warnings[WARN_TEAMKILL][1] = totalmillis ? totalmillis : 1;
+                        if(ip && G(teamkillban) && v->state.warnings[WARN_TEAMKILL][0] >= G(teamkillban) && !haspriv(v, PRIV_MODERATOR) && !checkipinfo(control, ipinfo::ALLOW, ip))
                         {
                             ipinfo &c = control.add();
                             c.ip = ip;
                             c.mask = 0xFFFFFFFF;
                             c.type = ipinfo::BAN;
                             c.time = totalmillis ? totalmillis : 1;
-                            srvoutf(-3, "\fs\fcbanned\fS %s (%s): team killing is not permitted", colourname(actor), gethostname(actor->clientnum));
+                            srvoutf(-3, "\fs\fcbanned\fS %s (%s): team killing is not permitted", colourname(v), gethostname(v->clientnum));
                             updatecontrols = true;
                         }
-                        else if(G(teamkillkick) && actor->state.warnings[WARN_TEAMKILL][0] >= G(teamkillkick))
+                        else if(G(teamkillkick) && v->state.warnings[WARN_TEAMKILL][0] >= G(teamkillkick))
                         {
-                            srvoutf(-3, "\fs\fckicked\fS %s: team killing is not permitted", colourname(actor));
-                            actor->kicked = updatecontrols = true;
+                            srvoutf(-3, "\fs\fckicked\fS %s: team killing is not permitted", colourname(v));
+                            v->kicked = updatecontrols = true;
                         }
-                        else srvmsgft(actor->clientnum, CON_CHAT, "\fy\fs\fzoyWARNING\fS: team killing is not permitted, action will be taken if you continue");
+                        else srvmsgft(v->clientnum, CON_CHAT, "\fy\fs\fzoyWARNING\fS: team killing is not permitted, action will be taken if you continue");
                     }
                 }
             }
@@ -3614,7 +3614,7 @@ namespace server
         }
         else if(!m_nopoints(gamemode, mutators)) givepoints(ci, smode ? smode->points(ci, ci) : -1);
         ci->state.deaths++;
-        dropitems(ci, aistyle[ci->state.aitype].living ? DROP_DEATH : DROP_EXPIRE);
+        dropitems(ci, actor[ci->state.actortype].living ? DROP_DEATH : DROP_EXPIRE);
         if(G(burntime) && flags&HIT_BURN)
         {
             ci->state.lastres[WR_BURN] = ci->state.lastrestime[WR_BURN] = gamemillis;
@@ -3630,7 +3630,7 @@ namespace server
         gs.lastdeath = gamemillis;
     }
 
-    int calcdamage(clientinfo *actor, clientinfo *target, int weap, int &flags, float radial, float size, float dist, float scale, bool self)
+    int calcdamage(clientinfo *v, clientinfo *m, int weap, int &flags, float radial, float size, float dist, float scale, bool self)
     {
         flags &= ~HIT_SFLAGS;
         if(!hithurts(flags))
@@ -3646,23 +3646,23 @@ namespace server
         {
             if(m_capture(gamemode) && G(capturebuffdelay))
             {
-                if(actor->state.lastbuff) skew *= G(capturebuffdamage);
-                if(target->state.lastbuff) skew /= G(capturebuffshield);
+                if(v->state.lastbuff) skew *= G(capturebuffdamage);
+                if(m->state.lastbuff) skew /= G(capturebuffshield);
             }
             else if(m_defend(gamemode) && G(defendbuffdelay))
             {
-                if(actor->state.lastbuff) skew *= G(defendbuffdamage);
-                if(target->state.lastbuff) skew /= G(defendbuffshield);
+                if(v->state.lastbuff) skew *= G(defendbuffdamage);
+                if(m->state.lastbuff) skew /= G(defendbuffshield);
             }
             else if(m_bomber(gamemode) && G(bomberbuffdelay))
             {
-                if(actor->state.lastbuff) skew *= G(bomberbuffdamage);
-                if(target->state.lastbuff) skew /= G(bomberbuffshield);
+                if(v->state.lastbuff) skew *= G(bomberbuffdamage);
+                if(m->state.lastbuff) skew /= G(bomberbuffshield);
             }
             else if(m_gauntlet(gamemode) && G(gauntletbuffdelay))
             {
-                if(actor->state.lastbuff) skew *= G(gauntletbuffdamage);
-                if(target->state.lastbuff) skew /= G(gauntletbuffshield);
+                if(v->state.lastbuff) skew *= G(gauntletbuffdamage);
+                if(m->state.lastbuff) skew /= G(gauntletbuffshield);
             }
         }
         if(!(flags&HIT_HEAD))
@@ -3682,7 +3682,7 @@ namespace server
                 flags |= HIT_WAVE;
             }
         }
-        else if(m_team(gamemode, mutators) && actor->team == target->team)
+        else if(m_team(gamemode, mutators) && v->team == m->team)
         {
             float modify = WF(WK(flags), weap, teamdamage, WS(flags))*G(teamdamagescale);
             if(modify != 0) skew *= modify;
@@ -3706,8 +3706,8 @@ namespace server
                 if(G(serverdebug) >= 2) srvmsgf(ci->clientnum, "sync error: sticky [%d (%d)] failed - not found", weap, id);
                 return;
             }
-            clientinfo *victim = target >= 0 ? (clientinfo *)getinfo(target) : NULL;
-            if(target < 0 || (victim && victim->state.state == CS_ALIVE && !victim->state.protect(gamemillis, m_protect(gamemode, mutators))))
+            clientinfo *m = m >= 0 ? (clientinfo *)getinfo(target) : NULL;
+            if(target < 0 || (m && m->state.state == CS_ALIVE && !m->state.protect(gamemillis, m_protect(gamemode, mutators))))
                 sendf(-1, 1, "ri9ix", N_STICKY, ci->clientnum, target, id, norm.x, norm.y, norm.z, pos.x, pos.y, pos.z, ci->clientnum);
             else if(G(serverdebug) >= 2) srvmsgf(ci->clientnum, "sync error: sticky [%d (%d)] failed - state disallows it", weap, id);
         }
@@ -3745,18 +3745,18 @@ namespace server
             else loopv(hits)
             {
                 hitset &h = hits[i];
-                clientinfo *target = (clientinfo *)getinfo(h.target);
-                if(!target)
+                clientinfo *m = (clientinfo *)getinfo(h.target);
+                if(!m)
                 {
                     if(G(serverdebug) >= 2) srvmsgf(ci->clientnum, "sync error: destroy [%d (%d)] failed - hit %d [%d] not found", weap, id, i, h.target);
                     continue;
                 }
                 if(h.proj)
                 {
-                    servstate &ts = target->state;
+                    servstate &ts = m->state;
                     loopj(W_MAX) loopk(2) if(ts.weapshots[j][k].find(h.proj))
                     {
-                        sendf(target->clientnum, 1, "ri4", N_DESTROY, target->clientnum, 1, h.proj);
+                        sendf(m->clientnum, 1, "ri4", N_DESTROY, m->clientnum, 1, h.proj);
                         break;
                     }
                 }
@@ -3765,10 +3765,10 @@ namespace server
                     int hflags = flags|h.flags;
                     float skew = float(scale)/DNF, rad = radial > 0 ? clamp(radial/DNF, 0.f, WX(WK(flags), weap, explode, WS(flags), gamemode, mutators, skew)) : 0.f,
                           size = rad > 0 ? (hflags&HIT_WAVE ? rad*WF(WK(flags), weap, wavepush, WS(flags)) : rad) : 0.f, dist = float(h.dist)/DNF;
-                    if(target->state.state == CS_ALIVE && !target->state.protect(gamemillis, m_protect(gamemode, mutators)))
+                    if(m->state.state == CS_ALIVE && !m->state.protect(gamemillis, m_protect(gamemode, mutators)))
                     {
-                        int damage = calcdamage(ci, target, weap, hflags, rad, size, dist, skew, ci == target);
-                        if(damage) dodamage(target, ci, damage, weap, hflags, 0, h.dir);
+                        int damage = calcdamage(ci, m, weap, hflags, rad, size, dist, skew, ci == m);
+                        if(damage) dodamage(m, ci, damage, weap, hflags, 0, h.dir);
                         else if(G(serverdebug) >= 2)
                             srvmsgf(ci->clientnum, "sync error: destroy [%d (%d)] failed - hit %d [%d] determined zero damage", weap, id, i, h.target);
                     }
@@ -4055,7 +4055,7 @@ namespace server
             loopv(clients)
             {
                 clientinfo *oi = clients[i];
-                if(oi->clientnum >= 0 && oi->name[0] && oi->state.aitype < AI_START && (!clients.inrange(maxnodes) || oi->state.cpnodes.length() > clients[maxnodes]->state.cpnodes.length()))
+                if(oi->clientnum >= 0 && oi->name[0] && oi->state.actortype < A_ENEMY && (!clients.inrange(maxnodes) || oi->state.cpnodes.length() > clients[maxnodes]->state.cpnodes.length()))
                     maxnodes = i;
             }
             if(clients.inrange(maxnodes)) loopv(clients[maxnodes]->state.cpnodes) ci->state.cpnodes.add(clients[maxnodes]->state.cpnodes[i]);
@@ -4094,7 +4094,7 @@ namespace server
         memset(items, 0, sizeof(items)); memset(lowest, -1, sizeof(lowest));
         if(thresh)
         {
-            loopv(clients) if(clients[i]->clientnum >= 0 && clients[i]->online && clients[i]->state.state == CS_ALIVE && clients[i]->state.aitype < AI_START)
+            loopv(clients) if(clients[i]->clientnum >= 0 && clients[i]->online && clients[i]->state.state == CS_ALIVE && clients[i]->state.actortype < A_ENEMY)
                 plr++;
             loopv(sents) if(enttype[sents[i].type].usetype == EU_ITEM && hasitem(i))
             {
@@ -4229,7 +4229,7 @@ namespace server
                     }
                 }
                 else if(ci->state.lastres[WR_SHOCK]) ci->state.lastres[WR_SHOCK] = ci->state.lastrestime[WR_SHOCK] = 0;
-                if(m_regen(gamemode, mutators) && ci->state.aitype < AI_START)
+                if(m_regen(gamemode, mutators) && ci->state.actortype < A_ENEMY)
                 {
                     int total = m_health(gamemode, mutators, ci->state.model), amt = G(regenhealth),
                         delay = ci->state.lastregen ? G(regentime) : G(regendelay);
@@ -4368,7 +4368,7 @@ namespace server
                 if(smode) smode->leavegame(ci, true);
                 mutate(smuts, mut->leavegame(ci, true));
                 ci->state.timeplayed += lastmillis-ci->state.lasttimeplayed;
-                if(m_teamscore(gamemode) && m_team(gamemode, mutators) && !m_nopoints(gamemode, mutators) && G(teamkillrestore) && canplay() && ci->state.aitype == AI_NONE)
+                if(m_teamscore(gamemode) && m_team(gamemode, mutators) && !m_nopoints(gamemode, mutators) && G(teamkillrestore) && canplay() && ci->state.actortype == A_PLAYER)
                 {
                     int restorepoints[T_MAX] = {0};
                     loopv(ci->state.teamkills) restorepoints[ci->state.teamkills[i].team] += ci->state.teamkills[i].points;
@@ -4422,7 +4422,7 @@ namespace server
             sendstring(cname, p);
             #endif
         }
-        loopv(clients) if(clients[i]->clientnum >= 0 && clients[i]->name[0] && clients[i]->state.aitype == AI_NONE)
+        loopv(clients) if(clients[i]->clientnum >= 0 && clients[i]->name[0] && clients[i]->state.actortype == A_PLAYER)
             sendstring(colourname(clients[i]), p);
         sendqueryreply(p);
     }
@@ -4557,7 +4557,7 @@ namespace server
         loopv(clients)
         {
             clientinfo &ci = *clients[i];
-            if(ci.state.aitype != AI_NONE) continue;
+            if(ci.state.actortype != A_PLAYER) continue;
             uchar *data = wsbuf.buf;
             int size = wslen;
             if(ci.wsdata >= wsbuf.buf) { data = ci.wsdata + ci.wslen; size -= ci.wslen; }
@@ -4591,7 +4591,7 @@ namespace server
         loopv(clients)
         {
             clientinfo &ci = *clients[i];
-            if(ci.state.aitype != AI_NONE) continue;
+            if(ci.state.actortype != A_PLAYER) continue;
             uchar *data = wsbuf.buf;
             int size = wslen;
             if(ci.wsdata >= wsbuf.buf) { data = ci.wsdata + ci.wslen; size -= ci.wslen; }
@@ -4643,7 +4643,7 @@ namespace server
         loopv(clients)
         {
             clientinfo &ci = *clients[i];
-            if(ci.state.aitype != AI_NONE) continue;
+            if(ci.state.actortype != A_PLAYER) continue;
             addposition(ws, wsbuf, mtu, ci, ci);
             loopvj(ci.bots) addposition(ws, wsbuf, mtu, *ci.bots[j], ci);
         }
@@ -4651,7 +4651,7 @@ namespace server
         loopv(clients)
         {
             clientinfo &ci = *clients[i];
-            if(ci.state.aitype != AI_NONE) continue;
+            if(ci.state.actortype != A_PLAYER) continue;
             addmessages(ws, wsbuf, mtu, ci, ci);
             loopvj(ci.bots) addmessages(ws, wsbuf, mtu, *ci.bots[j], ci);
         }
@@ -4700,7 +4700,7 @@ namespace server
         ci->state.lasttimeplayed = lastmillis;
 
         sendwelcome(ci);
-        if(m_teamscore(gamemode) && m_team(gamemode, mutators) && !m_nopoints(gamemode, mutators) && G(teamkillrestore) && canplay() && ci->state.aitype == AI_NONE)
+        if(m_teamscore(gamemode) && m_team(gamemode, mutators) && !m_nopoints(gamemode, mutators) && G(teamkillrestore) && canplay() && ci->state.actortype == A_PLAYER)
         {
             int restorepoints[T_MAX] = {0};
             loopv(ci->state.teamkills) restorepoints[ci->state.teamkills[i].team] += ci->state.teamkills[i].points;
@@ -4929,7 +4929,7 @@ namespace server
                 case N_EDITMODE:
                 {
                     int val = getint(p);
-                    if(!ci || ci->state.aitype > AI_NONE) break;
+                    if(!ci || ci->state.actortype > A_PLAYER) break;
                     if(!allowstate(ci, val ? ALST_EDIT : ALST_WALK) && !haspriv(ci, G(editlock), val ? "enter editmode" : "exit editmode"))
                     {
                         spectator(ci);
@@ -5406,7 +5406,7 @@ namespace server
                 {
                     int team = getint(p);
                     if(!allowteam(ci, team, T_FIRST)) team = chooseteam(ci);
-                    if(!m_team(gamemode, mutators) || ci->state.aitype >= AI_START || team == ci->team) break;
+                    if(!m_team(gamemode, mutators) || ci->state.actortype >= A_ENEMY || team == ci->team) break;
                     uint ip = getclientip(ci->clientnum);
                     if(ip && checkipinfo(control, ipinfo::LIMIT, ip) && !checkipinfo(control, ipinfo::ALLOW, ip) && !haspriv(ci, G(limitlock), "change teams while limited")) break;
                     bool reset = true;
@@ -5676,14 +5676,14 @@ namespace server
 
                 case N_ADDCONTROL:
                 {
-                    int victim = getint(p), value = getint(p);
+                    int m = getint(p), value = getint(p);
                     getstring(text, p);
                     #define CONTROLSWITCH(x,y) \
                         case x: \
                         { \
-                            if(haspriv(ci, G(y##lock), #y " people") && victim >= 0) \
+                            if(haspriv(ci, G(y##lock), #y " people") && m >= 0) \
                             { \
-                                clientinfo *cp = (clientinfo *)getinfo(victim); \
+                                clientinfo *cp = (clientinfo *)getinfo(m); \
                                 if(!cp || cp->state.ownernum >= 0 || (value != ipinfo::ALLOW && !cmppriv(ci, cp, #y))) break; \
                                 uint ip = getclientip(cp->clientnum); \
                                 if(!ip) break; \
@@ -5733,7 +5733,7 @@ namespace server
                 {
                     int sn = getint(p), val = getint(p);
                     clientinfo *cp = (clientinfo *)getinfo(sn);
-                    if(!cp || cp->state.aitype > AI_NONE || (val ? cp->state.state == CS_SPECTATOR : cp->state.state != CS_SPECTATOR)) break;
+                    if(!cp || cp->state.actortype > A_PLAYER || (val ? cp->state.state == CS_SPECTATOR : cp->state.state != CS_SPECTATOR)) break;
                     if((sn != sender || !allowstate(cp, val ? ALST_SPEC : ALST_TRY)) && !haspriv(ci, G(speclock), sn != sender ? "control other players" : (val ? "enter spectator" : "exit spectator")))
                         break;
                     bool spec = val != 0, quarantine = cp != ci && val != 0 && val == 2, wasq = cp->state.quarantine;
@@ -5756,7 +5756,7 @@ namespace server
                     int who = getint(p), team = getint(p);
                     if(who<0 || who>=getnumclients() || !haspriv(ci, G(speclock), "change the team of others")) break;
                     clientinfo *cp = (clientinfo *)getinfo(who);
-                    if(!cp || cp == ci || !m_team(gamemode, mutators) || m_local(gamemode) || cp->state.aitype >= AI_START) break;
+                    if(!cp || cp == ci || !m_team(gamemode, mutators) || m_local(gamemode) || cp->state.actortype >= A_ENEMY) break;
                     if(cp->state.state == CS_SPECTATOR || !allowteam(cp, team, T_FIRST)) break;
                     setteam(cp, team, TT_DFINFO);
                     break;

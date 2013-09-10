@@ -1,49 +1,5 @@
-struct aistyles
-{
-    int type,           weap,           health;
-    float   xradius,    yradius,    height,     weight,     speed,      scale;
-    bool    canmove,    canstrafe,  canjump,    cancrouch,  useweap,    living,     hitbox;
-    const char  *name,      *playermodel[4];
-};
-
-enum { AI_NONE = 0, AI_BOT, AI_TURRET, AI_GRUNT, AI_DRONE, AI_MAX, AI_START = AI_TURRET, AI_TOTAL = AI_MAX-AI_START };
-#ifdef GAMESERVER
-aistyles aistyle[] = {
-    {
-        AI_NONE,         -1,             0,
-            3,          3,          14,         200,        50,         1,
-            true,       true,       true,       true,       true,       true,       true,
-                "player",   { "actors/player/male/hwep",      "actors/player/male",     "actors/player/male/body",      "actors/player/male/headless" }
-    },
-    {
-        AI_BOT,         -1,             0,
-            3,          3,          14,         200,        50,         1,
-            true,       true,       true,       true,       true,       true,       true,
-                "bot",      { "actors/player/male/hwep",      "actors/player/male",     "actors/player/male/body",      "actors/player/male/headless" }
-    },
-    {
-        AI_TURRET,      W_SMG,       100,
-            4.75,       4.75,       8.75,       150,        1,          1,
-            false,      false,      false,      false,      false,      false,      false,
-                "turret",   { "actors/player/male/hwep",      "actors/turret",          "actors/player/male/body",      "actors/turret" }
-    },
-    {
-        AI_GRUNT,       W_PISTOL,   50,
-            3,          3,          14,         200,        50,         1,
-            true,       true,       true,       true,       true,       true,       true,
-                "grunt",   { "actors/player/male/hwep",      "actors/player/male",      "actors/player/male/body",      "actors/player/male/headless" }
-    },
-    {
-        AI_DRONE,       W_MELEE,     50,
-            3,          3,          14,         150,        40,         1,
-            true,       true,       true,       true,       true,       true,       true,
-                "drone",    { "actors/player/male/hwep",      "actors/drone",           "actors/player/male/body",      "actors/drone" }
-    },
-};
-#endif
-#ifndef GAMESERVER
 struct gameent;
-extern aistyles aistyle[];
+extern actors actor[];
 
 namespace ai
 {
@@ -365,4 +321,3 @@ namespace ai
     extern void render();
     extern void preload();
 };
-#endif

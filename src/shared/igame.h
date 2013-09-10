@@ -136,7 +136,7 @@ namespace server
     extern bool serveroption(char *arg);
     extern void *newinfo();
     extern void deleteinfo(void *ci);
-    extern int numclients(int exclude = -1, bool nospec = false, int aitype = -1);
+    extern int numclients(int exclude = -1, bool nospec = false, int actortype = -1);
     extern int reserveclients();
     extern int numchannels();
     extern int dupclients();

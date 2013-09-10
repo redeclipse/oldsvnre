@@ -534,14 +534,14 @@ namespace capture
 
     int aiowner(gameent *d)
     {
-        loopv(st.flags) if(entities::ents.inrange(st.flags[i].ent) && entities::ents[d->aientity]->links.find(st.flags[i].ent) >= 0)
+        loopv(st.flags) if(entities::ents.inrange(st.flags[i].ent) && entities::ents[d->spawnpoint]->links.find(st.flags[i].ent) >= 0)
             return st.flags[i].team;
         return d->team;
     }
 
     bool aicheck(gameent *d, ai::aistate &b)
     {
-        if(d->aitype == AI_BOT)
+        if(d->actortype == A_BOT)
         {
             static vector<int> taken; taken.setsize(0);
             loopv(st.flags)
@@ -575,12 +575,12 @@ namespace capture
         {
             capturestate::flag &f = st.flags[j];
             bool home = f.team == ai::owner(d);
-            if(d->aitype == AI_BOT && m_duke(game::gamemode, game::mutators) && home) continue;
+            if(d->actortype == A_BOT && m_duke(game::gamemode, game::mutators) && home) continue;
             static vector<int> targets; // build a list of others who are interested in this
             targets.setsize(0);
-            bool regen = d->aitype != AI_BOT || f.team == T_NEUTRAL || m_gsp3(game::gamemode, game::mutators) || !m_regen(game::gamemode, game::mutators) || d->health >= m_health(game::gamemode, game::mutators, d->model);
-            ai::checkothers(targets, d, home || d->aitype != AI_BOT ? ai::AI_S_DEFEND : ai::AI_S_PURSUE, ai::AI_T_AFFINITY, j, true);
-            if(d->aitype == AI_BOT)
+            bool regen = d->actortype != A_BOT || f.team == T_NEUTRAL || m_gsp3(game::gamemode, game::mutators) || !m_regen(game::gamemode, game::mutators) || d->health >= m_health(game::gamemode, game::mutators, d->model);
+            ai::checkothers(targets, d, home || d->actortype != A_BOT ? ai::AI_S_DEFEND : ai::AI_S_PURSUE, ai::AI_T_AFFINITY, j, true);
+            if(d->actortype == A_BOT)
             {
                 gameent *e = NULL;
                 int numdyns = game::numdynents();
@@ -624,7 +624,7 @@ namespace capture
                 if(targets.empty())
                 { // attack the flag
                     ai::interest &n = interests.add();
-                    n.state = d->aitype == AI_BOT ? ai::AI_S_PURSUE : ai::AI_S_DEFEND;
+                    n.state = d->actortype == A_BOT ? ai::AI_S_PURSUE : ai::AI_S_DEFEND;
                     n.node = ai::closestwaypoint(f.pos(), ai::CLOSEDIST, true);
                     n.target = j;
                     n.targtype = ai::AI_T_AFFINITY;
@@ -654,10 +654,10 @@ namespace capture
 
     bool aidefense(gameent *d, ai::aistate &b)
     {
-        if(d->aitype == AI_BOT)
+        if(d->actortype == A_BOT)
         {
             if(!m_gsp3(game::gamemode, game::mutators)) loopv(st.flags) if(st.flags[i].owner == d) return aihomerun(d, b);
-            if(d->aitype == AI_BOT && m_duke(game::gamemode, game::mutators)) return false;
+            if(d->actortype == A_BOT && m_duke(game::gamemode, game::mutators)) return false;
         }
         if(st.flags.inrange(b.target))
         {
@@ -665,7 +665,7 @@ namespace capture
             if(f.team == ai::owner(d) && f.owner && ai::owner(f.owner) != ai::owner(d))
                 return ai::violence(d, b, f.owner, 4);
             int walk = f.owner && ai::owner(f.owner) != ai::owner(d) ? 1 : 0;
-            if(d->aitype == AI_BOT)
+            if(d->actortype == A_BOT)
             {
                 bool regen = !m_regen(game::gamemode, game::mutators) || d->health >= m_health(game::gamemode, game::mutators, d->model);
                 if(regen && lastmillis-b.millis >= (201-d->skill)*33)
@@ -711,7 +711,7 @@ namespace capture
 
     bool aipursue(gameent *d, ai::aistate &b)
     {
-        if(st.flags.inrange(b.target) && d->aitype == AI_BOT)
+        if(st.flags.inrange(b.target) && d->actortype == A_BOT)
         {
             capturestate::flag &f = st.flags[b.target];
             if(f.team != ai::owner(d))
