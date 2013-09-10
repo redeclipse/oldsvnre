@@ -102,9 +102,10 @@ namespace ai
     extern vector<oldwaypoint> oldwaypoints;
 
     extern int showwaypoints, dropwaypoints;
-    extern int closestwaypoint(const vec &pos, float mindist, bool links);
+    extern int closestwaypoint(const vec &pos, float mindist = CLOSEDIST, bool links = true);
     extern void findwaypointswithin(const vec &pos, float mindist, float maxdist, vector<int> &results);
 	extern void inferwaypoints(gameent *d, const vec &o, const vec &v, float mindist = ai::CLOSEDIST);
+	extern void delwaypoint(int n = -1);
 
     struct avoidset
     {
