@@ -692,20 +692,14 @@ namespace hud
         vec c = vec::hexcolor(colour);
         int size = int(s*skew);
         string str, q;
-        if(m_laptime(game::gamemode, game::mutators)) { formatstring(str)("[ \fs%s%s\fS ]", col, score ? timestr(score) : "dnf"); }
+        if(m_laptime(game::gamemode, game::mutators)) { formatstring(str)("[ \fs%s%s\fS ]", col, timestr(score)); }
         else if(m_defend(game::gamemode) && score == INT_MAX) { formatstring(str)("[ \fs%sWIN\fS ]", col); }
         else { formatstring(str)("[ \fs%s%d\fS ]", col, score); }
-        if(inventoryscoreinfo&1)
+        if(inventoryscoreinfo)
         {
             if(m_laptime(game::gamemode, game::mutators))
                 { formatstring(q)("\n\fs\f[%d]\f(%s)\fS%s", offset ? (offset < 0 ? 0x00FF00 : 0xFF0000) : 0xFFFF00, offset ? (offset < 0 ? arrowtex : arrowdowntex) : arrowrighttex, timestr(offset < 0 ? 0-offset : offset)); }
-            else { formatstring(q)("%s\fs\f[%d]\f(%s)\fS%d", inventoryscorebreak&1 ? "\n" : " ", offset ? (offset > 0 ? 0x00FF00 : 0xFF0000) : 0xFFFF00, offset ? (offset > 0 ? arrowtex : arrowdowntex) : arrowrighttex, offset < 0 ? 0-offset : offset); }
-            concatstring(str, q);
-        }
-        if(inventoryscoreinfo&2)
-        {
-            const char *pls[10] = { "th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th" };
-            formatstring(q)("%s\fs\f[%d]\f(%s)\fS\fs%s%d%s%s\fS", inventoryscorebreak&2 || m_laptime(game::gamemode, game::mutators) ? "\n" : " ", colour, icon, col, pos+1, pls[(pos+1)%10], m_laptime(game::gamemode, game::mutators) || (inventoryscoreinfo&1 && !(inventoryscorebreak&1) && inventoryscorebreak&2) ? " place" : "");
+            else { formatstring(q)("%s\fs\f[%d]\f(%s)\fS%d", inventoryscorebreak ? "\n" : " ", offset ? (offset > 0 ? 0x00FF00 : 0xFF0000) : 0xFFFF00, offset ? (offset > 0 ? arrowtex : arrowdowntex) : arrowrighttex, offset < 0 ? 0-offset : offset); }
             concatstring(str, q);
         }
         drawitem(icon, x, y+size, s, inventoryscorebg!=0, 0, false, c.r, c.g, c.b, fade, skew, "default", "%s", str);

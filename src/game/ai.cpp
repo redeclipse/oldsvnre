@@ -331,7 +331,7 @@ namespace ai
         return randomnode(d, b, d->feetpos(), guard, wander);
     }
 
-    bool enemy(gameent *d, aistate &b, const vec &pos, float guard, int pursue, bool force)
+    bool enemy(gameent *d, aistate &b, const vec &pos, float guard, int pursue, bool force, bool retry = false)
     {
         if(passive() || (d->ai->enemy >= 0 && lastmillis-d->ai->enemymillis >= (111-d->skill)*50)) return false;
         gameent *t = NULL, *e = NULL;
@@ -342,13 +342,14 @@ namespace ai
         {
             vec ep = getaimpos(d, e, altfire(d, e));
             float dist = ep.squaredist(dp);
-            if(dist < bestdist && (cansee(d, dp, ep, d->aitype >= AI_START) || dist <= mindist))
+            if(dist < bestdist && (force || dist <= mindist || cansee(d, dp, ep, d->aitype >= AI_START)))
             {
                 t = e;
                 bestdist = dist;
             }
         }
         if(t && violence(d, b, t, pursue)) return true;
+        if(retry && !force) return enemy(d, b, pos, guard, pursue, true, false);
         return false;
     }
 
@@ -381,14 +382,14 @@ namespace ai
     {
         if(!aistyle[d->aitype].canmove)
         {
-            b.idle = enemy(d, b, pos, FARDIST, weaptype[d->weapselect].melee ? 1 : 0, false) ? 2 : 1;
+            b.idle = enemy(d, b, pos, wander, weaptype[d->weapselect].melee ? 1 : 0, false, true) ? 2 : 1;
             return true;
         }
         if(!walk)
         {
             if(pos.squaredist(d->feetpos()) <= guard*guard)
             {
-                b.idle = enemy(d, b, pos, FARDIST, weaptype[d->weapselect].melee ? 1 : 0, false) ? 2 : 1;
+                b.idle = enemy(d, b, pos, wander, weaptype[d->weapselect].melee ? 1 : 0, false, true) ? 2 : 1;
                 return true;
             }
             walk++;
