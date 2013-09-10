@@ -174,15 +174,15 @@ namespace game
 
     VAR(IDF_PERSIST, aboveheadnames, 0, 1, 1);
     VAR(IDF_PERSIST, aboveheadstatus, 0, 1, 1);
-    VAR(IDF_PERSIST, aboveheadteam, 0, 3, 3);
+    VAR(IDF_PERSIST, aboveheadteam, 0, 0, 3);
     VAR(IDF_PERSIST, aboveheaddamage, 0, 0, 1);
     VAR(IDF_PERSIST, aboveheadicons, 0, 5, 7);
     FVAR(IDF_PERSIST, aboveheadblend, 0.f, 1, 1.f);
-    FVAR(IDF_PERSIST, aboveheadnamesize, 0, 2.5f, 1000);
+    FVAR(IDF_PERSIST, aboveheadnamesize, 0, 3.f, 1000);
     FVAR(IDF_PERSIST, aboveheadstatussize, 0, 2.5f, 1000);
     FVAR(IDF_PERSIST, aboveheadiconsize, 0, 2.5f, 1000);
-    FVAR(IDF_PERSIST, aboveheadeventsize, 0, 2.5f, 1000);
-    FVAR(IDF_PERSIST, aboveitemiconsize, 0, 2.25f, 1000);
+    FVAR(IDF_PERSIST, aboveheadeventsize, 0, 3.f, 1000);
+    FVAR(IDF_PERSIST, aboveitemiconsize, 0, 2.5f, 1000);
 
     FVAR(IDF_PERSIST, aboveheadsmooth, 0, 0.25f, 1);
     VAR(IDF_PERSIST, aboveheadsmoothmillis, 1, 100, 10000);
@@ -224,15 +224,15 @@ namespace game
     VAR(IDF_PERSIST, playerovertone, -1, CTONE_TEAM, CTONE_MAX-1);
     VAR(IDF_PERSIST, playerundertone, -1, CTONE_TONE, CTONE_MAX-1);
     VAR(IDF_PERSIST, playerdisplaytone, -1, CTONE_TONE, CTONE_MAX-1);
-    VAR(IDF_PERSIST, playereffecttone, -1, CTONE_TEAM, CTONE_MAX-1);
-    VAR(IDF_PERSIST, playerlighttone, -1, CTONE_TEAM, CTONE_MAX-1);
+    VAR(IDF_PERSIST, playereffecttone, -1, CTONE_TEAMED, CTONE_MAX-1);
+    VAR(IDF_PERSIST, playerlighttone, -1, CTONE_TEAMED, CTONE_MAX-1);
     VAR(IDF_PERSIST, playerteamtone, -1, CTONE_TEAM, CTONE_MAX-1);
     FVAR(IDF_PERSIST, playerlightmix, 0, 0.75f, 100);
     FVAR(IDF_PERSIST, playertonemix, 0, 0.25f, 1);
     FVAR(IDF_PERSIST, playerblend, 0, 1, 1);
 
     VAR(IDF_PERSIST, playerhint, 0, 3, 3);
-    VAR(IDF_PERSIST, playerhinttone, -1, CTONE_TEAM, CTONE_MAX-1);
+    VAR(IDF_PERSIST, playerhinttone, -1, CTONE_TEAMED, CTONE_MAX-1);
     FVAR(IDF_PERSIST, playerhintblend, 0, 0.1f, 1);
     FVAR(IDF_PERSIST, playerhintsize, 0, 1.1f, 2);
     FVAR(IDF_PERSIST, playerhintfade, 0, 64, FVAR_MAX);
