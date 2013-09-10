@@ -222,6 +222,7 @@ namespace hud
     VAR(IDF_PERSIST, showinventory, 0, 1, 1);
     VAR(IDF_PERSIST, inventoryammo, 0, 3, 3);
     VAR(IDF_PERSIST, inventoryammobar, 0, 2, 2);
+    VAR(IDF_PERSIST, inventoryammostyle, 0, 1, 1);
     VAR(IDF_PERSIST, inventoryhidemelee, 0, 1, 1);
     VAR(IDF_PERSIST, inventorygame, 0, 2, 2);
     VAR(IDF_PERSIST, inventoryscore, 0, 1, VAR_MAX);
@@ -371,11 +372,11 @@ namespace hud
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, hinttex, "<grey>textures/hint", 3);
     FVAR(IDF_PERSIST, radarblend, 0, 1, 1);
     FVAR(IDF_PERSIST, radarplayerblend, 0, 1, 1);
-    FVAR(IDF_PERSIST, radarplayerhintblend, 0, 1, 1);
-    FVAR(IDF_PERSIST, radarplayersize, 0, 0.3f, 1000);
-    FVAR(IDF_PERSIST, radarplayerhintsize, 0, 0.7f, 1);
+    FVAR(IDF_PERSIST, radarplayerhintblend, 0, 0.65f, 1);
+    FVAR(IDF_PERSIST, radarplayersize, 0, 0.35f, 1000);
+    FVAR(IDF_PERSIST, radarplayerhintsize, 0, 0.8f, 1);
     FVAR(IDF_PERSIST, radarblipblend, 0, 1, 1);
-    FVAR(IDF_PERSIST, radarblipsize, 0, 0.3f, 1000);
+    FVAR(IDF_PERSIST, radarblipsize, 0, 0.35f, 1000);
     FVAR(IDF_PERSIST, radarbliprotate, 0, 1, 1);
     FVAR(IDF_PERSIST, radaraffinityblend, 0, 1, 1);
     FVAR(IDF_PERSIST, radaraffinitysize, 0, 1, 1000);
@@ -2408,12 +2409,15 @@ namespace hud
                     vec c(1, 1, 1);
                     if(inventorycolour) c.mul(vec::hexcolor(W(i, colour)));
                     else if(inventorytone) skewcolour(c.r, c.g, c.b, inventorytone);
-                    int oldy = y-sy;
+                    int oldy = y-sy, curammo = game::focus->ammo[i];
+                    if(inventoryammostyle && (game::focus->weapstate[i] == W_S_RELOAD || game::focus->weapstate[i] == W_S_USE) && game::focus->weapload[i] > 0)
+                        curammo = (curammo-game::focus->weapload[i])+int(game::focus->weapload[i]*clamp(float(lastmillis-game::focus->weaplast[i])/float(game::focus->weapwait[i]), 0.f, 1.f));
+
                     if(inventoryammo >= 2 && (i == game::focus->weapselect || inventoryammo >= 3) && W(i, max) > 1 && game::focus->hasweap(i, sweap))
-                        sy += drawitem(hudtexs[i], x, y-sy, size, 0, true, false, c.r, c.g, c.b, blend, skew, "super", "%d", game::focus->ammo[i]);
+                        sy += drawitem(hudtexs[i], x, y-sy, size, 0, true, false, c.r, c.g, c.b, blend, skew, "super", "%d", curammo);
                     else sy += drawitem(hudtexs[i], x, y-sy, size, 0, true, false, c.r, c.g, c.b, blend, skew);
                     if(inventoryammobar && (i == game::focus->weapselect || inventoryammobar >= 2) && W(i, max) > 1 && game::focus->hasweap(i, sweap))
-                        drawitembar(x, oldy, size, false, c.r, c.g, c.b, blend, skew, game::focus->ammo[i]/float(W(i, max)));
+                        drawitembar(x, oldy, size, false, c.r, c.g, c.b, blend, skew, curammo/float(W(i, max)));
                     if(inventoryweapids && (i == game::focus->weapselect || inventoryweapids >= 2))
                     {
                         static string weapids[W_MAX];
