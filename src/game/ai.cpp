@@ -1442,15 +1442,19 @@ namespace ai
         if(d->blocked)
         {
             d->ai->blocktime += lastmillis-d->ai->lastrun;
-            if(d->ai->blocktime > (d->ai->blockseq+1)*1000)
+            if(d->ai->blocktime > (d->ai->blockseq+1)*250)
             {
                 d->ai->blockseq++;
                 switch(d->ai->blockseq)
                 {
                     case 1: case 2:
-                        d->ai->clear(d->ai->blockseq!=1);
-                        if(iswaypoint(d->ai->targnode) && !d->ai->hasprevnode(d->ai->targnode))
-                            d->ai->addprevnode(d->ai->targnode);
+                        d->ai->clear(d->ai->blockseq != 1);
+                        if(d->ai->blockseq != 1 && iswaypoint(d->ai->targnode))
+                        {
+                            if(!d->ai->hasprevnode(d->ai->targnode)) d->ai->addprevnode(d->ai->targnode);
+                            waypoints[d->ai->targnode].weight = -1;
+                            wpavoid.avoidnear(NULL, waypoints[d->ai->targnode].o.z + WAYPOINTRADIUS, waypoints[d->ai->targnode].o, WAYPOINTRADIUS);
+                        }
                         break;
                     case 3: if(!transport(d)) d->ai->reset(false); break;
                     case 4: default:
@@ -1473,7 +1477,7 @@ namespace ai
                 switch(d->ai->targseq)
                 {
                     case 1: case 2:
-                        d->ai->clear(d->ai->targseq!=1);
+                        d->ai->clear(d->ai->targseq != 1);
                         if(iswaypoint(d->ai->targnode) && !d->ai->hasprevnode(d->ai->targnode))
                             d->ai->addprevnode(d->ai->targnode);
                         break;
@@ -1542,7 +1546,7 @@ namespace ai
             gameent *d = (gameent *)game::iterdynents(i);
             if(!d) continue; // || d->aitype >= AI_START) continue;
             if(d->state != CS_ALIVE || !physics::issolid(d)) continue;
-            obstacles.avoidnear(d, d->o.z + d->aboveeye + 1, d->feetpos(), guessradius + d->radius);
+            obstacles.avoidnear(d, d->o.z + d->aboveeye + 1, d->feetpos(), guessradius + d->radius + 1);
         }
         obstacles.add(wpavoid);
         loopv(projs::projs)
@@ -1551,20 +1555,33 @@ namespace ai
             if(p && p->state == CS_ALIVE && p->projtype == PRJ_SHOT)
             {
                 float expl = WX(WK(p->flags), p->weap, explode, WS(p->flags), game::gamemode, game::mutators, p->curscale);
-                if(expl > 0) obstacles.avoidnear(p, p->o.z + expl, p->o, guessradius + expl);
+                if(expl > 0) obstacles.avoidnear(p, p->o.z + expl, p->o, guessradius + expl + 1);
             }
         }
-        loopi(entities::lastenttype[MAPMODEL]) if(entities::ents[i]->type == MAPMODEL && !entities::ents[i]->links.empty() && !entities::ents[i]->spawned)
+        loopi(entities::lastenttype[MAPMODEL]) if(entities::ents[i]->type == MAPMODEL && !entities::ents[i]->spawned)
         {
-            mapmodelinfo *mmi = getmminfo(entities::ents[i]->attrs[0]);
+            gameentity &e = *(gameentity *)entities::ents[i];
+            bool skip = false;
+            loopvk(e.links) if(entities::ents.inrange(e.links[k]))
+            {
+                gameentity &f = *(gameentity *)entities::ents[e.links[k]];
+                if(f.type != TRIGGER || !m_check(f.attrs[5], f.attrs[6], game::gamemode, game::mutators)) continue;
+                if(f.attrs[2] != TA_AUTO || (f.attrs[1] != TR_TOGGLE && f.attrs[1] != TR_LINK)) continue;
+                skip = true;
+                break;
+            }
+            if(skip) continue;
+            mapmodelinfo *mmi = getmminfo(e.attrs[0]);
             if(!mmi) continue;
             vec center, radius;
             mmi->m->collisionbox(center, radius);
-            if(entities::ents[i]->attrs[5]) { center.mul(entities::ents[i]->attrs[5]/100.f); radius.mul(entities::ents[i]->attrs[5]/100.f); }
-            if(!mmi->m->ellipsecollide) rotatebb(center, radius, int(entities::ents[i]->attrs[1]), int(entities::ents[i]->attrs[2]));
-            float limit = WAYPOINTRADIUS+(max(radius.x, max(radius.y, radius.z))*mmi->m->height);
-            vec pos = entities::ents[i]->o; pos.z += limit*0.5f;
-            obstacles.avoidnear(NULL, pos.z + limit*0.5f, pos, limit);
+            if(e.attrs[5])
+            {
+                center.mul(e.attrs[5]/100.f);
+                radius.mul(e.attrs[5]/100.f);
+            }
+            if(!mmi->m->ellipsecollide) rotatebb(center, radius, int(e.attrs[1]), int(e.attrs[2]));
+            obstacles.avoidnear(NULL, e.o.z + radius.z, e.o, max(radius.x, max(radius.y, radius.z)) + WAYPOINTRADIUS);
         }
     }
 

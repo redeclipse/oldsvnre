@@ -791,6 +791,22 @@ namespace ai
         return loadwaypoints(force, mname) || importwaypoints();
     }
 
+    void delwaypoint(int n)
+    {
+        if(n < 0)
+        {
+            if(noedit(true)) return;
+            n = closestwaypoint(camera1->o);
+        }
+        if(!iswaypoint(n)) return;
+        waypoints[n].links[0] = 0;
+        waypoints[n].links[1] = 0xFFFF;
+        remapwaypoints();
+        clearwpcache();
+    }
+    ICOMMAND(0, delwaypoint, "b", (int *n), delwaypoint(*n));
+
+
     void delselwaypoints()
     {
         if(noedit(true)) return;
