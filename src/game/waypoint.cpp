@@ -527,7 +527,7 @@ namespace ai
     static inline bool shouldnavigate()
     {
         if(dropwaypoints) return true;
-        loopvrev(players) if(players[i] && players[i]->aitype != AI_NONE) return true;
+        loopvrev(players) if(players[i] && players[i]->actortype != A_PLAYER) return true;
         return false;
     }
 

@@ -8,7 +8,7 @@ struct duelservmode : servmode
 
     bool checkready(clientinfo *ci)
     {
-        if(ci->state.aitype < AI_START)
+        if(ci->state.actortype < A_ENEMY)
         {
             if(m_loadout(gamemode, mutators) && !chkloadweap(ci, false)) return false;
         }
@@ -28,7 +28,7 @@ struct duelservmode : servmode
 
     void queue(clientinfo *ci, bool pos = true, bool top = false, bool wait = true)
     {
-        if(ci->state.state != CS_SPECTATOR && ci->state.state != CS_EDITING && ci->state.aitype < AI_START)
+        if(ci->state.state != CS_SPECTATOR && ci->state.state != CS_EDITING && ci->state.actortype < A_ENEMY)
         {
             int n = duelqueue.find(ci);
             if(top)
@@ -63,23 +63,23 @@ struct duelservmode : servmode
         respawns.removeobj(ci);
     }
 
-    bool damage(clientinfo *target, clientinfo *actor, int damage, int weap, int flags, int material, const ivec &hitpush)
+    bool damage(clientinfo *m, clientinfo *v, int damage, int weap, int flags, int material, const ivec &hitpush)
     {
-        if(dueltime >= 0 && target->state.aitype < AI_START) return false;
+        if(dueltime >= 0 && m->state.actortype < A_ENEMY) return false;
         return true;
     }
 
     bool canspawn(clientinfo *ci, bool tryspawn = false)
     {
         if(!checkready(ci)) return false;
-        if(allowed.find(ci) >= 0 || ci->state.aitype >= AI_START) return true;
+        if(allowed.find(ci) >= 0 || ci->state.actortype >= A_ENEMY) return true;
         if(m_affinity(gamemode) && respawns.find(ci) >= 0)
         {
             if(m_survivor(gamemode, mutators))
             {
                 int alive = 0;
                 vector<clientinfo *> mates;
-                loopv(clients) if(clients[i]->state.aitype < AI_START && clients[i]->team == ci->team)
+                loopv(clients) if(clients[i]->state.actortype < A_ENEMY && clients[i]->team == ci->team)
                 { // includes ci
                     if(clients[i]->state.state == CS_ALIVE) alive++;
                     mates.add(clients[i]);
@@ -113,7 +113,7 @@ struct duelservmode : servmode
 
     void layout()
     {
-        loopvj(clients) if(clients[j]->state.aitype < AI_START)
+        loopvj(clients) if(clients[j]->state.actortype < A_ENEMY)
         {
             vector<int> shots;
             loop(a, W_MAX) loop(b, 2)
@@ -133,7 +133,7 @@ struct duelservmode : servmode
     {
         if(!m_affinity(gamemode) || dueltime >= 0 || duelround <= 0 || !win) return;
         respawns.shrink(0);
-        loopv(clients) if(clients[i]->state.aitype < AI_START) switch(clients[i]->state.state)
+        loopv(clients) if(clients[i]->state.actortype < A_ENEMY) switch(clients[i]->state.state)
         {
             case CS_ALIVE:
                 if(playing.find(clients[i]) < 0 || clients[i]->team != ci->team) queue(clients[i], false);
@@ -173,7 +173,7 @@ struct duelservmode : servmode
             {
                 int numwins = G(duelcycles), numplrs = 0;
                 loopv(clients)
-                    if(clients[i]->state.aitype < AI_START && clients[i]->state.state != CS_SPECTATOR && clients[i]->team == ci->team)
+                    if(clients[i]->state.actortype < A_ENEMY && clients[i]->state.state != CS_SPECTATOR && clients[i]->team == ci->team)
                         numplrs++;
                 if(numplrs > (m_team(gamemode, mutators) ? 1 : 2))
                 {
@@ -195,7 +195,7 @@ struct duelservmode : servmode
 
     void update()
     {
-        if(interm || !hasgameinfo || gamewait || numclients(-1, true, AI_BOT) <= 1) return;
+        if(interm || !hasgameinfo || gamewait || numclients(-1, true, A_BOT) <= 1) return;
         if(dueltime >= 0)
         {
             if(gamemillis >= dueltime && !duelqueue.empty())
@@ -261,7 +261,7 @@ struct duelservmode : servmode
         {
             bool cleanup = false;
             vector<clientinfo *> alive;
-            loopv(clients) if(clients[i]->state.aitype < AI_START && clients[i]->state.state == CS_ALIVE)
+            loopv(clients) if(clients[i]->state.actortype < A_ENEMY && clients[i]->state.state == CS_ALIVE)
             {
                 if(playing.find(clients[i]) < 0) queue(clients[i]);
                 else alive.add(clients[i]);

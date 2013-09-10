@@ -14,7 +14,7 @@ struct bomberservmode : bomberstate, servmode
 
     void dropaffinity(clientinfo *ci, const vec &o, const vec &inertia = vec(0, 0, 0), int target = -1)
     {
-        if(!canplay(hasflaginfo) || ci->state.aitype >= AI_START) return;
+        if(!canplay(hasflaginfo) || ci->state.actortype >= A_ENEMY) return;
         vec n = inertia.iszero() ? vec(0, 0, G(bomberspeed)/10.f) : inertia, v = o; v.z += 1;
         loopv(flags) if(flags[i].owner == ci->clientnum)
         {
@@ -30,9 +30,9 @@ struct bomberservmode : bomberstate, servmode
         dropaffinity(ci, ci->state.o, vec(ci->state.vel).add(ci->state.falling));
     }
 
-    void dodamage(clientinfo *target, clientinfo *actor, int &damage, int &hurt, int &weap, int &flags, int &material, const ivec &hitpush)
+    void dodamage(clientinfo *m, clientinfo *v, int &damage, int &hurt, int &weap, int &flags, int &material, const ivec &hitpush)
     {
-        //if(weaptype[weap].melee) dropaffinity(target, target->state.o);
+        //if(weaptype[weap].melee) dropaffinity(m, m->state.o);
     }
 
     void spawned(clientinfo *ci)
@@ -54,13 +54,13 @@ struct bomberservmode : bomberstate, servmode
         loopvj(sents) if(enttype[sents[j].type].usetype == EU_ITEM) setspawn(j, hasitem(j), true, true);
     }
 
-    void died(clientinfo *ci, clientinfo *actor)
+    void died(clientinfo *ci, clientinfo *v)
     {
         if(!canplay(hasflaginfo)) return;
         dropaffinity(ci, ci->state.o, vec(ci->state.vel).add(ci->state.falling));
-        if(actor && m_gsp1(gamemode, mutators) && (!m_team(gamemode, mutators) || ci->team != actor->team))
+        if(v && m_gsp1(gamemode, mutators) && (!m_team(gamemode, mutators) || ci->team != v->team))
         {
-            loopv(flags) if(isbomberaffinity(flags[i]) && flags[i].owner == actor->clientnum)
+            loopv(flags) if(isbomberaffinity(flags[i]) && flags[i].owner == v->clientnum)
                 flags[i].taketime = gamemillis;
         }
     }
@@ -111,7 +111,7 @@ struct bomberservmode : bomberstate, servmode
 
     void moved(clientinfo *ci, const vec &oldpos, const vec &newpos)
     {
-        if(!canplay(hasflaginfo) || ci->state.aitype >= AI_START) return;
+        if(!canplay(hasflaginfo) || ci->state.actortype >= A_ENEMY) return;
         if(G(bomberthreshold) > 0 && oldpos.dist(newpos) >= G(bomberthreshold))
             dropaffinity(ci, oldpos, vec(ci->state.vel).add(ci->state.falling));
         if(!m_team(gamemode, mutators) || m_gsp1(gamemode, mutators)) return;
@@ -127,7 +127,7 @@ struct bomberservmode : bomberstate, servmode
 
     void takeaffinity(clientinfo *ci, int i)
     {
-        if(!canplay(hasflaginfo) || !flags.inrange(i) || ci->state.state!=CS_ALIVE || ci->state.aitype >= AI_START) return;
+        if(!canplay(hasflaginfo) || !flags.inrange(i) || ci->state.state!=CS_ALIVE || ci->state.actortype >= A_ENEMY) return;
         flag &f = flags[i];
         if(!isbomberaffinity(f) || f.owner >= 0 || !f.enabled) return;
         if(f.lastowner == ci->clientnum && f.droptime && (G(bomberpickupdelay) < 0 || lastmillis-f.droptime <= G(bomberpickupdelay))) return;
@@ -356,11 +356,11 @@ struct bomberservmode : bomberstate, servmode
         }
     }
 
-    int points(clientinfo *victim, clientinfo *actor)
+    int points(clientinfo *m, clientinfo *v)
     {
-        bool isteam = victim==actor || (m_team(gamemode, mutators) && victim->team == actor->team);
-        int p = isteam ? -1 : (m_team(gamemode, mutators) ? 1 : 0), v = p;
-        if(p) { loopv(flags) if(flags[i].owner == victim->clientnum) p += v; }
+        bool isteam = m==v || (m_team(gamemode, mutators) && m->team == v->team);
+        int p = isteam ? -1 : (m_team(gamemode, mutators) ? 1 : 0), q = p;
+        if(p) { loopv(flags) if(flags[i].owner == m->clientnum) p += q; }
         return p;
     }
 } bombermode;

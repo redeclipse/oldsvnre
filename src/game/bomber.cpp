@@ -3,11 +3,11 @@ namespace bomber
 {
     bomberstate st;
 
-    void killed(gameent *d, gameent *actor)
+    void killed(gameent *d, gameent *v)
     {
-        if(actor && m_gsp1(game::gamemode, game::mutators) && (!m_team(game::gamemode, game::mutators) || d->team != actor->team))
+        if(v && m_gsp1(game::gamemode, game::mutators) && (!m_team(game::gamemode, game::mutators) || d->team != v->team))
         {
-            loopv(st.flags) if(isbomberaffinity(st.flags[i]) && st.flags[i].owner == actor)
+            loopv(st.flags) if(isbomberaffinity(st.flags[i]) && st.flags[i].owner == v)
                 st.flags[i].taketime = lastmillis;
         }
     }
@@ -43,16 +43,16 @@ namespace bomber
         float bestangle = 1e16f, bestdist = 1e16f;
         int best = -1;
         int numdyns = game::numdynents();
-        loopk(d->aitype != AI_NONE ? 4 : 2)
+        loopk(d->actortype != A_PLAYER ? 4 : 2)
         {
             if(bombertargetintersect)
             {
                 findorientation(d->o, d->yaw, d->pitch, dest);
-                if((e = game::intersectclosest(d->o, dest, d)) && e->team == d->team && e->state == CS_ALIVE && (k%2 || e->aitype != AI_BOT))
+                if((e = game::intersectclosest(d->o, dest, d)) && e->team == d->team && e->state == CS_ALIVE && (k%2 || e->actortype != A_BOT))
                     return e->clientnum;
             }
             float fx = k >= 2 ? 360 : (d->ai ? d->ai->views[0] : curfov), fy = k >= 2 ? 360 : (d->ai ? d->ai->views[1] : fovy);
-            loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && e->team == d->team && e->state == CS_ALIVE && (k%2 || e->aitype != AI_BOT))
+            loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && e->team == d->team && e->state == CS_ALIVE && (k%2 || e->actortype != A_BOT))
             {
                 if(getsight(d->o, d->yaw, d->pitch, e->o, dest, 1e16f, fx, fy))
                 {
@@ -601,14 +601,14 @@ namespace bomber
 
     int aiowner(gameent *d)
     {
-        loopv(st.flags) if(entities::ents.inrange(st.flags[i].ent) && entities::ents[d->aientity]->links.find(st.flags[i].ent) >= 0)
+        loopv(st.flags) if(entities::ents.inrange(st.flags[i].ent) && entities::ents[d->spawnpoint]->links.find(st.flags[i].ent) >= 0)
             return st.flags[i].team;
         return d->team;
     }
 
     bool aicheck(gameent *d, ai::aistate &b)
     {
-        if(d->aitype == AI_BOT)
+        if(d->actortype == A_BOT)
         {
             static vector<int> taken; taken.setsize(0);
             loopv(st.flags)
@@ -640,12 +640,12 @@ namespace bomber
             if(!entities::ents.inrange(f.ent) || !f.enabled) continue;
             int owner = ai::owner(d);
             bool home = isbomberhome(f, owner) || isbombertarg(f, owner);
-            if(d->aitype == AI_BOT && m_duke(game::gamemode, game::mutators) && home) continue;
+            if(d->actortype == A_BOT && m_duke(game::gamemode, game::mutators) && home) continue;
             static vector<int> targets; // build a list of others who are interested in this
             targets.setsize(0);
-            bool regen = d->aitype != AI_BOT || f.team != owner || !m_regen(game::gamemode, game::mutators) || d->health >= m_health(game::gamemode, game::mutators, d->model);
-            ai::checkothers(targets, d, home || d->aitype != AI_BOT ? ai::AI_S_DEFEND : ai::AI_S_PURSUE, ai::AI_T_AFFINITY, j, true);
-            if(d->aitype == AI_BOT)
+            bool regen = d->actortype != A_BOT || f.team != owner || !m_regen(game::gamemode, game::mutators) || d->health >= m_health(game::gamemode, game::mutators, d->model);
+            ai::checkothers(targets, d, home || d->actortype != A_BOT ? ai::AI_S_DEFEND : ai::AI_S_PURSUE, ai::AI_T_AFFINITY, j, true);
+            if(d->actortype == A_BOT)
             {
                 gameent *e = NULL;
                 int numdyns = game::numdynents();
@@ -689,7 +689,7 @@ namespace bomber
                 if(targets.empty())
                 { // attack the flag
                     ai::interest &n = interests.add();
-                    n.state = d->aitype == AI_BOT ? ai::AI_S_PURSUE : ai::AI_S_DEFEND;
+                    n.state = d->actortype == A_BOT ? ai::AI_S_PURSUE : ai::AI_S_DEFEND;
                     n.node = ai::closestwaypoint(f.pos(), ai::CLOSEDIST, true);
                     n.target = j;
                     n.targtype = ai::AI_T_AFFINITY;
@@ -704,7 +704,7 @@ namespace bomber
                     {
                         ai::interest &n = interests.add();
                         bool team = owner == ai::owner(t);
-                        if(d->aitype == AI_BOT && m_duke(game::gamemode, game::mutators) && team) continue;
+                        if(d->actortype == A_BOT && m_duke(game::gamemode, game::mutators) && team) continue;
                         n.state = team ? ai::AI_S_DEFEND : ai::AI_S_PURSUE;
                         n.node = t->lastnode;
                         n.target = t->clientnum;
@@ -720,7 +720,7 @@ namespace bomber
 
     bool aidefense(gameent *d, ai::aistate &b)
     {
-        if(d->aitype == AI_BOT)
+        if(d->actortype == A_BOT)
         {
             loopv(st.flags) if(st.flags[i].owner == d) return aihomerun(d, b);
             if(m_duke(game::gamemode, game::mutators)) return false;
@@ -731,7 +731,7 @@ namespace bomber
             if(isbomberaffinity(f) && f.owner && ai::owner(d) != ai::owner(f.owner))
                 return ai::violence(d, b, f.owner, 4);
             int walk = f.owner && ai::owner(f.owner) != ai::owner(d) ? 1 : 0;
-            if(d->aitype == AI_BOT)
+            if(d->actortype == A_BOT)
             {
                 bool regen = !m_regen(game::gamemode, game::mutators) || d->health >= m_health(game::gamemode, game::mutators, d->model);
                 if(regen && lastmillis-b.millis >= (201-d->skill)*33)
@@ -777,7 +777,7 @@ namespace bomber
 
     bool aipursue(gameent *d, ai::aistate &b)
     {
-        if(st.flags.inrange(b.target) && d->aitype == AI_BOT)
+        if(st.flags.inrange(b.target) && d->actortype == A_BOT)
         {
             bomberstate::flag &f = st.flags[b.target];
             if(!entities::ents.inrange(f.ent) || !f.enabled) return false;

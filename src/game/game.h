@@ -362,8 +362,10 @@ struct demoheader
     char magic[16];
     int version, gamever;
 };
-
 #include "player.h"
+#ifndef GAMESERVER
+#include "ai.h"
+#endif
 
 template<class T>
 static inline void adjustscaled(T &n, int s)
@@ -405,7 +407,6 @@ enum { SPHY_NONE = 0, SPHY_JUMP, SPHY_BOOST, SPHY_DASH, SPHY_MELEE, SPHY_KICK, S
 #define CROUCHHEIGHT 0.7f
 #define PHYSMILLIS 250
 
-#include "ai.h"
 #include "vars.h"
 
 static inline void modecheck(int &mode, int &muts, int trying = 0)
@@ -488,12 +489,12 @@ struct gamestate
     int health, armour, ammo[W_MAX], entid[W_MAX], reloads[W_MAX], colour, model;
     int lastweap, weapselect, weapload[W_MAX], weapshot[W_MAX], weapstate[W_MAX], weapwait[W_MAX], weaplast[W_MAX];
     int lastdeath, lastspawn, lastrespawn, lastpain, lastregen, lastbuff, lastres[WR_MAX], lastrestime[WR_MAX];
-    int aitype, aientity, ownernum, skill, points, frags, deaths, cpmillis, cptime, cplaps;
+    int actortype, spawnpoint, ownernum, skill, points, frags, deaths, cpmillis, cptime, cplaps;
     bool quarantine;
     string vanity;
     vector<int> loadweap;
     gamestate() : colour(0), model(0), weapselect(W_MELEE), lastdeath(0), lastspawn(0), lastrespawn(0), lastpain(0), lastregen(0), lastbuff(0),
-        aitype(AI_NONE), aientity(-1), ownernum(-1), skill(0), points(0), frags(0), deaths(0), cpmillis(0), cptime(0), cplaps(0), quarantine(false)
+        actortype(A_PLAYER), spawnpoint(-1), ownernum(-1), skill(0), points(0), frags(0), deaths(0), cpmillis(0), cptime(0), cplaps(0), quarantine(false)
     {
         setvanity();
         loadweap.shrink(0);
@@ -607,7 +608,7 @@ struct gamestate
 
     bool canswitch(int weap, int sweap, int millis, int skip = 0)
     {
-        if((aitype >= AI_START || weap != W_MELEE || sweap == W_MELEE || weapselect == W_MELEE) && weap != weapselect && weapwaited(weapselect, millis, skip) && hasweap(weap, sweap) && weapwaited(weap, millis, skip))
+        if((actortype >= A_ENEMY || weap != W_MELEE || sweap == W_MELEE || weapselect == W_MELEE) && weap != weapselect && weapwaited(weapselect, millis, skip) && hasweap(weap, sweap) && weapwaited(weap, millis, skip))
             return true;
         return false;
     }
@@ -725,7 +726,7 @@ struct gamestate
         weapreset(true);
         if(!isweap(sweap))
         {
-            if(aitype >= AI_START) sweap = W_MELEE;
+            if(actortype >= A_ENEMY) sweap = W_MELEE;
             else if(m_kaboom(gamemode, mutators)) sweap = W_GRENADE;
             else sweap = isweap(m_weapon(gamemode, mutators)) ? m_weapon(gamemode, mutators) : W_PISTOL;
         }
@@ -734,7 +735,7 @@ struct gamestate
             ammo[sweap] = max(1, W(sweap, max));
             reloads[sweap] = 0;
         }
-        if(aitype >= AI_START)
+        if(actortype >= A_ENEMY)
         {
             loadweap.shrink(0);
             lastweap = weapselect = sweap;
@@ -809,7 +810,7 @@ struct gamestate
     int protect(int millis, int delay)
     {
         int amt = 0;
-        if(aitype < AI_START && lastspawn && delay && millis-lastspawn <= delay) amt = delay-(millis-lastspawn);
+        if(actortype < A_ENEMY && lastspawn && delay && millis-lastspawn <= delay) amt = delay-(millis-lastspawn);
         return amt;
     }
 
@@ -966,16 +967,16 @@ struct gameent : dynent, gamestate
 
     void setparams(bool reset = false, int gamemode = 0, int mutators = 0)
     {
-        int type = clamp(aitype, 0, int(AI_MAX-1));
+        int type = clamp(actortype, 0, int(A_MAX-1));
 #ifdef MEK
-        if(type >= AI_START)
+        if(type >= A_ENEMY)
         {
 #endif
-            speed = aistyle[type].speed;
-            xradius = aistyle[type].xradius*curscale;
-            yradius = aistyle[type].yradius*curscale;
-            zradius = height = aistyle[type].height*curscale;
-            weight = aistyle[type].weight*curscale;
+            speed = actor[type].speed;
+            xradius = actor[type].xradius*curscale;
+            yradius = actor[type].yradius*curscale;
+            zradius = height = actor[type].height*curscale;
+            weight = actor[type].weight*curscale;
 #ifdef MEK
         }
         else
@@ -1223,7 +1224,7 @@ struct gameent : dynent, gamestate
         }
     }
 
-    bool wantshitbox() { return type == ENT_PLAYER || (type == ENT_AI && aistyle[aitype].hitbox); }
+    bool wantshitbox() { return type == ENT_PLAYER || (type == ENT_AI && actor[actortype].hitbox); }
 
     void checktags()
     {
@@ -1562,11 +1563,11 @@ namespace hud
     extern int drawweapons(int x, int y, int s, float blend = 1);
     extern int drawhealth(int x, int y, int s, float blend = 1, bool interm = false);
     extern void drawinventory(int w, int h, int edge, float blend = 1);
-    extern void damage(int n, const vec &loc, gameent *actor, int weap, int flags);
+    extern void damage(int n, const vec &loc, gameent *v, int weap, int flags);
     extern const char *teamtexname(int team = T_NEUTRAL);
     extern const char *itemtex(int type, int stype);
-    extern const char *privname(int priv = PRIV_NONE, int aitype = AI_NONE);
-    extern const char *privtex(int priv = PRIV_NONE, int aitype = AI_NONE);
+    extern const char *privname(int priv = PRIV_NONE, int actortype = A_PLAYER);
+    extern const char *privtex(int priv = PRIV_NONE, int actortype = A_PLAYER);
     extern bool canshowscores();
     extern void showscores(bool on, bool interm = false, bool onauto = true, bool ispress = false);
     extern score &teamscore(int team);
@@ -1640,9 +1641,9 @@ namespace game
     extern void resetcamera(bool cam = true, bool input = true);
     extern void resetworld();
     extern void resetstate();
-    extern void hiteffect(int weap, int flags, int damage, gameent *d, gameent *actor, vec &dir, bool local = false);
-    extern void damaged(int weap, int flags, int damage, int health, int armour, gameent *d, gameent *actor, int millis, vec &dir);
-    extern void killed(int weap, int flags, int damage, gameent *d, gameent *actor, vector<gameent*> &log, int style, int material);
+    extern void hiteffect(int weap, int flags, int damage, gameent *d, gameent *v, vec &dir, bool local = false);
+    extern void damaged(int weap, int flags, int damage, int health, int armour, gameent *d, gameent *v, int millis, vec &dir);
+    extern void killed(int weap, int flags, int damage, gameent *d, gameent *v, vector<gameent*> &log, int style, int material);
     extern void timeupdate(int timeremain);
     extern vec rescolour(dynent *d, int c = PULSE_BURN);
     extern float rescale(gameent *d);

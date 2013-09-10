@@ -170,11 +170,11 @@ namespace entities
             }
             case ACTOR:
             {
-                if(full && attr[0] >= 0 && attr[0] < AI_TOTAL)
+                if(full && attr[0] >= 0 && attr[0] < A_TOTAL)
                 {
-                    addentinfo(aistyle[attr[0]+AI_START].name);
+                    addentinfo(actor[attr[0]+A_ENEMY].name);
                     addmodeinfo(attr[3], attr[4]);
-                    addentinfo(W(attr[6] > 0 && attr[6] <= W_MAX ? attr[6]-1 : aistyle[attr[0]+AI_START].weap, name));
+                    addentinfo(W(attr[6] > 0 && attr[6] <= W_MAX ? attr[6]-1 : actor[attr[0]+A_ENEMY].weap, name));
                 }
                 break;
             }
@@ -306,14 +306,14 @@ namespace entities
             case HEALTH: return "props/health";
             case ARMOUR: return "props/armour";
 #else
-            case PLAYERSTART: return aistyle[AI_NONE].playermodel[1];
+            case PLAYERSTART: return actor[A_PLAYER].playermodel[1];
 #endif
             case WEAPON:
             {
                 int sweap = m_weapon(game::gamemode, game::mutators), attr1 = w_attr(game::gamemode, game::mutators, attr[0], sweap);
                 return weaptype[attr1].item;
             }
-            case ACTOR: return aistyle[clamp(attr[0]+AI_START, int(AI_START), int(AI_MAX-1))].playermodel[1];
+            case ACTOR: return actor[clamp(attr[0]+A_ENEMY, int(A_ENEMY), int(A_MAX-1))].playermodel[1];
             default: break;
         }
         return "";
@@ -491,7 +491,7 @@ namespace entities
             d->setused(n, lastmillis);
             switch(e.attrs[1])
             {
-                case TR_EXIT: if(d->aitype >= AI_BOT) break;
+                case TR_EXIT: if(d->actortype >= A_BOT) break;
                 case TR_TOGGLE: case TR_LINK: case TR_ONCE:
                 {
                     client::addmsg(N_TRIGGER, "ri2", d->clientnum, n);
@@ -970,8 +970,8 @@ namespace entities
                 if(create && (e.attrs[6] == CP_LAST || e.attrs[6] == CP_FINISH)) numcheckpoints++;
                 break;
             case ACTOR:
-                while(e.attrs[0] < 0) e.attrs[0] += AI_TOTAL;
-                while(e.attrs[0] >= AI_TOTAL) e.attrs[0] -= AI_TOTAL;
+                while(e.attrs[0] < 0) e.attrs[0] += A_TOTAL;
+                while(e.attrs[0] >= A_TOTAL) e.attrs[0] -= A_TOTAL;
                 while(e.attrs[1] < 0) e.attrs[1] += 360;
                 while(e.attrs[1] >= 360) e.attrs[1] -= 360;
                 while(e.attrs[2] < -90) e.attrs[2] += 180;
@@ -1723,7 +1723,7 @@ namespace entities
                 }
                 case ACTOR:
                 {
-                    if(mtype == MAP_MAPZ && gver <= 200) e.attrs[0] -= 1; // remoe AI_BOT from array
+                    if(mtype == MAP_MAPZ && gver <= 200) e.attrs[0] -= 1; // remoe A_BOT from array
                     if(mtype == MAP_MAPZ && gver <= 207 && e.attrs[0] > 1) // combine into one type
                     {
                         switch(e.attrs[0])
@@ -1832,9 +1832,9 @@ namespace entities
                 e.type = ACTOR;
                 e.o = ents[i]->o;
                 e.attrs.add(0, max(5, enttype[ACTOR].numattrs));
-                e.attrs[0] = (i%5 != 4 ? AI_GRUNT : AI_TURRET)-1;
+                e.attrs[0] = (i%5 != 4 ? A_GRUNT : A_TURRET)-1;
                 e.attrs[6] = (i/5)%(W_MAX+1);
-                if(e.attrs[0] == AI_TURRET && e.attrs[5] == W_MELEE) e.attrs[5] = W_SMG;
+                if(e.attrs[0] == A_TURRET && e.attrs[5] == W_MELEE) e.attrs[5] = W_SMG;
                 switch(ents[i]->type)
                 {
                     case PLAYERSTART:
@@ -1951,7 +1951,7 @@ namespace entities
                 }
                 case ACTOR:
                 {
-                    part_radius(vec(e.o).add(vec(0, 0, aistyle[e.attrs[0]].height/2)), vec(aistyle[e.attrs[0]].xradius, aistyle[e.attrs[0]].height/2), showentsize, 1, 1, 0x888888);
+                    part_radius(vec(e.o).add(vec(0, 0, actor[e.attrs[0]].height/2)), vec(actor[e.attrs[0]].xradius, actor[e.attrs[0]].height/2), showentsize, 1, 1, 0x888888);
                     part_radius(e.o, vec(ai::ALERTMAX, ai::ALERTMAX, ai::ALERTMAX), showentsize, 1, 1, 0x888888);
                     break;
                 }
@@ -2148,9 +2148,9 @@ namespace entities
                             {
                                 yaw = e.attrs[1]+90;
                                 pitch = e.attrs[2];
-                                int weap = e.attrs[6] > 0 ? e.attrs[6]-1 : aistyle[e.attrs[0]].weap;
+                                int weap = e.attrs[6] > 0 ? e.attrs[6]-1 : actor[e.attrs[0]].weap;
                                 if(isweap(weap)) colour = W(weap, colour);
-                                size = e.attrs[9] > 0 ? e.attrs[9]/100.f : aistyle[e.attrs[0]].scale;
+                                size = e.attrs[9] > 0 ? e.attrs[9]/100.f : actor[e.attrs[0]].scale;
                             }
                             //fade = 0.5f;
                         }

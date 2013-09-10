@@ -15,7 +15,7 @@ struct defendservmode : defendstate, servmode
     void stealaffinity(int n, int team)
     {
         flag &b = flags[n];
-        loopv(clients) if(clients[i]->state.aitype < AI_START)
+        loopv(clients) if(clients[i]->state.actortype < A_ENEMY)
         {
             server::clientinfo *ci = clients[i];
             if(ci->state.state==CS_ALIVE && ci->team && ci->team == team && insideaffinity(b, ci->state.o))
@@ -52,7 +52,7 @@ struct defendservmode : defendstate, servmode
     {
         if(!points) return;
         flag &b = flags[i];
-        loopvk(clients) if(clients[k]->state.aitype < AI_START && team == clients[k]->team && insideaffinity(b, clients[k]->state.o)) givepoints(clients[k], points);
+        loopvk(clients) if(clients[k]->state.actortype < A_ENEMY && team == clients[k]->team && insideaffinity(b, clients[k]->state.o)) givepoints(clients[k], points);
         score &cs = teamscore(team);
         cs.total += points;
         sendf(-1, 1, "ri3", N_SCORE, team, cs.total);
@@ -72,7 +72,7 @@ struct defendservmode : defendstate, servmode
                 if(!b.owners || !b.enemies)
                 {
                     int pts = b.occupy(b.enemy, G(defendpoints)*(b.enemies ? b.enemies : -(1+b.owners))*t, defendcount, defendinstant);
-                    if(pts > 0) loopvk(clients) if(clients[k]->state.aitype < AI_START && b.owner == clients[k]->team && insideaffinity(b, clients[k]->state.o)) givepoints(clients[k], G(defendpoints));
+                    if(pts > 0) loopvk(clients) if(clients[k]->state.actortype < A_ENEMY && b.owner == clients[k]->team && insideaffinity(b, clients[k]->state.o)) givepoints(clients[k], G(defendpoints));
                 }
                 sendaffinity(i);
             }
@@ -153,31 +153,31 @@ struct defendservmode : defendstate, servmode
 
     void entergame(clientinfo *ci)
     {
-        if(!canplay(hasflaginfo) || ci->state.state!=CS_ALIVE || ci->state.aitype >= AI_START) return;
+        if(!canplay(hasflaginfo) || ci->state.state!=CS_ALIVE || ci->state.actortype >= A_ENEMY) return;
         enteraffinity(ci->team, ci->state.o);
     }
 
     void spawned(clientinfo *ci)
     {
-        if(!canplay(hasflaginfo) || ci->state.aitype >= AI_START) return;
+        if(!canplay(hasflaginfo) || ci->state.actortype >= A_ENEMY) return;
         enteraffinity(ci->team, ci->state.o);
     }
 
     void leavegame(clientinfo *ci, bool disconnecting = false)
     {
-        if(!canplay(hasflaginfo) || ci->state.state!=CS_ALIVE || ci->state.aitype >= AI_START) return;
+        if(!canplay(hasflaginfo) || ci->state.state!=CS_ALIVE || ci->state.actortype >= A_ENEMY) return;
         leaveaffinity(ci->team, ci->state.o);
     }
 
-    void died(clientinfo *ci, clientinfo *actor)
+    void died(clientinfo *ci, clientinfo *v)
     {
-        if(!canplay(hasflaginfo) || ci->state.aitype >= AI_START) return;
+        if(!canplay(hasflaginfo) || ci->state.actortype >= A_ENEMY) return;
         leaveaffinity(ci->team, ci->state.o);
     }
 
     void moved(clientinfo *ci, const vec &oldpos, const vec &newpos)
     {
-        if(!canplay(hasflaginfo) || ci->state.aitype >= AI_START) return;
+        if(!canplay(hasflaginfo) || ci->state.actortype >= A_ENEMY) return;
         moveaffinity(ci->team, oldpos, newpos);
     }
 
@@ -235,11 +235,11 @@ struct defendservmode : defendstate, servmode
         }
     }
 
-    int points(clientinfo *victim, clientinfo *actor)
+    int points(clientinfo *m, clientinfo *v)
     {
-        bool isteam = victim==actor || victim->team == actor->team;
-        int p = isteam ? -1 : 1, v = p;
-        loopv(flags) if(insideaffinity(flags[i], victim->state.o)) p += v;
+        bool isteam = m==v || m->team == v->team;
+        int p = isteam ? -1 : 1, q = p;
+        loopv(flags) if(insideaffinity(flags[i], m->state.o)) p += q;
         return p;
     }
 

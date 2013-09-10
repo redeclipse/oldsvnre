@@ -1,3 +1,47 @@
+struct actors
+{
+    int type,           weap,           health;
+    float   xradius,    yradius,    height,     weight,     speed,      scale;
+    bool    canmove,    canstrafe,  canjump,    cancrouch,  useweap,    living,     hitbox;
+    const char  *name,      *playermodel[4];
+};
+
+enum { A_PLAYER = 0, A_BOT, A_TURRET, A_GRUNT, A_DRONE, A_MAX, A_ENEMY = A_TURRET, A_TOTAL = A_MAX-A_ENEMY };
+#ifdef GAMESERVER
+actors actor[] = {
+    {
+        A_PLAYER,         -1,             0,
+            3,          3,          14,         200,        50,         1,
+            true,       true,       true,       true,       true,       true,       true,
+                "player",   { "actors/player/male/hwep",      "actors/player/male",     "actors/player/male/body",      "actors/player/male/headless" }
+    },
+    {
+        A_BOT,         -1,             0,
+            3,          3,          14,         200,        50,         1,
+            true,       true,       true,       true,       true,       true,       true,
+                "bot",      { "actors/player/male/hwep",      "actors/player/male",     "actors/player/male/body",      "actors/player/male/headless" }
+    },
+    {
+        A_TURRET,      W_SMG,       100,
+            4.75,       4.75,       8.75,       150,        1,          1,
+            false,      false,      false,      false,      false,      false,      false,
+                "turret",   { "actors/player/male/hwep",      "actors/turret",          "actors/player/male/body",      "actors/turret" }
+    },
+    {
+        A_GRUNT,       W_PISTOL,   50,
+            3,          3,          14,         200,        50,         1,
+            true,       true,       true,       true,       true,       true,       true,
+                "grunt",   { "actors/player/male/hwep",      "actors/player/male",      "actors/player/male/body",      "actors/player/male/headless" }
+    },
+    {
+        A_DRONE,       W_MELEE,     50,
+            3,          3,          14,         150,        40,         1,
+            true,       true,       true,       true,       true,       true,       true,
+                "drone",    { "actors/player/male/hwep",      "actors/drone",           "actors/player/male/body",      "actors/drone" }
+    },
+};
+#endif
+
 enum
 {
     T_NEUTRAL = 0, T_ALPHA, T_OMEGA, T_KAPPA, T_SIGMA, T_ENEMY, T_MAX,

@@ -22,14 +22,14 @@ namespace client
     int otherclients(bool nospec)
     {
         int n = 0; // ai don't count
-        loopv(game::players) if(game::players[i] && game::players[i]->aitype == AI_NONE && (!nospec || game::players[i]->state != CS_SPECTATOR)) n++;
+        loopv(game::players) if(game::players[i] && game::players[i]->actortype == A_PLAYER && (!nospec || game::players[i]->state != CS_SPECTATOR)) n++;
         return n;
     }
 
     int numplayers()
     {
         int n = 1; // count ourselves
-        loopv(game::players) if(game::players[i] && game::players[i]->aitype < AI_START) n++;
+        loopv(game::players) if(game::players[i] && game::players[i]->actortype < A_ENEMY) n++;
         return n;
     }
 
@@ -561,8 +561,8 @@ namespace client
     bool isai(int cn, int type)
     {
         gameent *d = game::getclient(cn);
-        int aitype = type > 0 && type < AI_MAX ? type : AI_BOT;
-        return d && d->aitype == aitype;
+        int actortype = type > 0 && type < A_MAX ? type : A_BOT;
+        return d && d->actortype == actortype;
     }
     ICOMMAND(0, isai, "ii", (int *cn, int *type), intret(isai(*cn, *type) ? 1 : 0));
 
@@ -1951,18 +1951,18 @@ namespace client
                     vec dir;
                     loopk(3) dir[k] = getint(p)/DNF;
                     dir.normalize();
-                    gameent *target = game::getclient(tcn), *actor = game::getclient(acn);
-                    if(!target || !actor) break;
-                    game::damaged(weap, flags, damage, health, armour, target, actor, lastmillis, dir);
+                    gameent *m = game::getclient(tcn), *v = game::getclient(acn);
+                    if(!m || !v) break;
+                    game::damaged(weap, flags, damage, health, armour, m, v, lastmillis, dir);
                     break;
                 }
 
                 case N_RELOAD:
                 {
                     int trg = getint(p), weap = getint(p), amt = getint(p), ammo = getint(p), reloads = getint(p);
-                    gameent *target = game::getclient(trg);
-                    if(!target || !isweap(weap)) break;
-                    weapons::weapreload(target, weap, amt, ammo, reloads, false);
+                    gameent *m = game::getclient(trg);
+                    if(!m || !isweap(weap)) break;
+                    weapons::weapreload(m, weap, amt, ammo, reloads, false);
                     break;
                 }
 
@@ -1986,7 +1986,7 @@ namespace client
                 case N_DIED:
                 {
                     int vcn = getint(p), deaths = getint(p), acn = getint(p), frags = getint(p), spree = getint(p), style = getint(p), weap = getint(p), flags = getint(p), damage = getint(p), material = getint(p);
-                    gameent *victim = game::getclient(vcn), *actor = game::getclient(acn);
+                    gameent *m = game::getclient(vcn), *v = game::getclient(acn);
                     static vector<gameent *> assist; assist.setsize(0);
                     int count = getint(p);
                     loopi(count)
@@ -1995,40 +1995,40 @@ namespace client
                         gameent *log = game::getclient(lcn);
                         if(log) assist.add(log);
                     }
-                    if(!actor || !victim) break;
-                    victim->deaths = deaths;
-                    actor->frags = frags;
-                    actor->spree = spree;
-                    game::killed(weap, flags, damage, victim, actor, assist, style, material);
-                    victim->lastdeath = lastmillis;
-                    victim->weapreset(true);
+                    if(!v || !m) break;
+                    m->deaths = deaths;
+                    v->frags = frags;
+                    v->spree = spree;
+                    game::killed(weap, flags, damage, m, v, assist, style, material);
+                    m->lastdeath = lastmillis;
+                    m->weapreset(true);
                     break;
                 }
 
                 case N_POINTS:
                 {
                     int acn = getint(p), add = getint(p), points = getint(p);
-                    gameent *actor = game::getclient(acn);
-                    if(!actor) break;
-                    actor->lastpoints = add;
-                    actor->points = points;
+                    gameent *v = game::getclient(acn);
+                    if(!v) break;
+                    v->lastpoints = add;
+                    v->points = points;
                     break;
                 }
 
                 case N_DROP:
                 {
                     int trg = getint(p), weap = getint(p), ds = getint(p);
-                    gameent *target = game::getclient(trg);
-                    bool local = target && (target == game::player1 || target->ai);
+                    gameent *m = game::getclient(trg);
+                    bool local = m && (m == game::player1 || m->ai);
                     if(ds) loopj(ds)
                     {
                         int gs = getint(p), drop = getint(p), ammo = getint(p), reloads = getint(p);
-                        if(target) projs::drop(target, gs, drop, ammo, reloads, local, j, weap);
+                        if(m) projs::drop(m, gs, drop, ammo, reloads, local, j, weap);
                     }
-                    if(isweap(weap) && target)
+                    if(isweap(weap) && m)
                     {
-                        target->weapswitch(weap, lastmillis, weaponswitchdelay);
-                        playsound(WSND(weap, S_W_SWITCH), target->o, target, 0, -1, -1, -1, &target->wschan);
+                        m->weapswitch(weap, lastmillis, weaponswitchdelay);
+                        playsound(WSND(weap, S_W_SWITCH), m->o, m, 0, -1, -1, -1, &m->wschan);
                     }
                     break;
                 }
@@ -2036,9 +2036,9 @@ namespace client
                 case N_WSELECT:
                 {
                     int trg = getint(p), weap = getint(p);
-                    gameent *target = game::getclient(trg);
-                    if(!target || !isweap(weap)) break;
-                    weapons::weapselect(target, weap, G(weaponinterrupts), false);
+                    gameent *m = game::getclient(trg);
+                    if(!m || !isweap(weap)) break;
+                    weapons::weapselect(m, weap, G(weaponinterrupts), false);
                     break;
                 }
 
@@ -2101,10 +2101,10 @@ namespace client
                 { // uses a specific drop so the client knows what to replace
                     int lcn = getint(p), ent = getint(p), ammoamt = getint(p), reloadamt = getint(p), spawn = getint(p),
                         weap = getint(p), drop = getint(p), ammo = getint(p), reloads = getint(p);
-                    gameent *target = game::getclient(lcn);
-                    if(!target) break;
+                    gameent *m = game::getclient(lcn);
+                    if(!m) break;
                     if(entities::ents.inrange(ent) && enttype[entities::ents[ent]->type].usetype == EU_ITEM)
-                        entities::useeffects(target, ent, ammoamt, reloadamt, spawn, weap, drop, ammo, reloads);
+                        entities::useeffects(m, ent, ammoamt, reloadamt, spawn, weap, drop, ammo, reloads);
                     break;
                 }
 
@@ -2393,7 +2393,7 @@ namespace client
                         s->stopmoving(true);
                         game::waiting.setsize(0);
                         gameent *d;
-                        loopv(game::players) if((d = game::players[i]) && d->aitype == AI_NONE && d->state == CS_WAITING)
+                        loopv(game::players) if((d = game::players[i]) && d->actortype == A_PLAYER && d->state == CS_WAITING)
                             game::waiting.add(d);
                     }
                     else if(!s->ai) s->resetinterp();
@@ -2412,7 +2412,7 @@ namespace client
                     if(!w) return;
                     if(w->team != tn)
                     {
-                        if(m_team(game::gamemode, game::mutators) && w->aitype == AI_NONE && showteamchange >= (w->team != T_NEUTRAL && tn != T_NEUTRAL ? 1 : 2))
+                        if(m_team(game::gamemode, game::mutators) && w->actortype == A_PLAYER && showteamchange >= (w->team != T_NEUTRAL && tn != T_NEUTRAL ? 1 : 2))
                             conoutft(CON_EVENT, "\fa%s is now on team %s", game::colourname(w), game::colourteam(tn));
                         w->team = tn;
                         if(w == game::focus) hud::lastteam = 0;
@@ -2480,7 +2480,7 @@ namespace client
                             t->cptime = getint(p);
                             t->cplaps = getint(p);
                             t->cpmillis = t->impulse[IM_METER] = 0;
-                            if(showlaptimes > (t != game::focus ? (t->aitype > AI_NONE ? 2 : 1) : 0))
+                            if(showlaptimes > (t != game::focus ? (t->actortype > A_PLAYER ? 2 : 1) : 0))
                             {
                                 defformatstring(best)("%s", timestr(t->cptime));
                                 conoutft(t != game::player1 ? CON_INFO : CON_SELF, "%s completed in \fs\fg%s\fS (best: \fs\fy%s\fS, laps: \fs\fc%d\fS)", game::colourname(t), timestr(t->cplast), best, t->cplaps);

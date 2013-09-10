@@ -109,7 +109,7 @@ namespace weapons
                 int p = m_weapon(game::gamemode, game::mutators);
                 #define skipweap(q,w) \
                 { \
-                    if(q && n == w && (d->aitype >= AI_START || w != W_MELEE || p == W_MELEE || d->weapselect == W_MELEE)) switch(q) \
+                    if(q && n == w && (d->actortype >= A_ENEMY || w != W_MELEE || p == W_MELEE || d->weapselect == W_MELEE)) switch(q) \
                     { \
                         case 10: continue; break; \
                         case 7: case 8: case 9: if(d->carry(p, 5, w) > (q-7)) continue; break; \

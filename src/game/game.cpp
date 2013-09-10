@@ -348,7 +348,7 @@ namespace game
         {
             case 1:
             {
-                const char *id = hud::privname(d->privilege, d->aitype);
+                const char *id = hud::privname(d->privilege, d->actortype);
                 loopv(vanities[n].files)
                     if(vanities[n].files[i].proj == proj && !strcmp(vanities[n].files[i].id, id))
                         file = vanities[n].files[i].name;
@@ -547,8 +547,7 @@ namespace game
 
     void resetfollow()
     {
-        if(!tvmode()) follow = -1;
-        else spectvfollow = -1;
+        follow = spectvfollow = -1;
         focus = player1;
     }
 
@@ -573,7 +572,7 @@ namespace game
             }
             else if(maptime > 0)
             {
-                if((gameent::is(d)) && d->aitype < AI_START)
+                if((gameent::is(d)) && d->actortype < A_ENEMY)
                 {
                     cament *c = cameras.add(new cament);
                     c->o = d->headpos();
@@ -617,6 +616,7 @@ namespace game
         }
         else if(focus != player1) followmode = 1;
         else specmode = 1;
+        resetfollow();
     });
     ICOMMAND(0, waitmodeswitch, "", (), {
         if(tvmode(true, true))
@@ -626,11 +626,12 @@ namespace game
         }
         else if(focus != player1) followmode = 1;
         else waitmode = 1;
+        resetfollow();
     });
 
     bool followswitch(int n, bool other)
     {
-        if(player1->state >= CS_SPECTATOR)
+        if(player1->state == CS_SPECTATOR)
         {
             bool istv = tvmode(true, false);
             int *f = istv ? &spectvfollow : &follow;
@@ -660,7 +661,7 @@ namespace game
                 else
                 {
                     gameent *d = players[*f];
-                    if(!d || d->aitype >= AI_START || !allowspec(d, istv ? spectvdead : followdead)) addfollow
+                    if(!d || d->actortype >= A_ENEMY || !allowspec(d, istv ? spectvdead : followdead)) addfollow
                     else
                     {
                         focus = d;
@@ -707,7 +708,7 @@ namespace game
         if(d == player1) specreset();
         if(d == focus) resetcamera();
 
-        if(d->aitype < AI_START)
+        if(d->actortype < A_ENEMY)
         {
             playsound(S_RESPAWN, d->o, d);
             if(dynlighteffects)
@@ -717,7 +718,7 @@ namespace game
                 regularshape(PART_SPARK, d->height*2, getcolour(d, playerovertone), 53, 50, 350, d->center(), 1.5f, 1, 1, 0, 35);
             }
         }
-        if(local && d->aitype <= AI_BOT && entities::ents.inrange(ent) && entities::ents[ent]->type == PLAYERSTART)
+        if(local && d->actortype <= A_BOT && entities::ents.inrange(ent) && entities::ents[ent]->type == PLAYERSTART)
             entities::execlink(d, ent, true);
         ai::respawned(d, local, ent);
     }
@@ -859,7 +860,7 @@ namespace game
                     }
                     adddynlight(d->center(), d->height*intensity*pc, rescolour(d, PULSE_SHOCK).mul(pc), 0, 0, DL_KEEP);
                 }
-                if(d->aitype < AI_START && illumlevel > 0 && illumradius > 0)
+                if(d->actortype < A_ENEMY && illumlevel > 0 && illumradius > 0)
                 {
                     vec col = vec::hexcolor(getcolour(d, playereffecttone)).mul(illumlevel);
                     adddynlight(d->center(), illumradius, col, 0, 0, DL_KEEP);
@@ -918,7 +919,7 @@ namespace game
 
     float spawnfade(gameent *d)
     {
-        int len = d->aitype >= AI_START ? (aistyle[d->aitype].living ? min(ai::aideadfade, enemyspawntime ? enemyspawntime : INT_MAX-1) : 500) : m_delay(gamemode, mutators);
+        int len = d->actortype >= A_ENEMY ? (actor[d->actortype].living ? min(ai::aideadfade, enemyspawntime ? enemyspawntime : INT_MAX-1) : 500) : m_delay(gamemode, mutators);
         if(len > 0)
         {
             int interval = min(len/3, ragdolleffect), over = max(len-interval, 1), millis = lastmillis-d->lastdeath;
@@ -931,17 +932,17 @@ namespace game
     float rescale(gameent *d)
     {
         float total = actorscale;
-        if(d->aitype > AI_NONE)
+        if(d->actortype > A_PLAYER)
         {
-            bool hasent = d->aitype >= AI_START && entities::ents.inrange(d->aientity) && entities::ents[d->aientity]->type == ACTOR;
-            if(hasent && entities::ents[d->aientity]->attrs[9] > 0) total *= (entities::ents[d->aientity]->attrs[9]/100.f)*enemyscale;
-            else total *= aistyle[clamp(d->aitype, int(AI_NONE), int(AI_MAX-1))].scale*(d->aitype >= AI_START ? enemyscale : botscale);
+            bool hasent = d->actortype >= A_ENEMY && entities::ents.inrange(d->spawnpoint) && entities::ents[d->spawnpoint]->type == ACTOR;
+            if(hasent && entities::ents[d->spawnpoint]->attrs[9] > 0) total *= (entities::ents[d->spawnpoint]->attrs[9]/100.f)*enemyscale;
+            else total *= actor[clamp(d->actortype, int(A_PLAYER), int(A_MAX-1))].scale*(d->actortype >= A_ENEMY ? enemyscale : botscale);
         }
         if(d->state != CS_SPECTATOR && d->state != CS_EDITING)
         {
-            if(m_resize(gamemode, mutators) || d->aitype >= AI_START)
+            if(m_resize(gamemode, mutators) || d->actortype >= A_ENEMY)
             {
-                float minscale = 1, amtscale = m_insta(gamemode, mutators) ? 1+(d->spree*instaresizeamt) : max(d->health, 1)/float(d->aitype >= AI_START ? aistyle[d->aitype].health*enemystrength : m_health(gamemode, mutators, d->model));
+                float minscale = 1, amtscale = m_insta(gamemode, mutators) ? 1+(d->spree*instaresizeamt) : max(d->health, 1)/float(d->actortype >= A_ENEMY ? actor[d->actortype].health*enemystrength : m_health(gamemode, mutators, d->model));
                 if(m_resize(gamemode, mutators))
                 {
                     minscale = minresizescale;
@@ -984,16 +985,16 @@ namespace game
 
         d->setscale(rescale(d), curtime, false, gamemode, mutators);
         d->speedscale = d->curscale;
-        if(d->aitype > AI_NONE)
+        if(d->actortype > A_PLAYER)
         {
-            bool hasent = d->aitype >= AI_START && entities::ents.inrange(d->aientity) && entities::ents[d->aientity]->type == ACTOR;
-            if(hasent && entities::ents[d->aientity]->attrs[8] > 0) d->speedscale *= entities::ents[d->aientity]->attrs[8]*enemyspeed;
-            else d->speedscale *= d->aitype >= AI_START ? enemyspeed : botspeed;
+            bool hasent = d->actortype >= A_ENEMY && entities::ents.inrange(d->spawnpoint) && entities::ents[d->spawnpoint]->type == ACTOR;
+            if(hasent && entities::ents[d->spawnpoint]->attrs[8] > 0) d->speedscale *= entities::ents[d->spawnpoint]->attrs[8]*enemyspeed;
+            else d->speedscale *= d->actortype >= A_ENEMY ? enemyspeed : botspeed;
         }
 
         float offset = d->height;
         d->o.z -= d->height;
-        if(d->state == CS_ALIVE && aistyle[clamp(d->aitype, int(AI_NONE), int(AI_MAX-1))].cancrouch)
+        if(d->state == CS_ALIVE && actor[clamp(d->actortype, int(A_PLAYER), int(A_MAX-1))].cancrouch)
         {
             bool crouching = d->action[AC_CROUCH];
             float crouchoff = 1.f-CROUCHHEIGHT, zrad = d->zradius-(d->zradius*crouchoff);
@@ -1150,22 +1151,22 @@ namespace game
     {
         enum { BURN = 1<<0, BLEED = 1<<1, SHOCK = 1<<2 };
 
-        gameent *d, *actor;
+        gameent *d, *v;
         int weap, damage, flags, millis;
 
         damagemerge() { millis = totalmillis; }
-        damagemerge(gameent *d, gameent *actor, int weap, int damage, int flags) : d(d), actor(actor), weap(weap), damage(damage), flags(flags) { millis = totalmillis; }
+        damagemerge(gameent *d, gameent *v, int weap, int damage, int flags) : d(d), v(v), weap(weap), damage(damage), flags(flags) { millis = totalmillis; }
 
         bool merge(const damagemerge &m)
         {
-            if(actor != m.actor || flags != m.flags) return false;
+            if(v != m.v || flags != m.flags) return false;
             damage += m.damage;
             return true;
         }
 
         void play()
         {
-            if(playdamagetones >= (actor == focus ? 1 : (d == focus ? 2 : 3)))
+            if(playdamagetones >= (v == focus ? 1 : (d == focus ? 2 : 3)))
             {
                 const int dmgsnd[8] = { 0, 10, 25, 50, 75, 100, 150, 200 };
                 int snd = -1;
@@ -1173,7 +1174,7 @@ namespace game
                 else if(flags&BLEED) snd = S_BLEED;
                 else if(flags&SHOCK) snd = S_SHOCK;
                 else loopirev(8) if(damage >= dmgsnd[i]) { snd = S_DAMAGE+i; break; }
-                if(snd >= 0) playsound(snd, d->o, d, actor == focus ? SND_FORCED : SND_DIRECT, damagetonevol);
+                if(snd >= 0) playsound(snd, d->o, d, v == focus ? SND_FORCED : SND_DIRECT, damagetonevol);
             }
             if(aboveheaddamage)
             {
@@ -1186,12 +1187,12 @@ namespace game
 
     void removedamagemerges(gameent *d)
     {
-        loopvrev(damagemerges) if(damagemerges[i].d == d || damagemerges[i].actor == d) damagemerges.removeunordered(i);
+        loopvrev(damagemerges) if(damagemerges[i].d == d || damagemerges[i].v == d) damagemerges.removeunordered(i);
     }
 
-    void pushdamagemerge(gameent *d, gameent *actor, int weap, int damage, int flags)
+    void pushdamagemerge(gameent *d, gameent *v, int weap, int damage, int flags)
     {
-        damagemerge dt(d, actor, weap, damage, flags);
+        damagemerge dt(d, v, weap, damage, flags);
         loopv(damagemerges) if(damagemerges[i].merge(dt)) return;
         damagemerges.add(dt);
     }
@@ -1213,15 +1214,15 @@ namespace game
     }
 
     static int alarmchan = -1;
-    void hiteffect(int weap, int flags, int damage, gameent *d, gameent *actor, vec &dir, bool local)
+    void hiteffect(int weap, int flags, int damage, gameent *d, gameent *v, vec &dir, bool local)
     {
         bool burning = burn(d, weap, flags), bleeding = bleed(d, weap, flags), shocking = shock(d, weap, flags);
         if(!local || burning || bleeding || shocking)
         {
             if(hithurts(flags))
             {
-                if(d == focus) hud::damage(damage, actor->o, actor, weap, flags);
-                if(aistyle[d->aitype].living)
+                if(d == focus) hud::damage(damage, v->o, v, weap, flags);
+                if(actor[d->actortype].living)
                 {
                     vec p = d->headpos(-d->height/4);
                     if(!nogore && bloodscale > 0)
@@ -1229,21 +1230,21 @@ namespace game
                     if(nogore != 2 && (bloodscale <= 0 || bloodsparks))
                         part_splash(PART_PLASMA, int(clamp(damage/2, 2, 10))*(bleeding ? 2: 1), bloodfade, p, 0x882222, 1, 0.5f, 50, DECAL_STAIN, int(d->radius));
                 }
-                if(d != actor)
+                if(d != v)
                 {
-                    bool sameteam = m_team(gamemode, mutators) && d->team == actor->team;
-                    if(!sameteam) pushdamagemerge(d, actor, weap, damage, (burning ? damagemerge::BURN : 0)|(bleeding ? damagemerge::BLEED : 0)|(shocking ? damagemerge::SHOCK : 0));
-                    else if(actor == player1 && !burning && !bleeding && !shocking)
+                    bool sameteam = m_team(gamemode, mutators) && d->team == v->team;
+                    if(!sameteam) pushdamagemerge(d, v, weap, damage, (burning ? damagemerge::BURN : 0)|(bleeding ? damagemerge::BLEED : 0)|(shocking ? damagemerge::SHOCK : 0));
+                    else if(v == player1 && !burning && !bleeding && !shocking)
                     {
                         player1->lastteamhit = d->lastteamhit = lastmillis;
-                        if(!issound(alarmchan)) playsound(S_ALARM, actor->o, actor, 0, -1, -1, -1, &alarmchan);
+                        if(!issound(alarmchan)) playsound(S_ALARM, v->o, v, 0, -1, -1, -1, &alarmchan);
                     }
-                    if(!burning && !bleeding && !shocking && !sameteam) actor->lasthit = totalmillis;
+                    if(!burning && !bleeding && !shocking && !sameteam) v->lasthit = totalmillis;
                 }
-                if(d->aitype < AI_START && !issound(d->vschan)) playsound(S_PAIN, d->o, d, 0, -1, -1, -1, &d->vschan);
+                if(d->actortype < A_ENEMY && !issound(d->vschan)) playsound(S_PAIN, d->o, d, 0, -1, -1, -1, &d->vschan);
                 d->lastpain = lastmillis;
             }
-            if(d->aitype < AI_START || aistyle[d->aitype].canmove)
+            if(d->actortype < A_ENEMY || actor[d->actortype].canmove)
             {
                 if(weap == -1 && shocking)
                 {
@@ -1267,12 +1268,12 @@ namespace game
                     if(WF(WK(flags), weap, hitpush, WS(flags)) != 0)
                     {
                         float amt = scale*WRS(flags&HIT_WAVE || !hithurts(flags) ? wavepushscale : (d->health <= 0 ? deadpushscale : hitpushscale), push, gamemode, mutators);
-                        if(d == actor)
+                        if(d == v)
                         {
                             float modify = WF(WK(flags), weap, selfdamage, WS(flags))*G(selfdamagescale);
                             if(modify != 0) amt *= 1/modify;
                         }
-                        else if(m_team(gamemode, mutators) && d->team == actor->team)
+                        else if(m_team(gamemode, mutators) && d->team == v->team)
                         {
                             float modify = WF(WK(flags), weap, teamdamage, WS(flags))*G(teamdamagescale);
                             if(modify != 0) amt *= 1/modify;
@@ -1286,11 +1287,11 @@ namespace game
                     }
                 }
             }
-            ai::damaged(d, actor, weap, flags, damage);
+            ai::damaged(d, v, weap, flags, damage);
         }
     }
 
-    void damaged(int weap, int flags, int damage, int health, int armour, gameent *d, gameent *actor, int millis, vec &dir)
+    void damaged(int weap, int flags, int damage, int health, int armour, gameent *d, gameent *v, int millis, vec &dir)
     {
         if(d->state != CS_ALIVE || intermission) return;
         if(hithurts(flags))
@@ -1299,12 +1300,12 @@ namespace game
             d->armour = armour;
             if(d->health <= m_health(gamemode, mutators, d->model)) d->lastregen = 0;
             d->lastpain = lastmillis;
-            actor->totaldamage += damage;
+            v->totaldamage += damage;
         }
-        hiteffect(weap, flags, damage, d, actor, dir, actor == player1 || actor->ai);
+        hiteffect(weap, flags, damage, d, v, dir, v == player1 || v->ai);
     }
 
-    void killed(int weap, int flags, int damage, gameent *d, gameent *actor, vector<gameent *> &log, int style, int material)
+    void killed(int weap, int flags, int damage, gameent *d, gameent *v, vector<gameent *> &log, int style, int material)
     {
         if(d->type != ENT_PLAYER && d->type != ENT_AI) return;
         d->lastregen = 0;
@@ -1312,17 +1313,17 @@ namespace game
         d->state = CS_DEAD;
         if(style&FRAG_OBLITERATE) d->obliterated = true;
         if(style&FRAG_HEADSHOT) d->headless = true;
-        bool burning = burn(d, weap, flags), bleeding = bleed(d, weap, flags), shocking = shock(d, weap, flags), isfocus = d == focus || actor == focus,
-             isme = d == player1 || actor == player1, allowanc = obitannounce && (obitannounce >= 2 || isfocus) && (m_fight(gamemode) || isme) && actor->aitype < AI_START;
-        int anc = d == focus && allowanc ? S_V_FRAGGED : -1, dth = d->aitype >= AI_START || d->obliterated ? S_SPLOSH : S_DEATH, curmat = material&MATF_VOLUME;
+        bool burning = burn(d, weap, flags), bleeding = bleed(d, weap, flags), shocking = shock(d, weap, flags), isfocus = d == focus || v == focus,
+             isme = d == player1 || v == player1, allowanc = obitannounce && (obitannounce >= 2 || isfocus) && (m_fight(gamemode) || isme) && v->actortype < A_ENEMY;
+        int anc = d == focus && allowanc ? S_V_FRAGGED : -1, dth = d->actortype >= A_ENEMY || d->obliterated ? S_SPLOSH : S_DEATH, curmat = material&MATF_VOLUME;
         if(d != player1) d->resetinterp();
         if(!isme) { loopv(log) if(log[i] == player1) { isme = true; break; } }
         formatstring(d->obit)("%s ", colourname(d));
-        if(d != actor && actor->lastattacker == d->clientnum) actor->lastattacker = -1;
-        d->lastattacker = actor->clientnum;
-        if(d == actor)
+        if(d != v && v->lastattacker == d->clientnum) v->lastattacker = -1;
+        d->lastattacker = v->clientnum;
+        if(d == v)
         {
-            if(!aistyle[d->aitype].living) concatstring(d->obit, "was destroyed");
+            if(!actor[d->actortype].living) concatstring(d->obit, "was destroyed");
             else if(!obitverbose) concatstring(d->obit, "died");
             else if(flags&HIT_SPAWN) concatstring(d->obit, obitverbose != 2 ? "couldn't respawn" : "tried to spawn inside solid matter");
             else if(flags&HIT_SPEC) concatstring(d->obit, obitverbose != 2 ? "entered spectator" : "gave up their corporeal form");
@@ -1357,7 +1358,7 @@ namespace game
         else
         {
             concatstring(d->obit, "was ");
-            if(!aistyle[d->aitype].living) concatstring(d->obit, "destroyed by");
+            if(!actor[d->actortype].living) concatstring(d->obit, "destroyed by");
             else if(!obitverbose) concatstring(d->obit, "fragged by");
             else if(burning) concatstring(d->obit, "set ablaze by");
             else if(bleeding) concatstring(d->obit, "fatally wounded by");
@@ -1437,28 +1438,28 @@ namespace game
             bool override = false;
             if(d->headless)
             {
-                actor->addicon(eventicon::HEADSHOT, lastmillis, eventiconfade, 0);
+                v->addicon(eventicon::HEADSHOT, lastmillis, eventiconfade, 0);
                 if(!override && allowanc) anc = S_V_HEADSHOT;
             }
-            if(!m_fight(gamemode) || actor->aitype >= AI_START)
+            if(!m_fight(gamemode) || v->actortype >= A_ENEMY)
             {
-                concatstring(d->obit, actor->aitype >= AI_START ? " a " : " ");
-                concatstring(d->obit, colourname(actor));
+                concatstring(d->obit, v->actortype >= A_ENEMY ? " a " : " ");
+                concatstring(d->obit, colourname(v));
             }
-            else if(m_team(gamemode, mutators) && d->team == actor->team)
+            else if(m_team(gamemode, mutators) && d->team == v->team)
             {
                 concatstring(d->obit, " \fs\fzawteam-mate\fS ");
-                concatstring(d->obit, colourname(actor));
-                if(actor == focus) { anc = S_ALARM; override = true; }
+                concatstring(d->obit, colourname(v));
+                if(v == focus) { anc = S_ALARM; override = true; }
             }
             else if(obitstyles)
             {
                 if(style&FRAG_REVENGE)
                 {
                     concatstring(d->obit, " \fs\fzoyvengeful\fS");
-                    actor->addicon(eventicon::REVENGE, lastmillis, eventiconfade); // revenge
-                    actor->dominating.removeobj(d);
-                    d->dominated.removeobj(actor);
+                    v->addicon(eventicon::REVENGE, lastmillis, eventiconfade); // revenge
+                    v->dominating.removeobj(d);
+                    d->dominated.removeobj(v);
                     if(allowanc)
                     {
                         anc = S_V_REVENGE;
@@ -1468,9 +1469,9 @@ namespace game
                 else if(style&FRAG_DOMINATE)
                 {
                     concatstring(d->obit, " \fs\fzoydominating\fS");
-                    actor->addicon(eventicon::DOMINATE, lastmillis, eventiconfade); // dominating
-                    if(actor->dominated.find(d) < 0) actor->dominated.add(d);
-                    if(d->dominating.find(actor) < 0) d->dominating.add(actor);
+                    v->addicon(eventicon::DOMINATE, lastmillis, eventiconfade); // dominating
+                    if(v->dominated.find(d) < 0) v->dominated.add(d);
+                    if(d->dominating.find(v) < 0) d->dominating.add(v);
                     if(allowanc)
                     {
                         anc = S_V_DOMINATE;
@@ -1478,12 +1479,12 @@ namespace game
                     }
                 }
                 concatstring(d->obit, " ");
-                concatstring(d->obit, colourname(actor));
+                concatstring(d->obit, colourname(v));
 
                 if(style&FRAG_BREAKER)
                 {
                     concatstring(d->obit, " \fs\fzPwspree-breaking\fS");
-                    actor->addicon(eventicon::BREAKER, lastmillis, eventiconfade);
+                    v->addicon(eventicon::BREAKER, lastmillis, eventiconfade);
                     if(!override && allowanc) anc = S_V_BREAKER;
                 }
 
@@ -1491,35 +1492,35 @@ namespace game
                 {
                     if(style&FRAG_BREAKER) concatstring(d->obit, " and");
                     concatstring(d->obit, " \fs\fzcwdouble-killing\fS");
-                    actor->addicon(eventicon::MULTIKILL, lastmillis, eventiconfade, 0);
+                    v->addicon(eventicon::MULTIKILL, lastmillis, eventiconfade, 0);
                     if(!override && allowanc) anc = S_V_MULTI;
                 }
                 else if(style&FRAG_MKILL2)
                 {
                     if(style&FRAG_BREAKER) concatstring(d->obit, " and");
                     concatstring(d->obit, " \fs\fzcwtriple-killing\fS");
-                    actor->addicon(eventicon::MULTIKILL, lastmillis, eventiconfade, 1);
+                    v->addicon(eventicon::MULTIKILL, lastmillis, eventiconfade, 1);
                     if(!override && allowanc) anc = S_V_MULTI2;
                 }
                 else if(style&FRAG_MKILL3)
                 {
                     if(style&FRAG_BREAKER) concatstring(d->obit, " and");
                     concatstring(d->obit, " \fs\fzcwmulti-killing\fS");
-                    actor->addicon(eventicon::MULTIKILL, lastmillis, eventiconfade, 2);
+                    v->addicon(eventicon::MULTIKILL, lastmillis, eventiconfade, 2);
                     if(!override && allowanc) anc = S_V_MULTI3;
                 }
             }
             else
             {
                 concatstring(d->obit, " ");
-                concatstring(d->obit, colourname(actor));
+                concatstring(d->obit, colourname(v));
             }
             if(obitstyles)
             {
                 if(style&FRAG_FIRSTBLOOD)
                 {
                     concatstring(d->obit, " for \fs\fzrwfirst blood\fS");
-                    actor->addicon(eventicon::FIRSTBLOOD, lastmillis, eventiconfade, 0);
+                    v->addicon(eventicon::FIRSTBLOOD, lastmillis, eventiconfade, 0);
                     if(!override && allowanc)
                     {
                         anc = S_V_FIRSTBLOOD;
@@ -1530,7 +1531,7 @@ namespace game
                 if(style&FRAG_SPREE1)
                 {
                     concatstring(d->obit, " in total \fs\fzYwcarnage\fS");
-                    actor->addicon(eventicon::SPREE, lastmillis, eventiconfade, 0);
+                    v->addicon(eventicon::SPREE, lastmillis, eventiconfade, 0);
                     if(!override && allowanc)
                     {
                         anc = S_V_SPREE;
@@ -1540,7 +1541,7 @@ namespace game
                 else if(style&FRAG_SPREE2)
                 {
                     concatstring(d->obit, " on a \fs\fzYwslaughter\fS");
-                    actor->addicon(eventicon::SPREE, lastmillis, eventiconfade, 1);
+                    v->addicon(eventicon::SPREE, lastmillis, eventiconfade, 1);
                     if(!override && allowanc)
                     {
                         anc = S_V_SPREE2;
@@ -1550,7 +1551,7 @@ namespace game
                 else if(style&FRAG_SPREE3)
                 {
                     concatstring(d->obit, " on a \fs\fzYwmassacre\fS");
-                    actor->addicon(eventicon::SPREE, lastmillis, eventiconfade, 2);
+                    v->addicon(eventicon::SPREE, lastmillis, eventiconfade, 2);
                     if(!override && allowanc)
                     {
                         anc = S_V_SPREE3;
@@ -1560,7 +1561,7 @@ namespace game
                 else if(style&FRAG_SPREE4)
                 {
                     concatstring(d->obit, " in a \fs\fzYPbloodbath\fS");
-                    actor->addicon(eventicon::SPREE, lastmillis, eventiconfade, 3);
+                    v->addicon(eventicon::SPREE, lastmillis, eventiconfade, 3);
                     if(!override && allowanc)
                     {
                         anc = S_V_SPREE4;
@@ -1569,10 +1570,10 @@ namespace game
                 }
             }
         }
-        if(d != actor)
+        if(d != v)
         {
-            if(showobitdists >= (d != player1 ? 2 : 1)) { defformatstring(obitx)(" \fs\fo@\fy%.2f\fom\fS", actor->o.dist(d->o)/8.f); concatstring(d->obit, obitx); }
-            if(showobithpleft >= (d != player1 ? 2 : 1)) { defformatstring(obitx)(" (\fs\fc%d\fS)", actor->health); concatstring(d->obit, obitx); }
+            if(showobitdists >= (d != player1 ? 2 : 1)) { defformatstring(obitx)(" \fs\fo@\fy%.2f\fom\fS", v->o.dist(d->o)/8.f); concatstring(d->obit, obitx); }
+            if(showobithpleft >= (d != player1 ? 2 : 1)) { defformatstring(obitx)(" (\fs\fc%d\fS)", v->health); concatstring(d->obit, obitx); }
         }
         if(!log.empty())
         {
@@ -1583,21 +1584,21 @@ namespace game
                 if(obitverbose == 2 || obitstyles)
                     concatstring(d->obit, log.length() > 1 && i == log.length()-1 ? " and " : (i ? ", " : " "));
                 else concatstring(d->obit, log.length() > 1 && i == log.length()-1 ? " + " : (i ? " + " : " "));
-                if(log[i]->aitype >= AI_START) concatstring(d->obit, "a ");
+                if(log[i]->actortype >= A_ENEMY) concatstring(d->obit, "a ");
                 concatstring(d->obit, colourname(log[i]));
                 if(showobithpleft >= (d != player1 ? 2 : 1)) { defformatstring(obitx)(" (\fs\fc%d\fS)", log[i]->health); concatstring(d->obit, obitx); }
             }
         }
-        if(d != actor)
+        if(d != v)
         {
-            if(actor->state == CS_ALIVE && d->aitype < AI_START)
+            if(v->state == CS_ALIVE && d->actortype < A_ENEMY)
             {
-                copystring(actor->obit, d->obit);
-                actor->lastkill = totalmillis;
+                copystring(v->obit, d->obit);
+                v->lastkill = totalmillis;
             }
         }
         if(dth >= 0) playsound(dth, d->o, d, 0, -1, -1, -1, &d->vschan);
-        if(d->aitype < AI_START)
+        if(d->actortype < A_ENEMY)
         {
             if(showobituaries)
             {
@@ -1607,15 +1608,15 @@ namespace game
                 {
                     case 1: if(isme || m_duke(gamemode, mutators)) show = true; break;
                     case 2: if(isme || anc >= 0 || m_duke(gamemode, mutators)) show = true; break;
-                    case 3: if(isme || d->aitype == AI_NONE || anc >= 0 || m_duke(gamemode, mutators)) show = true; break;
-                    case 4: if(isme || d->aitype == AI_NONE || actor->aitype == AI_NONE || anc >= 0 || m_duke(gamemode, mutators)) show = true; break;
+                    case 3: if(isme || d->actortype == A_PLAYER || anc >= 0 || m_duke(gamemode, mutators)) show = true; break;
+                    case 4: if(isme || d->actortype == A_PLAYER || v->actortype == A_PLAYER || anc >= 0 || m_duke(gamemode, mutators)) show = true; break;
                     case 5: default: show = true; break;
                 }
                 int target = show ? (isme ? CON_SELF : CON_INFO) : -1;
                 announcef(anc, target, d, false, "\fw%s", d->obit);
             }
             else if(anc >= 0) announce(anc, d);
-            if(anc >= 0 && d != actor) announce(anc, actor);
+            if(anc >= 0 && d != v) announce(anc, v);
         }
         vec pos = d->wantshitbox() ? d->head : d->headpos();
         pos.z -= d->zradius*0.125f;
@@ -1634,19 +1635,19 @@ namespace game
             }
         }
 #endif
-        if(aistyle[d->aitype].living && nogore != 2 && gibscale > 0)
+        if(actor[d->actortype].living && nogore != 2 && gibscale > 0)
         {
             int gib = clamp(max(damage, 10)/10, 1, 20), amt = int((rnd(gib)+gib)*gibscale);
             if(d->obliterated) amt *= 2;
             loopi(amt) projs::create(pos, pos, true, d, nogore ? PRJ_DEBRIS : PRJ_GIBS, rnd(gibfade)+gibfade, 0, rnd(500)+1, rnd(50)+10);
         }
-        if(m_team(gamemode, mutators) && d->team == actor->team && d != actor && actor == player1 && isweap(weap) && WF(WK(flags), weap, teampenalty, WS(flags)))
+        if(m_team(gamemode, mutators) && d->team == v->team && d != v && v == player1 && isweap(weap) && WF(WK(flags), weap, teampenalty, WS(flags)))
         {
             hud::teamkills.add(totalmillis);
             if(hud::numteamkills() >= teamkillwarn) hud::lastteam = totalmillis;
         }
-        if(m_bomber(gamemode)) bomber::killed(d, actor);
-        ai::killed(d, actor);
+        if(m_bomber(gamemode)) bomber::killed(d, v);
+        ai::killed(d, v);
     }
 
     void timeupdate(int timeremain)
@@ -1703,7 +1704,7 @@ namespace game
         if(!players.inrange(cn)) return;
         gameent *d = players[cn];
         if(!d) return;
-        if(d->name[0] && client::showpresence >= (client::waiting(false) ? 2 : 1) && (d->aitype == AI_NONE || ai::showaiinfo))
+        if(d->name[0] && client::showpresence >= (client::waiting(false) ? 2 : 1) && (d->actortype == A_PLAYER || ai::showaiinfo))
             conoutft(CON_EVENT, "\fo%s (%s) left the game (%s)", colourname(d), d->hostname, reason >= 0 ? disc_reasons[reason] : "normal");
         gameent *e = NULL;
         int numdyns = numdynents();
@@ -1888,7 +1889,7 @@ namespace game
     {
         if(tone)
         {
-            int col = d->aitype < AI_START ? d->colour : 0;
+            int col = d->actortype < A_ENEMY ? d->colour : 0;
             if(!col && isweap(d->weapselect)) col = W(d->weapselect, colour);
             if(col)
             {
@@ -1929,12 +1930,12 @@ namespace game
         concatstring(colored, "\fs");
         if(icon)
         {
-            formatstring(colortmp)("\f[%d]\f($priv%stex)", findcolour(d), hud::privname(d->privilege, d->aitype));
+            formatstring(colortmp)("\f[%d]\f($priv%stex)", findcolour(d), hud::privname(d->privilege, d->actortype));
             concatstring(colored, colortmp);
         }
         formatstring(colortmp)("\f[%d]%s", TEAM(d->team, colour), name);
         concatstring(colored, colortmp);
-        if(!name[0] || (d->aitype < AI_START && dupname && duplicatename(d, name)))
+        if(!name[0] || (d->actortype < A_ENEMY && dupname && duplicatename(d, name)))
         {
             formatstring(colortmp)("%s[%d]", name[0] ? " " : "", d->clientnum);
             concatstring(colored, colortmp);
@@ -2396,7 +2397,7 @@ namespace game
             loopv(players) if(players[i])
             {
                 gameent *d = players[i];
-                if((d->type != ENT_PLAYER && d->type != ENT_AI) || d->aitype >= AI_START) continue;
+                if((d->type != ENT_PLAYER && d->type != ENT_AI) || d->actortype >= A_ENEMY) continue;
                 cament *c = cameras.add(new cament);
                 c->o = d->headpos();
                 c->type = cament::PLAYER;
@@ -2563,7 +2564,7 @@ namespace game
             camera1->state = CS_ALIVE;
             camera1->height = camera1->zradius = camera1->radius = camera1->xradius = camera1->yradius = 2;
         }
-        if(player1->state < CS_SPECTATOR && focus != player1) specreset();
+        if(player1->state < CS_SPECTATOR && focus != player1 && !intermission) specreset();
         if(tvmode() || player1->state < CS_SPECTATOR)
         {
             camera1->vel = vec(0, 0, 0);
@@ -2661,6 +2662,7 @@ namespace game
                 maptime = NZT(lastmillis);
                 if(type != 6) musicdone(false);
                 RUNWORLD("on_start");
+                resetcamera();
                 return;
             }
             else if(!nosound && mastervol && musicvol && type && !playingmusic())
@@ -2849,16 +2851,17 @@ namespace game
     {
 #ifdef MEK
         const char *mdl = playertypes[0][third];
-        if(d->aitype >= AI_START) mdl = aistyle[d->aitype%AI_MAX].playermodel[third];
+        if(d->actortype >= A_ENEMY) mdl = actor[d->actortype%A_MAX].playermodel[third];
         else mdl = playertypes[d->model%PLAYERTYPES][third];
 #else
         int idx = third == 1 && d->headless && !nogore && headlessmodels ? 3 : third;
         const char *mdl = playertypes[forceplayermodel >= 0 ? forceplayermodel : 0][idx];
-        if(d->aitype >= AI_START && d->aitype != AI_GRUNT) mdl = aistyle[d->aitype%AI_MAX].playermodel[idx];
+        if(d->actortype >= A_ENEMY && d->actortype != A_GRUNT) mdl = actor[d->actortype%A_MAX].playermodel[idx];
         else if(forceplayermodel < 0) mdl = playertypes[d->model%PLAYERTYPES][idx];
 #endif
         bool onfloor = d->physstate >= PHYS_SLOPE || d->onladder || physics::liquidcheck(d);
         float yaw = d->yaw, pitch = d->pitch, roll = calcroll(focus);
+        if(d == player1 && intermission) yaw = pitch = 0;
         vec o = third ? d->feetpos() : camerapos(d);
         if(third == 2)
         {
@@ -2897,7 +2900,7 @@ namespace game
         else
         {
             bool melee = d->hasmelee(lastmillis, true, physics::sliding(d, true), onfloor);
-            if(secondary && allowmove(d) && aistyle[d->aitype].canmove)
+            if(secondary && allowmove(d) && actor[d->actortype].canmove)
             {
                 if(physics::jetpack(d))
                 {
@@ -3150,7 +3153,7 @@ namespace game
         }
         int team = m_fight(gamemode) && m_team(gamemode, mutators) ? d->team : T_NEUTRAL,
             weap = d->weapselect, lastaction = 0, animflags = ANIM_IDLE|ANIM_LOOP, weapflags = animflags, weapaction = 0, animdelay = 0;
-        bool secondary = false, showweap = third != 2 && isweap(weap) && (d->aitype < AI_START || aistyle[d->aitype].useweap);
+        bool secondary = false, showweap = third != 2 && isweap(weap) && (d->actortype < A_ENEMY || actor[d->actortype].useweap);
         float weapscale = 1.f;
         if(d->state == CS_DEAD || d->state == CS_WAITING)
         {

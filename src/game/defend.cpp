@@ -348,7 +348,7 @@ namespace defend
 
     int aiowner(gameent *d)
     {
-        loopv(st.flags) if(entities::ents.inrange(st.flags[i].ent) && entities::ents[d->aientity]->links.find(st.flags[i].ent) >= 0)
+        loopv(st.flags) if(entities::ents.inrange(st.flags[i].ent) && entities::ents[d->spawnpoint]->links.find(st.flags[i].ent) >= 0)
             return st.flags[i].owner ? st.flags[i].owner : st.flags[i].enemy;
         return d->team;
     }
@@ -360,7 +360,7 @@ namespace defend
 
     void aifind(gameent *d, ai::aistate &b, vector<ai::interest> &interests)
     {
-        if(d->aitype == AI_BOT)
+        if(d->actortype == A_BOT)
         {
             vec pos = d->feetpos();
             loopvj(st.flags)
@@ -398,14 +398,14 @@ namespace defend
         if(st.flags.inrange(b.target))
         {
             defendstate::flag &f = st.flags[b.target];
-            bool regen = d->aitype != AI_BOT || !m_regen(game::gamemode, game::mutators) || d->health >= m_health(game::gamemode, game::mutators, d->model);
+            bool regen = d->actortype != A_BOT || !m_regen(game::gamemode, game::mutators) || d->health >= m_health(game::gamemode, game::mutators, d->model);
             int walk = f.enemy && f.enemy != ai::owner(d) ? 1 : 0;
             if(regen && (!f.enemy && ai::owner(d) == f.owner))
             {
                 static vector<int> targets; // build a list of others who are interested in this
                 targets.setsize(0);
                 ai::checkothers(targets, d, ai::AI_S_DEFEND, ai::AI_T_AFFINITY, b.target, true);
-                if(d->aitype == AI_BOT)
+                if(d->actortype == A_BOT)
                 {
                     gameent *e = NULL;
                     int numdyns = game::numdynents();
