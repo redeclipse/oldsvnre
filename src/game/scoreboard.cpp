@@ -682,26 +682,28 @@ namespace hud
 
     int drawscoreitem(const char *icon, int colour, int x, int y, int s, float skew, float fade, int pos, int score, int offset, const char *name, const char *ext = NULL)
     {
-        const char *col = "\fr";
+        int col = 0xFF0000;
         switch(pos)
         {
-            case 0: col = "\fg"; break;
-            case 1: col = "\fy"; break;
-            case 2: col = "\fo"; break;
+            case 0: col = 0x00FF00; break;
+            case 1: col = 0x00FFFF; break;
+            case 2: col = 0xFFFF00; break;
+            case 3: col = 0xFF8800; break;
+            default: break;
         }
-        vec c = vec::hexcolor(colour);
         int size = int(s*skew);
         string str, q;
-        if(m_laptime(game::gamemode, game::mutators)) { formatstring(str)("[ \fs%s%s\fS ]", col, timestr(score)); }
-        else if(m_defend(game::gamemode) && score == INT_MAX) { formatstring(str)("[ \fs%sWIN\fS ]", col); }
-        else { formatstring(str)("[ \fs%s%d\fS ]", col, score); }
+        if(m_laptime(game::gamemode, game::mutators)) { formatstring(str)("\fs\f[%d]\f(%s)\fS %s", col, insigniatex, timestr(score)); }
+        else if(m_defend(game::gamemode) && score == INT_MAX) { formatstring(str)("\fs\f[%d]\f(%s)\fS WIN", col, insigniatex); }
+        else { formatstring(str)("\fs\f[%d]\f(%s)\fS %d", col, insigniatex, score); }
         if(inventoryscoreinfo)
         {
             if(m_laptime(game::gamemode, game::mutators))
-                { formatstring(q)("\n\fs\f[%d]\f(%s)\fS%s", offset ? (offset < 0 ? 0x00FF00 : 0xFF0000) : 0xFFFF00, offset ? (offset < 0 ? arrowtex : arrowdowntex) : arrowrighttex, timestr(offset < 0 ? 0-offset : offset)); }
-            else { formatstring(q)("%s\fs\f[%d]\f(%s)\fS%d", inventoryscorebreak ? "\n" : " ", offset ? (offset > 0 ? 0x00FF00 : 0xFF0000) : 0xFFFF00, offset ? (offset > 0 ? arrowtex : arrowdowntex) : arrowrighttex, offset < 0 ? 0-offset : offset); }
+                { formatstring(q)("\n\fs\f[%d]\f(%s)\fS %s", col, offset ? (offset < 0 ? arrowtex : arrowdowntex) : arrowrighttex, timestr(offset < 0 ? 0-offset : offset)); }
+            else { formatstring(q)("%s\fs\f[%d]\f(%s)\fS %d", inventoryscorebreak ? "\n" : " ", col, offset ? (offset > 0 ? arrowtex : arrowdowntex) : arrowrighttex, offset < 0 ? 0-offset : offset); }
             concatstring(str, q);
         }
+        vec c = vec::hexcolor(colour);
         drawitem(icon, x, y+size, s, inventoryscorebg!=0, 0, false, c.r, c.g, c.b, fade, skew, "default", "%s", str);
         int sy = 0;
         if(ext) sy += drawitemtext(x, y+size, 0, false, skew, "default", fade, "%s", ext);
