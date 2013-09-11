@@ -1178,7 +1178,7 @@ namespace game
             }
             if(aboveheaddamage)
             {
-                defformatstring(ds)("<sub>\fr+%d", damage);
+                defformatstring(ds)("<sub>\fo%c%d", damage > 0 ? '-' : (damage < 0 ? '+' : '~'), damage < 0 ? 0-damage : damage);
                 part_textcopy(d->abovehead(), ds, d != focus ? PART_TEXT : PART_TEXT_ONTOP, eventiconfade, 0xFFFFFF, 4, 1, -10, 0, d);
             }
         }
