@@ -4397,6 +4397,13 @@ namespace server
         else shouldcheckvotes = true;
     }
 
+    static int querysort(const clientinfo *a, const clientinfo *b)
+    {
+        if(a->state.points > b->state.points) return -1;
+        if(a->state.points < b->state.points) return 1;
+        return strcmp(a->name, b->name);
+    }
+
     void queryreply(ucharbuf &req, ucharbuf &p)
     {
         if(!getint(req)) return;
@@ -4422,8 +4429,13 @@ namespace server
             sendstring(cname, p);
             #endif
         }
-        loopv(clients) if(clients[i]->clientnum >= 0 && clients[i]->name[0] && clients[i]->state.actortype == A_PLAYER)
-            sendstring(colourname(clients[i]), p);
+        vector<clientinfo *> q;
+        loopv(clients) if(clients[i]->clientnum >= 0 && clients[i]->name[0] && clients[i]->state.actortype == A_PLAYER) q.add(clients[i]);
+        if(!q.empty())
+        {
+            q.sort(querysort);
+            loopv(q) sendstring(colourname(q[i]), p);
+        }
         sendqueryreply(p);
     }
 
