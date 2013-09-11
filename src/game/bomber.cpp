@@ -411,6 +411,7 @@ namespace bomber
             if(p.overread()) break;
             while(!st.flags.inrange(i)) st.flags.add();
             bomberstate::flag &f = st.flags[i];
+            f.reset();
             f.team = team;
             f.ent = ent;
             f.enabled = enabled ? 1 : 0;
