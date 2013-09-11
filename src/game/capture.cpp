@@ -363,6 +363,7 @@ namespace capture
             if(p.overread()) break;
             while(!st.flags.inrange(i)) st.flags.add();
             capturestate::flag &f = st.flags[i];
+            f.reset();
             f.team = team;
             f.ent = ent;
             f.spawnloc = spawnloc;
