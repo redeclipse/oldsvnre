@@ -229,6 +229,7 @@ namespace hud
     VAR(IDF_PERSIST, inventoryscorebg, 0, 0, 1);
     VAR(IDF_PERSIST, inventoryscoreinfo, 0, 1, 1); // shows offset
     VAR(IDF_PERSIST, inventoryscorebreak, 0, 1, 1); // two lines instead of one
+    VAR(IDF_PERSIST, inventoryscorepos, 0, 1, 1); // shows position
     VAR(IDF_PERSIST, inventoryweapids, 0, 2, 2);
     VAR(IDF_PERSIST, inventorycolour, 0, 2, 2);
     VAR(IDF_PERSIST, inventoryflash, 0, 0, 1);
@@ -2434,7 +2435,7 @@ namespace hud
                             }
                             lastweapids = changedkeys;
                         }
-                        drawitemtext(x, oldy, size, false, skew, "reduced", blend, "\f[%d]%s", inventorycolour >= 2 ? W(i, colour) : 0xAAAAAA, isweap(n) ? weapids[n] : "?");
+                        drawitemtext(x, oldy, size, false, skew, "default", blend, "\f[%d]%s", inventorycolour >= 2 ? W(i, colour) : 0xAAAAAA, isweap(n) ? weapids[n] : "?");
                     }
                 }
             }

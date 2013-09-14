@@ -680,15 +680,17 @@ namespace hud
         g.end();
     }
 
+    static const char *posnames[10] = { "th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th" };
+
     int drawscoreitem(const char *icon, int colour, int x, int y, int s, float skew, float fade, int pos, int score, int offset, const char *name, const char *ext = NULL)
     {
         int col = 0xFF0000;
         switch(pos)
         {
-            case 0: col = 0x00FF00; break;
-            case 1: col = 0x00FFFF; break;
-            case 2: col = 0xFFFF00; break;
-            case 3: col = 0xFF8800; break;
+            case 1: col = 0x00FF00; break;
+            case 2: col = 0x00FFFF; break;
+            case 3: col = 0xFFFF00; break;
+            case 4: col = 0xFF8800; break;
             default: break;
         }
         int size = int(s*skew);
@@ -704,10 +706,11 @@ namespace hud
             concatstring(str, q);
         }
         vec c = vec::hexcolor(colour);
-        drawitem(icon, x, y+size, s, inventoryscorebg!=0, 0, false, c.r, c.g, c.b, fade, skew, "default", "%s", str);
+        drawitem(icon, x, y+size, s, 0, inventoryscorebg!=0, false, c.r, c.g, c.b, fade, skew, m_laptime(game::gamemode, game::mutators) ? "reduced" : "emphasis", "%s", str);
         int sy = 0;
         if(ext) sy += drawitemtext(x, y+size, 0, false, skew, "default", fade, "%s", ext);
-        drawitemtext(x, y+size-sy, 0, false, skew, "default", fade, "\f[%d]%s", colour, name);
+        int ts = drawitemtext(x, y+size-sy, 0, false, skew, "default", fade, "\f[%d]%s", colour, name);
+        if(inventoryscorepos) drawitemtext(x, y+ts, 0, false, skew, "default", fade, "\f[%d]%d%s", col, pos, posnames[pos%10]);
         return size;
     }
 
@@ -715,29 +718,44 @@ namespace hud
     {
         if(!m_fight(game::gamemode) || (inventoryscore == 1 && game::player1->state == CS_SPECTATOR && game::focus == game::player1)) return 0;
         int sy = 0, numgroups = groupplayers(), numout = 0;
-        loopi(2) loopk(numgroups)
+        loopi(2)
         {
-            if(sy > m) break;
-            scoregroup &sg = *groups[k];
-            if(m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
+            int pos = 0, lastpos = -1;
+            loopk(numgroups)
             {
-                if(!sg.team || ((sg.team != game::focus->team) == !i)) continue;
-                float sk = numout && inventoryscoreshrink > 0 ? 1.f-min(numout*inventoryscoreshrink, inventoryscoreshrinkmax) : 1;
-                int offset = numgroups > 1 ? sg.total-groups[k ? 0 : 1]->total : 0;
-                sy += drawscoreitem(teamtexname(sg.team), TEAM(sg.team, colour), x, y+sy, s, sk*inventoryscoresize, blend*inventoryblend, k, sg.total, offset, TEAM(sg.team, name), i ? NULL : game::colourname(game::focus));
-                if(++numout >= inventoryscore) return sy;
-            }
-            else
-            {
-                if(sg.team) continue;
-                loopvj(sg.players)
+                if(sy > m) break;
+                scoregroup &sg = *groups[k];
+                if(m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
                 {
-                    gameent *d = sg.players[j];
-                    if((d != game::focus) == !i) continue;
+                    if(!pos || (m_laptime(game::gamemode, game::mutators) ? sg.total > groups[lastpos]->total : sg.total < groups[lastpos]->total))
+                    {
+                        pos++;
+                        lastpos = k;
+                    }
+                    if(!sg.team || ((sg.team != game::focus->team) == !i)) continue;
                     float sk = numout && inventoryscoreshrink > 0 ? 1.f-min(numout*inventoryscoreshrink, inventoryscoreshrinkmax) : 1;
-                    int score = m_laptime(game::gamemode, game::mutators) ? d->cptime : d->points, offset = sg.players.length() > 1 ? score-(m_laptime(game::gamemode, game::mutators) ? sg.players[j ? 0 : 1]->cptime : sg.players[j ? 0 : 1]->points) : 0;
-                    sy += drawscoreitem(playertex, game::getcolour(d, game::playerdisplaytone), x, y+sy, s, sk*inventoryscoresize, blend*inventoryblend, j, score, offset, game::colourname(d));
+                    int offset = numgroups > 1 ? sg.total-groups[k ? 0 : 1]->total : 0;
+                    sy += drawscoreitem(teamtexname(sg.team), TEAM(sg.team, colour), x, y+sy, s, sk*inventoryscoresize, blend*inventoryblend, pos, sg.total, offset, TEAM(sg.team, name), i ? NULL : game::colourname(game::focus));
                     if(++numout >= inventoryscore) return sy;
+                }
+                else
+                {
+                    if(sg.team) continue;
+                    loopvj(sg.players)
+                    {
+                        gameent *d = sg.players[j];
+                        if(!pos || (m_laptime(game::gamemode, game::mutators) ? d->cptime > sg.players[lastpos]->cptime : d->points < sg.players[lastpos]->points))
+                        {
+                            pos++;
+                            lastpos = j;
+                        }
+                        if((d != game::focus) == !i) continue;
+                        float sk = numout && inventoryscoreshrink > 0 ? 1.f-min(numout*inventoryscoreshrink, inventoryscoreshrinkmax) : 1;
+                        int score = m_laptime(game::gamemode, game::mutators) ? d->cptime : d->points,
+                            offset = sg.players.length() > 1 ? score-(m_laptime(game::gamemode, game::mutators) ? sg.players[j ? 0 : 1]->cptime : sg.players[j ? 0 : 1]->points) : 0;
+                        sy += drawscoreitem(playertex, game::getcolour(d, game::playerdisplaytone), x, y+sy, s, sk*inventoryscoresize, blend*inventoryblend, pos, score, offset, game::colourname(d));
+                        if(++numout >= inventoryscore) return sy;
+                    }
                 }
             }
         }
