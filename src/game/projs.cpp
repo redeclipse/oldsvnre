@@ -1455,7 +1455,7 @@ namespace projs
                         float expl = WX(WK(proj.flags), proj.weap, explode, WS(proj.flags), game::gamemode, game::mutators, proj.curscale*proj.lifesize);
                         if(expl > 0)
                         {
-                            part_explosion(proj.o, expl, PART_SHOCKBALL, 1, FWCOL(H, partcol, proj), 1.f, 0.95f);
+                            part_explosion(proj.o, expl, PART_SHOCKBALL, 1, FWCOL(H, partcol, proj), 1.f, trans);
                             if(WF(WK(proj.flags), proj.weap, wavepush, WS(proj.flags)) >= 1)
                                 part_explosion(proj.o, expl*WF(WK(proj.flags), proj.weap, wavepush, WS(proj.flags)), PART_SHOCKWAVE, 1, projhint(proj.owner, FWCOL(H, partcol, proj)), 1.f, 0.125f*projhintblend*trans);
                         }
