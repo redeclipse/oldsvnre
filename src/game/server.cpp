@@ -2398,8 +2398,23 @@ namespace server
 
     void savescore(clientinfo *ci)
     {
+        ci->state.timeplayed += lastmillis - ci->state.lasttimeplayed;
         savedscore *sc = findscore(ci, true);
-        if(sc) sc->save(ci->state);
+        if(sc)
+        {
+            if(ci->state.actortype == A_PLAYER && m_teamscore(gamemode) && m_team(gamemode, mutators) && !m_nopoints(gamemode, mutators) && G(teamkillrestore) && canplay())
+            {
+                int restorepoints[T_MAX] = {0};
+                loopv(ci->state.teamkills) restorepoints[ci->state.teamkills[i].team] += ci->state.teamkills[i].points;
+                loopi(T_MAX) if(restorepoints[i] >= G(teamkillrestore))
+                {
+                    score &ts = teamscore(i);
+                    ts.total += restorepoints[i];
+                    sendf(-1, 1, "ri3", N_SCORE, ts.team, ts.total);
+                }
+            }
+            sc->save(ci->state);
+        }
     }
 
     void setteam(clientinfo *ci, int team, int flags)
@@ -3095,6 +3110,17 @@ namespace server
         if(sc)
         {
             sc->restore(ci->state);
+            if(ci->state.actortype == A_PLAYER && m_teamscore(gamemode) && m_team(gamemode, mutators) && !m_nopoints(gamemode, mutators) && G(teamkillrestore) && canplay())
+            {
+                int restorepoints[T_MAX] = {0};
+                loopv(ci->state.teamkills) restorepoints[ci->state.teamkills[i].team] += ci->state.teamkills[i].points;
+                loopi(T_MAX) if(restorepoints[i] >= G(teamkillrestore))
+                {
+                    score &ts = teamscore(i);
+                    ts.total -= restorepoints[i];
+                    sendf(-1, 1, "ri3", N_SCORE, ts.team, ts.total);
+                }
+            }
             return true;
         }
         return false;
@@ -3561,7 +3587,7 @@ namespace server
             m->state.lastdeath = gamemillis;
             if(isteamkill && v->state.actortype == A_PLAYER) // don't punish the idiot bots
             {
-                v->state.teamkills.add(teamkill(totalmillis, v->team, -pointvalue));
+                v->state.teamkills.add(teamkill(totalmillis, v->team, 0-pointvalue));
                 if(G(teamkilllock) && !haspriv(v, G(teamkilllock)))
                 {
                     int numkills = 0;
@@ -4367,18 +4393,6 @@ namespace server
                 if(ci->privilege) auth::setprivilege(ci, -1);
                 if(smode) smode->leavegame(ci, true);
                 mutate(smuts, mut->leavegame(ci, true));
-                ci->state.timeplayed += lastmillis-ci->state.lasttimeplayed;
-                if(m_teamscore(gamemode) && m_team(gamemode, mutators) && !m_nopoints(gamemode, mutators) && G(teamkillrestore) && canplay() && ci->state.actortype == A_PLAYER)
-                {
-                    int restorepoints[T_MAX] = {0};
-                    loopv(ci->state.teamkills) restorepoints[ci->state.teamkills[i].team] += ci->state.teamkills[i].points;
-                    loopi(T_MAX) if(restorepoints[i] >= G(teamkillrestore))
-                    {
-                        score &ts = teamscore(i);
-                        ts.total += restorepoints[i];
-                        sendf(-1, 1, "ri3", N_SCORE, ts.team, ts.total);
-                    }
-                }
                 savescore(ci);
                 aiman::removeai(ci, complete);
                 if(!complete) aiman::dorefresh = max(aiman::dorefresh, G(airefreshdelay));
@@ -4712,17 +4726,6 @@ namespace server
         ci->state.lasttimeplayed = lastmillis;
 
         sendwelcome(ci);
-        if(m_teamscore(gamemode) && m_team(gamemode, mutators) && !m_nopoints(gamemode, mutators) && G(teamkillrestore) && canplay() && ci->state.actortype == A_PLAYER)
-        {
-            int restorepoints[T_MAX] = {0};
-            loopv(ci->state.teamkills) restorepoints[ci->state.teamkills[i].team] += ci->state.teamkills[i].points;
-            loopi(T_MAX) if(restorepoints[i] >= G(teamkillrestore))
-            {
-                score &ts = teamscore(i);
-                ts.total -= restorepoints[i];
-                sendf(-1, 1, "ri3", N_SCORE, ts.team, ts.total);
-            }
-        }
         if(restorescore(ci)) sendresume(ci);
         sendinitclient(ci);
         int amt = numclients();
