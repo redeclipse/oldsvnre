@@ -20,7 +20,7 @@ struct defendstate
         int lasthad;
         vec render;
 #endif
-        int owners, enemies, converted;
+        int owners, enemies, converted, points;
 
         flag()
         {
@@ -92,19 +92,34 @@ struct defendstate
         {
             if(enemy != team) return -1;
             converted += units;
-            if(units<0)
+
+            if(units < 0)
             {
-                if(converted<=0) noenemy();
+                if(converted <= 0) noenemy();
                 return -1;
             }
-            else if(converted<(!instant && owner ? 2 : 1)*occupy) return -1;
-            if(!instant && owner) { owner = T_NEUTRAL; converted = 0; enemy = team; return 0; }
-            else { owner = team; owners = enemies; noenemy(); return 1; }
+            else if(converted < occupy) return -1;
+
+            if(!instant && owner)
+            {
+                owner = T_NEUTRAL;
+                converted = points = 0;
+                enemy = team;
+                return 0;
+            }
+            else
+            {
+                owner = team;
+                points = 0;
+                owners = enemies;
+                noenemy();
+                return 1;
+            }
         }
 
         float occupied(bool instant, float amt)
         {
-            return (enemy ? enemy : owner) ? (!owner || enemy ? clamp(converted/float((!instant && owner ? 2 : 1)*amt), 0.f, 1.f) : 1.f) : 0.f;
+            return (enemy ? enemy : owner) ? (!owner || enemy ? clamp(converted/amt, 0.f, 1.f) : 1.f) : 0.f;
         }
     };
 
