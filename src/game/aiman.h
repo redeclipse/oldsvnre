@@ -126,7 +126,6 @@ namespace aiman
         }
         if(smode) smode->leavegame(ci, true);
         mutate(smuts, mut->leavegame(ci, true));
-        ci->state.timeplayed += lastmillis - ci->state.lasttimeplayed;
         savescore(ci);
         sendf(-1, 1, "ri3", N_DISCONNECT, cn, DISC_NONE);
         clientinfo *owner = (clientinfo *)getinfo(ci->state.ownernum);

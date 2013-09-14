@@ -448,8 +448,8 @@ namespace ai
                     if(!(c.targ = targetable(d, e))) continue;
                     c.pos = getaimpos(d, e, altfire(d, e));
                     c.dist = c.pos.squaredist(dp);
-                    if(d->dominating.find(c.d) >= 0) c.dist *= 0.5f; // REVENGE
-                    if((!t || c.dist < t->dist) && (mindist <= 0 || c.dist <= mindist))
+                    if(d->dominating.find(c.d) >= 0) t = &c; // REVENGE
+                    else if((!t || c.dist < t->dist) && (mindist <= 0 || c.dist <= mindist))
                     {
                         if(!(c.see = force || cansee(d, dp, c.pos, d->actortype >= A_ENEMY))) continue;
                         t = &c;
