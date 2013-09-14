@@ -231,7 +231,7 @@ namespace capture
             capturestate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent)) continue;
             float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(capturedelay), 0.f, 1.f) : ((m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team) ? clamp((lastmillis-f.taketime)/float(captureprotectdelay), 0.f, 1.f) : 0.f),
-                  blend = !f.owner && !f.droptime && f.team == game::focus->team ? clamp(camera1->o.dist(f.pos(true))/enttype[AFFINITY].radius, 0.f, 1.f) : 1.f;
+                  blend = !f.owner && !f.droptime && f.team == game::focus->team ? camera1->o.distrange(f.pos(true), enttype[AFFINITY].radius, enttype[AFFINITY].radius/8) : 1.f;
             entitylight *light = &entities::ents[f.ent]->light;
             vec effect = vec::hexcolor(TEAM(f.team, colour));
             int colour = effect.tohexcolor();

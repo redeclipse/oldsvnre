@@ -62,12 +62,12 @@ namespace defend
         {
             defendstate::flag &b = st.flags[i];
             if(!entities::ents.inrange(b.ent)) continue;
-            float occupy = b.occupied(defendinstant, defendcount), blend = clamp(camera1->o.dist(b.o)/enttype[AFFINITY].radius, 0.f, 1.f);
+            float occupy = b.occupied(defendinstant, defendcount);
             entitylight *light = &entities::ents[b.ent]->light;
             vec effect = skewcolour(b.owner, b.enemy, occupy);
             int colour = effect.tohexcolor();
             light->material[0] = bvec::fromcolor(effect);
-            rendermodel(light, "props/point", ANIM_MAPMODEL|ANIM_LOOP, b.render, entities::ents[b.ent]->attrs[1], entities::ents[b.ent]->attrs[2], 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, max(blend, 0.25f));
+            rendermodel(light, "props/point", ANIM_MAPMODEL|ANIM_LOOP, b.render, entities::ents[b.ent]->attrs[1], entities::ents[b.ent]->attrs[2], 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, max(camera1->o.distrange(b.o, enttype[AFFINITY].radius, enttype[AFFINITY].radius/8), 0.125f));
             if(b.enemy && b.owner)
             {
                 defformatstring(bowner)("%s", game::colourteam(b.owner));
@@ -80,6 +80,7 @@ namespace defend
             }
             vec above = b.o;
             if(b.render.z >= above.z-1) above.z += (b.render.z-(above.z-1))+2;
+            float blend = camera1->o.distrange(b.o, enttype[AFFINITY].radius, enttype[AFFINITY].radius/8);
             part_explosion(above, 3, PART_SHOCKBALL, 1, colour, 1, 0.5f*blend);
             above.z += 4;
             part_text(above, b.info, PART_TEXT, 1, 0xFFFFFF, 2, blend);

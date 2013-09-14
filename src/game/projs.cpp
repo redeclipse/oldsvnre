@@ -665,7 +665,16 @@ namespace projs
 
     float fadeweap(projent &proj)
     {
-        float trans = 1;
+        float trans = WF(WK(proj.flags), proj.weap, blend, WS(proj.flags));
+        if(WF(WK(proj.flags), proj.weap, fade, WS(proj.flags))&(proj.owner != game::focus ? 2 : 1))
+        {
+            int millis = lastmillis-proj.spawntime;
+            if(millis < WF(WK(proj.flags), proj.weap, fadetime, WS(proj.flags)))
+            {
+                float range = camera1->o.distrange(proj.o, WF(WK(proj.flags), proj.weap, fadeat, WS(proj.flags)), WF(WK(proj.flags), proj.weap, fadecut, WS(proj.flags)));
+                trans *= range*(1.f-(millis/float(WF(WK(proj.flags), proj.weap, fadetime, WS(proj.flags)))));
+            }
+        }
         if(proj.stuck && isweap(proj.weap) && WF(WK(proj.flags), proj.weap, vistime, WS(proj.flags)))
         {
             int millis = lastmillis-proj.stuck;
@@ -1312,10 +1321,10 @@ namespace projs
             case PRJ_SHOT:
             {
                 updatetaper(proj, proj.distance);
-                float trans = fadeweap(proj);
+                float trans = fadeweap(proj)*WF(WK(proj.flags), proj.weap, partblend, WS(proj.flags));
                 if(!WK(proj.flags) && !proj.limited && proj.weap != W_MELEE)
                 {
-                    int vol = int(ceilf(255*proj.curscale*trans));
+                    int vol = int(ceilf(255*proj.curscale));
                     if(W2(proj.weap, power, WS(proj.flags))) switch(W2(proj.weap, cooked, WS(proj.flags)))
                     {
                         case 4: case 5: vol = 10+int(245*(1.f-proj.lifespan)*proj.lifesize*proj.curscale); break; // longer

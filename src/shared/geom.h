@@ -113,6 +113,7 @@ struct vec
     float dist(const vec &e) const { vec t; return dist(e, t); }
     float dist(const vec &e, vec &t) const { t = *this; t.sub(e); return t.magnitude(); }
     float dist2(const vec &o) const { float dx = x-o.x, dy = y-o.y; return sqrtf(dx*dx + dy*dy); }
+    float distrange(const vec &o, float r = 1e16f, float m = 0.f) const { float dt = dist(o); return r > m && dt > m ? (dt < r ? (dt-m)/(r-m) : 1.f) : 0.f; }
     bool reject(const vec &o, float r) { return x>o.x+r || x<o.x-r || y>o.y+r || y<o.y-r; }
     bool rejectxyz(const vec &o, float rx, float ry, float rz1, float rz2) { return x>o.x+rx || x<o.x-rx || y>o.y+ry || y<o.y-ry || z>o.z+rz2 || z<o.z-rz1; }
     template<class A, class B>
