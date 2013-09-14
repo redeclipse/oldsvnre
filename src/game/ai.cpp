@@ -1572,7 +1572,7 @@ namespace ai
             }
             if(skip) continue;
             mapmodelinfo *mmi = getmminfo(e.attrs[0]);
-            if(!mmi) continue;
+            if(!mmi || !mmi->m) continue;
             vec center, radius;
             mmi->m->collisionbox(center, radius);
             if(e.attrs[5])
