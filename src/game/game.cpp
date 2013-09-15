@@ -3414,18 +3414,24 @@ namespace game
                 if(burntime-millis < burndelay) pc *= float(burntime-millis)/float(burndelay);
                 else pc *= 0.75f+(float(millis%burndelay)/float(burndelay*4));
                 vec pos = vec(d->center()).sub(vec(rnd(11)-5, rnd(11)-5, rnd(5)-2).mul(pc));
-                regular_part_create(PART_FIREBALL, 50, pos, pulsecols[PULSE_FIRE][rnd(PULSECOLOURS)], d->height*0.75f*intensity*pc, fade*blend*pc, -10, 0);
+                regular_part_create(PART_FIREBALL, 50, pos, pulsecols[PULSE_FIRE][rnd(PULSECOLOURS)], d->height*0.75f*intensity*blend*pc, fade*blend*pc, -10, 0);
             }
             if(shocktime && d->shocking(lastmillis, shocktime))
             {
-                vec origin = d->center(), col = rescolour(d, PULSE_SHOCK);
+                vec origin = d->center(), col = rescolour(d, PULSE_SHOCK), rad = vec(d->xradius, d->yradius, d->height/2).mul(blend);
                 int millis = lastmillis-d->lastres[WR_SHOCK], colour = (int(col.x*255)<<16)|(int(col.y*255)<<8)|(int(col.z*255));
-                float pc = shocktime-millis < shockdelay ? (shocktime-millis)/float(shockdelay) : 0.5f+(float(millis%shockdelay)/float(shockdelay*4));
-                loopi(10+rnd(20))
+                float pc = shocktime-millis < shockdelay ? (shocktime-millis)/float(shockdelay) : 0.5f+(float(millis%shockdelay)/float(shockdelay*4)), fade = (d != focus ? 0.5f : 0.f)+(pc*0.5f);
+                loopi(10+rnd(10))
                 {
-                    vec from = vec(origin).add(vec(rnd(201)-100, rnd(201)-100, rnd(201)-100).div(100.f).normalize().mul(vec(d->xradius, d->yradius, d->height).mul(0.35f*pc))),
-                        to = vec(origin).add(vec(rnd(201)-100, rnd(201)-100, rnd(201)-100).div(100.f).normalize().mul(d->height*pc*rnd(100)/80.f));
-                    part_flare(from, to, 1, PART_LIGHTNING_FLARE, colour, 0.1f+pc, 0.25f+pc*0.5f);
+                    float q = 1;
+                    vec from = vec(origin).add(vec(rnd(201)-100, rnd(201)-100, rnd(201)-100).div(100.f).normalize().mul(rad).mul(rnd(200)/100.f)), to = from;
+                    loopj(1+rnd(10))
+                    {
+                        to = vec(from).add(vec(rnd(201)-100, rnd(201)-100, rnd(201)-100).div(100.f).normalize().mul(rad).mul(rnd(200)/100.f*q));
+                        part_flare(from, to, 1, PART_LIGHTNING_FLARE, colour, q, fade*blend*q);
+                        from = to;
+                        q = q*3/4;
+                    }
                 }
                 if(d->ragdoll && twitchspeed > 0) twitchragdoll(d, twitchspeed*pc*rnd(100)/80.f);
             }
