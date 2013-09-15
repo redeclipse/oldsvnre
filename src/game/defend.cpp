@@ -143,7 +143,7 @@ namespace defend
             {
                 defendstate::flag &f = st.flags[i];
                 pushfont("emphasis");
-                float occupy = !f.owner || f.enemy ? clamp(f.converted/float((!defendinstant && f.owner ? 2 : 1) * defendcount), 0.f, 1.f) : 1.f;
+                float occupy = !f.owner || f.enemy ? clamp(f.converted/float(defendcount), 0.f, 1.f) : 1.f;
                 bool overthrow = f.owner && f.enemy == game::focus->team;
                 ty += draw_textx("%s %s \fs\f[%d]\f(%s)\f(%s)\fS \fs%s%d%%\fS", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, overthrow ? "Overthrow" : "Secure", f.name, TEAM(f.owner, colour), hud::teamtexname(f.owner), hud::pointtex, overthrow ? "\fy" : (occupy < 1.f ? "\fc" : "\fg"), int(occupy*100.f))*hud::noticescale;
                 popfont();
@@ -166,7 +166,7 @@ namespace defend
             if(headsup || f.hasflag || millis <= 1000)
             {
                 float skew = headsup ? hud::inventoryskew : 0.f,
-                    occupy = f.enemy ? clamp(f.converted/float((!defendinstant && f.owner ? 2 : 1)*defendcount), 0.f, 1.f) : (f.owner ? 1.f : 0.f);
+                    occupy = f.enemy ? clamp(f.converted/float(defendcount), 0.f, 1.f) : (f.owner ? 1.f : 0.f);
                 vec c = vec::hexcolor(TEAM(f.owner, colour)), c1 = c;
                 if(f.enemy)
                 {

@@ -710,7 +710,7 @@ namespace hud
         int sy = 0;
         if(ext) sy += drawitemtext(x, y+size, 0, false, skew, "default", fade, "%s", ext);
         int ts = drawitemtext(x, y+size-sy, 0, false, skew, "default", fade, "\f[%d]%s", colour, name);
-        if(inventoryscorepos) drawitemtext(x, y+ts, 0, false, skew, "default", fade, "\f[%d]%d%s", col, pos, posnames[pos%10]);
+        if(inventoryscorepos) drawitemtext(x, y+ts, 0, false, skew, "default", fade, "\f[%d]%d%s", col, pos, posnames[pos < 10 || pos > 13 ? pos%10 : 0]);
         return size;
     }
 
@@ -720,16 +720,17 @@ namespace hud
         int sy = 0, numgroups = groupplayers(), numout = 0;
         loopi(2)
         {
-            int pos = 0, lastpos = -1;
+            int pos = 0, realpos = 0, lastpos = -1;
             loopk(numgroups)
             {
                 if(sy > m) break;
                 scoregroup &sg = *groups[k];
                 if(m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
                 {
+                    realpos++;
                     if(!pos || (m_laptime(game::gamemode, game::mutators) ? sg.total > groups[lastpos]->total : sg.total < groups[lastpos]->total))
                     {
-                        pos++;
+                        pos = realpos;
                         lastpos = k;
                     }
                     if(!sg.team || ((sg.team != game::focus->team) == !i)) continue;
@@ -744,9 +745,10 @@ namespace hud
                     loopvj(sg.players)
                     {
                         gameent *d = sg.players[j];
+                        realpos++;
                         if(!pos || (m_laptime(game::gamemode, game::mutators) ? d->cptime > sg.players[lastpos]->cptime : d->points < sg.players[lastpos]->points))
                         {
-                            pos++;
+                            pos = realpos;
                             lastpos = j;
                         }
                         if((d != game::focus) == !i) continue;
