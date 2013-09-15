@@ -623,13 +623,6 @@ namespace hud
         return teamnotices >= 2 && totalmillis-lastteam <= teamnoticedelay;
     }
 
-    bool hasteamnotice(gameent *d)
-    {
-        if(d->state == CS_ALIVE && m_fight(game::gamemode) && shownotices && d == game::player1 && teamnotices)
-            return hastkwarn(d) || hasteaminfo(d);
-        return false;
-    }
-
     bool keypress(int code, bool isdown, int cooked)
     {
         if(curcompass) return keycmenu(code, isdown, cooked);
@@ -1163,7 +1156,6 @@ namespace hud
         int cx = int(hudwidth*cursorx), cy = int(hudheight*cursory);
         if(index != POINTER_GUI)
         {
-            if(hasteamnotice(game::focus)) return;
             drawpointertex(getpointer(index, game::focus->weapselect), cx-cs/2, cy-cs/2, cs, c.r, c.g, c.b, fade*hudblend);
             if(index > POINTER_GUI)
             {
@@ -1255,6 +1247,10 @@ namespace hud
             tf = int(255*hudblend*noticeblend), tr = 255, tg = 255, tb = 255,
             tw = int((hudwidth-((hudsize*gapsize)*2+(hudsize*inventorysize)*2))/noticescale);
         if(noticestone) skewcolour(tr, tg, tb, noticestone);
+
+        if(hastkwarn(game::focus)) // first and foremost
+            ty += draw_textx("\fzryDo NOT shoot team mates", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
+
         if(lastmillis-game::maptime <= noticetitle)
         {
 
@@ -2998,32 +2994,32 @@ namespace hud
 
     void drawevents(float blend)
     {
-        if(hasteamnotice(game::focus))
+        int ty = int((hudheight/2)-(hudheight/2*eventoffset)), tx = int(hudwidth/2);
+        if(hasteaminfo(game::focus))
         {
+            ty /= noticescale;
+            tx /= noticescale;
             glPushMatrix();
             glScalef(noticescale, noticescale, 1);
             pushfont("huge");
-            int ty = int(((hudheight/2)-(FONTH/2))/noticescale), tx = int((hudwidth/2)/noticescale),
-                tf = int(255*hudblend*noticeblend), tr = 255, tg = 255, tb = 255,
+            int tf = int(255*hudblend*noticeblend), tr = 255, tg = 255, tb = 255,
                 tw = int((hudwidth-(int(hudsize*gapsize)*2+int(hudsize*inventorysize)*2))/noticescale);
             if(noticestone) skewcolour(tr, tg, tb, noticestone);
-            if(hastkwarn(game::focus))
-                draw_textx("\fzryDo NOT shoot team mates", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
-            if(hasteaminfo(game::focus))
-            {
-                if(m_trial(game::gamemode)) draw_textx("Time Trial", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
-                else if(!m_team(game::gamemode, game::mutators)) draw_textx("Free-for-all %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1, m_bomber(game::gamemode) ? "Bomber-ball" : "Deathmatch");
-                else draw_textx("You are on team %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, game::colourteam(game::focus->team));
-            }
+            if(m_trial(game::gamemode)) ty += draw_textx("\fzwyTime Trial", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
+            else if(!m_team(game::gamemode, game::mutators)) ty += draw_textx("\fzwyFree-for-all %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1, m_bomber(game::gamemode) ? "Bomber-ball" : "Deathmatch");
+            else ty += draw_textx("\fzwyYou are on team %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, game::colourteam(game::focus->team));
             popfont();
             glPopMatrix();
+            ty *= noticescale;
+            tx *= noticescale;
         }
         if(showevents && game::focus->state != CS_EDITING && game::focus->state != CS_SPECTATOR)
         {
+            ty /= eventscale;
+            tx /= eventscale;
             glPushMatrix();
             glScalef(eventscale, eventscale, 1);
             pushfont("emphasis");
-            int ty = int(((hudheight/2)-(hudheight/2*eventoffset))/eventscale), tx = int((hudwidth/2)/eventscale);
             loopv(game::focus->icons)
             {
                 if(game::focus->icons[i].type == eventicon::AFFINITY && !(showevents&2)) continue;
@@ -3054,6 +3050,8 @@ namespace hud
             }
             popfont();
             glPopMatrix();
+            //ty *= eventscale;
+            //tx *= eventscale; // don't really care
         }
     }
 
