@@ -52,12 +52,16 @@ namespace ai
 
     float weapmindist(int weap, bool alt)
     {
-        return WX(false, weap, explode, alt, game::gamemode, game::mutators, 1.f) > 0 && W2(weap, collide, alt)&COLLIDE_OWNER ? WX(false, weap, explode, alt, game::gamemode, game::mutators, 1.f) : 2;
+        if(weaptype[weap].melee) return 0.f;
+        if(WX(false, weap, explode, alt, game::gamemode, game::mutators, 1.f) > 0) return WX(false, weap, explode, alt, game::gamemode, game::mutators, 1.f);
+        return CLOSEDIST;
     }
 
     float weapmaxdist(int weap, bool alt)
     {
-        return W2(weap, aidist, alt) ? W2(weap, aidist, alt) : hdr.worldsize;
+        if(weaptype[weap].melee) return CLOSEDIST;
+        if(W2(weap, aidist, alt) > 0) return W2(weap, aidist, alt);
+        return getworldsize();
     }
 
     bool weaprange(gameent *d, int weap, bool alt, float dist)
@@ -905,11 +909,7 @@ namespace ai
                 {
                     bool alt = altfire(d, e);
                     if(actor[d->actortype].canmove)
-                    {
-                        float mindist = weapmindist(d->weapselect, alt);
-                        if(!weaptype[d->weapselect].melee) mindist = min(mindist, CLOSEDIST);
-                        return patrol(d, b, e->feetpos(), mindist, d->ai->views[2]) ? 1 : 0;
-                    }
+                        return patrol(d, b, e->feetpos(), weapmindist(d->weapselect, alt), weapmaxdist(d->weapselect, alt)) ? 1 : 0;
                     else
                     {
                         vec dp = d->headpos(), ep = getaimpos(d, e, alt);
