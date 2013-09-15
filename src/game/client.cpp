@@ -310,7 +310,7 @@ namespace client
         loopv(ids)
         {
             ident &id = *ids[i];
-            if(!(id.flags&IDF_SERVER)) // TODO: which flags should be included?
+            if(!(id.flags&IDF_SERVER)) // Exclude sv_* duplicates
             {
                 f->printf("%s\t%d\t%d", id.name, id.type, id.flags);
                 switch(id.type)
