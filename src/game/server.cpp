@@ -3474,11 +3474,12 @@ namespace server
             if(m_team(gamemode, mutators) && v->team == m->team)
             {
                 v->state.spree = 0;
-                if(v->state.actortype < A_ENEMY && isweap(weap) && WF(WK(flags), weap, teampenalty, WS(flags)))
+                if(isweap(weap) && WF(WK(flags), weap, teampenalty, WS(flags)))
                 {
                     pointvalue *= G(teamkillpenalty);
                     if(v != m) isteamkill = true;
                 }
+                else pointvalue = 0; // no penalty
                 if(flags&HIT_HEAD) style |= FRAG_HEADSHOT;
             }
             else if(v != m && v->state.actortype < A_ENEMY)
