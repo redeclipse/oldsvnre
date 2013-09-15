@@ -3474,7 +3474,7 @@ namespace server
             if(m_team(gamemode, mutators) && v->team == m->team)
             {
                 v->state.spree = 0;
-                if(isweap(weap) && WF(WK(flags), weap, teampenalty, WS(flags)))
+                if(isweap(weap) && (v == m || WF(WK(flags), weap, teampenalty, WS(flags))))
                 {
                     pointvalue *= G(teamkillpenalty);
                     if(v != m) isteamkill = true;
