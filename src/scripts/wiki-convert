@@ -6,6 +6,21 @@ BEGIN {
     print "This page was automatically generated from the source of Red Eclipse, please do not edit it manually."
     print ""
     print "<table style=\"border:1px solid #000000; width:100%;\">"
+
+    header[0] = "Name & Parameters"
+    header[1] = "Description"
+    header[2] = "Type"
+    header[3] = "Default Value"
+    header[4] = "Range"
+    header[5] = "Identifier Flags"
+
+    print "<tr>"
+    for (i = 0; i < length(header); i++) {
+        print "<th>"
+        print ("<nowiki>" header[i] "</nowiki>")
+        print "</th>"
+    }
+    print "</tr>"
 }
 
 {
