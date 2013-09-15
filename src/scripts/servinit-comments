@@ -7,10 +7,6 @@
 #
 # Usage: update-servexec-comments /path/usage.cfg /path/servexec.cfg
 
-DIR="$(cd "$(dirname "$0")" && pwd)"
-
-source "$DIR"/wiki-common
-
 IFS=$'\n'
 for i in $(grep "// sv_" "$2")
 do

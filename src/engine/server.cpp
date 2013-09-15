@@ -1539,7 +1539,7 @@ void writecfg()
         ident &id = *ids[i];
         if(id.flags&IDF_PERSIST) switch(id.type)
         {
-            case ID_VAR: if(*id.storage.i != id.def.i) { found = true; f->printf((id.flags&IDF_HEX && *id.storage.i >= 0 ? (id.maxval==0xFFFFFF ? "%s 0x%.6X\n" : "%s 0x%X\n") : "%s %d\n"), escapeid(id), *id.storage.i); } break;
+            case ID_VAR: if(*id.storage.i != id.def.i) { found = true; f->printf("%s %s\n", escapeid(id), intstr(&id)); } break;
             case ID_FVAR: if(*id.storage.f != id.def.f) { found = true; f->printf("%s %s\n", escapeid(id), floatstr(*id.storage.f)); } break;
             case ID_SVAR: if(strcmp(*id.storage.s, id.def.s)) { found = true; f->printf("%s %s\n", escapeid(id), escapestring(*id.storage.s)); } break;
         }
