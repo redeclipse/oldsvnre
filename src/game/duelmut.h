@@ -300,7 +300,7 @@ struct duelservmode : servmode
                                     }
                                     else ancmsgft(clients[i]->clientnum, S_V_YOULOSE, CON_INFO, end);
                                 }
-                                else ancmsgft(clients[i]->clientnum, S_V_NOTIFY, CON_INFO, end);
+                                else ancmsgft(clients[i]->clientnum, S_V_BOMBSCORE, CON_INFO, end);
                             }
                             clear();
                         }
@@ -313,10 +313,7 @@ struct duelservmode : servmode
                         if(m_affinity(gamemode) && !playing.empty()) break; // this should not happen
                         if(!cleanup)
                         {
-                            defformatstring(end)("\fyeveryone died, \fzoyepic fail");
-                            loopv(clients) if(playing.find(clients[i]) >= 0)
-                                ancmsgft(clients[i]->clientnum, S_V_DRAW, CON_INFO, end);
-                            else ancmsgft(clients[i]->clientnum, S_V_NOTIFY, CON_INFO, end);
+                            ancmsgft(clients[i]->clientnum, S_V_DRAW, CON_INFO, "\fyeveryone died, \fzoyepic fail");
                             duelwinner = -1;
                             duelwins = 0;
                         }
@@ -354,16 +351,19 @@ struct duelservmode : servmode
                                 duelwins++;
                                 formatstring(end)("\fy%s was the winner%s (\fs\fc%d\fS in a row)", colourname(alive[0]), hp, duelwins);
                             }
-                            loopv(clients) if(playing.find(clients[i]) >= 0)
+                            loopv(clients)
                             {
-                                if(clients[i] == alive[0])
+                                if(playing.find(clients[i]) >= 0)
                                 {
-                                    ancmsgft(clients[i]->clientnum, S_V_YOUWIN, CON_INFO, end);
-                                    if(!m_affinity(gamemode)) givepoints(clients[i], 1);
+                                    if(clients[i] == alive[0])
+                                    {
+                                        ancmsgft(clients[i]->clientnum, S_V_YOUWIN, CON_INFO, end);
+                                        if(!m_affinity(gamemode)) givepoints(clients[i], 1);
+                                    }
+                                    else ancmsgft(clients[i]->clientnum, S_V_YOULOSE, CON_INFO, end);
                                 }
-                                else ancmsgft(clients[i]->clientnum, S_V_YOULOSE, CON_INFO, end);
+                                else ancmsgft(clients[i]->clientnum, S_V_BOMBSCORE, CON_INFO, end);
                             }
-                            else ancmsgft(clients[i]->clientnum, S_V_NOTIFY, CON_INFO, end);
                         }
                         clear();
                         break;
