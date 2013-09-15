@@ -3,13 +3,9 @@
 # "$1" is doc/readme.txt
 # "$2" is output file
 
-DIR="$(cd "$(dirname "$0")" && pwd)"
-
-source "$DIR"/wiki-common
-
-noedit_header > "$2"
-
 cat <<EOF >> "$2"
+This page was automatically generated from the source of Red Eclipse, please do not edit it manually.
+
 == Red Eclipse Team ==
 
 === Team Lead ===

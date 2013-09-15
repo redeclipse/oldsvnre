@@ -826,7 +826,7 @@ void save_config(char *mname)
         ident &id = *ids[i];
         if(id.flags&IDF_WORLD && !(id.flags&IDF_SERVER)) switch(id.type)
         {
-            case ID_VAR: h->printf((id.flags&IDF_HEX && *id.storage.i >= 0 ? (id.maxval==0xFFFFFF ? "// %s 0x%.6X\n" : "// %s 0x%X\n") : "// %s %d\n"), escapeid(id), *id.storage.i); vars++;break;
+            case ID_VAR: h->printf("// %s %s\n", escapeid(id), intstr(&id)); vars++;break;
             case ID_FVAR: h->printf("// %s %s\n", escapeid(id), floatstr(*id.storage.f)); vars++; break;
             case ID_SVAR: h->printf("// %s %s\n", escapeid(id), escapestring(*id.storage.s)); vars++; break;
             default: break;

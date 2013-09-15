@@ -271,7 +271,7 @@ namespace client
                         else break;
                     }
                     if(server) f->printf("sv_");
-                    f->printf((id.flags&IDF_HEX && *id.storage.i >= 0 ? (id.maxval==0xFFFFFF ? "%s 0x%.6X\n" : "%s 0x%X\n") : "%s %d\n"), id.name, *id.storage.i);
+                    f->printf("%s %s\n", escapeid(id), intstr(&id));
                     break;
                 case ID_FVAR:
                     if(*id.storage.f == id.def.f)
@@ -280,7 +280,7 @@ namespace client
                         else break;
                     }
                     if(server) f->printf("sv_");
-                    f->printf("%s %s\n", id.name, floatstr(*id.storage.f));
+                    f->printf("%s %s\n", escapeid(id), floatstr(*id.storage.f));
                     break;
                 case ID_SVAR:
                     if(!strcmp(*id.storage.s, id.def.s))
@@ -289,13 +289,82 @@ namespace client
                         else break;
                     }
                     if(server) f->printf("sv_");
-                    f->printf("%s %s\n", id.name, escapestring(*id.storage.s));
+                    f->printf("%s %s\n", escapeid(id), escapestring(*id.storage.s));
                     break;
             }
         }
         delete f;
     }
     ICOMMAND(0, writevars, "sii", (char *name, int *all, int *sv), if(!(identflags&IDF_WORLD)) writegamevars(name, *all!=0, *sv!=0));
+
+    void writegamevarsinfo(const char *name)
+    {
+        if(!name || !*name) name = "varsinfo.txt";
+        stream *f = openfile(name, "w");
+        if(!f) return;
+        f->printf("// List of vars properties, fields are separated by tabs; empty if nonexistent\n");
+        f->printf("// Fields: NAME TYPE FLAGS ARGS VALTYPE VALUE MIN MAX DESC USAGE\n");
+        vector<ident *> ids;
+        enumerate(idents, ident, id, ids.add(&id));
+        ids.sort(ident::compare);
+        loopv(ids)
+        {
+            ident &id = *ids[i];
+            if(!(id.flags&IDF_SERVER)) // TODO: which flags should be included?
+            {
+                f->printf("%s\t%d\t%d", id.name, id.type, id.flags);
+                switch(id.type)
+                {
+                    case ID_VAR:
+                        f->printf("\t\t"); // empty ARGS VALTYPE
+                        if(!(id.flags&IDF_HEX))
+                            f->printf("\t%d\t%d\t%d", id.def.i, id.minval, id.maxval);
+                        else
+                        {
+                            if(id.maxval==0xFFFFFF)
+                                f->printf("\t0x%.6X\t0x%.6X\t0x%.6X", id.def.i, id.minval, id.maxval);
+                            else
+                                f->printf("\t0x%X\t0x%X\t0x%X", id.def.i, id.minval, id.maxval);
+                        }
+                        break;
+                    case ID_FVAR:
+                        f->printf("\t\t\t%s\t%s\t%s", floatstr(id.def.f), floatstr(id.minvalf), floatstr(id.maxvalf)); // empty ARGS VALTYPE
+                        break;
+                    case ID_SVAR:
+                        f->printf("\t\t\t%s\t\t", escapestring(id.def.s)); // empty ARGS VALTYPE MIN MAX
+                        break;
+                    case ID_ALIAS:
+                        f->printf("\t\t%d", id.valtype); // empty ARGS
+                        switch(id.valtype)
+                        {
+                            case VAL_NULL:
+                                f->printf("\tNULL");
+                                break;
+                            case VAL_INT:
+                                f->printf("\t%d", id.val.i);
+                                break;
+                            case VAL_FLOAT:
+                                f->printf("\t%s", floatstr(id.val.f));
+                                break;
+                            case VAL_STR:
+                                f->printf("\t%s", escapestring(id.val.s));
+                                break;
+                        }
+                        f->printf("\t\t"); // empty MIN MAX
+                        break;
+                    case ID_COMMAND:
+                        f->printf("\t%s\t\t\t\t", escapestring(id.args)); // empty VALTYPE VALUE MIN MAX
+                        break;
+                }
+                // empty if nonexistent
+                f->printf("\t%s", escapestring(id.desc ? id.desc : ""));
+                f->printf("\t%s", escapestring(id.usage ? id.usage : ""));
+                f->printf("\n");
+            }
+        }
+        delete f;
+    }
+    ICOMMAND(0, writevarsinfo, "s", (char *name), if(!(identflags&IDF_WORLD)) writegamevarsinfo(name));
 
     // collect c2s messages conveniently
     vector<uchar> messages;
