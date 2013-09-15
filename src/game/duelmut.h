@@ -313,7 +313,7 @@ struct duelservmode : servmode
                         if(m_affinity(gamemode) && !playing.empty()) break; // this should not happen
                         if(!cleanup)
                         {
-                            ancmsgft(clients[i]->clientnum, S_V_DRAW, CON_INFO, "\fyeveryone died, \fzoyepic fail");
+                            ancmsgft(-1, S_V_DRAW, CON_INFO, "\fyeveryone died, \fzoyepic fail");
                             duelwinner = -1;
                             duelwins = 0;
                         }
