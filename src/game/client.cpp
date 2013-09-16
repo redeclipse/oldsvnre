@@ -1102,7 +1102,7 @@ namespace client
                 else formatstring(fname)("demos/%u.dmo", uint(clocktime));
                 stream *demo = openfile(fname, "wb");
                 if(!demo) return;
-                conoutft(CON_MESG, "\fyreceived demo: \fc%s", fname);
+                conoutft(CON_EVENT, "\fyreceived demo: \fc%s", fname);
                 demo->write(data, len);
                 delete demo;
                 break;
@@ -1121,7 +1121,7 @@ namespace client
                 stream *f = openfile(reqfext, "wb");
                 if(!f)
                 {
-                    conoutft(CON_MESG, "\frfailed to open map file: \fc%s", reqfext);
+                    conoutft(CON_EVENT, "\frfailed to open map file: \fc%s", reqfext);
                     break;
                 }
                 gettingmap = true;
@@ -1154,15 +1154,15 @@ namespace client
 
     void getdemo(int i)
     {
-        if(i <= 0) conoutft(CON_MESG, "\fygetting demo, please wait...");
-        else conoutft(CON_MESG, "\fygetting demo \fs\fc%d\fS, please wait...", i);
+        if(i <= 0) conoutft(CON_EVENT, "\fygetting demo, please wait...");
+        else conoutft(CON_EVENT, "\fygetting demo \fs\fc%d\fS, please wait...", i);
         addmsg(N_GETDEMO, "ri", i);
     }
     ICOMMAND(0, getdemo, "i", (int *val), getdemo(*val));
 
     void listdemos()
     {
-        conoutft(CON_MESG, "\fylisting demos...");
+        conoutft(CON_EVENT, "\fylisting demos...");
         addmsg(N_LISTDEMOS, "r");
     }
     ICOMMAND(0, listdemos, "", (), listdemos());
@@ -1188,7 +1188,7 @@ namespace client
 
     void sendmap()
     {
-        conoutft(CON_MESG, "\fysending map...");
+        conoutft(CON_EVENT, "\fysending map...");
         const char *reqmap = mapname;
         if(!reqmap || !*reqmap) reqmap = "maps/untitled";
         bool edit = m_edit(game::gamemode);
@@ -1204,12 +1204,12 @@ namespace client
             stream *f = openfile(reqfext, "rb");
             if(f)
             {
-                conoutft(CON_MESG, "\fytransmitting file: \fc%s", reqfext);
+                conoutft(CON_EVENT, "\fytransmitting file: \fc%s", reqfext);
                 sendfile(-1, 2, f, "ri2", N_SENDMAPFILE, i);
                 if(needclipboard >= 0) needclipboard++;
                 delete f;
             }
-            else if(i <= SENDMAP_MIN) conoutft(CON_MESG, "\frfailed to open map file: \fc%s", reqfext);
+            else if(i <= SENDMAP_MIN) conoutft(CON_EVENT, "\frfailed to open map file: \fc%s", reqfext);
         }
     }
     ICOMMAND(0, sendmap, "", (), sendmap());
@@ -1712,7 +1712,7 @@ namespace client
                     int mycn = getint(p), gver = getint(p);
                     if(gver!=GAMEVERSION)
                     {
-                        conoutft(CON_MESG, "\fryou are using a different game version (you: \fs\fc%d\fS, server: \fs\fc%d\fS)", GAMEVERSION, gver);
+                        conoutft(CON_EVENT, "\fryou are using a different game version (you: \fs\fc%d\fS, server: \fs\fc%d\fS)", GAMEVERSION, gver);
                         disconnect();
                         return;
                     }
@@ -1720,7 +1720,7 @@ namespace client
                     if(!game::player1->hostname[0]) copystring(game::player1->hostname, "unknown");
                     sessionid = getint(p);
                     game::player1->clientnum = mycn;
-                    if(getint(p)) conoutft(CON_MESG, "\fothe server is password protected");
+                    if(getint(p)) conoutft(CON_EVENT, "\fothe server is password protected");
                     else if(verbose >= 2) conoutf("\fythe server welcomes us, yay");
                     sendintro();
                     break;
@@ -1822,13 +1822,13 @@ namespace client
                     {
                         case 0: case 2:
                         {
-                            conoutft(CON_MESG, "\fyserver requested map change to \fs\fc%s\fS, and we need it, so asking for it", text);
+                            conoutft(CON_EVENT, "\fyserver requested map change to \fs\fc%s\fS, and we need it, so asking for it", text);
                             addmsg(N_GETMAP, "r");
                             break;
                         }
                         case 1:
                         {
-                            conoutft(CON_MESG, "\fyserver is requesting the map from another client for us");
+                            conoutft(CON_EVENT, "\fyserver is requesting the map from another client for us");
                             break;
                         }
                         default: needsmap = false; break;
@@ -2288,7 +2288,7 @@ namespace client
                 case N_REMIP:
                 {
                     if(!d) return;
-                    conoutft(CON_MESG, "\fy%s remipped", game::colourname(d));
+                    conoutft(CON_EVENT, "\fy%s remipped", game::colourname(d));
                     mpremip(false);
                     break;
                 }
@@ -2343,12 +2343,12 @@ namespace client
                 case N_SENDDEMOLIST:
                 {
                     int demos = getint(p);
-                    if(demos <= 0) conoutft(CON_MESG, "\fono demos available");
+                    if(demos <= 0) conoutft(CON_EVENT, "\fono demos available");
                     else loopi(demos)
                     {
                         getstring(text, p);
                         if(p.overread()) break;
-                        conoutft(CON_MESG, "\fademo: %d. %s", i+1, text);
+                        conoutft(CON_EVENT, "\fademo: %d. %s", i+1, text);
                     }
                     break;
                 }
@@ -2638,12 +2638,12 @@ namespace client
 
                 case N_GETMAP:
                 {
-                    conoutft(CON_MESG, "\fyserver has requested we send the map..");
+                    conoutft(CON_EVENT, "\fyserver has requested we send the map..");
                     if(!needsmap && !gettingmap) sendmap();
                     else
                     {
-                        if(!gettingmap) conoutft(CON_MESG, "\fy..we don't have the map though, so asking for it instead");
-                        else conoutft(CON_MESG, "\fy..but we're in the process of getting it");
+                        if(!gettingmap) conoutft(CON_EVENT, "\fy..we don't have the map though, so asking for it instead");
+                        else conoutft(CON_EVENT, "\fy..but we're in the process of getting it");
                         addmsg(N_GETMAP, "r");
                     }
                     break;
@@ -2651,10 +2651,10 @@ namespace client
 
                 case N_SENDMAP:
                 {
-                    conoutft(CON_MESG, "\fymap data has been uploaded to the server");
+                    conoutft(CON_EVENT, "\fymap data has been uploaded to the server");
                     if(needsmap && !gettingmap)
                     {
-                        conoutft(CON_MESG, "\fy.. and we want the map too, so asking for it");
+                        conoutft(CON_EVENT, "\fy.. and we want the map too, so asking for it");
                         addmsg(N_GETMAP, "r");
                     }
                     break;
@@ -2662,7 +2662,7 @@ namespace client
 
                 case N_FAILMAP:
                 {
-                    if(needsmap) conoutft(CON_MESG, "\fyunable to load map, nobody else has a copy of it..");
+                    if(needsmap) conoutft(CON_EVENT, "\fyunable to load map, nobody else has a copy of it..");
                     needsmap = gettingmap = false;
                     break;
                 }
@@ -2678,7 +2678,7 @@ namespace client
                     {
                         int newsize = 0;
                         while(1<<newsize < getworldsize()) newsize++;
-                        conoutft(CON_MESG, size>=0 ? "\fy%s started a new map of size \fs\fc%d\fS" : "\fy%s enlarged the map to size \fs\fc%d\fS", game::colourname(d), newsize);
+                        conoutft(CON_EVENT, size>=0 ? "\fy%s started a new map of size \fs\fc%d\fS" : "\fy%s enlarged the map to size \fs\fc%d\fS", game::colourname(d), newsize);
                     }
                     break;
                 }
@@ -2702,7 +2702,7 @@ namespace client
                     getstring(text, p);
                     if(accountname[0] && accountpass[0])
                     {
-                        if(verbose) conoutft(CON_MESG, "\fyanswering account challenge..");
+                        conoutft(CON_EVENT"\fyidentifying as: \fc%s", accountname);
                         vector<char> buf;
                         answerchallenge(accountpass, text, buf);
                         addmsg(N_AUTHANS, "ris", id, buf.getbuf());
