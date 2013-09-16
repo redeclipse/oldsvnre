@@ -655,8 +655,8 @@ namespace projs
             }
             case PRJ_EJECT: case PRJ_AFFINITY:
             {
-                int mag = int(proj.vel.magnitude()), vol = int(ceilf(clamp(mag*2, 10, 255)*proj.curscale));
-                if(vol) playsound(S_SHELL, proj.o, NULL, 0, vol);
+                int mag = int(proj.vel.magnitude()), vol = int(ceilf(clamp(mag*3, proj.projtype == PRJ_AFFINITY ? 60 : 10, 255)*proj.curscale));
+                if(vol) playsound(proj.projtype == PRJ_EJECT ? S_SHELL : S_BOUNCE, proj.o, NULL, 0, vol);
                 break;
             }
             default: break;

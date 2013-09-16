@@ -708,9 +708,9 @@ namespace hud
         vec c = vec::hexcolor(colour);
         drawitem(icon, x, y+size, s, 0, inventoryscorebg!=0, false, c.r, c.g, c.b, fade, skew, m_laptime(game::gamemode, game::mutators) ? "reduced" : "emphasis", "%s", str);
         int sy = 0;
-        if(ext) sy += drawitemtext(x, y+size, 0, false, skew, "default", fade, "%s", ext);
-        int ts = drawitemtext(x, y+size-sy, 0, false, skew, "default", fade, "\f[%d]%s", colour, name);
-        if(inventoryscorepos) drawitemtext(x, y+ts, 0, false, skew, "default", fade, "\f[%d]%d%s", col, pos, posnames[pos < 10 || pos > 13 ? pos%10 : 0]);
+        if(ext) sy += drawitemtextx(x, y+size, 0, TEXT_RIGHT_UP, skew, "default", fade, "%s", ext);
+        drawitemtextx(x, y+size-sy, 0, TEXT_RIGHT_UP, skew, "default", fade, "\f[%d]%s", colour, name);
+        if(inventoryscorepos) drawitemtextx(x, y, 0, TEXT_RIGHT_JUSTIFY, skew, "emphasis", fade, "\f[%d]%d%s", col, pos, posnames[pos < 10 || pos > 13 ? pos%10 : 0]);
         return size;
     }
 
