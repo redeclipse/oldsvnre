@@ -1580,18 +1580,15 @@ namespace physics
                 d->o = orig; \
             } \
         }
-        if((gameent::is(d)) && d->state == CS_ALIVE)
+        if(gameent::is(d) || projent::is(d))
         {
             vec dir;
             vecfromyawpitch(d->yaw, d->pitch, 1, 0, dir);
-            if(!dir.iszero()) loopk(2) inmapchk(100, d->o.add(vec(dir).mul(i/20.f).mul(k ? 1 : -1)));
+            if(!dir.iszero()) loopk(2) inmapchk(100, d->o.add(vec(dir).mul(i/10.f).mul(k ? 1 : -1)));
+            dir = vec(d->vel).normalize();
+            if(!dir.iszero()) loopk(2) inmapchk(100, d->o.add(vec(dir).mul(i/10.f).mul(k ? 1 : -1)));
         }
-        if(gameent::is(d) || d->type == ENT_PROJ)
-        {
-            vec dir = vec(d->vel).normalize();
-            if(!dir.iszero()) loopk(2) inmapchk(100, d->o.add(vec(dir).mul(i/20.f).mul(k ? 1 : -1)));
-        }
-        inmapchk(100, d->o.add(vec((rnd(21)-10)*i/20.f, (rnd(21)-10)*i/20.f, (rnd(21)-10)*i/20.f)));
+        inmapchk(20, d->o.add(vec((rnd(21)-10)*i/10.f, (rnd(21)-10)*i/10.f, (rnd(21)-10)*i/10.f)));
         d->o = orig;
         d->resetinterp();
         return false;
