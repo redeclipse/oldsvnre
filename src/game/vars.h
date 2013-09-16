@@ -251,7 +251,7 @@ GVAR(0, capturelimit, 0, 0, VAR_MAX); // finish when score is this or more
 GVAR(0, captureresetdelay, 0, 30000, VAR_MAX);
 GVAR(0, capturedefenddelay, 0, 15000, VAR_MAX);
 GVAR(0, captureprotectdelay, 0, 15000, VAR_MAX);
-GVAR(0, capturepickupdelay, -1, 5000, VAR_MAX);
+GVAR(0, capturepickupdelay, -1, 2500, VAR_MAX);
 GFVAR(0, capturecarryspeed, 0, 0.9f, FVAR_MAX);
 GVAR(0, capturepoints, 0, 5, VAR_MAX); // points added to score
 GVAR(0, capturepickuppoints, 0, 3, VAR_MAX); // points added to score
@@ -259,9 +259,9 @@ GVAR(0, capturecollide, 0, BOUNCE_GEOM, VAR_MAX);
 GVAR(0, captureextinguish, 0, 6, 7);
 GVAR(0, captureinteracts, 0, 3, 3);
 GFVAR(0, capturerelativity, 0, 0.25f, FVAR_MAX);
-GFVAR(0, captureelasticity, FVAR_MIN, 0.5f, FVAR_MAX);
+GFVAR(0, captureelasticity, FVAR_MIN, 0.65f, FVAR_MAX);
 GFVAR(0, captureliquidcoast, FVAR_MIN, 1.75f, FVAR_MAX);
-GFVAR(0, captureweight, FVAR_MIN, 200, FVAR_MAX);
+GFVAR(0, captureweight, FVAR_MIN, 250, FVAR_MAX);
 GFVAR(0, captureminspeed, 0, 0, FVAR_MAX);
 GFVAR(0, capturerepulsion, 0, 16, FVAR_MAX);
 GFVAR(0, capturerepelspeed, 0, 25, FVAR_MAX);
@@ -306,20 +306,20 @@ GVAR(0, bomberholdpoints, 0, 1, VAR_MAX); // points added to score
 GVAR(0, bomberholdpenalty, 0, 10, VAR_MAX); // penalty for holding too long
 GVAR(0, bomberholdinterval, 0, 1000, VAR_MAX);
 GVAR(0, bomberlockondelay, 0, 250, VAR_MAX);
-GFVAR(0, bomberspeed, 0, 200, FVAR_MAX);
+GFVAR(0, bomberspeed, 0, 250, FVAR_MAX);
 GFVAR(0, bomberdelta, 0, 1000, FVAR_MAX);
 GVAR(0, bombercollide, 0, BOUNCE_GEOM, VAR_MAX);
 GVAR(0, bomberextinguish, 0, 6, 7);
 GVAR(0, bomberinteracts, 0, 3, 3);
 GFVAR(0, bomberrelativity, 0, 0.25f, FVAR_MAX);
-GFVAR(0, bomberelasticity, FVAR_MIN, 0.7f, FVAR_MAX);
+GFVAR(0, bomberelasticity, FVAR_MIN, 0.75f, FVAR_MAX);
 GFVAR(0, bomberliquidcoast, FVAR_MIN, 1.75f, FVAR_MAX);
-GFVAR(0, bomberweight, FVAR_MIN, 200, FVAR_MAX);
-GFVAR(0, bomberminspeed, 0, 50, FVAR_MAX);
+GFVAR(0, bomberweight, FVAR_MIN, 350, FVAR_MAX);
+GFVAR(0, bomberminspeed, 0, 65, FVAR_MAX);
 GFVAR(0, bomberthreshold, 0, 0, FVAR_MAX); // if someone 'warps' more than this distance, auto-drop
 GVAR(0, bomberbuffing, 0, 1, 3); // buffed; 0 = off, &1 = when guarding, &2 = when securing
 GVAR(0, bomberbuffdelay, 0, 3000, VAR_MAX); // buffed for this long after leaving
-GFVAR(0, bomberbuffarea, FVAR_NONZERO, 128, FVAR_MAX); // multiply affinity radius by this much for buff
+GFVAR(0, bomberbuffarea, FVAR_NONZERO, 128, FVAR_MAX); // radius in which buffing occurs
 GFVAR(0, bomberbuffdamage, 1, 1.5f, FVAR_MAX); // multiply outgoing damage by this much when buffed
 GFVAR(0, bomberbuffshield, 1, 1.5f, FVAR_MAX); // divide incoming damage by this much when buffed
 GVAR(0, bomberregenbuff, 0, 1, 1); // 0 = off, 1 = modify regeneration when buffed
