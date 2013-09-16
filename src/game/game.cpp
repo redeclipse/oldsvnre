@@ -963,11 +963,7 @@ namespace game
         if(deathfade && (d->state == CS_DEAD || d->state == CS_WAITING)) total *= spawnfade(d);
         else if(d->state == CS_ALIVE)
         {
-            if(d == focus)
-            {
-                if(third) total *= camera1->o.dist(d->o)/(d != player1 ? followdist : thirdpersondist);
-                else if(d->weapselect == W_MELEE) return 0; // hack
-            }
+            if(d == focus && third) total *= camera1->o.dist(d->o)/(d != player1 ? followdist : thirdpersondist);
             int prot = m_protect(gamemode, mutators), millis = d->protect(lastmillis, prot); // protect returns time left
             if(millis > 0) total *= 1.f-(float(millis)/float(prot));
             if(d == player1 && inzoom())
@@ -3323,17 +3319,17 @@ namespace game
         d->checktags();
         if(rendernormally)
         {
-            float blend = opacity(d, true);
-            if(d != focus && playerhint&(d->team != focus->team ? 2 : 1))
-            {
-                float radius = d->height*playerhintsize*blend;
-                vec o = d->center(), offset = vec(o).sub(camera1->o).rescale(radius/2);
-                offset.z = max(offset.z, -1.0f);
-                float fade = camera1->o.distrange(o, playerhintfadeat, playerhintfadecut)*blend*playerhintblend;
-                part_create(PART_HINT_BOLD_SOFT, 1, offset.add(o), getcolour(d, playerhinttone), radius, fade);
-            }
+            float blend = opacity(d, third);
             if(d->state == CS_ALIVE)
             {
+                if(d != focus && playerhint&(d->team != focus->team ? 2 : 1))
+                {
+                    float radius = d->height*playerhintsize*blend;
+                    vec o = d->center(), offset = vec(o).sub(camera1->o).rescale(radius/2);
+                    offset.z = max(offset.z, -1.0f);
+                    float fade = camera1->o.distrange(o, playerhintfadeat, playerhintfadecut)*blend*playerhintblend;
+                    part_create(PART_HINT_BOLD_SOFT, 1, offset.add(o), getcolour(d, playerhinttone), radius, fade);
+                }
                 float minz = d == focus && !third && firstpersonbodyfeet >= 0 && d->wantshitbox() ? camera1->o.z-firstpersonbodyfeet : 0.f;
                 if(d->hasmelee(lastmillis, true, physics::sliding(d, true), d->physstate >= PHYS_SLOPE || d->onladder || physics::liquidcheck(d))) loopi(2)
                 {
@@ -3461,7 +3457,7 @@ namespace game
         if(rendernormally && early) focus->cleartags();
         if(project && !third) viewproject(firstpersondepth);
         if(third || !rendernormally) renderplayer(focus, 1, opacity(focus, thirdpersonview(true)), focus->curscale, early);
-        else if(!third && focus->state == CS_ALIVE) renderplayer(focus, 0, opacity(focus, false), focus->curscale, early);
+        else if(!third && focus->state == CS_ALIVE && focus->weapselect != W_MELEE) renderplayer(focus, 0, opacity(focus, false), focus->curscale, early);
         if(project && !third) viewproject();
         if(!third && focus->state == CS_ALIVE && firstpersonmodel == 2)
         {
