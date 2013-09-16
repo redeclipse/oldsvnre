@@ -365,6 +365,7 @@ namespace entities
         checkspawns(ent);
     }
 
+    /*
     static inline void collateents(octaentities &oe, const vec &pos, float xyrad, float zrad, bool alive, vector<actitem> &actitems)
     {
         vector<extentity *> &ents = entities::getents();
@@ -426,6 +427,7 @@ namespace entities
         }
         if(c->children && 1<<scale >= octaentsize) collateents(c->children, ivec(bo).mask(~((2<<scale)-1)), 1<<scale, bo, br, pos, xyrad, zrad, alive, actitems);
     }
+    */
 
     static inline bool sortitems(const actitem &a, const actitem &b)
     {
@@ -435,16 +437,46 @@ namespace entities
     bool collateitems(dynent *d, vector<actitem> &actitems)
     {
         vec m = d->center();
-        float eye = gameent::is(d) ? d->height*0.5f : d->radius;
-        collateents(m, d->radius, eye, d->state == CS_ALIVE, actitems);
+        //float eye = gameent::is(d) ? d->height*0.5f : d->radius;
+        //collateents(m, d->radius, eye, d->state == CS_ALIVE, actitems);
+        float sqrad = max(d->xradius, d->yradius);
+        if(gameent::is(d)) sqrad = max(d->headpos().z-m.z, sqrad);
+        sqrad *= sqrad;
+        loopv(ents)
+        {
+            extentity &e = *ents[i];
+            if(enttype[e.type].usetype != EU_NONE && (enttype[e.type].usetype != EU_ITEM || (d->state == CS_ALIVE && e.spawned)))
+            {
+                float sqradius = enttype[e.type].radius, sqdist = m.squaredist(e.o);
+                switch(e.type)
+                {
+                    case TRIGGER: case TELEPORT: case PUSHER: if(e.attrs[3] > 0) sqradius = e.attrs[3]; break;
+                    case CHECKPOINT: if(e.attrs[0] > 0) sqradius = e.attrs[0]; break;
+                }
+                sqradius *= sqradius;
+                if(sqdist > sqrad+sqradius) continue;
+                actitem &t = actitems.add();
+                t.type = actitem::ENT;
+                t.target = i;
+                t.score = sqdist;
+            }
+        }
         if(d->state == CS_ALIVE) loopv(projs::projs)
         {
             projent &proj = *projs::projs[i];
             if(proj.projtype != PRJ_ENT || !proj.ready()) continue;
             if(!ents.inrange(proj.id) || enttype[ents[proj.id]->type].usetype != EU_ITEM) continue;
             if(!(enttype[ents[proj.id]->type].canuse&(1<<d->type))) continue;
-            if(!overlapsbox(m, eye, d->radius, proj.o, enttype[ents[proj.id]->type].radius, enttype[ents[proj.id]->type].radius))
-                continue;
+            //if(!overlapsbox(m, eye, d->radius, proj.o, enttype[ents[proj.id]->type].radius, enttype[ents[proj.id]->type].radius))
+            //    continue;
+            float sqradius = enttype[ents[proj.id]->type].radius, sqdist = m.squaredist(proj.o);
+            switch(ents[proj.id]->type)
+            {
+                case TRIGGER: case TELEPORT: case PUSHER: if(ents[proj.id]->attrs[3] > 0) sqradius = ents[proj.id]->attrs[3]; break;
+                case CHECKPOINT: if(ents[proj.id]->attrs[0] > 0) sqradius = ents[proj.id]->attrs[0]; break;
+            }
+            sqradius *= sqradius;
+            if(sqdist > sqrad+sqradius) continue;
             actitem &t = actitems.add();
             t.type = actitem::PROJ;
             t.target = i;
