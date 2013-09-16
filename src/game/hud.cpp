@@ -620,7 +620,7 @@ namespace hud
     bool hasteaminfo(gameent *d)
     {
         if(game::focus->state == CS_ALIVE && !lastteam) lastteam = totalmillis;
-        return teamnotices >= 2 && totalmillis-lastteam <= teamnoticedelay;
+        return teamnotices >= 1 && totalmillis-lastteam <= teamnoticedelay;
     }
 
     bool keypress(int code, bool isdown, int cooked)
@@ -3002,12 +3002,13 @@ namespace hud
             glPushMatrix();
             glScalef(noticescale, noticescale, 1);
             pushfont("huge");
+            const char *col = teamnotices >= 2 ? "\fs\fzyS" : "";
             int tf = int(255*hudblend*noticeblend), tr = 255, tg = 255, tb = 255,
                 tw = int((hudwidth-(int(hudsize*gapsize)*2+int(hudsize*inventorysize)*2))/noticescale);
             if(noticestone) skewcolour(tr, tg, tb, noticestone);
-            if(m_trial(game::gamemode)) ty += draw_textx("\fzwyTime Trial", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
-            else if(!m_team(game::gamemode, game::mutators)) ty += draw_textx("\fzwyFree-for-all %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1, m_bomber(game::gamemode) ? "Bomber-ball" : "Deathmatch");
-            else ty += draw_textx("\fzwyYou are on team %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, game::colourteam(game::focus->team));
+            if(m_trial(game::gamemode)) ty += draw_textx("%sTime Trial", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1, col);
+            else if(!m_team(game::gamemode, game::mutators)) ty += draw_textx("%sFree-for-all %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1, col, m_bomber(game::gamemode) ? "Bomber-ball" : "Deathmatch");
+            else ty += draw_textx("%sYou are on team %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, col, game::colourteam(game::focus->team));
             popfont();
             glPopMatrix();
             ty *= noticescale;
