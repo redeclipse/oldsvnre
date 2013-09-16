@@ -217,6 +217,10 @@ namespace hud
     VAR(IDF_PERSIST, circlebartype, 0, 7, 7); // 0 = off, &1 = health, &2 = impulse, &4 = ammo
     FVAR(IDF_PERSIST, circlebarsize, 0, 0.04f, 1000);
     FVAR(IDF_PERSIST, circlebarblend, 0, 0.75f, 1);
+    VAR(IDF_PERSIST|IDF_HEX, circlebarhealthtone, -CTONE_MAX, 0x88FF88, 0xFFFFFF);
+    VAR(IDF_PERSIST|IDF_HEX, circlebarimpulsetone, -CTONE_MAX, 0xFF88FF, 0xFFFFFF);
+    VAR(IDF_PERSIST|IDF_HEX, circlebarammocolour, 0, 1, 1);
+    VAR(IDF_PERSIST|IDF_HEX, circlebarammotone, -CTONE_MAX-1, 0xFFAA66, 0xFFFFFF);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, circlebartex, "textures/hud/circlebar", 3);
 
     VAR(IDF_PERSIST, showinventory, 0, 1, 1);
@@ -901,9 +905,8 @@ namespace hud
               slice = 360/float(maxammo), angle = (maxammo > (cliprots[weap]&4 ? 4 : 3) || maxammo%2 ? 360.f : 360.f-slice*0.5f)-((maxammo-ammo)*slice),
               area = 1-clamp(clipoffs[weap]*2, 1e-3f, 1.f), need = s*clipsize*clipskew[weap]*area*maxammo, have = 2*M_PI*s*clipoffset,
               scale = clamp(have/need, clipminscale, clipmaxscale);
-        vec c(clipcolour, clipcolour, clipcolour);
-        if(clipcolour > 0) c.mul(vec::hexcolor(W(weap, colour)));
-        else if(clipstone) skewcolour(c.r, c.g, c.b, clipstone);
+        vec c(1, 1, 1);
+        if(clipstone || clipcolour) skewcolour(c.r, c.g, c.b, clipcolour ? W(weap, colour) : clipstone);
         if(interval <= game::focus->weapwait[weap]) switch(game::focus->weapstate[weap])
         {
             case W_S_PRIMARY: case W_S_SECONDARY:
@@ -1002,18 +1005,18 @@ namespace hud
             {
                 case 0:
                     val = min(1.f, game::focus->health/float(m_health(game::gamemode, game::mutators, game::focus->model)));
-                    c = vec(0.25f, 0.75f, 0.125f);
+                    if(circlebarhealthtone) skewcolour(c.r, c.g, c.b, circlebarhealthtone);
                     break;
                 case 1:
                     val = 1-clamp(float(game::focus->impulse[IM_METER])/float(impulsemeter), 0.f, 1.f);
-                    c = vec(0.75f, 0.35f, 0.95f);
+                    if(circlebarimpulsetone) skewcolour(c.r, c.g, c.b, circlebarimpulsetone);
                     break;
                 case 2:
                 {
                     if(!isweap(game::focus->weapselect)) continue;
                     int weap = game::focus->weapselect, interval = lastmillis-game::focus->weaplast[weap];
                     val = game::focus->ammo[weap]/float(W(weap, max));
-                    c = vec(0.8f, 0.55f, 0.15f);
+                    if(circlebarammotone || circlebarammocolour) skewcolour(c.r, c.g, c.b, circlebarammocolour ? W(weap, colour) : circlebarammotone);
                     if(interval <= game::focus->weapwait[weap]) switch(game::focus->weapstate[weap])
                     {
                         case W_S_RELOAD: case W_S_USE:
@@ -2412,8 +2415,7 @@ namespace hud
                     else if(game::focus->hasweap(i, sweap) || i == game::focus->weapselect) skew = i != game::focus->weapselect ? inventoryskew : 1.f;
                     else continue;
                     vec c(1, 1, 1);
-                    if(inventorycolour) c.mul(vec::hexcolor(W(i, colour)));
-                    else if(inventorytone) skewcolour(c.r, c.g, c.b, inventorytone);
+                    if(inventorytone || inventorycolour) skewcolour(c.r, c.g, c.b, inventorycolour ? W(i, colour) : inventorytone);
                     int oldy = y-sy, curammo = game::focus->ammo[i];
                     if(inventoryammostyle && (game::focus->weapstate[i] == W_S_RELOAD || game::focus->weapstate[i] == W_S_USE) && game::focus->weapload[i] > 0)
                         curammo = (curammo-game::focus->weapload[i])+int(game::focus->weapload[i]*clamp(float(lastmillis-game::focus->weaplast[i])/float(game::focus->weapwait[i]), 0.f, 1.f));
