@@ -2183,7 +2183,8 @@ namespace server
     bool checkvotes(bool force)
     {
         shouldcheckvotes = false;
-
+        int style = maprequest ? G(voteinterm) : G(votestyle);
+        if(style == 3 && !force) return false;
         vector<votecount> votes;
         int maxvotes = 0;
         loopv(clients)
@@ -2192,39 +2193,47 @@ namespace server
             if(oi->state.actortype > A_PLAYER) continue;
             maxvotes++;
             if(!oi->mapvote[0]) continue;
-            votecount *vc = NULL;
-            loopvj(votes) if(!strcmp(oi->mapvote, votes[j].map) && oi->modevote == votes[j].mode && oi->mutsvote == votes[j].muts)
+            if(style == 3) votes.add(votecount(oi->mapvote, oi->modevote, oi->mutsvote));
+            else
             {
-                vc = &votes[j];
-                break;
+                votecount *vc = NULL;
+                loopvj(votes) if(!strcmp(oi->mapvote, votes[j].map) && oi->modevote == votes[j].mode && oi->mutsvote == votes[j].muts)
+                {
+                    vc = &votes[j];
+                    break;
+                }
+                if(!vc) vc = &votes.add(votecount(oi->mapvote, oi->modevote, oi->mutsvote));
+                vc->count++;
             }
-            if(!vc) vc = &votes.add(votecount(oi->mapvote, oi->modevote, oi->mutsvote));
-            vc->count++;
         }
 
         votecount *best = NULL;
-        int morethanone = 0;
-        loopv(votes) if(!best || votes[i].count >= best->count)
-        {
-            if(best && votes[i].count == best->count) morethanone++;
-            else morethanone = 0;
-            best = &votes[i];
-        }
-        if(force && morethanone)
-        {
-            int r = rnd(morethanone+1), n = 0;
-            loopv(votes) if(votes[i].count == best->count)
-            {
-                if(n != r) n++;
-                else { best = &votes[i]; break; }
-            }
-        }
         bool passed = force;
-        if(!passed && best) switch(maprequest ? G(voteinterm) : G(votestyle))
+        if(style == 3) best = !votes.empty() ? &votes[votes.length() > 1 ? rnd(votes.length()) : 0] : NULL;
+        else
         {
-            case 2: passed = best->count >= maxvotes; break;
-            case 1: passed = best->count >= maxvotes*G(votethreshold); break;
-            case 0: default: break;
+            int morethanone = 0;
+            loopv(votes) if(!best || votes[i].count >= best->count)
+            {
+                if(best && votes[i].count == best->count) morethanone++;
+                else morethanone = 0;
+                best = &votes[i];
+            }
+            if(force && morethanone)
+            {
+                int r = rnd(morethanone+1), n = 0;
+                loopv(votes) if(votes[i].count == best->count)
+                {
+                    if(n != r) n++;
+                    else { best = &votes[i]; break; }
+                }
+            }
+            if(!passed && best) switch(style)
+            {
+                case 2: passed = best->count >= maxvotes; break;
+                case 1: passed = best->count >= maxvotes*G(votethreshold); break;
+                case 0: default: break;
+            }
         }
         if(passed)
         {

@@ -131,7 +131,7 @@ GVAR(IDF_ADMIN, votelock, 0, PRIV_OPERATOR, PRIV_CREATOR);
 GVAR(IDF_ADMIN, votelocktype, 0, 2, 2); // 0 = off, 1 = lock level only, 2 = lock level can select previousmaps
 GVAR(IDF_ADMIN, votewait, 0, 2500, VAR_MAX);
 GVAR(IDF_ADMIN, votestyle, 0, 2, 2); // 0 = votes don't pass mid-match, 1 = passes if votethreshold is met, 2 = passes if unanimous
-GVAR(IDF_ADMIN, voteinterm, 0, 2, 2); // 0 = must wait entire time, 1 = passes if votethreshold is met, 2 = passes if unanimous
+GVAR(IDF_ADMIN, voteinterm, 0, 2, 3); // 0 = must wait entire time, 1 = passes if votethreshold is met, 2 = passes if unanimous, 3 = passes after waiting then selects a random vote
 GFVAR(IDF_ADMIN, votethreshold, 0, 0.5f, 1); // auto-pass votes when this many agree
 
 GVAR(IDF_ADMIN, smallmapmax, 0, 6, VAR_MAX); // maximum number of players for a small map
