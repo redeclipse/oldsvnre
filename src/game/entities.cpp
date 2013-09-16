@@ -570,40 +570,42 @@ namespace entities
                     if(!teleports.empty())
                     {
                         bool teleported = false;
+                        vec orig = d->o, ovel = d->vel;
+                        float oyaw = d->yaw, opitch = d->pitch;
                         while(!teleports.empty())
                         {
                             int r = e.type == TELEPORT ? rnd(teleports.length()) : 0, q = teleports[r];
                             gameentity &f = *(gameentity *)ents[q];
-                            d->o = vec(f.o).add(f.attrs[5] != 3 ? vec(0, 0, d->height*0.5f) : vec(e.o).sub(d->o));
-                            if(d->state != CS_ALIVE || physics::entinmap(d, true))
+                            d->o = vec(f.o).add(f.attrs[5] != 3 ? vec(0, 0, d->height*0.5f) : vec(e.o).sub(orig));
+                            if(f.attrs[5] != 3)
                             {
-                                d->resetinterp();
-                                if(f.attrs[5] != 3)
+                                float mag = max(vec(d->vel).add(d->falling).magnitude(), f.attrs[2] ? float(f.attrs[2]) : 50.f),
+                                      yaw = f.attrs[0] < 0 ? (lastmillis/5)%360 : f.attrs[0], pitch = f.attrs[1];
+                                game::fixrange(yaw, pitch);
+                                vecfromyawpitch(yaw, pitch, 1, 0, d->vel);
+                                d->vel.normalize().mul(mag);
+                                switch(f.attrs[5])
                                 {
-                                    float mag = max(vec(d->vel).add(d->falling).magnitude(), f.attrs[2] ? float(f.attrs[2]) : 50.f),
-                                          yaw = f.attrs[0] < 0 ? (lastmillis/5)%360 : f.attrs[0], pitch = f.attrs[1];
-                                    game::fixrange(yaw, pitch);
-                                    vecfromyawpitch(yaw, pitch, 1, 0, d->vel);
-                                    d->vel.normalize().mul(mag);
-                                    if(d->state == CS_ALIVE) switch(f.attrs[5])
+                                    case 2: break; // keep
+                                    case 1:
                                     {
-                                        case 2: break; // keep
-                                        case 1:
-                                        {
-                                            float offyaw = d->yaw-(e.attrs[0] < 0 ? (lastmillis/5)%360 : e.attrs[0]), offpitch = d->pitch-e.attrs[1];
-                                            d->yaw = yaw+offyaw;
-                                            d->pitch = pitch+offpitch;
-                                            break;
-                                        }
-                                        case 0: default: // absolute
-                                        {
-                                            d->yaw = yaw;
-                                            d->pitch = pitch;
-                                            break;
-                                        }
+                                        float offyaw = d->yaw-(e.attrs[0] < 0 ? (lastmillis/5)%360 : e.attrs[0]), offpitch = d->pitch-e.attrs[1];
+                                        d->yaw = yaw+offyaw;
+                                        d->pitch = pitch+offpitch;
+                                        break;
+                                    }
+                                    case 0: default: // absolute
+                                    {
+                                        d->yaw = yaw;
+                                        d->pitch = pitch;
+                                        break;
                                     }
                                 }
-                                game::fixfullrange(d->yaw, d->pitch, d->roll, true);
+                            }
+                            game::fixrange(d->yaw, d->pitch);
+                            d->resetinterp();
+                            if(physics::entinmap(d, true) || d->state != CS_ALIVE) // entinmap first for getting position
+                            {
                                 f.lastemit = lastmillis;
                                 d->setused(n, lastmillis);
                                 d->setused(q, lastmillis);
@@ -623,19 +625,42 @@ namespace entities
                                         projent *g = (projent *)d;
                                         g->lastbounce = lastmillis;
                                         g->movement = 0;
-                                        g->from = g->o;
-                                        g->to = g->dest = vec(g->vel).normalize().mul(getworldsize()).add(g->o);
+                                        g->from = g->deltapos = g->o;
+                                        g->to = g->dest = vec(g->o).add(g->vel);
                                     }
                                 }
                                 else if(gameent::is(d)) warpragdoll(d, d->vel, vec(f.o).sub(e.o));
                                 teleported = true;
                                 break;
                             }
+                            d->o = orig;
+                            d->vel = ovel;
+                            d->yaw = oyaw;
+                            d->pitch = opitch;
+                            d->resetinterp();
+                            if(projent::is(d)) d->deltapos = d->o;
                             teleports.remove(r); // must've really sucked, try another one
                         }
-                        if(!teleported)
+                        if(!teleported || !physics::entinmap(d, true))
                         {
                             if(gameent::is(d)) game::suicide((gameent *)d, HIT_SPAWN);
+                            else if(projent::is(d))
+                            {
+                                projent *g = (projent *)d;
+                                switch(g->projtype)
+                                {
+                                    case PRJ_ENT: case PRJ_AFFINITY:
+                                    {
+                                        if(!g->beenused)
+                                        {
+                                            g->beenused = 1;
+                                            g->lifetime = min(g->lifetime, g->fadetime);
+                                        }
+                                        if(g->lifetime > 0) break;
+                                    }
+                                    default: g->state = CS_DEAD; g->escaped = true; break;
+                                }
+                            }
                             else d->state = CS_DEAD;
                         }
                     }
@@ -684,8 +709,8 @@ namespace entities
                             projent *g = (projent *)d;
                             g->lastbounce = lastmillis;
                             g->movement = 0;
-                            g->from = g->o;
-                            g->to = g->dest = vec(g->vel).normalize().mul(getworldsize()).add(g->o);
+                            g->from = g->deltapos = g->o;
+                            g->to = g->dest = vec(g->o).add(g->vel);
                         }
                     }
                     else if(gameent::is(d)) warpragdoll(d, d->vel);
