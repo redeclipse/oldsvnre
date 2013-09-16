@@ -440,8 +440,7 @@ namespace entities
         //float eye = gameent::is(d) ? d->height*0.5f : d->radius;
         //collateents(m, d->radius, eye, d->state == CS_ALIVE, actitems);
         float sqrad = max(d->xradius, d->yradius);
-        if(gameent::is(d)) sqrad = max(d->headpos().z-m.z, sqrad);
-        sqrad *= sqrad;
+        if(gameent::is(d)) sqrad = max(d->height*0.5f, sqrad);
         loopv(ents)
         {
             extentity &e = *ents[i];
@@ -453,8 +452,9 @@ namespace entities
                     case TRIGGER: case TELEPORT: case PUSHER: if(e.attrs[3] > 0) sqradius = e.attrs[3]; break;
                     case CHECKPOINT: if(e.attrs[0] > 0) sqradius = e.attrs[0]; break;
                 }
+                sqradius += sqrad;
                 sqradius *= sqradius;
-                if(sqdist > sqrad+sqradius) continue;
+                if(sqdist > sqradius) continue;
                 actitem &t = actitems.add();
                 t.type = actitem::ENT;
                 t.target = i;
@@ -475,8 +475,9 @@ namespace entities
                 case TRIGGER: case TELEPORT: case PUSHER: if(ents[proj.id]->attrs[3] > 0) sqradius = ents[proj.id]->attrs[3]; break;
                 case CHECKPOINT: if(ents[proj.id]->attrs[0] > 0) sqradius = ents[proj.id]->attrs[0]; break;
             }
+            sqradius += sqrad;
             sqradius *= sqradius;
-            if(sqdist > sqrad+sqradius) continue;
+            if(sqdist > sqradius) continue;
             actitem &t = actitems.add();
             t.type = actitem::PROJ;
             t.target = i;
