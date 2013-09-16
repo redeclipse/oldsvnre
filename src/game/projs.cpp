@@ -474,7 +474,7 @@ namespace projs
             if(closeent < 0 || test <= closedist)
             {
                 closeent = list[i].ent;
-                closedist = dist;
+                closedist = test;
             }
         }
         if(entities::ents.inrange(closeent))
