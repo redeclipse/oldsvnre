@@ -208,7 +208,7 @@ namespace game
 
     VAR(IDF_PERSIST, deathanim, 0, 2, 2); // 0 = hide player when dead, 1 = old death animation, 2 = ragdolls
     VAR(IDF_PERSIST, deathfade, 0, 1, 1); // 0 = don't fade out dead players, 1 = fade them out
-    VAR(IDF_PERSIST, deathscale, 0, 1, 1); // 0 = don't scale out dead players, 1 = scale them out
+    VAR(IDF_PERSIST, deathscale, 0, 0, 1); // 0 = don't scale out dead players, 1 = scale them out
     FVAR(IDF_PERSIST, bloodscale, 0, 1, 1000);
     VAR(IDF_PERSIST, bloodfade, 1, 3000, VAR_MAX);
     VAR(IDF_PERSIST, bloodsize, 1, 50, 1000);
