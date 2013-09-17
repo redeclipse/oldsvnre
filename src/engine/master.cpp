@@ -300,7 +300,7 @@ bool checkmasterclientinput(masterclient &c)
                 c.numpings = 0;
                 c.lastcontrol = controlversion;
                 loopv(control) if(control[i].flag == ipinfo::LOCAL)
-                    masteroutf(c, "%s %u %u\n", ipinfotypes[control[i].type], control[i].ip, control[i].mask);
+                    masteroutf(c, "%s %u %u %s\n", ipinfotypes[control[i].type], control[i].ip, control[i].mask, control[i].reason);
                 if(c.isserver)
                 {
                     masteroutf(c, "echo \"server updated, sending ping request\"\n");
@@ -392,7 +392,7 @@ void checkmaster()
         if(c.isserver && c.lastcontrol < controlversion)
         {
             loopv(control) if(control[i].flag == ipinfo::LOCAL && control[i].version > c.lastcontrol)
-                masteroutf(c, "%s %u %u\n", ipinfotypes[control[i].type], control[i].ip, control[i].mask);
+                masteroutf(c, "%s %u %u %s\n", ipinfotypes[control[i].type], control[i].ip, control[i].mask, control[i].reason);
             c.lastcontrol = controlversion;
         }
         if(c.outputpos < c.output.length()) ENET_SOCKETSET_ADD(writeset, c.socket);

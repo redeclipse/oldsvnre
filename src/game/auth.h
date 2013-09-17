@@ -1,7 +1,7 @@
 // WARNING: Before modifying this file, please read our Guidelines
 // This file can be found in the distribution under: ./docs/guidelines.txt
 // Or at: http://www.redeclipse.net/wiki/Multiplayer_Guidelines
-// 
+//
 // The Red Eclipse Team provides the play.redeclipse.net master server for the
 // benefit of the Red Eclipse Community. We impose a general set of guidelines
 // for any server/user which connects to the play.redeclipse.net master server.
@@ -195,7 +195,12 @@ namespace auth
         if(!ip || !checkipinfo(control, ipinfo::ALLOW, ip))
         {
             if(mastermode >= MM_PRIVATE || serverpass[0] || (G(connectlock) && !haspriv(ci, G(connectlock)))) return DISC_PRIVATE;
-            if(checkipinfo(control, ipinfo::BAN, ip)) return DISC_IPBAN;
+            ipinfo *info = checkipinfo(control, ipinfo::BAN, ip);
+            if(info)
+            {
+                srvmsgftforce(ci->clientnum, CON_EVENT, "\foyou are \fs\fcbanned\fS: \fy%s", info->reason && *info->reason ? info->reason : "no reason specified");
+                return DISC_IPBAN;
+            }
         }
         return DISC_NONE;
     }
@@ -316,6 +321,7 @@ namespace auth
             p.type = j;
             p.flag = ipinfo::GLOBAL; // master info
             p.time = totalmillis ? totalmillis : 1;
+            if(w[3] && *w[3]) p.reason = newstring(w[3]);
             updatecontrols = true;
             break;
         }
@@ -351,17 +357,17 @@ namespace auth
         }
         if(!quickcheck && totalmillis-lastactivity > 30*60*1000) regserver();
     }
-    
+
     void masterconnected()
     {
     }
-    
+
     void masterdisconnected()
     {
         quickcheck = false;
         loopvrev(clients)
         {
-            clientinfo *ci = clients[i];    
+            clientinfo *ci = clients[i];
             if(ci->authreq) authfailed(ci);
         }
     }
@@ -380,5 +386,5 @@ void masterconnected()
 void masterdisconnected()
 {
     auth::masterdisconnected();
-} 
+}
 
