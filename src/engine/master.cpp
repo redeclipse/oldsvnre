@@ -17,7 +17,7 @@ SVAR(0, masterscriptserver, "");
 
 struct authuser
 {
-    char *name, *flags;
+    char *name, *flags, *email;
     void *pubkey;
 };
 
@@ -96,19 +96,20 @@ void masteroutf(masterclient &c, const char *fmt, ...)
 
 static hashtable<char *, authuser> authusers;
 
-void addauth(char *name, char *flags, char *pubkey)
+void addauth(char *name, char *flags, char *pubkey, char *email)
 {
     name = newstring(name);
     authuser &u = authusers[name];
     u.name = name;
     u.flags = newstring(flags);
     u.pubkey = parsepubkey(pubkey);
+    u.email = newstring(email);
 }
-COMMAND(0, addauth, "sss");
+COMMAND(0, addauth, "ssss");
 
 void clearauth()
 {
-    enumerate(authusers, authuser, u, { delete[] u.name; delete[] u.flags; freepubkey(u.pubkey); });
+    enumerate(authusers, authuser, u, { delete[] u.name; delete[] u.flags; delete[] e.email; freepubkey(u.pubkey); });
     authusers.clear();
 }
 COMMAND(0, clearauth, "");
