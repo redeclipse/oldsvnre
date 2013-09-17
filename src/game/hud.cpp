@@ -618,11 +618,13 @@ namespace hud
 
     bool hastkwarn(gameent *d)
     {
+        if(!m_fight(game::gamemode)) return false;
         return teamkillwarn && m_team(game::gamemode, game::mutators) && numteamkills() >= teamkillwarn;
     }
 
     bool hasteaminfo(gameent *d)
     {
+        if(!m_fight(game::gamemode)) return false;
         if(game::focus->state == CS_ALIVE && !lastteam) lastteam = totalmillis;
         return teamnotices >= 1 && totalmillis-lastteam <= teamnoticedelay;
     }
