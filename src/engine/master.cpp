@@ -109,7 +109,7 @@ COMMAND(0, addauth, "ssss");
 
 void clearauth()
 {
-    enumerate(authusers, authuser, u, { delete[] u.name; delete[] u.flags; delete[] e.email; freepubkey(u.pubkey); });
+    enumerate(authusers, authuser, u, { delete[] u.name; delete[] u.flags; delete[] u.email; freepubkey(u.pubkey); });
     authusers.clear();
 }
 COMMAND(0, clearauth, "");
