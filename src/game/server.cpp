@@ -3616,7 +3616,8 @@ namespace server
                             c.mask = 0xFFFFFFFF;
                             c.type = ipinfo::BAN;
                             c.time = totalmillis ? totalmillis : 1;
-                            srvoutf(-3, "\fs\fcbanned\fS %s (%s): team killing is not permitted", colourname(v), gethostname(v->clientnum));
+                            c.reason = newstring("team killing is not permitted");
+                            srvoutf(-3, "\fs\fcbanned\fS %s (%s): %s", colourname(v), gethostname(v->clientnum), c.reason);
                             updatecontrols = true;
                         }
                         else if(G(teamkillkick) && v->state.warnings[WARN_TEAMKILL][0] >= G(teamkillkick))
@@ -4321,7 +4322,7 @@ namespace server
             loopvrev(clients)
             {
                 uint ip = getclientip(clients[i]->clientnum);
-                if(ip && !haspriv(clients[i], PRIV_MODERATOR) && checkipinfo(control, ipinfo::BAN, ip) && !checkipinfo(control, ipinfo::ALLOW, ip))
+                if(ip && !haspriv(clients[i], G(banlock)) && checkipinfo(control, ipinfo::BAN, ip) && !checkipinfo(control, ipinfo::ALLOW, ip))
                 {
                     disconnect_client(clients[i]->clientnum, DISC_IPBAN);
                     continue;
@@ -5345,7 +5346,8 @@ namespace server
                                     c.mask = 0xFFFFFFFF;
                                     c.type = ipinfo::MUTE;
                                     c.time = totalmillis ? totalmillis : 1;
-                                    srvoutf(-3, "\fs\fcmute\fS added on %s: exceeded the number of allowed flood warnings", colourname(cp));
+                                    c.reason = newstring("exceeded the number of allowed flood warnings");
+                                    srvoutf(-3, "\fs\fcmute\fS added on %s: %s", colourname(cp), c.reason);
                                 }
                             }
                             break;
@@ -5664,6 +5666,7 @@ namespace server
                                     allow.mask = 0xFFFFFFFF;
                                     allow.type = ipinfo::ALLOW;
                                     allow.time = totalmillis ? totalmillis : 1;
+                                    allow.reason = newstring("mastermode set private");
                                 }
                             }
                             srvoutf(-3, "\fymastermode is now \fs\fc%d\fS (\fs\fc%s\fS)", mastermode, mastermodename(mastermode));
@@ -5728,6 +5731,7 @@ namespace server
                                     c.mask = 0xFFFFFFFF; \
                                     c.type = value; \
                                     c.time = totalmillis ? totalmillis : 1; \
+                                    c.reason = newstring(text); \
                                     if(text[0]) srvoutf(-3, "\fP%s added \fs\fc" #y "\fS on %s (%s): %s", name, colourname(cp), gethostname(cp->clientnum), text); \
                                     else srvoutf(-3, "\fP%s added \fs\fc" #y "\fS on %s", name, colourname(cp)); \
                                     if(value == ipinfo::BAN) updatecontrols = true; \

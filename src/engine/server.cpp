@@ -71,7 +71,7 @@ const char *timestr(int dur, int style)
 ICOMMAND(0, timestr, "ii", (int *d, int *s), result(timestr(*d, *s)));
 
 vector<ipinfo> control;
-void addipinfo(vector<ipinfo> &info, int type, const char *name)
+void addipinfo(vector<ipinfo> &info, int type, const char *name, const char *reason)
 {
     union { uchar b[sizeof(enet_uint32)]; enet_uint32 i; } ip, mask;
     ip.i = 0;
@@ -94,12 +94,13 @@ void addipinfo(vector<ipinfo> &info, int type, const char *name)
 #ifdef STANDALONE
     p.version = nextcontrolversion();
 #endif
+    if(reason && *reason) p.reason = newstring(reason);
     server::updatecontrols = true;
 }
-ICOMMAND(0, addallow, "s", (char *name), addipinfo(control, ipinfo::ALLOW, name));
-ICOMMAND(0, addban, "s", (char *name), addipinfo(control, ipinfo::BAN, name));
-ICOMMAND(0, addmute, "s", (char *name), addipinfo(control, ipinfo::MUTE, name));
-ICOMMAND(0, addlimit, "s", (char *name), addipinfo(control, ipinfo::LIMIT, name));
+ICOMMAND(0, addallow, "ss", (char *name, char *reason), addipinfo(control, ipinfo::ALLOW, name, reason));
+ICOMMAND(0, addban, "ss", (char *name, char *reason), addipinfo(control, ipinfo::BAN, name, reason));
+ICOMMAND(0, addmute, "ss", (char *name, char *reason), addipinfo(control, ipinfo::MUTE, name, reason));
+ICOMMAND(0, addlimit, "ss", (char *name, char *reason), addipinfo(control, ipinfo::LIMIT, name, reason));
 
 const char *ipinfotypes[ipinfo::MAXTYPES] = { "allow", "ban", "mute", "limit" };
 char *printipinfo(const ipinfo &info, char *buf)
@@ -120,10 +121,10 @@ char *printipinfo(const ipinfo &info, char *buf)
     return str;
 }
 
-bool checkipinfo(vector<ipinfo> &info, int type, enet_uint32 ip)
+ipinfo *checkipinfo(vector<ipinfo> &info, int type, enet_uint32 ip)
 {
-    loopv(info) if(info[i].type == type && (ip & info[i].mask) == info[i].ip) return true;
-    return false;
+    loopv(info) if(info[i].type == type && (ip & info[i].mask) == info[i].ip) return &info[i];
+    return NULL;
 }
 
 #define LOGSTRLEN 512

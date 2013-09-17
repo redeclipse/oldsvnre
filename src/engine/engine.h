@@ -45,15 +45,19 @@ struct ipinfo
     enum { TEMPORARY = 0, LOCAL, GLOBAL };
     enet_uint32 ip, mask;
     int type, flag, time, version;
+    char *reason;
 
-    ipinfo() : ip(0), mask(0), type(-1), flag(TEMPORARY), time(-1), version(-1) {}
-    ~ipinfo() {}
+    ipinfo() : ip(0), mask(0), type(-1), flag(TEMPORARY), time(-1), version(-1), reason(NULL) {}
+    ~ipinfo()
+    {
+        if(reason) delete[] reason;
+    }
 };
 extern vector<ipinfo> control;
 extern const char *ipinfotypes[ipinfo::MAXTYPES];
-extern void addipinfo(vector<ipinfo> &info, int type, const char *name);
+extern void addipinfo(vector<ipinfo> &info, int type, const char *name, const char *reason = NULL);
 extern char *printipinfo(const ipinfo &info, char *buf = NULL);
-extern bool checkipinfo(vector<ipinfo> &info, int type, enet_uint32 ip);
+extern ipinfo *checkipinfo(vector<ipinfo> &info, int type, enet_uint32 ip);
 extern void writecfg();
 extern void rehash(bool reload = true);
 
