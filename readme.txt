@@ -165,7 +165,7 @@ too.
 * Adam "lycanfox" Hobson
 * Sébastien "sinma" Chauvel
 * Ludwig "Sniper-goth" Boscolo
-* "Boognish"
+* "Boognish" - Maps
 * "bonifarz"
 * Viktor "Unnamed" Hahn
 * Mikhail "Agustis" Kashin
