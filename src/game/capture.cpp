@@ -485,7 +485,7 @@ namespace capture
                     client::addmsg(N_MOVEAFFIN, "ri8", f.lastowner->clientnum, i, int(f.droploc.x*DMF), int(f.droploc.y*DMF), int(f.droploc.z*DMF), int(f.inertia.x*DMF), int(f.inertia.y*DMF), int(f.inertia.z*DMF));
                 }
             }
-            if(f.pickuptime && lastmillis-f.pickuptime <= 1000) continue;
+            if(f.pickuptime && lastmillis-f.pickuptime <= capturepickupdelay) continue;
             if(f.team == d->team && (m_gsp2(game::gamemode, game::mutators) || (!f.droptime && (m_gsp1(game::gamemode, game::mutators) || !d->action[AC_AFFINITY])))) continue;
             if(f.lastowner == d && f.droptime && (capturepickupdelay < 0 || lastmillis-f.droptime <= capturepickupdelay))
                 continue;

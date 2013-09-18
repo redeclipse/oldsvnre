@@ -267,7 +267,7 @@ namespace hud
 
     void renderscoreboard(guient &g, bool firstpass)
     {
-        g.start(menustart, menuscale, NULL, game::player1->state != CS_ALIVE, false);
+        g.start(menustart, menuscale, NULL, false, false);
         int numgroups = groupplayers();
         uilist(g, {
             uicenter(g, {

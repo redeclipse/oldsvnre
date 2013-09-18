@@ -11,7 +11,7 @@ struct capturestate
         vec droploc, inertia, spawnloc;
         int team, ent, droptime, taketime;
 #ifdef GAMESERVER
-        int owner, lastowner;
+        int owner, lastowner, nextreset;
         vector<int> votes;
 #else
         gameent *owner, *lastowner;
@@ -31,6 +31,7 @@ struct capturestate
             inertia = vec(0, 0, 0);
             droploc = spawnloc = vec(-1, -1, -1);
 #ifdef GAMESERVER
+            nextreset = 0;
             owner = lastowner = -1;
             votes.shrink(0);
 #else

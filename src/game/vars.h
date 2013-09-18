@@ -252,6 +252,8 @@ GVAR(0, captureresetdelay, 0, 30000, VAR_MAX);
 GVAR(0, capturedefenddelay, 0, 15000, VAR_MAX);
 GVAR(0, captureprotectdelay, 0, 15000, VAR_MAX);
 GVAR(0, capturepickupdelay, -1, 2500, VAR_MAX);
+GVAR(0, captureteampenalty, -1, 7500, VAR_MAX);
+GVAR(0, captureresetpenalty, -1, 3500, VAR_MAX);
 GFVAR(0, capturecarryspeed, 0, 0.9f, FVAR_MAX);
 GVAR(0, capturepoints, 0, 5, VAR_MAX); // points added to score
 GVAR(0, capturepickuppoints, 0, 3, VAR_MAX); // points added to score
