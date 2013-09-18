@@ -47,6 +47,7 @@ namespace hud
     VAR(IDF_PERSIST, scorehostinfo, 0, 0, 1);
     VAR(IDF_PERSIST, scoreicons, 0, 1, 1);
     VAR(IDF_PERSIST|IDF_HEX, scorehilight, 0, 0x888888, 0xFFFFFF);
+    VAR(IDF_READONLY, scoretarget, -1, -1, VAR_MAX);
 
     static bool scoreson = false, scoresoff = false, shownscores = false;
     static int menustart = 0, menulastpress = 0;
@@ -266,12 +267,14 @@ namespace hud
 
     void renderscoreboard(guient &g, bool firstpass)
     {
-        g.start(menustart, menuscale, NULL, false, false);
+        g.start(menustart, menuscale, NULL, game::player1->state != CS_ALIVE, false);
         int numgroups = groupplayers();
         uilist(g, {
-            g.image(NULL, 6, true);
-            g.space(2);
             uicenter(g, {
+                uicenterlist(g, {
+                    g.image(NULL, 6, true);
+                });
+                g.space(2);
                 uicenterlist(g, {
                     g.space(0.25f);
                     uicenterlist(g, uifont(g, "emphasis", g.textf("%s", 0xFFFFFF, NULL, 0, *maptitle ? maptitle : mapname)));
@@ -482,7 +485,13 @@ namespace hud
                         loopscoregroup(uicenterlist(g, {
                             uipad(g, 0.25f, uicenterlist(g, {
                                 if(o == game::player1 && scorehilight) g.background(scorehilight);
-                                uilist(g, uipad(g, 0.25f, g.textf("%s", 0xFFFFFF, NULL, 0, game::colourname(o, NULL, false, true))));
+                                uilist(g, uipad(g, 0.25f, {
+                                    if(g.button(game::colourname(o, NULL, false, true), 0xFFFFFF)&GUI_UP)
+                                    {
+                                        scoretarget = o->clientnum;
+                                        showgui("client");
+                                    }
+                                }));
                             }));
                         }));
                     });
@@ -652,8 +661,18 @@ namespace hud
                         if(o == game::player1 && scorehilight) g.background(scorehilight);
                         uipad(g, 0.25f, {
                             if(scoreclientnum || game::player1->privilege >= PRIV_ELEVATED)
-                                g.textf("%s [%d]", 0xFFFFFF, NULL, 0, game::colourname(o, NULL, true, false), o->clientnum);
-                            else g.textf("%s ", 0xFFFFFF, NULL, 0, game::colourname(o));
+                            {
+                                if(g.buttonf("%s [%d]", 0xFFFFFF, NULL, 0, false, game::colourname(o, NULL, true, false), o->clientnum)&GUI_UP)
+                                {
+                                    scoretarget = o->clientnum;
+                                    showgui("client");
+                                }
+                            }
+                            else if(g.buttonf("%s ", 0xFFFFFF, NULL, 0, false, game::colourname(o))&GUI_UP)
+                            {
+                                scoretarget = o->clientnum;
+                                showgui("client");
+                            }
                         });
                     })));
                     if(!((i+1)%count) && pushed)
