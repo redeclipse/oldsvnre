@@ -13,8 +13,8 @@ IF /I "%PROCESSOR_ARCHITEW6432%" == "amd64" (
 )
 
 :RETRY
-IF EXIST %APP_ARCH%\bin\redeclipse.exe (
-    start %APP_ARCH%\bin\redeclipse.exe %APP_OPTIONS% %*
+IF EXIST bin\%APP_ARCH%\redeclipse.exe (
+    start bin\%APP_ARCH%\redeclipse.exe %APP_OPTIONS% %*
 ) ELSE (
     IF EXIST %APP_DIR%\bin\%APP_ARCH%\redeclipse.exe (
         pushd %APP_DIR%
