@@ -534,6 +534,13 @@ namespace client
         if(m_edit(game::gamemode)) addmsg(N_EDITMODE, "ri", edit ? 1 : 0);
     }
 
+    int getclientpresence(int cn)
+    {
+        gameent *d = game::getclient(cn);
+        return d ? 1 : 0;
+    }
+    ICOMMAND(0, getclientpresence, "i", (int *cn), intret(getclientpresence(*cn)));
+
     const char *getclientname(int cn, int colour)
     {
         gameent *d = game::getclient(cn);
@@ -591,6 +598,20 @@ namespace client
         return d ? d->team : -1;
     }
     ICOMMAND(0, getclientteam, "i", (int *cn), intret(getclientteam(*cn)));
+
+    int getclientweapselect(int cn)
+    {
+        gameent *d = game::getclient(cn);
+        return d ? d->weapselect : -1;
+    }
+    ICOMMAND(0, getclientweapselect, "i", (int *cn), intret(getclientweapselect(*cn)));
+
+    int getclientloadweap(int cn, int n)
+    {
+        gameent *d = game::getclient(cn);
+        return d ? (d->loadweap.inrange(n) ? d->loadweap[n] : 0) : -1;
+    }
+    ICOMMAND(0, getclientloadweap, "ii", (int *cn, int *n), intret(getclientloadweap(*cn, *n)));
 
     bool haspriv(gameent *d, int priv)
     {
@@ -748,6 +769,14 @@ namespace client
         result(buf.getbuf());
     }
     ICOMMAND(0, listclients, "i", (int *local), listclients(*local!=0));
+
+    void getlastclientnum()
+    {
+        int cn = game::player1->clientnum;
+        loopv(game::players) if(game::players[i] && game::players[i]->clientnum > cn) cn = game::players[i]->clientnum;
+        intret(cn);
+    }
+    ICOMMAND(0, getlastclientnum, "", (), getlastclientnum());
 
     void addcontrol(const char *arg, int type, const char *msg)
     {
