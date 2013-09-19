@@ -2455,13 +2455,15 @@ namespace client
                     int sn = getint(p), val = getint(p);
                     gameent *s = game::newclient(sn);
                     if(!s) break;
-                    if(s == game::player1) game::specreset();
+                    if(s == game::player1)
+                    {
+                        game::specreset();
+                        if(m_checkpoint(game::gamemode)) game::specmode = 0;
+                    }
                     if(val != 0)
                     {
                         if(s == game::player1 && editmode) toggleedit();
                         s->state = CS_SPECTATOR;
-                        s->checkpoint = -1;
-                        s->cpmillis = 0;
                         s->quarantine = val == 2;
                     }
                     else
@@ -2469,8 +2471,6 @@ namespace client
                         if(s->state == CS_SPECTATOR)
                         {
                             s->state = CS_WAITING;
-                            s->checkpoint = -1;
-                            s->cpmillis = 0;
                             if(s != game::player1 && !s->ai) s->resetinterp();
                             game::waiting.removeobj(s);
                         }

@@ -2431,12 +2431,14 @@ namespace server
         if(ci->team != team)
         {
             bool reenter = false;
+            /*
             if(m_checkpoint(gamemode))
             {
                 ci->state.cpmillis = 0;
                 ci->state.cpnodes.shrink(0);
                 sendf(-1, 1, "ri3", N_CHECKPOINT, ci->clientnum, -1);
             }
+            */
             if(flags&TT_RESET) waiting(ci, DROP_WEAPONS);
             else if(flags&TT_SMODE && ci->state.state == CS_ALIVE)
             {
@@ -3643,7 +3645,7 @@ namespace server
             mutate(smuts, if(!mut->damage(ci, ci, ci->state.health, -1, flags, material)) { return; });
         }
         ci->state.spree = 0;
-        if(m_checkpoint(gamemode) && (!flags || m_gauntlet(gamemode) || ci->state.cpnodes.length() == 1))
+        if(m_checkpoint(gamemode) && !(flags&HIT_SPEC) && (!flags || m_gauntlet(gamemode) || ci->state.cpnodes.length() == 1))
         { // reset if suicided, hasn't reached another checkpoint yet
             ci->state.cpmillis = 0;
             ci->state.cpnodes.shrink(0);
@@ -4199,8 +4201,6 @@ namespace server
             if(smode) smode->leavegame(ci);
             mutate(smuts, mut->leavegame(ci));
             sendf(-1, 1, "ri3", N_SPECTATOR, ci->clientnum, quarantine ? 2 : 1);
-            ci->state.cpnodes.shrink(0);
-            ci->state.cpmillis = 0;
             ci->state.state = CS_SPECTATOR;
             ci->state.quarantine = quarantine;
             ci->state.timeplayed += lastmillis-ci->state.lasttimeplayed;
@@ -4211,8 +4211,6 @@ namespace server
         {
             if(ci->clientmap[0] || ci->mapcrc) checkmaps();
             //if(crclocked(ci)) return false;
-            ci->state.cpnodes.shrink(0);
-            ci->state.cpmillis = 0;
             ci->state.state = CS_DEAD;
             ci->state.lasttimeplayed = lastmillis;
             ci->state.quarantine = false;
