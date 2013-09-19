@@ -434,31 +434,25 @@ namespace entities
         return a.score > b.score;
     }
 
-    bool collateitems(dynent *d, vector<actitem> &actitems)
+    bool collateitems(dynent *d, vec &pos, float radius, vector<actitem> &actitems)
     {
-        vec m = d->center();
-        //float eye = gameent::is(d) ? d->height*0.5f : d->radius;
-        //collateents(m, d->radius, eye, d->state == CS_ALIVE, actitems);
-        float sqrad = max(d->xradius, d->yradius);
-        if(gameent::is(d)) sqrad = max(d->height*0.5f, sqrad);
         loopv(ents)
         {
             extentity &e = *ents[i];
             if(enttype[e.type].usetype != EU_NONE && (enttype[e.type].usetype != EU_ITEM || (d->state == CS_ALIVE && e.spawned)))
             {
-                float sqradius = enttype[e.type].radius, sqdist = m.squaredist(e.o);
+                float eradius = enttype[e.type].radius, edist = pos.dist(e.o);
                 switch(e.type)
                 {
-                    case TRIGGER: case TELEPORT: case PUSHER: if(e.attrs[3] > 0) sqradius = e.attrs[3]; break;
-                    case CHECKPOINT: if(e.attrs[0] > 0) sqradius = e.attrs[0]; break;
+                    case TRIGGER: case TELEPORT: case PUSHER: if(e.attrs[3] > 0) eradius = e.attrs[3]; break;
+                    case CHECKPOINT: if(e.attrs[0] > 0) eradius = e.attrs[0]; break;
                 }
-                sqradius += sqrad;
-                sqradius *= sqradius;
-                if(sqdist > sqradius) continue;
+                float diff = edist-radius;
+                if(diff > eradius) continue;
                 actitem &t = actitems.add();
                 t.type = actitem::ENT;
                 t.target = i;
-                t.score = sqdist;
+                t.score = diff;
             }
         }
         if(d->state == CS_ALIVE) loopv(projs::projs)
@@ -469,19 +463,18 @@ namespace entities
             if(!(enttype[ents[proj.id]->type].canuse&(1<<d->type))) continue;
             //if(!overlapsbox(m, eye, d->radius, proj.o, enttype[ents[proj.id]->type].radius, enttype[ents[proj.id]->type].radius))
             //    continue;
-            float sqradius = enttype[ents[proj.id]->type].radius, sqdist = m.squaredist(proj.o);
+            float eradius = enttype[ents[proj.id]->type].radius, edist = pos.dist(proj.o);
             switch(ents[proj.id]->type)
             {
-                case TRIGGER: case TELEPORT: case PUSHER: if(ents[proj.id]->attrs[3] > 0) sqradius = ents[proj.id]->attrs[3]; break;
-                case CHECKPOINT: if(ents[proj.id]->attrs[0] > 0) sqradius = ents[proj.id]->attrs[0]; break;
+                case TRIGGER: case TELEPORT: case PUSHER: if(ents[proj.id]->attrs[3] > 0) eradius = ents[proj.id]->attrs[3]; break;
+                case CHECKPOINT: if(ents[proj.id]->attrs[0] > 0) eradius = ents[proj.id]->attrs[0]; break;
             }
-            sqradius += sqrad;
-            sqradius *= sqradius;
-            if(sqdist > sqradius) continue;
+            float diff = edist-radius;
+            if(diff > eradius) continue;
             actitem &t = actitems.add();
             t.type = actitem::PROJ;
             t.target = i;
-            t.score = sqdist;
+            t.score = diff;
         }
         if(!actitems.empty())
         {
@@ -552,7 +545,7 @@ namespace entities
     }
     ICOMMAND(0, exectrigger, "i", (int *n), if(identflags&IDF_WORLD) runtriggers(*n, trigger ? trigger : game::player1));
 
-    bool execitem(int n, dynent *d)
+    bool execitem(int n, dynent *d, vec &pos, float radius, float dist)
     {
         gameentity &e = *(gameentity *)ents[n];
         switch(enttype[e.type].usetype)
@@ -704,12 +697,8 @@ namespace entities
                     e.lastemit = lastmillis;
                     d->setused(n, lastmillis);
                     float mag = max(e.attrs[2], 1);
-                    if(e.attrs[4] && e.attrs[4] < e.attrs[3])
-                    {
-                        float dist = e.o.dist(d->center());
-                        if(dist > e.attrs[4] && dist < e.attrs[3])
-                            mag *= 1.f-clamp((dist-e.attrs[4])/float(e.attrs[3]-e.attrs[4]), 0.f, 0.99f);
-                    }
+                    if(dist > 0 && e.attrs[4] > 0 && e.attrs[4] < e.attrs[3] && dist > e.attrs[4] && dist < e.attrs[3])
+                        mag *= 1.f-clamp((dist-e.attrs[4])/float(e.attrs[3]-e.attrs[4]), 0.f, 1.f);
                     vec dir, rel;
                     vecfromyawpitch(e.attrs[0], e.attrs[1], 1, 0, dir);
                     (rel = dir.normalize()).mul(mag);
@@ -778,19 +767,24 @@ namespace entities
     {
         static vector<actitem> actitems;
         actitems.setsize(0);
-        if(collateitems(d, actitems))
+        vec pos = d->center();
+        float radius = max(d->xradius, d->yradius);
+        if(gameent::is(d)) radius = max(d->height*0.5f, radius);
+        if(collateitems(d, pos, radius, actitems))
         {
             bool tried = false;
             while(!actitems.empty())
             {
                 actitem &t = actitems.last();
                 int ent = -1;
+                float dist = 0;
                 switch(t.type)
                 {
                     case actitem::ENT:
                     {
                         if(!ents.inrange(t.target)) break;
                         ent = t.target;
+                        dist = t.score;
                         break;
                     }
                     case actitem::PROJ:
@@ -798,11 +792,12 @@ namespace entities
                         if(!projs::projs.inrange(t.target)) break;
                         projent &proj = *projs::projs[t.target];
                         ent = proj.id;
+                        dist = t.score;
                         break;
                     }
                     default: break;
                 }
-                if(ents.inrange(ent) && execitem(ent, d)) tried = true;
+                if(ents.inrange(ent) && execitem(ent, d, pos, radius, dist)) tried = true;
                 actitems.pop();
             }
             if(tried && gameent::is(d))
@@ -1528,7 +1523,7 @@ namespace entities
             {
                 case WEAPON:
                 {
-                    float mindist = float(enttype[WEAPON].radius*enttype[WEAPON].radius*6);
+                    float mindist = float((enttype[WEAPON].radius*4)*(enttype[WEAPON].radius*4));
                     int weaps[W_MAX];
                     loopj(W_MAX) weaps[j] = j != e.attrs[0] ? 0 : 1;
                     loopvj(ents) if(j != i)

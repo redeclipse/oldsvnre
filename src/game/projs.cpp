@@ -437,7 +437,7 @@ namespace projs
 
     bool checkitems(projent &proj, vector<toolent> &list, const vec &ray = vec(0, 0, 0), float dist = 0.f, bool teleport = false)
     {
-        float closedist = 1e16f;
+        float closedist = 1e16f, radius = max(proj.radius, 1.f);
         int closeent = -1;
         loopv(list)
         {
@@ -448,27 +448,27 @@ namespace projs
                 int millis = proj.lastused(list[i].ent, true);
                 if(millis && lastmillis-millis < 1000) continue;
             }
-            float test = 1e16f, radius = list[i].radius;
+            float test = 1e16f;
             if(ray.iszero())
             {
                 vec to = vec(ray).mul(dist).add(proj.o);
                 float x1 = floor(min(proj.o.x, to.x)), y1 = floor(min(proj.o.y, to.y)),
                       x2 = ceil(max(proj.o.x, to.x)), y2 = ceil(max(proj.o.y, to.y));
-                if(list[i].o.x+radius >= x1 && list[i].o.y+radius >= y1 && list[i].o.x-radius <= x2 && list[i].o.y-radius <= y2)
+                if(list[i].o.x+list[i].radius >= x1 && list[i].o.y+list[i].radius >= y1 && list[i].o.x-list[i].radius <= x2 && list[i].o.y-list[i].radius <= y2)
                 {
                     vec bottom(list[i].o), top(list[i].o);
-                    bottom.z -= radius;
-                    top.z += radius;
-                    if(!linecylinderintersect(proj.o, to, bottom, top, radius, test)) continue;
-                    test *= proj.o.dist(to);
-                    if(test < 0) continue;
+                    bottom.z -= list[i].radius;
+                    top.z += list[i].radius;
+                    if(!linecylinderintersect(proj.o, to, bottom, top, list[i].radius, test)) continue;
+                    //test *= proj.o.dist(to);
+                    //if(test < 0) continue;
                 }
                 else continue;
             }
             else
             {
-                radius *= radius;
-                if((test = proj.o.squaredist(list[i].o)) > radius) continue;
+                test = proj.o.dist(list[i].o)-radius;
+                if(test > list[i].radius) continue;
             }
 
             if(closeent < 0 || test <= closedist)
@@ -479,7 +479,7 @@ namespace projs
         }
         if(entities::ents.inrange(closeent))
         {
-            entities::execitem(closeent, &proj);
+            entities::execitem(closeent, &proj, proj.o, radius, closedist);
             return true;
         }
         return false;
