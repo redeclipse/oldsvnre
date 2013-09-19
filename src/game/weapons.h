@@ -43,7 +43,7 @@ enum
     S_GRENADE   = S_RIFLE+S_W_MAX,
     S_MINE      = S_GRENADE+S_W_MAX,
     S_ROCKET    = S_MINE+S_W_MAX,
-    S_MAX
+    S_OTHERS    = S_ROCKET+S_W_MAX
 };
 
 enum

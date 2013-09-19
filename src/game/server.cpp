@@ -407,6 +407,7 @@ namespace server
     int mastermode = MM_OPEN;
     bool updatecontrols = false, mapsending = false, shouldcheckvotes = false;
     stream *mapdata[SENDMAP_MAX] = { NULL };
+    uint mapcrc = 0;
     vector<clientinfo *> clients, connects;
 
     struct demofile
@@ -2643,7 +2644,7 @@ namespace server
         mutate(smuts, mut->reset(false));
         aiman::clearai();
         aiman::dorefresh = max(aiman::dorefresh, G(airefreshdelay));
-
+        mapcrc = 0;
         const char *reqmap = name && *name ? name : pickmap(smapname, gamemode, mutators);
 #ifdef STANDALONE // interferes with savemap on clients, in which case we can just use the auto-request
         loopi(SENDMAP_MAX)
@@ -2657,6 +2658,7 @@ namespace server
                 break;
             }
         }
+        if(mapdata[0]) mapcrc = mapdata[0]->getcrc();
 #else
         loopi(SENDMAP_MAX) if(mapdata[i]) DELETEP(mapdata[i]);
 #endif
@@ -3218,6 +3220,7 @@ namespace server
         else if(!ci->online && m_edit(gamemode) && numclients(ci->clientnum))
         {
             loopi(SENDMAP_MAX) if(mapdata[i]) DELETEP(mapdata[i]);
+            mapcrc = 0;
             ci->wantsmap = true;
             if(!mapsending)
             {
@@ -4497,7 +4500,7 @@ namespace server
             return false;
         }
         mapdata[n]->write(data, len);
-        return n == 2;
+        return n == SENDMAP_PNG;
     }
 
     static struct msgfilter
@@ -4819,6 +4822,7 @@ namespace server
         {
             if(receivefile(sender, p.buf, p.maxlen))
             {
+                mapcrc = mapdata[0]->getcrc();
                 mapsending = false;
                 sendf(-1, 1, "ri", N_SENDMAP);
             }
@@ -5927,6 +5931,7 @@ namespace server
                         else if(best)
                         {
                             loopk(SENDMAP_MAX) if(mapdata[k]) DELETEP(mapdata[k]);
+                            mapcrc = 0;
                             srvmsgft(ci->clientnum, CON_EVENT, "map is being requested, please wait..");
                             sendf(best->clientnum, 1, "ri", N_GETMAP);
                             mapsending = true;

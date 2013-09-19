@@ -40,7 +40,6 @@ enum
     S_V_REVENGE, S_V_DOMINATE, S_V_FIRSTBLOOD, S_V_BREAKER,
     S_V_YOUWIN, S_V_YOULOSE, S_V_DRAW,
     S_V_FRAGGED, S_V_BALWARN, S_V_BALALERT,
-    S_BOUNCE,
     S_GAME
 };
 
@@ -275,6 +274,8 @@ const int pulsecols[PULSE_MAX][PULSECOLOURS] = {
 
 #include "gamemode.h"
 #include "weapons.h"
+
+enum { S_BOUNCE = S_OTHERS, S_FOOTSTEP, S_MAX } ;
 
 enum
 {
@@ -932,7 +933,7 @@ struct gameent : dynent, gamestate
     editinfo *edit; ai::aiinfo *ai;
     int team, clientnum, privilege, projid, lastnode, checkpoint, cplast, respawned, suicided, lastupdate, lastpredict, plag, ping, lastflag, totaldamage,
         actiontime[AC_MAX], impulse[IM_MAX], smoothmillis, turnmillis, turnside, aschan, cschan, vschan, wschan, pschan, fschan, jschan,
-        lasthit, lastteamhit, lastkill, lastattacker, lastpoints, quake, spree;
+        lasthit, lastteamhit, lastkill, lastattacker, lastpoints, quake, spree, lastfoot;
     float deltayaw, deltapitch, newyaw, newpitch, turnyaw, turnroll;
     vec head, torso, muzzle, origin, eject, waist, jet[3], legs, hrad, trad, lrad, toe[2];
     bool action[AC_MAX], conopen, k_up, k_down, k_left, k_right, obliterated, headless;
@@ -1038,7 +1039,7 @@ struct gameent : dynent, gamestate
         loopi(IM_MAX) impulse[i] = 0;
         cplast = lasthit = lastkill = quake = turnmillis = turnside = spree = 0;
         turnroll = turnyaw = 0;
-        lastteamhit = lastflag = respawned = suicided = lastnode = -1;
+        lastteamhit = lastflag = respawned = suicided = lastnode = lastfoot = -1;
         obit[0] = 0;
         obliterated = headless = false;
         setscale(1, 0, true, gamemode, mutators);
@@ -1087,6 +1088,24 @@ struct gameent : dynent, gamestate
     }
 
     void cleartags() { head = torso = muzzle = origin = eject = waist = jet[0] = jet[1] = jet[2] = toe[0] = toe[1] = vec(-1, -1, -1); }
+
+    vec checkfootpos(int foot)
+    {
+        if(foot < 0 || foot > 1) return feetpos();
+        if(toe[foot] == vec(-1, -1, -1))
+        {
+            float amt = ((lastmillis%500)-250)/250.f;
+            vec dir, right; vecfromyawpitch(yaw, pitch, 1, 0, dir); vecfromyawpitch(yaw, pitch, 0, foot ? 1 : -1, right);
+            dir.mul(radius*0.5f); right.mul(radius*0.5f); dir.z -= height*0.4f*(foot ? 1-amt : amt);
+            toe[foot] = vec(o).add(dir).add(right);
+        }
+        return toe[foot];
+    }
+
+    vec footpos(int foot)
+    {
+        return checkfootpos(foot);
+    }
 
     vec checkoriginpos()
     {
@@ -1374,6 +1393,11 @@ struct gameent : dynent, gamestate
         if(!hasmelee(millis, check, slide, onfloor, false)) return false;
         if(!canshoot(W_MELEE, HIT_ALT, sweap, millis, (1<<W_S_RELOAD))) return false;
         return true;
+    }
+
+    int curfoot()
+    {
+        return footpos(0).z < footpos(1).z ? 0 : 1;
     }
 };
 
