@@ -229,6 +229,8 @@ namespace hud
     VAR(IDF_PERSIST, inventoryammostyle, 0, 1, 1);
     VAR(IDF_PERSIST, inventoryhidemelee, 0, 1, 1);
     VAR(IDF_PERSIST, inventorygame, 0, 2, 2);
+    VAR(IDF_PERSIST, inventorydate, 0, 1, 1);
+    SVAR(IDF_PERSIST, inventorydateformat, "%a %d %b %Y %H:%M:%S");
     VAR(IDF_PERSIST, inventorytime, 0, 1, 1);
     VAR(IDF_PERSIST, inventoryscore, 0, 1, VAR_MAX);
     VAR(IDF_PERSIST, inventoryscorebg, 0, 0, 1);
@@ -240,6 +242,8 @@ namespace hud
     VAR(IDF_PERSIST, inventoryflash, 0, 0, 1);
     FVAR(IDF_PERSIST, inventorysize, 0, 0.06f, 1000);
     FVAR(IDF_PERSIST, inventoryskew, 1e-4f, 0.65f, 1000);
+    FVAR(IDF_PERSIST, inventorydateskew, 1e-4f, 1, 1000);
+    FVAR(IDF_PERSIST, inventorydateblend, 1e-4f, 1, 1);
     FVAR(IDF_PERSIST, inventorytimeskew, 1e-4f, 1, 1000);
     FVAR(IDF_PERSIST, inventorytimeblend, 1e-4f, 1, 1);
     FVAR(IDF_PERSIST, inventoryscoresize, 0, 0.75f, 1);
@@ -2812,6 +2816,8 @@ namespace hud
                     }
                     else if(!m_edit(game::gamemode))
                     {
+                        if(inventorydate)
+                            cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorydateskew, "default", fade*inventorydateblend, "[ \fs\fa%s\fS ]", gettime(clocktime, inventorydateformat));
                         if(inventorytime)
                         {
                             if((m_play(game::gamemode) || client::demoplayback) && game::timeremaining >= 0)
