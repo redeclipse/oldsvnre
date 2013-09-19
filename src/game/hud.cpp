@@ -229,8 +229,8 @@ namespace hud
     VAR(IDF_PERSIST, inventoryammostyle, 0, 1, 1);
     VAR(IDF_PERSIST, inventoryhidemelee, 0, 1, 1);
     VAR(IDF_PERSIST, inventorygame, 0, 2, 2);
-    VAR(IDF_PERSIST, inventorydate, 0, 1, 1);
-    SVAR(IDF_PERSIST, inventorydateformat, "%a %d %b %Y %H:%M:%S");
+    VAR(IDF_PERSIST, inventorydate, 0, 0, 1);
+    SVAR(IDF_PERSIST, inventorydateformat, "%H:%M:%S");
     VAR(IDF_PERSIST, inventorytime, 0, 1, 1);
     VAR(IDF_PERSIST, inventoryscore, 0, 1, VAR_MAX);
     VAR(IDF_PERSIST, inventoryscorebg, 0, 0, 1);
@@ -242,7 +242,7 @@ namespace hud
     VAR(IDF_PERSIST, inventoryflash, 0, 0, 1);
     FVAR(IDF_PERSIST, inventorysize, 0, 0.06f, 1000);
     FVAR(IDF_PERSIST, inventoryskew, 1e-4f, 0.65f, 1000);
-    FVAR(IDF_PERSIST, inventorydateskew, 1e-4f, 1, 1000);
+    FVAR(IDF_PERSIST, inventorydateskew, 1e-4f, 0.85f, 1000);
     FVAR(IDF_PERSIST, inventorydateblend, 1e-4f, 1, 1);
     FVAR(IDF_PERSIST, inventorytimeskew, 1e-4f, 1, 1000);
     FVAR(IDF_PERSIST, inventorytimeblend, 1e-4f, 1, 1);
@@ -2282,7 +2282,7 @@ namespace hud
         defvformatstring(str, text, text);
         int tx = int(((align&TEXT_ALIGN) == TEXT_LEFT_JUSTIFY ? (cx+(FONTW*skew*0.5f)) : (cx-(FONTW*skew*0.5f)))/skew),
             ty = int(cy/skew), ti = int(255.f*blend),
-            sy = draw_textx("%s", tx, ty, 255, 255, 255, ti, align|TEXT_NO_INDENT, -1, -1, str);
+            sy = draw_textx("%s", tx, ty, 255, 255, 255, ti, align|TEXT_NO_INDENT, -1, -1, str)*skew;
         if(font && *font) popfont();
         glPopMatrix();
         return sy;
@@ -2817,14 +2817,14 @@ namespace hud
                     else if(!m_edit(game::gamemode))
                     {
                         if(inventorydate)
-                            cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorydateskew, "default", fade*inventorydateblend, "[ \fs\fa%s\fS ]", gettime(clocktime, inventorydateformat));
+                            cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorydateskew, "super", fade*inventorydateblend, "%s", gettime(clocktime, inventorydateformat));
                         if(inventorytime)
                         {
                             if((m_play(game::gamemode) || client::demoplayback) && game::timeremaining >= 0)
                             {
-                                if(game::intermission) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "[ \fs\fyintermission\fS ]")+cr;
-                                else if(paused) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "[ \fs\fopaused\fS ]", 0xFFFFFF)+cr;
-                                else if(game::timeremaining) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "[ \fs\fg%s\fS ]", timestr(game::timeremaining, 2))+cr;
+                                if(game::intermission) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fyintermission\fS")+cr;
+                                else if(paused) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fopaused\fS", 0xFFFFFF)+cr;
+                                else if(game::timeremaining) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fg%s\fS", timestr(game::timeremaining, 2))+cr;
                             }
                         }
                         if(!interm && inventoryscore && ((cc = drawscore(cx[i], cm, cs, (h-edge*2)/2, fade)) > 0)) cm += cc+cr;
