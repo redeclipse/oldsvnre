@@ -275,7 +275,7 @@ const int pulsecols[PULSE_MAX][PULSECOLOURS] = {
 #include "gamemode.h"
 #include "weapons.h"
 
-enum { S_BOUNCE = S_OTHERS, S_FOOTSTEP, S_MAX } ;
+enum { S_BOUNCE = S_OTHERS, S_FOOTSTEP, S_SWIMSTEP, S_MAX } ;
 
 enum
 {
@@ -932,7 +932,7 @@ struct gameent : dynent, gamestate
 {
     editinfo *edit; ai::aiinfo *ai;
     int team, clientnum, privilege, projid, lastnode, checkpoint, cplast, respawned, suicided, lastupdate, lastpredict, plag, ping, lastflag, totaldamage,
-        actiontime[AC_MAX], impulse[IM_MAX], smoothmillis, turnmillis, turnside, aschan, cschan, vschan, wschan, pschan, fschan, jschan,
+        actiontime[AC_MAX], impulse[IM_MAX], smoothmillis, turnmillis, turnside, aschan, cschan, vschan, wschan, pschan, fschan, jschan, sschan[2],
         lasthit, lastteamhit, lastkill, lastattacker, lastpoints, quake, spree, lastfoot;
     float deltayaw, deltapitch, newyaw, newpitch, turnyaw, turnroll;
     vec head, torso, muzzle, origin, eject, waist, jet[3], legs, hrad, trad, lrad, toe[2];
@@ -944,13 +944,14 @@ struct gameent : dynent, gamestate
     vector<int> vitems;
 
     gameent() : edit(NULL), ai(NULL), team(T_NEUTRAL), clientnum(-1), privilege(PRIV_NONE), projid(0), checkpoint(-1), cplast(0), lastupdate(0), lastpredict(0), plag(0), ping(0),
-        totaldamage(0), smoothmillis(-1), turnmillis(0), aschan(-1), cschan(-1), vschan(-1), wschan(-1), pschan(-1), fschan(-1), jschan(-1), lastattacker(-1), lastpoints(0), quake(0),
+        totaldamage(0), smoothmillis(-1), turnmillis(0), lastattacker(-1), lastpoints(0), quake(0),
         conopen(false), k_up(false), k_down(false), k_left(false), k_right(false), obliterated(false)
     {
         state = CS_DEAD;
         type = ENT_PLAYER;
         copystring(hostname, "unknown");
         name[0] = handle[0] = info[0] = obit[0] = 0;
+        removesounds();
         cleartags();
         checktags();
         respawn(-1, 100);
@@ -1021,7 +1022,8 @@ struct gameent : dynent, gamestate
         if(issound(pschan)) removesound(pschan);
         if(issound(fschan)) removesound(fschan);
         if(issound(jschan)) removesound(jschan);
-        aschan = cschan = vschan = wschan = pschan = fschan = jschan = -1;
+        loopi(2) if(issound(sschan[i])) removesound(sschan[i]);
+        aschan = cschan = vschan = wschan = pschan = fschan = jschan = sschan[0] = sschan[1] = -1;
     }
 
     void stopmoving(bool full)

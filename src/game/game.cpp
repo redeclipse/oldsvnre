@@ -249,7 +249,10 @@ namespace game
     VAR(IDF_PERSIST, footstepsounds, 0, 3, 3);
     FVAR(IDF_PERSIST, footstepsoundmin, 0, 10, FVAR_MAX);
     FVAR(IDF_PERSIST, footstepsoundmax, 0, 150, FVAR_MAX);
-    VAR(IDF_PERSIST, footstepsoundminvol, 0, 16, 254);
+    FVAR(IDF_PERSIST, footstepsoundlevel, 0, 1, 10);
+    FVAR(IDF_PERSIST, footstepsoundfocus, 0, 0.65f, 10);
+    VAR(IDF_PERSIST, footstepsoundminvol, 0, 8, 255);
+    VAR(IDF_PERSIST, footstepsoundmaxvol, 0, 255, 255);
     VAR(IDF_PERSIST, autoloadweap, 0, 0, 1); // 0 = off, 1 = auto-set loadout weapons
     SVAR(IDF_PERSIST, favloadweaps, "");
     FVAR(IDF_PERSIST, twitchspeed, 0, 20, FVAR_MAX);
@@ -1103,17 +1106,20 @@ namespace game
             int curfoot = d->curfoot();
             if(curfoot != d->lastfoot)
             {
-                d->lastfoot = curfoot;
-                if(footstepsounds&(d != focus ? 2 : 1) && (d->move || d->strafe) && (d->physstate >= PHYS_SLOPE || d->onladder || d->turnside) && !physics::liquidcheck(d))
+                bool moving = d->move || d->strafe, liquid = physics::liquidcheck(d), onfloor = d->physstate >= PHYS_SLOPE || d->onladder || d->turnside;
+                if(footstepsounds&(d != focus ? 2 : 1) && moving && (liquid || onfloor))
                 {
                     float mag = d->vel.magnitude(), m = min(footstepsoundmax, footstepsoundmin), n = max(footstepsoundmax, footstepsoundmin);
                     if(n > m && mag > m)
                     {
-                        float amt = clamp((mag-m)/(n-m), 0.f, 1.f);
-                        playsound(S_FOOTSTEP, d->footpos(d->lastfoot), NULL, 0, int(amt*(255-footstepsoundminvol))+footstepsoundminvol);
+                        float amt = clamp(mag/n, 0.f, 1.f);
+                        int vol = clamp(int(amt*(d != focus ? footstepsoundlevel : footstepsoundfocus)*footstepsoundmaxvol), footstepsoundminvol, footstepsoundmaxvol);
+                        playsound(liquid && (!onfloor || rnd(4)) ? S_SWIMSTEP : S_FOOTSTEP, d->footpos(curfoot), NULL, 0, vol, -1, -1, &d->sschan[curfoot]);
                     }
                 }
+                d->lastfoot = curfoot;
             }
+            else loopi(2) if(issound(d->sschan[i])) sounds[d->sschan[i]].pos = d->footpos(i);
         }
     }
 
