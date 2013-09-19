@@ -481,7 +481,7 @@ namespace entities
             actitem &t = actitems.add();
             t.type = actitem::PROJ;
             t.target = i;
-            t.score = m.squaredist(proj.o);
+            t.score = sqdist;
         }
         if(!actitems.empty())
         {
