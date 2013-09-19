@@ -1325,7 +1325,9 @@ namespace ai
             {
                 static vector<actitem> actitems;
                 actitems.setsize(0);
-                if(entities::collateitems(d, actitems))
+                vec pos = d->center();
+                float radius = max(d->height*0.5f, max(d->xradius, d->yradius));
+                if(entities::collateitems(d, pos, radius, actitems))
                 {
                     while(!actitems.empty())
                     {

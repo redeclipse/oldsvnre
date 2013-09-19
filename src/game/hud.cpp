@@ -1376,7 +1376,9 @@ namespace hud
                     pushfont("emphasis");
                     static vector<actitem> actitems;
                     actitems.setsize(0);
-                    if(entities::collateitems(target, actitems))
+                    vec pos = target->center();
+                    float radius = max(target->height*0.5f, max(target->xradius, target->yradius));
+                    if(entities::collateitems(target, pos, radius, actitems))
                     {
                         SEARCHBINDCACHE(actionkey)("use", 0);
                         while(!actitems.empty())
