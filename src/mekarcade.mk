@@ -13,8 +13,5 @@ MEK_DEFINES= \
 	APPSHORTNAME=mek \
 	APPFLAGS=" -DMEK=1"
 
-mekarcade:
-	$(MAKE) $(MEK_DEFINES)
-
 install-mekarcade:
 	$(MAKE) $(MEK_DEFINES) install
