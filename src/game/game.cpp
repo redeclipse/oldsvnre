@@ -246,6 +246,10 @@ namespace game
     VAR(IDF_PERSIST, vanitymodels, 0, 1, 1);
 #endif
     VAR(IDF_PERSIST, headlessmodels, 0, 1, 1);
+    VAR(IDF_PERSIST, footstepsounds, 0, 3, 3);
+    FVAR(IDF_PERSIST, footstepsoundmin, 0, 10, FVAR_MAX);
+    FVAR(IDF_PERSIST, footstepsoundmax, 0, 150, FVAR_MAX);
+    VAR(IDF_PERSIST, footstepsoundminvol, 0, 16, 254);
     VAR(IDF_PERSIST, autoloadweap, 0, 0, 1); // 0 = off, 1 = auto-set loadout weapons
     SVAR(IDF_PERSIST, favloadweaps, "");
     FVAR(IDF_PERSIST, twitchspeed, 0, 20, FVAR_MAX);
@@ -1094,6 +1098,23 @@ namespace game
             else sounds[d->jschan].vol = int(ceilf(255*(float(sounds[d->jschan].ends-lastmillis)/250.f)));
         }
         loopv(d->icons) if(lastmillis-d->icons[i].millis > d->icons[i].fade) d->icons.remove(i--);
+        if(d->state == CS_ALIVE)
+        {
+            int curfoot = d->curfoot();
+            if(curfoot != d->lastfoot)
+            {
+                d->lastfoot = curfoot;
+                if(footstepsounds&(d != focus ? 2 : 1) && (d->move || d->strafe) && (d->physstate >= PHYS_SLOPE || d->onladder || d->turnside) && !physics::liquidcheck(d))
+                {
+                    float mag = d->vel.magnitude(), m = min(footstepsoundmax, footstepsoundmin), n = max(footstepsoundmax, footstepsoundmin);
+                    if(n > m && mag > m)
+                    {
+                        float amt = clamp((mag-m)/(n-m), 0.f, 1.f);
+                        playsound(S_FOOTSTEP, d->footpos(d->lastfoot), NULL, 0, int(amt*(255-footstepsoundminvol))+footstepsoundminvol);
+                    }
+                }
+            }
+        }
     }
 
 
