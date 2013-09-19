@@ -85,6 +85,26 @@ DISTFILES= \
 	$(SRC_FILES) \
 	$(SRC_XCODE)
 
+# appname can be used for e.g. an *-svn package
+ifneq ($(APPNAME),$(appname))
+define distappnamedef
+appname=$(appname)
+
+endef
+endif
+
+# generated game-specific dist Makefile
+define DIST_MAKEFILE
+APPNAME=$(APPNAME)
+$(distappnamedef)
+all:
+
+include $(APPNAME).mk
+
+include core.mk
+endef
+export DIST_MAKEFILE
+
 weapon-names=$(shell sed -n '/WPSVAR(0, name,/,/);/s/ *"\([^"]*\)",*/\1 /g;s/ $$//p' game/weapons.h)
 weapon-wiki-pages=$(shell for w in $(weapon-names); do echo "../doc/wiki-weapon-$${w}.txt"; done)
 
@@ -94,17 +114,7 @@ weapon-wiki-pages=$(shell for w in $(weapon-names); do echo "../doc/wiki-weapon-
 	tar --exclude='.svn' --exclude='*.git' --exclude='*.hg' \
 		--exclude='*.bzr' \
 		-cf - $(DISTFILES:%=../%) | (mkdir $@/; cd $@/ ; tar -xpf -)
-	# create dedicated Makefile
-	echo "APPNAME=$(APPNAME)" >$@/src/Makefile
-ifneq ($(APPNAME),$(appname))
-	echo "appname=$(appname)" >>$@/src/Makefile
-endif
-	echo >>$@/src/Makefile
-	echo "all:" >>$@/src/Makefile
-	echo >>$@/src/Makefile
-	echo "include $(APPNAME).mk" >>$@/src/Makefile
-	echo >>$@/src/Makefile
-	echo "include core.mk" >>$@/src/Makefile
+	printf '%s\n' "$$DIST_MAKEFILE" >$@/src/Makefile
 	$(MAKE) -C $@/src clean
 	-$(MAKE) -C $@/src/enet distclean
 	rm -rf $@/src/enet/autom4te.cache/
