@@ -238,6 +238,14 @@ namespace game
     FVAR(IDF_PERSIST, playerhintfadeat, 0, 128, FVAR_MAX);
     FVAR(IDF_PERSIST, playerhintfadecut, 0, 16, FVAR_MAX);
 
+    VAR(IDF_PERSIST, footstepsounds, 0, 3, 3); // 0 = off, &1 = focus, &2 = everyone else
+    FVAR(IDF_PERSIST, footstepsoundmin, 0, 10, FVAR_MAX); // minimum velocity magnitude
+    FVAR(IDF_PERSIST, footstepsoundmax, 0, 150, FVAR_MAX); // maximum velocity magnitude
+    FVAR(IDF_PERSIST, footstepsoundlevel, 0, 1, 10); // a way to scale the volume
+    FVAR(IDF_PERSIST, footstepsoundfocus, 0, 1, 10); // focused player version of above
+    VAR(IDF_PERSIST, footstepsoundminvol, 0, 8, 255);
+    VAR(IDF_PERSIST, footstepsoundmaxvol, 0, 255, 255);
+
     VAR(IDF_PERSIST, nogore, 0 , 0, 2); // turns off all gore, 0 = off, 1 = replace, 2 = remove
 #ifndef MEK
     VAR(IDF_PERSIST, forceplayermodel, -1, -1, PLAYERTYPES-1);
@@ -246,13 +254,6 @@ namespace game
     VAR(IDF_PERSIST, vanitymodels, 0, 1, 1);
 #endif
     VAR(IDF_PERSIST, headlessmodels, 0, 1, 1);
-    VAR(IDF_PERSIST, footstepsounds, 0, 3, 3);
-    FVAR(IDF_PERSIST, footstepsoundmin, 0, 10, FVAR_MAX);
-    FVAR(IDF_PERSIST, footstepsoundmax, 0, 150, FVAR_MAX);
-    FVAR(IDF_PERSIST, footstepsoundlevel, 0, 1, 10);
-    FVAR(IDF_PERSIST, footstepsoundfocus, 0, 0.75f, 10);
-    VAR(IDF_PERSIST, footstepsoundminvol, 0, 8, 255);
-    VAR(IDF_PERSIST, footstepsoundmaxvol, 0, 200, 255);
     VAR(IDF_PERSIST, autoloadweap, 0, 0, 1); // 0 = off, 1 = auto-set loadout weapons
     SVAR(IDF_PERSIST, favloadweaps, "");
     FVAR(IDF_PERSIST, twitchspeed, 0, 20, FVAR_MAX);
