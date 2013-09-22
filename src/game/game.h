@@ -1675,6 +1675,7 @@ namespace game
     extern void timeupdate(int timeremain);
     extern vec rescolour(dynent *d, int c = PULSE_BURN);
     extern float rescale(gameent *d);
+    extern void footstep(gameent *d, int curfoot = -1);
 }
 
 namespace entities
