@@ -2811,7 +2811,7 @@ namespace hud
                             else if(amt > 0.25f) col = "\fy";
                             else col = "\fo";
                             drawprogress(cx[i], cm+cs, 0, 1, cs, false, 1, 1, 1, fade*0.25f, 1);
-                            cm += drawprogress(cx[i], cm+cs, 1-amt, amt, cs, false, 1, 1, 1, fade, 1, "default", "%s%d", col, int(millis/1000.f));
+                            cm += drawprogress(cx[i], cm+cs, 1-amt, amt, cs, false, 1, 1, 1, fade, 1, "super", "%s%d", col, int(millis/1000.f));
                         }
                     }
                     else if(!m_edit(game::gamemode))
@@ -2822,9 +2822,9 @@ namespace hud
                         {
                             if((m_play(game::gamemode) || client::demoplayback) && game::timeremaining >= 0)
                             {
-                                if(game::intermission) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fyintermission\fS")+cr;
-                                else if(paused) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fopaused\fS", 0xFFFFFF)+cr;
-                                else if(game::timeremaining) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fg%s\fS", timestr(game::timeremaining, 2))+cr;
+                                if(game::intermission) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fyintermission\fS");
+                                else if(paused) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fopaused\fS", 0xFFFFFF);
+                                else if(game::timeremaining) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fg%s\fS", timestr(game::timeremaining, 2));
                             }
                         }
                         if(!interm && inventoryscore && ((cc = drawscore(cx[i], cm, cs, (h-edge*2)/2, fade)) > 0)) cm += cc+cr;

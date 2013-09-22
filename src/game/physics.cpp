@@ -928,6 +928,7 @@ namespace physics
                     d->action[AC_JUMP] = onfloor = false;
                     client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_KICK);
                     game::impulseeffect(d);
+                    game::footstep(d);
                 }
             }
         }
@@ -1043,6 +1044,7 @@ namespace physics
                                 d->turnside = 0; d->turnyaw = d->turnroll = 0;
                                 client::addmsg(N_SPHY, "ri2", d->clientnum, vault ? SPHY_VAULT : SPHY_KICK);
                                 game::impulseeffect(d);
+                                game::footstep(d);
                             }
                         }
                         break;
@@ -1070,6 +1072,7 @@ namespace physics
                                 d->turnroll = (impulseroll*d->turnside)-d->roll;
                                 client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_SKATE);
                                 game::impulseeffect(d);
+                                game::footstep(d);
                                 found = true;
                             }
                             break;
@@ -1304,6 +1307,7 @@ namespace physics
                         d->action[AC_DASH] = true;
                         d->actiontime[AC_DASH] = lastmillis;
                     }
+                    game::footstep(d);
                     if(timeinair >= PHYSMILLIS*2 && mag >= 20)
                     {
                         int vol = min(int(mag*1.25f), 255); if(d->inliquid) vol /= 2;

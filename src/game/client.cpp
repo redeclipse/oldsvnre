@@ -1783,6 +1783,8 @@ namespace client
                         {
                             t->doimpulse(0, IM_T_BOOST+(st-SPHY_BOOST), lastmillis);
                             game::impulseeffect(t);
+                            if(st == SPHY_KICK || st == SPHY_VAULT || st == SPHY_SKATE || st == SPHY_MELEE)
+                                game::footstep(d);
                             break;
                         }
                         case SPHY_POWER: t->setweapstate(t->weapselect, W_S_POWER, param, lastmillis); break;
