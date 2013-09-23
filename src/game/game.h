@@ -1571,7 +1571,7 @@ namespace hud
 {
     extern char *chattex, *insigniatex, *playertex, *deadtex, *waitingtex, *spectatortex, *editingtex, *dominatingtex, *dominatedtex, *inputtex, *bliptex, *pointtex, *flagtex, *bombtex, *arrowtex, *arrowrighttex, *arrowdowntex, *arrowlefttex, *alerttex, *questiontex, *flagdroptex, *flagtakentex, *bombdroptex, *bombtakentex, *attacktex,
                 *inventorytex, *indicatortex, *crosshairtex, *hithairtex, *spree1tex, *spree2tex, *spree3tex, *spree4tex, *multi1tex, *multi2tex, *multi3tex, *headshottex, *dominatetex, *revengetex, *firstbloodtex, *breakertex;
-    extern int hudwidth, hudheight, hudsize, lastteam, lastnewgame, damageresidue, damageresiduefade, shownotices, radarstyle, radaraffinitynames, inventorygame, inventoryscore, inventoryscorebg, inventoryscoreinfo, inventoryscorebreak, inventoryscorepos;
+    extern int hudwidth, hudheight, hudsize, lastteam, lastnewgame, damageresidue, damageresiduefade, shownotices, radarstyle, radaraffinitynames, inventorygame, inventoryscore, inventoryscorespec, inventoryscorebg, inventoryscoreinfo, inventoryscorebreak, inventoryscorepos;
     extern float noticescale, inventoryblend, inventoryskew, radaraffinityblend, radarblipblend, radaraffinitysize, inventoryglow, inventoryscoresize, inventoryscoreshrink, inventoryscoreshrinkmax;
     extern vector<int> teamkills;
     extern const char *icontex(int type, int value);
@@ -1601,7 +1601,7 @@ namespace hud
     extern score &teamscore(int team);
     extern void resetscores();
     extern int trialinventory(int x, int y, int s, float blend);
-    extern int drawscore(int x, int y, int s, int m, float blend);
+    extern int drawscore(int x, int y, int s, int m, float blend, int count, bool spec);
 }
 
 enum { CTONE_TEAM = 0, CTONE_TONE, CTONE_TEAMED, CTONE_ALONE, CTONE_MIXED, CTONE_TMIX, CTONE_AMIX, CTONE_MAX };
