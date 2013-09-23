@@ -1123,7 +1123,7 @@ namespace game
             int curfoot = d->curfoot();
             if(curfoot != d->lastfoot)
             {
-                if(d->lastfoot > 0 && issound(d->sschan[d->lastfoot])) sounds[d->sschan[d->lastfoot]].pos = d->footpos(d->lastfoot);
+                if(d->lastfoot >= 0 && issound(d->sschan[d->lastfoot])) sounds[d->sschan[d->lastfoot]].pos = d->footpos(d->lastfoot);
                 footstep(d, curfoot);
                 d->lastfoot = curfoot;
             }
