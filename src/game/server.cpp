@@ -467,6 +467,8 @@ namespace server
         virtual void regen(clientinfo *ci, int &total, int &amt, int &delay) {}
         virtual void checkclient(clientinfo *ci) {}
         virtual void scoreaffinity(clientinfo *ci, bool win = true) {}
+
+        virtual bool aibalance() { return true; }
     };
 
     vector<srventity> sents;

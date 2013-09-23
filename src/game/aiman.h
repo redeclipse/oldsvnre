@@ -330,6 +330,8 @@ namespace aiman
     {
         if(!m_demo(gamemode) && numclients())
         {
+            if(smode) if(!smode->aibalance()) return;
+            mutate(smuts, if(!mut->aibalance()) return);
             if(hasgameinfo && !interm && !gamewait)
             {
                 if(!dorefresh)
