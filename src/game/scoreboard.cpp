@@ -733,12 +733,12 @@ namespace hud
         return size;
     }
 
-    int drawscore(int x, int y, int s, int m, float blend, int count, bool spec)
+    int drawscore(int x, int y, int s, int m, float blend, int count)
     {
         int sy = 0, numgroups = groupplayers(), numout = 0;
         loopi(2)
         {
-            if(!i && spec) continue;
+            if(!i && game::focus->state == CS_SPECTATOR) continue;
             int pos = 0, realpos = 0, lastpos = -1;
             loopk(numgroups)
             {

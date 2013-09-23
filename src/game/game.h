@@ -1592,7 +1592,7 @@ namespace hud
     extern score &teamscore(int team);
     extern void resetscores();
     extern int trialinventory(int x, int y, int s, float blend);
-    extern int drawscore(int x, int y, int s, int m, float blend, int count, bool spec);
+    extern int drawscore(int x, int y, int s, int m, float blend, int count);
 }
 
 enum { CTONE_TEAM = 0, CTONE_TONE, CTONE_TEAMED, CTONE_ALONE, CTONE_MIXED, CTONE_TMIX, CTONE_AMIX, CTONE_MAX };

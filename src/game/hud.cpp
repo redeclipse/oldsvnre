@@ -2831,9 +2831,8 @@ namespace hud
                         }
                         if(m_fight(game::gamemode))
                         {
-                            bool spec = game::player1->state == CS_SPECTATOR;
-                            int count = spec ? inventoryscorespec : inventoryscore;
-                            if(count && ((cc = drawscore(cx[i], cm, cs, (h-edge*2)/2, fade, count, spec)) > 0)) cm += cc+cr;
+                            int count = game::player1->state == CS_SPECTATOR ? inventoryscorespec : inventoryscore;
+                            if(count && ((cc = drawscore(cx[i], cm, cs, (h-edge*2)/2, fade, count)) > 0)) cm += cc+cr;
                         }
                     }
 
