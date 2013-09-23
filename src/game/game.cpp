@@ -240,11 +240,11 @@ namespace game
     FVAR(IDF_PERSIST, playerhintfadecut, 0, 16, FVAR_MAX);
 
     VAR(IDF_PERSIST, footstepsounds, 0, 3, 3); // 0 = off, &1 = focus, &2 = everyone else
-    FVAR(IDF_PERSIST, footstepsoundmin, 0, 10, FVAR_MAX); // minimum velocity magnitude
+    FVAR(IDF_PERSIST, footstepsoundmin, 0, 0, FVAR_MAX); // minimum velocity magnitude
     FVAR(IDF_PERSIST, footstepsoundmax, 0, 150, FVAR_MAX); // maximum velocity magnitude
     FVAR(IDF_PERSIST, footstepsoundlevel, 0, 1, 10); // a way to scale the volume
     FVAR(IDF_PERSIST, footstepsoundfocus, 0, 1, 10); // focused player version of above
-    VAR(IDF_PERSIST, footstepsoundminvol, 0, 8, 255);
+    VAR(IDF_PERSIST, footstepsoundminvol, 0, 32, 255);
     VAR(IDF_PERSIST, footstepsoundmaxvol, 0, 255, 255);
 
     VAR(IDF_PERSIST, nogore, 0 , 0, 2); // turns off all gore, 0 = off, 1 = replace, 2 = remove
@@ -992,9 +992,10 @@ namespace game
             if(n > m && mag > m)
             {
                 if(curfoot < 0) curfoot = d->lastfoot;
+                vec pos = d->footpos(curfoot);
                 float amt = clamp(mag/n, 0.f, 1.f);
                 int vol = clamp(int(amt*(d != focus ? footstepsoundlevel : footstepsoundfocus)*footstepsoundmaxvol), footstepsoundminvol, footstepsoundmaxvol);
-                playsound(liquid && (!onfloor || rnd(4)) ? S_SWIMSTEP : S_FOOTSTEP, d->footpos(curfoot), NULL, 0, vol, -1, -1, &d->sschan[curfoot]);
+                playsound(liquid && (!onfloor || rnd(4)) ? S_SWIMSTEP : S_FOOTSTEP, pos, NULL, 0, vol, -1, -1, &d->sschan[curfoot]);
             }
         }
     }
@@ -1122,6 +1123,7 @@ namespace game
             int curfoot = d->curfoot();
             if(curfoot != d->lastfoot)
             {
+                if(d->lastfoot > 0 && issound(d->sschan[d->lastfoot])) sounds[d->sschan[d->lastfoot]].pos = d->footpos(d->lastfoot);
                 footstep(d, curfoot);
                 d->lastfoot = curfoot;
             }
@@ -2905,7 +2907,7 @@ namespace game
             }
             if(firstpersonbodyfeet >= 0 && d->wantshitbox())
             {
-                float minz = max(d->toe[0].z, d->toe[1].z)+firstpersonbodyfeet;
+                float minz = max(d->footpos(0).z, d->footpos(1).z)+firstpersonbodyfeet;
                 if(minz > camera1->o.z) o.z -= minz-camera1->o.z;
             }
         }
@@ -3364,7 +3366,7 @@ namespace game
                 float minz = d == focus && !third && firstpersonbodyfeet >= 0 && d->wantshitbox() ? camera1->o.z-firstpersonbodyfeet : 0.f;
                 if(d->hasmelee(lastmillis, true, physics::sliding(d, true), d->physstate >= PHYS_SLOPE || d->onladder || physics::liquidcheck(d))) loopi(2)
                 {
-                    vec pos = d->toe[i];
+                    vec pos = d->footpos(i);
                     if(minz > 0 && pos.z > minz) pos.z -= pos.z-minz;
                     float amt = 1-((lastmillis-d->weaplast[W_MELEE])/float(d->weapwait[W_MELEE]));
                     part_create(PART_HINT, 1, pos, TEAM(d->team, colour), 2.f, amt*blend, 0, 0);

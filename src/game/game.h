@@ -1096,9 +1096,12 @@ struct gameent : dynent, gamestate
         if(foot < 0 || foot > 1) return feetpos();
         if(toe[foot] == vec(-1, -1, -1))
         {
-            float amt = ((lastmillis%500)-250)/250.f;
+            float amt = ((lastmillis%1000)-500)/500.f;
             vec dir, right; vecfromyawpitch(yaw, pitch, 1, 0, dir); vecfromyawpitch(yaw, pitch, 0, foot ? 1 : -1, right);
-            dir.mul(radius*0.5f); right.mul(radius*0.5f); dir.z -= height*0.4f*(foot ? 1-amt : amt);
+            dir.mul(radius*0.5f); right.mul(radius*0.5f);
+            dir.z -= height*0.6f+(height*0.4f*(foot ? 1-amt : amt));
+            dir.x *= foot ? 1-amt : amt;
+            dir.y *= foot ? 1-amt : amt;
             toe[foot] = vec(o).add(dir).add(right);
         }
         return toe[foot];
@@ -1228,21 +1231,6 @@ struct gameent : dynent, gamestate
             dir.mul(radius*1.25f);
             dir.z -= height*0.35f;
             jet[2] = vec(o).add(dir);
-        }
-        if(toe[0] == vec(-1, -1, -1))
-        {
-            vec dir; vecfromyawpitch(yaw, 0, 1, -1, dir);
-            dir.mul(radius);
-            dir.z -= height;
-            toe[0] = vec(o).add(dir);
-        }
-        if(toe[1] == vec(-1, -1, -1))
-        {
-            vec dir;
-            vecfromyawpitch(yaw, 0, 1, 1, dir);
-            dir.mul(radius);
-            dir.z -= height;
-            toe[1] = vec(o).add(dir);
         }
     }
 
@@ -1399,7 +1387,10 @@ struct gameent : dynent, gamestate
 
     int curfoot()
     {
-        return footpos(0).z < footpos(1).z ? 0 : 1;
+        vec dir;
+        vecfromyawpitch(yaw, 0, 1, 0, dir);
+        dir.mul(radius).add(o).z -= height; // foot furthest away is one being set down
+        return footpos(0).squaredist(dir) > footpos(1).squaredist(dir) ? 0 : 1;
     }
 };
 
