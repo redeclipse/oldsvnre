@@ -67,7 +67,7 @@ namespace defend
             vec effect = skewcolour(b.owner, b.enemy, occupy);
             int colour = effect.tohexcolor();
             light->material[0] = bvec::fromcolor(effect);
-            rendermodel(light, "props/point", ANIM_MAPMODEL|ANIM_LOOP, b.render, entities::ents[b.ent]->attrs[1], entities::ents[b.ent]->attrs[2], 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, max(camera1->o.distrange(b.o, enttype[AFFINITY].radius, enttype[AFFINITY].radius/8), 0.125f));
+            rendermodel(light, "props/point", ANIM_MAPMODEL|ANIM_LOOP, b.render, entities::ents[b.ent]->attrs[1], 0, 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, max(camera1->o.distrange(b.o, enttype[AFFINITY].radius, enttype[AFFINITY].radius/8), 0.125f));
             if(b.enemy && b.owner)
             {
                 defformatstring(bowner)("%s", game::colourteam(b.owner));
