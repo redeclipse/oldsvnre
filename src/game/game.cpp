@@ -640,7 +640,7 @@ namespace game
 
     bool followswitch(int n, bool other)
     {
-        if(player1->state == CS_SPECTATOR)
+        if(player1->state == CS_SPECTATOR || player1->state == CS_WAITING)
         {
             bool istv = tvmode(true, false);
             int *f = istv ? &spectvfollow : &follow;
