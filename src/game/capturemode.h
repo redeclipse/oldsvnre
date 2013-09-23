@@ -123,7 +123,7 @@ struct captureservmode : capturestate, servmode
         {
             f.nextreset = gamemillis;
             clientinfo *last = (clientinfo *)getinfo(f.lastowner);
-            if(last->team == f.team) f.nextreset += G(captureteampenalty);
+            if(last && last->team == f.team) f.nextreset += G(captureteampenalty);
             else f.nextreset += G(captureresetpenalty);
             capturestate::returnaffinity(i, gamemillis);
             sendf(-1, 1, "ri3", N_RESETAFFIN, i, 2);
