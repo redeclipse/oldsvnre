@@ -298,7 +298,7 @@ namespace game
     }
     ICOMMAND(0, resetvanity, "", (), vanityreset());
 
-    int vanityitem(int type, const char *ref, const char *name, const char *tag, int cond, int style, int priv)
+    int vanityitem(int type, const char *ref, const char *name, const char *tag, int cond, int style)
     {
         if(type < 0 || type >= VANITYMAX || !ref || !name || !tag) return -1;
         int num = vanities.length();
@@ -310,10 +310,9 @@ namespace game
         v.tag = newstring(tag);
         v.cond = cond;
         v.style = style;
-        v.priv = priv;
         return num;
     }
-    ICOMMAND(0, addvanity, "isssiii", (int *t, char *r, char *n, char *g, int *c, int *s, int *p), intret(vanityitem(*t, r, n, g, *c, *s, *p)));
+    ICOMMAND(0, addvanity, "isssii", (int *t, char *r, char *n, char *g, int *c, int *s), intret(vanityitem(*t, r, n, g, *c, *s)));
 
     void vanityinfo(int id, int value)
     {
@@ -327,8 +326,7 @@ namespace game
             case 3: result(vanities[id].tag); break;
             case 4: intret(vanities[id].cond); break;
             case 5: intret(vanities[id].style); break;
-            case 6: intret(vanities[id].priv); break;
-            case 7: result(vanities[id].model); break;
+            case 6: result(vanities[id].model); break;
             default: break;
         }
     }
@@ -1661,7 +1659,6 @@ namespace game
             {
                 if(found[vanities[d->vitems[k]].type]) continue;
                 if(!(vanities[d->vitems[k]].cond&2)) continue;
-                if(!client::haspriv(d, vanities[d->vitems[k]].priv)) continue;
                 projs::create(pos, pos, true, d, PRJ_VANITY, (rnd(gibfade)+gibfade)*2, 0, 0, rnd(50)+10, -1, d->vitems[k], 0, 0);
                 found[vanities[d->vitems[k]].type]++;
             }
@@ -3303,7 +3300,6 @@ namespace game
                 if(found[vanities[d->vitems[k]].type]) continue;
                 if(vanities[d->vitems[k]].cond&1 && idx == 2) continue;
                 if(vanities[d->vitems[k]].cond&2 && idx == 3) continue;
-                if(!client::haspriv(d, vanities[d->vitems[k]].priv)) continue;
                 const char *file = vanityfname(d, d->vitems[k]);
                 if(file)
                 {
