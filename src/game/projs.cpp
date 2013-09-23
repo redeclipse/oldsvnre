@@ -2136,23 +2136,41 @@ namespace projs
         return true;
     }
 
+    struct canrem
+    {
+        projent *p;
+        float dist;
+
+        canrem(projent *p, float dist = 0) : p(p), dist(dist) {}
+        ~canrem() {}
+
+        static bool cmsort(const canrem *a, const canrem *b)
+        {
+            if(a->dist > b->dist) return true;
+            if(a->dist < b->dist) return false;
+            if(a->p->addtime < b->p->addtime) return true;
+            if(a->p->addtime > b->p->addtime) return false;
+            return false;
+        }
+    };
+
+
     void update()
     {
-        vector<projent *> canremove;
+        vector<canrem *> canremove;
         loopvrev(projs) if(projs[i]->projtype == PRJ_DEBRIS || projs[i]->projtype == PRJ_GIBS || projs[i]->projtype == PRJ_EJECT)
-            canremove.add(projs[i]);
-        while(!canremove.empty() && canremove.length() > maxprojectiles)
+            canremove.add(new canrem(projs[i], camera1->o.dist(projs[i]->o)));
+        int count = canremove.length()-maxprojectiles;
+        if(count > 0)
         {
-            int oldest = 0;
-            loopv(canremove) if(canremove[i]->addtime < canremove[oldest]->addtime) oldest = i;
-            if(canremove.inrange(oldest))
+            canremove.sort(canrem::cmsort);
+            loopi(count)
             {
-                canremove[oldest]->state = CS_DEAD;
-                canremove[oldest]->escaped = true;
-                canremove.removeunordered(oldest);
+                canremove[i]->p->state = CS_DEAD;
+                canremove[i]->p->escaped = true;
             }
-            else break;
         }
+        canremove.deletecontents();
 
         loopv(projs)
         {
