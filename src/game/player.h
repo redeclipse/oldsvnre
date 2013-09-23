@@ -81,8 +81,8 @@ TEAMDEF(int, colour);
 struct score
 {
     int team, total;
-    score() {}
-    score(int s, int n) : team(s), total(n) {}
+    score(int s = -1, int n = 0) : team(s), total(n) {}
+    ~score() {}
 };
 
 #define numteams(a,b)   (m_fight(a) && m_team(a,b) ? (m_multi(a,b) ? T_TOTAL : T_NUM) : 1)
