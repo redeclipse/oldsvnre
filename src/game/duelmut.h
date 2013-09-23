@@ -280,7 +280,7 @@ struct duelservmode : servmode
                     loopv(alive) if(i && alive[i]->team != alive[i-1]->team) { found = true; break; }
                     if(!found)
                     {
-                        if(dueldeath < 0) dueldeath = gamemillis+DEATHMILLIS;
+                        if(dueldeath < 0) dueldeath = gamemillis+G(dueldelay);
                         else if(gamemillis >= dueldeath)
                         {
                             if(!cleanup)
@@ -326,7 +326,7 @@ struct duelservmode : servmode
                         {
                             if(dueldeath < 0)
                             {
-                                dueldeath = gamemillis+DEATHMILLIS;
+                                dueldeath = gamemillis+G(dueldelay);
                                 break;
                             }
                             else if(gamemillis < dueldeath) break;
@@ -376,8 +376,14 @@ struct duelservmode : servmode
 
     bool wantsovertime()
     {
-        if((dueltime < 0 || dueltime > gamemillis) && duelround > 0) return true;
-        return 0;
+        if(dueltime < 0 && duelround > 0) return true;
+        return false;
+    }
+
+    bool aibalance()
+    {
+        if(dueltime < 0 && duelround > 0) return false;
+        return true;
     }
 
     void reset(bool empty)

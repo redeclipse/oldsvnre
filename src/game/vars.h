@@ -235,6 +235,7 @@ GVAR(0, intermlimit, 0, 15000, VAR_MAX); // .. before vote menu comes up
 GVAR(0, votelimit, 0, 45000, VAR_MAX); // .. before vote passes by default
 GVAR(0, duelreset, 0, 1, 1); // reset winner in duel
 GVAR(0, duelclear, 0, 1, 1); // clear items in duel
+GVAR(0, dueldelay, 500, 1000, VAR_MAX); // round continues for this length after winning
 GVAR(0, duelcooloff, 0, 5000, VAR_MAX); // cool off period before duel goes to next round
 GVAR(0, duelcycle, 0, 2, 3); // determines if players are force-cycled after a certain number of wins (bit: 0 = off, 1 = non-team games, 2 = team games)
 GVAR(0, duelcycles, 0, 2, VAR_MAX); // maximum wins in a row before force-cycling (0 = num team/total players)
