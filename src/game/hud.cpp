@@ -233,6 +233,7 @@ namespace hud
     SVAR(IDF_PERSIST, inventorydateformat, "%H:%M:%S");
     VAR(IDF_PERSIST, inventorytime, 0, 1, 1);
     VAR(IDF_PERSIST, inventoryscore, 0, 1, VAR_MAX);
+    VAR(IDF_PERSIST, inventoryscorespec, 0, 2, VAR_MAX);
     VAR(IDF_PERSIST, inventoryscorebg, 0, 0, 1);
     VAR(IDF_PERSIST, inventoryscoreinfo, 0, 1, 1); // shows offset
     VAR(IDF_PERSIST, inventoryscorebreak, 0, 1, 1); // two lines instead of one
@@ -2814,20 +2815,26 @@ namespace hud
                             cm += drawprogress(cx[i], cm+cs, 1-amt, amt, cs, false, 1, 1, 1, fade, 1, "super", "%s%d", col, int(millis/1000.f));
                         }
                     }
-                    else if(!m_edit(game::gamemode))
+                    else
                     {
                         if(inventorydate)
                             cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorydateskew, "super", fade*inventorydateblend, "%s", gettime(clocktime, inventorydateformat));
                         if(inventorytime)
                         {
-                            if((m_play(game::gamemode) || client::demoplayback) && game::timeremaining >= 0)
+                            if(m_edit(game::gamemode)) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fgediting\fS");
+                            else if((m_play(game::gamemode) || client::demoplayback) && game::timeremaining >= 0)
                             {
                                 if(game::intermission) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fyintermission\fS");
                                 else if(paused) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fopaused\fS", 0xFFFFFF);
                                 else if(game::timeremaining) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fg%s\fS", timestr(game::timeremaining, 2));
                             }
                         }
-                        if(!interm && inventoryscore && ((cc = drawscore(cx[i], cm, cs, (h-edge*2)/2, fade)) > 0)) cm += cc+cr;
+                        if(m_fight(game::gamemode))
+                        {
+                            bool spec = game::player1->state == CS_SPECTATOR;
+                            int count = spec ? inventoryscorespec : inventoryscore;
+                            if(count && ((cc = drawscore(cx[i], cm, cs, (h-edge*2)/2, fade, count, spec)) > 0)) cm += cc+cr;
+                        }
                     }
 
                     if((cc = drawselection(cx[i], cy[i], cs, cm, fade)) > 0) cy[i] -= cc+cr;

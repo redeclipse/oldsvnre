@@ -733,12 +733,12 @@ namespace hud
         return size;
     }
 
-    int drawscore(int x, int y, int s, int m, float blend)
+    int drawscore(int x, int y, int s, int m, float blend, int count, bool spec)
     {
-        if(!m_fight(game::gamemode) || (inventoryscore == 1 && game::player1->state == CS_SPECTATOR && game::focus == game::player1)) return 0;
         int sy = 0, numgroups = groupplayers(), numout = 0;
         loopi(2)
         {
+            if(!i && spec) continue;
             int pos = 0, realpos = 0, lastpos = -1;
             loopk(numgroups)
             {
@@ -756,7 +756,7 @@ namespace hud
                     float sk = numout && inventoryscoreshrink > 0 ? 1.f-min(numout*inventoryscoreshrink, inventoryscoreshrinkmax) : 1;
                     int offset = numgroups > 1 ? sg.total-groups[k ? 0 : 1]->total : 0;
                     sy += drawscoreitem(teamtexname(sg.team), TEAM(sg.team, colour), x, y+sy, s, sk*inventoryscoresize, blend*inventoryblend, pos, sg.total, offset, TEAM(sg.team, name), i ? NULL : game::colourname(game::focus));
-                    if(++numout >= inventoryscore) return sy;
+                    if(++numout >= count) return sy;
                 }
                 else
                 {
@@ -775,7 +775,7 @@ namespace hud
                         int score = m_laptime(game::gamemode, game::mutators) ? d->cptime : d->points,
                             offset = sg.players.length() > 1 ? score-(m_laptime(game::gamemode, game::mutators) ? sg.players[j ? 0 : 1]->cptime : sg.players[j ? 0 : 1]->points) : 0;
                         sy += drawscoreitem(playertex, game::getcolour(d, game::playerdisplaytone), x, y+sy, s, sk*inventoryscoresize, blend*inventoryblend, pos, score, offset, game::colourname(d));
-                        if(++numout >= inventoryscore) return sy;
+                        if(++numout >= count) return sy;
                     }
                 }
             }
