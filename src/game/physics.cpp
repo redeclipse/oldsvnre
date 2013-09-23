@@ -1307,11 +1307,14 @@ namespace physics
                         d->action[AC_DASH] = true;
                         d->actiontime[AC_DASH] = lastmillis;
                     }
-                    game::footstep(d);
-                    if(timeinair >= PHYSMILLIS*2 && mag >= 20)
+                    if(timeinair >= PHYSMILLIS)
                     {
-                        int vol = min(int(mag*1.25f), 255); if(d->inliquid) vol /= 2;
-                        playsound(S_LAND, d->o, d, 0, vol);
+                        if(mag >= 20)
+                        {
+                            int vol = min(int(mag*1.25f), 255); if(d->inliquid) vol *= 0.5f;
+                            playsound(S_LAND, d->o, d, 0, vol);
+                        }
+                        else game::footstep(d);
                     }
                 }
             }
