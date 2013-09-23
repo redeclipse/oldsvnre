@@ -330,8 +330,6 @@ namespace aiman
     {
         if(!m_demo(gamemode) && numclients())
         {
-            if(smode) if(!smode->aibalance()) return;
-            mutate(smuts, if(!mut->aibalance()) return);
             if(hasgameinfo && !interm && !gamewait)
             {
                 if(!dorefresh)
@@ -363,7 +361,14 @@ namespace aiman
                 if(dorefresh)
                 {
                     dorefresh -= curtime;
-                    if(dorefresh <= 0) { dorefresh = 0; checksetup(); }
+                    if(dorefresh <= 0)
+                    {
+                        bool allow = true;
+                        if(smode) if(!smode->aibalance()) allow = false;
+                        if(allow) mutate(smuts, if(!mut->aibalance()) { allow = false; break; });
+                        dorefresh = allow ? 0 : 1;
+                        if(allow) checksetup();
+                    }
                 }
                 checkenemies();
                 loopvrev(clients) if(clients[i]->state.actortype > A_PLAYER) reinitai(clients[i]);
