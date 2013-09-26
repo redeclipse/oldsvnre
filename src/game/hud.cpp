@@ -2687,7 +2687,7 @@ namespace hud
             {
                 int millis = lastmillis%1000;
                 float amt = millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f);
-                flashcolour(gr, gg, gb, 1.f, 1.f, 1.f, amt);
+                flashcolour(gr, gg, gb, 0.f, 1.f, 1.f, amt);
             }
             #define ADDMODE(a) sy += drawitem(a, x, y-sy, width, 0, false, true, gr, gg, gb, fade);
             if(game::focus->state != CS_EDITING && !m_dm(game::gamemode) && ((alive && inventorygameinfo&1) || over)) ADDMODEICON(game::gamemode, game::mutators)

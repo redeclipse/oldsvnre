@@ -334,9 +334,9 @@ struct duelservmode : servmode
                         if(!cleanup)
                         {
                             string end, hp; hp[0] = 0;
-                            if(!m_affinity(gamemode))
+                            if(!m_insta(gamemode, mutators) && !m_affinity(gamemode))
                             {
-                                if(!m_insta(gamemode, mutators) && !m_vampire(gamemode, mutators) && alive[0]->state.health == m_health(gamemode, mutators, alive[0]->state.model))
+                                if(alive[0]->state.health >= m_health(gamemode, mutators, alive[0]->state.model))
                                     formatstring(hp)(" with a \fs\fcflawless victory\fS");
                                 else formatstring(hp)(" with \fs\fc%d\fS health left", alive[0]->state.health);
                             }
