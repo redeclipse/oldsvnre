@@ -696,9 +696,9 @@ namespace entities
                 {
                     e.lastemit = lastmillis;
                     d->setused(n, lastmillis);
-                    float mag = max(e.attrs[2], 1);
-                    if(dist > 0 && e.attrs[4] > 0 && e.attrs[4] < e.attrs[3] && dist > e.attrs[4] && dist < e.attrs[3])
-                        mag *= 1.f-clamp((dist-e.attrs[4])/float(e.attrs[3]-e.attrs[4]), 0.f, 1.f);
+                    float mag = max(e.attrs[2], 1), maxrad = e.attrs[3] ? e.attrs[3] : enttype[PUSHER].radius, minrad = e.attrs[4];
+                    if(dist > 0 && minrad > 0 && maxrad > minrad && dist > minrad && maxrad >= dist)
+                        mag *= 1.f-clamp((dist-minrad)/float(maxrad-minrad), 0.f, 1.f);
                     vec dir, rel;
                     vecfromyawpitch(e.attrs[0], e.attrs[1], 1, 0, dir);
                     (rel = dir.normalize()).mul(mag);
