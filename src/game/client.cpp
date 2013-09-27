@@ -9,7 +9,7 @@ namespace client
     int needclipboard = -1;
 
     SVAR(IDF_PERSIST, demolist, "");
-
+    VAR(0, demoendless, 0, 0, 1);
     VAR(IDF_PERSIST, showpresence, 0, 1, 2); // 0 = never show join/leave, 1 = show only during game, 2 = show when connecting/disconnecting
     VAR(IDF_PERSIST, showteamchange, 0, 1, 2); // 0 = never show, 1 = show only when switching between, 2 = show when entering match too
     VAR(IDF_PERSIST, showservervariables, 0, 0, 1); // determines if variables set by the server are printed to the console
@@ -1101,6 +1101,7 @@ namespace client
             game::timeremaining = 0;
             return;
         }
+        else if(demoendless) demoendless = 0;
         if(m_capture(game::gamemode)) capture::reset();
         else if(m_defend(game::gamemode)) defend::reset();
         else if(m_bomber(game::gamemode)) bomber::reset();
@@ -2391,7 +2392,7 @@ namespace client
                     if(demoplayback) game::player1->state = CS_SPECTATOR;
                     else loopv(game::players) if(game::players[i]) game::clientdisconnected(i);
                     game::player1->clientnum = getint(p);
-                    if(!demoplayback && wasdemopb)
+                    if(!demoplayback && wasdemopb && demoendless)
                     {
                         string demofile;
                         demofile[0] = 0;
