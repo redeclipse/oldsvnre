@@ -223,9 +223,9 @@ namespace entities
                 if(full)
                 {
                     if(attr[6]&MMT_HIDE) addentinfo("hide");
-                    if(attr[6]&MMT_NOCLIP) addentinfo("noclip");
-                    if(attr[6]&MMT_NOSHADOW) addentinfo("noshadow");
-                    if(attr[6]&MMT_NODYNSHADOW) addentinfo("nodynshadow");
+                    if(attr[6]&MMT_NOCLIP) addentinfo("no-clip");
+                    if(attr[6]&MMT_NOSHADOW) addentinfo("no-shadow");
+                    if(attr[6]&MMT_NODYNSHADOW) addentinfo("no-dynshadow");
                 }
                 break;
             }
@@ -239,12 +239,12 @@ namespace entities
                 }
                 if(full)
                 {
-                    if(attr[4]&SND_NOATTEN) addentinfo("noatten");
-                    if(attr[4]&SND_NODELAY) addentinfo("nodelay");
-                    if(attr[4]&SND_NOCULL) addentinfo("nocull");
-                    if(attr[4]&SND_NOPAN) addentinfo("nopan");
-                    if(attr[4]&SND_NODIST) addentinfo("nodist");
-                    if(attr[4]&SND_NOQUIET) addentinfo("noquiet");
+                    if(attr[4]&SND_NOATTEN) addentinfo("no-atten");
+                    if(attr[4]&SND_NODELAY) addentinfo("no-delay");
+                    if(attr[4]&SND_NOCULL) addentinfo("no-cull");
+                    if(attr[4]&SND_NOPAN) addentinfo("no-pan");
+                    if(attr[4]&SND_NODIST) addentinfo("no-dist");
+                    if(attr[4]&SND_NOQUIET) addentinfo("no-quiet");
                     if(attr[4]&SND_CLAMPED) addentinfo("clamped");
                 }
                 break;
@@ -266,10 +266,10 @@ namespace entities
             {
                 if(full) switch(attr[5])
                 {
-                    case 0: addentinfo("conditional"); break;
-                    case 1: addentinfo("additional"); break;
-                    case 2: addentinfo("redirectional"); break;
-                    case 3: addentinfo("absolute"); break;
+                    case 0: addentinfo("conditional-dir"); break;
+                    case 1: addentinfo("add-to-dir"); break;
+                    case 2: addentinfo("redirect-dir"); break;
+                    case 3: addentinfo("absolute-dir"); break;
                     default: break;
                 }
                 break;
@@ -278,15 +278,16 @@ namespace entities
             {
                 if(full)
                 {
-                    if(attr[5] >= 3) addentinfo("positional");
+                    if(attr[5] >= 3) addentinfo("pos-offset");
+                    if(attr[5] >= 6) addentinfo("mod-velocity");
                     switch(attr[5]%3)
                     {
-                        case 0: addentinfo("absolute"); break;
-                        case 1: addentinfo("relative"); break;
-                        case 2: addentinfo("keep"); break;
+                        case 0: addentinfo("absolute-dir"); break;
+                        case 1: addentinfo("relative-dir"); break;
+                        case 2: addentinfo("keep-dir"); break;
                         default: break;
                     }
-                    const char *telenames[TELE_MAX] = { "no affinity" };
+                    const char *telenames[TELE_MAX] = { "no-affinity" };
                     loopj(TELE_MAX) if(attr[8]&(1<<j)) { addentinfo(telenames[j]); }
                 }
                 break;
@@ -606,14 +607,19 @@ namespace entities
                             float mag = max(vec(d->vel).add(d->falling).magnitude(), f.attrs[2] ? float(f.attrs[2]) : 50.f),
                                   yaw = f.attrs[0] < 0 ? (lastmillis/5)%360 : f.attrs[0], pitch = f.attrs[1];
                             game::fixrange(yaw, pitch);
-                            vecfromyawpitch(yaw, pitch, 1, 0, d->vel);
-                            d->vel.normalize().mul(mag);
+                            if(f.attrs[5] < 6)
+                            {
+                                vecfromyawpitch(yaw, pitch, 1, 0, d->vel);
+                                d->vel.normalize().mul(mag);
+                            }
                             switch(f.attrs[5]%3)
                             {
                                 case 2: break; // keep
-                                case 1:
+                                case 1: // relative
                                 {
-                                    float offyaw = d->yaw-(e.attrs[0] < 0 ? (lastmillis/5)%360 : e.attrs[0]), offpitch = d->pitch-e.attrs[1];
+                                    float relyaw = (e.attrs[0] < 0 ? (lastmillis/5)%360 : e.attrs[0])-180, relpitch = e.attrs[1];
+                                    game::fixrange(relyaw, relpitch);
+                                    float offyaw = d->yaw-relyaw, offpitch = d->pitch-relpitch;
                                     d->yaw = yaw+offyaw;
                                     d->pitch = pitch+offpitch;
                                     break;
@@ -626,6 +632,11 @@ namespace entities
                                 }
                             }
                             game::fixrange(d->yaw, d->pitch);
+                            if(f.attrs[5] >= 6)
+                            {
+                                vecfromyawpitch(d->yaw, d->pitch, 1, 0, d->vel);
+                                d->vel.normalize().mul(mag);
+                            }
                             d->resetinterp();
                             if(physics::entinmap(d, true) || d->state != CS_ALIVE) // entinmap first for getting position
                             {
@@ -1049,10 +1060,10 @@ namespace entities
                 while(e.attrs[0] >= 360) e.attrs[0] -= 360;
                 while(e.attrs[1] < -90) e.attrs[1] += 180;
                 while(e.attrs[1] > 90) e.attrs[1] -= 180;
-                while(e.attrs[5] < 0) e.attrs[5] += 3;
-                while(e.attrs[5] > 2) e.attrs[5] -= 3;
-                while(e.attrs[6] < 0) e.attrs[6]++;
-                while(e.attrs[7] < 0) e.attrs[7]++;
+                while(e.attrs[5] < 0) e.attrs[5] += 6;
+                while(e.attrs[5] >= 6) e.attrs[5] -= 6;
+                if(e.attrs[6] < 0) e.attrs[6] = 0;
+                if(e.attrs[7] < 0) e.attrs[7] = 0;
                 break;
             default: break;
         }
