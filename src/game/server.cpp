@@ -432,7 +432,7 @@ namespace server
 
     bool canplay(bool chk = true)
     {
-        if(!demoplayback)
+        if(!demoplayback && !m_demo(gamemode))
             if(!chk || !hasgameinfo || gamewait || !timeremaining || interm) return false;
         return true;
     }
@@ -2062,7 +2062,7 @@ namespace server
 
     void readdemo()
     {
-        if(!demoplayback || paused || (G(waitforplayers) && gamewait)) return;
+        if(!demoplayback || paused) return;
         while(gamemillis>=nextplayback)
         {
             int chan, len;
@@ -2635,7 +2635,7 @@ namespace server
         oldtimelimit = G(timelimit);
         timeremaining = G(timelimit) ? G(timelimit)*60 : -1;
         gamelimit = G(timelimit) ? timeremaining*1000 : 0;
-        gamewait = G(waitforplayers) && numclients() ? totalmillis : 0;
+        gamewait = m_fight(gamemode) && G(waitforplayers) && numclients() ? totalmillis : 0;
         inovertime = false;
         sents.shrink(0);
         scores.shrink(0);
@@ -4340,7 +4340,7 @@ namespace server
 
         if(gamewait)
         {
-            if(interm || !G(waitforplayers) || totalmillis-gamewait >= G(waitforplayers) || !numclients()) gamewait = 0;
+            if(interm || !m_fight(gamemode) || !G(waitforplayers) || totalmillis-gamewait >= G(waitforplayers) || !numclients()) gamewait = 0;
             else
             {
                 int numwait = 0;
