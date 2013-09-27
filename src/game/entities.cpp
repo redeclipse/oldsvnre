@@ -278,12 +278,12 @@ namespace entities
             {
                 if(full)
                 {
-                    switch(attr[5])
+                    if(attr[5] >= 3) addentinfo("positional");
+                    switch(attr[5]%3)
                     {
                         case 0: addentinfo("absolute"); break;
                         case 1: addentinfo("relative"); break;
                         case 2: addentinfo("keep"); break;
-                        case 3: addentinfo("positional"); break;
                         default: break;
                     }
                     const char *telenames[TELE_MAX] = { "no affinity" };
@@ -591,41 +591,38 @@ namespace entities
                     static vector<int> teleports;
                     teleports.shrink(0);
                     loopv(e.links)
-                        if(ents.inrange(e.links[i]) && ents[e.links[i]]->type == e.type)
+                        if(e.links[i] != n && ents.inrange(e.links[i]) && ents[e.links[i]]->type == e.type)
                             teleports.add(e.links[i]);
+                    bool teleported = false;
                     if(!teleports.empty())
                     {
-                        bool teleported = false;
                         vec orig = d->o, ovel = d->vel;
                         float oyaw = d->yaw, opitch = d->pitch;
                         while(!teleports.empty())
                         {
                             int r = e.type == TELEPORT ? rnd(teleports.length()) : 0, q = teleports[r];
                             gameentity &f = *(gameentity *)ents[q];
-                            d->o = vec(f.o).add(f.attrs[5] != 3 ? vec(0, 0, d->height*0.5f) : vec(e.o).sub(orig));
-                            if(f.attrs[5] != 3)
+                            d->o = vec(f.o).add(projent::is(d) || f.attrs[5] >= 3 ? vec(e.o).sub(orig) : vec(0, 0, d->height*0.5f));
+                            float mag = max(vec(d->vel).add(d->falling).magnitude(), f.attrs[2] ? float(f.attrs[2]) : 50.f),
+                                  yaw = f.attrs[0] < 0 ? (lastmillis/5)%360 : f.attrs[0], pitch = f.attrs[1];
+                            game::fixrange(yaw, pitch);
+                            vecfromyawpitch(yaw, pitch, 1, 0, d->vel);
+                            d->vel.normalize().mul(mag);
+                            switch(f.attrs[5]%3)
                             {
-                                float mag = max(vec(d->vel).add(d->falling).magnitude(), f.attrs[2] ? float(f.attrs[2]) : 50.f),
-                                      yaw = f.attrs[0] < 0 ? (lastmillis/5)%360 : f.attrs[0], pitch = f.attrs[1];
-                                game::fixrange(yaw, pitch);
-                                vecfromyawpitch(yaw, pitch, 1, 0, d->vel);
-                                d->vel.normalize().mul(mag);
-                                switch(f.attrs[5])
+                                case 2: break; // keep
+                                case 1:
                                 {
-                                    case 2: break; // keep
-                                    case 1:
-                                    {
-                                        float offyaw = d->yaw-(e.attrs[0] < 0 ? (lastmillis/5)%360 : e.attrs[0]), offpitch = d->pitch-e.attrs[1];
-                                        d->yaw = yaw+offyaw;
-                                        d->pitch = pitch+offpitch;
-                                        break;
-                                    }
-                                    case 0: default: // absolute
-                                    {
-                                        d->yaw = yaw;
-                                        d->pitch = pitch;
-                                        break;
-                                    }
+                                    float offyaw = d->yaw-(e.attrs[0] < 0 ? (lastmillis/5)%360 : e.attrs[0]), offpitch = d->pitch-e.attrs[1];
+                                    d->yaw = yaw+offyaw;
+                                    d->pitch = pitch+offpitch;
+                                    break;
+                                }
+                                case 0: default: // absolute
+                                {
+                                    d->yaw = yaw;
+                                    d->pitch = pitch;
+                                    break;
                                 }
                             }
                             game::fixrange(d->yaw, d->pitch);
@@ -659,6 +656,7 @@ namespace entities
                                 teleported = true;
                                 break;
                             }
+                            else conoutft(CON_SELF, "failed to teleport from %d to %d", n, q);
                             d->o = orig;
                             d->vel = ovel;
                             d->yaw = oyaw;
@@ -667,28 +665,28 @@ namespace entities
                             if(projent::is(d)) d->deltapos = d->o;
                             teleports.remove(r); // must've really sucked, try another one
                         }
-                        if(!teleported || !physics::entinmap(d, true))
+                    }
+                    if(d->state == CS_ALIVE && !teleported)
+                    {
+                        if(gameent::is(d)) game::suicide((gameent *)d, HIT_SPAWN);
+                        else if(projent::is(d))
                         {
-                            if(gameent::is(d)) game::suicide((gameent *)d, HIT_SPAWN);
-                            else if(projent::is(d))
+                            projent *g = (projent *)d;
+                            switch(g->projtype)
                             {
-                                projent *g = (projent *)d;
-                                switch(g->projtype)
+                                case PRJ_ENT: case PRJ_AFFINITY:
                                 {
-                                    case PRJ_ENT: case PRJ_AFFINITY:
+                                    if(!g->beenused)
                                     {
-                                        if(!g->beenused)
-                                        {
-                                            g->beenused = 1;
-                                            g->lifetime = min(g->lifetime, g->fadetime);
-                                        }
-                                        if(g->lifetime > 0) break;
+                                        g->beenused = 1;
+                                        g->lifetime = min(g->lifetime, g->fadetime);
                                     }
-                                    default: g->state = CS_DEAD; g->escaped = true; break;
+                                    if(g->lifetime > 0) break;
                                 }
+                                default: g->state = CS_DEAD; g->escaped = true; break;
                             }
-                            else d->state = CS_DEAD;
                         }
+                        else d->state = CS_DEAD;
                     }
                     break;
                 }
