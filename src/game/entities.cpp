@@ -619,9 +619,8 @@ namespace entities
                                 {
                                     float relyaw = (e.attrs[0] < 0 ? (lastmillis/5)%360 : e.attrs[0])-180, relpitch = e.attrs[1];
                                     game::fixrange(relyaw, relpitch);
-                                    float offyaw = d->yaw-relyaw, offpitch = d->pitch-relpitch;
-                                    d->yaw = yaw+offyaw;
-                                    d->pitch = pitch+offpitch;
+                                    d->yaw = yaw+(d->yaw-relyaw);
+                                    d->pitch = pitch+(d->pitch-relpitch);
                                     break;
                                 }
                                 case 0: default: // absolute
