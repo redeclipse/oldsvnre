@@ -1388,7 +1388,7 @@ struct gameent : dynent, gamestate
     int curfoot()
     {
         vec dir;
-        vecfromyawpitch(yaw, 0, 1, 0, dir);
+        vecfromyawpitch(yaw, 0, move, strafe && !move ? strafe : 0, dir);
         dir.mul(radius).add(o).z -= height; // foot furthest away is one being set down
         return footpos(0).squaredist(dir) > footpos(1).squaredist(dir) ? 0 : 1;
     }
