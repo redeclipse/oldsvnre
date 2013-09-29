@@ -1579,7 +1579,7 @@ namespace physics
             loopi(x) \
             { \
                 if(i) { y; } \
-                if(insideworld(d->o) && !collide(d) && !collideinside && (!avoidplayers || !hitplayer)) \
+                if(insideworld(d->o) && !collide(d, vec(0, 0, 0), 0, !avoidplayers)) \
                 { \
                     d->resetinterp(); \
                     return true; \

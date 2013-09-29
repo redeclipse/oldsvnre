@@ -1206,7 +1206,7 @@ namespace game
                 else if(flags&BLEED) snd = S_BLEED;
                 else if(flags&SHOCK) snd = S_SHOCK;
                 else loopirev(8) if(damage >= dmgsnd[i]) { snd = S_DAMAGE+i; break; }
-                if(snd >= 0) playsound(snd, d->o, d, v != focus ? SND_DIRECT : SND_FORCED, damagetonevol);
+                if(snd >= 0) playsound(snd, d->o, d, SND_IMPORT|(v == focus ? SND_NODIST : SND_CLAMPED), damagetonevol);
             }
             if(aboveheaddamage)
             {
@@ -1857,7 +1857,7 @@ namespace game
             d->mapchange(lastmillis, m_health(gamemode, mutators, d->model), m_armour(gamemode, mutators, d->model));
         if(!client::demoplayback && m_loadout(gamemode, mutators) && autoloadweap && *favloadweaps)
             chooseloadweap(player1, favloadweaps);
-        entities::spawnplayer(player1, -1, false); // prevent the player from being in the middle of nowhere
+        entities::spawnplayer(player1); // prevent the player from being in the middle of nowhere
         specreset();
         resetsway();
         resetcamera();
