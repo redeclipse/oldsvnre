@@ -1191,7 +1191,7 @@ namespace game
 
         bool merge(const damagemerge &m)
         {
-            if(v != m.v || flags != m.flags) return false;
+            if(d != m.d || v != m.v || flags != m.flags) return false;
             damage += m.damage;
             return true;
         }
@@ -1206,7 +1206,7 @@ namespace game
                 else if(flags&BLEED) snd = S_BLEED;
                 else if(flags&SHOCK) snd = S_SHOCK;
                 else loopirev(8) if(damage >= dmgsnd[i]) { snd = S_DAMAGE+i; break; }
-                if(snd >= 0) playsound(snd, d->o, d, v == focus ? SND_FORCED : SND_DIRECT, damagetonevol);
+                if(snd >= 0) playsound(snd, d->o, d, v != focus ? SND_DIRECT : SND_FORCED, damagetonevol);
             }
             if(aboveheaddamage)
             {

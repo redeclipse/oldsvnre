@@ -327,7 +327,9 @@ ICOMMAND(0, mapsound, "sissi", (char *n, int *v, char *w, char *x, int *u), intr
 
 void calcvol(int flags, int vol, int slotvol, int maxrad, int minrad, const vec &pos, int *curvol, int *curpan, bool liquid)
 {
-    int svol = flags&SND_CLAMPED ? 255 : clamp(vol, 0, 255), span = 127; vec v; float dist = pos.dist(camera1->o, v);
+    vec v;
+    float dist = pos.dist(camera1->o, v);
+    int svol = clamp(vol, 0, 255), span = 127;
     if(!(flags&SND_NOATTEN) && dist > 0)
     {
         if(!(flags&SND_NOPAN) && !soundmono && (v.x != 0 || v.y != 0))
@@ -449,7 +451,7 @@ int playsound(int n, const vec &pos, physent *d, int flags, int vol, int maxrad,
                 if((chan = Mix_PlayChannel(-1, sample->sound, flags&SND_LOOP ? -1 : 0)) < 0)
                 {
                     int lowest = -1;
-                    loopv(sounds) if(sounds[i].chan >= 0 && !(sounds[i].flags&SND_NOCULL) && !(sounds[i].flags&SND_MAP) && (sounds[i].owner && game::camerapos(sounds[i].owner).dist(camera1->o) > 0))
+                    loopv(sounds) if(sounds[i].chan >= 0 && !(sounds[i].flags&SND_NOCULL) && !(sounds[i].flags&SND_MAP) && (sounds[i].owner && game::camerapos(sounds[i].owner).dist(camera1->o) > 1))
                         if((nocull || sounds[i].curvol < cvol) && (!sounds.inrange(lowest) || sounds[i].curvol < sounds[lowest].curvol))
                             lowest = i;
                     if(sounds.inrange(lowest))
