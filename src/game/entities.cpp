@@ -594,87 +594,85 @@ namespace entities
                     loopv(e.links)
                         if(e.links[i] != n && ents.inrange(e.links[i]) && ents[e.links[i]]->type == e.type)
                             teleports.add(e.links[i]);
+                    if(teleports.empty()) break;
                     bool teleported = false;
-                    if(!teleports.empty())
+                    vec orig = d->o, ovel = d->vel;
+                    float oyaw = d->yaw, opitch = d->pitch;
+                    while(!teleports.empty())
                     {
-                        vec orig = d->o, ovel = d->vel;
-                        float oyaw = d->yaw, opitch = d->pitch;
-                        while(!teleports.empty())
+                        int r = e.type == TELEPORT ? rnd(teleports.length()) : 0, q = teleports[r];
+                        gameentity &f = *(gameentity *)ents[q];
+                        d->o = vec(f.o).add(projent::is(d) || f.attrs[5] >= 3 ? vec(orig).sub(e.o) : vec(0, 0, d->height*0.5f));
+                        float mag = max(vec(d->vel).add(d->falling).magnitude(), f.attrs[2] ? float(f.attrs[2]) : 50.f),
+                              yaw = f.attrs[0] < 0 ? (lastmillis/5)%360 : f.attrs[0], pitch = f.attrs[1];
+                        game::fixrange(yaw, pitch);
+                        if(f.attrs[5] < 6)
                         {
-                            int r = e.type == TELEPORT ? rnd(teleports.length()) : 0, q = teleports[r];
-                            gameentity &f = *(gameentity *)ents[q];
-                            d->o = vec(f.o).add(projent::is(d) || f.attrs[5] >= 3 ? vec(orig).sub(e.o) : vec(0, 0, d->height*0.5f));
-                            float mag = max(vec(d->vel).add(d->falling).magnitude(), f.attrs[2] ? float(f.attrs[2]) : 50.f),
-                                  yaw = f.attrs[0] < 0 ? (lastmillis/5)%360 : f.attrs[0], pitch = f.attrs[1];
-                            game::fixrange(yaw, pitch);
-                            if(f.attrs[5] < 6)
+                            vecfromyawpitch(yaw, pitch, 1, 0, d->vel);
+                            d->vel.normalize().mul(mag);
+                        }
+                        switch(f.attrs[5]%3)
+                        {
+                            case 2: break; // keep
+                            case 1: // relative
                             {
-                                vecfromyawpitch(yaw, pitch, 1, 0, d->vel);
-                                d->vel.normalize().mul(mag);
-                            }
-                            switch(f.attrs[5]%3)
-                            {
-                                case 2: break; // keep
-                                case 1: // relative
-                                {
-                                    float relyaw = (e.attrs[0] < 0 ? (lastmillis/5)%360 : e.attrs[0])-180, relpitch = e.attrs[1];
-                                    game::fixrange(relyaw, relpitch);
-                                    d->yaw = yaw+(d->yaw-relyaw);
-                                    d->pitch = pitch+(d->pitch-relpitch);
-                                    break;
-                                }
-                                case 0: default: // absolute
-                                {
-                                    d->yaw = yaw;
-                                    d->pitch = pitch;
-                                    break;
-                                }
-                            }
-                            game::fixrange(d->yaw, d->pitch);
-                            if(f.attrs[5] >= 6)
-                            {
-                                vecfromyawpitch(d->yaw, d->pitch, 1, 0, d->vel);
-                                d->vel.normalize().mul(mag);
-                            }
-                            d->resetinterp();
-                            if(physics::entinmap(d, true) || d->state != CS_ALIVE) // entinmap first for getting position
-                            {
-                                f.lastemit = lastmillis;
-                                d->setused(n, lastmillis);
-                                d->setused(q, lastmillis);
-                                if(d->state == CS_ALIVE)
-                                {
-                                    if(gameent::is(d))
-                                    {
-                                        gameent *g = (gameent *)d;
-                                        if(g == game::focus) game::resetcamera();
-                                        execlink(g, n, true);
-                                        execlink(g, q, true);
-                                        g->resetair();
-                                        ai::inferwaypoints(g, e.o, f.o, float(e.attrs[3] ? e.attrs[3] : enttype[e.type].radius)+ai::CLOSEDIST);
-                                    }
-                                    else if(projent::is(d))
-                                    {
-                                        projent *g = (projent *)d;
-                                        g->lastbounce = lastmillis;
-                                        g->movement = 0;
-                                        g->from = g->deltapos = g->o;
-                                        g->to = g->dest = vec(g->o).add(g->vel);
-                                    }
-                                }
-                                else if(gameent::is(d)) warpragdoll(d, d->vel, vec(f.o).sub(e.o));
-                                teleported = true;
+                                float relyaw = (e.attrs[0] < 0 ? (lastmillis/5)%360 : e.attrs[0])-180, relpitch = e.attrs[1];
+                                game::fixrange(relyaw, relpitch);
+                                d->yaw = yaw+(d->yaw-relyaw);
+                                d->pitch = pitch+(d->pitch-relpitch);
                                 break;
                             }
-                            else conoutft(CON_SELF, "failed to teleport from %d to %d", n, q);
-                            d->o = orig;
-                            d->vel = ovel;
-                            d->yaw = oyaw;
-                            d->pitch = opitch;
-                            d->resetinterp();
-                            if(projent::is(d)) d->deltapos = d->o;
-                            teleports.remove(r); // must've really sucked, try another one
+                            case 0: default: // absolute
+                            {
+                                d->yaw = yaw;
+                                d->pitch = pitch;
+                                break;
+                            }
                         }
+                        game::fixrange(d->yaw, d->pitch);
+                        if(f.attrs[5] >= 6)
+                        {
+                            vecfromyawpitch(d->yaw, d->pitch, 1, 0, d->vel);
+                            d->vel.normalize().mul(mag);
+                        }
+                        d->resetinterp();
+                        if(physics::entinmap(d, true) || d->state != CS_ALIVE) // entinmap first for getting position
+                        {
+                            f.lastemit = lastmillis;
+                            d->setused(n, lastmillis);
+                            d->setused(q, lastmillis);
+                            if(d->state == CS_ALIVE)
+                            {
+                                if(gameent::is(d))
+                                {
+                                    gameent *g = (gameent *)d;
+                                    if(g == game::focus) game::resetcamera();
+                                    execlink(g, n, true);
+                                    execlink(g, q, true);
+                                    g->resetair();
+                                    ai::inferwaypoints(g, e.o, f.o, float(e.attrs[3] ? e.attrs[3] : enttype[e.type].radius)+ai::CLOSEDIST);
+                                }
+                                else if(projent::is(d))
+                                {
+                                    projent *g = (projent *)d;
+                                    g->lastbounce = lastmillis;
+                                    g->movement = 0;
+                                    g->from = g->deltapos = g->o;
+                                    g->to = g->dest = vec(g->o).add(g->vel);
+                                }
+                            }
+                            else if(gameent::is(d)) warpragdoll(d, d->vel, vec(f.o).sub(e.o));
+                            teleported = true;
+                            break;
+                        }
+                        else conoutft(CON_SELF, "failed to teleport from %d to %d", n, q);
+                        d->o = orig;
+                        d->vel = ovel;
+                        d->yaw = oyaw;
+                        d->pitch = opitch;
+                        d->resetinterp();
+                        if(projent::is(d)) d->deltapos = d->o;
+                        teleports.remove(r); // must've really sucked, try another one
                     }
                     if(d->state == CS_ALIVE && !teleported)
                     {
@@ -1135,7 +1133,7 @@ namespace entities
     bool tryspawn(dynent *d, const vec &o, float yaw, float pitch)
     {
         game::fixfullrange(d->yaw = yaw, d->pitch = pitch, d->roll = 0);
-        d->o = vec(o).add(vec(0, 0, d->zradius+d->aboveeye));
+        (d->o = o).z += d->height+d->aboveeye;
         return physics::entinmap(d, true);
     }
 
@@ -1150,7 +1148,7 @@ namespace entities
                 default: if(tryspawn(d, ents[ent]->o, rnd(360), 0)) return;
             }
         }
-        if(gameent::is(d))
+        else
         {
             vector<int> spawns;
             loopk(4)
