@@ -329,7 +329,7 @@ void calcvol(int flags, int vol, int slotvol, int maxrad, int minrad, const vec 
 {
     vec v;
     float dist = pos.dist(camera1->o, v);
-    int svol = clamp(vol, 0, 255), span = 127;
+    int svol = flags&SND_CLAMPED ? 255 : clamp(vol, 0, 255), span = 127;
     if(!(flags&SND_NOATTEN) && dist > 0)
     {
         if(!(flags&SND_NOPAN) && !soundmono && (v.x != 0 || v.y != 0))
