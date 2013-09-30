@@ -2070,7 +2070,7 @@ namespace entities
                 }
                 case AFFINITY:
                 {
-                    float radius = (float)enttype[e.type].radius;
+                    float radius = enttype[e.type].radius;
                     part_radius(e.o, vec(radius, radius, radius), showentsize, 1, 1, TEAM(e.attrs[0], colour));
                     radius = radius*2/3; // capture pickup dist
                     part_radius(e.o, vec(radius, radius, radius), showentsize, 1, 1, TEAM(e.attrs[0], colour));
@@ -2078,11 +2078,11 @@ namespace entities
                 }
                 default:
                 {
-                    float radius = (float)enttype[e.type].radius;
+                    float radius = enttype[e.type].radius;
                     if((e.type == TRIGGER || e.type == TELEPORT || e.type == PUSHER || e.type == CHECKPOINT) && e.attrs[e.type == CHECKPOINT ? 0 : 3])
-                        radius = (float)e.attrs[e.type == CHECKPOINT ? 0 : 3];
-                    if(radius > 0.f) part_radius(e.o, vec(radius, radius, radius), showentsize, 1, 1, 0x00FFFF);
-                    if(e.type == PUSHER && e.attrs[4] && e.attrs[4] < e.attrs[3])
+                        radius = e.attrs[e.type == CHECKPOINT ? 0 : 3];
+                    if(radius > 0) part_radius(e.o, vec(radius, radius, radius), showentsize, 1, 1, 0x00FFFF);
+                    if(e.type == PUSHER && e.attrs[4] > 0 && e.attrs[4] < radius)
                         part_radius(e.o, vec(e.attrs[4], e.attrs[4], e.attrs[4]), showentsize, 1, 1, 0x00FFFF);
                     break;
                 }
