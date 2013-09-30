@@ -1579,7 +1579,7 @@ namespace physics
             loopi(x) \
             { \
                 if(i) { y; } \
-                if(insideworld(d->o) && !collide(d, vec(0, 0, 0), 0, !avoidplayers)) \
+                if(insideworld(d->o) && !collide(d, vec(0, 0, 0), 0, avoidplayers)) \
                 { \
                     d->resetinterp(); \
                     return true; \
@@ -1591,11 +1591,11 @@ namespace physics
         {
             vec dir;
             vecfromyawpitch(d->yaw, d->pitch, 1, 0, dir);
-            if(!dir.iszero()) loopk(2) inmapchk(100, d->o.add(vec(dir).mul(i/10.f).mul(k ? -1 : 1)));
+            if(!dir.iszero()) loopk(2) { inmapchk(100, d->o.add(vec(dir).mul(i/5.f).mul(k ? -1 : 1))); }
             dir = vec(d->vel).normalize();
-            if(!dir.iszero()) loopk(2) inmapchk(100, d->o.add(vec(dir).mul(i/10.f).mul(k ? -1 : 1)));
+            if(!dir.iszero()) loopk(2) { inmapchk(100, d->o.add(vec(dir).mul(i/5.f).mul(k ? -1 : 1))); }
         }
-        inmapchk(20, d->o.add(vec((rnd(21)-10)*i/10.f, (rnd(21)-10)*i/10.f, (rnd(21)-10)*i/10.f)));
+        inmapchk(20, d->o.add(vec((rnd(21)-10)*i/5.f, (rnd(21)-10)*i/5.f, (rnd(21)-10)*i/5.f)));
         d->o = orig;
         d->resetinterp();
         return false;
