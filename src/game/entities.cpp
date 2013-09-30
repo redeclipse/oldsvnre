@@ -1144,7 +1144,9 @@ namespace entities
             switch(ents[ent]->type)
             {
                 case ACTOR: if(d->type == ENT_PLAYER) break;
-                case PLAYERSTART: case CHECKPOINT: if(tryspawn(d, ents[ent]->o, ents[ent]->attrs[1], ents[ent]->attrs[2])) return;
+                case PLAYERSTART: case CHECKPOINT:
+                    if(tryspawn(d, ents[ent]->o, ents[ent]->attrs[1], ents[ent]->attrs[2])) return;
+                    break;
                 default: if(tryspawn(d, ents[ent]->o, rnd(360), 0)) return;
             }
         }
