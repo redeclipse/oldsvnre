@@ -5253,16 +5253,26 @@ namespace server
                                             }
                                         }
                                     }
+                                    else waiting(cp);
                                     cp->state.cpmillis = 0;
                                     cp->state.cpnodes.shrink(0);
-                                    if(sents[ent].attrs[6] == CP_FINISH) waiting(cp); // so they start again
+                                    if(sents[ent].attrs[6] == CP_FINISH) waiting(cp);
                                     break;
                                 }
-                                case CP_RESPAWN: case CP_START:
+                                case CP_START: case CP_RESPAWN:
                                 {
                                     if(m_gauntlet(gamemode) || cp->state.cpnodes.find(ent) >= 0) break;
+                                    if(sents[ent].attrs[6] == CP_START)
+                                    {
+                                        if(cp->state.cpmillis) break;
+                                        cp->state.cpmillis = gamemillis;
+                                    }
+                                    else if(!cp->state.cpmillis)
+                                    {
+                                        waiting(cp);
+                                        break;
+                                    }
                                     sendf(-1, 1, "ri4", N_CHECKPOINT, cp->clientnum, ent, -1);
-                                    if(!cp->state.cpmillis || sents[ent].attrs[6] != CP_RESPAWN) cp->state.cpmillis = gamemillis;
                                     cp->state.cpnodes.add(ent);
                                 }
                                 default: break;
