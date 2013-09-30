@@ -164,7 +164,7 @@ enttypes enttype[] = {
                 "actor",        { "type",   "yaw",      "pitch",    "modes",    "muts",     "id",       "weap",     "health",   "speed",    "scale" }
     },
     {
-        TRIGGER,        1,          58,     16,     EU_AUTO,    7,          5,          0,
+        TRIGGER,        1,          58,     16,     EU_AUTO,    7,          5,          -1,
             (1<<MAPMODEL)|(1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             (1<<MAPMODEL)|(1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             (1<<ENT_PLAYER)|(1<<ENT_AI),
