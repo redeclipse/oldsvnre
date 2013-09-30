@@ -551,35 +551,39 @@ namespace entities
         gameentity &e = *(gameentity *)ents[n];
         switch(enttype[e.type].usetype)
         {
-            case EU_ITEM: if(gameent::is(d) && (e.type != WEAPON || ((gameent *)d)->action[AC_USE]))
+            case EU_ITEM:
             {
-                gameent *f = (gameent *)d;
-                if(game::allowmove(f))
+                if(gameent::is(d) && (e.type != WEAPON || ((gameent *)d)->action[AC_USE]))
                 {
-                    int interrupts = G(weaponinterrupts), sweap = m_weapon(game::gamemode, game::mutators), attr = e.type == WEAPON ? w_attr(game::gamemode, game::mutators, e.attrs[0], sweap) : e.attrs[0];
-                    interrupts &= ~(1<<W_S_RELOAD);
-                    if(!f->canuse(e.type, attr, e.attrs, sweap, lastmillis, interrupts))
+                    gameent *f = (gameent *)d;
+                    if(game::allowmove(f))
                     {
-                        if(!f->canuse(e.type, attr, e.attrs, sweap, lastmillis, (1<<W_S_RELOAD))) return true;
-                        else if(!isweap(f->weapselect) || f->weapload[f->weapselect] <= 0) return true;
-                        else
+                        int interrupts = G(weaponinterrupts), sweap = m_weapon(game::gamemode, game::mutators), attr = e.type == WEAPON ? w_attr(game::gamemode, game::mutators, e.attrs[0], sweap) : e.attrs[0];
+                        interrupts &= ~(1<<W_S_RELOAD);
+                        if(!f->canuse(e.type, attr, e.attrs, sweap, lastmillis, interrupts))
                         {
-                            int offset = f->weapload[f->weapselect];
-                            f->ammo[f->weapselect] = max(f->ammo[f->weapselect]-offset, 0);
-                            f->reloads[f->weapselect] = max(f->reloads[f->weapselect]-1, 0);
-                            f->weapload[f->weapselect] = -f->weapload[f->weapselect];
+                            if(!f->canuse(e.type, attr, e.attrs, sweap, lastmillis, (1<<W_S_RELOAD))) return true;
+                            else if(!isweap(f->weapselect) || f->weapload[f->weapselect] <= 0) return true;
+                            else
+                            {
+                                int offset = f->weapload[f->weapselect];
+                                f->ammo[f->weapselect] = max(f->ammo[f->weapselect]-offset, 0);
+                                f->reloads[f->weapselect] = max(f->reloads[f->weapselect]-1, 0);
+                                f->weapload[f->weapselect] = -f->weapload[f->weapselect];
+                            }
                         }
+                        client::addmsg(N_ITEMUSE, "ri3", f->clientnum, lastmillis-game::maptime, n);
+                        f->setweapstate(f->weapselect, W_S_WAIT, weaponswitchdelay, lastmillis);
+                        f->action[AC_USE] = false;
+                        return false;
                     }
-                    client::addmsg(N_ITEMUSE, "ri3", f->clientnum, lastmillis-game::maptime, n);
-                    f->setweapstate(f->weapselect, W_S_WAIT, weaponswitchdelay, lastmillis);
-                    f->action[AC_USE] = false;
-                    return false;
+                    return true;
                 }
-                return true;
-            } break;
-            case EU_AUTO: switch(e.type)
+                break;
+            }
+            case EU_AUTO:
             {
-                case TELEPORT:
+                if(e.type == TELEPORT)
                 {
                     if(e.attrs[8]&(1<<TELE_NOAFFIN))
                     {
@@ -696,10 +700,11 @@ namespace entities
                         }
                         else d->state = CS_DEAD;
                     }
-                    break;
                 }
-                case PUSHER:
+                else if(e.type == PUSHER)
                 {
+                    //int millis = d->lastused(n, true);
+                    //if(millis && lastmillis-millis < triggertime(e)) break;
                     e.lastemit = lastmillis;
                     d->setused(n, lastmillis);
                     float mag = max(e.attrs[2], 1), maxrad = e.attrs[3] ? e.attrs[3] : enttype[PUSHER].radius, minrad = e.attrs[4];
@@ -742,16 +747,14 @@ namespace entities
                         }
                     }
                     else if(gameent::is(d)) warpragdoll(d, d->vel);
-                    break;
                 }
-                case TRIGGER:
+                else if(e.type == TRIGGER)
                 {
                     if(d->state != CS_ALIVE || !gameent::is(d)) break;
                     gameent *g = (gameent *)d;
                     if((e.attrs[2] == TA_ACTION && g->action[AC_USE] && g == game::player1) || e.attrs[2] == TA_AUTO) runtrigger(n, g);
-                    break;
                 }
-                case CHECKPOINT:
+                else if(e.type == CHECKPOINT)
                 {
                     if(d->state != CS_ALIVE || !gameent::is(d)) break;
                     gameent *g = (gameent *)d;
@@ -765,9 +768,9 @@ namespace entities
                     else if(!g->cpmillis) break;
                     client::addmsg(N_TRIGGER, "ri2", g->clientnum, n);
                     g->checkpoint = n;
-                    break;
                 }
-            } break;
+                break;
+            }
         }
         return false;
     }
