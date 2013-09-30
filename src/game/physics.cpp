@@ -1574,6 +1574,7 @@ namespace physics
             return insideworld(d->o);
         }
         vec orig = d->o;
+        float maxrad = max(d->radius, max(d->xradius, d->yradius));
         #define inmapchk(x,y) \
         { \
             loopi(x) \
@@ -1587,15 +1588,16 @@ namespace physics
                 d->o = orig; \
             } \
         }
-        if(gameent::is(d) || projent::is(d))
+        if(gameent::is(d))
         {
             vec dir;
             vecfromyawpitch(d->yaw, d->pitch, 1, 0, dir);
-            if(!dir.iszero()) loopk(2) { inmapchk(100, d->o.add(vec(dir).mul(i/5.f).mul(k ? -1 : 1))); }
-            dir = vec(d->vel).normalize();
-            if(!dir.iszero()) loopk(2) { inmapchk(100, d->o.add(vec(dir).mul(i/5.f).mul(k ? -1 : 1))); }
+            dir.normalize().mul(maxrad);
+            if(!dir.iszero()) loopk(2) { inmapchk(100, d->o.add(vec(dir).mul(i/10.f).mul(k ? -0.5f : 1.f))); }
         }
-        inmapchk(20, d->o.add(vec((rnd(21)-10)*i/5.f, (rnd(21)-10)*i/5.f, (rnd(21)-10)*i/5.f)));
+        vec dir = vec(d->vel).normalize().mul(maxrad);
+        if(!dir.iszero()) loopk(2) { inmapchk(100, d->o.add(vec(dir).mul(i/10.f).mul(k ? -0.5f : 1.f))); }
+        inmapchk(20, d->o.add(vec((rnd(21)-10)*i/10.f, (rnd(21)-10)*i/10.f, (rnd(21)-10)*i/20.f)));
         d->o = orig;
         d->resetinterp();
         return false;
