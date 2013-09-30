@@ -986,11 +986,6 @@ namespace entities
                 while(e.attrs[2] >= TA_MAX) e.attrs[2] -= TA_MAX;
                 while(e.attrs[4] < 0) e.attrs[4] += 4;
                 while(e.attrs[4] >= 4) e.attrs[4] -= 4;
-                if(e.attrs[4] >= 2)
-                {
-                    while(e.attrs[0] < 0) e.attrs[0] += TRIGGERIDS+1;
-                    while(e.attrs[0] > TRIGGERIDS) e.attrs[0] -= TRIGGERIDS+1;
-                }
                 if(cantrigger(n)) loopv(e.links) if(ents.inrange(e.links[i]) && (ents[e.links[i]]->type == MAPMODEL || ents[e.links[i]]->type == PARTICLES || ents[e.links[i]]->type == MAPSOUND || ents[e.links[i]]->type == LIGHTFX))
                 {
                     ents[e.links[i]]->lastemit = e.lastemit;
@@ -1035,8 +1030,6 @@ namespace entities
                 while(e.attrs[1] >= 360) e.attrs[1] -= 360;
                 while(e.attrs[2] < -90) e.attrs[2] += 180;
                 while(e.attrs[2] > 90) e.attrs[2] -= 180;
-                while(e.attrs[5] < 0) e.attrs[5] += TRIGGERIDS;
-                while(e.attrs[5] >= TRIGGERIDS) e.attrs[5] -= TRIGGERIDS;
                 while(e.attrs[6] < 0) e.attrs[6] += W_MAX+1; // allow any weapon
                 while(e.attrs[6] > W_MAX) e.attrs[6] -= W_MAX+1;
                 if(e.attrs[7] < 0) e.attrs[7] = 0;
@@ -1065,7 +1058,10 @@ namespace entities
             default: break;
         }
         if(enttype[e.type].idattr >= 0 && (e.attrs[enttype[e.type].idattr] < 0 || e.attrs[enttype[e.type].idattr] > TRIGGERIDS))
-            e.attrs[enttype[e.type].idattr] = 0;
+        {
+            while(e.attrs[enttype[e.type].idattr] < 0) e.attrs[enttype[e.type].idattr] += TRIGGERIDS+1;
+            while(e.attrs[enttype[e.type].idattr] > TRIGGERIDS) e.attrs[enttype[e.type].idattr] -= TRIGGERIDS+1;
+        }
     }
 
     const char *findname(int type)
