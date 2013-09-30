@@ -1521,18 +1521,18 @@ namespace physics
                 float bestdist = 1e16f;
                 if(e->legs.x+e->lrad.x >= x1 && e->legs.y+e->lrad.y >= y1 && e->legs.x-e->lrad.x <= x2 && e->legs.y-e->lrad.y <= y2)
                 {
-                    vec bottom(e->legs), top(e->legs); bottom.z -= e->lrad.z; top.z += e->lrad.z; float d = 1e16f;
-                    if(linecylinderintersect(from, to, bottom, top, max(e->lrad.x, e->lrad.y), d)) { hitflags |= HITFLAG_LEGS; bestdist = min(bestdist, d); }
+                    vec bottom(e->legs), top(e->legs); bottom.z -= e->lrad.z; top.z += e->lrad.z; float t = 1e16f;
+                    if(linecylinderintersect(from, to, bottom, top, max(e->lrad.x, e->lrad.y), t)) { hitflags |= HITFLAG_LEGS; bestdist = min(bestdist, t); }
                 }
                 if(e->torso.x+e->trad.x >= x1 && e->torso.y+e->trad.y >= y1 && e->torso.x-e->trad.x <= x2 && e->torso.y-e->trad.y <= y2)
                 {
-                    vec bottom(e->torso), top(e->torso); bottom.z -= e->trad.z; top.z += e->trad.z; float d = 1e16f;
-                    if(linecylinderintersect(from, to, bottom, top, max(e->trad.x, e->trad.y), d)) { hitflags |= HITFLAG_TORSO; bestdist = min(bestdist, d); }
+                    vec bottom(e->torso), top(e->torso); bottom.z -= e->trad.z; top.z += e->trad.z; float t = 1e16f;
+                    if(linecylinderintersect(from, to, bottom, top, max(e->trad.x, e->trad.y), t)) { hitflags |= HITFLAG_TORSO; bestdist = min(bestdist, t); }
                 }
                 if(e->head.x+e->hrad.x >= x1 && e->head.y+e->hrad.y >= y1 && e->head.x-e->hrad.x <= x2 && e->head.y-e->hrad.y <= y2)
                 {
-                    vec bottom(e->head), top(e->head); bottom.z -= e->hrad.z; top.z += e->hrad.z; float d = 1e16f;
-                    if(linecylinderintersect(from, to, bottom, top, max(e->hrad.x, e->hrad.y), d)) { hitflags |= HITFLAG_HEAD; bestdist = min(bestdist, d); }
+                    vec bottom(e->head), top(e->head); bottom.z -= e->hrad.z; top.z += e->hrad.z; float t = 1e16f;
+                    if(linecylinderintersect(from, to, bottom, top, max(e->hrad.x, e->hrad.y), t)) { hitflags |= HITFLAG_HEAD; bestdist = min(bestdist, t); }
                 }
                 if(hitflags == HITFLAG_NONE) return false;
                 dist = bestdist*from.dist(to);
