@@ -756,13 +756,16 @@ namespace entities
                     if(d->state != CS_ALIVE || !gameent::is(d)) break;
                     gameent *g = (gameent *)d;
                     if(!m_check(e.attrs[3], e.attrs[4], game::gamemode, game::mutators) || !m_checkpoint(game::gamemode)) break;
-                    if(m_gauntlet(game::gamemode) && g->team != T_ALPHA) break;
-                    if(g->checkpoint != n)
+                    if((m_gauntlet(game::gamemode) && g->team != T_ALPHA) || g->checkpoint == n) break;
+                    if(e.attrs[6] == CP_START)
                     {
-                        client::addmsg(N_TRIGGER, "ri2", g->clientnum, n);
-                        g->checkpoint = n;
-                        if(!g->cpmillis || e.attrs[6] == CP_START) g->cpmillis = lastmillis;
+                        if(g->cpmillis) break;
+                        g->cpmillis = lastmillis;
                     }
+                    else if(!g->cpmillis) break;
+                    client::addmsg(N_TRIGGER, "ri2", g->clientnum, n);
+                    g->checkpoint = n;
+                    break;
                 }
             } break;
         }
