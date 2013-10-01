@@ -1845,7 +1845,7 @@ namespace game
         physics::reset();
         resetworld();
         resetcursor();
-        if(*name)
+        if(!empty)
         {
             conoutft(CON_MESG, "\fs%s\fS by \fs%s\fS \fs[\fa%s\fS]", *maptitle ? maptitle : "Untitled", *mapauthor ? mapauthor : "Unknown", server::gamename(gamemode, mutators));
             preload();
@@ -1918,16 +1918,17 @@ namespace game
 
     int findcolour(gameent *d, bool tone, bool mix)
     {
+        int team = d->actortype >= A_ENEMY ? ai::owner(d) : d->team;
         if(tone)
         {
-            int col = d->actortype < A_ENEMY ? d->colour : 0;
+            int col = d->actortype >= A_ENEMY ? 0 : d->colour;
             if(!col && isweap(d->weapselect)) col = W(d->weapselect, colour);
             if(col)
             {
                 if(mix)
                 {
                     int r1 = (col>>16), g1 = ((col>>8)&0xFF), b1 = (col&0xFF),
-                        c = TEAM(d->team, colour), r2 = (c>>16), g2 = ((c>>8)&0xFF), b2 = (c&0xFF),
+                        c = TEAM(team, colour), r2 = (c>>16), g2 = ((c>>8)&0xFF), b2 = (c&0xFF),
                         r3 = clamp(int((r1*(1-playertonemix))+(r2*playertonemix)), 0, 255),
                         g3 = clamp(int((g1*(1-playertonemix))+(g2*playertonemix)), 0, 255),
                         b3 = clamp(int((b1*(1-playertonemix))+(b2*playertonemix)), 0, 255);
@@ -1936,7 +1937,7 @@ namespace game
                 return col;
             }
         }
-        return TEAM(d->team, colour);
+        return TEAM(team, colour);
     }
 
     int getcolour(gameent *d, int level)
@@ -2686,7 +2687,7 @@ namespace game
                 if(player1->clientnum >= 0) client::c2sinfo();
                 return;
             }
-            int type = m_edit(gamemode) && musicedit >= 0 ? musicedit : musictype;
+            int type = client::needsmap ? 6 : (m_edit(gamemode) && musicedit >= 0 ? musicedit : musictype);
             if(!maptime) { maptime = -1; return; } // skip the first loop
             else if(maptime < 0)
             {

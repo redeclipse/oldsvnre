@@ -17,7 +17,8 @@ struct capturestate
         gameent *owner, *lastowner;
         projent *proj;
         int displaytime, pickuptime, movetime, viewtime, interptime;
-        vec viewpos, interppos;
+        vec viewpos, interppos, render, above;
+        entitylight light;
 #endif
 
         flag()
@@ -48,7 +49,7 @@ struct capturestate
         {
             if(owner) return owner->waist;
             if(droptime) return proj ? proj->o : droploc;
-            return spawnloc;
+            return above;
         }
 
         vec &pos(bool view = false)
@@ -84,6 +85,12 @@ struct capturestate
         f.team = team;
         f.spawnloc = o;
         f.ent = ent;
+#ifndef GAMESERVER
+        f.render = f.above = o;
+        f.render.z += 2;
+        physics::droptofloor(f.render);
+        if(f.render.z >= f.above.z-1) f.above.z += f.render.z-(f.above.z-1);
+#endif
     }
 
 #ifndef GAMESERVER
