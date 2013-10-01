@@ -18,7 +18,7 @@ struct defendstate
         string info;
         bool hasflag;
         int lasthad;
-        vec render;
+        vec render, above;
 #endif
         int owners, enemies, converted, points;
 
@@ -139,9 +139,10 @@ struct defendstate
         flag &b = flags.add();
         b.o = o;
 #ifndef GAMESERVER
-        b.render = o;
+        b.render = b.above = o;
         b.render.z += 2;
         physics::droptofloor(b.render);
+        if(b.render.z >= b.above.z-1) b.above.z += (b.render.z-(b.above.z-1))+2;
 #endif
         b.kinship = team;
         b.reset();
@@ -158,9 +159,10 @@ struct defendstate
         b.ent = ent;
         b.o = o;
 #ifndef GAMESERVER
-        b.render = o;
+        b.render = b.above = o;
         b.render.z += 2;
         physics::droptofloor(b.render);
+        if(b.render.z >= b.above.z-1) b.above.z += (b.render.z-(b.above.z-1))+2;
 #endif
         b.owner = owner;
         b.enemy = enemy;

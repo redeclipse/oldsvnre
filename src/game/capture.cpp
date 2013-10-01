@@ -24,6 +24,7 @@ namespace capture
 
     void preload()
     {
+        preloadmodel("props/point");
         preloadmodel("props/flag");
     }
 
@@ -230,8 +231,9 @@ namespace capture
         {
             capturestate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent)) continue;
+            vec pos = f.pos(true);
             float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(capturedelay), 0.f, 1.f) : ((m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team) ? clamp((lastmillis-f.taketime)/float(captureprotectdelay), 0.f, 1.f) : 0.f),
-                  blend = !f.owner && !f.droptime && f.team == game::focus->team ? camera1->o.distrange(f.pos(true), enttype[AFFINITY].radius, enttype[AFFINITY].radius/8) : 1.f;
+                  blend = !f.owner && (!f.droptime || m_gsp2(game::gamemode, game::mutators)) && f.team == game::focus->team ? camera1->o.distrange(pos, enttype[AFFINITY].radius, enttype[AFFINITY].radius/8) : 1.f;
             entitylight *light = &entities::ents[f.ent]->light;
             vec effect = vec::hexcolor(TEAM(f.team, colour));
             int colour = effect.tohexcolor();
@@ -241,12 +243,12 @@ namespace capture
                 float amt = (millis <= delay ? millis/float(delay) : 1.f-((millis-delay)/float(delay)));
                 flashcolour(effect.r, effect.g, effect.b, 0.65f, 0.65f, 0.65f, amt);
             }
-            light->material[0] = bvec::fromcolor(effect);
+            light->material[0] = f.light.material[0] = bvec::fromcolor(effect);
             if(!f.owner && !f.droptime)
-                rendermodel(light, "props/flag", ANIM_MAPMODEL|ANIM_LOOP, f.pos(true), entities::ents[f.ent]->attrs[1], entities::ents[f.ent]->attrs[2], 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, blend);
+                rendermodel(&f.light, "props/flag", ANIM_MAPMODEL|ANIM_LOOP, pos, entities::ents[f.ent]->attrs[1], entities::ents[f.ent]->attrs[2], 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, blend);
             else if(!f.owner || f.owner != game::focus || game::thirdpersonview(true) || !(rendernormally))
             {
-                vec lac(f.pos(true));
+                vec flagpos = pos;
                 float yaw = 0, pitch = 0, roll = 0;
                 if(f.owner)
                 {
@@ -257,41 +259,43 @@ namespace capture
                 else
                 {
                     yaw = ((lastmillis/8)+(360/st.flags.length()*i))%360;
-                    if(f.proj) lac.z -= f.proj->height;
+                    if(f.proj) flagpos.z -= f.proj->height;
                 }
                 while(yaw >= 360.f) yaw -= 360.f;
-                rendermodel(light, "props/flag", ANIM_MAPMODEL|ANIM_LOOP, lac, yaw, pitch, roll, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_LIGHT|MDL_LIGHTFX, NULL, NULL, 0, 0, blend);
-                lac.z += enttype[AFFINITY].radius*2/3;
-                if(f.owner) { lac.z += iterflags[f.owner->clientnum]*2; iterflags[f.owner->clientnum]++; }
+                rendermodel(&f.light, "props/flag", ANIM_MAPMODEL|ANIM_LOOP, flagpos, yaw, pitch, roll, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_LIGHT|MDL_LIGHTFX, NULL, NULL, 0, 0, blend);
+                flagpos.z += enttype[AFFINITY].radius*2/3;
+                if(f.owner) { flagpos.z += iterflags[f.owner->clientnum]*2; iterflags[f.owner->clientnum]++; }
                 defformatstring(info)("<super>%s flag", TEAM(f.team, name));
-                part_textcopy(lac, info, PART_TEXT, 1, TEAM(f.team, colour), 2, blend);
-                lac.z += 2.5f;
+                part_textcopy(flagpos, info, PART_TEXT, 1, TEAM(f.team, colour), 2, blend);
+                flagpos.z += 2.5f;
                 if(!game::intermission && (f.droptime || (m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team)))
                 {
                     float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(capturedelay), 0.f, 1.f) : clamp((lastmillis-f.taketime)/float(captureprotectdelay), 0.f, 1.f);
-                    part_icon(lac, textureload(hud::progringtex, 3), 4, blend, 0, 0, 1, colour, (lastmillis%1000)/1000.f, 0.1f);
-                    part_icon(lac, textureload(hud::progresstex, 3), 4, 0.25f*blend, 0, 0, 1, colour);
-                    part_icon(lac, textureload(hud::progresstex, 3), 4, blend, 0, 0, 1, colour, 0, wait);
-                    //lac.z += 0.5f;
-                    //defformatstring(str)("<huge>%d%%", int(wait*100.f)); part_textcopy(lac, str, PART_TEXT, 1, 0xFFFFFF, 2, 1);
-                    lac.z += 3;
+                    part_icon(flagpos, textureload(hud::progringtex, 3), 4, blend, 0, 0, 1, colour, (lastmillis%1000)/1000.f, 0.1f);
+                    part_icon(flagpos, textureload(hud::progresstex, 3), 4, 0.25f*blend, 0, 0, 1, colour);
+                    part_icon(flagpos, textureload(hud::progresstex, 3), 4, blend, 0, 0, 1, colour, 0, wait);
+                    //flagpos.z += 0.5f;
+                    //defformatstring(str)("<huge>%d%%", int(wait*100.f)); part_textcopy(flagpos, str, PART_TEXT, 1, 0xFFFFFF, 2, 1);
+                    //flagpos.z += 3;
                 }
             }
-            vec loc(f.spawnloc);
-            loc.z += enttype[AFFINITY].radius*2/3;
+            rendermodel(light, "props/point", ANIM_MAPMODEL|ANIM_LOOP, f.render, entities::ents[f.ent]->attrs[1], 0, 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, 1);
+            vec above = f.above;
+            above.z += !f.owner && !f.droptime ? enttype[AFFINITY].radius*2/3 : 3;
+            blend = camera1->o.distrange(above, enttype[AFFINITY].radius, enttype[AFFINITY].radius/8);
             defformatstring(info)("<super>%s %s", TEAM(f.team, name), !f.owner && !f.droptime ? "flag" : "base");
-            part_textcopy(loc, info, PART_TEXT, 1, TEAM(f.team, colour), 2, blend);
-            loc.z += 2.5f;
-            if(f.owner) part_icon(loc, textureload(hud::flagtakentex, 3), 2, blend, 0, 0, 1, TEAM(f.owner->team, colour));
-            else if(f.droptime) part_icon(loc, textureload(hud::flagdroptex, 3), 2, blend, 0, 0, 1, 0x28FFFF);
-            else part_icon(loc, textureload(hud::teamtexname(f.team), 3), 2, blend, 0, 0, 1, TEAM(f.team, colour));
-            loc.z += 2.5f;
+            part_textcopy(above, info, PART_TEXT, 1, TEAM(f.team, colour), 2, blend);
+            above.z += 2.5f;
+            if(f.owner) part_icon(above, textureload(hud::flagtakentex, 3), 2, blend, 0, 0, 1, TEAM(f.owner->team, colour));
+            else if(f.droptime) part_icon(above, textureload(hud::flagdroptex, 3), 2, blend, 0, 0, 1, 0x28FFFF);
+            else part_icon(above, textureload(hud::teamtexname(f.team), 3), 2, blend, 0, 0, 1, TEAM(f.team, colour));
+            above.z += 2.5f;
             if(!game::intermission && (f.droptime || (m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team)))
             {
-                part_icon(loc, textureload(hud::progringtex, 3), 4, blend, 0, 0, 1, colour, (lastmillis%1000)/1000.f, 0.1f);
-                part_icon(loc, textureload(hud::progresstex, 3), 4, 0.25f*blend, 0, 0, 1, colour);
-                part_icon(loc, textureload(hud::progresstex, 3), 4, blend, 0, 0, 1, colour, 0, wait);
-                loc.z += 3;
+                part_icon(above, textureload(hud::progringtex, 3), 4, blend, 0, 0, 1, colour, (lastmillis%1000)/1000.f, 0.1f);
+                part_icon(above, textureload(hud::progresstex, 3), 4, 0.25f*blend, 0, 0, 1, colour);
+                part_icon(above, textureload(hud::progresstex, 3), 4, blend, 0, 0, 1, colour, 0, wait);
+                //above.z += 3;
             }
         }
     }
@@ -303,7 +307,7 @@ namespace capture
             capturestate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent)) continue;
             if(f.owner || f.droptime)
-                adddynlight(vec(f.spawnloc).add(vec(0, 0, enttype[AFFINITY].radius/2)), enttype[AFFINITY].radius, vec::hexcolor(TEAM(f.team, colour)), 0, 0, DL_KEEP);
+                adddynlight(vec(f.above).add(vec(0, 0, enttype[AFFINITY].radius/2)), enttype[AFFINITY].radius, vec::hexcolor(TEAM(f.team, colour)), 0, 0, DL_KEEP);
             adddynlight(vec(f.pos(true)).add(vec(0, 0, enttype[AFFINITY].radius/2)), enttype[AFFINITY].radius, vec::hexcolor(TEAM(f.team, colour)), 0, 0, DL_KEEP);
         }
     }
@@ -366,7 +370,10 @@ namespace capture
             f.reset();
             f.team = team;
             f.ent = ent;
-            f.spawnloc = spawnloc;
+            f.spawnloc = f.render = f.above = spawnloc;
+            f.render.z += 2;
+            physics::droptofloor(f.render);
+            if(f.render.z >= f.above.z-1) f.above.z += f.render.z-(f.above.z-1);
             if(owner >= 0) st.takeaffinity(i, game::getclient(owner), lastmillis);
             else if(dropped) st.dropaffinity(i, droploc, inertia, lastmillis);
         }
@@ -416,7 +423,7 @@ namespace capture
     {
         if(!st.flags.inrange(i)) return;
         capturestate::flag &f = st.flags[i];
-        affinityeffect(i, d->team, d->feetpos(), f.spawnloc, m_gsp(game::gamemode, game::mutators) ? 2 : 3, "RETURNED");
+        affinityeffect(i, d->team, d->feetpos(), f.above, m_gsp(game::gamemode, game::mutators) ? 2 : 3, "RETURNED");
         game::announcef(S_V_FLAGRETURN, CON_SELF, d, true, "\fa%s returned the %s flag (time taken: \fs\fc%s\fS)", game::colourname(d), game::colourteam(f.team, "flagtex"), timestr(lastmillis-(m_gsp1(game::gamemode, game::mutators) ? f.droptime : f.taketime)));
         entities::execlink(NULL, f.ent, false);
         st.returnaffinity(i, lastmillis);
@@ -428,7 +435,7 @@ namespace capture
         capturestate::flag &f = st.flags[i];
         if(value > 0)
         {
-            affinityeffect(i, T_NEUTRAL, f.droploc, f.spawnloc, 3, "RESET");
+            affinityeffect(i, T_NEUTRAL, f.droploc, f.above, 3, "RESET");
             game::announcef(S_V_FLAGRESET, CON_SELF, NULL, true, "\fathe %s flag has been reset", game::colourteam(f.team, "flagtex"));
         }
         entities::execlink(NULL, f.ent, false);
@@ -442,10 +449,10 @@ namespace capture
         if(st.flags.inrange(goal))
         {
             capturestate::flag &g = st.flags[goal];
-            affinityeffect(goal, d->team, g.spawnloc, f.spawnloc, 3, "CAPTURED");
+            affinityeffect(goal, d->team, g.above, f.above, 3, "CAPTURED");
             entities::execlink(NULL, g.ent, false);
         }
-        else affinityeffect(goal, d->team, f.pos(true), f.spawnloc, 3, "CAPTURED");
+        else affinityeffect(goal, d->team, f.pos(true), f.above, 3, "CAPTURED");
         entities::execlink(NULL, f.ent, false);
         hud::teamscore(d->team).total = score;
         defformatstring(fteam)("%s", game::colourteam(f.team, "flagtex"));

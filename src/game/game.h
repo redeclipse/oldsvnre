@@ -1498,7 +1498,7 @@ struct cament
 namespace client
 {
     extern int showpresence, showteamchange;
-    extern bool sendplayerinfo, sendcrcinfo, sendgameinfo, demoplayback, isready, waitplayers;
+    extern bool sendplayerinfo, sendcrcinfo, sendgameinfo, demoplayback, isready, needsmap, gettingmap, waitplayers;
     extern void clearvotes(gameent *d, bool msg = false);
     extern void ignore(int cn);
     extern void unignore(int cn);

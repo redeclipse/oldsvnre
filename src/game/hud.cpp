@@ -3,7 +3,6 @@ namespace hud
 {
     const int NUMSTATS = 11;
     int damageresidue = 0, hudwidth = 0, hudheight = 0, lastteam = 0, lastnewgame = 0, laststats = 0, prevstats[NUMSTATS] = {0}, curstats[NUMSTATS] = {0};
-    bool forceprogress = false;
 
     #include "compass.h"
     vector<int> teamkills;
@@ -2939,23 +2938,35 @@ namespace hud
         glTexCoord2f(0, 1); glVertex2f(w-336, 128);
         glTexCoord2f(1, 1); glVertex2f(w-80, 128);
         glEnd();
-        if(!forceprogress)
+
+        pushfont("console");
+        int y = h-FONTH/2;
+        bool p = progressing;
+        const char *ptitle = progresstitle, *ptext = progresstext;
+        float pamt = progressamt, ppart = progresspart;
+        if(!p)
         {
-            pushfont("console");
-            int y = h-FONTH/2;
-            if(progressing)
+            int wait = client::waiting();
+            if(wait > 1)
             {
-                if(progressamt > 0) drawprogress(FONTH, y, 0, progressamt, FONTH*2, true, 1, 1, 1, 1, 1, "consub", "\fy%d%%", int(progressamt*100));
-                else drawprogress(FONTH, y, 0, progressamt, FONTH*2, true, 1, 1, 1, 1, 1, "consub", "\fg...");
-                y -= FONTH/2;
-                if(*progresstext) y -= draw_textx("%s %s [\fs\fa%d%%\fS]", FONTH*7/2, y, 255, 255, 255, 255, TEXT_LEFT_UP, -1, -1, *progresstitle ? progresstitle : "please wait...", progresstext, int(progresspart*100));
-                else y -= draw_textx("%s", FONTH*7/2, y, 255, 255, 255, 255, TEXT_LEFT_UP, -1, -1, *progresstitle ? progresstitle : "please wait...");
+                p = true;
+                ptitle = wait == 2 ? "requesting map.." : "downloading map..";
+                pamt = ppart = 0;
+                ptext = "";
             }
-            y = h-FONTH/2;
-            y -= draw_textx("v%s-%s %d bit (%s)", w-FONTH, y, 255, 255, 255, 255, TEXT_RIGHT_UP, -1, -1, versionstring, CUR_PLATFORM, CUR_ARCH, versionrelease);
-            y -= draw_textx("%s", w-FONTH, y, 255, 255, 255, 255, TEXT_RIGHT_UP, -1, -1, versionurl);
-            popfont();
         }
+        if(p)
+        {
+            if(pamt > 0) drawprogress(FONTH, y, 0, pamt, FONTH*2, true, 1, 1, 1, 1, 1, "consub", "\fy%d%%", int(pamt*100));
+            else drawprogress(FONTH, y, 0, pamt, FONTH*2, true, 1, 1, 1, 1, 1, "consub", "\fg...");
+            y -= FONTH/2;
+            if(*ptext) y -= draw_textx("%s %s [\fs\fa%d%%\fS]", FONTH*7/2, y, 255, 255, 255, 255, TEXT_LEFT_UP, -1, -1, *ptitle ? ptitle : "please wait...", ptext, int(ppart*100));
+            else y -= draw_textx("%s", FONTH*7/2, y, 255, 255, 255, 255, TEXT_LEFT_UP, -1, -1, *ptitle ? ptitle : "please wait...");
+        }
+        y = h-FONTH/2;
+        y -= draw_textx("v%s-%s %d bit (%s)", w-FONTH, y, 255, 255, 255, 255, TEXT_RIGHT_UP, -1, -1, versionstring, CUR_PLATFORM, CUR_ARCH, versionrelease);
+        y -= draw_textx("%s", w-FONTH, y, 255, 255, 255, 255, TEXT_RIGHT_UP, -1, -1, versionurl);
+        popfont();
     }
 
     void drawheadsup(int w, int h, int os, float fade)
@@ -3188,26 +3199,5 @@ namespace hud
             hudheight = int(ceil(hudsize/aspect));
         }
         else hudwidth = hudheight = hudsize;
-#if 0
-        if(!hasinput(true))
-        {
-            int wait = client::waiting();
-            if(wait > 1)
-            {
-                forceprogress = progressing = true;
-                setfvar("progressamt", 0);
-                switch(wait)
-                {
-                    case 3: setsvar("progresstitle", "downloading map.."); break;
-                    case 2: setsvar("progresstitle", "requesting map.."); break;
-                    case 1: case 0: default: break;
-                }
-                setsvar("progresstext", "this could take some time..");
-                setfvar("progresspart", 0);
-            }
-            else if(forceprogress) forceprogress = progressing = false;
-        }
-        else if(forceprogress) forceprogress = progressing = false;
-#endif
     }
 }

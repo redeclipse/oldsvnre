@@ -10,6 +10,7 @@ namespace defend
 
     void preload()
     {
+        preloadmodel("props/point");
     }
 
     static vec skewcolour(int owner, int enemy, float occupy)
@@ -78,9 +79,8 @@ namespace defend
                 int defend = b.owner ? b.owner : b.enemy;
                 formatstring(b.info)("%s - %s", b.name, game::colourteam(defend));
             }
-            vec above = b.o;
-            if(b.render.z >= above.z-1) above.z += (b.render.z-(above.z-1))+2;
-            float blend = camera1->o.distrange(b.o, enttype[AFFINITY].radius, enttype[AFFINITY].radius/8);
+            vec above = b.above;
+            float blend = camera1->o.distrange(above, enttype[AFFINITY].radius, enttype[AFFINITY].radius/8);
             part_explosion(above, 3, PART_SHOCKBALL, 1, colour, 1, 0.5f*blend);
             above.z += 4;
             part_text(above, b.info, PART_TEXT, 1, 0xFFFFFF, 2, blend);

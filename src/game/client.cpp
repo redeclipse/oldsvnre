@@ -35,7 +35,7 @@ namespace client
 
     int waiting(bool state)
     {
-        if(!connected(false) || !isready || game::maptime <= 0 || (state && needsmap && otherclients()))
+        if(!connected(false) || !isready || game::maptime <= 0 || (state && needsmap)) // && otherclients()
             return state && needsmap ? (gettingmap ? 3 : 2) : 1;
         return 0;
     }
