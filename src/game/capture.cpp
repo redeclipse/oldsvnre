@@ -224,7 +224,11 @@ namespace capture
         {
             capturestate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent) || !f.owner) continue;
-            while(numflags.length() <= f.owner->clientnum) { numflags.add(0); iterflags.add(0); }
+            while(numflags.length() <= f.owner->clientnum)
+            {
+                numflags.add(0);
+                iterflags.add(0);
+            }
             numflags[f.owner->clientnum]++;
         }
         loopv(st.flags) // flags/bases
@@ -250,12 +254,7 @@ namespace capture
             {
                 vec flagpos = pos;
                 float yaw = 0, pitch = 0, roll = 0;
-                if(f.owner)
-                {
-                    yaw = f.owner->yaw-45.f+(90/float(numflags[f.owner->clientnum]+1)*(iterflags[f.owner->clientnum]+1));
-                    //pitch = f.owner->pitch; // broken by mdlyaw 270
-                    //roll = f.owner->roll;
-                }
+                if(f.owner) yaw = f.owner->yaw-45.f+(90/float(numflags[f.owner->clientnum]+1)*(iterflags[f.owner->clientnum]+1));
                 else
                 {
                     yaw = ((lastmillis/8)+(360/st.flags.length()*i))%360;
@@ -264,7 +263,11 @@ namespace capture
                 while(yaw >= 360.f) yaw -= 360.f;
                 rendermodel(&f.light, "props/flag", ANIM_MAPMODEL|ANIM_LOOP, flagpos, yaw, pitch, roll, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_LIGHT|MDL_LIGHTFX, NULL, NULL, 0, 0, blend);
                 flagpos.z += enttype[AFFINITY].radius*2/3;
-                if(f.owner) { flagpos.z += iterflags[f.owner->clientnum]*2; iterflags[f.owner->clientnum]++; }
+                if(f.owner)
+                {
+                    flagpos.z += iterflags[f.owner->clientnum]*2;
+                    iterflags[f.owner->clientnum]++;
+                }
                 defformatstring(info)("<super>%s flag", TEAM(f.team, name));
                 part_textcopy(flagpos, info, PART_TEXT, 1, TEAM(f.team, colour), 2, blend);
                 flagpos.z += 2.5f;
@@ -286,17 +289,16 @@ namespace capture
             defformatstring(info)("<super>%s %s", TEAM(f.team, name), !f.owner && !f.droptime ? "flag" : "base");
             part_textcopy(above, info, PART_TEXT, 1, TEAM(f.team, colour), 2, blend);
             above.z += 2.5f;
-            if(f.owner) part_icon(above, textureload(hud::flagtakentex, 3), 2, blend, 0, 0, 1, TEAM(f.owner->team, colour));
-            else if(f.droptime) part_icon(above, textureload(hud::flagdroptex, 3), 2, blend, 0, 0, 1, 0x28FFFF);
-            else part_icon(above, textureload(hud::teamtexname(f.team), 3), 2, blend, 0, 0, 1, TEAM(f.team, colour));
-            above.z += 2.5f;
             if(!game::intermission && (f.droptime || (m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team)))
             {
                 part_icon(above, textureload(hud::progringtex, 3), 4, blend, 0, 0, 1, colour, (lastmillis%1000)/1000.f, 0.1f);
                 part_icon(above, textureload(hud::progresstex, 3), 4, 0.25f*blend, 0, 0, 1, colour);
                 part_icon(above, textureload(hud::progresstex, 3), 4, blend, 0, 0, 1, colour, 0, wait);
-                //above.z += 3;
+                above.z += 3;
             }
+            if(f.owner) part_icon(above, textureload(hud::flagtakentex, 3), 2, blend, 0, 0, 1, TEAM(f.owner->team, colour));
+            else if(f.droptime) part_icon(above, textureload(hud::flagdroptex, 3), 2, blend, 0, 0, 1, 0x28FFFF);
+            else part_icon(above, textureload(hud::teamtexname(f.team), 3), 2, blend, 0, 0, 1, TEAM(f.team, colour));
         }
     }
 
@@ -423,7 +425,7 @@ namespace capture
     {
         if(!st.flags.inrange(i)) return;
         capturestate::flag &f = st.flags[i];
-        affinityeffect(i, d->team, d->feetpos(), f.above, m_gsp(game::gamemode, game::mutators) ? 2 : 3, "RETURNED");
+        affinityeffect(i, d->team, d->feetpos(), f.above, m_gsp(game::gamemode, game::mutators) ? 3 : 2, "RETURNED");
         game::announcef(S_V_FLAGRETURN, CON_SELF, d, true, "\fa%s returned the %s flag (time taken: \fs\fc%s\fS)", game::colourname(d), game::colourteam(f.team, "flagtex"), timestr(lastmillis-(m_gsp1(game::gamemode, game::mutators) ? f.droptime : f.taketime)));
         entities::execlink(NULL, f.ent, false);
         st.returnaffinity(i, lastmillis);

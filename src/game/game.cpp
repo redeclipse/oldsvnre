@@ -244,8 +244,9 @@ namespace game
     FVAR(IDF_PERSIST, footstepsoundmax, 0, 150, FVAR_MAX); // maximum velocity magnitude
     FVAR(IDF_PERSIST, footstepsoundlevel, 0, 1, 10); // a way to scale the volume
     FVAR(IDF_PERSIST, footstepsoundfocus, 0, 1, 10); // focused player version of above
+    FVAR(IDF_PERSIST, footstepsounddim, 0, 0.5f, 10); // crouch/lighter player version of above
     VAR(IDF_PERSIST, footstepsoundminvol, 0, 32, 255);
-    VAR(IDF_PERSIST, footstepsoundmaxvol, 0, 255, 255);
+    VAR(IDF_PERSIST, footstepsoundmaxvol, 0, 200, 255);
 
     VAR(IDF_PERSIST, nogore, 0 , 0, 2); // turns off all gore, 0 = off, 1 = replace, 2 = remove
 #ifndef MEK
@@ -993,8 +994,9 @@ namespace game
             {
                 if(curfoot < 0) curfoot = d->lastfoot;
                 vec pos = d->footpos(curfoot);
-                float amt = clamp(mag/n, 0.f, 1.f);
-                int vol = clamp(int(amt*(d != focus ? footstepsoundlevel : footstepsoundfocus)*footstepsoundmaxvol), footstepsoundminvol, footstepsoundmaxvol);
+                float amt = clamp(mag/n, 0.f, 1.f)*(d != focus ? footstepsoundlevel : footstepsoundfocus);
+                if(onfloor && physics::iscrouching(d)) amt *= footstepsounddim;
+                int vol = clamp(int(amt*footstepsoundmaxvol), footstepsoundminvol, footstepsoundmaxvol);
                 playsound(liquid && (!onfloor || rnd(4)) ? S_SWIMSTEP : S_FOOTSTEP, pos, NULL, 0, vol, -1, -1, &d->sschan[curfoot]);
             }
         }
@@ -2893,7 +2895,6 @@ namespace game
 #endif
         bool onfloor = d->physstate >= PHYS_SLOPE || d->onladder || physics::liquidcheck(d);
         float yaw = d->yaw, pitch = d->pitch, roll = calcroll(focus);
-        if(d == player1 && intermission) yaw = pitch = 0;
         vec o = third ? d->feetpos() : camerapos(d);
         if(third == 2)
         {
@@ -2912,15 +2913,18 @@ namespace game
                 if(minz > camera1->o.z) o.z -= minz-camera1->o.z;
             }
         }
-        else if(third == 1 && d == focus && d == player1 && thirdpersonview(true, d))
-            vectoyawpitch(vec(worldpos).sub(d->headpos()).normalize(), yaw, pitch);
-        else if(!third && firstpersonsway && !intermission)
+        else if(!intermission)
         {
-            vec dir; vecfromyawpitch(d->yaw, 0, 0, 1, dir);
-            float steps = swaydist/(firstpersonbob ? firstpersonbobstep : firstpersonswaystep)*M_PI;
-            dir.mul(firstpersonswayside*cosf(steps));
-            dir.z = firstpersonswayup*(fabs(sinf(steps)) - 1);
-            o.add(dir).add(swaydir).add(swaypush);
+            if(third == 1 && d == focus && d == player1 && thirdpersonview(true, d))
+                vectoyawpitch(vec(worldpos).sub(d->headpos()).normalize(), yaw, pitch);
+            else if(!third && firstpersonsway)
+            {
+                vec dir; vecfromyawpitch(d->yaw, 0, 0, 1, dir);
+                float steps = swaydist/(firstpersonbob ? firstpersonbobstep : firstpersonswaystep)*M_PI;
+                dir.mul(firstpersonswayside*cosf(steps));
+                dir.z = firstpersonswayup*(fabs(sinf(steps)) - 1);
+                o.add(dir).add(swaydir).add(swaypush);
+            }
         }
 
         int anim = animflags, basetime = lastaction, basetime2 = 0;
