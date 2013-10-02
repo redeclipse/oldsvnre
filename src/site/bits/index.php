@@ -39,6 +39,7 @@
     
     $app['platforms'] = array('windows' => 0, 'linux' => 0, 'macosx' => 0, 'arch' => 1, 'chakra' => 1, 'slackware' => 1, 'gentoo' => 1);
 
+    $app['targets']['apply'] = array('name' => 'Apply', 'url' => 'http://docs.google.com/forms/d/1ZuvNFCIivYY_b5YLpCa_pnsbdR4oRdPplIkcbBexCDU/viewform', 'nav' => -1, 'redir' => 1);
     $app['targets']['guidelines'] = array('name' => 'Guidelines', 'url' => 'http://sourceforge.net/apps/mediawiki/redeclipse/index.php?title=Multiplayer_Guidelines', 'nav' => -1, 'redir' => 1);
     $app['targets']['faq'] = array('name' => 'FAQ', 'url' => 'http://sourceforge.net/apps/mediawiki/redeclipse/index.php?title=FAQ_for_Red_Eclipse', 'nav' => -1, 'redir' => 1);
     $app['targets']['trademark'] = array('name' => 'Trademark', 'url' => 'http://sourceforge.net/apps/mediawiki/redeclipse/index.php?title=Trademark_Policy', 'nav' => -1, 'redir' => 1);
