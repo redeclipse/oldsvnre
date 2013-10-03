@@ -5982,12 +5982,12 @@ namespace server
                     {
                         if(adminpass[0] && (ci->local || (text[0] && checkpassword(ci, adminpass, text))))
                             auth::setprivilege(ci, 1, PRIV_ADMINISTRATOR);
-                        else if(ci->privilege <= PRIV_PLAYER)
+                        else if(ci->privilege < PRIV_ELEVATED)
                         {
                             bool fail = false;
-                            if(!(mastermask()&MM_AUTOAPPROVE) && !ci->privilege)
+                            if(!(mastermask()&MM_AUTOAPPROVE))
                             {
-                                srvmsgft(ci->clientnum, CON_EVENT, "\fraccess denied, you need \fs\fcmoderator/administrator\fS access to \fs\fcelevate privileges\fS");
+                                srvmsgft(ci->clientnum, CON_EVENT, "\fraccess denied, you need a \fs\fcpassword/account\fS to \fs\fcelevate privileges\fS");
                                 fail = true;
                             }
                             else loopv(clients) if(ci != clients[i] && clients[i]->privilege >= PRIV_ELEVATED)
