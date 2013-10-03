@@ -1637,8 +1637,7 @@ namespace game
             if(showobituaries)
             {
                 bool show = false;
-                if(flags&HIT_LOST) show = true;
-                else switch(showobituaries)
+                switch(showobituaries)
                 {
                     case 1: if(isme || m_duke(gamemode, mutators)) show = true; break;
                     case 2: if(isme || anc >= 0 || m_duke(gamemode, mutators)) show = true; break;
