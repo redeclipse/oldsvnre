@@ -1188,7 +1188,7 @@ namespace hud
     {
         int index = POINTER_NONE;
         if(hasinput()) index = !hasinput(true) || commandmillis > 0 ? POINTER_NONE : POINTER_GUI;
-        else if(!showhud || !showcrosshair || game::focus->state == CS_DEAD || game::intermission || client::waiting() || (game::thirdpersonview(true) && game::focus != game::player1))
+        else if(!showhud || !showcrosshair || game::focus->state == CS_DEAD || game::intermission || client::waitplayers || client::waiting() || (game::thirdpersonview(true) && game::focus != game::player1))
             index = POINTER_NONE;
         else if(game::focus->state == CS_EDITING) index = POINTER_EDIT;
         else if(game::focus->state >= CS_SPECTATOR) index = POINTER_SPEC;
@@ -2797,7 +2797,7 @@ namespace hud
             case 1:
             {
                 int cm = cr+gap;
-                if(radarstyle == 3 && !game::intermission && !hasinput(true) && (game::focus->state == CS_EDITING ? showeditradar >= 1 : chkcond(showradar, !game::tvmode() || (game::focus != game::player1 && radarstyle==3))))
+                if(radarstyle == 3 && !game::intermission && !client::waitplayers && !hasinput(true) && (game::focus->state == CS_EDITING ? showeditradar >= 1 : chkcond(showradar, !game::tvmode() || (game::focus != game::player1 && radarstyle==3))))
                     cm += int(max(w, h)/2*radarcorner*2);
                 if(!texpaneltimer)
                 {
@@ -2824,9 +2824,10 @@ namespace hud
                         if(inventorytime)
                         {
                             if(m_edit(game::gamemode)) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fgediting\fS");
-                            else if((m_play(game::gamemode) || client::demoplayback) && game::timeremaining >= 0)
+                            else if(m_play(game::gamemode) || client::demoplayback)
                             {
                                 if(game::intermission) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fyintermission\fS");
+                                else if(client::waitplayers) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fywaiting\fS");
                                 else if(paused) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fopaused\fS", 0xFFFFFF);
                                 else if(game::timeremaining) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fg%s\fS", timestr(game::timeremaining, 2));
                             }
@@ -2915,7 +2916,7 @@ namespace hud
 
     int drawspecborder(int w, int h)
     {
-        float border = game::intermission || game::player1->state == CS_SPECTATOR ? specborder : waitborder;
+        float border = game::intermission || client::waitplayers || game::player1->state == CS_SPECTATOR ? specborder : waitborder;
         int s = int(h*0.5f*border);
         if(!s) return 0;
         usetexturing(false);
@@ -2987,7 +2988,7 @@ namespace hud
     int drawheadsup(int w, int h, int os, float fade)
     {
         int gap = 0;
-        if(game::intermission || game::player1->state == CS_SPECTATOR || game::player1->state == CS_WAITING) gap += drawspecborder(w, h);
+        if(game::intermission || client::waitplayers || game::player1->state == CS_SPECTATOR || game::player1->state == CS_WAITING) gap += drawspecborder(w, h);
         if(underlaydisplay >= 2 || (game::focus->state == CS_ALIVE && (underlaydisplay || !game::thirdpersonview(true))))
         {
             Texture *t = *underlaytex ? textureload(underlaytex, 3) : notexture;
@@ -2998,7 +2999,7 @@ namespace hud
                 drawtexture(0, gap, w, h-gap);
             }
         }
-        if(!game::intermission)
+        if(!game::intermission && !client::waitplayers)
         {
             bool third = game::thirdpersonview(true) && game::focus != game::player1;
             if(game::focus->state == CS_ALIVE && game::inzoom() && W(game::focus->weapselect, zooms)) drawzoom(w, h);
