@@ -3227,12 +3227,20 @@ char *rigcasestr(const char *s, const char *n)
         a++;
         b++;
     }
-    if(!passed && !*b)
+    if(!*b)
     {
-        char *p = strstr(start, needle);
-        if(p) ret = (char *)(s+(p-start));
+        if(passed) ret = (char *)s;
+        else
+        {
+            while(*a)
+            {
+                *a = tolower(*a);
+                a++;
+            }
+            char *p = strstr(start, needle);
+            if(p) ret = (char *)(s+(p-start));
+        }
     }
-    else if(!*b && passed) ret = (char *)s;
     delete[] start;
     delete[] needle;
     return ret;
