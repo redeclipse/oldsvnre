@@ -143,6 +143,9 @@ namespace hud
     VAR(IDF_PERSIST, teamhurtdist, 0, 0, VAR_MAX);
     FVAR(IDF_PERSIST, teamhurtsize, 0, 0.0175f, 1000);
 
+    FVAR(IDF_PERSIST, specborder, 0, 0.04f, 1);
+    FVAR(IDF_PERSIST, waitborder, 0, 0.04f, 1);
+
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, underlaytex, "", 3);
     VAR(IDF_PERSIST, underlaydisplay, 0, 0, 2); // 0 = only firstperson and alive, 1 = only when alive, 2 = always
     VAR(IDF_PERSIST, underlayblend, 0, 1, 1);
@@ -2910,6 +2913,16 @@ namespace hud
         drawtexture(x, y, c, c);
     }
 
+    void drawspecborder(int w, int h)
+    {
+        int border = game::player1->state == CS_SPECTATOR ? specborder : waitborder, size = int(h*border);
+        if(!size) return;
+        usetexturing(false);
+        drawblend(0, 0, w, size, 0, 0, 0, true);
+        drawblend(0, h-size, w, size, 0, 0, 0, true);
+        usetexturing(true);
+    }
+
     void drawbackground(int w, int h)
     {
         Texture *t = textureload(bgtex, 3);
@@ -3018,6 +3031,7 @@ namespace hud
             if(!hasinput(true) && (game::focus->state == CS_EDITING ? showeditradar >= 1 : chkcond(showradar, !game::tvmode() || (game::focus != game::player1 && radarstyle==3))))
                 drawradar(w, h, fade);
         }
+        if(game::player1->state == CS_SPECTATOR || game::player1->state == CS_WAITING) drawspecborder(w, h);
         drawinventory(w, h, os, fade);
     }
 
