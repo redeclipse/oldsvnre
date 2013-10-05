@@ -285,6 +285,7 @@ namespace hud
                         if((m_play(game::gamemode) || client::demoplayback) && game::timeremaining >= 0)
                         {
                             if(game::intermission) g.textf(", \fs\fyintermission\fS", 0xFFFFFF, NULL, 0);
+                            else if(client::waitplayers) g.textf(", \fs\fywaiting\fS", 0xFFFFFF, NULL, 0);
                             else if(paused) g.textf(", \fs\fopaused\fS", 0xFFFFFF, NULL, 0);
                             else if(game::timeremaining) g.textf(", \fs\fg%s\fS remain", 0xFFFFFF, NULL, 0, timestr(game::timeremaining, 2));
                         }
