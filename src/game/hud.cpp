@@ -3191,7 +3191,7 @@ namespace hud
         }
         if(UI::ready && showconsole && showhud)
         {
-            drawconsole(showconsole < 2 || noview ? 0 : 1, hudwidth, hudheight, gap+exgap, gap, hudwidth-gap*2, consolefade);
+            drawconsole(showconsole < 2 || noview ? 0 : 1, hudwidth, hudheight, gap, gap+exgap, hudwidth-gap*2, consolefade);
             if(showconsole >= 2 && !noview)
             {
                 int br = inv+gap*2, bs = (hudwidth-br*2)/2;
