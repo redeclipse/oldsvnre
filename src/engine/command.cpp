@@ -2941,7 +2941,7 @@ ICOMMAND(0, loopfiles, "rsse", (ident *id, char *dir, char *ext, uint *body),
     if(files.length()) poparg(*id);
 });
 
-ICOMMAND(0, findfile, "s", (char *name), 
+ICOMMAND(0, findfile, "s", (char *name),
 {
     string fname;
     copystring(fname, name);
@@ -3214,6 +3214,31 @@ ICOMMAND(0, echo, "C", (char *s), conoutft(CON_MESG, "%s", s));
 ICOMMAND(0, error, "C", (char *s), conoutft(CON_DEBUG, "\fr%s", s));
 ICOMMAND(0, strstr, "ss", (char *a, char *b), { char *s = strstr(a, b); intret(s ? s-a : -1); });
 ICOMMAND(0, strlen, "s", (char *s), intret(strlen(s)));
+
+char *rigcasestr(const char *s, const char *n)
+{
+    bool passed = true;
+    char *start = newstring(s), *needle = newstring(n), *a = start, *b = needle, *ret = NULL;
+    while(*a && *b)
+    {
+        *a = tolower(*a);
+        *b = tolower(*b);
+        if(passed && *a != *b) passed = false;
+        a++;
+        b++;
+    }
+    if(!passed && !*b)
+    {
+        char *p = strstr(start, needle);
+        if(p) ret = (char *)(s+(p-start));
+    }
+    else if(!*b && passed) ret = (char *)s;
+    delete[] start;
+    delete[] needle;
+    return ret;
+}
+
+ICOMMAND(0, strcasestr, "ss", (char *a, char *b), { char *s = rigcasestr(a, b); intret(s ? s-a : -1); });
 
 char *strreplace(const char *s, const char *oldval, const char *newval)
 {
