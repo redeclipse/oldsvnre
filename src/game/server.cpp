@@ -602,7 +602,7 @@ namespace server
 
         bool spawnqueue(bool all = false, bool needinfo = true)
         {
-            return m_fight(gamemode) && !m_duke(gamemode, mutators) && G(maxalive) > 0 && (!needinfo || (hasgameinfo && !gamewait)) && (!all || G(maxalivequeue)) && numclients() > 1;
+            return m_fight(gamemode) && !m_trial(gamemode) && !m_duke(gamemode, mutators) && G(maxalive) > 0 && (!needinfo || (hasgameinfo && !gamewait)) && (!all || G(maxalivequeue)) && numclients() > 1;
         }
 
         void queue(clientinfo *ci, bool msg = true, bool wait = true, bool top = false)
