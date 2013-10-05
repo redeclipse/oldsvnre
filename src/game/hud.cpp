@@ -2915,11 +2915,12 @@ namespace hud
 
     void drawspecborder(int w, int h)
     {
-        int border = game::player1->state == CS_SPECTATOR ? specborder : waitborder, size = int(h*border);
-        if(!size) return;
+        float border = game::player1->state == CS_SPECTATOR ? specborder : waitborder;
+        int s = int(h*border);
+        if(!s) return;
         usetexturing(false);
-        drawblend(0, 0, w, size, 0, 0, 0, true);
-        drawblend(0, h-size, w, size, 0, 0, 0, true);
+        drawblend(0, 0, w, s, 0, 0, 0, true);
+        drawblend(0, h-s, w, s, 0, 0, 0, true);
         usetexturing(true);
     }
 
