@@ -2915,7 +2915,7 @@ namespace hud
 
     int drawspecborder(int w, int h)
     {
-        float border = game::player1->state == CS_SPECTATOR ? specborder : waitborder;
+        float border = game::intermission || game::player1->state == CS_SPECTATOR ? specborder : waitborder;
         int s = int(h*0.5f*border);
         if(!s) return 0;
         usetexturing(false);
@@ -2987,7 +2987,7 @@ namespace hud
     int drawheadsup(int w, int h, int os, float fade)
     {
         int gap = 0;
-        if(game::player1->state == CS_SPECTATOR || game::player1->state == CS_WAITING) gap += drawspecborder(w, h);
+        if(game::intermission || game::player1->state == CS_SPECTATOR || game::player1->state == CS_WAITING) gap += drawspecborder(w, h);
         if(underlaydisplay >= 2 || (game::focus->state == CS_ALIVE && (underlaydisplay || !game::thirdpersonview(true))))
         {
             Texture *t = *underlaytex ? textureload(underlaytex, 3) : notexture;
