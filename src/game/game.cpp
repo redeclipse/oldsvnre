@@ -3361,11 +3361,19 @@ namespace game
             {
                 if(d != focus && playerhint&(d->team != focus->team ? 2 : 1))
                 {
+                    vec c = vec::hexcolor(getcolour(d, playerhinttone));
                     float radius = d->height*playerhintsize*blend;
+                    if(d->state == CS_ALIVE && d->lastbuff)
+                    {
+                        int millis = lastmillis%1000;
+                        float amt = millis <= 500 ? 1.f-(millis/500.f) : (millis-500)/500.f;
+                        flashcolour(c.r, c.g, c.b, 1.f, 1.f, 1.f, amt);
+                        radius += radius*amt*0.1f;
+                    }
                     vec o = d->center(), offset = vec(o).sub(camera1->o).rescale(radius/2);
                     offset.z = max(offset.z, -1.0f);
                     float fade = camera1->o.distrange(o, playerhintfadeat, playerhintfadecut)*blend*playerhintblend;
-                    part_create(PART_HINT_BOLD_SOFT, 1, offset.add(o), getcolour(d, playerhinttone), radius, fade);
+                    part_create(PART_HINT_BOLD_SOFT, 1, offset.add(o), c.tohexcolor(), radius, fade);
                 }
                 float minz = d == focus && !third && firstpersonbodyfeet >= 0 && d->wantshitbox() ? camera1->o.z-firstpersonbodyfeet : 0.f;
                 if(d->hasmelee(lastmillis, true, physics::sliding(d, true), d->physstate >= PHYS_SLOPE || d->onladder || physics::liquidcheck(d))) loopi(2)
