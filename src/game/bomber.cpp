@@ -263,6 +263,7 @@ namespace bomber
             c->o.z += enttype[AFFINITY].radius/2;
             c->type = cament::AFFINITY;
             c->id = i;
+            c->player = f.owner;
         }
     }
 
@@ -277,7 +278,7 @@ namespace bomber
                     bomberstate::flag &f = st.flags[c->id];
                     c->o = f.pos(true);
                     c->o.z += enttype[AFFINITY].radius/2;
-                    if(f.owner) c->player = f.owner;
+                    c->player = f.owner;
                 }
                 break;
             }

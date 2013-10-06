@@ -2361,6 +2361,7 @@ namespace game
                 switch(cam->type)
                 {
                     case cament::ENTITY: continue;
+                    case cament::AFFINITY: if(cam->player == c->player) continue;
                     case cament::PLAYER:
                     {
                         if(!cam->player || c->player == cam->player || !allowspec(cam->player, spectvdead, spectvfollowing)) continue;
