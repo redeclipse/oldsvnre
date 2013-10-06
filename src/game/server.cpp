@@ -1626,6 +1626,8 @@ namespace server
                             }
                         }
                         ancmsgft(-1, S_V_BALALERT, CON_EVENT, "\fy\fs\fzoyALERT\fS: \fs\fcteams\fS have now been \fs\fcbalanced\fS");
+                        lastteambalance = gamemillis+G(teambalancewait);
+                        nextteambalance = 0;
                     }
                 }
                 else
