@@ -1777,9 +1777,10 @@ namespace projs
     {
         if((!d || dynent::is(d)) && (d ? proj.projcollide&(d->type == ENT_PROJ ? COLLIDE_SHOTS : COLLIDE_PLAYER) : proj.projcollide&COLLIDE_GEOM))
         {
+            proj.norm = norm;
             if(d)
             {
-                proj.norm = vec(proj.o).sub(d->center()).normalize();
+                if(proj.norm.iszero()) proj.norm = vec(proj.o).sub(d->center()).normalize();
                 if(proj.norm.iszero()) proj.norm = vec(proj.vel).normalize().neg();
                 if((d->type == ENT_AI || d->type == ENT_PLAYER) && proj.projcollide&IMPACT_PLAYER && proj.projcollide&STICK_PLAYER)
                 {
@@ -1790,7 +1791,6 @@ namespace projs
             }
             else
             {
-                proj.norm = norm;
                 if(proj.norm.iszero()) proj.norm = vec(proj.vel).normalize().neg();
                 if(proj.projcollide&IMPACT_GEOM && proj.projcollide&STICK_GEOM)
                 {
