@@ -2899,16 +2899,9 @@ namespace game
         {
             o.sub(vec(yaw*RAD, 0.f).mul(firstpersonbodydist+firstpersonspineoffset));
             o.sub(vec(yaw*RAD, 0.f).rotate_around_z(90*RAD).mul(firstpersonbodyside));
-            if(d->zradius > d->height)
-            {
-                float offz = d->zradius-d->height;
-                if(onfloor || d->turnside) { if(d->floortime(lastmillis) <= 50) { offz *= 1-(d->floortime(lastmillis)/50.f); } }
-                else if(d->airtime(lastmillis) <= 50) offz *= d->airtime(lastmillis)/50.f;
-                o.z -= offz;
-            }
             if(firstpersonbodyfeet >= 0 && d->wantshitbox())
             {
-                float minz = max(d->footpos(0).z, d->footpos(1).z)+firstpersonbodyfeet;
+                float minz = max(d->toe[0].z, d->toe[1].z)+firstpersonbodyfeet;
                 if(minz > camera1->o.z) o.z -= minz-camera1->o.z;
             }
         }
