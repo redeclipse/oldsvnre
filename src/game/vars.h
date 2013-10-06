@@ -169,7 +169,9 @@ GVAR(0, bomberdelay, 0, 3000, VAR_MAX); // delay before spawning in bomber
 GVAR(0, spawnprotect, 0, 3000, VAR_MAX); // delay before damage can be dealt to spawning player
 GVAR(0, duelprotect, 0, 5000, VAR_MAX); // .. in duel/survivor matches
 GVAR(0, instaprotect, 0, 3000, VAR_MAX); // .. in instagib matches
+
 GVAR(0, radardisabled, 0, 0, 1); // forces the radar to be off
+GVAR(0, radardistlimit, 0, 0, VAR_MAX); // forces the radar to this distance max, 0 = off
 
 GVAR(0, balancemaps, -1, -1, 1); // determined if map team balancing is used: -1 = map default, 0 = off, 1 = on
 GVAR(0, balancedelay, 0, 10000, 30000); // before mapbalance forces

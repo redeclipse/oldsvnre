@@ -1757,15 +1757,17 @@ namespace hud
         popfont();
     }
 
-    float radarrange()
+    int radarrange()
     {
         if(game::focus->state == CS_EDITING) return editradardist ? editradardist : getworldsize();
+        int dist = getworldsize();
         switch(radarstyle)
         {
-            case 3: return radarcornerdist ? radarcornerdist : getworldsize();
-            case 2: case 1: case 0: case -1: default: return radardist ? radardist : getworldsize();
+            case 3: dist = radarcornerdist ? radarcornerdist : getworldsize(); break;
+            case 2: case 1: case 0: case -1: default: dist = radardist ? radardist : getworldsize(); break;
         }
-        return getworldsize();
+        if(radardistlimit) dist = min(radardistlimit, dist);
+        return dist;
     }
 
     void drawblip(const char *tex, float area, int w, int h, float s, float blend, int style, vec &pos, const vec &colour, const char *font, const char *text, ...)
@@ -1780,7 +1782,7 @@ namespace hud
         else
         {
             dir = style ? vec(pos).sub(camera1->o) : pos;
-            dist = clamp(dir.magnitude()/radarrange(), 0.f, 1.f);
+            dist = clamp(dir.magnitude()/float(radarrange()), 0.f, 1.f);
         }
         dir.rotate_around_z(-camera1->yaw*RAD).normalize();
         vec loc(0, 0, 0);
@@ -1931,7 +1933,7 @@ namespace hud
             else colour[0] = vec::hexcolor(game::getcolour(d, game::playerundertone));
             colour[1] = vec::hexcolor(game::getcolour(d, game::playerovertone));
             const char *tex = isdominated ? dominatedtex : (killer || self ? arrowtex : playerbliptex);
-            float fade = (force || killer || self || dominated ? 1.f : clamp(1.f-(dist/radarrange()), isdominated ? 0.25f : 0.f, 1.f))*blend, size = killer || self ? 1.5f : (isdominated ? 1.25f : 1.f);
+            float fade = (force || killer || self || dominated ? 1.f : clamp(1.f-(dist/float(radarrange())), isdominated ? 0.25f : 0.f, 1.f))*blend, size = killer || self ? 1.5f : (isdominated ? 1.25f : 1.f);
             if(!self && (d->state == CS_DEAD || d->state == CS_WAITING))
             {
                 int millis = d->lastdeath ? lastmillis-d->lastdeath : 0;
@@ -1986,7 +1988,7 @@ namespace hud
             }
             const char *tex = bliptex;
             vec colour(1, 1, 1);
-            float fade = insel ? 1.f : clamp(1.f-(dist/radarrange()), 0.1f, 1.f), size = radarblipsize;
+            float fade = insel ? 1.f : clamp(1.f-(dist/float(radarrange())), 0.1f, 1.f), size = radarblipsize;
             if(type == WEAPON)
             {
                 int attr1 = w_attr(game::gamemode, game::mutators, attr[0], m_weapon(game::gamemode, game::mutators));
