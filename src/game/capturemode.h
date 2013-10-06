@@ -15,7 +15,7 @@ struct captureservmode : capturestate, servmode
         if(!canplay(hasflaginfo) || ci->state.actortype >= A_ENEMY) return;
         int numflags = 0, iterflags = 0;
         loopv(flags) if(flags[i].owner == ci->clientnum) numflags++;
-        vec dir = inertia, olddir = dir, v = o; v.z += 1;
+        vec dir = inertia, olddir = dir;
         if(numflags > 1 && dir.iszero())
         {
             dir.x = -sinf(RAD*ci->state.yaw);
@@ -31,16 +31,16 @@ struct captureservmode : capturestate, servmode
                 dir = vec(olddir).rotate_around_z(yaw*RAD);
                 iterflags++;
             }
-            ivec p(vec(v).mul(DMF)), q(vec(dir).mul(DMF));
+            ivec p(vec(o).mul(DMF)), q(vec(dir).mul(DMF));
             sendf(-1, 1, "ri3i7", N_DROPAFFIN, ci->clientnum, -1, i, p.x, p.y, p.z, q.x, q.y, q.z);
-            capturestate::dropaffinity(i, v, dir, gamemillis);
+            capturestate::dropaffinity(i, o, dir, gamemillis);
         }
     }
 
     void leavegame(clientinfo *ci, bool disconnecting = false)
     {
         if(!canplay(hasflaginfo)) return;
-        dropaffinity(ci, ci->state.o, vec(ci->state.vel).add(ci->state.falling));
+        dropaffinity(ci, ci->state.feetpos(1), vec(ci->state.vel).add(ci->state.falling));
     }
 
     void dodamage(clientinfo *m, clientinfo *v, int &damage, int &hurt, int &weap, int &flags, int &material, const ivec &hitpush)
@@ -51,7 +51,7 @@ struct captureservmode : capturestate, servmode
     void died(clientinfo *ci, clientinfo *v)
     {
         if(!canplay(hasflaginfo)) return;
-        dropaffinity(ci, ci->state.o, vec(ci->state.vel).add(ci->state.falling));
+        dropaffinity(ci, ci->state.feetpos(1), vec(ci->state.vel).add(ci->state.falling));
     }
 
     int addscore(int team, int points = 1)

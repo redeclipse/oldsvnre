@@ -15,19 +15,19 @@ struct bomberservmode : bomberstate, servmode
     void dropaffinity(clientinfo *ci, const vec &o, const vec &inertia = vec(0, 0, 0), int target = -1)
     {
         if(!canplay(hasflaginfo) || ci->state.actortype >= A_ENEMY) return;
-        vec n = inertia.iszero() ? vec(0, 0, G(bomberspeed)/10.f) : inertia, v = o; v.z += 1;
+        vec n = inertia.iszero() ? vec(0, 0, G(bomberspeed)/10.f) : inertia;
         loopv(flags) if(flags[i].owner == ci->clientnum)
         {
-            ivec p(vec(v).mul(DMF)), q(vec(n).mul(DMF));
+            ivec p(vec(o).mul(DMF)), q(vec(n).mul(DMF));
             sendf(-1, 1, "ri3i7", N_DROPAFFIN, ci->clientnum, target, i, p.x, p.y, p.z, q.x, q.y, q.z);
-            bomberstate::dropaffinity(i, v, n, gamemillis);
+            bomberstate::dropaffinity(i, o, n, gamemillis);
         }
     }
 
     void leavegame(clientinfo *ci, bool disconnecting = false)
     {
         if(!canplay(hasflaginfo)) return;
-        dropaffinity(ci, ci->state.o, vec(ci->state.vel).add(ci->state.falling));
+        dropaffinity(ci, ci->state.feetpos(1), vec(ci->state.vel).add(ci->state.falling));
     }
 
     void dodamage(clientinfo *m, clientinfo *v, int &damage, int &hurt, int &weap, int &flags, int &material, const ivec &hitpush)
@@ -57,7 +57,7 @@ struct bomberservmode : bomberstate, servmode
     void died(clientinfo *ci, clientinfo *v)
     {
         if(!canplay(hasflaginfo)) return;
-        dropaffinity(ci, ci->state.o, vec(ci->state.vel).add(ci->state.falling));
+        dropaffinity(ci, ci->state.feetpos(1), vec(ci->state.vel).add(ci->state.falling));
         if(v && m_gsp1(gamemode, mutators) && (!m_team(gamemode, mutators) || ci->team != v->team))
         {
             loopv(flags) if(isbomberaffinity(flags[i]) && flags[i].owner == v->clientnum)
@@ -235,7 +235,7 @@ struct bomberservmode : bomberstate, servmode
                 {
                     ci->state.weapshots[W_GRENADE][0].add(1);
                     sendf(-1, 1, "ri8", N_DROP, ci->clientnum, -1, 1, W_GRENADE, -1, -1, -1);
-                    dropaffinity(ci, ci->state.o, vec(ci->state.vel).add(ci->state.falling));
+                    dropaffinity(ci, ci->state.feetpos(1), vec(ci->state.vel).add(ci->state.falling));
                     if((!m_team(gamemode, mutators) || m_gsp1(gamemode, mutators)) && G(bomberholdpenalty))
                     {
                         givepoints(ci, -G(bomberholdpenalty));

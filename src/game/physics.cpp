@@ -1590,10 +1590,7 @@ namespace physics
                 doposchk; \
             }
         doposchk;
-        inmapchk(20, {
-            d->o.z += (d->height+d->aboveeye)*n/10.f;
-            physics::droptofloor(d->o, maxrad, d->height);
-        });
+        inmapchk(20, d->o.z += (d->height+d->aboveeye)*n/10.f);
         if(gameent::is(d))
         {
             vec dir;
