@@ -251,6 +251,10 @@ namespace server
             vel = falling = vec(0, 0, 0);
             yaw = pitch = roll = 0;
         }
+
+        vec feetpos(float offset = 0) const { return vec(o).add(vec(0, 0, offset)); }
+        vec headpos(float offset = 0) const { return vec(o).add(vec(0, 0, offset+actor[A_PLAYER].height)); }
+        vec center() const { return vec(o).add(vec(0, 0, actor[A_PLAYER].height*0.5f)); }
     };
 
     struct savedscore
