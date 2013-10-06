@@ -669,7 +669,6 @@ namespace entities
                             teleported = true;
                             break;
                         }
-                        else conoutft(CON_SELF, "failed to teleport from %d to %d", n, q);
                         d->o = orig;
                         d->vel = ovel;
                         d->yaw = oyaw;
