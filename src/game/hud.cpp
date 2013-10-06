@@ -63,14 +63,18 @@ namespace hud
     VAR(IDF_PERSIST, conoverflow, 0, 5, VAR_MAX);
     VAR(IDF_PERSIST, concenter, 0, 0, 1);
     VAR(IDF_PERSIST, confilter, 0, 1, 1);
+    VAR(IDF_PERSIST, condate, 0, 0, 1);
     FVAR(IDF_PERSIST, conblend, 0, 0.6f, 1);
     FVAR(IDF_PERSIST, conscale, FVAR_NONZERO, 1, FVAR_MAX);
+    SVAR(IDF_PERSIST, condateformat, "%H:%M:%S");
     VAR(IDF_PERSIST, chatconsize, 0, 5, 100);
     VAR(IDF_PERSIST, chatcontime, 0, 30000, VAR_MAX);
     VAR(IDF_PERSIST, chatconfade, 0, 2000, VAR_MAX);
     VAR(IDF_PERSIST, chatconoverflow, 0, 5, VAR_MAX);
+    VAR(IDF_PERSIST, chatcondate, 0, 0, 1);
     FVAR(IDF_PERSIST, chatconblend, 0, 1, 1);
     FVAR(IDF_PERSIST, chatconscale, FVAR_NONZERO, 1, FVAR_MAX);
+    SVAR(IDF_PERSIST, chatcondateformat, "%H:%M:%S");
 
     FVAR(IDF_PERSIST, selfconblend, 0, 1, 1);
     FVAR(IDF_PERSIST, fullconblend, 0, 1, 1);
@@ -1585,7 +1589,9 @@ namespace hud
                     int len = !full && conlines[refs[j]].type > CON_CHAT ? chatcontime/2 : chatcontime;
                     float f = full || !chatconfade ? 1.f : clamp(((len+chatconfade)-(totalmillis-conlines[refs[j]].reftime))/float(chatconfade), 0.f, 1.f),
                         g = conlines[refs[j]].type > CON_CHAT ? conblend : chatconblend;
-                    tz += draw_textx("%s", tr, ty-tz, 255, 255, 255, int(255*fade*f*g), TEXT_LEFT_UP, -1, ts, conlines[refs[j]].cref)*f;
+                    if(chatcondate && *chatcondateformat)
+                        tz += draw_textx("%s %s", tr, ty-tz, 255, 255, 255, int(255*fade*f*g), TEXT_LEFT_UP, -1, ts, gettime(conlines[refs[j]].realtime, chatcondateformat), conlines[refs[j]].cref)*f;
+                    else tz += draw_textx("%s", tr, ty-tz, 255, 255, 255, int(255*fade*f*g), TEXT_LEFT_UP, -1, ts, conlines[refs[j]].cref)*f;
                 }
                 glPopMatrix();
                 tz = int(tz*chatconscale);
@@ -1635,7 +1641,9 @@ namespace hud
                     int len = !full && conlines[refs[i]].type < CON_IMPORTANT ? contime/2 : contime;
                     float f = full || !confade ? 1.f : clamp(((len+confade)-(totalmillis-conlines[refs[i]].reftime))/float(confade), 0.f, 1.f),
                         g = full ? fullconblend  : (conlines[refs[i]].type >= CON_IMPORTANT ? selfconblend : conblend);
-                    tz += draw_textx("%s", tr, ty+tz, 255, 255, 255, int(255*fade*f*g), concenter ? TEXT_CENTERED : TEXT_LEFT_JUSTIFY, -1, ts, conlines[refs[i]].cref)*f;
+                    if(condate && *condateformat)
+                        tz += draw_textx("%s %s", tr, ty+tz, 255, 255, 255, int(255*fade*f*g), concenter ? TEXT_CENTERED : TEXT_LEFT_JUSTIFY, -1, ts, gettime(conlines[refs[i]].realtime, condateformat), conlines[refs[i]].cref)*f;
+                    else tz += draw_textx("%s", tr, ty+tz, 255, 255, 255, int(255*fade*f*g), concenter ? TEXT_CENTERED : TEXT_LEFT_JUSTIFY, -1, ts, conlines[refs[i]].cref)*f;
                 }
                 glPopMatrix();
                 tz = int(tz*conscale);
