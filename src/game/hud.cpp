@@ -2800,7 +2800,7 @@ namespace hud
             case 1:
             {
                 int cm = cr+gap;
-                if(radarstyle == 3 && !game::intermission && !client::waitplayers && !hasinput(true) && (game::focus->state == CS_EDITING ? showeditradar >= 1 : chkcond(showradar, !game::tvmode() || (game::focus != game::player1 && radarstyle==3))))
+                if(!radardisabled && radarstyle == 3 && !game::intermission && !client::waitplayers && !hasinput(true) && (game::focus->state == CS_EDITING ? showeditradar >= 1 : chkcond(showradar, !game::tvmode() || (game::focus != game::player1 && radarstyle==3))))
                     cm += int(max(w, h)/2*radarcorner*2);
                 if(!texpaneltimer)
                 {
@@ -3054,7 +3054,7 @@ namespace hud
                     }
                 }
             }
-            if(!hasinput(true) && (game::focus->state == CS_EDITING ? showeditradar >= 1 : chkcond(showradar, !game::tvmode() || (game::focus != game::player1 && radarstyle==3))))
+            if(!radardisabled && !hasinput(true) && (game::focus->state == CS_EDITING ? showeditradar >= 1 : chkcond(showradar, !game::tvmode() || (game::focus != game::player1 && radarstyle==3))))
                 drawradar(w, h, fade);
         }
         drawinventory(w, h, os, gap, fade);
