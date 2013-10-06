@@ -3,7 +3,7 @@
 extern int verbose, curtime, lastmillis, totalmillis, timescale, paused;
 extern uint totalsecs;
 extern time_t clocktime;
-extern int servertype, serverport, servermasterport;
+extern int servertype, serverport, serverlanport, servermasterport;
 extern char *servermaster, *serverip;
 extern ENetAddress masteraddress;
 extern void fatal(const char *s, ...) PRINTFARGS(1, 2);

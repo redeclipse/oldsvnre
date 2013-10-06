@@ -284,11 +284,11 @@ void pingservers()
         si.checkdecay(serverdecay*1000);
     }
 
-    if(searchlan)
+    if(searchlan && serverlanport)
     {
         ENetAddress address;
         address.host = ENET_HOST_BROADCAST;
-        address.port = LAN_PORT;
+        address.port = serverlanport;
         buf.data = ping;
         buf.dataLength = p.length();
         enet_socket_send(pingsock, &address, &buf, 1);
