@@ -17,6 +17,7 @@ void conline(int type, const char *sf, int n)
     cl.type = type;
     cl.cref = buf;
     cl.reftime = cl.outtime = totalmillis;
+    cl.realtime = clocktime;
 
     int c = 0;
     #define addcref(d) { cl.cref[c] = d; c++; }
