@@ -194,6 +194,7 @@ namespace capture
             c->o.z += enttype[AFFINITY].radius*2/3;
             c->type = cament::AFFINITY;
             c->id = i;
+            c->player = f.owner;
         }
     }
 
@@ -208,7 +209,7 @@ namespace capture
                     capturestate::flag &f = st.flags[c->id];
                     c->o = f.pos(true);
                     c->o.z += enttype[AFFINITY].radius*2/3;
-                    if(f.owner) c->player = f.owner;
+                    c->player = f.owner;
                 }
                 break;
             }
