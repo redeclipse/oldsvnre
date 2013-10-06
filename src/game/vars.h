@@ -244,7 +244,7 @@ GVAR(0, selfdamage, 0, 1, 1); // 0 = off, 1 = either hurt self or use teamdamage
 GFVAR(0, selfdamagescale, FVAR_MIN, 1, FVAR_MAX); // 0 = off, anything else = scale for damage
 GVAR(0, teamdamage, 0, 1, 2); // 0 = off, 1 = non-bots damage team, 2 = all players damage team
 GFVAR(0, teamdamagescale, FVAR_MIN, 1, FVAR_MAX); // 0 = off, anything else = scale for damage
-GVAR(0, teambalance, 0, 1, 2); // 0 = off, 1 = by number then rank, 2 = by rank then number
+GVAR(0, teambalance, 0, 3, 3); // 0 = off, 1 = by number then rank, 2 = by rank then number, 3 = by number and enforce
 GVAR(0, teampersist, 0, 1, 2); // 0 = off, 1 = only attempt, 2 = forced
 GVAR(0, pointlimit, 0, 0, VAR_MAX); // finish when score is this or more
 
@@ -365,7 +365,7 @@ GFVAR(0, enemyspeed, 0, 1, FVAR_MAX);
 GFVAR(0, enemyscale, FVAR_NONZERO, 1, FVAR_MAX);
 GFVAR(0, enemystrength, FVAR_NONZERO, 1, FVAR_MAX); // scale enemy health values by this much
 GFVAR(0, enemyspawndistmin, 0, 0, FVAR_MAX);
-GFVAR(0, enemyspawndistmax, 0, 256, FVAR_MAX);
+GFVAR(0, enemyspawndistmax, 0, 64, FVAR_MAX);
 
 GFVAR(0, movespeed, FVAR_NONZERO, 100, FVAR_MAX); // speed
 GFVAR(0, movecrawl, 0, 0.6f, FVAR_MAX); // crawl modifier
