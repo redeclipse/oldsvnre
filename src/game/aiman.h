@@ -17,6 +17,17 @@ namespace aiman
         return least;
     }
 
+    int getlimit(int type = A_BOT)
+    {
+        if(type >= A_ENEMY) return G(enemylimit);
+        if(m_coop(gamemode, mutators))
+        {
+            int people = numclients(-1, true, -1), numt = numteams(gamemode, mutators)-1;
+            return int(ceilf(people*numt*(m_multi(gamemode, mutators) ? G(coopmultibalance) : G(coopbalance))));
+        }
+        return G(botlimit);
+    }
+
     void getskillrange(int type, int &m, int &n)
     {
         switch(type)
@@ -42,31 +53,24 @@ namespace aiman
 
     bool addai(int type, int ent, int skill)
     {
-        int numbots = 0, numenemies = 0;
-        loopv(clients)
+        int count = 0, limit = getlimit(type);
+        if(!limit) return false;
+        loopv(clients) if(clients[i]->state.actortype == type)
         {
-            if(type == A_BOT && numbots >= G(botlimit)) return false;
-            if(type >= A_ENEMY && numenemies >= G(enemylimit)) return false;
-            if(clients[i]->state.actortype == type)
-            {
-                clientinfo *ci = clients[i];
-                if(ci->state.ownernum < 0)
-                { // reuse a slot that was going to removed
-                    clientinfo *owner = findaiclient();
-                    if(!owner) return false;
-                    ci->state.ownernum = owner->clientnum;
-                    owner->bots.add(ci);
-                    ci->state.aireinit = 1;
-                    ci->state.actortype = type;
-                    ci->state.spawnpoint = ent;
-                    return true;
-                }
-                if(type == A_BOT) numbots++;
-                if(type >= A_ENEMY) numenemies++;
+            clientinfo *ci = clients[i];
+            if(ci->state.ownernum < 0)
+            { // reuse a slot that was going to removed
+                clientinfo *owner = findaiclient();
+                if(!owner) return false;
+                ci->state.ownernum = owner->clientnum;
+                owner->bots.add(ci);
+                ci->state.aireinit = 1;
+                ci->state.actortype = type;
+                ci->state.spawnpoint = ent;
+                return true;
             }
+            if(++count >= limit) return false;
         }
-        if(type == A_BOT && numbots >= G(botlimit)) return false;
-        if(type >= A_ENEMY && numenemies >= G(enemylimit)) return false;
         int cn = addclient(ST_REMOTE);
         if(cn >= 0)
         {
@@ -206,7 +210,7 @@ namespace aiman
 
     void checksetup()
     {
-        int m = 100, n = 1, numbots = 0, numenemies = 0;
+        int m = 100, n = 1, numbots = 0, numenemies = 0, blimit = getlimit(A_BOT), elimit = getlimit(A_ENEMY);
         loopv(clients) if(clients[i]->state.actortype > A_PLAYER && clients[i]->state.ownernum >= 0)
         {
             clientinfo *ci = clients[i];
@@ -216,8 +220,8 @@ namespace aiman
                 ci->state.skill = (m != n ? rnd(m-n) + n + 1 : m);
                 if(!ci->state.aireinit) ci->state.aireinit = 1;
             }
-            if(ci->state.actortype == A_BOT && ++numbots >= G(botlimit)) shiftai(ci, NULL);
-            if(ci->state.actortype >= A_ENEMY && ++numenemies >= G(enemylimit)) shiftai(ci, NULL);
+            if(ci->state.actortype == A_BOT && ++numbots >= blimit) shiftai(ci, NULL);
+            if(ci->state.actortype >= A_ENEMY && ++numenemies >= elimit) shiftai(ci, NULL);
         }
 
         int balance = 0, people = numclients(-1, true, -1), numt = numteams(gamemode, mutators);
@@ -230,7 +234,7 @@ namespace aiman
             numt--; // filter out the human team
             balance = people+int(ceilf(people*numt*(m_multi(gamemode, mutators) ? G(coopmultibalance) : G(coopbalance))));
         }
-        else if(m_bots(gamemode) && G(botlimit) > 0)
+        else if(m_bots(gamemode) && blimit > 0)
         {
             switch(G(botbalance))
             {
@@ -260,7 +264,7 @@ namespace aiman
         }
         balance += G(botoffset)*numt;
         int bots = balance-people;
-        if(bots > G(botlimit)) balance -= bots-G(botlimit);
+        if(bots > blimit) balance -= bots-blimit;
         if(balance > 0)
         {
             while(numclients(-1, true, A_BOT) < balance) if(!addai(A_BOT)) break;

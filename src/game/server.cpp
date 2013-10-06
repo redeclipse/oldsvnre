@@ -2475,18 +2475,23 @@ namespace server
         ~teamcheck() {}
     };
 
-    bool allowteam(clientinfo *ci, int team, int first = T_FIRST)
+    int chooseteam(clientinfo *ci, int suggest = -1);
+    bool allowteam(clientinfo *ci, int team, int first = T_FIRST, bool check = true)
     {
         if(isteam(gamemode, mutators, team, first))
         {
-            if(!m_coop(gamemode, mutators)) return true;
-            else if(ci->state.actortype > A_PLAYER) return team != mapbals[curbalance][0];
+            if(!m_coop(gamemode, mutators))
+            {
+                if(check && G(teambalance) == 3 && team != chooseteam(ci, team)) return false;
+                return true;
+            }
+            else if(ci->state.actortype >= A_BOT) return team != mapbals[curbalance][0];
             else return team == mapbals[curbalance][0];
         }
         return false;
     }
 
-    int chooseteam(clientinfo *ci, int suggest = -1)
+    int chooseteam(clientinfo *ci, int suggest)
     {
         if(ci->state.actortype >= A_ENEMY) return T_ENEMY;
         else if(m_fight(gamemode) && m_team(gamemode, mutators) && ci->state.state != CS_SPECTATOR && ci->state.state != CS_EDITING)
@@ -2501,14 +2506,14 @@ namespace server
                     { suggest, ci->team, ci->lastteam },
                     { suggest, ci->lastteam, ci->team }
                 };
-                loopi(3) if(allowteam(ci, teams[G(teampersist)][i], T_FIRST))
+                loopi(3) if(allowteam(ci, teams[G(teampersist)][i], T_FIRST, false))
                 {
                     team = teams[G(teampersist)][i];
-                    if(G(teampersist) == 2) return team;
+                    if(bal != 3 && G(teampersist) == 2) return team;
                     break;
                 }
             }
-            if(bal || team < 0)
+            if(bal || team < 0) loopj(2)
             {
                 teamcheck teamchecks[T_TOTAL];
                 loopk(T_TOTAL) teamchecks[k].team = T_FIRST+k;
@@ -2527,28 +2532,33 @@ namespace server
                     }
                 }
                 teamcheck *worst = NULL;
-                loopi(numteams(gamemode, mutators)) if(allowteam(ci, teamchecks[i].team, T_FIRST))
+                loopi(numteams(gamemode, mutators)) if(allowteam(ci, teamchecks[i].team, T_FIRST, false))
                 {
                     teamcheck &ts = teamchecks[i];
                     switch(bal)
                     {
                         case 2:
                         {
-                            if(!worst || ts.score < worst->score || (ts.score == worst->score && ts.clients < worst->clients))
+                            if(!worst || (!j && ts.team == team && ts.score <= worst->score) || ts.score < worst->score || ((j || worst->team != team) && ts.score == worst->score && ts.clients < worst->clients))
                                 worst = &ts;
                             break;
                         }
-                        case 1: default:
+                        case 1: case 3: default:
                         {
-                            if(!worst || ts.clients < worst->clients || (ts.clients == worst->clients && ts.score < worst->score))
+                            if(!worst || (!j && ts.team == team && ts.clients <= worst->clients) || ts.clients < worst->clients || ((j || worst->team != team) && ts.clients == worst->clients && ts.score < worst->score))
                                 worst = &ts;
                             break;
                         }
                     }
                 }
-                team = worst ? worst->team : T_ALPHA;
+                if(worst)
+                {
+                    team = worst->team;
+                    break;
+                }
+                team = -1;
             }
-            return team;
+            return allowteam(ci, team, T_FIRST, false) ? team : T_ALPHA;
         }
         return T_NEUTRAL;
     }
