@@ -402,14 +402,11 @@ namespace server
         extern void checkai();
     }
 
-    bool hasgameinfo = false;
-    int gamemode = G_EDITMODE, mutators = 0, gamemillis = 0, gamelimit = 0;
     string smapname;
-    int interm = 0, timeremaining = -1, oldtimelimit = -1, gamewait = 0, lastwaitinfo = 0;
-    bool maprequest = false, inovertime = false;
+    int gamemode = G_EDITMODE, mutators = 0, gamemillis = 0, gamelimit = 0, mastermode = MM_OPEN;
+    int interm = 0, timeremaining = -1, oldtimelimit = -1, gamewait = 0, lastwaitinfo = 0, lastteambalance = 0, nextteambalance = 0;
+    bool hasgameinfo = false, maprequest = false, inovertime = false, updatecontrols = false, mapsending = false, shouldcheckvotes = false, firstblood = false;
     enet_uint32 lastsend = 0;
-    int mastermode = MM_OPEN;
-    bool updatecontrols = false, mapsending = false, shouldcheckvotes = false;
     stream *mapdata[SENDMAP_MAX] = { NULL };
     uint mapcrc = 0;
     vector<clientinfo *> clients, connects;
@@ -1569,6 +1566,82 @@ namespace server
                 }
             }
         }
+        if(m_fight(gamemode) && m_team(gamemode, mutators) && !m_coop(gamemode, mutators) && G(teambalance) == 4 && !inovertime && !interm &&
+           gamemillis > G(teambalancewait) && (!lastteambalance || gamemillis >= lastteambalance) && (!nextteambalance || gamemillis >= nextteambalance))
+        {
+            vector<clientinfo *> tc[T_TOTAL];
+            int numplaying = 0;
+            loopv(clients)
+            {
+                clientinfo *cp = clients[i];
+                if(!cp->team || cp->state.state == CS_SPECTATOR || cp->state.actortype > A_PLAYER) continue;
+                tc[cp->team-T_FIRST].add(cp);
+                numplaying++;
+            }
+            if(numplaying >= G(teambalanceplaying))
+            {
+                int nt = numteams(gamemode, mutators), mid = numplaying/nt, pmax = -1, pmin = -1;
+                loopi(nt)
+                {
+                    int cl = tc[i].length();
+                    if(pmax < 0 || cl > pmax) pmax = cl;
+                    if(pmin < 0 || cl < pmin) pmin = cl;
+                }
+                int offset = pmax-pmin;
+                if(offset > G(teambalanceamt))
+                {
+                    if(!nextteambalance)
+                    {
+                        int secs = G(teambalancedelay)/1000;
+                        nextteambalance = gamemillis+G(teambalancedelay);
+                        ancmsgft(-1, S_V_BALWARN, CON_EVENT, "\fy\fs\fzoyWARNING\fS: \fs\fcteams\fS will be \fs\fcbalanced\fS in \fs\fc%d\fS %s", secs, secs != 1 ? "seconds" : "second");
+                    }
+                    else
+                    {
+                        loopi(nt)
+                        {
+                            int iters = tc[i].length()*2;
+                            while(iters > 0 && tc[i].length() > mid)
+                            {
+                                int id = -1;
+                                loopvj(tc[i])
+                                {
+                                    tc[i][j]->state.timeplayed += lastmillis-tc[i][j]->state.lasttimeplayed;
+                                    tc[i][j]->state.lasttimeplayed = lastmillis;
+                                    if(id < 0 || tc[i][id]->state.timeplayed >= tc[i][j]->state.timeplayed)
+                                        id = j;
+                                }
+                                if(id >= 0)
+                                {
+                                    clientinfo *cp = tc[i][id];
+                                    int team = chooseteam(cp);
+                                    if(team != cp->team)
+                                    {
+                                        setteam(cp, team);
+                                        tc[i].removeobj(cp);
+                                        tc[team-T_FIRST].add(cp);
+                                    }
+                                }
+                                iters--;
+                            }
+                        }
+                        ancmsgft(-1, S_V_BALALERT, CON_EVENT, "\fy\fs\fzoyALERT\fS: \fs\fcteams\fS have now been \fs\fcbalanced\fS");
+                    }
+                }
+                else
+                {
+                    if(nextteambalance) ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fy\fs\fcteams\fS no longer need to be \fs\fcbalanced\fS");
+                    lastteambalance = gamemillis+(nextteambalance ? G(teambalancewait) : G(teambalancedelay));
+                    nextteambalance = 0;
+                }
+            }
+            else
+            {
+                if(nextteambalance) ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fy\fs\fcteams\fS are no longer able to be \fs\fcbalanced\fS");
+                lastteambalance = gamemillis+(nextteambalance ? G(teambalancewait) : G(teambalancedelay));
+                nextteambalance = 0;
+            }
+        }
     }
 
     bool hasitem(int i)
@@ -2479,14 +2552,13 @@ namespace server
         ~teamcheck() {}
     };
 
-    int chooseteam(clientinfo *ci, int suggest = -1);
     bool allowteam(clientinfo *ci, int team, int first = T_FIRST, bool check = true)
     {
         if(isteam(gamemode, mutators, team, first))
         {
             if(!m_coop(gamemode, mutators))
             {
-                if(check && G(teambalance) == 3 && team != chooseteam(ci, team)) return false;
+                if(check && G(teambalance) >= 3 && team != chooseteam(ci, team)) return false;
                 return true;
             }
             else if(ci->state.actortype >= A_BOT) return team != mapbals[curbalance][0];
@@ -2513,7 +2585,7 @@ namespace server
                 loopi(3) if(allowteam(ci, teams[G(teampersist)][i], T_FIRST, false))
                 {
                     team = teams[G(teampersist)][i];
-                    if(bal != 3 && G(teampersist) == 2) return team;
+                    if(bal <= 2 && G(teampersist) == 2) return team;
                     break;
                 }
             }
@@ -2547,7 +2619,7 @@ namespace server
                                 worst = &ts;
                             break;
                         }
-                        case 1: case 3: default:
+                        case 1: case 3: case 4: default:
                         {
                             if(!worst || (!j && ts.team == team && ts.clients <= worst->clients) || ts.clients < worst->clients || ((j || worst->team != team) && ts.clients == worst->clients && ts.score < worst->score))
                                 worst = &ts;
@@ -2639,7 +2711,6 @@ namespace server
     #include "duelmut.h"
     #include "aiman.h"
 
-    bool firstblood = false;
     void changemap(const char *name, int mode, int muts)
     {
         hasgameinfo = maprequest = mapsending = shouldcheckvotes = firstblood = false;
