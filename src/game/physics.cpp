@@ -1575,29 +1575,43 @@ namespace physics
         }
         vec orig = d->o;
         float maxrad = max(d->radius, max(d->xradius, d->yradius));
+        #define doposchk \
+            if(insideworld(d->o) && !collide(d, vec(0, 0, 0), 0, avoidplayers)) \
+            { \
+                d->resetinterp(); \
+                return true; \
+            } \
+            else d->o = orig;
         #define inmapchk(x,y) \
-        { \
             loopi(x) \
             { \
-                if(i) { y; } \
-                if(insideworld(d->o) && !collide(d, vec(0, 0, 0), 0, avoidplayers)) \
-                { \
-                    d->resetinterp(); \
-                    return true; \
-                } \
-                d->o = orig; \
-            } \
-        }
+                int n = i+1; \
+                y; \
+                doposchk; \
+            }
+        doposchk;
+        inmapchk(20, {
+            d->o.z += (d->height+d->aboveeye)*n/10.f;
+            physics::droptofloor(d->o, maxrad, d->height);
+        });
         if(gameent::is(d))
         {
             vec dir;
             vecfromyawpitch(d->yaw, d->pitch, 1, 0, dir);
             dir.normalize().mul(maxrad);
-            if(!dir.iszero()) loopk(2) { inmapchk(100, d->o.add(vec(dir).mul(i/10.f).mul(k ? -0.5f : 1.f))); }
+            if(!dir.iszero())
+            {
+                inmapchk(200, d->o.add(vec(dir).mul(n/10.f)));
+                inmapchk(50, d->o.add(vec(dir).mul(-n/10.f)));
+            }
         }
         vec dir = vec(d->vel).normalize().mul(maxrad);
-        if(!dir.iszero()) loopk(2) { inmapchk(100, d->o.add(vec(dir).mul(i/10.f).mul(k ? -0.5f : 1.f))); }
-        inmapchk(20, d->o.add(vec((rnd(21)-10)*i/10.f, (rnd(21)-10)*i/10.f, (rnd(21)-10)*i/20.f)));
+        if(!dir.iszero())
+        {
+            inmapchk(200, d->o.add(vec(dir).mul(n/10.f)));
+            inmapchk(50, d->o.add(vec(dir).mul(-n/10.f)));
+        }
+        inmapchk(50, d->o.add(vec((rnd(21)-10)/10.f, (rnd(21)-10)/10.f, (rnd(21)-10)/10.f).normalize().mul(maxrad).mul(vec(n/10.f, n/10.f, n/25.f))));
         d->o = orig;
         d->resetinterp();
         return false;
