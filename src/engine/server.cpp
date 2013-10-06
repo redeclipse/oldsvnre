@@ -226,6 +226,7 @@ VAR(0, standalone, 1, 0, -1);
 #endif
 VAR(0, serveruprate, 0, 0, VAR_MAX);
 VAR(0, serverport, 1, SERVER_PORT, VAR_MAX);
+VAR(0, serverlanport, 0, LAN_PORT, VAR_MAX);
 SVAR(0, serverip, "");
 
 int curtime = 0, totalmillis = 1, lastmillis = 1, timescale = 100, paused = 0, timeerr = 0;
@@ -1301,16 +1302,18 @@ int setupserversockets()
             return servertype;
         }
         enet_socket_set_option(pongsock, ENET_SOCKOPT_NONBLOCK, 1);
-
-        address.port = LAN_PORT;
-        lansock = enet_socket_create(ENET_SOCKET_TYPE_DATAGRAM);
-        if(lansock != ENET_SOCKET_NULL && (enet_socket_set_option(lansock, ENET_SOCKOPT_REUSEADDR, 1) < 0 || enet_socket_bind(lansock, &address) < 0))
+        if(serverlanport)
         {
-            enet_socket_destroy(lansock);
-            lansock = ENET_SOCKET_NULL;
+            address.port = LAN_PORT;
+            lansock = enet_socket_create(ENET_SOCKET_TYPE_DATAGRAM);
+            if(lansock != ENET_SOCKET_NULL && (enet_socket_set_option(lansock, ENET_SOCKOPT_REUSEADDR, 1) < 0 || enet_socket_bind(lansock, &address) < 0))
+            {
+                enet_socket_destroy(lansock);
+                lansock = ENET_SOCKET_NULL;
+            }
+            if(lansock == ENET_SOCKET_NULL) conoutf("\frcould not create LAN server info socket");
+            else enet_socket_set_option(lansock, ENET_SOCKOPT_NONBLOCK, 1);
         }
-        if(lansock == ENET_SOCKET_NULL) conoutf("\frcould not create LAN server info socket");
-        else enet_socket_set_option(lansock, ENET_SOCKOPT_NONBLOCK, 1);
     }
 
     return servertype;
