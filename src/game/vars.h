@@ -1,6 +1,6 @@
 GVAR(IDF_WORLD, numplayers, 0, 4, MAXCLIENTS); // 0 = determine from number of spawns
 GVAR(IDF_WORLD, maxplayers, 0, 0, MAXCLIENTS); // 0 = numplayers*2
-GVAR(IDF_WORLD, mapbalance, 0, 0, 2); // switches teams for asymmetrical maps, 0 = off, 1 = ctf/dac/bb, 2 = all
+GVAR(IDF_WORLD, mapbalance, 0, 0, 2); // switches teams for asymmetrical maps, 0 = off, 1 = ctf/dnc/bb, 2 = all
 
 GFVAR(IDF_WORLD, gravity, 0, 50.f, 1000); // gravity
 GFVAR(0, gravityscale, 0, 1, FVAR_MAX);
