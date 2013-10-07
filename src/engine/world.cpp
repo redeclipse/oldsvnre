@@ -683,7 +683,7 @@ extentity *newentity(bool local, const vec &o, int type, const attrvector &attrs
     else while(ents.length() < idx) ents.add(entities::newent())->type = ET_EMPTY;
     extentity &e = *entities::newent();
     e.o = o;
-    e.attrs.add(0, clamp(attrs.length(), entities::numattrs(type), MAXENTATTRS) - e.attrs.length());
+    e.attrs.add(0, min(attrs.length(), MAXENTATTRS) - e.attrs.length());
     loopi(min(attrs.length(), e.attrs.length())) e.attrs[i] = attrs[i];
     e.type = type;
     e.spawned = false;
