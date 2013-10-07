@@ -335,12 +335,12 @@ namespace hud
                                     }
                                 }));
                                 if(game::player1->state != CS_WAITING && lastmillis-game::player1->lastdeath >= 500)
-                                    uicenterlist(g, uifont(g, "little", g.textf("Press \fs\fc%s\fS to enter respawn queue", 0xFFFFFF, NULL, 0, attackkey)));
+                                    uicenterlist(g, uifont(g, "little", g.textf("Press %s to enter respawn queue", 0xFFFFFF, NULL, 0, attackkey)));
                             }
                             else
                             {
                                 uicenterlist(g, uifont(g, "reduced", g.textf("Ready to respawn", 0xFFFFFF, NULL, 0)));
-                                if(game::player1->state != CS_WAITING) uicenterlist(g, uifont(g, "little", g.textf("Press \fs\fc%s\fS to respawn now", 0xFFFFFF, NULL, 0, attackkey)));
+                                if(game::player1->state != CS_WAITING) uicenterlist(g, uifont(g, "little", g.textf("Press %s to respawn now", 0xFFFFFF, NULL, 0, attackkey)));
                             }
                             if(shownotices >= 2)
                             {
@@ -348,17 +348,17 @@ namespace hud
                                     if(game::player1->state == CS_WAITING && lastmillis-game::player1->lastdeath >= 500)
                                     {
                                         SEARCHBINDCACHE(waitmodekey)("waitmodeswitch", 3);
-                                        uicenterlist(g, g.textf("Press \fs\fc%s\fS to %s", 0xFFFFFF, NULL, 0, waitmodekey, game::tvmode() ? "interact" : "switch to TV"));
+                                        uicenterlist(g, g.textf("Press %s to %s", 0xFFFFFF, NULL, 0, waitmodekey, game::tvmode() ? "interact" : "switch to TV"));
                                     }
                                     if(m_loadout(game::gamemode, game::mutators))
                                     {
                                         SEARCHBINDCACHE(loadkey)("showgui loadout", 0);
-                                        uicenterlist(g, g.textf("Press \fs\fc%s\fS to \fs%s\fS loadout", 0xFFFFFF, NULL, 0, loadkey, game::player1->loadweap.empty() ? "\fzoyselect" : "change"));
+                                        uicenterlist(g, g.textf("Press %s to \fs%s\fS loadout", 0xFFFFFF, NULL, 0, loadkey, game::player1->loadweap.empty() ? "\fzoyselect" : "change"));
                                     }
                                     if(m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
                                     {
                                         SEARCHBINDCACHE(teamkey)("showgui team", 0);
-                                        uicenterlist(g, g.textf("Press \fs\fc%s\fS to change teams", 0xFFFFFF, NULL, 0, teamkey));
+                                        uicenterlist(g, g.textf("Press %s to change teams", 0xFFFFFF, NULL, 0, teamkey));
                                     }
                                 });
                             }
@@ -387,11 +387,11 @@ namespace hud
                             uicenterlist(g, uifont(g, "reduced", g.textf("%s", 0xFFFFFF, NULL, 0, game::tvmode() ? "SpecTV" : "Spectating")));
                             SEARCHBINDCACHE(speconkey)("spectator 0", 1);
                             uifont(g, "little", {
-                                uicenterlist(g, g.textf("Press \fs\fc%s\fS to join the game", 0xFFFFFF, NULL, 0, speconkey));
+                                uicenterlist(g, g.textf("Press %s to join the game", 0xFFFFFF, NULL, 0, speconkey));
                                 if(!m_edit(game::gamemode) && shownotices >= 2)
                                 {
                                     SEARCHBINDCACHE(specmodekey)("specmodeswitch", 1);
-                                    uicenterlist(g, g.textf("Press \fs\fc%s\fS to %s", 0xFFFFFF, NULL, 0, specmodekey, game::tvmode() ? "interact" : "switch to TV"));
+                                    uicenterlist(g, g.textf("Press %s to %s", 0xFFFFFF, NULL, 0, specmodekey, game::tvmode() ? "interact" : "switch to TV"));
                                 }
                             });
                         }
@@ -399,12 +399,12 @@ namespace hud
                         if(m_edit(game::gamemode) && (game::focus->state != CS_EDITING || shownotices >= 4))
                         {
                             SEARCHBINDCACHE(editkey)("edittoggle", 1);
-                            uicenterlist(g, uifont(g, "reduced", g.textf("Press \fs\fc%s\fS to %s editmode", 0xFFFFFF, NULL, 0, editkey, game::focus->state != CS_EDITING ? "enter" : "exit")));
+                            uicenterlist(g, uifont(g, "reduced", g.textf("Press %s to %s editmode", 0xFFFFFF, NULL, 0, editkey, game::focus->state != CS_EDITING ? "enter" : "exit")));
                         }
                     }
 
                     SEARCHBINDCACHE(scoreboardkey)("showscores", 1);
-                    uicenterlist(g, uifont(g, "little", g.textf("%s \fs\fc%s\fS to close this window", 0xFFFFFF, NULL, 0, scoresoff ? "Release" : "Press", scoreboardkey)));
+                    uicenterlist(g, uifont(g, "little", g.textf("%s %s to close this window", 0xFFFFFF, NULL, 0, scoresoff ? "Release" : "Press", scoreboardkey)));
                     uicenterlist(g, uifont(g, "tiny", g.textf("Double-tap to keep the window open", 0xFFFFFF, NULL, 0)));
                 });
             });

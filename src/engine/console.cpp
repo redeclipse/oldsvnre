@@ -94,7 +94,7 @@ const char *getkeyname(int code)
     { \
         names.put("\fs", 2); \
         names.put(pretty, strlen(pretty)); \
-        if(comma) names.add(comma); \
+        if(comma) names.put(comma, strlen(comma)); \
         names.add(' '); \
         if((conj)[0]) \
         { \
@@ -103,11 +103,11 @@ const char *getkeyname(int code)
         } \
         names.put("\fS", 2); \
     } \
-    else if(sep && *sep) names.put(sep, strlen(sep)); \
+    else if(sep2 && *sep2) names.put(sep2, strlen(sep2)); \
     else names.add(' '); \
 } while(0)
 
-void searchbindlist(const char *action, int type, int limit, const char *sep, const char *pretty, vector<char> &names)
+void searchbindlist(const char *action, int type, int limit, const char *sep1, const char *sep2, const char *pretty, const char *s1, const char *s2, vector<char> &names)
 {
     const char *name1 = NULL, *name2 = NULL, *lastname = NULL;
     int found = 0;
@@ -122,14 +122,20 @@ void searchbindlist(const char *action, int type, int limit, const char *sep, co
             {
                 if(lastname)
                 {
-                    ADDSEP(',', "");
+                    ADDSEP(sep1, "");
+                    if(s1 && *s1) names.put(s1, strlen(s1));
                     names.put(lastname, strlen(lastname));
+                    if(s2 && *s2) names.put(s2, strlen(s2));
                 }
                 else
                 {
+                    if(s1 && *s1) names.put(s1, strlen(s1));
                     names.put(name1, strlen(name1));
-                    ADDSEP(',', "");
+                    if(s2 && *s2) names.put(s2, strlen(s2));
+                    ADDSEP(sep1, "");
+                    if(s1 && *s1) names.put(s1, strlen(s1));
                     names.put(name2, strlen(name2));
+                    if(s2 && *s2) names.put(s2, strlen(s2));
                 }
                 lastname = km.name;
             }
@@ -139,16 +145,25 @@ void searchbindlist(const char *action, int type, int limit, const char *sep, co
     });
     if(lastname)
     {
-        ADDSEP(',', sep);
+        ADDSEP(sep1, sep2);
+        if(s1 && *s1) names.put(s1, strlen(s1));
         names.put(lastname, strlen(lastname));
+        if(s2 && *s2) names.put(s2, strlen(s2));
     }
     else
     {
-        if(name1) names.put(name1, strlen(name1));
+        if(name1)
+        {
+            if(s1 && *s1) names.put(s1, strlen(s1));
+            names.put(name1, strlen(name1));
+            if(s2 && *s2) names.put(s2, strlen(s2));
+        }
         if(name2)
         {
-            ADDSEP('\0', sep);
+            ADDSEP("\0", sep2);
+            if(s1 && *s1) names.put(s1, strlen(s1));
             names.put(name2, strlen(name2));
+            if(s2 && *s2) names.put(s2, strlen(s2));
         }
     }
     names.add('\0');
@@ -164,7 +179,7 @@ const char *searchbind(const char *action, int type)
     return NULL;
 }
 
-void getkeypressed(int limit, const char *sep, const char *pretty, vector<char> &names)
+void getkeypressed(int limit, const char *sep1, const char *sep2, const char *pretty, const char *s1, const char *s2, vector<char> &names)
 {
     const char *name1 = NULL, *name2 = NULL, *lastname = NULL;
     int found = 0;
@@ -178,14 +193,20 @@ void getkeypressed(int limit, const char *sep, const char *pretty, vector<char> 
             {
                 if(lastname)
                 {
-                    ADDSEP(',', "");
+                    ADDSEP(",", "");
+                    if(s1 && *s1) names.put(s1, strlen(s1));
                     names.put(lastname, strlen(lastname));
+                    if(s2 && *s2) names.put(s2, strlen(s2));
                 }
                 else
                 {
+                    if(s1 && *s1) names.put(s1, strlen(s1));
                     names.put(name1, strlen(name1));
-                    ADDSEP(',', "");
+                    if(s2 && *s2) names.put(s2, strlen(s2));
+                    ADDSEP(",", "");
+                    if(s1 && *s1) names.put(s1, strlen(s1));
                     names.put(name2, strlen(name2));
+                    if(s2 && *s2) names.put(s2, strlen(s2));
                 }
                 lastname = km.name;
             }
@@ -195,16 +216,25 @@ void getkeypressed(int limit, const char *sep, const char *pretty, vector<char> 
     });
     if(lastname)
     {
-        ADDSEP(',', sep);
+        ADDSEP(",", sep2);
+        if(s1 && *s1) names.put(s1, strlen(s1));
         names.put(lastname, strlen(lastname));
+        if(s2 && *s2) names.put(s2, strlen(s2));
     }
     else
     {
-        if(name1) names.put(name1, strlen(name1));
+        if(name1)
+        {
+            if(s1 && *s1) names.put(s1, strlen(s1));
+            names.put(name1, strlen(name1));
+            if(s2 && *s2) names.put(s2, strlen(s2));
+        }
         if(name2)
         {
-            ADDSEP('\0', sep);
+            ADDSEP("\0", sep2);
+            if(s1 && *s1) names.put(s1, strlen(s1));
             names.put(name2, strlen(name2));
+            if(s2 && *s2) names.put(s2, strlen(s2));
         }
     }
     names.add('\0');
@@ -261,12 +291,12 @@ ICOMMAND(0, getbind,     "s", (char *key), getbind(key, keym::ACTION_DEFAULT));
 ICOMMAND(0, getspecbind, "s", (char *key), getbind(key, keym::ACTION_SPECTATOR));
 ICOMMAND(0, geteditbind, "s", (char *key), getbind(key, keym::ACTION_EDITING));
 ICOMMAND(0, getwaitbind, "s", (char *key), getbind(key, keym::ACTION_WAITING));
-ICOMMAND(0, searchbinds,     "siss", (char *action, int *limit, char *sep, char *pretty), { vector<char> list; searchbindlist(action, keym::ACTION_DEFAULT, max(*limit, 0), sep, pretty, list); result(list.getbuf()); });
-ICOMMAND(0, searchspecbinds, "siss", (char *action, int *limit, char *sep, char *pretty), { vector<char> list; searchbindlist(action, keym::ACTION_SPECTATOR, max(*limit, 0), sep, pretty, list); result(list.getbuf()); });
-ICOMMAND(0, searcheditbinds, "siss", (char *action, int *limit, char *sep, char *pretty), { vector<char> list; searchbindlist(action, keym::ACTION_EDITING, max(*limit, 0), sep, pretty, list); result(list.getbuf()); });
-ICOMMAND(0, searchwaitbinds, "siss", (char *action, int *limit, char *sep, char *pretty), { vector<char> list; searchbindlist(action, keym::ACTION_WAITING, max(*limit, 0), sep, pretty, list); result(list.getbuf()); });
+ICOMMAND(0, searchbinds,     "sisssss", (char *action, int *limit, char *sep1, char *sep2, char *pretty, char *s1, char *s2), { vector<char> list; searchbindlist(action, keym::ACTION_DEFAULT, max(*limit, 0), sep1, sep2, pretty, s1, s2, list); result(list.getbuf()); });
+ICOMMAND(0, searchspecbinds, "sisssss", (char *action, int *limit, char *sep1, char *sep2, char *pretty, char *s1, char *s2), { vector<char> list; searchbindlist(action, keym::ACTION_SPECTATOR, max(*limit, 0), sep1, sep2, pretty, s1, s2, list); result(list.getbuf()); });
+ICOMMAND(0, searcheditbinds, "sisssss", (char *action, int *limit, char *sep1, char *sep2, char *pretty, char *s1, char *s2), { vector<char> list; searchbindlist(action, keym::ACTION_EDITING, max(*limit, 0), sep1, sep2, pretty, s1, s2, list); result(list.getbuf()); });
+ICOMMAND(0, searchwaitbinds, "sisssss", (char *action, int *limit, char *sep1, char *sep2, char *pretty, char *s1, char *s2), { vector<char> list; searchbindlist(action, keym::ACTION_WAITING, max(*limit, 0), sep1, sep2, pretty, s1, s2, list); result(list.getbuf()); });
 
-ICOMMAND(0, keyspressed, "iss", (int *limit, char *sep, char *pretty), { vector<char> list; getkeypressed(max(*limit, 0), sep, pretty, list); result(list.getbuf()); });
+ICOMMAND(0, keyspressed, "isssss", (int *limit, const char *sep1, const char *sep2, const char *pretty, const char *s1, const char *s2), { vector<char> list; getkeypressed(max(*limit, 0), sep1, sep2, pretty, s1, s2, list); result(list.getbuf()); });
 
 void inputcommand(char *init, char *action = NULL, char *icon = NULL, int colour = 0, char *flags = NULL) // turns input to the command line on or off
 {

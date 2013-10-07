@@ -288,9 +288,9 @@ bool filtertext(char *dst, const char *src, bool newline, bool colour, bool whit
                     if(c) c = *++src;
                     if(!c) break;
                 }
-                else if(c == '[' || c == '(')
+                else if(c == '[' || c == '(' || c == '{')
                 {
-                    const char *end = strchr(src, c == '[' ? ']' : ')');
+                    const char *end = strchr(src, c == '[' ? ']' : (c == '(' ? ')' : '}'));
                     src += end ? end-src : strlen(src);
                 }
 
