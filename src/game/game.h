@@ -188,12 +188,12 @@ enttypes enttype[] = {
                 "affinity",     { "team",   "yaw",      "pitch",    "modes",    "muts",     "id" }
     },
     {
-        CHECKPOINT,     1,          48,     16,     EU_AUTO,    7,          3,          5,
+        CHECKPOINT,     1,          48,     16,     EU_AUTO,    8,          3,          5,
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             (1<<ENT_PLAYER)|(1<<ENT_AI),
             false,  true,   false,      true,       false,
-                "checkpoint",   { "radius", "yaw",      "pitch",    "modes",    "muts",     "id",       "type" }
+                "checkpoint",   { "radius", "yaw",      "pitch",    "modes",    "muts",     "id",       "type",     "sound" }
     },
 #ifdef MEK
     {
@@ -275,7 +275,7 @@ const int pulsecols[PULSE_MAX][PULSECOLOURS] = {
 #include "gamemode.h"
 #include "weapons.h"
 
-enum { S_BOUNCE = S_OTHERS, S_FOOTSTEP, S_SWIMSTEP, S_MAX } ;
+enum { S_BOUNCE = S_OTHERS, S_FOOTSTEP, S_SWIMSTEP, S_V_START, S_V_COMPLETE, S_MAX } ;
 
 enum
 {
