@@ -44,6 +44,7 @@ GVAR(IDF_ADMIN, demoautorec, 0, 1, 1); // 0 = off, 1 = automatically record demo
 GVAR(IDF_ADMIN, demokeep, 0, 0, 1); // 0 = off, 1 = keep demos that don't run to end of match
 
 GVAR(IDF_ADMIN, speclock, 0, PRIV_MODERATOR, PRIV_CREATOR);
+GVAR(IDF_ADMIN, teamlock, 0, PRIV_MODERATOR, PRIV_CREATOR);
 GVAR(IDF_ADMIN, kicklock, 0, PRIV_MODERATOR, PRIV_CREATOR);
 GVAR(IDF_ADMIN, allowlock, 0, PRIV_OPERATOR, PRIV_CREATOR);
 GVAR(IDF_ADMIN, banlock, 0, PRIV_OPERATOR, PRIV_CREATOR);
@@ -243,17 +244,19 @@ GVAR(0, duelcooloff, 0, 5000, VAR_MAX); // cool off period before duel goes to n
 GVAR(0, duelcycle, 0, 2, 3); // determines if players are force-cycled after a certain number of wins (bit: 0 = off, 1 = non-team games, 2 = team games)
 GVAR(0, duelcycles, 0, 2, VAR_MAX); // maximum wins in a row before force-cycling (0 = num team/total players)
 
+GVAR(0, pointlimit, 0, 0, VAR_MAX); // finish when score is this or more
+GVAR(0, teampersist, 0, 1, 2); // 0 = off, 1 = only attempt, 2 = forced
 GVAR(0, selfdamage, 0, 1, 1); // 0 = off, 1 = either hurt self or use teamdamage rules
 GFVAR(0, selfdamagescale, FVAR_MIN, 1, FVAR_MAX); // 0 = off, anything else = scale for damage
 GVAR(0, teamdamage, 0, 1, 2); // 0 = off, 1 = non-bots damage team, 2 = all players damage team
 GFVAR(0, teamdamagescale, FVAR_MIN, 1, FVAR_MAX); // 0 = off, anything else = scale for damage
+
 GVAR(0, teambalance, 0, 4, 4); // 0 = off, 1 = by number then rank, 2 = by rank then number, 3 = by number and enforce, 4 = number, enforce, and reassign
 GVAR(0, teambalanceplaying, 1, 4, VAR_MAX); // min players before teambalance 4 reassignments occur
 GVAR(0, teambalanceamt, 1, 1, VAR_MAX); // max-min offset before teambalance 4 reassignments occur
 GVAR(0, teambalancewait, 10000, 30000, VAR_MAX); // how long before teambalance 4 can happen after map start
 GVAR(0, teambalancedelay, 2000, 5000, VAR_MAX); // how long before teambalance 4 reassignments start
-GVAR(0, teampersist, 0, 1, 2); // 0 = off, 1 = only attempt, 2 = forced
-GVAR(0, pointlimit, 0, 0, VAR_MAX); // finish when score is this or more
+GVAR(0, teambalanceswap, 0, 1, 1); // allow swap requests if unable to change team
 
 GVAR(0, capturelimit, 0, 0, VAR_MAX); // finish when score is this or more
 GVAR(0, captureresetdelay, 0, 30000, VAR_MAX);
