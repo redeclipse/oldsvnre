@@ -116,7 +116,7 @@ namespace capture
                 popfont();
                 SEARCHBINDCACHE(altkey)("affinity", 0);
                 pushfont("reduced");
-                ty += draw_textx("Press \fs\fc%s\fS to drop", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, altkey)*hud::noticescale;
+                ty += draw_textx("Press %s to drop", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, altkey)*hud::noticescale;
                 popfont();
             }
             pushfont("default");

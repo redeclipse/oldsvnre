@@ -129,9 +129,9 @@ void converttext(char *dst, const char *src)
                 c = *++src;
                 if(c) ++src;
             }
-            else if(c == '[' || c == '(')
+            else if(c == '[' || c == '(' || c == '{')
             {
-                const char *end = strchr(src, c == '[' ? ']' : ')');
+                const char *end = strchr(src, c == '[' ? ']' : (c == '(' ? ')' : '}'));
                 src += end ? end-src : strlen(src);
             }
             else if(c == 's') { if(colorpos < (int)sizeof(colorstack)-1) colorpos++; continue; }
@@ -711,12 +711,12 @@ bool ircaddsockets(ENetSocket &maxsock, ENetSocketSet &readset, ENetSocketSet &w
                 // fall-through
             case IRC_ONLINE:
             case IRC_CONN:
-                maxsock == ENET_SOCKET_NULL ? maxsock : max(maxsock, n->sock); 
+                maxsock == ENET_SOCKET_NULL ? maxsock : max(maxsock, n->sock);
                 ENET_SOCKETSET_ADD(readset, n->sock);
                 numsocks++;
                 break;
         }
-    }        
+    }
     return numsocks > 0;
 }
 

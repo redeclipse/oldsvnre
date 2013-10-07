@@ -4,6 +4,11 @@ VAR(IDF_PERSIST, textblinking, 0, 350, VAR_MAX);
 FVARF(IDF_PERSIST, textscale, FVAR_NONZERO, 1, FVAR_MAX, UI::setup());
 VAR(IDF_PERSIST, textfaded, 0, 1, 1);
 VAR(IDF_PERSIST, textminintensity, 0, 32, 255);
+VAR(IDF_PERSIST, textkeybg, 0, 1, 1);
+VAR(IDF_PERSIST|IDF_HEX, textkeybgcolour, 0x000000, 0xFFFFFF, 0xFFFFFF);
+VAR(IDF_PERSIST|IDF_HEX, textkeyfgcolour, 0x000000, 0x00FFFF, 0xFFFFFF);
+FVAR(IDF_PERSIST, textkeybgblend, 0, 0.35f, 1);
+FVAR(IDF_PERSIST, textkeyfgblend, 0, 1, 1);
 
 static inline bool htcmp(const char *key, const font &f) { return !strcmp(key, f.name); }
 
@@ -21,6 +26,7 @@ void newfont(char *name, char *tex, int *defaultw, int *defaulth)
     f->texs.shrink(0);
     f->texs.add(textureload(tex));
     f->chars.shrink(0);
+
     f->charoffset = '!';
     f->maxw = f->defaultw = *defaultw;
     f->maxh = f->defaulth = f->scale = *defaulth;
@@ -339,6 +345,23 @@ static float icon_width(const char *name, float scale)
         } \
         else break; \
     } \
+    else if(str[h] == '{') \
+    { \
+        h++; \
+        const char *start = &str[h]; \
+        const char *end = strchr(start, '}'); \
+        if(end) \
+        { \
+            if(s && end > start) \
+            { \
+                string value; \
+                copystring(value, start, min(size_t(end - start + 1), sizeof(value))); \
+                TEXTKEY(value); \
+            } \
+            h += end-start; \
+        } \
+        else break; \
+    } \
     else if(s) TEXTCOLOR(h); \
 }
 #define TEXTALIGN \
@@ -403,6 +426,7 @@ int text_visible(const char *str, float hitx, float hity, int maxwidth, int flag
     #define TEXTCOLOR(idx)
     #define TEXTHEXCOLOR(ret)
     #define TEXTICON(ret) x += icon_width(ret, scale);
+    #define TEXTKEY(ret) x += (textkeybg ? icon_width("textures/guikey", scale)*0.6f : 0.f)+(text_widthf(ret, flags)*scale);
     #define TEXTCHAR(idx) x += cw; TEXTWHITE(idx)
     #define TEXTWORD TEXTWORDSKELETON
     TEXTSKELETON
@@ -412,6 +436,7 @@ int text_visible(const char *str, float hitx, float hity, int maxwidth, int flag
     #undef TEXTCOLOR
     #undef TEXTHEXCOLOR
     #undef TEXTICON
+    #undef TEXTKEY
     #undef TEXTCHAR
     #undef TEXTWORD
     return i;
@@ -425,7 +450,8 @@ void text_posf(const char *str, int cursor, float &cx, float &cy, int maxwidth, 
     #define TEXTLINE(idx)
     #define TEXTCOLOR(idx)
     #define TEXTHEXCOLOR(ret)
-    #define TEXTICON(ret) x += icon_width(ret, scale)+2;
+    #define TEXTICON(ret) x += icon_width(ret, scale);
+    #define TEXTKEY(ret) x += (textkeybg ? icon_width("textures/guikey", scale)*0.6f : 0.f)+(text_widthf(ret, flags)*scale);
     #define TEXTCHAR(idx) x += cw;
     #define TEXTWORD TEXTWORDSKELETON if(i >= cursor) break;
     cx = cy = 0;
@@ -437,6 +463,7 @@ void text_posf(const char *str, int cursor, float &cx, float &cy, int maxwidth, 
     #undef TEXTCOLOR
     #undef TEXTHEXCOLOR
     #undef TEXTICON
+    #undef TEXTKEY
     #undef TEXTCHAR
     #undef TEXTWORD
 }
@@ -448,7 +475,8 @@ void text_boundsf(const char *str, float &width, float &height, int maxwidth, in
     #define TEXTLINE(idx) if(x > width) width = x;
     #define TEXTCOLOR(idx)
     #define TEXTHEXCOLOR(ret)
-    #define TEXTICON(ret) x += icon_width(ret, scale)+2;
+    #define TEXTICON(ret) x += icon_width(ret, scale);
+    #define TEXTKEY(ret) x += (textkeybg ? icon_width("textures/guikey", scale)*0.6f : 0.f)+(text_widthf(ret, flags)*scale);
     #define TEXTCHAR(idx) x += cw;
     #define TEXTWORD TEXTWORDSKELETON
     width = 0;
@@ -461,8 +489,89 @@ void text_boundsf(const char *str, float &width, float &height, int maxwidth, in
     #undef TEXTCOLOR
     #undef TEXTHEXCOLOR
     #undef TEXTICON
+    #undef TEXTKEY
     #undef TEXTCHAR
     #undef TEXTWORD
+}
+
+int draw_key(Texture *&tex, const char *str, float sx, float sy, float sc, cvec &cl, int flags)
+{
+    float swidth = text_widthf(str, flags), ss = 0, sp = 0;
+    if(textkeybg)
+    {
+        Texture *t = textureload("textures/guikey", 3, true, false);
+        if(!t) return 0;
+        if(tex != t)
+        {
+            xtraverts += varray::end();
+            tex = t;
+            glBindTexture(GL_TEXTURE_2D, tex->id);
+        }
+
+        glColor4ub(uchar((textkeybgcolour>>16)&0xFF), uchar((textkeybgcolour>>8)&0xFF), uchar(textkeybgcolour&0xFF), uchar(textkeybgblend*255));
+
+        float sh = sc*FONTX, sw = (t->w*sh)/float(t->h), w1 = sw*0.3f, w2 = sw*0.4f, amt = swidth/w2;
+        int count = int(floorf(amt));
+        varray::attrib<float>(sx + ss,     sy    ); varray::attrib<float>(0, 0);
+        varray::attrib<float>(sx + ss + w1, sy    ); varray::attrib<float>(0.3f, 0);
+        varray::attrib<float>(sx + ss + w1, sy + sh); varray::attrib<float>(0.3f, 1);
+        varray::attrib<float>(sx + ss,     sy + sh); varray::attrib<float>(0, 1);
+        sp = (ss += w1);
+        loopi(count)
+        {
+            varray::attrib<float>(sx + ss,     sy    ); varray::attrib<float>(0.3f, 0);
+            varray::attrib<float>(sx + ss + w2, sy    ); varray::attrib<float>(0.7f, 0);
+            varray::attrib<float>(sx + ss + w2, sy + sh); varray::attrib<float>(0.7f, 1);
+            varray::attrib<float>(sx + ss,     sy + sh); varray::attrib<float>(0.3f, 1);
+            ss += w2;
+        }
+        float w3 = amt-float(count), w4 = w1 + w2*w3, w5 = 0.7f - 0.4f*w3;
+        varray::attrib<float>(sx + ss,     sy    ); varray::attrib<float>(w5, 0);
+        varray::attrib<float>(sx + ss + w4, sy    ); varray::attrib<float>(1, 0);
+        varray::attrib<float>(sx + ss + w4, sy + sh); varray::attrib<float>(1, 1);
+        varray::attrib<float>(sx + ss,     sy + sh); varray::attrib<float>(w5, 1);
+        ss += w4;
+    }
+    else ss = swidth;
+    xtraverts += varray::end();
+
+    #define TEXTINDEX(idx)
+    #define TEXTWHITE(idx)
+    #define TEXTLINE(idx) ly += FONTH;
+    #define TEXTCOLOR(idx) text_color(str[idx], colorstack, sizeof(colorstack), colorpos, color, r, g, b, fade);
+    #define TEXTHEXCOLOR(ret) \
+        if(usecolor) \
+        { \
+            int alpha = colorstack[colorpos].a; \
+            color = TVECA(ret, alpha); \
+            colorstack[colorpos] = color; \
+            xtraverts += varray::end(); \
+            glColor4ub((uchar)color.r, (uchar)color.g, (uchar)color.b, (char)color.a); \
+        }
+    #define TEXTICON(ret) x += draw_icon(tex, ret, left+x, top+y, scale);
+    #define TEXTKEY(ret) x += draw_key(tex, ret, left+x, top+y, scale, color, flags);
+    #define TEXTCHAR(idx) { draw_char(tex, c, left+x, top+y, scale); x += cw; }
+    #define TEXTWORD TEXTWORDSKELETON
+    bool usecolor = true;
+    int fade = textkeyfgblend*255, r = (textkeyfgcolour>>16)&0xFF, g = (textkeyfgcolour>>8)&0xFF, b = textkeyfgcolour&0xFF,
+        colorpos = 1, ly = 0, left = sx + sp, top = sy, cursor = -1, maxwidth = -1;
+    cvec colorstack[16], color = TVECX(r, g, b, fade);
+    loopi(16) colorstack[i] = color;
+    glColor4ub((uchar)color.r, (uchar)color.g, (uchar)color.b, (uchar)color.a);
+    TEXTSKELETON
+    TEXTEND(cursor)
+    xtraverts += varray::end();
+
+    glColor4ub((uchar)cl.r, (uchar)cl.g, (uchar)cl.b, (uchar)cl.a);
+
+    #undef TEXTINDEX
+    #undef TEXTWHITE
+    #undef TEXTLINE
+    #undef TEXTCOLOR
+    #undef TEXTHEXCOLOR
+    #undef TEXTCHAR
+    #undef TEXTWORD
+    return ss;
 }
 
 int draw_text(const char *str, int rleft, int rtop, int r, int g, int b, int a, int flags, int cursor, int maxwidth)
@@ -491,6 +600,7 @@ int draw_text(const char *str, int rleft, int rtop, int r, int g, int b, int a, 
             glColor4ub((uchar)color.r, (uchar)color.g, (uchar)color.b, (char)color.a); \
         }
     #define TEXTICON(ret) x += draw_icon(tex, ret, left+x, top+y, scale);
+    #define TEXTKEY(ret) x += draw_key(tex, ret, left+x, top+y, scale, color, flags);
     #define TEXTCHAR(idx) { draw_char(tex, c, left+x, top+y, scale); x += cw; }
     #define TEXTWORD TEXTWORDSKELETON
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

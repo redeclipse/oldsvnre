@@ -4208,7 +4208,7 @@ namespace server
     {
         if(!allowteam(ci, team, T_FIRST))
         {
-            if(team && ci->state.actortype == A_PLAYER && m_balteam(gamemode, mutators, 3) && G(teambalanceswap) && ci->swapteam != team)
+            if(team && ci->team != team && ci->state.actortype == A_PLAYER && m_balteam(gamemode, mutators, 3) && G(teambalanceswap) && ci->swapteam != team)
             {
                 if(canplay()) ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fy%s requests swap to team %s, change teams to accept", colourname(ci), colourteam(team));
                 ci->swapteam = team;

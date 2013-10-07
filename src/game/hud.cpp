@@ -1354,7 +1354,7 @@ namespace hud
                     if(target == game::player1 && target->state != CS_WAITING && shownotices >= 2 && lastmillis-target->lastdeath >= 500)
                     {
                         pushfont("little");
-                        ty += draw_textx("Press \fs\fc%s\fS to enter respawn queue", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, attackkey);
+                        ty += draw_textx("Press %s to enter respawn queue", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, attackkey);
                         popfont();
                     }
                 }
@@ -1364,7 +1364,7 @@ namespace hud
                     if(target == game::player1 && target->state != CS_WAITING && shownotices >= 2)
                     {
                         pushfont("little");
-                        ty += draw_textx("Press \fs\fc%s\fS to respawn now", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, attackkey);
+                        ty += draw_textx("Press %s to respawn now", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, attackkey);
                         popfont();
                     }
                 }
@@ -1382,21 +1382,21 @@ namespace hud
                         {
                             SEARCHBINDCACHE(waitmodekey)("waitmodeswitch", 3);
                             pushfont("little");
-                            ty += draw_textx("Press \fs\fc%s\fS to %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, waitmodekey, game::tvmode() ? "interact" : "switch to TV");
+                            ty += draw_textx("Press %s to %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, waitmodekey, game::tvmode() ? "interact" : "switch to TV");
                             popfont();
                         }
                         if(m_loadout(game::gamemode, game::mutators))
                         {
                             SEARCHBINDCACHE(loadkey)("showgui loadout", 0);
                             pushfont("little");
-                            ty += draw_textx("Press \fs\fc%s\fS to \fs%s\fS loadout", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, loadkey, target->loadweap.empty() ? "\fzoyselect" : "change");
+                            ty += draw_textx("Press %s to \fs%s\fS loadout", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, loadkey, target->loadweap.empty() ? "\fzoyselect" : "change");
                             popfont();
                         }
                         if(m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
                         {
                             SEARCHBINDCACHE(teamkey)("showgui team", 0);
                             pushfont("little");
-                            ty += draw_textx("Press \fs\fc%s\fS to change teams", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, teamkey);
+                            ty += draw_textx("Press %s to change teams", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, teamkey);
                             popfont();
                         }
                     }
@@ -1459,17 +1459,17 @@ namespace hud
                                                 static struct dropattrs : attrvector { dropattrs() { add(0, 5); } } attrs;
                                                 attrs[0] = drop;
                                                 defformatstring(dropweap)("%s", entities::entinfo(WEAPON, attrs, false, true));
-                                                ty += draw_textx("Press \fs\fc%s\fS to swap \fs%s\fS for \fs%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey, dropweap, entities::entinfo(e.type, e.attrs, false, true));
+                                                ty += draw_textx("Press %s to swap \fs%s\fS for \fs%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey, dropweap, entities::entinfo(e.type, e.attrs, false, true));
                                             }
-                                            else ty += draw_textx("Press \fs\fc%s\fS to pickup \fs%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey, entities::entinfo(e.type, e.attrs, false, true));
+                                            else ty += draw_textx("Press %s to pickup \fs%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey, entities::entinfo(e.type, e.attrs, false, true));
                                         }
-                                        else ty += draw_textx("Press \fs\fc%s\fS to use \fs%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey, entities::entinfo(e.type, e.attrs, false, true));
+                                        else ty += draw_textx("Press %s to use \fs%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey, entities::entinfo(e.type, e.attrs, false, true));
                                         break;
                                     }
                                 }
                                 else if(e.type == TRIGGER && e.attrs[2] == TA_ACTION)
                                 {
-                                    ty += draw_textx("Press \fs\fc%s\fS to interact", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey);
+                                    ty += draw_textx("Press %s to interact", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey);
                                     break;
                                 }
                             }
@@ -1483,14 +1483,14 @@ namespace hud
                         if(target->canshoot(target->weapselect, 0, m_weapon(game::gamemode, game::mutators), lastmillis, (1<<W_S_RELOAD)))
                         {
                             SEARCHBINDCACHE(attackkey)("primary", 0);
-                            ty += draw_textx("Press \fs\fc%s\fS to attack", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, attackkey);
+                            ty += draw_textx("Press %s to attack", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, attackkey);
                             SEARCHBINDCACHE(altkey)("secondary", 0);
-                            ty += draw_textx("Press \fs\fc%s\fS to %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, altkey, W(target->weapselect, zooms) ? "zoom" : "alt-attack");
+                            ty += draw_textx("Press %s to %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, altkey, W(target->weapselect, zooms) ? "zoom" : "alt-attack");
                         }
                         if(target->canreload(target->weapselect, m_weapon(game::gamemode, game::mutators), false, lastmillis))
                         {
                             SEARCHBINDCACHE(reloadkey)("reload", 0);
-                            ty += draw_textx("Press \fs\fc%s\fS to reload ammo", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, reloadkey);
+                            ty += draw_textx("Press %s to reload ammo", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, reloadkey);
                         }
                         popfont();
                     }
@@ -1503,17 +1503,17 @@ namespace hud
                 pushfont("little");
                 if(!client::demoplayback)
                 {
-                    ty += draw_textx("Press \fs\fc%s\fS to join the game", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, speconkey);
+                    ty += draw_textx("Press %s to join the game", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, speconkey);
                     if(m_fight(game::gamemode) && m_team(game::gamemode, game::mutators) && shownotices >= 2)
                     {
                         SEARCHBINDCACHE(teamkey)("showgui team", 0);
-                        ty += draw_textx("Press \fs\fc%s\fS to join a team", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, teamkey);
+                        ty += draw_textx("Press %s to join a team", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, teamkey);
                     }
                 }
                 if(!m_edit(game::gamemode) && shownotices >= 2)
                 {
                     SEARCHBINDCACHE(specmodekey)("specmodeswitch", 1);
-                    ty += draw_textx("Press \fs\fc%s\fS to %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, specmodekey, game::tvmode() ? "interact" : "switch to TV");
+                    ty += draw_textx("Press %s to %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, specmodekey, game::tvmode() ? "interact" : "switch to TV");
                 }
                 popfont();
             }
@@ -1522,7 +1522,7 @@ namespace hud
             {
                 SEARCHBINDCACHE(editkey)("edittoggle", 1);
                 pushfont("little");
-                ty += draw_textx("Press \fs\fc%s\fS to %s editmode", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, editkey, game::focus->state != CS_EDITING ? "enter" : "exit");
+                ty += draw_textx("Press %s to %s editmode", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, editkey, game::focus->state != CS_EDITING ? "enter" : "exit");
                 popfont();
             }
 

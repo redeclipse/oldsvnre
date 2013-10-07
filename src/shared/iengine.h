@@ -109,7 +109,7 @@ extern char *getcurcommand();
 extern void resetcomplete();
 extern void complete(char *s, const char *cmdprefix);
 extern const char *searchbind(const char *action, int type);
-extern void searchbindlist(const char *action, int type, int limit, const char *sep, const char *pretty, vector<char> &names);
+extern void searchbindlist(const char *action, int type, int limit, const char *sep1, const char *sep2, const char *pretty, const char *s1, const char *s2, vector<char> &names);
 
 struct bindlist
 {
@@ -118,12 +118,12 @@ struct bindlist
 
     bindlist() : lastsearch(-1) {}
 
-    const char *search(const char *action, int type = 0, int limit = 5, const char *sep = "or", const char *pretty = "\fw")
+    const char *search(const char *action, int type = 0, int limit = 5, const char *sep1 = "", const char *sep2 = "or", const char *pretty = "\fw", const char *s1 = "\f{", const char *s2 = "}")
     {
         if(names.empty() || lastsearch != changedkeys)
         {
             names.shrink(0);
-            searchbindlist(action, type, limit, sep, pretty, names);
+            searchbindlist(action, type, limit, sep1, sep2, pretty, s1, s2, names);
             lastsearch = changedkeys;
         }
         return names.getbuf();
