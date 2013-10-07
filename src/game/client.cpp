@@ -2573,6 +2573,12 @@ namespace client
                             if(t != game::player1 && !t->ai && (!t->cpmillis || entities::ents[ent]->attrs[6] == CP_START))
                                 t->cpmillis = lastmillis;
                             entities::execlink(t, ent, false);
+                            if(entities::ents[ent]->attrs[7]&(t != game::focus ? 2 : 1)) switch(entities::ents[ent]->attrs[6])
+                            {
+                                case CP_START: game::announce(S_V_START, t); break;
+                                case CP_FINISH: case CP_LAST: game::announce(S_V_COMPLETE, t); break;
+                                default: game::announce(S_V_CHECKPOINT, t); break;
+                            }
                         }
                         int laptime = getint(p);
                         if(laptime >= 0)
