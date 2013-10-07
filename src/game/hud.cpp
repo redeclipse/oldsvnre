@@ -23,7 +23,7 @@ namespace hud
     VAR(IDF_PERSIST, hudminimal, 0, 0, 1);
 
     VAR(IDF_PERSIST, showdemoplayback, 0, 1, 1);
-    FVAR(IDF_PERSIST, gapsize, 0, 0.005f, 1000);
+    FVAR(IDF_PERSIST, edgesize, 0, 0.005f, 1000);
 
     VAR(IDF_PERSIST, showconsole, 0, 2, 2);
     VAR(IDF_PERSIST, shownotices, 0, 3, 4);
@@ -147,9 +147,34 @@ namespace hud
     VAR(IDF_PERSIST, teamhurtdist, 0, 0, VAR_MAX);
     FVAR(IDF_PERSIST, teamhurtsize, 0, 0.0175f, 1000);
 
-    FVAR(IDF_PERSIST, specborder, 0, 0.05f, 1);
-    FVAR(IDF_PERSIST, waitborder, 0, 0.05f, 1);
-    FVAR(IDF_PERSIST, progborder, 0, 0.05f, 1);
+    enum { BORDER_PLAY, BORDER_EDIT, BORDER_SPEC, BORDER_WAIT, BORDER_BG, BORDER_MAX };
+    enum { BORDERP_TOP, BORDERP_BOTTOM, BORDERP_MAX, BORDERP_ALL = (1<<BORDERP_TOP)|(1<<BORDERP_BOTTOM) };
+
+    VAR(IDF_PERSIST, playborder, 0, 0, BORDERP_ALL);
+    VAR(IDF_PERSIST|IDF_HEX, playbordertone, -CTONE_MAX, -CTONE_TEAM-1, 0xFFFFFF);
+    FVAR(IDF_PERSIST, playbordersize, 0, 0.05f, 1);
+    FVAR(IDF_PERSIST, playborderblend, 0, 0.5f, 1);
+
+    VAR(IDF_PERSIST, editborder, 0, 0, BORDERP_ALL);
+    VAR(IDF_PERSIST|IDF_HEX, editbordertone, -CTONE_MAX, 0x000000, 0xFFFFFF);
+    FVAR(IDF_PERSIST, editbordersize, 0, 0.05f, 1);
+    FVAR(IDF_PERSIST, editborderblend, 0, 0.9f, 1);
+
+    VAR(IDF_PERSIST, specborder, 0, BORDERP_ALL, BORDERP_ALL);
+    VAR(IDF_PERSIST|IDF_HEX, specbordertone, -CTONE_MAX, 0x000000, 0xFFFFFF);
+    FVAR(IDF_PERSIST, specbordersize, 0, 0.05f, 1);
+    FVAR(IDF_PERSIST, specborderblend, 0, 0.9f, 1);
+
+    VAR(IDF_PERSIST, waitborder, 0, BORDERP_ALL, BORDERP_ALL);
+    VAR(IDF_PERSIST|IDF_HEX, waitbordertone, -CTONE_MAX, 0x000000, 0xFFFFFF);
+    FVAR(IDF_PERSIST, waitbordersize, 0, 0.05f, 1);
+    FVAR(IDF_PERSIST, waitborderblend, 0, 0.9f, 1);
+
+    VAR(IDF_PERSIST, bgborder, 0, BORDERP_ALL, BORDERP_ALL);
+    VAR(IDF_PERSIST|IDF_HEX, bgbordertone, -CTONE_MAX, 0x080000, 0xFFFFFF);
+    FVAR(IDF_PERSIST, bgbordersize, 0, 0.05f, 1);
+    FVAR(IDF_PERSIST, bgborderblend, 0, 0.5f, 1);
+
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, bordertoptex, "<grey>textures/hud/border", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, borderbottomtex, "<grey><rotate:2>textures/hud/border", 3);
 
@@ -1264,7 +1289,7 @@ namespace hud
         pushfont("default");
         int ty = int(((hudheight/2)+(hudheight/2*noticeoffset))/noticescale), tx = int((hudwidth/2)/noticescale),
             tf = int(255*hudblend*noticeblend), tr = 255, tg = 255, tb = 255,
-            tw = int((hudwidth-((hudsize*gapsize)*2+(hudsize*inventorysize)*2))/noticescale);
+            tw = int((hudwidth-((hudsize*edgesize)*2+(hudsize*inventorysize)*2))/noticescale);
         if(noticestone) skewcolour(tr, tg, tb, noticestone);
 
         if(hastkwarn(game::focus)) // first and foremost
@@ -2750,9 +2775,9 @@ namespace hud
         return sy;
     }
 
-    void drawinventory(int w, int h, int edge, int gap, float blend)
+    void drawinventory(int w, int h, int edge, int top, int bottom, float blend)
     {
-        int cx[2] = { edge, w-edge }, cy[2] = { h-edge-gap, h-edge-gap }, cs = int(inventorysize*w), cr = edge/2, cc = 0, bf = blend*255, bs = (w-edge*2)/2;
+        int cx[2] = { edge, w-edge }, cy[2] = { h-edge-bottom, h-edge-bottom }, cs = int(inventorysize*w), cr = edge/2, cc = 0, bf = blend*255, bs = (w-edge*2)/2;
         if(texpaneltimer) return;
         if(totalmillis-laststats >= statrate)
         {
@@ -2809,7 +2834,7 @@ namespace hud
             }
             case 1:
             {
-                int cm = cr+gap;
+                int cm = cr+top;
                 if(!radardisabled && radarstyle == 3 && !game::intermission && !client::waitplayers && !hasinput(true) && (game::focus->state == CS_EDITING ? showeditradar >= 1 : chkcond(showradar, !game::tvmode() || (game::focus != game::player1 && radarstyle==3))))
                     cm += int(max(w, h)/2*radarcorner*2);
                 if(!texpaneltimer)
@@ -2865,7 +2890,7 @@ namespace hud
         }
     }
 
-    void drawdamage(int w, int h, int gap, float blend)
+    void drawdamage(int w, int h, int top, int bottom, float blend)
     {
         if(*damagetex)
         {
@@ -2877,13 +2902,13 @@ namespace hud
                 {
                     glBindTexture(GL_TEXTURE_2D, t->id);
                     glColor4f(0.85f, 0.09f, 0.09f, pc*blend*damageblend);
-                    drawtexture(0, gap, w, h-gap);
+                    drawtexture(0, top, w, h-top-bottom);
                 }
             }
         }
     }
 
-    void drawfire(int w, int h, int gap, float blend)
+    void drawfire(int w, int h, int top, int bottom, float blend)
     {
         if(*burntex && game::focus->burning(lastmillis, burntime))
         {
@@ -2894,7 +2919,7 @@ namespace hud
                 float pc = interval >= burntime-500 ? 1.f+(interval-(burntime-500))/500.f : (interval%burndelay)/float(burndelay/2); if(pc > 1.f) pc = 2.f-pc;
                 glBindTexture(GL_TEXTURE_2D, t->id);
                 glColor4f(0.9f*max(pc,0.5f), 0.3f*pc, 0.0625f*max(pc,0.25f), blend*burnblend*(interval >= burntime-(burndelay/2) ? pc : min(pc+0.5f, 1.f)));
-                drawtexture(0, gap, w, h-gap);
+                drawtexture(0, top, w, h-top-bottom);
             }
         }
     }
@@ -2930,62 +2955,77 @@ namespace hud
         drawtexture(x, y, c, c);
     }
 
-    int drawspecborder(int w, int h, float border)
+    void drawspecborder(int w, int h, int type, int &top, int &bottom)
     {
-        int s = int(h*0.5f*border);
-        if(!s) return 0;
-        if(*bordertoptex)
+        if(type < 0 || type >= BORDER_MAX) return;
+        int btype[BORDER_MAX] = { playborder, editborder, specborder, waitborder, bgborder };
+        if(!btype[type]) return;
+        int bcolour[BORDER_MAX] = { playbordertone, editbordertone, specbordertone, waitbordertone, bgbordertone };
+        float bsize[BORDER_MAX] = { playbordersize, editbordersize, specbordersize, waitbordersize, bgbordersize },
+              bfade[BORDER_MAX] = { playborderblend, editborderblend, specborderblend, waitborderblend, bgborderblend };
+        int s = int(h*0.5f*bsize[type]);
+        if(!s) return;
+        vec col = vec(1, 1, 1);
+        skewcolour(col.x, col.y, col.z, bcolour[type]);
+        glColor4f(col.r, col.g, col.b, bfade[type]);
+        loopi(BORDERP_MAX) if(btype[type]&(1<<i))
         {
-            Texture *t = textureload(bordertoptex, 3);
-            glBindTexture(GL_TEXTURE_2D, t->id);
-            glColor4f(1.f, 1.f, 1.f, 1.f);
-            float tw = t->w*(s/float(t->h));
-            int cw = int(ceilf(w/tw));
-            loopi(cw) drawtexture(i*tw, 0, tw, s);
+            const char *bptex = i ? borderbottomtex : bordertoptex;
+            if(*bptex)
+            {
+                Texture *t = textureload(bptex, 3);
+                glBindTexture(GL_TEXTURE_2D, t->id);
+                float tw = t->w*(s/float(t->h));
+                int cw = int(ceilf(w/tw));
+                loopk(cw) switch(i)
+                {
+                    case BORDERP_TOP: drawtexture(k*tw, 0, tw, s); break;
+                    case BORDERP_BOTTOM: drawtexture(k*tw, h-s, tw, s); break;
+                    default: break;
+                }
+            }
+            else
+            {
+                usetexturing(false);
+                switch(i)
+                {
+                    case BORDERP_TOP: drawblend(0, 0, w, s, col.r, col.g, col.b, true); break;
+                    case BORDERP_BOTTOM: drawblend(0, h-s, w, s, 0, 0, 0, true); break;
+                    default: break;
+                }
+                usetexturing(true);
+            }
+            switch(i)
+            {
+                case BORDERP_TOP: top += s; break;
+                case BORDERP_BOTTOM: bottom += s; break;
+                default: break;
+            }
         }
-        else
-        {
-            usetexturing(false);
-            drawblend(0, 0, w, s, 0, 0, 0, true);
-            usetexturing(true);
-        }
-        if(*borderbottomtex)
-        {
-            Texture *t = textureload(borderbottomtex, 3);
-            glBindTexture(GL_TEXTURE_2D, t->id);
-            glColor4f(1.f, 1.f, 1.f, 1.f);
-            float tw = t->w*(s/float(t->h));
-            int cw = int(ceilf(w/tw));
-            loopi(cw) drawtexture(i*tw, h-s, tw, s);
-        }
-        else
-        {
-            usetexturing(false);
-            drawblend(0, h-s, w, s, 0, 0, 0, true);
-            usetexturing(true);
-        }
-        return s;
     }
 
-    int drawbackground(int w, int h)
+    void drawbackground(int w, int h, int &top, int &bottom)
     {
+        glColor4f(1, 1, 1, 1);
+
         Texture *t = textureload(bgtex, 3);
         glBindTexture(GL_TEXTURE_2D, t->id);
         drawtexture(0, 0, w, h);
 
-        int gap = drawspecborder(w, h, progborder);
+        drawspecborder(w, h, BORDER_BG, top, bottom);
+
+        glColor4f(1, 1, 1, 1);
 
         t = textureload(logotex, 3);
         glBindTexture(GL_TEXTURE_2D, t->id);
-        drawtexture(w-1024, gap, 1024, 256);
+        drawtexture(w-1024, top, 1024, 256);
 
         t = textureload(badgetex, 3);
         glBindTexture(GL_TEXTURE_2D, t->id);
-        glBegin(GL_TRIANGLE_STRIP); // goes off the edge on purpose
-        drawtexture(w-336, gap, 256, 128);
+        drawtexture(w-336, top, 256, 128);
 
         pushfont("console");
-        int y = h-gap-FONTH/2;
+        int y = h-bottom-FONTH/2;
         bool p = progressing;
         const char *ptitle = progresstitle, *ptext = progresstext;
         float pamt = progressamt, ppart = progresspart;
@@ -3008,18 +3048,15 @@ namespace hud
             if(*ptext) y -= draw_textx("%s %s [\fs\fa%d%%\fS]", FONTH*7/2, y, 255, 255, 255, 255, TEXT_LEFT_UP, -1, -1, *ptitle ? ptitle : "please wait...", ptext, int(ppart*100));
             else y -= draw_textx("%s", FONTH*7/2, y, 255, 255, 255, 255, TEXT_LEFT_UP, -1, -1, *ptitle ? ptitle : "please wait...");
         }
-        y = h-gap-FONTH/2;
+        y = h-bottom-FONTH/2;
         y -= draw_textx("v%s-%s %d bit (%s)", w-FONTH, y, 255, 255, 255, 255, TEXT_RIGHT_UP, -1, -1, versionstring, CUR_PLATFORM, CUR_ARCH, versionrelease);
         y -= draw_textx("%s", w-FONTH, y, 255, 255, 255, 255, TEXT_RIGHT_UP, -1, -1, versionurl);
         popfont();
-        return gap;
     }
 
-    int drawheadsup(int w, int h, int os, float fade)
+    void drawheadsup(int w, int h, int edge, int &top, int &bottom, float fade)
     {
-        int gap = 0;
-        if(game::intermission || client::waitplayers || game::player1->state == CS_SPECTATOR || game::player1->state == CS_WAITING)
-            gap += drawspecborder(w, h, game::intermission || client::waitplayers || game::player1->state == CS_SPECTATOR ? specborder : waitborder);
+        drawspecborder(w, h, game::intermission || client::waitplayers || game::player1->state == CS_SPECTATOR ? BORDER_SPEC : (game::player1->state == CS_WAITING ? BORDER_WAIT : (game::player1->state == CS_WAITING ? BORDER_EDIT : BORDER_PLAY)), top, bottom);
         if(underlaydisplay >= 2 || (game::focus->state == CS_ALIVE && (underlaydisplay || !game::thirdpersonview(true))))
         {
             Texture *t = *underlaytex ? textureload(underlaytex, 3) : notexture;
@@ -3027,7 +3064,7 @@ namespace hud
             {
                 glBindTexture(GL_TEXTURE_2D, t->id);
                 glColor4f(1.f, 1.f, 1.f, underlayblend*hudblend);
-                drawtexture(0, gap, w, h-gap);
+                drawtexture(0, top, w, h-top-bottom);
             }
         }
         if(!game::intermission && !client::waitplayers)
@@ -3036,8 +3073,8 @@ namespace hud
             if(game::focus->state == CS_ALIVE && game::inzoom() && W(game::focus->weapselect, zooms)) drawzoom(w, h);
             if(showdamage && !third)
             {
-                if(burntime && game::focus->state == CS_ALIVE) drawfire(w, h, gap, fade);
-                drawdamage(w, h, gap, fade);
+                if(burntime && game::focus->state == CS_ALIVE) drawfire(w, h, top, bottom, fade);
+                drawdamage(w, h, top, bottom, fade);
             }
             if(teamhurttime && m_team(game::gamemode, game::mutators) && game::focus == game::player1 && game::player1->lastteamhit >= 0 && lastmillis-game::player1->lastteamhit <= teamhurttime)
             {
@@ -3067,8 +3104,7 @@ namespace hud
             if(!radardisabled && !hasinput(true) && (game::focus->state == CS_EDITING ? showeditradar >= 1 : chkcond(showradar, !game::tvmode() || (game::focus != game::player1 && radarstyle==3))))
                 drawradar(w, h, fade);
         }
-        drawinventory(w, h, os, gap, fade);
-        return gap;
+        drawinventory(w, h, edge, top, bottom, fade);
     }
 
     void drawevents(float blend)
@@ -3083,7 +3119,7 @@ namespace hud
             pushfont("huge");
             const char *col = teamnotices >= 2 ? "\fs\fzyS" : "";
             int tf = int(255*hudblend*noticeblend), tr = 255, tg = 255, tb = 255,
-                tw = int((hudwidth-(int(hudsize*gapsize)*2+int(hudsize*inventorysize)*2))/noticescale);
+                tw = int((hudwidth-(int(hudsize*edgesize)*2+int(hudsize*inventorysize)*2))/noticescale);
             if(noticestone) skewcolour(tr, tg, tb, noticestone);
             if(m_trial(game::gamemode)) ty += draw_textx("%sTime Trial", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1, col);
             else if(!m_team(game::gamemode, game::mutators)) ty += draw_textx("%sFree-for-all %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1, col, m_bomber(game::gamemode) ? "Bomber-ball" : "Deathmatch");
@@ -3210,24 +3246,24 @@ namespace hud
             }
         }
 
-        int gap = int(hudsize*gapsize), inv = int(hudsize*inventorysize), exgap = 0;
+        int edge = int(hudsize*edgesize), inv = int(hudsize*inventorysize), top = 0, bottom = 0;
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glColor3f(1, 1, 1);
 
-        if(noview) exgap += drawbackground(hudwidth, hudheight);
+        if(noview) drawbackground(hudwidth, hudheight, top, bottom);
         else if(!client::waiting() && showhud)
         {
-            exgap += drawheadsup(hudwidth, hudheight, gap, fade);
+            drawheadsup(hudwidth, hudheight, edge, top, bottom, fade);
             if(!texpaneltimer && !game::tvmode() && !client::waiting() && !hasinput(false)) drawevents(fade);
         }
         if(UI::ready && showconsole && showhud)
         {
-            drawconsole(showconsole < 2 || noview ? 0 : 1, hudwidth, hudheight, gap, gap+exgap, hudwidth-gap*2, consolefade);
+            drawconsole(showconsole < 2 || noview ? 0 : 1, hudwidth, hudheight, edge, edge+top, hudwidth-edge*2, consolefade);
             if(showconsole >= 2 && !noview)
             {
-                int br = inv+gap*2, bs = (hudwidth-br*2)/2;
-                drawconsole(2, hudwidth, hudheight, br+gap*2, hudheight-gap-exgap, showfps >= 2 || showstats >= (m_edit(game::gamemode) ? 1 : 2) ? bs-gap*4 : (bs-gap*4)*2, consolefade);
+                int br = inv+edge*2, bs = (hudwidth-br*2)/2;
+                drawconsole(2, hudwidth, hudheight, br+edge*2, hudheight-edge-bottom, showfps >= 2 || showstats >= (m_edit(game::gamemode) ? 1 : 2) ? bs-edge*4 : (bs-edge*4)*2, consolefade);
             }
         }
 
