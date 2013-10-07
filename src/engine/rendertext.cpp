@@ -509,7 +509,7 @@ int draw_key(Texture *&tex, const char *str, float sx, float sy, float sc, cvec 
             glBindTexture(GL_TEXTURE_2D, tex->id);
         }
 
-        glColor4ub(uchar((textkeybgcolour>>16)&0xFF), uchar((textkeybgcolour>>8)&0xFF), uchar(textkeybgcolour&0xFF), uchar(textkeybgblend*255));
+        glColor4ub(uchar((textkeybgcolour>>16)&0xFF), uchar((textkeybgcolour>>8)&0xFF), uchar(textkeybgcolour&0xFF), uchar(textkeybgblend*cl.a));
 
         float sh = sc*FONTX, sw = (t->w*sh)/float(t->h), w1 = sw*0.3f, w2 = sw*0.4f, amt = swidth/w2;
         int count = int(floorf(amt));
@@ -554,7 +554,7 @@ int draw_key(Texture *&tex, const char *str, float sx, float sy, float sc, cvec 
     #define TEXTCHAR(idx) { draw_char(tex, c, left+x, top+y, scale); x += cw; }
     #define TEXTWORD TEXTWORDSKELETON
     bool usecolor = true;
-    int fade = textkeyfgblend*255, r = (textkeyfgcolour>>16)&0xFF, g = (textkeyfgcolour>>8)&0xFF, b = textkeyfgcolour&0xFF,
+    int fade = textkeyfgblend*cl.a, r = (textkeyfgcolour>>16)&0xFF, g = (textkeyfgcolour>>8)&0xFF, b = textkeyfgcolour&0xFF,
         colorpos = 1, ly = 0, left = sx + sp, top = sy, cursor = -1, maxwidth = -1;
     cvec colorstack[16], color = TVECX(r, g, b, fade);
     loopi(16) colorstack[i] = color;
