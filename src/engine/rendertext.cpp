@@ -8,7 +8,7 @@ VARF(IDF_PERSIST, textkeybg, 0, 1, 1, changedkeys = totalmillis);
 VARF(IDF_PERSIST, textkeyseps, 0, 0, 1, changedkeys = totalmillis);
 VAR(IDF_PERSIST|IDF_HEX, textkeybgcolour, 0x000000, 0xFFFFFF, 0xFFFFFF);
 VAR(IDF_PERSIST|IDF_HEX, textkeyfgcolour, 0x000000, 0x00FFFF, 0xFFFFFF);
-FVAR(IDF_PERSIST, textkeybgblend, 0, 0.35f, 1);
+FVAR(IDF_PERSIST, textkeybgblend, 0, 0.25f, 1);
 FVAR(IDF_PERSIST, textkeyfgblend, 0, 1, 1);
 
 static inline bool htcmp(const char *key, const font &f) { return !strcmp(key, f.name); }
@@ -257,7 +257,6 @@ static void text_color(char c, cvec *stack, int size, int &sp, cvec &color, int 
     glColor4ub((uchar)color.r, (uchar)color.g, (uchar)color.b, (uchar)color.a);
 }
 
-#define FONTX int(curfont->maxh*textscale)
 static const char *gettexvar(const char *var)
 {
     ident *id = getident(var);
@@ -285,7 +284,7 @@ static float draw_icon(Texture *&tex, const char *name, float x, float y, float 
         tex = t;
         glBindTexture(GL_TEXTURE_2D, tex->id);
     }
-    float h = scale*FONTX, w = (t->w*h)/float(t->h);
+    float h = curfont->maxh*scale, w = (t->w*h)/float(t->h);
     varray::attrib<float>(x,     y    ); varray::attrib<float>(0, 0);
     varray::attrib<float>(x + w, y    ); varray::attrib<float>(1, 0);
     varray::attrib<float>(x + w, y + h); varray::attrib<float>(1, 1);
@@ -301,7 +300,7 @@ static float icon_width(const char *name, float scale)
     if(!*file) return 0;
     Texture *t = textureload(file, 3, true, false);
     if(!t) return 0;
-    return (t->w*scale*FONTX)/t->h;
+    return (t->w*curfont->maxh*scale)/t->h;
 }
 
 #define TEXTCOLORIZE(h,s) \
@@ -379,7 +378,7 @@ static float icon_width(const char *name, float scale)
         int c = uchar(str[i]);\
         TEXTINDEX(i)\
         if(c == '\t')      { x = TEXTTAB(x); TEXTWHITE(i) }\
-        else if(c == ' ')  { x += scale*curfont->defaultw*textscale; TEXTWHITE(i) }\
+        else if(c == ' ')  { x += scale*curfont->defaultw; TEXTWHITE(i) }\
         else if(c == '\n') { TEXTLINE(i) TEXTALIGN }\
         else if(c == '\f') { if(str[i+1]) { i++; TEXTCOLORIZE(i, true); } }\
         else if(curfont->chars.inrange(c-curfont->charoffset))\
@@ -427,7 +426,7 @@ int text_visible(const char *str, float hitx, float hity, int maxwidth, int flag
     #define TEXTCOLOR(idx)
     #define TEXTHEXCOLOR(ret)
     #define TEXTICON(ret) x += icon_width(ret, scale);
-    #define TEXTKEY(ret) x += (textkeybg ? icon_width("textures/guikey", scale)*0.6f : 0.f)+(text_widthf(ret, flags)*scale);
+    #define TEXTKEY(ret) x += (textkeybg ? icon_width("textures/guikey", scale)*0.6f : 0.f)+text_widthf(ret, flags);
     #define TEXTCHAR(idx) x += cw; TEXTWHITE(idx)
     #define TEXTWORD TEXTWORDSKELETON
     TEXTSKELETON
@@ -452,7 +451,7 @@ void text_posf(const char *str, int cursor, float &cx, float &cy, int maxwidth, 
     #define TEXTCOLOR(idx)
     #define TEXTHEXCOLOR(ret)
     #define TEXTICON(ret) x += icon_width(ret, scale);
-    #define TEXTKEY(ret) x += (textkeybg ? icon_width("textures/guikey", scale)*0.6f : 0.f)+(text_widthf(ret, flags)*scale);
+    #define TEXTKEY(ret) x += (textkeybg ? icon_width("textures/guikey", scale)*0.6f : 0.f)+text_widthf(ret, flags);
     #define TEXTCHAR(idx) x += cw;
     #define TEXTWORD TEXTWORDSKELETON if(i >= cursor) break;
     cx = cy = 0;
@@ -477,7 +476,7 @@ void text_boundsf(const char *str, float &width, float &height, int maxwidth, in
     #define TEXTCOLOR(idx)
     #define TEXTHEXCOLOR(ret)
     #define TEXTICON(ret) x += icon_width(ret, scale);
-    #define TEXTKEY(ret) x += (textkeybg ? icon_width("textures/guikey", scale)*0.6f : 0.f)+(text_widthf(ret, flags)*scale);
+    #define TEXTKEY(ret) x += (textkeybg ? icon_width("textures/guikey", scale)*0.6f : 0.f)+text_widthf(ret, flags);
     #define TEXTCHAR(idx) x += cw;
     #define TEXTWORD TEXTWORDSKELETON
     width = 0;
@@ -501,7 +500,6 @@ int draw_key(Texture *&tex, const char *str, float sx, float sy, float sc, cvec 
     if(textkeybg)
     {
         Texture *t = textureload("textures/guikey", 3, true, false);
-        if(!t) return 0;
         if(tex != t)
         {
             xtraverts += varray::end();
@@ -511,7 +509,7 @@ int draw_key(Texture *&tex, const char *str, float sx, float sy, float sc, cvec 
 
         glColor4ub(uchar((textkeybgcolour>>16)&0xFF), uchar((textkeybgcolour>>8)&0xFF), uchar(textkeybgcolour&0xFF), uchar(textkeybgblend*cl.a));
 
-        float sh = sc*FONTX, sw = (t->w*sh)/float(t->h), w1 = sw*0.3f, w2 = sw*0.4f, amt = swidth/w2;
+        float sh = curfont->maxh*sc, sw = (t->w*sh)/float(t->h), w1 = sw*0.3f, w2 = sw*0.4f, amt = swidth/w2;
         int count = int(floorf(amt));
         varray::attrib<float>(sx + ss,     sy    ); varray::attrib<float>(0, 0);
         varray::attrib<float>(sx + ss + w1, sy    ); varray::attrib<float>(0.3f, 0);
