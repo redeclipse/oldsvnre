@@ -315,23 +315,16 @@ namespace server
 
     struct clientinfo
     {
-        int clientnum, connectmillis, sessionid, overflow, ping, team, lastteam, lastplayerinfo;
-        string name, handle, mapvote;
-        int modevote, mutsvote, lastvote;
-        int privilege;
-        bool connected, ready, local, timesync, online, wantsmap, failedmap, connectauth;
-        int gameoffset, lastevent;
         servstate state;
+        string name, handle, mapvote, authname, clientmap;
+        int clientnum, connectmillis, sessionid, overflow, ping, team, lastteam, lastplayerinfo,
+            modevote, mutsvote, lastvote, privilege, gameoffset, lastevent, wslen, mapcrc, swapteam;
+        bool connected, ready, local, timesync, online, wantsmap, failedmap, connectauth, warned, kicked;
         vector<gameevent *> events;
         vector<uchar> position, messages;
         uchar *wsdata;
         vector<clientinfo *> bots;
-        int wslen;
         uint authreq;
-        string authname;
-        string clientmap;
-        int mapcrc;
-        bool warned, kicked;
         ENetPacket *clipboard;
         int lastclipboard, needclipboard;
 
@@ -352,7 +345,7 @@ namespace server
             overflow = 0;
             ready = timesync = wantsmap = failedmap = false;
             lastevent = gameoffset = lastvote = 0;
-            team = lastteam = T_NEUTRAL;
+            team = lastteam = swapteam = T_NEUTRAL;
             clientmap[0] = '\0';
             mapcrc = 0;
             warned = false;
@@ -1566,8 +1559,8 @@ namespace server
                 }
             }
         }
-        if(m_fight(gamemode) && m_team(gamemode, mutators) && !m_coop(gamemode, mutators) && G(teambalance) == 4 && !inovertime && !interm &&
-           gamemillis > G(teambalancewait) && (!lastteambalance || gamemillis >= lastteambalance) && (!nextteambalance || gamemillis >= nextteambalance))
+        if(m_balteam(gamemode, mutators, 4) && !inovertime && !interm && gamemillis > G(teambalancewait)
+           && (!lastteambalance || gamemillis >= lastteambalance) && (!nextteambalance || gamemillis >= nextteambalance))
         {
             vector<clientinfo *> tc[T_TOTAL];
             int numplaying = 0;
@@ -1600,15 +1593,17 @@ namespace server
                     {
                         loopi(nt)
                         {
-                            int iters = tc[i].length()*2;
+                            int team = i+T_FIRST, iters = tc[i].length()*2;
                             while(iters > 0 && tc[i].length() > mid)
                             {
                                 int id = -1;
                                 loopvj(tc[i])
                                 {
-                                    tc[i][j]->state.timeplayed += lastmillis-tc[i][j]->state.lasttimeplayed;
-                                    tc[i][j]->state.lasttimeplayed = lastmillis;
-                                    if(id < 0 || tc[i][id]->state.timeplayed >= tc[i][j]->state.timeplayed)
+                                    clientinfo *cp = tc[i][j];
+                                    if(G(teambalanceswap) && cp->swapteam == team) { id = j; break; }
+                                    cp->state.timeplayed += lastmillis-cp->state.lasttimeplayed;
+                                    cp->state.lasttimeplayed = lastmillis;
+                                    if(id < 0 || tc[i][id]->state.timeplayed >= cp->state.timeplayed)
                                         id = j;
                                 }
                                 if(id >= 0)
@@ -1617,7 +1612,7 @@ namespace server
                                     int team = chooseteam(cp);
                                     if(team != cp->team)
                                     {
-                                        setteam(cp, team);
+                                        setteam(cp, team, (m_balreset(gamemode) ? TT_DEFAULT : 0)|TT_INFO);
                                         tc[i].removeobj(cp);
                                         tc[team-T_FIRST].add(cp);
                                     }
@@ -2508,7 +2503,7 @@ namespace server
         }
     }
 
-    void setteam(clientinfo *ci, int team, int flags)
+    void setteam(clientinfo *ci, int team, int flags, bool swaps)
     {
         if(ci->team != team)
         {
@@ -2521,6 +2516,32 @@ namespace server
                 sendf(-1, 1, "ri3", N_CHECKPOINT, ci->clientnum, -1);
             }
             */
+            if(ci->state.actortype == A_PLAYER)
+            {
+                if(!team)
+                {
+                    ci->swapteam = T_NEUTRAL;
+                    if(ci->team && m_balteam(gamemode, mutators, 3) && G(teambalanceswap) && swaps)
+                    {
+                        loopv(clients) if(clients[i] && clients[i] != ci && clients[i]->state.actortype == A_PLAYER && clients[i]->swapteam && clients[i]->swapteam == ci->team)
+                        {
+                            clients[i]->swapteam = T_NEUTRAL;
+                            setteam(clients[i], ci->team, (m_balreset(gamemode) ? TT_DEFAULT : 0)|TT_INFO, false);
+                            break;
+                        }
+                    }
+                }
+                else if(m_balteam(gamemode, mutators, 3) && G(teambalanceswap) && swaps)
+                {
+                    if(ci->swapteam && ci->swapteam == team) ci->swapteam = T_NEUTRAL;
+                    loopv(clients) if(clients[i] && clients[i] != ci && clients[i]->state.actortype == A_PLAYER && clients[i]->team == team && clients[i]->swapteam && clients[i]->swapteam == ci->team)
+                    {
+                        clients[i]->swapteam = T_NEUTRAL;
+                        setteam(clients[i], ci->team, (m_balreset(gamemode) ? TT_DEFAULT : 0)|TT_INFO, false);
+                        break;
+                    }
+                }
+            }
             if(flags&TT_RESET) waiting(ci, DROP_WEAPONS);
             else if(flags&TT_SMODE && ci->state.state == CS_ALIVE)
             {
@@ -2537,6 +2558,7 @@ namespace server
             }
             if(ci->state.actortype == A_PLAYER) aiman::dorefresh = max(aiman::dorefresh, G(airefreshdelay)); // get the ai to reorganise
         }
+        else if(!team) ci->swapteam = T_NEUTRAL;
         if(flags&TT_INFO) sendf(-1, 1, "ri3", N_SETTEAM, ci->clientnum, ci->team);
     }
 
@@ -2545,13 +2567,14 @@ namespace server
         int team;
         float score;
         int clients;
+        vector<clientinfo *> swaps;
 
         teamcheck() : team(T_NEUTRAL), score(0.f), clients(0) {}
         teamcheck(int n) : team(n), score(0.f), clients(0) {}
         teamcheck(int n, float r) : team(n), score(r), clients(0) {}
         teamcheck(int n, int s) : team(n), score(s), clients(0) {}
 
-        ~teamcheck() {}
+        ~teamcheck() { swaps.setsize(0); }
     };
 
     bool allowteam(clientinfo *ci, int team, int first = T_FIRST, bool check = true)
@@ -2560,7 +2583,7 @@ namespace server
         {
             if(!m_coop(gamemode, mutators))
             {
-                if(check && G(teambalance) >= 3 && team != chooseteam(ci, team)) return false;
+                if(check && m_balteam(gamemode, mutators, 3) && team != chooseteam(ci, team)) return false;
                 return true;
             }
             else if(ci->state.actortype >= A_BOT) return team != mapbals[curbalance][0];
@@ -2591,7 +2614,7 @@ namespace server
                     break;
                 }
             }
-            if(bal || team < 0) loopj(2)
+            if(bal || team <= 0) loopj(team > 0 ? 2 : 1)
             {
                 teamcheck teamchecks[T_TOTAL];
                 loopk(T_TOTAL) teamchecks[k].team = T_FIRST+k;
@@ -2607,6 +2630,8 @@ namespace server
                         teamcheck &ts = teamchecks[cp->team-T_FIRST];
                         ts.score += cp->state.score/float(max(cp->state.timeplayed, 1));
                         ts.clients++;
+                        if(cp->state.actortype == A_PLAYER && m_balteam(gamemode, mutators, 3) && G(teambalanceswap) && cp->swapteam)
+                            teamchecks[cp->swapteam-T_FIRST].swaps.add(cp);
                     }
                 }
                 teamcheck *worst = NULL;
@@ -2617,13 +2642,13 @@ namespace server
                     {
                         case 2:
                         {
-                            if(!worst || (!j && ts.team == team && ts.score <= worst->score) || ts.score < worst->score || ((j || worst->team != team) && ts.score == worst->score && ts.clients < worst->clients))
+                            if(!worst || (team > 0 && ts.team == team && ts.score <= worst->score) || ts.score < worst->score || ((team <= 0 || worst->team != team) && ts.score == worst->score && ts.clients < worst->clients))
                                 worst = &ts;
                             break;
                         }
                         case 1: case 3: case 4: default:
                         {
-                            if(!worst || (!j && ts.team == team && ts.clients <= worst->clients) || ts.clients < worst->clients || ((j || worst->team != team) && ts.clients == worst->clients && ts.score < worst->score))
+                            if(!worst || (team > 0 && ts.team == team && ts.clients <= worst->clients) || ts.clients < worst->clients || ((team <= 0 || worst->team != team) && ts.clients == worst->clients && ts.score < worst->score))
                                 worst = &ts;
                             break;
                         }
@@ -2631,6 +2656,8 @@ namespace server
                 }
                 if(worst)
                 {
+                    if(team > 0 && team == worst->team && !teamchecks[team-T_FIRST].swaps.empty() && allowteam(ci, team, T_FIRST, false))
+                        return team;
                     team = worst->team;
                     break;
                 }
@@ -4177,6 +4204,20 @@ namespace server
         while(ci->events.length() > keep) delete ci->events.pop();
     }
 
+    int requestswap(clientinfo *ci, int team)
+    {
+        if(!allowteam(ci, team, T_FIRST))
+        {
+            if(team && ci->state.actortype == A_PLAYER && m_balteam(gamemode, mutators, 3) && G(teambalanceswap) && ci->swapteam != team)
+            {
+                if(canplay()) ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fy%s requests swap to team %s, change teams to accept", colourname(ci), colourteam(team));
+                ci->swapteam = team;
+            }
+            team = chooseteam(ci);
+        }
+        return team;
+    }
+
     void waiting(clientinfo *ci, int drop, bool exclude)
     {
 #ifdef CAMPAIGN
@@ -4205,7 +4246,7 @@ namespace server
         ci->state.state = CS_WAITING;
         ci->state.weapreset(false);
         if(m_loadout(gamemode, mutators)) chkloadweap(ci);
-        if(!allowteam(ci, ci->team, T_FIRST)) setteam(ci, chooseteam(ci), TT_SMINFO);
+        setteam(ci, requestswap(ci, ci->team), TT_SMINFO);
     }
 
     int triggertime(int i)
@@ -4486,6 +4527,20 @@ namespace server
         {
             if(reason != DISC_SHUTDOWN)
             {
+                aiman::removeai(ci, complete);
+                if(!complete)
+                {
+                    aiman::dorefresh = max(aiman::dorefresh, G(airefreshdelay));
+                    if(ci->team && ci->state.actortype == A_PLAYER && m_balteam(gamemode, mutators, 3) && G(teambalanceswap))
+                    {
+                        loopv(clients) if(clients[i] && clients[i] != ci && clients[i]->state.actortype == A_PLAYER && clients[i]->swapteam && clients[i]->swapteam == ci->team)
+                        {
+                            clients[i]->swapteam = T_NEUTRAL;
+                            setteam(clients[i], ci->team, (m_balreset(gamemode) ? TT_DEFAULT : 0)|TT_INFO, false);
+                            break;
+                        }
+                    }
+                }
                 loopv(clients) if(clients[i] != ci)
                 {
                     loopvk(clients[i]->state.fraglog) if(clients[i]->state.fraglog[k] == ci->clientnum)
@@ -4495,8 +4550,6 @@ namespace server
                 if(smode) smode->leavegame(ci, true);
                 mutate(smuts, mut->leavegame(ci, true));
                 savescore(ci);
-                aiman::removeai(ci, complete);
-                if(!complete) aiman::dorefresh = max(aiman::dorefresh, G(airefreshdelay));
             }
             sendf(-1, 1, "ri3", N_DISCONNECT, n, reason);
             ci->connected = false;
@@ -5533,10 +5586,11 @@ namespace server
                 case N_SWITCHTEAM:
                 {
                     int team = getint(p);
-                    if(!allowteam(ci, team, T_FIRST)) team = chooseteam(ci);
                     if(!m_team(gamemode, mutators) || ci->state.actortype >= A_ENEMY || team == ci->team) break;
                     uint ip = getclientip(ci->clientnum);
                     if(ip && checkipinfo(control, ipinfo::LIMIT, ip) && !checkipinfo(control, ipinfo::ALLOW, ip) && !haspriv(ci, G(limitlock), "change teams while limited")) break;
+                    int newteam = requestswap(ci, team);
+                    if(newteam != team || newteam == ci->team) break;
                     bool reset = true;
                     if(ci->state.state == CS_SPECTATOR)
                     {
@@ -5545,7 +5599,7 @@ namespace server
                         if(!spectate(ci, false)) break;
                         reset = false;
                     }
-                    setteam(ci, team, (reset ? TT_RESET : 0)|TT_SMINFO);
+                    setteam(ci, newteam, (reset ? TT_RESET : 0)|TT_SMINFO);
                     break;
                 }
 
@@ -5884,10 +5938,10 @@ namespace server
                 case N_SETTEAM:
                 {
                     int who = getint(p), team = getint(p);
-                    if(who<0 || who>=getnumclients() || !haspriv(ci, G(speclock), "change the team of others")) break;
+                    if(who<0 || who>=getnumclients() || !haspriv(ci, G(teamlock), "change the team of others")) break;
                     clientinfo *cp = (clientinfo *)getinfo(who);
                     if(!cp || cp == ci || !m_team(gamemode, mutators) || m_local(gamemode) || cp->state.actortype >= A_ENEMY) break;
-                    if(cp->state.state == CS_SPECTATOR || !allowteam(cp, team, T_FIRST)) break;
+                    if(cp->state.state == CS_SPECTATOR || !allowteam(cp, team, T_FIRST, false)) break;
                     setteam(cp, team, TT_DFINFO);
                     break;
                 }
