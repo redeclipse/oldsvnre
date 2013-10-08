@@ -671,7 +671,7 @@ void dropent()
 
 static int keepents = 0;
 
-extentity *newentity(bool local, const vec &o, int type, const attrvector &attrs, int &idx)
+extentity *newentity(bool local, const vec &o, int type, const attrvector &attrs, int &idx, bool fix = true)
 {
     vector<extentity *> &ents = entities::getents();
     if(local)
@@ -692,7 +692,7 @@ extentity *newentity(bool local, const vec &o, int type, const attrvector &attrs
     e.light.dir = vec(0, 0, 1);
     if(ents.inrange(idx)) { entities::deleteent(ents[idx]); ents[idx] = &e; }
     else { idx = ents.length(); ents.add(&e); }
-    if(local) entities::fixentity(idx, true, true);
+    if(local && fix) entities::fixentity(idx, true, true);
     return &e;
 }
 
@@ -762,7 +762,7 @@ void entpaste()
         vec o(c.o);
         o.mul(m).add(sel.o.tovec());
         int idx;
-        extentity *e = newentity(true, o, ET_EMPTY, c.attrs, idx);
+        extentity *e = newentity(true, o, ET_EMPTY, c.attrs, idx, false);
         if(!e) continue;
         loopvk(c.links) e->links.add(c.links[k]);
         entadd(idx);
