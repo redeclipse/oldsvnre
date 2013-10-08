@@ -266,6 +266,7 @@ GVAR(0, capturepickupdelay, -1, 2500, VAR_MAX);
 GVAR(0, captureteampenalty, -1, 7500, VAR_MAX);
 GVAR(0, captureresetpenalty, -1, 3500, VAR_MAX);
 GFVAR(0, capturecarryspeed, 0, 0.9f, FVAR_MAX);
+GFVAR(0, capturedropheight, 0, 8, FVAR_MAX);
 GVAR(0, capturepoints, 0, 5, VAR_MAX); // points added to score
 GVAR(0, capturepickuppoints, 0, 3, VAR_MAX); // points added to score
 GVAR(0, capturecollide, 0, BOUNCE_GEOM, VAR_MAX);
@@ -311,6 +312,7 @@ GVAR(0, bomberresetdelay, 0, 15000, VAR_MAX);
 GVAR(0, bomberpickupdelay, -1, 5000, VAR_MAX);
 GVAR(0, bombercarrytime, 0, 15000, VAR_MAX);
 GFVAR(0, bombercarryspeed, 0, 0.9f, FVAR_MAX);
+GFVAR(0, bomberdropheight, 0, 8, FVAR_MAX);
 GVAR(0, bomberpoints, 0, 5, VAR_MAX); // points added to score
 GVAR(0, bomberpenalty, 0, 5, VAR_MAX); // points taken from score
 GVAR(0, bomberpickuppoints, 0, 3, VAR_MAX); // points added to score

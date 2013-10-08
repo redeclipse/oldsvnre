@@ -733,8 +733,30 @@ namespace projs
                 break;
             }
         }
-        if(!init) physics::entinmap(&proj, proj.projcollide&COLLIDE_PLAYER);
-        else if(proj.projtype == PRJ_AFFINITY) proj.o.z += proj.height*2;
+        if(!init && (!insideworld(proj.o) || collide(&proj, vec(0, 0, 0), 0, proj.projcollide&COLLIDE_PLAYER)))
+        {
+            vec orig = proj.o;
+            if(!proj.lastbb.iszero())
+            {
+                proj.o = proj.lastbb;
+                if(insideworld(proj.o) && !collide(&proj, vec(0, 0, 0), 0, proj.projcollide&COLLIDE_PLAYER))
+                {
+                    proj.resetinterp();
+                    return;
+                }
+            }
+            loopi(20) loopj(8) loopk(8)
+            {
+                proj.o.add(vec(k*45.f, j*45.f).mul(proj.radius*i/10.f));
+                if(insideworld(proj.o) && !collide(&proj, vec(0, 0, 0), 0, proj.projcollide&COLLIDE_PLAYER))
+                {
+                    proj.resetinterp();
+                    return;
+                }
+                else proj.o = orig;
+            }
+        }
+        else proj.lastbb = proj.o;
     }
 
     void updatetargets(projent &proj, int style = 0)
