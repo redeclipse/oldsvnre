@@ -80,7 +80,7 @@ namespace bomber
         if(carryaffinity(d) && (d->action[AC_AFFINITY] || d->actiontime[AC_AFFINITY] > 0))
         {
             if(d->action[AC_AFFINITY]) return true;
-            vec o = d->feetpos(1), inertia;
+            vec o = d->feetpos(bomberdropheight), inertia;
             vecfromyawpitch(d->yaw, d->pitch, 1, 0, inertia);
             inertia.normalize().mul(bomberspeed).add(vec(d->vel).add(d->falling).mul(bomberrelativity));
             bool guided = m_team(game::gamemode, game::mutators) && bomberlockondelay && lastmillis-d->actiontime[AC_AFFINITY] >= bomberlockondelay;
@@ -433,7 +433,7 @@ namespace bomber
         loopv(st.flags) if(st.flags[i].owner == d)
         {
             bomberstate::flag &f = st.flags[i];
-            st.dropaffinity(i, f.owner->feetpos(1), f.owner->vel, lastmillis);
+            st.dropaffinity(i, f.owner->feetpos(bomberdropheight), f.owner->vel, lastmillis);
         }
     }
 
@@ -564,7 +564,7 @@ namespace bomber
                 }
             }
             if(f.pickuptime && lastmillis-f.pickuptime <= 1000) continue;
-            if(f.lastowner == d && f.droptime && (bomberpickupdelay < 0 || lastmillis-f.droptime <= bomberpickupdelay)) continue;
+            if(f.lastowner == d && f.droptime && (bomberpickupdelay < 0 || lastmillis-f.droptime <= max(bomberpickupdelay, 500))) continue;
             if(o.dist(f.pos()) <= enttype[AFFINITY].radius/2)
             {
                 client::addmsg(N_TAKEAFFIN, "ri2", d->clientnum, i);

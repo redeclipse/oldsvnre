@@ -27,7 +27,7 @@ struct bomberservmode : bomberstate, servmode
     void leavegame(clientinfo *ci, bool disconnecting = false)
     {
         if(!canplay(hasflaginfo)) return;
-        dropaffinity(ci, ci->state.feetpos(1), vec(ci->state.vel).add(ci->state.falling));
+        dropaffinity(ci, ci->state.feetpos(G(bomberdropheight)), vec(ci->state.vel).add(ci->state.falling));
     }
 
     void dodamage(clientinfo *m, clientinfo *v, int &damage, int &hurt, int &weap, int &flags, int &material, const ivec &hitpush)
@@ -57,7 +57,7 @@ struct bomberservmode : bomberstate, servmode
     void died(clientinfo *ci, clientinfo *v)
     {
         if(!canplay(hasflaginfo)) return;
-        dropaffinity(ci, ci->state.feetpos(1), vec(ci->state.vel).add(ci->state.falling));
+        dropaffinity(ci, ci->state.feetpos(G(bomberdropheight)), vec(ci->state.vel).add(ci->state.falling));
         if(v && m_gsp1(gamemode, mutators) && (!m_team(gamemode, mutators) || ci->team != v->team))
         {
             loopv(flags) if(isbomberaffinity(flags[i]) && flags[i].owner == v->clientnum)
@@ -130,7 +130,7 @@ struct bomberservmode : bomberstate, servmode
         if(!canplay(hasflaginfo) || !flags.inrange(i) || ci->state.state!=CS_ALIVE || ci->state.actortype >= A_ENEMY) return;
         flag &f = flags[i];
         if(!isbomberaffinity(f) || f.owner >= 0 || !f.enabled) return;
-        if(f.lastowner == ci->clientnum && f.droptime && (G(bomberpickupdelay) < 0 || lastmillis-f.droptime <= G(bomberpickupdelay))) return;
+        if(f.lastowner == ci->clientnum && f.droptime && (G(bomberpickupdelay) < 0 || lastmillis-f.droptime <= max(G(bomberpickupdelay), 500))) return;
         bomberstate::takeaffinity(i, ci->clientnum, gamemillis);
         if(!m_nopoints(gamemode, mutators) && (!f.droptime || f.lastowner != ci->clientnum)) givepoints(ci, G(bomberpickuppoints));
         sendf(-1, 1, "ri3", N_TAKEAFFIN, ci->clientnum, i);
@@ -235,7 +235,7 @@ struct bomberservmode : bomberstate, servmode
                 {
                     ci->state.weapshots[W_GRENADE][0].add(1);
                     sendf(-1, 1, "ri8", N_DROP, ci->clientnum, -1, 1, W_GRENADE, -1, -1, -1);
-                    dropaffinity(ci, ci->state.feetpos(1), vec(ci->state.vel).add(ci->state.falling));
+                    dropaffinity(ci, ci->state.feetpos(G(bomberdropheight)), vec(ci->state.vel).add(ci->state.falling));
                     if((!m_team(gamemode, mutators) || m_gsp1(gamemode, mutators)) && G(bomberholdpenalty))
                     {
                         givepoints(ci, -G(bomberholdpenalty));

@@ -1593,22 +1593,29 @@ namespace physics
         inmapchk(20, d->o.z += (d->height+d->aboveeye)*n/10.f);
         if(gameent::is(d))
         {
-            vec dir;
-            vecfromyawpitch(d->yaw, d->pitch, 1, 0, dir);
-            dir.normalize().mul(maxrad);
+            vec dir = vec(d->yaw, d->pitch).normalize().mul(maxrad);
             if(!dir.iszero())
             {
                 inmapchk(200, d->o.add(vec(dir).mul(n/10.f)));
                 inmapchk(50, d->o.add(vec(dir).mul(-n/10.f)));
             }
+            dir = vec(d->vel).normalize().mul(maxrad);
+            if(!dir.iszero())
+            {
+                inmapchk(200, d->o.add(vec(dir).mul(n/10.f)));
+                inmapchk(50, d->o.add(vec(dir).mul(-n/10.f)));
+            }
+            inmapchk(50, d->o.add(vec((rnd(21)-10)/10.f, (rnd(21)-10)/10.f, (rnd(21)-10)/10.f).normalize().mul(maxrad).mul(vec(n/10.f, n/10.f, n/25.f))));
         }
-        vec dir = vec(d->vel).normalize().mul(maxrad);
-        if(!dir.iszero())
+        else
         {
-            inmapchk(200, d->o.add(vec(dir).mul(n/10.f)));
-            inmapchk(50, d->o.add(vec(dir).mul(-n/10.f)));
+            vec dir = vec(d->vel).normalize().mul(maxrad);
+            if(!dir.iszero())
+            {
+                inmapchk(100, d->o.add(vec(dir).mul(n/10.f)));
+                inmapchk(20, d->o.add(vec(dir).mul(-n/10.f)));
+            }
         }
-        inmapchk(50, d->o.add(vec((rnd(21)-10)/10.f, (rnd(21)-10)/10.f, (rnd(21)-10)/10.f).normalize().mul(maxrad).mul(vec(n/10.f, n/10.f, n/25.f))));
         d->o = orig;
         d->resetinterp();
         return false;
