@@ -162,10 +162,13 @@ namespace bomber
                             popfont();
                         }
                     }
-                    SEARCHBINDCACHE(altkey)("affinity", 0);
-                    pushfont("reduced");
-                    ty += draw_textx("Press %s to throw", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, altkey)*hud::noticescale;
-                    popfont();
+                    if(game::focus == game::player1)
+                    {
+                        SEARCHBINDCACHE(altkey)("affinity", 0);
+                        pushfont("reduced");
+                        ty += draw_textx("Press %s to throw", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, altkey)*hud::noticescale;
+                        popfont();
+                    }
                     break;
                 }
             }
