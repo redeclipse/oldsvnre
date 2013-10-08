@@ -173,15 +173,23 @@ namespace game
     VAR(IDF_PERSIST, zoomscroll, 0, 0, 1); // 0 = stop at min/max, 1 = go to opposite end
 
     VAR(IDF_PERSIST, aboveheadnames, 0, 1, 1);
+    VAR(IDF_PERSIST, aboveheadinventory, 0, 2, 2); // 0 = off, 1 = weapselect only, 2 = all weapons
     VAR(IDF_PERSIST, aboveheadstatus, 0, 1, 1);
     VAR(IDF_PERSIST, aboveheadteam, 0, 0, 3);
     VAR(IDF_PERSIST, aboveheaddamage, 0, 0, 1);
     VAR(IDF_PERSIST, aboveheadicons, 0, 5, 7);
     FVAR(IDF_PERSIST, aboveheadblend, 0.f, 1, 1.f);
-    FVAR(IDF_PERSIST, aboveheadnamesize, 0, 3.f, 1000);
+    FVAR(IDF_PERSIST, aboveheadnamesblend, 0.f, 1, 1.f);
+    FVAR(IDF_PERSIST, aboveheadinventoryblend, 0.f, 0.9f, 1.f);
+    FVAR(IDF_PERSIST, aboveheadinventoryfade, 0.f, 0.25f, 1.f);
+    FVAR(IDF_PERSIST, aboveheadstatusblend, 0.f, 1, 1.f);
+    FVAR(IDF_PERSIST, aboveheadiconsblend, 0.f, 1, 1.f);
+    FVAR(IDF_PERSIST, aboveheadnamessize, 0, 3, 1000);
+    FVAR(IDF_PERSIST, aboveheadinventorysize, 0, 6, 1000);
     FVAR(IDF_PERSIST, aboveheadstatussize, 0, 2.5f, 1000);
-    FVAR(IDF_PERSIST, aboveheadiconsize, 0, 2.5f, 1000);
-    FVAR(IDF_PERSIST, aboveheadeventsize, 0, 3.f, 1000);
+    FVAR(IDF_PERSIST, aboveheadiconssize, 0, 2.5f, 1000);
+    FVAR(IDF_PERSIST, aboveheadeventsize, 0, 3, 1000);
+
     FVAR(IDF_PERSIST, aboveitemiconsize, 0, 2.5f, 1000);
 
     FVAR(IDF_PERSIST, aboveheadsmooth, 0, 0.25f, 1);
@@ -3093,9 +3101,24 @@ namespace game
         float blend = aboveheadblend*trans;
         if(aboveheadnames && d != player1)
         {
-            pos.z += aboveheadnamesize/2;
-            part_textcopy(pos, colourname(d), PART_TEXT, 1, 0xFFFFFF, aboveheadnamesize, blend);
-            pos.z += aboveheadnamesize/2+0.5f;
+            pos.z += aboveheadnamessize/2;
+            part_textcopy(pos, colourname(d), PART_TEXT, 1, 0xFFFFFF, aboveheadnamessize, blend*aboveheadnamesblend);
+        }
+        if(aboveheadinventory && d != player1)
+        {
+            mkstring(weapons);
+            #define printweapon(q) \
+                if((q != W_MELEE || q == d->weapselect) && d->hasweap(q, m_weapon(gamemode, mutators))) \
+                { \
+                    vec colour = vec::hexcolor(W(q, colour)); \
+                    if(q != d->weapselect) colour.mul(aboveheadinventoryfade); \
+                    defformatstring(str)("\fs\f[%d]%s\f(%s)\fS", colour.tohexcolor(), q != d->weapselect ? "\fE" : "", hud::itemtex(WEAPON, q)); \
+                    concatstring(weapons, str); \
+                }
+            if(aboveheadinventory >= 2) { loopi(W_MAX) printweapon(i); }
+            else { printweapon(d->weapselect); }
+            pos.z += aboveheadinventorysize/2;
+            part_textcopy(pos, weapons, PART_TEXT, 1, 0xFFFFFF, aboveheadinventorysize, blend*aboveheadinventoryblend);
         }
         if(aboveheadstatus)
         {
@@ -3123,9 +3146,8 @@ namespace game
             }
             if(t && t != notexture)
             {
-                pos.z += aboveheadstatussize/2;
-                part_icon(pos, t, aboveheadstatussize, blend, 0, 0, 1, colour);
-                pos.z += aboveheadstatussize/2+1.5f;
+                pos.z += aboveheadstatussize;
+                part_icon(pos, t, aboveheadstatussize, blend*aboveheadstatusblend, 0, 0, 1, colour);
             }
         }
         if(aboveheadicons && d->state != CS_EDITING && d->state != CS_SPECTATOR) loopv(d->icons)
@@ -3143,7 +3165,7 @@ namespace game
                           size = skew, fade = blend*skew;
                     if(d->icons[i].type >= eventicon::SORTED)
                     {
-                        size *= aboveheadiconsize;
+                        size *= aboveheadiconssize;
                         switch(d->icons[i].type)
                         {
                             case eventicon::WEAPON: colour = W(d->icons[i].value, colour); break;
@@ -3159,10 +3181,9 @@ namespace game
                         }
                     }
                     else size *= aboveheadeventsize;
-                    pos.z += size/2;
-                    part_icon(pos, t, size, fade, 0, 0, 1, colour);
-                    pos.z += size/2;
-                    if(d->icons[i].type >= eventicon::SORTED) pos.z += 1.5f;
+                    pos.z += size;
+                    part_icon(pos, t, size, fade*aboveheadiconsblend, 0, 0, 1, colour);
+                    //if(d->icons[i].type >= eventicon::SORTED) pos.z += 1.5f;
                 }
             }
         }
@@ -3459,12 +3480,12 @@ namespace game
             }
             if(shocktime && d->shocking(lastmillis, shocktime))
             {
-                vec origin = d->center(), col = rescolour(d, PULSE_SHOCK), rad = vec(d->xradius, d->yradius, d->height/2).mul(blend);
+                vec origin = d->center(), col = rescolour(d, PULSE_SHOCK), rad = vec(d->xradius, d->yradius, d->height/(d->state == CS_ALIVE ? 2 : 3)).mul(blend);
                 int millis = lastmillis-d->lastres[WR_SHOCK], colour = (int(col.x*255)<<16)|(int(col.y*255)<<8)|(int(col.z*255));
                 float pc = shocktime-millis < shockdelay ? (shocktime-millis)/float(shockdelay) : 0.5f+(float(millis%shockdelay)/float(shockdelay*4)), fade = (d != focus ? 0.5f : 0.f)+(pc*0.5f);
                 loopi(10+rnd(10))
                 {
-                    float q = 1;
+                    float q = 0.5f;
                     vec from = vec(origin).add(vec(rnd(201)-100, rnd(201)-100, rnd(201)-100).div(100.f).normalize().mul(rad).mul(rnd(200)/100.f)), to = from;
                     loopj(1+rnd(10))
                     {
