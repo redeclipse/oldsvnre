@@ -733,23 +733,27 @@ namespace projs
                 break;
             }
         }
-        if(!init && (!insideworld(proj.o) || collide(&proj, vec(0, 0, 0), 0, proj.projcollide&COLLIDE_PLAYER)))
+        vec dir = vec(proj.vel).normalize();
+        if(!init && (!insideworld(proj.o) || collide(&proj, dir, 0, proj.projcollide&COLLIDE_PLAYER)))
         {
+            float mag = max(max(proj.vel.magnitude()*proj.elasticity, 1.f), proj.minspeed);
             vec orig = proj.o;
             if(!proj.lastbb.iszero())
             {
                 proj.o = proj.lastbb;
-                if(insideworld(proj.o) && !collide(&proj, vec(0, 0, 0), 0, proj.projcollide&COLLIDE_PLAYER))
+                if(insideworld(proj.o) && !collide(&proj, dir, 0, proj.projcollide&COLLIDE_PLAYER))
                 {
                     proj.resetinterp();
+                    if(proj.projcollide&(hitplayer ? BOUNCE_PLAYER : BOUNCE_GEOM)) proj.vel = vec(proj.o).sub(orig).normalize().mul(mag);
                     return;
                 }
             }
             loopi(20) loopj(8) loopk(8)
             {
                 proj.o.add(vec(k*45.f, j*45.f).mul(proj.radius*i/10.f));
-                if(insideworld(proj.o) && !collide(&proj, vec(0, 0, 0), 0, proj.projcollide&COLLIDE_PLAYER))
+                if(insideworld(proj.o) && !collide(&proj, dir, 0, proj.projcollide&COLLIDE_PLAYER))
                 {
+                    if(proj.projcollide&(hitplayer ? BOUNCE_PLAYER : BOUNCE_GEOM)) proj.vel = vec(proj.o).sub(orig).normalize().mul(mag);
                     proj.resetinterp();
                     return;
                 }
