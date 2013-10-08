@@ -3366,137 +3366,134 @@ namespace game
     void rendercheck(gameent *d, bool third = false)
     {
         d->checktags();
-        if(rendernormally)
+        float blend = opacity(d, third);
+        if(d->state == CS_ALIVE)
         {
-            float blend = opacity(d, third);
-            if(d->state == CS_ALIVE)
+            if(d != focus && playerhint&(d->team != focus->team ? 2 : 1))
             {
-                if(d != focus && playerhint&(d->team != focus->team ? 2 : 1))
+                vec c = vec::hexcolor(getcolour(d, playerhinttone));
+                float radius = d->height*playerhintsize, fade = blend*playerhintblend;
+                if(playerhintscale > 0)
                 {
-                    vec c = vec::hexcolor(getcolour(d, playerhinttone));
-                    float radius = d->height*playerhintsize, fade = blend*playerhintblend;
-                    if(playerhintscale > 0)
+                    float per = d->health/float(m_maxhealth(gamemode, mutators, d->state.model));
+                    fade = (fade*(1.f-playerhintscale))+(fade*per*playerhintscale);
+                    if(fade > 1)
                     {
-                        float per = d->health/float(m_maxhealth(gamemode, mutators, d->state.model));
-                        fade = (fade*(1.f-playerhintscale))+(fade*per*playerhintscale);
-                        if(fade > 1)
-                        {
-                            radius *= 1.f+(fade-1.f);
-                            fade = 1;
-                        }
-                    }
-                    if(d->state == CS_ALIVE && d->lastbuff)
-                    {
-                        int millis = lastmillis%1000;
-                        float amt = millis <= 500 ? 1.f-(millis/500.f) : (millis-500)/500.f;
-                        flashcolour(c.r, c.g, c.b, 1.f, 1.f, 1.f, amt);
-                        radius += radius*amt*0.1f;
-                    }
-                    vec o = d->center(), offset = vec(o).sub(camera1->o).rescale(radius/2);
-                    offset.z = max(offset.z, -1.0f);
-                    part_create(PART_HINT_BOLD_SOFT, 1, offset.add(o), c.tohexcolor(), radius, fade*camera1->o.distrange(o, playerhintfadeat, playerhintfadecut));
-                }
-                float minz = d == focus && !third && firstpersonbodyfeet >= 0 && d->wantshitbox() ? camera1->o.z-firstpersonbodyfeet : 0.f;
-                if(d->hasmelee(lastmillis, true, physics::sliding(d, true), d->physstate >= PHYS_SLOPE || d->onladder || physics::liquidcheck(d))) loopi(2)
-                {
-                    vec pos = d->footpos(i);
-                    if(minz > 0 && pos.z > minz) pos.z -= pos.z-minz;
-                    float amt = 1-((lastmillis-d->weaplast[W_MELEE])/float(d->weapwait[W_MELEE]));
-                    part_create(PART_HINT, 1, pos, TEAM(d->team, colour), 2.f, amt*blend, 0, 0);
-                }
-                bool last = lastmillis-d->weaplast[d->weapselect] > 0,
-                     powering = last && d->weapstate[d->weapselect] == W_S_POWER,
-                     reloading = last && d->weapstate[d->weapselect] == W_S_RELOAD,
-                     secondary = physics::secondaryweap(d);
-                float amt = last ? (lastmillis-d->weaplast[d->weapselect])/float(d->weapwait[d->weapselect]) : 1.f;
-                int colour = WHCOL(d, d->weapselect, partcol, secondary);
-                if(d->weapselect == W_FLAMER && (!reloading || amt > 0.5f) && !physics::liquidcheck(d))
-                {
-                    float scale = powering ? 1.f+(amt*1.5f) : (d->weapstate[d->weapselect] == W_S_IDLE ? 1.f : (reloading ? (amt-0.5f)*2 : amt));
-                    part_create(PART_HINT, 1, d->ejectpos(d->weapselect), 0x1818A8, 0.75f*scale, min(0.65f*scale, 0.8f)*blend, 0, 0);
-                    part_create(PART_FIREBALL, 1, d->ejectpos(d->weapselect), colour, 0.5f*scale, min(0.75f*scale, 0.95f)*blend, 0, 0);
-                    regular_part_create(PART_FIREBALL, d->vel.magnitude() > 10 ? 30 : 75, d->ejectpos(d->weapselect), colour, 0.5f*scale, min(0.75f*scale, 0.95f)*blend, d->vel.magnitude() > 10 ? -40 : -10, 0);
-                }
-                if(W(d->weapselect, laser) && !reloading)
-                {
-                    vec v, origin = d->originpos(), muzzle = d->muzzlepos(d->weapselect);
-                    origin.z += 0.25f; muzzle.z += 0.25f;
-                    float yaw, pitch;
-                    vectoyawpitch(vec(muzzle).sub(origin).normalize(), yaw, pitch);
-                    findorientation(d->o, d->yaw, d->pitch, v);
-                    part_flare(origin, v, 1, PART_FLARE, colour, 0.5f*amt, amt*blend);
-                }
-                if(d->weapselect == W_SWORD || powering)
-                {
-                    static const struct powerfxs {
-                        int type, parttype;
-                        float size, radius;
-                    } powerfx[W_MAX] = {
-                        { 0, 0, 0, 0 },
-                        { 2, PART_SPARK, 0.1f, 1.5f },
-                        { 4, PART_LIGHTNING, 1, 1 },
-                        { 2, PART_SPARK, 0.15f, 2 },
-                        { 2, PART_SPARK, 0.1f, 2 },
-                        { 2, PART_FIREBALL, 0.1f, 6 },
-                        { 1, PART_PLASMA, 0.05f, 2 },
-                        { 2, PART_PLASMA, 0.05f, 2.5f },
-                        { 3, PART_PLASMA, 0.1f, 0.125f },
-                        { 0, 0, 0, 0 },
-                        { 0, 0, 0, 0 },
-                    };
-                    switch(powerfx[d->weapselect].type)
-                    {
-                        case 1: case 2:
-                        {
-                            regularshape(powerfx[d->weapselect].parttype, 1+(amt*powerfx[d->weapselect].radius), colour, powerfx[d->weapselect].type == 2 ? 21 : 53, 5, 60+int(30*amt), d->muzzlepos(d->weapselect), powerfx[d->weapselect].size*max(amt, 0.25f), max(amt*0.25f, 0.05f)*blend, 1, 0, 5+(amt*5));
-                            break;
-                        }
-                        case 3:
-                        {
-                            int interval = lastmillis%1000;
-                            float fluc = powerfx[d->weapselect].size+(interval ? (interval <= 500 ? interval/500.f : (1000-interval)/500.f) : 0.f);
-                            part_create(powerfx[d->weapselect].parttype, 1, d->originpos(), colour, (powerfx[d->weapselect].radius*max(amt, 0.25f))+fluc, max(amt, 0.1f)*blend);
-                            break;
-                        }
-                        case 4:
-                        {
-                            part_flare(d->originpos(), d->muzzlepos(d->weapselect), 1, powerfx[d->weapselect].parttype, colour, W2(d->weapselect, partsize, secondary)*0.75f, blend);
-                            break;
-                        }
-                        case 0: default: break;
+                        radius *= 1.f+(fade-1.f);
+                        fade = 1;
                     }
                 }
-                if(d->turnside || d->impulse[IM_JUMP] || physics::sliding(d)) impulseeffect(d, 1);
-                if(physics::jetpack(d)) impulseeffect(d, 2);
+                if(d->state == CS_ALIVE && d->lastbuff)
+                {
+                    int millis = lastmillis%1000;
+                    float amt = millis <= 500 ? 1.f-(millis/500.f) : (millis-500)/500.f;
+                    flashcolour(c.r, c.g, c.b, 1.f, 1.f, 1.f, amt);
+                    radius += radius*amt*0.1f;
+                }
+                vec o = d->center(), offset = vec(o).sub(camera1->o).rescale(radius/2);
+                offset.z = max(offset.z, -1.0f);
+                part_create(PART_HINT_BOLD_SOFT, 1, offset.add(o), c.tohexcolor(), radius, fade*camera1->o.distrange(o, playerhintfadeat, playerhintfadecut));
             }
-            if(burntime && d->burning(lastmillis, burntime))
+            float minz = d == focus && !third && firstpersonbodyfeet >= 0 && d->wantshitbox() ? camera1->o.z-firstpersonbodyfeet : 0.f;
+            if(d->hasmelee(lastmillis, true, physics::sliding(d, true), d->physstate >= PHYS_SLOPE || d->onladder || physics::liquidcheck(d))) loopi(2)
             {
-                int millis = lastmillis-d->lastres[WR_BURN];
-                float pc = 1, intensity = 0.5f+(rnd(50)/100.f), fade = (d != focus ? 0.5f : 0.f)+(rnd(50)/100.f);
-                if(burntime-millis < burndelay) pc *= float(burntime-millis)/float(burndelay);
-                else pc *= 0.75f+(float(millis%burndelay)/float(burndelay*4));
-                vec pos = vec(d->center()).sub(vec(rnd(11)-5, rnd(11)-5, rnd(5)-2).mul(pc));
-                regular_part_create(PART_FIREBALL, 50, pos, pulsecols[PULSE_FIRE][rnd(PULSECOLOURS)], d->height*0.75f*intensity*blend*pc, fade*blend*pc, -10, 0);
+                vec pos = d->footpos(i);
+                if(minz > 0 && pos.z > minz) pos.z -= pos.z-minz;
+                float amt = 1-((lastmillis-d->weaplast[W_MELEE])/float(d->weapwait[W_MELEE]));
+                part_create(PART_HINT, 1, pos, TEAM(d->team, colour), 2.f, amt*blend, 0, 0);
             }
-            if(shocktime && d->shocking(lastmillis, shocktime))
+            bool last = lastmillis-d->weaplast[d->weapselect] > 0,
+                 powering = last && d->weapstate[d->weapselect] == W_S_POWER,
+                 reloading = last && d->weapstate[d->weapselect] == W_S_RELOAD,
+                 secondary = physics::secondaryweap(d);
+            float amt = last ? (lastmillis-d->weaplast[d->weapselect])/float(d->weapwait[d->weapselect]) : 1.f;
+            int colour = WHCOL(d, d->weapselect, partcol, secondary);
+            if(d->weapselect == W_FLAMER && (!reloading || amt > 0.5f) && !physics::liquidcheck(d))
             {
-                vec origin = d->center(), col = rescolour(d, PULSE_SHOCK), rad = vec(d->xradius, d->yradius, d->height/(d->state == CS_ALIVE ? 2 : 3)).mul(blend);
-                int millis = lastmillis-d->lastres[WR_SHOCK], colour = (int(col.x*255)<<16)|(int(col.y*255)<<8)|(int(col.z*255));
-                float pc = shocktime-millis < shockdelay ? (shocktime-millis)/float(shockdelay) : 0.5f+(float(millis%shockdelay)/float(shockdelay*4)), fade = (d != focus ? 0.5f : 0.f)+(pc*0.5f);
-                loopi(10+rnd(10))
-                {
-                    float q = 0.75f;
-                    vec from = vec(origin).add(vec(rnd(201)-100, rnd(201)-100, rnd(201)-100).div(100.f).normalize().mul(rad).mul(rnd(200)/100.f)), to = from;
-                    loopj(1+rnd(10))
-                    {
-                        to = vec(from).add(vec(rnd(201)-100, rnd(201)-100, rnd(201)-100).div(100.f).normalize().mul(rad).mul(rnd(200)/100.f*q));
-                        part_flare(from, to, 1, PART_LIGHTNING_FLARE, colour, q, fade*blend*q);
-                        from = to;
-                        q = q*0.75f;
-                    }
-                }
-                if(d->ragdoll && twitchspeed > 0) twitchragdoll(d, twitchspeed*pc*rnd(100)/80.f);
+                float scale = powering ? 1.f+(amt*1.5f) : (d->weapstate[d->weapselect] == W_S_IDLE ? 1.f : (reloading ? (amt-0.5f)*2 : amt));
+                part_create(PART_HINT, 1, d->ejectpos(d->weapselect), 0x1818A8, 0.75f*scale, min(0.65f*scale, 0.8f)*blend, 0, 0);
+                part_create(PART_FIREBALL, 1, d->ejectpos(d->weapselect), colour, 0.5f*scale, min(0.75f*scale, 0.95f)*blend, 0, 0);
+                regular_part_create(PART_FIREBALL, d->vel.magnitude() > 10 ? 30 : 75, d->ejectpos(d->weapselect), colour, 0.5f*scale, min(0.75f*scale, 0.95f)*blend, d->vel.magnitude() > 10 ? -40 : -10, 0);
             }
+            if(W(d->weapselect, laser) && !reloading)
+            {
+                vec v, origin = d->originpos(), muzzle = d->muzzlepos(d->weapselect);
+                origin.z += 0.25f; muzzle.z += 0.25f;
+                float yaw, pitch;
+                vectoyawpitch(vec(muzzle).sub(origin).normalize(), yaw, pitch);
+                findorientation(d->o, d->yaw, d->pitch, v);
+                part_flare(origin, v, 1, PART_FLARE, colour, 0.5f*amt, amt*blend);
+            }
+            if(d->weapselect == W_SWORD || powering)
+            {
+                static const struct powerfxs {
+                    int type, parttype;
+                    float size, radius;
+                } powerfx[W_MAX] = {
+                    { 0, 0, 0, 0 },
+                    { 2, PART_SPARK, 0.1f, 1.5f },
+                    { 4, PART_LIGHTNING, 1, 1 },
+                    { 2, PART_SPARK, 0.15f, 2 },
+                    { 2, PART_SPARK, 0.1f, 2 },
+                    { 2, PART_FIREBALL, 0.1f, 6 },
+                    { 1, PART_PLASMA, 0.05f, 2 },
+                    { 2, PART_PLASMA, 0.05f, 2.5f },
+                    { 3, PART_PLASMA, 0.1f, 0.125f },
+                    { 0, 0, 0, 0 },
+                    { 0, 0, 0, 0 },
+                };
+                switch(powerfx[d->weapselect].type)
+                {
+                    case 1: case 2:
+                    {
+                        regularshape(powerfx[d->weapselect].parttype, 1+(amt*powerfx[d->weapselect].radius), colour, powerfx[d->weapselect].type == 2 ? 21 : 53, 5, 60+int(30*amt), d->muzzlepos(d->weapselect), powerfx[d->weapselect].size*max(amt, 0.25f), max(amt*0.25f, 0.05f)*blend, 1, 0, 5+(amt*5));
+                        break;
+                    }
+                    case 3:
+                    {
+                        int interval = lastmillis%1000;
+                        float fluc = powerfx[d->weapselect].size+(interval ? (interval <= 500 ? interval/500.f : (1000-interval)/500.f) : 0.f);
+                        part_create(powerfx[d->weapselect].parttype, 1, d->originpos(), colour, (powerfx[d->weapselect].radius*max(amt, 0.25f))+fluc, max(amt, 0.1f)*blend);
+                        break;
+                    }
+                    case 4:
+                    {
+                        part_flare(d->originpos(), d->muzzlepos(d->weapselect), 1, powerfx[d->weapselect].parttype, colour, W2(d->weapselect, partsize, secondary)*0.75f, blend);
+                        break;
+                    }
+                    case 0: default: break;
+                }
+            }
+            if(d->turnside || d->impulse[IM_JUMP] || physics::sliding(d)) impulseeffect(d, 1);
+            if(physics::jetpack(d)) impulseeffect(d, 2);
+        }
+        if(burntime && d->burning(lastmillis, burntime))
+        {
+            int millis = lastmillis-d->lastres[WR_BURN];
+            float pc = 1, intensity = 0.5f+(rnd(50)/100.f), fade = (d != focus ? 0.5f : 0.f)+(rnd(50)/100.f);
+            if(burntime-millis < burndelay) pc *= float(burntime-millis)/float(burndelay);
+            else pc *= 0.75f+(float(millis%burndelay)/float(burndelay*4));
+            vec pos = vec(d->center()).sub(vec(rnd(11)-5, rnd(11)-5, rnd(5)-2).mul(pc));
+            regular_part_create(PART_FIREBALL, 50, pos, pulsecols[PULSE_FIRE][rnd(PULSECOLOURS)], d->height*0.75f*intensity*blend*pc, fade*blend*pc, -10, 0);
+        }
+        if(shocktime && d->shocking(lastmillis, shocktime))
+        {
+            vec origin = d->center(), col = rescolour(d, PULSE_SHOCK), rad = vec(d->xradius, d->yradius, d->height/(d->state == CS_ALIVE ? 2 : 3)).mul(blend);
+            int millis = lastmillis-d->lastres[WR_SHOCK], colour = (int(col.x*255)<<16)|(int(col.y*255)<<8)|(int(col.z*255));
+            float pc = shocktime-millis < shockdelay ? (shocktime-millis)/float(shockdelay) : 0.5f+(float(millis%shockdelay)/float(shockdelay*4)), fade = (d != focus ? 0.5f : 0.f)+(pc*0.5f);
+            loopi(10+rnd(10))
+            {
+                float q = 0.75f;
+                vec from = vec(origin).add(vec(rnd(201)-100, rnd(201)-100, rnd(201)-100).div(100.f).normalize().mul(rad).mul(rnd(200)/100.f)), to = from;
+                loopj(1+rnd(10))
+                {
+                    to = vec(from).add(vec(rnd(201)-100, rnd(201)-100, rnd(201)-100).div(100.f).normalize().mul(rad).mul(rnd(200)/100.f*q));
+                    part_flare(from, to, 1, PART_LIGHTNING_FLARE, colour, q, fade*blend*q);
+                    from = to;
+                    q = q*0.75f;
+                }
+            }
+            if(rendernormally && d->ragdoll && twitchspeed > 0) twitchragdoll(d, twitchspeed*pc*rnd(100)/80.f);
         }
     }
 
