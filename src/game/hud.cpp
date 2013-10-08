@@ -2108,8 +2108,7 @@ namespace hud
     {
         if(radarstyle == 3)
         {
-            vec pos = vec(camera1->o).sub(minimapcenter).mul(minimapscale).add(0.5f), dir;
-            vecfromyawpitch(camera1->yaw, 0, 1, 0, dir);
+            vec pos = vec(camera1->o).sub(minimapcenter).mul(minimapscale).add(0.5f), dir(camera1->yaw*RAD, 0.f);
             float scale = radarrange(), size = max(w, h)/2, s = size*radarcorner, x = w-s*2, y = 0, q = s*2*radarcorneroffset, r = s-q;
             bindminimap();
             glColor4f(radarcornerbright, radarcornerbright, radarcornerbright, radarcornerblend);

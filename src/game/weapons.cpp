@@ -270,7 +270,7 @@ namespace weapons
             vec unitv;
             float dist = to.dist(from, unitv);
             if(dist > 0) unitv.div(dist);
-            else vecfromyawpitch(d->yaw, d->pitch, 1, 0, unitv);
+            else unitv = vec(d->yaw*RAD, d->pitch*RAD);
 
             // move along the eye ray towards the weap origin, stopping when something is hit
             // nudge the target a tiny bit forward in the direction of the target for stability

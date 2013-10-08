@@ -2035,8 +2035,7 @@ namespace game
             {
                 float dist = p->o.dist(p->d);
                 p->d = p->o = d->muzzlepos(d->weapselect);
-                vec dir; vecfromyawpitch(d->yaw, d->pitch, 1, 0, dir);
-                p->d.add(dir.mul(dist));
+                p->d.add(vec(d->yaw*RAD, d->pitch*RAD).mul(dist));
                 break;
             }
             case PT_PART: case PT_FIREBALL: case PT_FLARE:
@@ -2248,10 +2247,8 @@ namespace game
             if(firstpersonbobtopspeed) scale *= clamp(d->vel.magnitude()/firstpersonbobtopspeed, firstpersonbobmin, 1.f);
             if(scale > 0)
             {
-                vec dir;
-                vecfromyawpitch(yaw, 0, 0, 1, dir);
                 float steps = bobdist/firstpersonbobstep*M_PI;
-                dir.mul(firstpersonbobside*cosf(steps)*scale);
+                vec dir = vec(yaw*RAD, 0.f).mul(firstpersonbobside*cosf(steps)*scale);
                 dir.z = firstpersonbobup*(fabs(sinf(steps)) - 1)*scale;
                 to.add(dir);
             }
@@ -2403,7 +2400,7 @@ namespace game
             yaw = c->player ? c->player->yaw : float(rnd(360));
             pitch = c->player ? c->player->pitch : float(rnd(91)-45);
             fixrange(yaw, pitch);
-            vecfromyawpitch(yaw, pitch, 1, 0, c->dir);
+            c->dir = vec(yaw*RAD, pitch*RAD);
             if(force) return true;
         }
         return false;
@@ -2912,9 +2909,8 @@ namespace game
                 vectoyawpitch(vec(worldpos).sub(d->headpos()).normalize(), yaw, pitch);
             else if(!third && firstpersonsway)
             {
-                vec dir; vecfromyawpitch(d->yaw, 0, 0, 1, dir);
                 float steps = swaydist/(firstpersonbob ? firstpersonbobstep : firstpersonswaystep)*M_PI;
-                dir.mul(firstpersonswayside*cosf(steps));
+                vec dir = vec(d->yaw*RAD, 0.f).mul(firstpersonswayside*cosf(steps));
                 dir.z = firstpersonswayup*(fabs(sinf(steps)) - 1);
                 o.add(dir).add(swaydir).add(swaypush);
             }

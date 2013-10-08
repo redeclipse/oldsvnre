@@ -610,11 +610,7 @@ namespace entities
                         float mag = max(vec(d->vel).add(d->falling).magnitude(), f.attrs[2] ? float(f.attrs[2]) : 50.f),
                               yaw = f.attrs[0] < 0 ? (lastmillis/5)%360 : f.attrs[0], pitch = f.attrs[1];
                         game::fixrange(yaw, pitch);
-                        if(f.attrs[5] < 6)
-                        {
-                            vecfromyawpitch(yaw, pitch, 1, 0, d->vel);
-                            d->vel.normalize().mul(mag);
-                        }
+                        if(f.attrs[5] < 6) d->vel = vec(yaw*RAD, pitch*RAD).mul(mag);
                         switch(f.attrs[5]%3)
                         {
                             case 2: break; // keep
@@ -634,17 +630,13 @@ namespace entities
                             }
                         }
                         game::fixrange(d->yaw, d->pitch);
-                        if(f.attrs[5] >= 6)
-                        {
-                            vecfromyawpitch(d->yaw, d->pitch, 1, 0, d->vel);
-                            d->vel.normalize().mul(mag);
-                        }
-                        d->resetinterp();
-                        if(physics::entinmap(d, true) || d->state != CS_ALIVE) // entinmap first for getting position
+                        if(f.attrs[5] >= 6) d->vel = vec(d->yaw*RAD, d->pitch*RAD).mul(mag);
+                        if(physics::entinmap(d, true)) // entinmap first for getting position
                         {
                             f.lastemit = lastmillis;
                             d->setused(n, lastmillis);
                             d->setused(q, lastmillis);
+                            d->resetinterp();
                             if(d->state == CS_ALIVE)
                             {
                                 if(gameent::is(d))
@@ -673,8 +665,6 @@ namespace entities
                         d->vel = ovel;
                         d->yaw = oyaw;
                         d->pitch = opitch;
-                        d->resetinterp();
-                        if(projent::is(d)) d->deltapos = d->o;
                         teleports.remove(r); // must've really sucked, try another one
                     }
                     if(d->state == CS_ALIVE && !teleported)
@@ -709,9 +699,7 @@ namespace entities
                     float mag = max(e.attrs[2], 1), maxrad = e.attrs[3] ? e.attrs[3] : enttype[PUSHER].radius, minrad = e.attrs[4];
                     if(dist > 0 && minrad > 0 && maxrad > minrad && dist > minrad && maxrad >= dist)
                         mag *= 1.f-clamp((dist-minrad)/float(maxrad-minrad), 0.f, 1.f);
-                    vec dir, rel;
-                    vecfromyawpitch(e.attrs[0], e.attrs[1], 1, 0, dir);
-                    (rel = dir.normalize()).mul(mag);
+                    vec dir(e.attrs[0]*RAD, e.attrs[1]*RAD), rel = vec(dir).mul(mag);
                     switch(e.attrs[5])
                     {
                         case 0:
@@ -1707,11 +1695,7 @@ namespace entities
                         {
                             int material = lookupmaterial(e.o), clipmat = material&MATF_CLIP;
                             if(clipmat == MAT_CLIP || (material&MAT_DEATH) || (material&MATF_VOLUME) == MAT_LAVA)
-                            {
-                                vec dir;
-                                vecfromyawpitch(e.attrs[0], e.attrs[1], 1, 0, dir);
-                                e.o.add(dir);
-                            }
+                                e.o.add(vec(e.attrs[0]*RAD, e.attrs[1]*RAD));
                         }
                     }
                     if(e.attrs[0] >= 0) checkyawmode(e, mtype, mver, gver, 0, -1);

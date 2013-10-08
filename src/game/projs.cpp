@@ -56,6 +56,8 @@ namespace projs
     FVAR(IDF_PERSIST, projhintsize, 0, 1.45f, FVAR_MAX);
     FVAR(IDF_PERSIST, projfirehintsize, 0, 1.85f, FVAR_MAX);
 
+    VAR(0, projdebug, 0, 0, 1);
+
     #define projhint(a,b)   (projhints >= 2 ? game::getcolour(a, projhints-2) : b)
 
     VAR(IDF_PERSIST, muzzleflash, 0, 3, 3); // 0 = off, 1 = only other players, 2 = only thirdperson, 3 = all
@@ -714,11 +716,11 @@ namespace projs
             m->boundbox(center, radius);
             center.mul(size*proj.curscale);
             radius.mul(size*proj.curscale);
-            rotatebb(center, radius, proj.yaw, proj.pitch, proj.roll);
+            rotatebb(center, radius, proj.yaw, 0, 0);
             proj.xradius = radius.x;
             proj.yradius = radius.y;
             proj.radius = max(radius.x, radius.y);
-            if(proj.projtype == PRJ_AFFINITY && m_capture(game::gamemode)) proj.o.z += radius.z-proj.zradius;
+            //if(proj.projtype == PRJ_AFFINITY) proj.o.z += radius.z-proj.zradius;
             proj.height = proj.zradius = proj.aboveeye = radius.z;
         }
         else switch(proj.projtype)
@@ -734,26 +736,26 @@ namespace projs
             }
         }
         vec dir = vec(proj.vel).normalize();
-        if(!init && (!insideworld(proj.o) || collide(&proj, dir, 0, proj.projcollide&COLLIDE_PLAYER)))
+        if(!init && (!insideworld(proj.o) || collide(&proj, dir, 0, false)))
         {
-            float mag = max(max(proj.vel.magnitude()*proj.elasticity, 1.f), proj.minspeed);
             vec orig = proj.o;
+            float mag = max(max(proj.vel.magnitude()*proj.elasticity, 1.f), proj.minspeed);
             if(!proj.lastbb.iszero())
             {
                 proj.o = proj.lastbb;
-                if(insideworld(proj.o) && !collide(&proj, dir, 0, proj.projcollide&COLLIDE_PLAYER))
+                if(insideworld(proj.o) && !collide(&proj, dir, 0, false))
                 {
                     proj.resetinterp();
-                    if(proj.projcollide&(hitplayer ? BOUNCE_PLAYER : BOUNCE_GEOM)) proj.vel = vec(proj.o).sub(orig).normalize().mul(mag);
+                    if(proj.projcollide&BOUNCE_GEOM) proj.vel = vec(proj.o).sub(orig).normalize().mul(mag);
                     return;
                 }
             }
             loopi(20) loopj(8) loopk(8)
             {
-                proj.o.add(vec(k*45.f, j*45.f).mul(proj.radius*i/10.f));
-                if(insideworld(proj.o) && !collide(&proj, dir, 0, proj.projcollide&COLLIDE_PLAYER))
+                proj.o.add(vec(k*45.f*RAD, j*45.f*RAD).mul(proj.radius*i/10.f));
+                if(insideworld(proj.o) && !collide(&proj, dir, 0, false))
                 {
-                    if(proj.projcollide&(hitplayer ? BOUNCE_PLAYER : BOUNCE_GEOM)) proj.vel = vec(proj.o).sub(orig).normalize().mul(mag);
+                    if(proj.projcollide&BOUNCE_GEOM) proj.vel = vec(proj.o).sub(orig).normalize().mul(mag);
                     proj.resetinterp();
                     return;
                 }
@@ -774,7 +776,7 @@ namespace projs
                     proj.o = proj.to = proj.from = proj.dest = proj.owner->center();
                     if(proj.target && proj.target->state == CS_ALIVE)
                         proj.to.add(vec(proj.target->center()).sub(proj.from).normalize().mul(proj.owner->radius*2));
-                    else proj.to.add(vec(RAD*proj.owner->yaw, RAD*proj.owner->pitch).mul(proj.owner->radius*2));
+                    else proj.to.add(vec(proj.owner->yaw*RAD, proj.owner->pitch*RAD).mul(proj.owner->radius*2));
                 }
                 else
                 {
@@ -941,7 +943,7 @@ namespace projs
                 float mag = proj.inertia.magnitude();
                 if(mag <= 50)
                 {
-                    if(mag <= 0) vecfromyawpitch(proj.yaw, proj.pitch, 1, 0, proj.inertia);
+                    if(mag <= 0) proj.inertia = vec(proj.yaw*RAD, proj.pitch*RAD);
                     proj.inertia.normalize().mul(50);
                 }
                 proj.to.add(proj.inertia);
@@ -1041,7 +1043,7 @@ namespace projs
                     proj.yaw = proj.owner->yaw;
                     proj.pitch = proj.owner->pitch;
                 }
-                vecfromyawpitch(proj.yaw, proj.pitch, 1, 0, dir);
+                dir = vec(proj.yaw*RAD, proj.pitch*RAD);
             }
             vec rel = vec(proj.vel).add(dir);
             if(proj.relativity > 0)
@@ -1234,9 +1236,7 @@ namespace projs
         }
         if(d->actortype < A_ENEMY || actor[d->actortype].canmove)
         {
-            vec kick;
-            vecfromyawpitch(d->yaw, d->pitch, 1, 0, kick);
-            kick.normalize().mul(-W2(weap, kickpush, WS(flags))*skew);
+            vec kick = vec(d->yaw*RAD, d->pitch*RAD).mul(-W2(weap, kickpush, WS(flags))*skew);
             if(!kick.iszero())
             {
                 if(d == game::focus) game::swaypush.add(vec(kick).mul(kickpushsway));
@@ -1342,6 +1342,13 @@ namespace projs
 
     void effect(projent &proj)
     {
+        if(projdebug)
+        {
+            float yaw, pitch;
+            vectoyawpitch(vec(proj.vel).normalize(), yaw, pitch);
+            part_create(PART_EDIT_ONTOP, 1, proj.o, 0x22FFFF, proj.radius);
+            part_dir(proj.o, yaw, pitch, max(proj.vel.magnitude(), proj.radius+2), 2, 1, 1, 0x22FFFF);
+        }
         switch(proj.projtype)
         {
             case PRJ_SHOT:
@@ -1769,7 +1776,7 @@ namespace projs
         int chk = 0;
         if(proj.extinguish&(1|2))
         {
-            if(mat < 0) mat = lookupmaterial(vec(proj.o.x, proj.o.y, proj.o.z + (proj.aboveeye - proj.height)/2));
+            if(mat < 0) mat = lookupmaterial(proj.o);
             if(proj.extinguish&1 && (mat&MATF_VOLUME) == MAT_WATER) chk |= 1;
             if(proj.extinguish&2 && ((mat&MATF_VOLUME) == MAT_LAVA || mat&MAT_DEATH)) chk |= 2;
         }
@@ -1909,7 +1916,7 @@ namespace projs
     bool moveproj(projent &proj, float secs, bool skip = false)
     {
         vec dir(proj.vel), pos(proj.o);
-        int mat = lookupmaterial(vec(proj.o.x, proj.o.y, proj.o.z + (proj.aboveeye - proj.height)/2));
+        int mat = lookupmaterial(pos);
         if(isliquid(mat&MATF_VOLUME) && proj.liquidcoast > 0) dir.div(proj.liquidcoast);
         dir.mul(secs);
 

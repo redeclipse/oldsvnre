@@ -80,9 +80,7 @@ namespace bomber
         if(carryaffinity(d) && (d->action[AC_AFFINITY] || d->actiontime[AC_AFFINITY] > 0))
         {
             if(d->action[AC_AFFINITY]) return true;
-            vec o = d->feetpos(bomberdropheight), inertia;
-            vecfromyawpitch(d->yaw, d->pitch, 1, 0, inertia);
-            inertia.normalize().mul(bomberspeed).add(vec(d->vel).add(d->falling).mul(bomberrelativity));
+            vec o = d->feetpos(bomberdropheight), inertia = vec(d->yaw*RAD, d->pitch*RAD).mul(bomberspeed).add(vec(d->vel).add(d->falling).mul(bomberrelativity));
             bool guided = m_team(game::gamemode, game::mutators) && bomberlockondelay && lastmillis-d->actiontime[AC_AFFINITY] >= bomberlockondelay;
             client::addmsg(N_DROPAFFIN, "ri8", d->clientnum, guided ? findtarget(d) : -1, int(o.x*DMF), int(o.y*DMF), int(o.z*DMF), int(inertia.x*DMF), int(inertia.y*DMF), int(inertia.z*DMF));
             d->action[AC_AFFINITY] = false;
@@ -290,56 +288,62 @@ namespace bomber
         loopv(st.flags) // flags/bases
         {
             bomberstate::flag &f = st.flags[i];
-            if(!entities::ents.inrange(f.ent) || !f.enabled || (f.owner == game::focus && !game::thirdpersonview(true) && rendernormally)) continue;
-            vec above(f.pos(true, true));
+            if(!entities::ents.inrange(f.ent)) continue;
             float trans = 1;
-            if(!isbomberaffinity(f) || !f.interptime) // || (!f.droptime && !f.owner))
+            if(!isbomberaffinity(f) || !f.interptime)
             {
                 int millis = lastmillis-f.displaytime;
                 if(millis <= 1000) trans *= float(millis)/1000.f;
             }
-            if(trans > 0)
+            entitylight *light = &entities::ents[f.ent]->light;
+            if(!f.enabled) light->material[0] = f.light.material[0] = bvec(0, 0, 0);
+            else if(isbomberaffinity(f))
             {
-                if(isbomberaffinity(f))
+                vec above(f.pos(true, true));
+                if(!f.owner && !f.droptime) above.z += enttype[AFFINITY].radius/4*trans;
+                float size = trans, yaw = !f.owner && f.proj ? f.proj->yaw : (lastmillis/4)%360, pitch = !f.owner && f.proj ? f.proj->pitch : 0, roll = !f.owner && f.proj ? f.proj->roll : 0,
+                      wait = f.droptime ? clamp((lastmillis-f.droptime)/float(bomberresetdelay), 0.f, 1.f) : ((f.owner && carrytime) ? clamp((lastmillis-f.taketime)/float(carrytime), 0.f, 1.f) : 0.f);
+                int interval = lastmillis%1000;
+                vec effect = pulsecolour();
+                if(wait > 0.5f)
                 {
-                    if(!f.owner && !f.droptime) above.z += enttype[AFFINITY].radius/4*trans;
-                    entitylight *light = &entities::ents[f.ent]->light;
-                    float size = trans, yaw = !f.owner && f.proj ? f.proj->yaw : (lastmillis/4)%360, pitch = !f.owner && f.proj ? f.proj->pitch : 0, roll = !f.owner && f.proj ? f.proj->roll : 0,
-                          wait = f.droptime ? clamp((lastmillis-f.droptime)/float(bomberresetdelay), 0.f, 1.f) : ((f.owner && carrytime) ? clamp((lastmillis-f.taketime)/float(carrytime), 0.f, 1.f) : 0.f);
-                    int interval = lastmillis%1000;
-                    vec effect = pulsecolour();
-                    if(wait > 0.5f)
-                    {
-                        int delay = wait > 0.7f ? (wait > 0.85f ? 150 : 300) : 600, millis = lastmillis%(delay*2);
-                        float amt = (millis <= delay ? millis/float(delay) : 1.f-((millis-delay)/float(delay)));
-                        flashcolour(effect.r, effect.g, effect.b, 1.f, 0.f, 0.f, amt);
-                    }
-                    light->material[0] = bvec::fromcolor(effect);
-                    if(f.owner == game::focus && game::thirdpersonview(true)) trans *= 0.25f;
-                    rendermodel(light, "props/ball", ANIM_MAPMODEL|ANIM_LOOP, above, yaw, pitch, roll, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_LIGHTFX, NULL, NULL, 0, 0, trans, size);
+                    int delay = wait > 0.7f ? (wait > 0.85f ? 150 : 300) : 600, millis = lastmillis%(delay*2);
+                    float amt = (millis <= delay ? millis/float(delay) : 1.f-((millis-delay)/float(delay)));
+                    flashcolour(effect.r, effect.g, effect.b, 1.f, 0.f, 0.f, amt);
+                }
+                light->material[0] = f.light.material[0] = bvec::fromcolor(effect);
+                if(f.owner != game::focus || game::thirdpersonview(true) || !rendernormally)
+                {
+                    if(f.owner == game::focus) trans *= 0.25f;
+                    rendermodel(&f.light, "props/ball", ANIM_MAPMODEL|ANIM_LOOP, above, yaw, pitch, roll, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_LIGHTFX, NULL, NULL, 0, 0, trans, size);
                     float fluc = interval >= 500 ? (1500-interval)/1000.f : (500+interval)/1000.f;
-                    int pcolour = (int(light->material[0].x)<<16)|(int(light->material[0].y)<<8)|int(light->material[0].z);
+                    int pcolour = effect.tohexcolor();
                     part_create(PART_HINT_SOFT, 1, above, pcolour, enttype[AFFINITY].radius/4*trans+(2*fluc), fluc*trans);
                     if(!game::intermission && f.droptime)
                     {
-                        above.z += enttype[AFFINITY].radius/3*trans+2.5f;
+                        above.z += enttype[AFFINITY].radius/4*trans+1.5f;
                         part_icon(above, textureload(hud::progringtex, 3), 4*trans, 1, 0, 0, 1, pcolour, (lastmillis%1000)/1000.f, 0.1f);
                         part_icon(above, textureload(hud::progresstex, 3), 4*trans, 0.25f, 0, 0, 1, pcolour);
                         part_icon(above, textureload(hud::progresstex, 3), 4*trans, 1, 0, 0, 1, pcolour, 0, wait);
                     }
                 }
-                else if(!m_gsp1(game::gamemode, game::mutators))
-                {
-                    //part_explosion(above, (enttype[AFFINITY].radius/4+1)*trans, PART_SHOCKWAVE, 1, TEAM(f.team, colour), 1.f, trans*0.1f);
-                    float blend = clamp(camera1->o.dist(above)/enttype[AFFINITY].radius, 0.f, 1.f);
-                    part_explosion(above, enttype[AFFINITY].radius/3*trans, PART_SHOCKBALL, 1, TEAM(f.team, colour), 1.f, trans*blend*0.25f);
-                    above.z += enttype[AFFINITY].radius/3*trans;
-                    defformatstring(info)("<super>%s base", TEAM(f.team, name));
-                    part_textcopy(above, info, PART_TEXT, 1, TEAM(f.team, colour), 2, trans*blend);
-                    above.z += 2.5f;
-                    part_icon(above, textureload(hud::teamtexname(f.team), 3), 2, trans*blend, 0, 0, 1, TEAM(f.team, colour));
-                }
             }
+            else if(!m_gsp1(game::gamemode, game::mutators))
+            {
+                vec above = f.above;
+                float blend = clamp(camera1->o.dist(above)/enttype[AFFINITY].radius, 0.f, 1.f);
+                vec effect = vec::hexcolor(TEAM(f.team, colour)).mul(trans);
+                light->material[0] = f.light.material[0] = bvec::fromcolor(effect);
+                int pcolour = effect.tohexcolor();
+                part_explosion(above, enttype[AFFINITY].radius/4*trans, PART_SHOCKBALL, 1, pcolour, 1.f, trans*blend*0.25f);
+                above.z += enttype[AFFINITY].radius/4*trans;
+                defformatstring(info)("<super>%s base", TEAM(f.team, name));
+                part_textcopy(above, info, PART_TEXT, 1, TEAM(f.team, colour), 2, trans*blend);
+                above.z += 2.5f;
+                part_icon(above, textureload(hud::teamtexname(f.team), 3), 2, trans*blend, 0, 0, 1, TEAM(f.team, colour));
+            }
+            if(!m_gsp1(game::gamemode, game::mutators))
+                rendermodel(light, "props/point", ANIM_MAPMODEL|ANIM_LOOP, f.render, entities::ents[f.ent]->attrs[1], 0, 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, 1);
         }
     }
 
@@ -416,7 +420,10 @@ namespace bomber
             f.team = team;
             f.ent = ent;
             f.enabled = enabled ? 1 : 0;
-            f.spawnloc = spawnloc;
+            f.spawnloc = f.render = f.above = spawnloc;
+            f.render.z += 2;
+            physics::droptofloor(f.render);
+            if(f.render.z >= f.above.z-1) f.above.z += f.render.z-(f.above.z-1);
             if(owner >= 0) st.takeaffinity(i, game::getclient(owner), lastmillis);
             else if(dropped) st.dropaffinity(i, droploc, inertia, lastmillis);
         }
