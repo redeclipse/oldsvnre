@@ -1098,8 +1098,11 @@ struct gameent : dynent, gamestate
         if(toe[foot] == vec(-1, -1, -1))
         {
             float amt = ((lastmillis%1000)-500)/500.f;
-            vec dir, right; vecfromyawpitch(yaw, pitch, 1, 0, dir); vecfromyawpitch(yaw, pitch, 0, foot ? 1 : -1, right);
-            dir.mul(radius*0.5f); right.mul(radius*0.5f);
+            vec dir, right;
+            vecfromyawpitch(yaw, pitch, 1, 0, dir);
+            vecfromyawpitch(yaw, pitch, 0, foot ? 1 : -1, right);
+            dir.mul(radius*0.5f);
+            right.mul(radius*0.5f);
             dir.z -= height*0.6f+(height*0.4f*(foot ? 1-amt : amt));
             dir.x *= foot ? 1-amt : amt;
             dir.y *= foot ? 1-amt : amt;
@@ -1117,8 +1120,12 @@ struct gameent : dynent, gamestate
     {
         if(origin == vec(-1, -1, -1))
         {
-            vec dir, right; vecfromyawpitch(yaw, pitch, 1, 0, dir); vecfromyawpitch(yaw, pitch, 0, -1, right);
-            dir.mul(radius*0.75f); right.mul(radius*0.85f); dir.z -= height*0.25f;
+            vec dir, right;
+            vecfromyawpitch(yaw, pitch, 1, 0, dir);
+            vecfromyawpitch(yaw, pitch, 0, -1, right);
+            dir.mul(radius*0.75f);
+            right.mul(radius*0.85f);
+            dir.z -= height*0.25f;
             origin = vec(o).add(dir).add(right);
         }
         return origin;
@@ -1152,14 +1159,16 @@ struct gameent : dynent, gamestate
                     if(px >= 180) px -= 360;
                     if(px < -180) px += 360;
                 }
-                vec dir;
-                vecfromyawpitch(yx, px, 1, 0, dir);
-                muzzle = vec(originpos()).add(dir.mul(8));
+                muzzle = vec(originpos()).add(vec(yx*RAD, px*RAD).mul(8));
             }
             else
             {
-                vec dir, right; vecfromyawpitch(yaw, pitch, 1, 0, dir); vecfromyawpitch(yaw, pitch, 0, -1, right);
-                dir.mul(radius*0.9f); right.mul(radius*0.6f); dir.z -= height*0.25f;
+                vec dir, right;
+                vecfromyawpitch(yaw, pitch, 1, 0, dir);
+                vecfromyawpitch(yaw, pitch, 0, -1, right);
+                dir.mul(radius*0.9f);
+                right.mul(radius*0.6f);
+                dir.z -= height*0.25f;
                 muzzle = vec(o).add(dir).add(right);
             }
         }
@@ -1206,14 +1215,16 @@ struct gameent : dynent, gamestate
         lrad = vec(xradius*0.85f, yradius*0.85f, lsize);
         if(waist == vec(-1, -1, -1))
         {
-            vec dir; vecfromyawpitch(yaw, 0, -1, 0, dir);
+            vec dir;
+            vecfromyawpitch(yaw, 0, -1, 0, dir);
             dir.mul(radius*1.5f);
             dir.z -= height*0.5f;
             waist = vec(o).add(dir);
         }
         if(jet[0] == vec(-1, -1, -1))
         {
-            vec dir; vecfromyawpitch(yaw, 0, -1, -1, dir);
+            vec dir;
+            vecfromyawpitch(yaw, 0, -1, -1, dir);
             dir.mul(radius);
             dir.z -= height;
             jet[0] = vec(o).add(dir);
@@ -1228,7 +1239,8 @@ struct gameent : dynent, gamestate
         }
         if(jet[2] == vec(-1, -1, -1))
         {
-            vec dir; vecfromyawpitch(yaw, 0, -1, 0, dir);
+            vec dir;
+            vecfromyawpitch(yaw, 0, -1, 0, dir);
             dir.mul(radius*1.25f);
             dir.z -= height*0.35f;
             jet[2] = vec(o).add(dir);

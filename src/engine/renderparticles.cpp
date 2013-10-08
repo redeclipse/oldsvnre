@@ -1431,7 +1431,7 @@ void part_dir(const vec &o, float yaw, float pitch, float length, float size, fl
 {
     if(!canaddparticles()) return;
 
-    vec v; vecfromyawpitch(yaw, pitch, 1, 0, v); v.normalize();
+    vec v(yaw*RAD, pitch*RAD);
     part_line(o, vec(v).mul(length).add(o), size, blend, fade, color);
     if(interval)
     {

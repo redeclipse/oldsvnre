@@ -58,7 +58,7 @@ void guessshadowdir()
             }
             case ET_SUNLIGHT:
             {
-                vec dir; vecfromyawpitch(e.attrs[0], e.attrs[1], 1, 0, dir); dir.normalize().mul(hdr.worldsize);
+                vec dir = vec(e.attrs[0]*RAD, e.attrs[1]*RAD).mul(getworldsize());
                 lightpos.add(vec(1, 1, 1).mul(hdr.worldsize/2).add(dir));
                 numlights++;
                 break;

@@ -22,7 +22,8 @@ struct bomberstate
         gameent *owner, *lastowner;
         projent *proj;
         int displaytime, pickuptime, movetime, inittime, viewtime, rendertime, interptime;
-        vec viewpos, renderpos, interppos;
+        vec viewpos, renderpos, interppos, render, above;
+        entitylight light;
 #endif
 
         flag()
@@ -61,8 +62,7 @@ struct bomberstate
                         if(totalmillis != rendertime)
                         {
                             float yaw = 360-((lastmillis/2)%360), off = (lastmillis%1000)/500.f;
-                            vecfromyawpitch(yaw, 0, 1, 0, renderpos);
-                            renderpos.normalize().mul(owner->radius+4).add(owner->center());
+                            renderpos = vec(yaw*RAD, 0.f).mul(owner->radius+4).add(owner->center());
                             renderpos.z += owner->height*(off > 1 ?  2-off : off);
                             rendertime = totalmillis;
                         }
@@ -72,7 +72,7 @@ struct bomberstate
                 }
                 if(droptime) return proj ? proj->o : droploc;
             }
-            return spawnloc;
+            return above;
         }
 
         vec &pos(bool view = false, bool render = false)
@@ -108,6 +108,12 @@ struct bomberstate
         f.team = team;
         f.spawnloc = o;
         f.ent = ent;
+#ifndef GAMESERVER
+        f.render = f.above = o;
+        f.render.z += 2;
+        physics::droptofloor(f.render);
+        if(f.render.z >= f.above.z-1) f.above.z += f.render.z-(f.above.z-1);
+#endif
     }
 
 #ifndef GAMESERVER

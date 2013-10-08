@@ -106,9 +106,9 @@ static void renderwaterfall(const materialsurface &m, float offset, const vec *n
                 varray::attrib<float>(wfxscale*v.x, wfyscale*(v.z+wfscroll)); \
             }
 #define GENFACENORMAL varray::attrib<float>(n.x, n.y, n.z);
-    if(normal) 
-    { 
-        vec n = *normal; 
+    if(normal)
+    {
+        vec n = *normal;
         switch(m.orient) { GENFACEVERTSXY(x, x, y, y, zmin, zmax, /**/, + csize, /**/, + rsize, + offset, - offset) }
     }
 #undef GENFACENORMAL
@@ -135,7 +135,7 @@ static void drawmaterial(const materialsurface &m, float offset)
 #define GENFACEORIENT(orient, v0, v1, v2, v3) \
         case orient: v0 v1 v2 v3 break;
 #define GENFACEVERT(orient, vert, mx,my,mz, sx,sy,sz) \
-            varray::attrib<float>(mx sx, my sy, mz sz); 
+            varray::attrib<float>(mx sx, my sy, mz sz);
         GENFACEVERTS(x, x, y, y, z, z, /**/, + csize, /**/, + rsize, + offset, - offset)
 #undef GENFACEORIENT
 #undef GENFACEVERT
@@ -174,10 +174,10 @@ const char *getmaterialdesc(int mat, const char *prefix)
     static string desc;
     desc[0] = '\0';
     loopi(sizeof(matmasks)/sizeof(matmasks[0])) if(mat&matmasks[i])
-    {               
+    {
         const char *matname = findmaterialname(mat&matmasks[i]);
-        if(matname)     
-        {               
+        if(matname)
+        {
             concatstring(desc, desc[0] ? ", " : prefix);
             concatstring(desc, matname);
         }
@@ -434,7 +434,7 @@ void setupmaterials(int start, int len)
             m.skip = 0;
             if(skip && m.material == skip->material && m.orient == skip->orient && skip->skip < 0xFFFF)
                 skip->skip++;
-            else 
+            else
                 skip = &m;
         }
     }
@@ -514,8 +514,7 @@ void sortmaterials(vector<materialsurface *> &vismats)
 {
     sortorigin = ivec(camera1->o);
     if(reflecting) sortorigin.z = int(reflectz - (camera1->o.z - reflectz));
-    vec dir;
-    vecfromyawpitch(camera1->yaw, reflecting ? -camera1->pitch : camera1->pitch, 1, 0, dir);
+    vec dir(camera1->yaw*RAD, reflecting ? -camera1->pitch : camera1->pitch);
     loopi(3) { dir[i] = fabs(dir[i]); sortdim[i] = i; }
     if(dir[sortdim[2]] > dir[sortdim[1]]) swap(sortdim[2], sortdim[1]);
     if(dir[sortdim[1]] > dir[sortdim[0]]) swap(sortdim[1], sortdim[0]);
@@ -618,7 +617,7 @@ static void drawglass(const materialsurface &m, float offset, const vec *normal 
     if(normal)
     {
         vec n = *normal;
-        switch(m.orient) { GENFACEVERTS(x, x, y, y, z, z, /**/, + csize, /**/, + rsize, + offset, - offset) }     
+        switch(m.orient) { GENFACEVERTS(x, x, y, y, z, z, /**/, + csize, /**/, + rsize, + offset, - offset) }
     }
     #undef GENFACENORMAL
     #define GENFACENORMAL
@@ -663,7 +662,7 @@ void rendermaterials()
     if(editmode && showmat && !envmapping)
     {
         glBlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
-        glEnable(GL_BLEND); blended = true; 
+        glEnable(GL_BLEND); blended = true;
         glDisable(GL_TEXTURE_2D); textured = 0;
         foggednotextureshader->set();
         glFogfv(GL_FOG_COLOR, zerofog); lastfogtype = 0;
@@ -709,7 +708,7 @@ void rendermaterials()
                     {
                         xtraverts += varray::end();
                         glBindTexture(GL_TEXTURE_2D, mslot->sts[1].t->id);
-                        float angle = fmod(float(lastmillis/(renderpath!=R_FIXEDFUNCTION ? 600.0f : 300.0f)/(2*M_PI)), 1.0f), 
+                        float angle = fmod(float(lastmillis/(renderpath!=R_FIXEDFUNCTION ? 600.0f : 300.0f)/(2*M_PI)), 1.0f),
                               s = angle - int(angle) - 0.5f;
                         s *= 8 - fabs(s)*16;
                         wfwave = vertwater ? WATER_AMPLITUDE*s-WATER_OFFSET : -WATER_OFFSET;

@@ -920,8 +920,8 @@ namespace physics
                 float mag = impulsevelocity(d, impulseparkourkick, cost, IM_A_PARKOUR);
                 if(mag > 0)
                 {
-                    vec rft; vecfromyawpitch(d->yaw, 0, 1, 0, rft);
-                    (d->vel = rft.normalize()).mul(mag); d->vel.z += mag/2;
+                    d->vel = vec(d->yaw*RAD, 0.f).mul(mag);
+                    d->vel.z += mag/2;
                     d->doimpulse(cost, IM_T_KICK, lastmillis);
                     d->turnmillis = PHYSMILLIS;
                     d->turnside = 0; d->turnyaw = d->turnroll = 0;
@@ -958,9 +958,8 @@ namespace physics
             }
             if(d->hasmelee(lastmillis, true, sliding(d, true), onfloor))
             {
-                vec oldpos = d->o, dir;
-                vecfromyawpitch(d->yaw, 0, 1, 0, dir);
-                d->o.add(dir.normalize());
+                vec oldpos = d->o, dir(d->yaw*RAD, 0.f);
+                d->o.add(dir);
                 bool collided = collide(d, dir);
                 d->o = oldpos;
                 if(collided && hitplayer && gameent::is(hitplayer))
@@ -1055,7 +1054,7 @@ namespace physics
                         if(off < 0) yaw += 90; else yaw -= 90;
                         while(yaw >= 360) yaw -= 360;
                         while(yaw < 0) yaw += 360;
-                        vec rft; vecfromyawpitch(yaw, 0, 1, 0, rft);
+                        vec rft(yaw*RAD, 0.f);
                         if(!d->turnside)
                         {
                             int cost = impulsecost;
