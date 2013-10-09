@@ -3,7 +3,7 @@
 namespace game
 {
     int nextmode = G_EDITMODE, nextmuts = 0, gamemode = G_EDITMODE, mutators = 0, maptime = 0, timeremaining = 0,
-        lastcamera = 0, lasttvcam = 0, lasttvchg = 0, lastzoom = 0, liquidchan = -1;
+        lastcamera = 0, lasttvcam = 0, lasttvchg = 0, lastzoom = 0, liquidchan = -1, spectvfollowing = -1;
     bool intermission = false, prevzoom = false, zooming = false, inputmouse = false, inputview = false, inputmode = false;
     float swayfade = 0, swayspeed = 0, swaydist = 0, bobfade = 0, bobdist = 0;
     vec swaydir(0, 0, 0), swaypush(0, 0, 0);
@@ -24,16 +24,12 @@ namespace game
         SVAR(IDF_WORLD, obit##name##4, ""); \
         const char *getobit##name(int mat, const char *def = NULL) \
         { \
-            loopi(2) \
+            loopi(2) switch(i ? 0 : mat&MATF_INDEX) \
             { \
-                int type = i ? 0 : mat&MATF_INDEX; \
-                switch(type) \
-                { \
-                    default: case 0: if(!def || *obit##name) return obit##name; break; \
-                    case 1: if(*obit##name##2) return obit##name##2; break; \
-                    case 2: if(*obit##name##3) return obit##name##3; break; \
-                    case 3: if(*obit##name##4) return obit##name##4; break; \
-                } \
+                default: case 0: if(!def || *obit##name) return obit##name; break; \
+                case 1: if(*obit##name##2) return obit##name##2; break; \
+                case 2: if(*obit##name##3) return obit##name##3; break; \
+                case 3: if(*obit##name##4) return obit##name##4; break; \
             } \
             return def ? def : ""; \
         }
@@ -140,7 +136,6 @@ namespace game
     VAR(IDF_PERSIST, spectvfirstperson, 0, 0, 2); // 0 = aim in direction followed player is facing, 1 = aim in direction determined by spectv when dead, 2 = always aim in direction
     VAR(IDF_PERSIST, spectvthirdperson, 0, 2, 2); // 0 = aim in direction followed player is facing, 1 = aim in direction determined by spectv when dead, 2 = always aim in direction
 
-    int spectvfollowing = -1;
     VARF(0, spectvfollow, -1, -1, VAR_MAX, spectvfollowing = spectvfollow); // attempts to always keep this client in view
     VAR(0, spectvfollowself, 0, 1, 2); // if we are not spectating, spectv should show us; 0 = off, 1 = not duel/survivor, 2 = always
     VAR(IDF_PERSIST, spectvfollowtime, 1000, 10000, VAR_MAX);
@@ -239,6 +234,7 @@ namespace game
     FVAR(IDF_PERSIST, playerlightmix, 0, 0.5f, 100);
     FVAR(IDF_PERSIST, playertonemix, 0, 0.25f, 1);
     FVAR(IDF_PERSIST, playerblend, 0, 1, 1);
+    FVAR(IDF_PERSIST, playerghost, 0, 0.5f, 1);
 
     VAR(IDF_PERSIST, playerhint, 0, 3, 3);
     VAR(IDF_PERSIST, playerhinttone, -1, CTONE_TEAMED, CTONE_MAX-1);
@@ -724,7 +720,7 @@ namespace game
         d->setscale(rescale(d), 0, true, gamemode, mutators);
 
         if(d == player1) specreset();
-        if(d == focus) resetcamera();
+        else if(d == focus) resetcamera();
 
         if(d->actortype < A_ENEMY)
         {
@@ -735,9 +731,8 @@ namespace game
                 regularshape(PART_SPARK, d->height*2, getcolour(d, playerundertone), 53, 50, 350, d->center(), 1.5f, 1, 1, 0, 35);
                 regularshape(PART_SPARK, d->height*2, getcolour(d, playerovertone), 53, 50, 350, d->center(), 1.5f, 1, 1, 0, 35);
             }
+            if(local && entities::ents.inrange(ent) && entities::ents[ent]->type == PLAYERSTART) entities::execlink(d, ent, true);
         }
-        if(local && d->actortype <= A_BOT && entities::ents.inrange(ent) && entities::ents[ent]->type == PLAYERSTART)
-            entities::execlink(d, ent, true);
         ai::respawned(d, local, ent);
     }
 
@@ -920,18 +915,6 @@ namespace game
         }
     }
 
-    gameent *pointatplayer()
-    {
-        vec pos = focus->headpos();
-        loopv(players) if(players[i])
-        {
-            gameent *o = players[i];
-            float dist;
-            if(intersect(o, pos, worldpos, dist)) return o;
-        }
-        return NULL;
-    }
-
     void setmode(int nmode, int nmuts) { modecheck(nextmode = nmode, nextmuts = nmuts); }
     ICOMMAND(0, mode, "ii", (int *val, int *mut), setmode(*val, *mut));
 
@@ -976,7 +959,7 @@ namespace game
     float opacity(gameent *d, bool third = true)
     {
         float total = d == focus ? (third ? (d != player1 ? followblend : thirdpersonblend) : firstpersonblend) : playerblend;
-        if(physics::isghost(d, focus)) total *= 0.5f;
+        if(physics::isghost(d, focus)) total *= playerghost;
         if(deathfade && (d->state == CS_DEAD || d->state == CS_WAITING)) total *= spawnfade(d);
         else if(d->state == CS_ALIVE)
         {
