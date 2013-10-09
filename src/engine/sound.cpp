@@ -358,7 +358,7 @@ void updatesound(int chan)
 {
     sound &s = sounds[chan];
     bool waiting = (!(s.flags&SND_NODELAY) && Mix_Paused(chan));
-    if((s.flags&SND_NOCULL) || s.curvol > 0 || (s.owner && game::camerapos(s.owner).dist(camera1->o) == 0))
+    if((s.flags&SND_NOCULL) || s.curvol > 0 || s.pos.dist(camera1->o) <= s.minrad)
     {
         if(waiting)
         { // delay the sound based on average physical constants
@@ -438,7 +438,7 @@ int playsound(int n, const vec &pos, physent *d, int flags, int vol, int maxrad,
 
         bool liquid = isliquid(lookupmaterial(camera1->o)&MATF_VOLUME);
         calcvol(flags, v, slot->vol, x, y, pos, &cvol, &cpan, liquid || isliquid(mat&MATF_VOLUME));
-        bool nocull = flags&SND_NOCULL || (d && game::camerapos(d).dist(camera1->o) == 0);
+        bool nocull = flags&SND_NOCULL || (d && game::camerapos(d).dist(camera1->o) <= minrad);
 
         if(nocull || cvol > 0)
         {
@@ -451,7 +451,7 @@ int playsound(int n, const vec &pos, physent *d, int flags, int vol, int maxrad,
                 if((chan = Mix_PlayChannel(-1, sample->sound, flags&SND_LOOP ? -1 : 0)) < 0)
                 {
                     int lowest = -1;
-                    loopv(sounds) if(sounds[i].chan >= 0 && !(sounds[i].flags&SND_NOCULL) && !(sounds[i].flags&SND_MAP) && (sounds[i].owner && game::camerapos(sounds[i].owner).dist(camera1->o) > 1))
+                    loopv(sounds) if(sounds[i].chan >= 0 && !(sounds[i].flags&SND_NOCULL) && !(sounds[i].flags&SND_MAP) && sounds[i].pos.dist(camera1->o) > sounds[i].minrad)
                         if((nocull || sounds[i].curvol < cvol) && (!sounds.inrange(lowest) || sounds[i].curvol < sounds[lowest].curvol))
                             lowest = i;
                     if(sounds.inrange(lowest))
