@@ -2108,6 +2108,7 @@ namespace hud
     {
         if(radarstyle == 3)
         {
+            if(lastnewgame) return;
             vec pos = vec(camera1->o).sub(minimapcenter).mul(minimapscale).add(0.5f), dir(camera1->yaw*RAD, 0.f);
             float scale = radarrange(), size = max(w, h)/2, s = size*radarcorner, x = w-s*2, y = 0, q = s*2*radarcorneroffset, r = s-q;
             bindminimap();
@@ -2853,10 +2854,7 @@ namespace hud
             }
             case 1:
             {
-                if(texpaneltimer) break;
                 int cm = cr+top;
-                if(!radardisabled && radarstyle == 3 && !game::intermission && !client::waitplayers && !hasinput(true) && (game::focus->state == CS_EDITING ? showeditradar >= 1 : chkcond(showradar, !game::tvmode() || (game::focus != game::player1 && radarstyle==3))))
-                    cm += int(max(w, h)/2*radarcorner*2);
                 if(lastnewgame)
                 {
                     if(!game::intermission) lastnewgame = 0;
@@ -2875,6 +2873,8 @@ namespace hud
                 }
                 else
                 {
+                    if(!radardisabled && radarstyle == 3 && !hasinput(true) && (game::focus->state == CS_EDITING ? showeditradar >= 1 : chkcond(showradar, !game::tvmode() || (game::focus != game::player1 && radarstyle==3))))
+                        cm += int(max(w, h)/2*radarcorner*2);
                     if(inventorydate)
                         cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorydateskew, "super", fade*inventorydateblend, "%s", gettime(clocktime, inventorydateformat));
                     if(inventorytime)
@@ -2888,13 +2888,14 @@ namespace hud
                             else if(game::timeremaining) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fg%s\fS", timestr(game::timeremaining, 2));
                         }
                     }
+                    if(texpaneltimer) break;
                     if(m_fight(game::gamemode))
                     {
                         int count = game::player1->state == CS_SPECTATOR ? inventoryscorespec : inventoryscore;
                         if(count && ((cc = drawscore(cx[i], cm, cs, (h-edge*2)/2, fade, count)) > 0)) cm += cc+cr;
                     }
                 }
-
+                if(texpaneltimer) break;
                 if((cc = drawselection(cx[i], cy[i], cs, cm, fade)) > 0) cy[i] -= cc+cr;
                 if(inventorygame)
                 {
