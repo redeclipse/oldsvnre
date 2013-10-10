@@ -689,7 +689,41 @@ namespace projs
         return trans;
     }
 
-    void updatebb(projent &proj, bool init = false)
+    bool spherecheck(projent &proj, bool rev = false)
+    {
+        vec dir = vec(proj.vel).normalize();
+        if(!insideworld(proj.o) || collide(&proj, dir, 0, false))
+        {
+            vec orig = proj.o;
+            if(!proj.lastgood.iszero())
+            {
+                proj.o = proj.lastgood;
+                if(insideworld(proj.o) && !collide(&proj, dir, 0, false))
+                {
+                    if(rev) proj.vel = vec(proj.o).sub(orig).normalize().mul(max(max(proj.vel.magnitude()*proj.elasticity, 1.f), proj.minspeed));
+                    return true;
+                }
+                else proj.o = orig;
+            }
+            float yaw, pitch;
+            vectoyawpitch(dir, yaw, pitch);
+            if((yaw += 180) >= 360) yaw -= 360;
+            loopi(20) loopj(8) loopk(8)
+            {
+                proj.o.add(vec((int(yaw+k*45)%360)*RAD, j*45*RAD).mul(proj.radius*i/10.f));
+                if(insideworld(proj.o) && !collide(&proj, dir, 0, false))
+                {
+                    if(rev) proj.vel = vec(proj.o).sub(orig).normalize().mul(max(max(proj.vel.magnitude()*proj.elasticity, 1.f), proj.minspeed));
+                    return true;
+                }
+                else proj.o = orig;
+            }
+        }
+        else proj.lastgood = proj.o;
+        return false;
+    }
+
+    bool updatebb(projent &proj, bool init = false)
     {
         float size = 1;
         switch(proj.projtype)
@@ -707,7 +741,7 @@ namespace projs
                         break;
                     }
                 } // all falls through to ..
-            default: return;
+            default: return false;
         }
         model *m = NULL;
         if(proj.mdl && *proj.mdl && ((m = loadmodel(proj.mdl)) != NULL))
@@ -720,7 +754,6 @@ namespace projs
             proj.xradius = radius.x;
             proj.yradius = radius.y;
             proj.radius = max(radius.x, radius.y);
-            //if(proj.projtype == PRJ_AFFINITY) proj.o.z += radius.z-proj.zradius;
             proj.height = proj.zradius = proj.aboveeye = radius.z;
         }
         else switch(proj.projtype)
@@ -735,34 +768,7 @@ namespace projs
                 break;
             }
         }
-        vec dir = vec(proj.vel).normalize();
-        if(!init && (!insideworld(proj.o) || collide(&proj, dir, 0, false)))
-        {
-            vec orig = proj.o;
-            float mag = max(max(proj.vel.magnitude()*proj.elasticity, 1.f), proj.minspeed);
-            if(!proj.lastbb.iszero())
-            {
-                proj.o = proj.lastbb;
-                if(insideworld(proj.o) && !collide(&proj, dir, 0, false))
-                {
-                    proj.resetinterp();
-                    if(proj.projcollide&BOUNCE_GEOM) proj.vel = vec(proj.o).sub(orig).normalize().mul(mag);
-                    return;
-                }
-            }
-            loopi(20) loopj(8) loopk(8)
-            {
-                proj.o.add(vec(k*45.f*RAD, j*45.f*RAD).mul(proj.radius*i/10.f));
-                if(insideworld(proj.o) && !collide(&proj, dir, 0, false))
-                {
-                    if(proj.projcollide&BOUNCE_GEOM) proj.vel = vec(proj.o).sub(orig).normalize().mul(mag);
-                    proj.resetinterp();
-                    return;
-                }
-                else proj.o = orig;
-            }
-        }
-        else proj.lastbb = proj.o;
+        return true;
     }
 
     void updatetargets(projent &proj, int style = 0)
@@ -1057,22 +1063,19 @@ namespace projs
         proj.hit = NULL;
         proj.hitflags = HITFLAG_NONE;
         proj.movement = 1;
-        if(proj.projtype != PRJ_SHOT || (!proj.child && !WK(proj.flags) && !weaptype[proj.weap].traced))
+        if(proj.owner && (proj.projtype != PRJ_SHOT || (!proj.child && !WK(proj.flags) && !weaptype[proj.weap].traced)))
         {
-            vec retract = vec(proj.vel).normalize().mul(vec(proj.xradius, proj.yradius, proj.zradius)),
-                loc = vec(proj.projtype != PRJ_SHOT || !proj.owner || proj.child || WK(proj.flags) ? proj.o : proj.owner->o).sub(retract),
-                eyedir = vec(proj.o).sub(loc);
+            vec eyedir = vec(proj.o).sub(proj.owner->o);
             float eyedist = eyedir.magnitude();
-            if(eyedist >= 1e-6f)
+            if(eyedist > 0)
             {
-                eyedir.div(eyedist);
-                float blocked = tracecollide(&proj, loc, eyedir, eyedist, RAY_CLIPMAT|RAY_ALPHAPOLY, proj.projcollide&COLLIDE_PLAYER);
-                if(blocked >= 0) proj.o = vec(eyedir).mul(blocked+proj.radius+1e-6f).add(loc);
+                eyedir.normalize();
+                float blocked = tracecollide(&proj, proj.owner->o, eyedir, eyedist, RAY_CLIPMAT|RAY_ALPHAPOLY, false);
+                if(blocked >= 0) proj.o = vec(eyedir).mul(blocked-1e-3f).add(proj.owner->o);
             }
         }
-        //if(proj.projtype != PRJ_SHOT || proj.child || WK(proj.flags))
-            physics::entinmap(&proj, proj.projcollide&COLLIDE_PLAYER);
-        //else proj.resetinterp();
+        if(proj.projtype != PRJ_SHOT) spherecheck(proj);
+        proj.resetinterp();
     }
 
     projent *create(const vec &from, const vec &to, bool local, gameent *d, int type, int lifetime, int lifemillis, int waittime, int speed, int id, int weap, int value, int flags, float scale, bool child, projent *parent)
@@ -1337,7 +1340,7 @@ namespace projs
             updatetargets(proj);
             updatetaper(proj, proj.distance, true);
         }
-        updatebb(proj);
+        else if(updatebb(proj) && spherecheck(proj, proj.projcollide&BOUNCE_GEOM)) proj.resetinterp();
     }
 
     void effect(projent &proj)
