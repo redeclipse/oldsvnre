@@ -311,7 +311,7 @@ namespace hud
     FVAR(IDF_PERSIST, inventoryhealthbgglow, 0, 0.05f, 1);
     FVAR(IDF_PERSIST, inventoryhealthbgblend, 0, 0.5f, 1);
 
-    VAR(IDF_PERSIST, inventoryimpulse, 0, 2, 2); // 0 = off, 1 = text, 2 = bar
+    VAR(IDF_PERSIST, inventoryimpulse, 0, 2, 3); // 0 = off, 1 = text, 2 = bar, 3 = both
     VAR(IDF_PERSIST, inventoryimpulseflash, 0, 1, 1);
     FVAR(IDF_PERSIST, inventoryimpulseblend, 0, 1, 1);
     FVAR(IDF_PERSIST, inventoryimpulsebartop, 0, 0.171875f, 1); // starts from this offset
@@ -2588,12 +2588,45 @@ namespace hud
                     float amt = (millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f))*pulse;
                     flashcolour(gr, gg, gb, 1.f, 0.f, 0.f, amt);
                 }
-                pushfont("super");
-                int ty = 0;
                 if(inventoryhealth&1)
-                    ty = draw_textx("%d", x+width/2, y-sy+(inventoryhealth == 1 ? FONTH : size/2-FONTH), int(gr*255), int(gg*255), int(gb*255), int(fade*255), TEXT_CENTERED, -1, -1, max(game::focus->health, 0));
-                if(inventoryhealth == 1) sy += ty;
-                popfont();
+                {
+                    pushfont("super");
+                    int ty = draw_textx("%d", x+width/2, y-sy+(inventoryhealth&2 ? size/2 : 0), int(gr*255), int(gg*255), int(gb*255), int(fade*255), TEXT_CENTER_UP, -1, -1, max(game::focus->health, 0));
+                    popfont();
+                    if(!(inventoryhealth&2))
+                    {
+                        pushfont("reduced");
+                        ty += draw_textx("health", x+width/2, y-sy-ty, 255, 255, 255, int(fade*255), TEXT_CENTER_UP, -1, -1);
+                        popfont();
+                        sy += ty;
+                    }
+                }
+            }
+            if(game::focus->actortype < A_ENEMY && physics::allowimpulse(game::focus) && impulsemeter && impulsecost && inventoryimpulse)
+            {
+                float fade = blend*inventoryimpulseblend;
+                float amt = 1-clamp(float(game::focus->impulse[IM_METER])/float(impulsemeter), 0.f, 1.f);
+                if(inventoryimpulse&2)
+                    sy += drawbar(x, y-sy, width, size, 2, inventoryimpulsebartop, inventoryimpulsebarbottom, fade, amt, impulsetex, impulsebgtex, inventorytone, inventoryimpulsebgglow, inventoryimpulsebgblend, inventoryimpulseflash && game::focus->impulse[IM_METER] ? 1-amt : 0.f, 0.f);
+                if(inventoryimpulse&1)
+                {
+                    if(!(inventoryimpulse&2))
+                    {
+                        pushfont("super");
+                        int ty = draw_textx("%d%%", x+width/2, y-sy+(inventoryimpulse&2 ? size/2 : 0), 100, int(amt*155)+100, 100, int(fade*255), TEXT_CENTER_UP, -1, -1, int(amt*100));
+                        popfont();
+                        pushfont("reduced");
+                        ty += draw_textx("impulse", x+width/2, y-sy-ty, 255, 255, 255, int(fade*255), TEXT_CENTER_UP, -1, -1);
+                        popfont();
+                        sy += ty;
+                    }
+                    else
+                    {
+                        pushfont("super");
+                        draw_textx("%d", x+width/2, y-sy+(inventoryimpulse&2 ? size/2 : 0), int(amt*200)+55, int(amt*200)+55, int(amt*200)+55, int(fade*255), TEXT_CENTER_UP, -1, -1, int(amt*100));
+                        popfont();
+                    }
+                }
             }
             if(inventoryvelocity >= (m_checkpoint(game::gamemode) ? 1 : 2))
             {
@@ -2604,24 +2637,6 @@ namespace hud
                 pushfont("reduced");
                 sy += draw_textx("speed", x+width/2, y-sy, 255, 255, 255, int(fade*255), TEXT_CENTER_UP, -1, -1);
                 popfont();
-            }
-            if(game::focus->actortype < A_ENEMY && physics::allowimpulse(game::focus) && impulsemeter && impulsecost && inventoryimpulse)
-            {
-                float fade = blend*inventoryimpulseblend;
-                float amt = 1-clamp(float(game::focus->impulse[IM_METER])/float(impulsemeter), 0.f, 1.f);
-                if(inventoryimpulse == 2)
-                    sy += drawbar(x, y-sy, width, size, 2, inventoryimpulsebartop, inventoryimpulsebarbottom, fade, amt, impulsetex, impulsebgtex, inventorytone, inventoryimpulsebgglow, inventoryimpulsebgblend, inventoryimpulseflash && game::focus->impulse[IM_METER] ? 1-amt : 0.f, 0.f);
-                else
-                {
-                    pushfont("emphasis");
-                    sy += draw_textx("%s%d%%", x+width/2, y-sy, 255, 255, 255, int(fade*255), TEXT_CENTER_UP, -1, -1,
-                        game::focus->impulse[IM_METER] > 0 ? (impulsemeter-game::focus->impulse[IM_METER] > impulsecost ? "\fc" : "\fy") : "\fg",
-                            int(amt*100));
-                    popfont();
-                    pushfont("reduced");
-                    sy += draw_textx("impulse", x+width/2, y-sy, 255, 255, 255, int(fade*255), TEXT_CENTER_UP, -1, -1);
-                    popfont();
-                }
             }
             if(inventoryalert)
             {
