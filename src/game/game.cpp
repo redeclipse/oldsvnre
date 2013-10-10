@@ -1020,7 +1020,7 @@ namespace game
                 {
                     vec dir;
                     vecfromyawpitch(d->yaw, 0, d->move, d->strafe, dir);
-                    d->o.add(dir.normalize().mul(2));
+                    d->o.add(dir.mul(2));
                 }
                 d->o.z += d->zradius;
                 d->height = d->zradius;
