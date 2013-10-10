@@ -2507,10 +2507,8 @@ namespace server
 
     void swapteam(clientinfo *ci, int oldteam, int newteam = T_NEUTRAL, bool swaps = true)
     {
-        if(ci->state.actortype != A_PLAYER) return;
         if(ci->swapteam && (!newteam || ci->swapteam == newteam)) ci->swapteam = T_NEUTRAL;
-        if(!oldteam || oldteam == newteam) return;
-        if(!m_balteam(gamemode, mutators, 3) || !G(teambalanceswap) || !swaps) return;
+        if(ci->state.actortype != A_PLAYER || !oldteam || oldteam == newteam || !m_swapteam(gamemode, mutators) || !swaps) return;
         loopv(clients) if(clients[i] && clients[i] != ci)
         {
             clientinfo *cp = clients[i];
@@ -2552,14 +2550,13 @@ namespace server
         int team;
         float score;
         int clients;
-        vector<clientinfo *> swaps;
 
         teamcheck() : team(T_NEUTRAL), score(0.f), clients(0) {}
         teamcheck(int n) : team(n), score(0.f), clients(0) {}
         teamcheck(int n, float r) : team(n), score(r), clients(0) {}
         teamcheck(int n, int s) : team(n), score(s), clients(0) {}
 
-        ~teamcheck() { swaps.setsize(0); }
+        ~teamcheck() {}
     };
 
     bool allowteam(clientinfo *ci, int team, int first = T_FIRST, bool check = true)
@@ -2599,26 +2596,26 @@ namespace server
                     break;
                 }
             }
+            teamcheck teamchecks[T_TOTAL];
+            loopk(T_TOTAL) teamchecks[k].team = T_FIRST+k;
+            loopv(clients) if(clients[i] != ci)
+            {
+                clientinfo *cp = clients[i];
+                if(!cp->team || cp->state.state == CS_SPECTATOR) continue;
+                if((cp->state.actortype > A_PLAYER && cp->state.ownernum < 0) || cp->state.actortype >= A_ENEMY) continue;
+                teamcheck &ts = teamchecks[cp->team-T_FIRST];
+                if(team > 0 && m_swapteam(gamemode, mutators) && ci->state.actortype == A_PLAYER && cp->state.actortype == A_PLAYER && cp->swapteam && ci->team == cp->swapteam && cp->team == team)
+                    return team; // swapteam
+                if(ci->state.actortype > A_PLAYER || (ci->state.actortype == A_PLAYER && cp->state.actortype == A_PLAYER))
+                { // remember: ai just balance teams
+                    cp->state.timeplayed += lastmillis-cp->state.lasttimeplayed;
+                    cp->state.lasttimeplayed = lastmillis;
+                    ts.score += cp->state.score/float(max(cp->state.timeplayed, 1));
+                    ts.clients++;
+                }
+            }
             if(bal || team <= 0) loopj(team > 0 ? 2 : 1)
             {
-                teamcheck teamchecks[T_TOTAL];
-                loopk(T_TOTAL) teamchecks[k].team = T_FIRST+k;
-                loopv(clients)
-                {
-                    clientinfo *cp = clients[i];
-                    if(!cp->team || cp == ci || cp->state.state == CS_SPECTATOR) continue;
-                    if((cp->state.actortype > A_PLAYER && cp->state.ownernum < 0) || cp->state.actortype >= A_ENEMY) continue;
-                    if(ci->state.actortype > A_PLAYER || (ci->state.actortype == A_PLAYER && cp->state.actortype == A_PLAYER))
-                    { // remember: ai just balance teams
-                        cp->state.timeplayed += lastmillis-cp->state.lasttimeplayed;
-                        cp->state.lasttimeplayed = lastmillis;
-                        teamcheck &ts = teamchecks[cp->team-T_FIRST];
-                        ts.score += cp->state.score/float(max(cp->state.timeplayed, 1));
-                        ts.clients++;
-                        if(cp->state.actortype == A_PLAYER && m_balteam(gamemode, mutators, 3) && G(teambalanceswap) && cp->swapteam)
-                            teamchecks[cp->swapteam-T_FIRST].swaps.add(cp);
-                    }
-                }
                 teamcheck *worst = NULL;
                 loopi(numteams(gamemode, mutators)) if(allowteam(ci, teamchecks[i].team, T_FIRST, false))
                 {
@@ -2641,8 +2638,6 @@ namespace server
                 }
                 if(worst)
                 {
-                    if(team > 0 && team == worst->team && !teamchecks[team-T_FIRST].swaps.empty() && allowteam(ci, team, T_FIRST, false))
-                        return team;
                     team = worst->team;
                     break;
                 }
@@ -4193,7 +4188,7 @@ namespace server
     {
         if(!allowteam(ci, team, T_FIRST))
         {
-            if(team && ci->team != team && ci->state.actortype == A_PLAYER && m_balteam(gamemode, mutators, 3) && G(teambalanceswap) && ci->swapteam != team)
+            if(team && m_swapteam(gamemode, mutators) && ci->team != team && ci->state.actortype == A_PLAYER && ci->swapteam != team)
             {
                 if(canplay()) ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fy%s requests swap to team %s, change teams to accept", colourname(ci), colourteam(team));
                 ci->swapteam = team;
