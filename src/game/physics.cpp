@@ -825,7 +825,7 @@ namespace physics
                             if(dir.z < 0) force += -dir.z*force;
                         }
                     }
-                    (d->vel = dir.normalize()).mul(force);
+                    d->vel = vec(dir).mul(force);
                     if(power) d->vel.z += jumpvel(d, true);
                     d->doimpulse(cost, melee ? IM_T_MELEE : (dash ? IM_T_DASH : IM_T_BOOST), lastmillis);
                     if(!m_jet(game::gamemode, game::mutators)) d->action[AC_JUMP] = false;
@@ -994,7 +994,6 @@ namespace physics
                 if(strafe == 2) strafe = d->turnside ? d->turnside : d->strafe;
                 if(!move && !strafe) continue;
                 vecfromyawpitch(d->yaw, 0, move, strafe, dir);
-                dir.normalize();
                 d->o.add(dir);
                 bool collided = collide(d, dir);
                 d->o = oldpos;
@@ -1006,7 +1005,8 @@ namespace physics
                     float yaw = 0, pitch = 0;
                     vectoyawpitch(face, yaw, pitch);
                     float off = yaw-d->yaw;
-                    if(off > 180) off -= 360; else if(off < -180) off += 360;
+                    if(off > 180) off -= 360;
+                    else if(off < -180) off += 360;
                     bool iskick = impulsekick > 0 && fabs(off) >= impulsekick, vault = false;
                     if(cankick && iskick)
                     {
@@ -1036,11 +1036,11 @@ namespace physics
                             float mag = impulsevelocity(d, vault ? impulseparkourvault : impulseparkourkick, cost, IM_A_PARKOUR);
                             if(mag > 0)
                             {
-                                vecfromyawpitch(d->yaw, vault ? 90.f : fabs(d->pitch), 1, 0, dir);
-                                (d->vel = dir.normalize()).reflect(face).normalize().mul(mag);
+                                d->vel = vec(d->yaw, vault ? 90.f : fabs(d->pitch)).reflect(face).mul(mag);
                                 d->doimpulse(cost, vault ? IM_T_VAULT : IM_T_KICK, lastmillis);
                                 d->turnmillis = PHYSMILLIS;
-                                d->turnside = 0; d->turnyaw = d->turnroll = 0;
+                                d->turnside = 0;
+                                d->turnyaw = d->turnroll = 0;
                                 client::addmsg(N_SPHY, "ri2", d->clientnum, vault ? SPHY_VAULT : SPHY_KICK);
                                 game::impulseeffect(d);
                                 game::footstep(d);
@@ -1061,13 +1061,14 @@ namespace physics
                             float mag = impulsevelocity(d, impulseparkour, cost, IM_A_PARKOUR);
                             if(mag > 0)
                             {
-                                (d->vel = rft.normalize()).mul(mag);
+                                d->vel = vec(rft).mul(mag);
                                 off = yaw-d->yaw;
                                 if(off > 180) off -= 360;
                                 else if(off < -180) off += 360;
                                 d->doimpulse(cost, IM_T_SKATE, lastmillis);
                                 d->turnmillis = PHYSMILLIS;
-                                d->turnside = side; d->turnyaw = off;
+                                d->turnside = side;
+                                d->turnyaw = off;
                                 d->turnroll = (impulseroll*d->turnside)-d->roll;
                                 client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_SKATE);
                                 game::impulseeffect(d);
@@ -1078,7 +1079,7 @@ namespace physics
                         }
                         if(side == d->turnside)
                         {
-                            (m = rft).normalize(); // re-project and override
+                            m = rft; // re-project and override
                             found = true;
                             break;
                         }
@@ -1131,11 +1132,7 @@ namespace physics
     {
         vec m(0, 0, 0);
         bool wantsmove = game::allowmove(pl) && (pl->move || pl->strafe);
-        if(wantsmove)
-        {
-            vecfromyawpitch(pl->yaw, movepitch(pl) ? pl->pitch : 0, pl->move, pl->strafe, m);
-            m.normalize();
-        }
+        if(wantsmove) vecfromyawpitch(pl->yaw, movepitch(pl) ? pl->pitch : 0, pl->move, pl->strafe, m);
         if(!floating && gameent::is(pl)) modifymovement((gameent *)pl, m, local, wantsmove, millis);
         else if(pl->physstate == PHYS_FALL && !pl->onladder)
         {
@@ -1592,7 +1589,7 @@ namespace physics
         inmapchk(20, d->o.z += (d->height+d->aboveeye)*n/10.f);
         if(gameent::is(d))
         {
-            vec dir = vec(d->yaw, d->pitch).normalize().mul(maxrad);
+            vec dir = vec(d->yaw, d->pitch).mul(maxrad);
             if(!dir.iszero())
             {
                 inmapchk(200, d->o.add(vec(dir).mul(n/10.f)));
