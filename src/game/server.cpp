@@ -2513,7 +2513,6 @@ namespace server
         {
             clientinfo *cp = clients[i];
             if(cp->state.actortype != A_PLAYER || (newteam && cp->team != newteam) || !cp->swapteam || cp->swapteam != oldteam) continue;
-            cp->swapteam = T_NEUTRAL;
             setteam(cp, oldteam, (m_balreset(gamemode) ? TT_DEFAULT : 0)|TT_INFO, false);
             ancmsgft(cp->clientnum, S_V_BALALERT, CON_EVENT, "\fyyou have been moved to %s as previously requested", colourteam(oldteam));
             return;
