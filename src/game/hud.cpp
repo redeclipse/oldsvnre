@@ -314,6 +314,7 @@ namespace hud
     VAR(IDF_PERSIST, inventoryimpulse, 0, 2, 3); // 0 = off, 1 = text, 2 = bar, 3 = both
     VAR(IDF_PERSIST, inventoryimpulseflash, 0, 1, 1);
     FVAR(IDF_PERSIST, inventoryimpulseblend, 0, 1, 1);
+    FVAR(IDF_PERSIST, inventoryimpulsethrob, 0, 0.035f, 1);
     FVAR(IDF_PERSIST, inventoryimpulsebartop, 0, 0.171875f, 1); // starts from this offset
     FVAR(IDF_PERSIST, inventoryimpulsebarbottom, 0, 0.0859375f, 1); // ends at this offset
     FVAR(IDF_PERSIST, inventoryimpulsebgglow, 0, 0.05f, 1);
@@ -2521,7 +2522,7 @@ namespace hud
             {
                 int millis = lastmillis%1000;
                 float skew = (millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f))*pulse;
-                flashcolourf(gr, gg, gb, gf, id != 1 ? 0.5f : 1.f, 0.f, id != 1 ? 0.5f : 0.f, 1.f, skew);
+                flashcolourf(gr, gg, gb, gf, id != 1 && (id != 2 || throb <= 0) ? 0.5f : 1.f, 0.f, id != 1 && (id != 2 || throb <= 0) ? 0.5f : 0.f, 1.f, skew);
                 glow += int(w*bgglow*skew);
             }
             settexture(bgtex, 3);
@@ -2582,15 +2583,15 @@ namespace hud
                     throb = inventoryhealththrob > 0 && regentime && game::focus->lastregen && lastmillis-game::focus->lastregen <= regentime ? clamp((lastmillis-game::focus->lastregen)/float(regentime/2), 0.f, 2.f) : 0.f;
                 if(inventoryhealth&2)
                     sy += drawbar(x, y, width, size, 1, inventoryhealthbartop, inventoryhealthbarbottom, fade, clamp(game::focus->health/float(heal), 0.0f, 1.0f), healthtex, healthbgtex, inventorytone, inventoryhealthbgglow, inventoryhealthbgblend, pulse, (throb > 1.f ? 1.f-throb : throb)*inventoryhealththrob);
-                float gr = 1, gg = 1, gb = 1;
-                if(pulse > 0)
-                {
-                    int millis = lastmillis%1000;
-                    float amt = (millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f))*pulse;
-                    flashcolour(gr, gg, gb, 1.f, 0.f, 0.f, amt);
-                }
                 if(inventoryhealth&1)
                 {
+                    float gr = 1, gg = 1, gb = 1;
+                    if(pulse > 0)
+                    {
+                        int millis = lastmillis%1000;
+                        float amt = (millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f))*pulse;
+                        flashcolour(gr, gg, gb, 1.f, 0.f, 0.f, amt);
+                    }
                     pushfont("super");
                     int ty = draw_textx("%d", x+width/2, y-sy+(inventoryhealth&2 ? size/2 : 0), int(gr*255), int(gg*255), int(gb*255), int(fade*255), TEXT_CENTER_UP, -1, -1, max(game::focus->health, 0));
                     popfont();
@@ -2605,16 +2606,23 @@ namespace hud
             }
             if(game::focus->actortype < A_ENEMY && physics::allowimpulse(game::focus) && impulsemeter && impulsecost && inventoryimpulse)
             {
-                float fade = blend*inventoryimpulseblend;
-                float amt = 1-clamp(float(game::focus->impulse[IM_METER])/float(impulsemeter), 0.f, 1.f);
+                float fade = blend*inventoryimpulseblend, span = 1-clamp(float(game::focus->impulse[IM_METER])/float(impulsemeter), 0.f, 1.f),
+                      pulse = inventoryimpulseflash && game::focus->impulse[IM_METER] ? 1-span : 0.f, throb = 0, gr = 1, gg = 1, gb = 1;
+                flashcolour(gr, gg, gb, 0.25f, 0.25f, 0.25f, span);
+                if(pulse > 0 && inventoryimpulsethrob > 0 && impulsemeter-game::focus->impulse[IM_METER] < impulsecost)
+                {
+                    int millis = lastmillis%1000;
+                    throb = millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f);
+                    flashcolour(gr, gg, gb, 1.f, 0.f, 0.f, throb);
+                }
                 if(inventoryimpulse&2)
-                    sy += drawbar(x, y-sy, width, size, 2, inventoryimpulsebartop, inventoryimpulsebarbottom, fade, amt, impulsetex, impulsebgtex, inventorytone, inventoryimpulsebgglow, inventoryimpulsebgblend, inventoryimpulseflash && game::focus->impulse[IM_METER] ? 1-amt : 0.f, 0.f);
+                    sy += drawbar(x, y-sy, width, size, 2, inventoryimpulsebartop, inventoryimpulsebarbottom, fade, span, impulsetex, impulsebgtex, inventorytone, inventoryimpulsebgglow, inventoryimpulsebgblend, pulse, throb*inventoryimpulsethrob);
                 if(inventoryimpulse&1)
                 {
                     if(!(inventoryimpulse&2))
                     {
                         pushfont("super");
-                        int ty = draw_textx("%d%%", x+width/2, y-sy+(inventoryimpulse&2 ? size/2 : 0), 100, int(amt*155)+100, 100, int(fade*255), TEXT_CENTER_UP, -1, -1, int(amt*100));
+                        int ty = draw_textx("%d%%", x+width/2, y-sy+(inventoryimpulse&2 ? size/2 : 0), int(gr*255), int(gg*255), int(gb*255), int(fade*255), TEXT_CENTER_UP, -1, -1, int(span*100));
                         popfont();
                         pushfont("reduced");
                         ty += draw_textx("impulse", x+width/2, y-sy-ty, 255, 255, 255, int(fade*255), TEXT_CENTER_UP, -1, -1);
@@ -2624,7 +2632,7 @@ namespace hud
                     else
                     {
                         pushfont("super");
-                        draw_textx("%d", x+width/2, y-sy+(inventoryimpulse&2 ? size/2 : 0), int(amt*200)+55, int(amt*200)+55, int(amt*200)+55, int(fade*255), TEXT_CENTER_UP, -1, -1, int(amt*100));
+                        draw_textx("%d", x+width/2, y-sy+(inventoryimpulse&2 ? size/2 : 0), int(gr*255), int(gg*255), int(gb*255), int(fade*255), TEXT_CENTER_UP, -1, -1, int(span*100));
                         popfont();
                     }
                 }
