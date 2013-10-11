@@ -597,7 +597,7 @@ namespace ai
         clearwpcache();
         if(full) loadedwaypoints[0] = '\0';
     }
-    ICOMMAND(0, clearwaypoints, "", (), clearwaypoints());
+    ICOMMAND(0, clearwaypoints, "", (), clearwaypoints(true));
 
     void remapwaypoints()
     {
