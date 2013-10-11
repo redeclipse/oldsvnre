@@ -23,7 +23,7 @@ namespace aiman
         if(m_coop(gamemode, mutators))
         {
             int people = numclients(-1, true, -1), numt = numteams(gamemode, mutators)-1;
-            return int(ceilf(people*numt*(m_multi(gamemode, mutators) ? G(coopmultibalance) : G(coopbalance))));
+            return min(int(ceilf(people*numt*(m_multi(gamemode, mutators) ? G(coopmultibalance) : G(coopbalance)))), MAXAI);
         }
         return G(botlimit);
     }

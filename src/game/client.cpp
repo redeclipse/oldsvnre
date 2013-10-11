@@ -129,7 +129,6 @@ namespace client
             conoutft(CON_EVENT, "%s suggests: \fs\fy%s\fS on \fs\fo%s\fS, press %s to vote", game::colourname(d), server::gamename(mode, muts), text, votekey);
         }
     }
-    ICOMMAND(0, fakevote, "sii", (char *s, int *m, int *n), vote(game::player1, s, *m, *n));
 
     void getvotes(int vote, int prop, int idx)
     {
@@ -150,7 +149,7 @@ namespace client
             }
         }
     }
-    ICOMMAND(0, getvote, "bbb", (int *vote, int *prop, int *idx, int *numargs), getvotes(*vote, *prop, *idx));
+    ICOMMAND(0, getvote, "bbb", (int *vote, int *prop, int *idx), getvotes(*vote, *prop, *idx));
 
     struct demoinfo
     {
