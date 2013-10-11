@@ -243,7 +243,8 @@ struct duelservmode : servmode
                         loopi(cnt)
                         {
                             concatstring(names, colourname(playing[i]));
-                            if(i == cnt-1) concatstring(names, " and ");
+                            if(i == cnt-1) break;
+                            else if(i == cnt-2) concatstring(names, " and ");
                             else concatstring(names, ", ");
                         }
                         formatstring(fight)("\fyduel between %s, round \fs\fr#%d\fS", names, duelround);
