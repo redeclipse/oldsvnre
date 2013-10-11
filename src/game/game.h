@@ -19,7 +19,7 @@
 #define DEMO_VERSION        GAMEVERSION
 
 #define MAXAI 256
-#define MAXPLAYERS (MAXCLIENTS + MAXAI)
+#define MAXPLAYERS (MAXCLIENTS + MAXAI*2)
 
 // network quantization scale
 #define DMF 16.0f           // for world locations
