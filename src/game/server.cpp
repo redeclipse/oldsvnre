@@ -1518,7 +1518,7 @@ namespace server
                 }
             }
         }
-        if(iterate && m_balance(gamemode, mutators) && gamelimit > 0 && curbalance < (numt-1))
+        if(m_balance(gamemode, mutators) && gamelimit > 0 && curbalance < (numt-1))
         {
             int delpart = min(gamelimit/(numt*2), G(balancedelay)), balpart = (gamelimit/numt*(curbalance+1))-delpart;
             if(gamemillis >= balpart)
@@ -1529,7 +1529,7 @@ namespace server
                     if(delpart >= 1000)
                     {
                         int secs = delpart/1000;
-                        ancmsgft(-1, S_V_BALWARN, CON_EVENT, "\fy\fs\fzoyWARNING\fS: \fs\fcteams\fS will be \fs\fcreassigned\fS in \fs\fc%d\fS %s%s", secs, secs != 1 ? "seconds" : "second", !m_gauntlet(gamemode) ? " for map symmetry" : "");
+                        ancmsgft(-1, S_V_BALWARN, CON_EVENT, "\fy\fs\fzoyWARNING:\fS \fs\fcteams\fS will be \fs\fcreassigned\fS in \fs\fc%d\fS %s%s", secs, secs != 1 ? "seconds" : "second", !m_gauntlet(gamemode) ? " for map symmetry" : "");
                     }
                 }
                 if(gamemillis >= nextbalance)
@@ -1554,14 +1554,14 @@ namespace server
                         cs.total = scores[tot];
                         sendf(-1, 1, "ri3", N_SCORE, cs.team, cs.total);
                     }
-                    ancmsgft(-1, S_V_BALALERT, CON_EVENT, "\fy\fs\fzoyALERT\fS: \fs\fcteams\fS have %sbeen \fs\fcreassigned\fS%s", delpart > 0 ? "now " : "", !m_gauntlet(gamemode) ? " for map symmetry" : "");
+                    ancmsgft(-1, S_V_BALALERT, CON_EVENT, "\fy\fs\fzoyALERT:\fS \fs\fcteams\fS have %sbeen \fs\fcreassigned\fS%s", delpart > 0 ? "now " : "", !m_gauntlet(gamemode) ? " for map symmetry" : "");
                     if(smode) smode->layout();
                     mutate(smuts, mut->layout());
                 }
             }
         }
-        if(m_balteam(gamemode, mutators, 4) && !inovertime && !interm && gamemillis > G(teambalancewait)
-           && (!lastteambalance || gamemillis >= lastteambalance) && (!nextteambalance || gamemillis >= nextteambalance))
+        if(m_balteam(gamemode, mutators, 4) && !inovertime && !interm && gamemillis >= G(teambalancewait) &&
+           (!lastteambalance || gamemillis >= lastteambalance) && (!nextteambalance || gamemillis >= nextteambalance))
         {
             vector<clientinfo *> tc[T_TOTAL];
             int numplaying = 0;
@@ -1569,6 +1569,8 @@ namespace server
             {
                 clientinfo *cp = clients[i];
                 if(!cp->team || cp->state.state == CS_SPECTATOR || cp->state.actortype > A_PLAYER) continue;
+                cp->state.timeplayed += lastmillis-cp->state.lasttimeplayed;
+                cp->state.lasttimeplayed = lastmillis;
                 tc[cp->team-T_FIRST].add(cp);
                 numplaying++;
             }
@@ -1582,61 +1584,64 @@ namespace server
                     if(pmin < 0 || cl < pmin) pmin = cl;
                 }
                 int offset = pmax-pmin;
-                if(offset > G(teambalanceamt))
+                if(offset >= G(teambalanceamt))
                 {
                     if(!nextteambalance)
                     {
                         int secs = G(teambalancedelay)/1000;
                         nextteambalance = gamemillis+G(teambalancedelay);
-                        ancmsgft(-1, S_V_BALWARN, CON_EVENT, "\fy\fs\fzoyWARNING\fS: \fs\fcteams\fS will be \fs\fcbalanced\fS in \fs\fc%d\fS %s", secs, secs != 1 ? "seconds" : "second");
+                        ancmsgft(-1, S_V_BALWARN, CON_EVENT, "\fy\fs\fzoyWARNING:\fS \fs\fcteams\fS will be \fs\fcbalanced\fS in \fs\fc%d\fS %s", secs, secs != 1 ? "seconds" : "second");
                     }
                     else
                     {
-                        loopi(nt)
+                        int moved = 0;
+                        loopi(nt) for(int team = i+T_FIRST, iters = tc[i].length(); iters > 0 && tc[i].length() > mid; iters--)
                         {
-                            int team = i+T_FIRST, iters = tc[i].length()*2;
-                            while(iters > 0 && tc[i].length() > mid)
+                            int id = -1;
+                            loopvj(tc[i])
                             {
-                                int id = -1;
-                                loopvj(tc[i])
+                                clientinfo *cp = tc[i][j];
+                                if(G(teambalanceswap) && cp->swapteam && cp->swapteam == team) { id = j; break; }
+                                switch(G(teambalancestyle))
                                 {
-                                    clientinfo *cp = tc[i][j];
-                                    if(G(teambalanceswap) && cp->swapteam && cp->swapteam == team) { id = j; break; }
-                                    cp->state.timeplayed += lastmillis-cp->state.lasttimeplayed;
-                                    cp->state.lasttimeplayed = lastmillis;
-                                    if(id < 0 || tc[i][id]->state.timeplayed >= cp->state.timeplayed)
-                                        id = j;
+                                    case 1: if(id < 0 || tc[i][id]->state.timeplayed > cp->state.timeplayed) id = j; break;
+                                    case 2: if(id < 0 || tc[i][id]->state.points > cp->state.points) id = j; break;
+                                    case 3: if(id < 0 || tc[i][id]->state.frags > cp->state.frags) id = j; break;
+                                    case 0: default: if(id < 0) id = j; break;
                                 }
-                                if(id >= 0)
-                                {
-                                    clientinfo *cp = tc[i][id];
-                                    int team = chooseteam(cp);
-                                    if(team != cp->team)
-                                    {
-                                        setteam(cp, team, (m_balreset(gamemode) ? TT_DEFAULT : 0)|TT_INFO);
-                                        tc[i].removeobj(cp);
-                                        tc[team-T_FIRST].add(cp);
-                                    }
-                                    if(cp->swapteam && cp->swapteam == team) cp->swapteam = T_NEUTRAL;
-                                }
-                                iters--;
+                                if(!G(teambalancestyle) && !G(teambalanceswap)) break;
                             }
+                            if(id >= 0)
+                            {
+                                clientinfo *cp = tc[i][id];
+                                int team = chooseteam(cp);
+                                if(team != cp->team)
+                                {
+                                    setteam(cp, team, (m_balreset(gamemode) ? TT_DEFAULT : 0)|TT_INFO);
+                                    tc[i].removeobj(cp);
+                                    tc[team-T_FIRST].add(cp);
+                                    moved++;
+                                }
+                                if(cp->swapteam && cp->swapteam == team) cp->swapteam = T_NEUTRAL;
+                            }
+                            else break; // won't get any more
                         }
-                        ancmsgft(-1, S_V_BALALERT, CON_EVENT, "\fy\fs\fzoyALERT\fS: \fs\fcteams\fS have now been \fs\fcbalanced\fS");
+                        if(moved) ancmsgft(-1, S_V_BALALERT, CON_EVENT, "\fy\fs\fzoyALERT:\fS \fs\fcteams\fS have now been \fs\fcbalanced\fS");
+                        else ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fy\fs\fzoyALERT:\fS \fs\fcteams\fS failed to be \fs\fcbalanced\fS");
                         lastteambalance = gamemillis+G(teambalancewait);
                         nextteambalance = 0;
                     }
                 }
                 else
                 {
-                    if(nextteambalance) ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fy\fs\fcteams\fS no longer need to be \fs\fcbalanced\fS");
+                    if(nextteambalance) ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fy\fs\fzoyALERT:\fS \fs\fcteams\fS no longer need to be \fs\fcbalanced\fS");
                     lastteambalance = gamemillis+(nextteambalance ? G(teambalancewait) : G(teambalancedelay));
                     nextteambalance = 0;
                 }
             }
             else
             {
-                if(nextteambalance) ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fy\fs\fcteams\fS are no longer able to be \fs\fcbalanced\fS");
+                if(nextteambalance) ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fy\fs\fzoyALERT:\fS \fs\fcteams\fS are no longer able to be \fs\fcbalanced\fS");
                 lastteambalance = gamemillis+(nextteambalance ? G(teambalancewait) : G(teambalancedelay));
                 nextteambalance = 0;
             }
@@ -3725,7 +3730,7 @@ namespace server
                             srvoutf(-3, "\fs\fckicked\fS %s: team killing is not permitted", colourname(v));
                             v->kicked = updatecontrols = true;
                         }
-                        else srvmsgft(v->clientnum, CON_CHAT, "\fy\fs\fzoyWARNING\fS: team killing is not permitted, action will be taken if you continue");
+                        else srvmsgft(v->clientnum, CON_CHAT, "\fy\fs\fzoyWARNING:\fS team killing is not permitted, action will be taken if you continue");
                     }
                 }
             }
