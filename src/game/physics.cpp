@@ -1036,7 +1036,9 @@ namespace physics
                             float mag = impulsevelocity(d, vault ? impulseparkourvault : impulseparkourkick, cost, IM_A_PARKOUR);
                             if(mag > 0)
                             {
-                                d->vel = vec(d->yaw, vault ? 90.f : fabs(d->pitch)).reflect(face).mul(mag);
+                                vec rft;
+                                vecfromyawpitch(d->yaw, vault ? 90.f : fabs(d->pitch), 1, 0, rft);
+                                d->vel = vec(rft).reflect(face).mul(mag);
                                 d->doimpulse(cost, vault ? IM_T_VAULT : IM_T_KICK, lastmillis);
                                 d->turnmillis = PHYSMILLIS;
                                 d->turnside = 0;
@@ -1054,7 +1056,8 @@ namespace physics
                         if(off < 0) yaw += 90; else yaw -= 90;
                         while(yaw >= 360) yaw -= 360;
                         while(yaw < 0) yaw += 360;
-                        vec rft(yaw*RAD, 0.f);
+                        vec rft;
+                        vecfromyawpitch(yaw*RAD, 0.f, 1, 0, rft);
                         if(!d->turnside)
                         {
                             int cost = impulsecost;
@@ -1098,7 +1101,7 @@ namespace physics
         { // move up or down slopes in air but only move up slopes in liquid
             float dz = -(m.x*d->floor.x + m.y*d->floor.y)/d->floor.z;
             m.z = liquidcheck(d) ? max(m.z, dz) : dz;
-            m.normalize();
+            if(!m.iszero()) m.normalize();
         }
         if(!d->turnside && (d->physstate >= PHYS_SLOPE || d->onladder || liquidcheck(d))) d->resetjump();
         if(local)

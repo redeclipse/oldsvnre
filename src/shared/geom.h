@@ -73,7 +73,7 @@ struct vec
     explicit vec(const vec2 &v, float z = 0) : x(v.x), y(v.y), z(z) {}
     explicit vec(const vec4 &v);
 
-    vec(float yaw, float pitch) : x(-sinf(yaw)*cosf(pitch)), y(cosf(yaw)*cosf(pitch)), z(sinf(pitch)) {}
+    vec(float yaw, float pitch) : x(-sinf(yaw)*cosf(pitch)), y(cosf(yaw)*cosf(pitch)), z(sinf(pitch)) { if(!iszero()) normalize(); }
 
     float &operator[](int i)       { return v[i]; }
     float  operator[](int i) const { return v[i]; }
