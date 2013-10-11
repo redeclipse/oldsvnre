@@ -2468,7 +2468,11 @@ namespace hud
                     if(inventorytone || inventorycolour) skewcolour(c.r, c.g, c.b, inventorycolour ? W(i, colour) : inventorytone);
                     int oldy = y-sy, curammo = game::focus->ammo[i];
                     if(inventoryammostyle && (game::focus->weapstate[i] == W_S_RELOAD || game::focus->weapstate[i] == W_S_USE) && game::focus->weapload[i] > 0)
-                        curammo = (curammo-game::focus->weapload[i])+int(game::focus->weapload[i]*clamp(float(lastmillis-game::focus->weaplast[i])/float(game::focus->weapwait[i]), 0.f, 1.f));
+                    {
+                        int reloaded = int(curammo*clamp(float(lastmillis-game::focus->weaplast[i])/float(game::focus->weapwait[i]), 0.f, 1.f));
+                        curammo = max(curammo-game::focus->weapload[i], 0);
+                        if(reloaded > curammo) curammo = reloaded;
+                    }
 
                     if(inventoryammo >= 2 && (i == game::focus->weapselect || inventoryammo >= 3) && W(i, max) > 1 && game::focus->hasweap(i, sweap))
                         sy += drawitem(hudtexs[i], x, y-sy, size, 0, true, false, c.r, c.g, c.b, blend, skew, "super", "%d", curammo);
