@@ -830,7 +830,7 @@ namespace server
 #ifdef GAMESERVER
     struct clientinfo;
     extern void waiting(clientinfo *ci, int drop = 0, bool exclude = false);
-    extern void setteam(clientinfo *ci, int team, int flags = TT_DEFAULT, bool swaps = true);
+    extern void setteam(clientinfo *ci, int team, int flags = TT_RESET, bool swaps = true);
     extern int chooseteam(clientinfo *ci, int suggest = -1);
 #endif
 }
