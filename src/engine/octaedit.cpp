@@ -1048,8 +1048,7 @@ void copy()
 void pasteclear()
 {
     if(!localedit) return;
-    if(localedit->copy) freeblock(localedit->copy);
-    localedit->copy = NULL;
+    freeeditinfo(localedit);
 }
 
 void pastehilight()
@@ -1062,7 +1061,7 @@ void pastehilight()
 
 void paste()
 {
-    if(noedit()) return;
+    if(noedit() || !localedit) return;
     mppaste(localedit, sel, true);
 }
 
