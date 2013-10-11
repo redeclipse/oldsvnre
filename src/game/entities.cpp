@@ -23,7 +23,9 @@ namespace entities
 
     vector<extentity *> &getents() { return ents; }
     int lastent(int type) { return type >= 0 && type < MAXENTTYPES ? lastenttype[type] : 0; }
+
     int numattrs(int type) { return type >= 0 && type < MAXENTTYPES ? enttype[type].numattrs : 0; }
+    ICOMMAND(0, entityattrs, "b", (int *n), intret(numattrs(*n)));
 
     int triggertime(extentity &e)
     {
@@ -34,6 +36,39 @@ namespace entities
         }
         return 0;
     }
+
+    int triggertime(int n)
+    {
+        if(ents.inrange(n)) return triggertime(*ents[n]);
+        return 0;
+    }
+    ICOMMAND(0, entitytriggertime, "b", (int *n), intret(triggertime(*n)));
+
+    void getentity(int id, int val, int ex)
+    {
+        if(id < 0) intret(ents.length());
+        else if(ents.inrange(id))
+        {
+            if(val < 0) intret(3);
+            else switch(val)
+            {
+                case 0: intret(ents[id]->type); break; // type
+                case 1: // attrs
+                {
+                    if(ex < 0) intret(ents[id]->attrs.length());
+                    else if(ents[id]->attrs.inrange(ex)) intret(ents[id]->attrs[ex]);
+                    break;
+                }
+                case 2: // links
+                {
+                    if(ex < 0) intret(ents[id]->links.length());
+                    else if(ents[id]->links.inrange(ex)) intret(ents[id]->links[ex]);
+                    break;
+                }
+            }
+        }
+    }
+    ICOMMAND(0, getentity, "bbb", (int *id, int *val, int *ex), getentity(*id, *val, *ex));
 
     const char *entinfo(int type, attrvector &attr, bool full, bool icon)
     {
@@ -319,7 +354,6 @@ namespace entities
         }
         return "";
     }
-
 
     void checkspawns(int n)
     {
