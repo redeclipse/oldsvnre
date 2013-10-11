@@ -1053,7 +1053,8 @@ namespace physics
                     else if(d->turnside || parkour)
                     {
                         int side = off < 0 ? -1 : 1;
-                        if(off < 0) yaw += 90; else yaw -= 90;
+                        if(off < 0) yaw += 90;
+                        else yaw -= 90;
                         while(yaw >= 360) yaw -= 360;
                         while(yaw < 0) yaw += 360;
                         vec rft;
@@ -1090,7 +1091,8 @@ namespace physics
                 }
             }
         }
-        if(d->canmelee(m_weapon(game::gamemode, game::mutators), lastmillis, true, sliding(d, true), onfloor)) weapons::doshot(d, d->o, W_MELEE, true, true);
+        if(d->canmelee(m_weapon(game::gamemode, game::mutators), lastmillis, true, sliding(d, true), onfloor))
+            weapons::doshot(d, d->o, W_MELEE, true, true);
         if(!found && d->turnside) d->turnside = 0;
         d->action[AC_DASH] = false;
     }
