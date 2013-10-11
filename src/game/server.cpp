@@ -4192,9 +4192,9 @@ namespace server
     {
         if(!allowteam(ci, team, T_FIRST))
         {
-            if(team && m_swapteam(gamemode, mutators) && ci->team != team && ci->state.actortype == A_PLAYER && ci->swapteam != team)
+            if(team && m_swapteam(gamemode, mutators) && ci->team != team && ci->state.actortype == A_PLAYER && ci->swapteam != team && canplay())
             {
-                if(canplay()) ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fy%s requests swap to team %s, change teams to accept", colourname(ci), colourteam(team));
+                ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fy%s requests swap to team %s, change teams to accept", colourname(ci), colourteam(team));
                 ci->swapteam = team;
             }
             team = chooseteam(ci);
