@@ -920,7 +920,9 @@ namespace physics
                 float mag = impulsevelocity(d, impulseparkourkick, cost, IM_A_PARKOUR);
                 if(mag > 0)
                 {
-                    d->vel = vec(d->yaw*RAD, 0.f).mul(mag);
+                    vec rft;
+                    vecfromyawpitch(d->yaw, 0.f, 1, 0, rft);
+                    (d->vel = rft).mul(mag);
                     d->vel.z += mag/2;
                     d->doimpulse(cost, IM_T_KICK, lastmillis);
                     d->turnmillis = PHYSMILLIS;
@@ -1058,14 +1060,14 @@ namespace physics
                         while(yaw >= 360) yaw -= 360;
                         while(yaw < 0) yaw += 360;
                         vec rft;
-                        vecfromyawpitch(yaw*RAD, 0.f, 1, 0, rft);
+                        vecfromyawpitch(yaw, 0.f, 1, 0, rft);
                         if(!d->turnside)
                         {
                             int cost = impulsecost;
                             float mag = impulsevelocity(d, impulseparkour, cost, IM_A_PARKOUR);
                             if(mag > 0)
                             {
-                                d->vel = vec(rft).mul(mag);
+                                (d->vel = rft).mul(mag);
                                 off = yaw-d->yaw;
                                 if(off > 180) off -= 360;
                                 else if(off < -180) off += 360;
@@ -1083,7 +1085,7 @@ namespace physics
                         }
                         if(side == d->turnside)
                         {
-                            m = rft; // re-project and override
+                            (m = rft).normalize(); // re-project and override
                             found = true;
                             break;
                         }
