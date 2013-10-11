@@ -63,7 +63,7 @@ TEAMS(sigma, 0x22FF22);
 TEAMS(enemy, 0x6F6F6F);
 
 #ifdef GAMESERVER
-enum { TT_INFO = 1<<0, TT_RESET = 1<<1, TT_SMODE = 1<<2, TT_DEFAULT = TT_RESET|TT_SMODE, TT_SMINFO = TT_INFO|TT_SMODE, TT_DFINFO = TT_INFO|TT_DEFAULT };
+enum { TT_INFO = 1<<0, TT_RESET = 1<<1, TT_SMODE = 1<<2, TT_INFOSM = TT_INFO|TT_SMODE, TT_RESETX = TT_INFO|TT_RESET };
 
 #define TEAMDEF(proto,name)     proto *sv_team_stat_##name[] = { &sv_teamneutral##name, &sv_teamalpha##name, &sv_teamomega##name, &sv_teamkappa##name, &sv_teamsigma##name, &sv_teamenemy##name };
 #define TEAM(id,name)           (*sv_team_stat_##name[id])

@@ -275,7 +275,7 @@ namespace aiman
                 if(ci->state.actortype == A_BOT && ci->state.ownernum >= 0)
                 {
                     int teamb = chooseteam(ci, ci->team);
-                    if(ci->team != teamb) setteam(ci, teamb, TT_DFINFO);
+                    if(ci->team != teamb) setteam(ci, teamb, TT_RESETX);
                 }
             }
         }

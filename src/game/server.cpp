@@ -1543,7 +1543,7 @@ namespace server
                     loopk(T_TOTAL) assign[k].setsize(0);
                     loopv(clients) if(isteam(gamemode, mutators, clients[i]->team, T_FIRST))
                         assign[clients[i]->team-T_FIRST].add(clients[i]);
-                    int scores[T_TOTAL] = {0}, flags = (m_balreset(gamemode) ? TT_DEFAULT : 0)|TT_INFO;
+                    int scores[T_TOTAL] = {0}, flags = (m_balreset(gamemode) ? TT_RESET : 0)|TT_INFOSM;
                     loopk(numt) scores[k] = teamscore(k+T_FIRST).total;
                     loopk(numt)
                     {
@@ -1617,7 +1617,7 @@ namespace server
                                 int team = chooseteam(cp);
                                 if(team != cp->team)
                                 {
-                                    setteam(cp, team, (m_balreset(gamemode) ? TT_DEFAULT : 0)|TT_INFO);
+                                    setteam(cp, team, (m_balreset(gamemode) ? TT_RESET : 0)|TT_INFOSM);
                                     tc[i].removeobj(cp);
                                     tc[team-T_FIRST].add(cp);
                                     moved++;
@@ -2518,7 +2518,7 @@ namespace server
         {
             clientinfo *cp = clients[i];
             if(cp->state.actortype != A_PLAYER || (newteam && cp->team != newteam) || !cp->swapteam || cp->swapteam != oldteam) continue;
-            setteam(cp, oldteam, (m_balreset(gamemode) ? TT_DEFAULT : 0)|TT_INFO, false);
+            setteam(cp, oldteam, (m_balreset(gamemode) ? TT_RESET : 0)|TT_INFOSM, false);
             ancmsgft(cp->clientnum, S_V_BALALERT, CON_EVENT, "\fyyou have been moved to %s as previously requested", colourteam(oldteam));
             return;
         }
@@ -2668,7 +2668,7 @@ namespace server
         ci->state.state = CS_SPECTATOR;
         ci->state.quarantine = quarantine;
         sendf(sender, 1, "ri3", N_SPECTATOR, ci->clientnum, quarantine ? 2 : 1);
-        setteam(ci, T_NEUTRAL, TT_SMINFO);
+        setteam(ci, T_NEUTRAL, TT_INFOSM);
     }
 
     enum { ALST_FIRST = 0, ALST_TRY, ALST_SPAWN, ALST_SPEC, ALST_EDIT, ALST_WALK, ALST_MAX };
@@ -4230,7 +4230,7 @@ namespace server
         ci->state.state = CS_WAITING;
         ci->state.weapreset(false);
         if(m_loadout(gamemode, mutators)) chkloadweap(ci);
-        setteam(ci, chooseteam(ci), TT_SMINFO);
+        setteam(ci, chooseteam(ci), TT_INFOSM);
     }
 
     int triggertime(int i)
@@ -4322,7 +4322,7 @@ namespace server
             ci->state.state = CS_SPECTATOR;
             ci->state.quarantine = quarantine;
             ci->state.timeplayed += lastmillis-ci->state.lasttimeplayed;
-            setteam(ci, T_NEUTRAL, TT_SMINFO);
+            setteam(ci, T_NEUTRAL, TT_INFOSM);
             aiman::dorefresh = max(aiman::dorefresh, G(airefreshdelay));
         }
         else if(ci->state.state == CS_SPECTATOR && !val)
@@ -5576,7 +5576,7 @@ namespace server
                         if(!spectate(ci, false)) break;
                         reset = false;
                     }
-                    setteam(ci, newteam, (reset ? TT_RESET : 0)|TT_SMINFO);
+                    setteam(ci, newteam, (reset ? TT_RESET : 0)|TT_INFOSM);
                     break;
                 }
 
@@ -5919,7 +5919,7 @@ namespace server
                     clientinfo *cp = (clientinfo *)getinfo(who);
                     if(!cp || cp == ci || !m_team(gamemode, mutators) || m_local(gamemode) || cp->state.actortype >= A_ENEMY) break;
                     if(cp->state.state == CS_SPECTATOR || !allowteam(cp, team, T_FIRST, false)) break;
-                    setteam(cp, team, TT_DFINFO);
+                    setteam(cp, team, TT_RESETX);
                     break;
                 }
 
