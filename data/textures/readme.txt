@@ -3,7 +3,7 @@ In the absence of an explicit license, content is considered to be covered by
     obey individual licensing criteria. This does not apply to the Red Eclipse
     logo or other trademarks unique to the project.
 
-    Red Eclipse, Copyright (C) 2009-2012 Red Eclipse Team
+    Red Eclipse, Copyright (C) 2009-2013 Red Eclipse Team
     Creative Commons Attribution ShareAlike 3.0 License (CC-BY-SA)
     http://creativecommons.org/licenses/by-sa/3.0/
 
@@ -11,8 +11,13 @@ lava.jpg
     Created by RaZgRiZ Made with Filter Forge II Beta 3
     Licensed publicly for everyone to use, modify and distribute as long as the author is credited for the original work.
 
+lava2.jpg
+    Created by Matt "greaserpirate" Kalt
+	Copyright (C) 2009-2013 Red Eclipse Team
+	Creative Commons Attribution ShareAlike 3.0 License (CC-BY-SA)
+
 emblem.png, logo.png
-    Created by Luckystrike-Rx
-	Copyright (C) 2009-2012 Red Eclipse Team
+    Created by Rémi "LuckystrikeRx" Clouet d'Orval
+	Copyright (C) 2009-2013 Red Eclipse Team
 	Creative Commons Attribution ShareAlike 3.0 License (CC-BY-SA)
 	In addition covered by "THE RED ECLIPSE MARK POLICY" (see trademark.txt included with this distribution)

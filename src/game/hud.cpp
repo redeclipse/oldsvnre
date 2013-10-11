@@ -2444,59 +2444,56 @@ namespace hud
     int drawselection(int x, int y, int s, int m, float blend)
     {
         int sy = 0;
-        if(game::focus->state == CS_ALIVE)
+        if(game::focus->state == CS_ALIVE && inventoryammo)
         {
-            if(inventoryammo)
+            const char *hudtexs[W_MAX] = {
+                meleetex, pistoltex, swordtex, shotguntex, smgtex, flamertex, plasmatex, rifletex, grenadetex, minetex, rockettex
+            };
+            int sweap = m_weapon(game::gamemode, game::mutators);
+            loopi(W_MAX) if((i != W_MELEE || sweap == W_MELEE || game::focus->weapselect == W_MELEE || !inventoryhidemelee) && game::focus->holdweap(i, sweap, lastmillis))
             {
-                const char *hudtexs[W_MAX] = {
-                    meleetex, pistoltex, swordtex, shotguntex, smgtex, flamertex, plasmatex, rifletex, grenadetex, minetex, rockettex
-                };
-                int sweap = m_weapon(game::gamemode, game::mutators);
-                loopi(W_MAX) if((i != W_MELEE || sweap == W_MELEE || game::focus->weapselect == W_MELEE || !inventoryhidemelee) && game::focus->holdweap(i, sweap, lastmillis))
+                if(y-sy-s < m) break;
+                float size = s, skew = 0.f;
+                if((game::focus->weapstate[i] == W_S_SWITCH || game::focus->weapstate[i] == W_S_USE) && (i != game::focus->weapselect || i != game::focus->lastweap))
                 {
-                    if(y-sy-s < m) break;
-                    float size = s, skew = 0.f;
-                    if((game::focus->weapstate[i] == W_S_SWITCH || game::focus->weapstate[i] == W_S_USE) && (i != game::focus->weapselect || i != game::focus->lastweap))
-                    {
-                        float amt = clamp(float(lastmillis-game::focus->weaplast[i])/float(game::focus->weapwait[i]), 0.f, 1.f);
-                        if(i != game::focus->weapselect) skew = game::focus->hasweap(i, sweap) ? 1.f-(amt*(1.f-inventoryskew)) : 1.f-amt;
-                        else skew = game::focus->weapstate[i] == W_S_USE ? amt : inventoryskew+(amt*(1.f-inventoryskew));
-                    }
-                    else if(game::focus->hasweap(i, sweap) || i == game::focus->weapselect) skew = i != game::focus->weapselect ? inventoryskew : 1.f;
-                    else continue;
-                    vec c(1, 1, 1);
-                    if(inventorytone || inventorycolour) skewcolour(c.r, c.g, c.b, inventorycolour ? W(i, colour) : inventorytone);
-                    int oldy = y-sy, curammo = game::focus->ammo[i];
-                    if(inventoryammostyle && (game::focus->weapstate[i] == W_S_RELOAD || game::focus->weapstate[i] == W_S_USE) && game::focus->weapload[i] > 0)
-                    {
-                        int reloaded = int(curammo*clamp(float(lastmillis-game::focus->weaplast[i])/float(game::focus->weapwait[i]), 0.f, 1.f));
-                        curammo = max(curammo-game::focus->weapload[i], 0);
-                        if(reloaded > curammo) curammo = reloaded;
-                    }
+                    float amt = clamp(float(lastmillis-game::focus->weaplast[i])/float(game::focus->weapwait[i]), 0.f, 1.f);
+                    if(i != game::focus->weapselect) skew = game::focus->hasweap(i, sweap) ? 1.f-(amt*(1.f-inventoryskew)) : 1.f-amt;
+                    else skew = game::focus->weapstate[i] == W_S_USE ? amt : inventoryskew+(amt*(1.f-inventoryskew));
+                }
+                else if(game::focus->hasweap(i, sweap) || i == game::focus->weapselect) skew = i != game::focus->weapselect ? inventoryskew : 1.f;
+                else continue;
+                vec c(1, 1, 1);
+                if(inventorytone || inventorycolour) skewcolour(c.r, c.g, c.b, inventorycolour ? W(i, colour) : inventorytone);
+                int oldy = y-sy, curammo = game::focus->ammo[i];
+                if(inventoryammostyle && (game::focus->weapstate[i] == W_S_RELOAD || game::focus->weapstate[i] == W_S_USE) && game::focus->weapload[i] > 0)
+                {
+                    int reloaded = int(curammo*clamp(float(lastmillis-game::focus->weaplast[i])/float(game::focus->weapwait[i]), 0.f, 1.f));
+                    curammo = max(curammo-game::focus->weapload[i], 0);
+                    if(reloaded > curammo) curammo = reloaded;
+                }
 
-                    if(inventoryammo >= 2 && (i == game::focus->weapselect || inventoryammo >= 3) && W(i, max) > 1 && game::focus->hasweap(i, sweap))
-                        sy += drawitem(hudtexs[i], x, y-sy, size, 0, true, false, c.r, c.g, c.b, blend, skew, "super", "%d", curammo);
-                    else sy += drawitem(hudtexs[i], x, y-sy, size, 0, true, false, c.r, c.g, c.b, blend, skew);
-                    if(inventoryammobar && (i == game::focus->weapselect || inventoryammobar >= 2) && W(i, max) > 1 && game::focus->hasweap(i, sweap))
-                        drawitembar(x, oldy, size, false, c.r, c.g, c.b, blend, skew, curammo/float(W(i, max)));
-                    if(inventoryweapids && (i == game::focus->weapselect || inventoryweapids >= 2))
+                if(inventoryammo >= 2 && (i == game::focus->weapselect || inventoryammo >= 3) && W(i, max) > 1 && game::focus->hasweap(i, sweap))
+                    sy += drawitem(hudtexs[i], x, y-sy, size, 0, true, false, c.r, c.g, c.b, blend, skew, "super", "%d", curammo);
+                else sy += drawitem(hudtexs[i], x, y-sy, size, 0, true, false, c.r, c.g, c.b, blend, skew);
+                if(inventoryammobar && (i == game::focus->weapselect || inventoryammobar >= 2) && W(i, max) > 1 && game::focus->hasweap(i, sweap))
+                    drawitembar(x, oldy, size, false, c.r, c.g, c.b, blend, skew, curammo/float(W(i, max)));
+                if(inventoryweapids && (i == game::focus->weapselect || inventoryweapids >= 2))
+                {
+                    static string weapids[W_MAX];
+                    static int lastweapids = -1;
+                    int n = weapons::slot(game::focus, i);
+                    if(lastweapids != changedkeys)
                     {
-                        static string weapids[W_MAX];
-                        static int lastweapids = -1;
-                        int n = weapons::slot(game::focus, i);
-                        if(lastweapids != changedkeys)
+                        loopj(W_MAX)
                         {
-                            loopj(W_MAX)
-                            {
-                                defformatstring(action)("weapon %d", j);
-                                const char *actkey = searchbind(action, 0);
-                                if(actkey && *actkey) copystring(weapids[j], actkey);
-                                else formatstring(weapids[j])("%d", j);
-                            }
-                            lastweapids = changedkeys;
+                            defformatstring(action)("weapon %d", j);
+                            const char *actkey = searchbind(action, 0);
+                            if(actkey && *actkey) copystring(weapids[j], actkey);
+                            else formatstring(weapids[j])("%d", j);
                         }
-                        drawitemtext(x, oldy, size, false, skew, "default", blend, "\f[%d]%s", inventorycolour >= 2 ? W(i, colour) : 0xAAAAAA, isweap(n) ? weapids[n] : "?");
+                        lastweapids = changedkeys;
                     }
+                    drawitemtext(x, oldy, size, false, skew, "default", blend, "\f[%d]%s", inventorycolour >= 2 ? W(i, colour) : 0xAAAAAA, isweap(n) ? weapids[n] : "?");
                 }
             }
         }
