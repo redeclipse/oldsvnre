@@ -1543,13 +1543,13 @@ namespace server
                     loopk(T_TOTAL) assign[k].setsize(0);
                     loopv(clients) if(isteam(gamemode, mutators, clients[i]->team, T_FIRST))
                         assign[clients[i]->team-T_FIRST].add(clients[i]);
-                    int scores[T_TOTAL] = {0}, flags = (m_balreset(gamemode) ? TT_RESET : 0)|TT_INFOSM;
+                    int scores[T_TOTAL] = {0};
                     loopk(numt) scores[k] = teamscore(k+T_FIRST).total;
                     loopk(numt)
                     {
                         int from = mapbals[oldbalance][k], fromt = from-T_FIRST,
                             to = mapbals[curbalance][k], tot = to-T_FIRST;
-                        loopv(assign[fromt]) setteam(assign[fromt][i], to, flags);
+                        loopv(assign[fromt]) setteam(assign[fromt][i], to, (m_balreset(gamemode) ? TT_RESET : 0)|TT_INFO);
                         score &cs = teamscore(from);
                         cs.total = scores[tot];
                         sendf(-1, 1, "ri3", N_SCORE, cs.team, cs.total);
@@ -2530,7 +2530,7 @@ namespace server
         if(ci->team != team)
         {
             bool reenter = false;
-            if(flags&TT_RESET) waiting(ci, DROP_WEAPONS);
+            if(flags&TT_RESET) waiting(ci, DROP_WEAPONS, false);
             else if(flags&TT_SMODE && ci->state.state == CS_ALIVE)
             {
                 if(smode) smode->leavegame(ci);
@@ -4202,7 +4202,7 @@ namespace server
         return team;
     }
 
-    void waiting(clientinfo *ci, int drop, bool exclude)
+    void waiting(clientinfo *ci, int drop, bool doteam, bool exclude)
     {
 #ifdef CAMPAIGN
         if(m_campaign(gamemode) && ci->state.cpnodes.empty())
@@ -4230,7 +4230,7 @@ namespace server
         ci->state.state = CS_WAITING;
         ci->state.weapreset(false);
         if(m_loadout(gamemode, mutators)) chkloadweap(ci);
-        setteam(ci, chooseteam(ci), TT_INFOSM);
+        if(doteam && !allowteam(ci, ci->team, T_FIRST, false)) setteam(ci, chooseteam(ci), TT_INFO);
     }
 
     int triggertime(int i)
@@ -4322,19 +4322,19 @@ namespace server
             ci->state.state = CS_SPECTATOR;
             ci->state.quarantine = quarantine;
             ci->state.timeplayed += lastmillis-ci->state.lasttimeplayed;
-            setteam(ci, T_NEUTRAL, TT_INFOSM);
+            setteam(ci, T_NEUTRAL, TT_INFO);
             aiman::dorefresh = max(aiman::dorefresh, G(airefreshdelay));
         }
         else if(ci->state.state == CS_SPECTATOR && !val)
         {
             if(ci->clientmap[0] || ci->mapcrc) checkmaps();
             //if(crclocked(ci)) return false;
+            if(smode) smode->entergame(ci);
+            mutate(smuts, mut->entergame(ci));
             ci->state.state = CS_DEAD;
             ci->state.lasttimeplayed = lastmillis;
             ci->state.quarantine = false;
             waiting(ci, DROP_RESET);
-            if(smode) smode->entergame(ci);
-            mutate(smuts, mut->entergame(ci));
             aiman::dorefresh = max(aiman::dorefresh, G(airefreshdelay));
         }
         return true;
