@@ -288,17 +288,6 @@ namespace aiman
         {
             loopvj(sents) if(sents[j].type == ACTOR && sents[j].attrs[0] >= 0 && sents[j].attrs[0] < A_TOTAL && gamemillis >= sents[j].millis && (sents[j].attrs[5] == triggerid || !sents[j].attrs[5]) && m_check(sents[j].attrs[3], sents[j].attrs[4], gamemode, mutators))
             {
-                bool allow = true;
-                loopv(clients) if(clients[i]->state.actortype < A_ENEMY)
-                {
-                    float dist = clients[i]->state.o.dist(sents[j].o);
-                    if((G(enemyspawndistmax) > 0 && dist > G(enemyspawndistmax)) || (G(enemyspawndistmin) > 0 && dist < G(enemyspawndistmin)))
-                    {
-                        allow = false;
-                        break;
-                    }
-                }
-                if(!allow) continue;
                 int count = 0, numenemies = 0;
                 loopvrev(clients) if(clients[i]->state.actortype >= A_ENEMY)
                 {
