@@ -728,7 +728,7 @@ namespace ai
         if(!cleanwaypoints()) clearwpcache();
         return true;
     }
-    ICOMMAND(0, loadwaypoints, "s", (char *mname), getwaypoints(true, mname));
+    ICOMMAND(0, loadwaypoints, "s", (char *mname), if(!(identflags&IDF_WORLD)) getwaypoints(true, mname));
 
     void savewaypoints(bool force, const char *mname)
     {
@@ -757,7 +757,7 @@ namespace ai
         conoutf("saved %d waypoints to %s", waypoints.length()-1, wptname);
     }
 
-    ICOMMAND(0, savewaypoints, "s", (char *mname), savewaypoints(true, mname));
+    ICOMMAND(0, savewaypoints, "s", (char *mname), if(!(identflags&IDF_WORLD)) savewaypoints(true, mname));
 
     bool importwaypoints()
     {
