@@ -2607,8 +2607,8 @@ namespace hud
             }
             if(game::focus->actortype < A_ENEMY && physics::allowimpulse(game::focus) && impulsemeter && impulsecost && inventoryimpulse)
             {
-                float fade = blend*inventoryimpulseblend, span = 1-clamp(float(game::focus->impulse[IM_METER])/float(impulsemeter), 0.f, 1.f),
-                      pulse = inventoryimpulseflash && game::focus->impulse[IM_METER] ? 1-span : 0.f, throb = 0, gr = 1, gg = 1, gb = 1;
+                float fade = blend*inventoryimpulseblend, span = clamp(float(game::focus->impulse[IM_METER])/float(impulsemeter), 0.f, 1.f),
+                      pulse = inventoryimpulseflash && game::focus->impulse[IM_METER] ? span : 0.f, throb = 0, gr = 1, gg = 1, gb = 1;
                 flashcolour(gr, gg, gb, 0.25f, 0.25f, 0.25f, span);
                 if(pulse > 0 && inventoryimpulsethrob > 0 && impulsemeter-game::focus->impulse[IM_METER] < impulsecost)
                 {
@@ -2617,7 +2617,7 @@ namespace hud
                     flashcolour(gr, gg, gb, 1.f, 0.f, 0.f, throb);
                 }
                 if(inventoryimpulse&2)
-                    sy += drawbar(x, y-sy, width, size, 2, inventoryimpulsebartop, inventoryimpulsebarbottom, fade, span, impulsetex, impulsebgtex, inventorytone, inventoryimpulsebgglow, inventoryimpulsebgblend, pulse, throb*inventoryimpulsethrob);
+                    sy += drawbar(x, y-sy, width, size, 2, inventoryimpulsebartop, inventoryimpulsebarbottom, fade, 1-span, impulsetex, impulsebgtex, inventorytone, inventoryimpulsebgglow, inventoryimpulsebgblend, pulse, throb*inventoryimpulsethrob);
                 if(inventoryimpulse&1)
                 {
                     if(!(inventoryimpulse&2))

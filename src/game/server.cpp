@@ -1525,7 +1525,7 @@ namespace server
             {
                 if(!nextbalance)
                 {
-                    nextbalance = NZT(gamemillis+delpart);
+                    nextbalance = gamemillis+delpart;
                     if(delpart >= 1000)
                     {
                         int secs = delpart/1000;

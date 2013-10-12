@@ -397,7 +397,7 @@ namespace projs
         {
             proj.vel = vec(0, 0, 0);
             proj.sticknrm = proj.norm;
-            proj.stuck = proj.lastbounce = NZT(lastmillis);
+            proj.stuck = proj.lastbounce = lastmillis ? lastmillis : 1;
             vec fwd = dir.iszero() ? vec(proj.vel).normalize() : dir;
             if(!fwd.iszero()) loopi(max(int(proj.radius), 100))
             {
@@ -423,7 +423,7 @@ namespace projs
     {
         loopv(projs) if(projs[i]->owner == d && projs[i]->projtype == PRJ_SHOT && projs[i]->id == id)
         {
-            projs[i]->stuck = projs[i]->lastbounce = NZT(lastmillis);
+            projs[i]->stuck = projs[i]->lastbounce = lastmillis ? lastmillis : 1;
             projs[i]->sticknrm = norm;
             projs[i]->stickpos = pos;
             if(f) projs[i]->stick = f;
