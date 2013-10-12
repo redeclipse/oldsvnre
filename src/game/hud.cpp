@@ -1420,7 +1420,7 @@ namespace hud
                     float radius = max(target->height*0.5f, max(target->xradius, target->yradius));
                     if(entities::collateitems(target, pos, radius, actitems))
                     {
-                        SEARCHBINDCACHE(actionkey)("use", 0);
+                        SEARCHBINDCACHE(actionkey)("use", 0, "\f{\fs\fzuy", "\fS}");
                         while(!actitems.empty())
                         {
                             actitem &t = actitems.last();

@@ -116,7 +116,7 @@ namespace capture
                 popfont();
                 if(game::focus == game::player1)
                 {
-                    SEARCHBINDCACHE(altkey)("affinity", 0);
+                    SEARCHBINDCACHE(altkey)("affinity", 0, "\f{\fs\fzuy", "\fS}");
                     pushfont("reduced");
                     ty += draw_textx("Press %s to drop", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, altkey)*hud::noticescale;
                     popfont();
