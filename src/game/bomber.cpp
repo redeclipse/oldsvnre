@@ -164,7 +164,7 @@ namespace bomber
                     }
                     if(game::focus == game::player1)
                     {
-                        SEARCHBINDCACHE(altkey)("affinity", 0);
+                        SEARCHBINDCACHE(altkey)("affinity", 0, "\f{\fs\fzuy", "\fS}");
                         pushfont("reduced");
                         ty += draw_textx("Press %s to throw", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, altkey)*hud::noticescale;
                         popfont();
@@ -497,7 +497,7 @@ namespace bomber
                 if(value == 2)
                 {
                     affinityeffect(i, T_NEUTRAL, f.pos(true, true), f.spawnloc, 3, "RESET");
-                    game::announcef(S_V_BOMBRESET, CON_SELF, NULL, true, "\fathe \fs\fwbomb\fS has been reset");
+                    game::announcef(S_V_BOMBRESET, CON_SELF, NULL, true, "\fathe \fs\fzwvbomb\fS has been reset");
                     isreset = true;
                 }
                 entities::execlink(NULL, f.ent, false);

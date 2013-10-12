@@ -119,7 +119,7 @@ struct bindlist
 
     bindlist() : lastsearch(-1) {}
 
-    const char *search(const char *action, int type = 0, int limit = 5, const char *s1 = "\f{", const char *s2 = "}")
+    const char *search(const char *action, int type = 0, const char *s1 = "\f{", const char *s2 = "}", int limit = 5)
     {
         if(names.empty() || lastsearch != changedkeys)
         {

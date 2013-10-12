@@ -1,6 +1,6 @@
 #include "engine.h"
 
-VAR(IDF_PERSIST, textblinking, 0, 350, VAR_MAX);
+VAR(IDF_PERSIST, textblinking, 0, 250, VAR_MAX);
 FVARF(IDF_PERSIST, textscale, FVAR_NONZERO, 1, FVAR_MAX, UI::setup());
 VAR(IDF_PERSIST, textfaded, 0, 1, 1);
 VAR(IDF_PERSIST, textminintensity, 0, 32, 255);
