@@ -2695,7 +2695,7 @@ namespace game
             if(!maptime) { maptime = -1; return; } // skip the first loop
             else if(maptime < 0)
             {
-                maptime = NZT(lastmillis);
+                maptime = lastmillis ? lastmillis : 1;
                 if(type != 6) musicdone(false);
                 RUNWORLD("on_start");
                 resetcamera();

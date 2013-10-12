@@ -61,8 +61,6 @@ extern ipinfo *checkipinfo(vector<ipinfo> &info, int type, enet_uint32 ip);
 extern void writecfg();
 extern void rehash(bool reload = true);
 
-#define NZT(t) (t != 0 ? t : 1)
-
 #ifndef STANDALONE
 #include "world.h"
 #include "octa.h"

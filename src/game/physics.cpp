@@ -1115,13 +1115,13 @@ namespace physics
         }
         if(d->physstate == PHYS_FALL && !d->onladder && !d->turnside)
         {
-            if(!d->airmillis) d->airmillis = NZT(lastmillis);
+            if(!d->airmillis) d->airmillis = lastmillis ? lastmillis : 1;
             d->floormillis = 0;
         }
         else
         {
             d->airmillis = 0;
-            if(!d->floormillis) d->floormillis = NZT(lastmillis);
+            if(!d->floormillis) d->floormillis = lastmillis ? lastmillis : 1;
         }
         if(!d->turnside)
         {
@@ -1143,13 +1143,13 @@ namespace physics
         if(!floating && gameent::is(pl)) modifymovement((gameent *)pl, m, local, wantsmove, millis);
         else if(pl->physstate == PHYS_FALL && !pl->onladder)
         {
-            if(!pl->airmillis) pl->airmillis = NZT(lastmillis);
+            if(!pl->airmillis) pl->airmillis = lastmillis ? lastmillis : 1;
             pl->floormillis = 0;
         }
         else
         {
             pl->airmillis = 0;
-            if(!pl->floormillis) pl->floormillis = NZT(lastmillis);
+            if(!pl->floormillis) pl->floormillis = lastmillis ? lastmillis : 1;
         }
 
         m.mul(movevelocity(pl, floating));
