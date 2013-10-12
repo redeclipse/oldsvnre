@@ -1,5 +1,4 @@
 // main.cpp: initialisation & main loop
-// main.cpp: initialisation & main loop
 
 #include "engine.h"
 #include <signal.h>
@@ -241,8 +240,8 @@ void screenshot(char *sname)
     saveimage(fname, image, imageformat, compresslevel, true);
 }
 
-COMMAND(0, screenshot, "s");
-COMMAND(0, quit, "");
+ICOMMAND(0, screenshot, "s", (char *s), if(!(identflags&IDF_WORLD)) screenshot(s));
+ICOMMAND(0, quit, "", (void), if(!(identflags&IDF_WORLD)) quit());
 
 void setfullscreen(bool enable, bool force)
 {
@@ -259,7 +258,7 @@ void setfullscreen(bool enable, bool force)
 #endif
 }
 
-VARF(0, fullscreen, 0, 1, 1, setfullscreen(fullscreen!=0));
+VARF(0, fullscreen, 0, 1, 1, if(!(identflags&IDF_WORLD)) setfullscreen(fullscreen!=0));
 
 void screenres(int *w, int *h)
 {
