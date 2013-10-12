@@ -899,7 +899,7 @@ void save_config(char *mname)
     delete h;
     if(verbose) conoutf("\fasaved config %s", fname);
 }
-ICOMMAND(0, savemapconfig, "s", (char *mname), save_config(*mname ? mname : mapname));
+ICOMMAND(0, savemapconfig, "s", (char *mname), if(!(identflags&IDF_WORLD)) save_config(*mname ? mname : mapname));
 
 VARF(IDF_PERSIST, mapshotsize, 0, 256, INT_MAX-1, mapshotsize -= mapshotsize%2);
 
@@ -923,7 +923,7 @@ void save_mapshot(char *mname)
     defformatstring(texname)("%s", mname);
     reloadtexture(texname);
 }
-ICOMMAND(0, savemapshot, "s", (char *mname), save_mapshot(*mname ? mname : mapname));
+ICOMMAND(0, savemapshot, "s", (char *mname), if(!(identflags&IDF_WORLD)) save_mapshot(*mname ? mname : mapname));
 
 #define istempname(n) (!strncmp(n, "temp/", 5) || !strncmp(n, "temp\\", 5))
 
@@ -1093,7 +1093,7 @@ void save_world(const char *mname, bool nodata, bool forcesave)
     if(istempname(mapname)) setnames(&mapname[5], MAP_MAPZ);
 }
 
-ICOMMAND(0, savemap, "s", (char *mname), save_world(*mname ? (istempname(mname) ? &mname[5] : mname) : (istempname(mapname) ? &mapname[5] : mapname)));
+ICOMMAND(0, savemap, "s", (char *mname), if(!(identflags&IDF_WORLD)) save_world(*mname ? (istempname(mname) ? &mname[5] : mname) : (istempname(mapname) ? &mapname[5] : mapname)));
 
 static uint mapcrc = 0;
 
@@ -1875,7 +1875,7 @@ void writeobj(char *name)
     delete f;
 }
 
-COMMAND(0, writeobj, "s");
+ICOMMAND(0, writeobj, "s", (char *s), if(!(identflags&IDF_WORLD)) writeobj(s));
 
 int getworldsize() { return hdr.worldsize; }
 int getmapversion() { return hdr.version; }

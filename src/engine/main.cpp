@@ -489,7 +489,7 @@ void resetgl()
     allchanged(true);
 }
 
-COMMAND(0, resetgl, "");
+ICOMMAND(0, resetgl, "", (void), if(!(identflags&IDF_WORLD)) resetgl());
 
 bool activewindow = true, warping = false, minimized = false;
 

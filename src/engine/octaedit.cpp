@@ -984,7 +984,7 @@ void saveprefab(char *name)
     delete f;
     conoutf("wrote prefab file %s", filename);
 }
-COMMAND(0, saveprefab, "s");
+ICOMMAND(0, saveprefab, "s", (char *s), if(!(identflags&IDF_WORLD)) saveprefab(s));
 
 void pasteblock(block3 &b, selinfo &sel, bool local)
 {
