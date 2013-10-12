@@ -254,8 +254,8 @@ GFVAR(0, teamdamagescale, FVAR_MIN, 1, FVAR_MAX); // 0 = off, anything else = sc
 GVAR(0, teambalance, 0, 4, 4); // 0 = off, 1 = by number then rank, 2 = by rank then number, 3 = by number and enforce, 4 = number, enforce, and reassign
 GVAR(0, teambalanceplaying, 2, 2, VAR_MAX); // min players before teambalance 4 reassignments occur
 GVAR(0, teambalanceamt, 2, 2, VAR_MAX); // max-min offset before teambalance 4 reassignments occur
-GVAR(0, teambalancewait, 10000, 30000, VAR_MAX); // how long before teambalance 4 can happen after map start
-GVAR(0, teambalancedelay, 2000, 5000, VAR_MAX); // how long before teambalance 4 reassignments start
+GVAR(0, teambalancewait, 10000, 60000, VAR_MAX); // how long before teambalance 4 can happen again
+GVAR(0, teambalancedelay, 2000, 15000, VAR_MAX); // how long before teambalance 4 reassignments start
 GVAR(0, teambalanceswap, 0, 1, 1); // allow swap requests if unable to change team
 GVAR(0, teambalancestyle, 0, 2, 3); // when moving players, sort by: 0 = top of list, 1 = lowest time played, 2 = lowest points, 3 = lowest frags
 
