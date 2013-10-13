@@ -76,7 +76,7 @@ struct enttypes
     int type,           priority, links,    radius, usetype,    numattrs,   modesattr,  idattr,
             canlink, reclink, canuse;
     bool    noisy,  syncs,  resyncs,    syncpos,    synckin;
-    const char *name,           *attrs[11];
+    const char *name,           *attrs[12];
 };
 #ifdef GAMESERVER
 enttypes enttype[] = {
@@ -113,12 +113,12 @@ enttypes enttype[] = {
                 "envmap",       { "radius", "size", "blur" }
     },
     {
-        PARTICLES,      1,          59,     0,      EU_NONE,    11,         -1,         -1,
+        PARTICLES,      1,          59,     0,      EU_NONE,    12,         -1,         -1,
             (1<<TELEPORT)|(1<<TRIGGER)|(1<<PUSHER)|(1<<PLAYERSTART)|(1<<AFFINITY)|(1<<CHECKPOINT),
             (1<<TRIGGER)|(1<<PUSHER)|(1<<PLAYERSTART)|(1<<AFFINITY)|(1<<CHECKPOINT),
             0,
             false,  false,  false,      false,      false,
-                "particles",    { "type",   "a",        "b",        "c",        "d",        "e",        "f",        "g",        "i",        "j",        "k" }
+                "particles",    { "type",   "a",        "b",        "c",        "d",        "e",        "f",        "g",        "i",        "j",        "k",        "j" }
     },
     {
         MAPSOUND,       1,          58,     0,      EU_NONE,    5,          -1,         -1,
@@ -854,10 +854,10 @@ template<class T> inline void flashcolourf(T &r, T &g, T &b, T &f, T br, T bg, T
 struct gameentity : extentity
 {
     int schan;
-    int lastspawn;
+    int lastspawn, nextemit;
     linkvector kin;
 
-    gameentity() : schan(-1), lastspawn(0) {}
+    gameentity() : schan(-1), lastspawn(0), nextemit(0) {}
     ~gameentity()
     {
         if(issound(schan)) removesound(schan);
