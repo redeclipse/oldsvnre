@@ -1726,7 +1726,6 @@ void makeparticle(const vec &o, attrvector &attr)
             break;
     }
 }
-void makeparticles(extentity &e) { makeparticle(e.o, e.attrs); }
 
 void updateparticles()
 {

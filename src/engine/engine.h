@@ -681,7 +681,6 @@ static inline model *loadmapmodel(int n)
 extern void particleinit();
 extern void clearparticles();
 extern void makeparticle(const vec &o, attrvector &attr);
-extern void makeparticles(extentity &e);
 extern void updateparticles();
 extern void renderparticles(bool mainpass = false);
 
