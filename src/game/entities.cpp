@@ -2281,13 +2281,12 @@ namespace entities
             case PARTICLES:
                 if(idx >= 0 && e.attrs[11])
                 {
-                    if(rendernormally && (e.nextemit -= curtime) <= 0) e.nextemit = 0;
+                    if((e.nextemit -= curtime) <= 0) e.nextemit = 0;
                     if(e.nextemit) break;
                 }
                 if(idx < 0 || e.links.empty()) makeparticles(e);
-                else if(e.spawned || (e.lastemit > 0 && lastmillis-e.lastemit <= triggertime(e)/2))
-                    makeparticle(o, e.attrs);
-                if(idx >= 0 && e.attrs[11] && rendernormally) e.nextemit += e.attrs[11];
+                else if(e.spawned || (e.lastemit > 0 && lastmillis-e.lastemit <= triggertime(e)/2)) makeparticle(o, e.attrs);
+                if(idx >= 0 && e.attrs[11]) e.nextemit += e.attrs[11];
                 break;
             case TELEPORT:
                 if(e.attrs[4]) maketeleport(e);
