@@ -27,6 +27,14 @@
 #define BPP 4
 #include "scale.h"
 
+TVAR(IDF_PERSIST|IDF_PRELOAD, notexturetex, "textures/notexture", 3);
+TVAR(IDF_PERSIST|IDF_PRELOAD, blanktex, "textures/blank", 3);
+TVAR(IDF_PERSIST|IDF_PRELOAD, logotex, "textures/logo", 3);
+TVAR(IDF_PERSIST|IDF_PRELOAD, badgetex, "textures/cube2badge", 3);
+TVAR(IDF_PERSIST|IDF_PRELOAD, emblemtex, "textures/emblem", 3);
+TVAR(IDF_PERSIST|IDF_PRELOAD, nothumbtex, "textures/nothumb", 3);
+TVAR(IDF_PERSIST|IDF_PRELOAD, backgroundtex, "textures/background", 3);
+
 static void scaletexture(uchar *src, uint sw, uint sh, uint bpp, uint pitch, uchar *dst, uint dw, uint dh)
 {
     if(sw == dw*2 && sh == dh*2)

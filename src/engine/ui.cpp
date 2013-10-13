@@ -97,10 +97,11 @@ struct gui : guient
                 if(mouseaction[0]&GUI_UP) { b; } \
                 hit = true; \
             } \
-            icon_(textureload(a, 3, true, false), false, x, y, guibound[1], !hit, hit ? 0xFF0000 : 0xFFFFFF); \
+            icon_(a, false, x, y, guibound[1], !hit, hit ? 0xFF0000 : 0xFFFFFF); \
             y += guibound[1]*3/2; \
         }
-        uibtn("textures/exit", cleargui(1));
+        if(!exittex) exittex = textureload(guiexittex, 3, true, false); \
+        uibtn(exittex, cleargui(1));
     }
 
     bool ishorizontal() const { return curdepth&1; }
@@ -632,7 +633,7 @@ struct gui : guient
             else
             {
                 defformatstring(texname)("%s", mapname);
-                if((t = textureload(texname, 3, true, false)) == notexture) t = textureload("textures/emblem", 3, true, false);
+                if((t = textureload(texname, 3, true, false)) == notexture) t = textureload(emblemtex, 3, true, false);
                 float scale = float(size)/max(t->xs, t->ys); //scale and preserve aspect ratio
                 xs = t->xs*scale; ys = t->ys*scale;
                 x += int((size-xs)/2);
@@ -830,7 +831,7 @@ struct gui : guient
         return layout(w, h);
     }
 
-    static Texture *overlaytex, *slidertex;
+    static Texture *overlaytex, *slidertex, *exittex;
 
     vec uiorigin, uiscale;
     guicb *cb;
@@ -936,9 +937,10 @@ struct gui : guient
     }
 };
 
-Texture *gui::overlaytex = NULL, *gui::slidertex = NULL;
+Texture *gui::overlaytex = NULL, *gui::slidertex = NULL, *gui::exittex = NULL;
 TVARN(IDF_PERSIST|IDF_PRELOAD, guioverlaytex, "textures/guioverlay", gui::overlaytex, 0);
 TVARN(IDF_PERSIST|IDF_PRELOAD, guislidertex, "textures/guislider", gui::slidertex, 0);
+TVARN(IDF_PERSIST|IDF_PRELOAD, guiexittex, "textures/exit", gui::exittex, 0);
 
 vector<gui::list> gui::lists;
 float gui::basescale, gui::maxscale = 1, gui::hitx, gui::hity;

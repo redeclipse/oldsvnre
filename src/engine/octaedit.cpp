@@ -2326,7 +2326,7 @@ struct texturegui : guicb
                     if(autoclosetexgui) menuon = false;
                 }
             }
-            else g.image(textureload("textures/nothumb", 3), thumbheight*thumbsize, true);
+            else g.image(textureload(nothumbtex, 3), thumbheight*thumbsize, true);
             g.space(1);
             uilistv(g, 2, {
                 uilist(g, loop(h, thumbheight)
