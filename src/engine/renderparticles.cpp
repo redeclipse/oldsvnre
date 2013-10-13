@@ -1004,7 +1004,7 @@ static coneprimitiverenderer coneprimitives(PT_CONE|PT_LERP), coneontopprimitive
 
 static partrenderer *parts[] =
 {
-    new portalrenderer("<grey>textures/teleport"), &icons,
+    new portalrenderer("<grey>particles/teleport"), &icons,
     &lineprimitives, &lineontopprimitives, &trisprimitives, &trisontopprimitives,
     &loopprimitives, &loopontopprimitives, &coneprimitives, &coneontopprimitives,
     new softquadrenderer("<grey>particles/fire", PT_PART|PT_GLARE|PT_RND4|PT_FLIP|PT_LERP|PT_SHRINK),

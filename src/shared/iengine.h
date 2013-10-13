@@ -584,7 +584,7 @@ struct guicb
     virtual void gui(guient &g, bool firstpass) = 0;
 };
 
-extern char *guioverlaytex, *guislidertex;
+extern char *guioverlaytex, *guislidertex, *guiexittex;
 
 struct editor;
 

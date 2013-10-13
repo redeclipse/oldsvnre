@@ -476,10 +476,6 @@ namespace hud
     FVAR(IDF_PERSIST, motionblurmax, 0, 0.75f, 1); // maximum
     FVAR(IDF_PERSIST, motionbluramt, 0, 0.5f, 1); // used for override
 
-    TVAR(IDF_PERSIST|IDF_PRELOAD, bgtex, "textures/background", 3);
-    TVAR(IDF_PERSIST|IDF_PRELOAD, logotex, "textures/logo", 3);
-    TVAR(IDF_PERSIST|IDF_PRELOAD, badgetex, "textures/cube2badge", 3);
-
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, spree1tex, "textures/rewards/carnage", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, spree2tex, "textures/rewards/slaughter", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, spree3tex, "textures/rewards/massacre", 3);
@@ -3039,7 +3035,7 @@ namespace hud
     {
         glColor4f(1, 1, 1, 1);
 
-        Texture *t = textureload(bgtex, 3);
+        Texture *t = textureload(backgroundtex, 3);
         glBindTexture(GL_TEXTURE_2D, t->id);
         drawtexture(0, 0, w, h);
 

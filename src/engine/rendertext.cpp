@@ -10,6 +10,7 @@ VAR(IDF_PERSIST|IDF_HEX, textkeybgcolour, 0x000000, 0xFFFFFF, 0xFFFFFF);
 VAR(IDF_PERSIST|IDF_HEX, textkeyfgcolour, 0x000000, 0x00FFFF, 0xFFFFFF);
 FVAR(IDF_PERSIST, textkeybgblend, 0, 0.25f, 1);
 FVAR(IDF_PERSIST, textkeyfgblend, 0, 1, 1);
+TVAR(IDF_PERSIST|IDF_PRELOAD, textkeybgtex, "textures/textkeybg", 3);
 
 static inline bool htcmp(const char *key, const font &f) { return !strcmp(key, f.name); }
 
@@ -426,7 +427,7 @@ int text_visible(const char *str, float hitx, float hity, int maxwidth, int flag
     #define TEXTCOLOR(idx)
     #define TEXTHEXCOLOR(ret)
     #define TEXTICON(ret) x += icon_width(ret, scale);
-    #define TEXTKEY(ret) x += (textkeybg ? icon_width("textures/guikey", scale)*0.6f : 0.f)+text_widthf(ret, flags);
+    #define TEXTKEY(ret) x += (textkeybg ? icon_width(textkeybgtex, scale)*0.6f : 0.f)+text_widthf(ret, flags);
     #define TEXTCHAR(idx) x += cw; TEXTWHITE(idx)
     #define TEXTWORD TEXTWORDSKELETON
     TEXTSKELETON
@@ -451,7 +452,7 @@ void text_posf(const char *str, int cursor, float &cx, float &cy, int maxwidth, 
     #define TEXTCOLOR(idx)
     #define TEXTHEXCOLOR(ret)
     #define TEXTICON(ret) x += icon_width(ret, scale);
-    #define TEXTKEY(ret) x += (textkeybg ? icon_width("textures/guikey", scale)*0.6f : 0.f)+text_widthf(ret, flags);
+    #define TEXTKEY(ret) x += (textkeybg ? icon_width(textkeybgtex, scale)*0.6f : 0.f)+text_widthf(ret, flags);
     #define TEXTCHAR(idx) x += cw;
     #define TEXTWORD TEXTWORDSKELETON if(i >= cursor) break;
     cx = cy = 0;
@@ -476,7 +477,7 @@ void text_boundsf(const char *str, float &width, float &height, int maxwidth, in
     #define TEXTCOLOR(idx)
     #define TEXTHEXCOLOR(ret)
     #define TEXTICON(ret) x += icon_width(ret, scale);
-    #define TEXTKEY(ret) x += (textkeybg ? icon_width("textures/guikey", scale)*0.6f : 0.f)+text_widthf(ret, flags);
+    #define TEXTKEY(ret) x += (textkeybg ? icon_width(textkeybgtex, scale)*0.6f : 0.f)+text_widthf(ret, flags);
     #define TEXTCHAR(idx) x += cw;
     #define TEXTWORD TEXTWORDSKELETON
     width = 0;
@@ -499,7 +500,7 @@ int draw_key(Texture *&tex, const char *str, float sx, float sy, float sc, cvec 
     float swidth = text_widthf(str, flags), ss = 0, sp = 0;
     if(textkeybg)
     {
-        Texture *t = textureload("textures/guikey", 3, true, false);
+        Texture *t = textureload(textkeybgtex, 3, true, false);
         if(tex != t)
         {
             xtraverts += varray::end();
