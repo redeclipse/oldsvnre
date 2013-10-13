@@ -3093,7 +3093,7 @@ namespace game
 
     void renderabovehead(gameent *d, float trans)
     {
-        vec pos = d->abovehead(d->state != CS_DEAD && d->state != CS_WAITING ? 1 : -1);
+        vec pos = d->abovehead(d->state != CS_DEAD && d->state != CS_WAITING ? 1 : 0);
         float blend = aboveheadblend*trans;
         if(aboveheadnames && d != player1)
         {
