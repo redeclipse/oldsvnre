@@ -2260,8 +2260,9 @@ namespace hud
         bool pulse = inventoryflash && game::focus->state == CS_ALIVE && game::focus->health < heal;
         if(bg && sub == 0 && inventorybg)
         {
-            int glow = 0;
+            Texture *u = textureload(*inventorytex ? inventorytex : tex, 3);
             float gr = 1, gb = 1, gg = 1, gf = fade*inventorybgblend;
+            int glow = 0, bw = int(float(u->w)/float(u->h)*s);
             if(inventorytone) skewcolour(gr, gg, gb, inventorytone);
             if(pulse)
             {
@@ -2270,9 +2271,9 @@ namespace hud
                 flashcolourf(gr, gg, gb, gf, 1.f, 0.f, 0.f, 1.f, amt);
                 glow += int(s*inventoryglow*amt);
             }
-            settexture(inventorytex, 3);
+            glBindTexture(GL_TEXTURE_2D, u->id);
             glColor4f(gr, gg, gb, fade*gf);
-            drawtexture(left ? cx-glow : cx-cw-glow, cy-cs-glow, cs+glow*2, cw+glow*2, left);
+            drawtexture(left ? cx-glow : cx-bw-glow, cy-cs-glow, bw+glow*2, cs+glow*2, left);
         }
         if(bg && inventorybg)
         {
@@ -2292,7 +2293,7 @@ namespace hud
         }
         glColor4f(cr, cg, cb, fade);
         glBindTexture(GL_TEXTURE_2D, t->id);
-        drawtexture(left ? cx : cx-cw, cy-cs, cs, cw);
+        drawtexture(left ? cx : cx-cw, cy-cs, cw, cs);
         if(text && *text)
         {
             glPushMatrix();
