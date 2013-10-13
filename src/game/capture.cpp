@@ -22,6 +22,30 @@ namespace capture
         return false;
     }
 
+    bool canpickup(gameent *d, int n)
+    {
+        if(!st.flags.inrange(n)) return false;
+        capturestate::flag &f = st.flags[n];
+        if(!entities::ents.inrange(f.ent) || f.owner) return false;
+        if(f.droptime)
+        {
+            f.droploc = f.pos();
+            if(f.lastowner && (f.lastowner == game::player1 || f.lastowner->ai) && f.proj && (!f.movetime || totalmillis-f.movetime >= 40))
+            {
+                f.inertia = f.proj->vel;
+                f.movetime = totalmillis;
+                client::addmsg(N_MOVEAFFIN, "ri8", f.lastowner->clientnum, n, int(f.droploc.x*DMF), int(f.droploc.y*DMF), int(f.droploc.z*DMF), int(f.inertia.x*DMF), int(f.inertia.y*DMF), int(f.inertia.z*DMF));
+            }
+        }
+        if(f.pickuptime && lastmillis-f.pickuptime <= 1000) return false;
+        if(f.team == d->team && (m_gsp2(game::gamemode, game::mutators) || (!f.droptime && (m_gsp1(game::gamemode, game::mutators) || !d->action[AC_AFFINITY]))))
+            return false;
+        if(f.lastowner == d && f.droptime && (capturepickupdelay < 0 || lastmillis-f.droptime <= max(capturepickupdelay, 500)))
+            return false;
+        if(d->feetpos().dist(f.pos()) > enttype[AFFINITY].radius*2/3) return false;
+        return true;
+    }
+
     void preload()
     {
         preloadmodel("props/point");
@@ -95,13 +119,14 @@ namespace capture
                 else ty += draw_textx("Buffing: \fs\fo%d%%\fS damage, \fs\fg%d%%\fS shield", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, int(capturebuffdamage*100), int(capturebuffshield*100))*hud::noticescale;
                 popfont();
             }
-            static vector<int> hasflags, taken, droppedflags;
-            hasflags.setsize(0); taken.setsize(0); droppedflags.setsize(0);
+            static vector<int> pickup, hasflags, taken, droppedflags;
+            pickup.setsize(0); hasflags.setsize(0); taken.setsize(0); droppedflags.setsize(0);
             loopv(st.flags)
             {
                 capturestate::flag &f = st.flags[i];
                 if(!entities::ents.inrange(f.ent)) continue;
                 if(f.owner == game::focus) hasflags.add(i);
+                else if(game::focus == game::player1 && canpickup(game::focus, i)) pickup.add(i);
                 else if(f.team == game::focus->team)
                 {
                     if(f.owner && f.owner->team != game::focus->team) taken.add(i);
@@ -114,13 +139,20 @@ namespace capture
                 char *str = buildflagstr(hasflags, hasflags.length() <= 3);
                 ty += draw_textx("Holding: \fs%s\fS", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, str)*hud::noticescale;
                 popfont();
-                if(game::focus == game::player1)
-                {
-                    SEARCHBINDCACHE(altkey)("affinity", 0, "\f{\fs\fzuy", "\fS}");
-                    pushfont("reduced");
-                    ty += draw_textx("Press %s to drop", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, altkey)*hud::noticescale;
-                    popfont();
-                }
+            }
+            if(!pickup.empty())
+            {
+                pushfont("emphasis");
+                char *str = buildflagstr(pickup, pickup.length() <= 3);
+                ty += draw_textx("Nearby: \fs%s\fS", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, str)*hud::noticescale;
+                popfont();
+            }
+            if(game::focus == game::player1 && (!hasflags.empty() || !pickup.empty()))
+            {
+                SEARCHBINDCACHE(altkey)("affinity", 0, "\f{\fs\fzuy", "\fS}");
+                pushfont("reduced");
+                ty += draw_textx("Press %s to %s", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, altkey, !pickup.empty() ? "pick up" : "throw away")*hud::noticescale;
+                popfont();
             }
             pushfont("default");
             if(!taken.empty())
@@ -483,32 +515,12 @@ namespace capture
     {
         if(e->state != CS_ALIVE || !gameent::is(e)) return;
         gameent *d = (gameent *)e;
-        vec o = d->feetpos();
-        loopv(st.flags)
+        loopv(st.flags) if(canpickup(d, i))
         {
-            capturestate::flag &f = st.flags[i];
-            if(!entities::ents.inrange(f.ent) || f.owner) continue;
-            if(f.droptime)
-            {
-                f.droploc = f.pos();
-                if(f.lastowner && (f.lastowner == game::player1 || f.lastowner->ai) && f.proj && (!f.movetime || totalmillis-f.movetime >= 40))
-                {
-                    f.inertia = f.proj->vel;
-                    f.movetime = totalmillis;
-                    client::addmsg(N_MOVEAFFIN, "ri8", f.lastowner->clientnum, i, int(f.droploc.x*DMF), int(f.droploc.y*DMF), int(f.droploc.z*DMF), int(f.inertia.x*DMF), int(f.inertia.y*DMF), int(f.inertia.z*DMF));
-                }
-            }
-            if(f.pickuptime && lastmillis-f.pickuptime <= 1000) continue;
-            if(f.team == d->team && (m_gsp2(game::gamemode, game::mutators) || (!f.droptime && (m_gsp1(game::gamemode, game::mutators) || !d->action[AC_AFFINITY])))) continue;
-            if(f.lastowner == d && f.droptime && (capturepickupdelay < 0 || lastmillis-f.droptime <= max(capturepickupdelay, 500)))
-                continue;
-            if(o.dist(f.pos()) <= enttype[AFFINITY].radius*2/3)
-            {
-                client::addmsg(N_TAKEAFFIN, "ri2", d->clientnum, i);
-                f.pickuptime = lastmillis;
-                d->action[AC_AFFINITY] = false;
-                d->actiontime[AC_AFFINITY] = 0;
-            }
+            client::addmsg(N_TAKEAFFIN, "ri2", d->clientnum, i);
+            st.flags[i].pickuptime = lastmillis;
+            d->action[AC_AFFINITY] = false;
+            d->actiontime[AC_AFFINITY] = 0;
         }
         dropaffinity(d);
     }
