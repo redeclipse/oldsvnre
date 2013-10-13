@@ -128,6 +128,7 @@ void searchbindlist(const char *action, int type, int limit, const char *s1, con
     if(lastname)
     {
         if(sep2 && *sep2) names.put(sep2, strlen(sep2));
+        else if(sep1 && *sep1) names.put(sep1, strlen(sep1));
         if(s1 && *s1) names.put(s1, strlen(s1));
         names.put(lastname, strlen(lastname));
         if(s2 && *s2) names.put(s2, strlen(s2));
@@ -143,6 +144,7 @@ void searchbindlist(const char *action, int type, int limit, const char *s1, con
         if(name2)
         {
             if(sep2 && *sep2) names.put(sep2, strlen(sep2));
+            else if(sep1 && *sep1) names.put(sep1, strlen(sep1));
             if(s1 && *s1) names.put(s1, strlen(s1));
             names.put(name2, strlen(name2));
             if(s2 && *s2) names.put(s2, strlen(s2));
@@ -199,6 +201,7 @@ void getkeypressed(int limit, const char *s1, const char *s2, const char *sep1, 
     if(lastname)
     {
         if(sep2 && *sep2) names.put(sep2, strlen(sep2));
+        else if(sep1 && *sep1) names.put(sep1, strlen(sep1));
         if(s1 && *s1) names.put(s1, strlen(s1));
         names.put(lastname, strlen(lastname));
         if(s2 && *s2) names.put(s2, strlen(s2));
@@ -214,6 +217,7 @@ void getkeypressed(int limit, const char *s1, const char *s2, const char *sep1, 
         if(name2)
         {
             if(sep2 && *sep2) names.put(sep2, strlen(sep2));
+            else if(sep1 && *sep1) names.put(sep1, strlen(sep1));
             if(s1 && *s1) names.put(s1, strlen(s1));
             names.put(name2, strlen(name2));
             if(s2 && *s2) names.put(s2, strlen(s2));
