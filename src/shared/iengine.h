@@ -124,7 +124,7 @@ struct bindlist
         if(names.empty() || lastsearch != changedkeys)
         {
             names.shrink(0);
-            searchbindlist(action, type, limit, s1, s2, textkeybg && !textkeyseps ? "" : ", ", textkeybg && !textkeyseps ? "" : " or ", names);
+            searchbindlist(action, type, limit, s1, s2, textkeyseps ? (textkeybg ? "|" : ", ") : (textkeybg ? "" : " "), textkeyseps ? (textkeybg ? "|" : " or ") : (textkeybg ? "" : " "), names);
             lastsearch = changedkeys;
         }
         return names.getbuf();
