@@ -22,7 +22,7 @@ namespace capture
         return false;
     }
 
-    bool canpickup(gameent *d, int n)
+    bool canpickup(gameent *d, int n, bool check = false)
     {
         if(!st.flags.inrange(n)) return false;
         capturestate::flag &f = st.flags[n];
@@ -38,7 +38,7 @@ namespace capture
             }
         }
         if(f.pickuptime && lastmillis-f.pickuptime <= 1000) return false;
-        if(f.team == d->team && (m_gsp2(game::gamemode, game::mutators) || (!f.droptime && (m_gsp1(game::gamemode, game::mutators) || !d->action[AC_AFFINITY]))))
+        if(f.team == d->team && (m_gsp2(game::gamemode, game::mutators) || (!f.droptime && (m_gsp1(game::gamemode, game::mutators) || check || !d->action[AC_AFFINITY]))))
             return false;
         if(f.lastowner == d && f.droptime && (capturepickupdelay < 0 || lastmillis-f.droptime <= max(capturepickupdelay, 500)))
             return false;
@@ -126,7 +126,7 @@ namespace capture
                 capturestate::flag &f = st.flags[i];
                 if(!entities::ents.inrange(f.ent)) continue;
                 if(f.owner == game::focus) hasflags.add(i);
-                else if(game::focus == game::player1 && canpickup(game::focus, i)) pickup.add(i);
+                else if(game::focus == game::player1 && canpickup(game::focus, i, true)) pickup.add(i);
                 else if(f.team == game::focus->team)
                 {
                     if(f.owner && f.owner->team != game::focus->team) taken.add(i);
