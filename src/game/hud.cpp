@@ -275,7 +275,8 @@ namespace hud
     VAR(IDF_PERSIST, inventoryweapids, 0, 2, 2);
     VAR(IDF_PERSIST, inventorycolour, 0, 2, 2);
     VAR(IDF_PERSIST, inventoryflash, 0, 0, 1);
-    FVAR(IDF_PERSIST, inventorysize, 0, 0.06f, 1000);
+    FVAR(IDF_PERSIST, inventoryleft, 0, 0.045f, 1000);
+    FVAR(IDF_PERSIST, inventoryright, 0, 0.05f, 1000);
     FVAR(IDF_PERSIST, inventoryskew, 1e-4f, 0.65f, 1000);
     FVAR(IDF_PERSIST, inventorydateskew, 1e-4f, 0.85f, 1000);
     FVAR(IDF_PERSIST, inventorydateblend, 1e-4f, 1, 1);
@@ -1290,7 +1291,7 @@ namespace hud
         pushfont("default");
         int ty = int(((hudheight/2)+(hudheight/2*noticeoffset))/noticescale), tx = int((hudwidth/2)/noticescale),
             tf = int(255*hudblend*noticeblend), tr = 255, tg = 255, tb = 255,
-            tw = int((hudwidth-((hudsize*edgesize)*2+(hudsize*inventorysize)*2))/noticescale);
+            tw = int((hudwidth-((hudsize*edgesize)*2+(hudsize*inventoryleft)+(hudsize*inventoryright)))/noticescale);
         if(noticestone) skewcolour(tr, tg, tb, noticestone);
 
         if(hastkwarn(game::focus)) // first and foremost
@@ -2572,7 +2573,7 @@ namespace hud
 
     int drawhealth(int x, int y, int s, float blend, bool interm)
     {
-        int size = s+s/2, width = s-s/4, sy = 0;
+        int size = s*2, sy = 0;
         bool alive = !interm && game::focus->state == CS_ALIVE;
         if(alive)
         {
@@ -2583,7 +2584,7 @@ namespace hud
                 float pulse = inventoryhealthflash && game::focus->health < heal ? float(heal-game::focus->health)/float(heal) : 0.f,
                     throb = inventoryhealththrob > 0 && regentime && game::focus->lastregen && lastmillis-game::focus->lastregen <= regentime ? clamp((lastmillis-game::focus->lastregen)/float(regentime/2), 0.f, 2.f) : 0.f;
                 if(inventoryhealth&2)
-                    sy += drawbar(x, y, width, size, 1, inventoryhealthbartop, inventoryhealthbarbottom, fade, clamp(game::focus->health/float(heal), 0.0f, 1.0f), healthtex, healthbgtex, inventorytone, inventoryhealthbgglow, inventoryhealthbgblend, pulse, (throb > 1.f ? 1.f-throb : throb)*inventoryhealththrob);
+                    sy += drawbar(x, y, s, size, 1, inventoryhealthbartop, inventoryhealthbarbottom, fade, clamp(game::focus->health/float(heal), 0.0f, 1.0f), healthtex, healthbgtex, inventorytone, inventoryhealthbgglow, inventoryhealthbgblend, pulse, (throb > 1.f ? 1.f-throb : throb)*inventoryhealththrob);
                 if(inventoryhealth&1)
                 {
                     float gr = 1, gg = 1, gb = 1;
@@ -2594,12 +2595,12 @@ namespace hud
                         flashcolour(gr, gg, gb, 1.f, 0.f, 0.f, amt);
                     }
                     pushfont("super");
-                    int ty = draw_textx("%d", x+width/2, y-sy+(inventoryhealth&2 ? size/2 : 0), int(gr*255), int(gg*255), int(gb*255), int(fade*255), TEXT_CENTER_UP, -1, -1, max(game::focus->health, 0));
+                    int ty = draw_textx("%d", x+s/2, y-sy+(inventoryhealth&2 ? size/2 : 0), int(gr*255), int(gg*255), int(gb*255), int(fade*255), TEXT_CENTER_UP, -1, -1, max(game::focus->health, 0));
                     popfont();
                     if(!(inventoryhealth&2))
                     {
                         pushfont("reduced");
-                        ty += draw_textx("health", x+width/2, y-sy-ty, 255, 255, 255, int(fade*255), TEXT_CENTER_UP, -1, -1);
+                        ty += draw_textx("health", x+s/2, y-sy-ty, 255, 255, 255, int(fade*255), TEXT_CENTER_UP, -1, -1);
                         popfont();
                         sy += ty;
                     }
@@ -2617,23 +2618,23 @@ namespace hud
                     flashcolour(gr, gg, gb, 1.f, 0.f, 0.f, throb);
                 }
                 if(inventoryimpulse&2)
-                    sy += drawbar(x, y-sy, width, size, 2, inventoryimpulsebartop, inventoryimpulsebarbottom, fade, span, impulsetex, impulsebgtex, inventorytone, inventoryimpulsebgglow, inventoryimpulsebgblend, pulse, throb*inventoryimpulsethrob);
+                    sy += drawbar(x, y-sy, s, size, 2, inventoryimpulsebartop, inventoryimpulsebarbottom, fade, span, impulsetex, impulsebgtex, inventorytone, inventoryimpulsebgglow, inventoryimpulsebgblend, pulse, throb*inventoryimpulsethrob);
                 if(inventoryimpulse&1)
                 {
                     if(!(inventoryimpulse&2))
                     {
                         pushfont("super");
-                        int ty = draw_textx("%d%%", x+width/2, y-sy+(inventoryimpulse&2 ? size/2 : 0), int(gr*255), int(gg*255), int(gb*255), int(fade*255), TEXT_CENTER_UP, -1, -1, int(span*100));
+                        int ty = draw_textx("%d%%", x+s/2, y-sy+(inventoryimpulse&2 ? size/2 : 0), int(gr*255), int(gg*255), int(gb*255), int(fade*255), TEXT_CENTER_UP, -1, -1, int(span*100));
                         popfont();
                         pushfont("reduced");
-                        ty += draw_textx("impulse", x+width/2, y-sy-ty, 255, 255, 255, int(fade*255), TEXT_CENTER_UP, -1, -1);
+                        ty += draw_textx("impulse", x+s/2, y-sy-ty, 255, 255, 255, int(fade*255), TEXT_CENTER_UP, -1, -1);
                         popfont();
                         sy += ty;
                     }
                     else
                     {
                         pushfont("super");
-                        draw_textx("%d", x+width/2, y-sy+(inventoryimpulse&2 ? size/2 : 0), int(gr*255), int(gg*255), int(gb*255), int(fade*255), TEXT_CENTER_UP, -1, -1, int(span*100));
+                        draw_textx("%d", x+s/2, y-sy+(inventoryimpulse&2 ? size/2 : 0), int(gr*255), int(gg*255), int(gb*255), int(fade*255), TEXT_CENTER_UP, -1, -1, int(span*100));
                         popfont();
                     }
                 }
@@ -2642,10 +2643,10 @@ namespace hud
             {
                 float fade = blend*inventoryvelocityblend;
                 pushfont("emphasis");
-                sy += draw_textx("%d", x+width/2, y-sy, 255, 255, 255, int(fade*255), TEXT_CENTER_UP, -1, -1, int(vec(game::focus->vel).add(game::focus->falling).magnitude()));
+                sy += draw_textx("%d", x+s/2, y-sy, 255, 255, 255, int(fade*255), TEXT_CENTER_UP, -1, -1, int(vec(game::focus->vel).add(game::focus->falling).magnitude()));
                 popfont();
                 pushfont("reduced");
-                sy += draw_textx("speed", x+width/2, y-sy, 255, 255, 255, int(fade*255), TEXT_CENTER_UP, -1, -1);
+                sy += draw_textx("speed", x+s/2, y-sy, 255, 255, 255, int(fade*255), TEXT_CENTER_UP, -1, -1);
                 popfont();
             }
             if(inventoryalert)
@@ -2661,7 +2662,7 @@ namespace hud
                         float amt = millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f);
                         flashcolour(gr, gg, gb, 1.f, 1.f, 1.f, amt);
                     }
-                    sy += drawitem(buffedtex, x, y-sy, width, 0, false, true, gr, gg, gb, fade);
+                    sy += drawitem(buffedtex, x, y-sy, s, 0, false, true, gr, gg, gb, fade);
                 }
                 if(burntime && game::focus->burning(lastmillis, burntime))
                 {
@@ -2673,7 +2674,7 @@ namespace hud
                         float amt = millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f);
                         flashcolour(gr, gg, gb, 1.f, 0.5f, 0.f, amt);
                     }
-                    sy += drawitem(burningtex, x, y-sy, width, 0, false, true, gr, gg, gb, fade);
+                    sy += drawitem(burningtex, x, y-sy, s, 0, false, true, gr, gg, gb, fade);
                 }
                 if(bleedtime && game::focus->bleeding(lastmillis, bleedtime))
                 {
@@ -2685,7 +2686,7 @@ namespace hud
                         float amt = millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f);
                         flashcolour(gr, gg, gb, 1.f, 0.f, 0.f, amt);
                     }
-                    sy += drawitem(bleedingtex, x, y-sy, width, 0, false, true, gr, gg, gb, fade);
+                    sy += drawitem(bleedingtex, x, y-sy, s, 0, false, true, gr, gg, gb, fade);
                 }
                 if(shocktime && game::focus->shocking(lastmillis, shocktime))
                 {
@@ -2697,7 +2698,7 @@ namespace hud
                         float amt = millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f);
                         flashcolour(gr, gg, gb, 0.f, 0.8f, 1.f, amt);
                     }
-                    sy += drawitem(shockingtex, x, y-sy, width, 0, false, true, gr, gg, gb, fade);
+                    sy += drawitem(shockingtex, x, y-sy, s, 0, false, true, gr, gg, gb, fade);
                 }
             }
             if(inventoryconopen)
@@ -2713,7 +2714,7 @@ namespace hud
                         float amt = millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f);
                         flashcolour(gr, gg, gb, 1.f, 1.f, 1.f, amt);
                     }
-                    sy += drawitem(chattex, x, y-sy, width, 0, false, true, gr, gg, gb, fade);
+                    sy += drawitem(chattex, x, y-sy, s, 0, false, true, gr, gg, gb, fade);
                 }
             }
         }
@@ -2732,14 +2733,14 @@ namespace hud
             {
                 sy -= x/2;
                 pushfont("emphasis");
-                sy += draw_textx("%s", x+width/2, y-sy, 255, 255, 255, int(blend*inventorystatusblend*255), TEXT_CENTER_UP, -1, -1, state);
+                sy += draw_textx("%s", x+s/2, y-sy, 255, 255, 255, int(blend*inventorystatusblend*255), TEXT_CENTER_UP, -1, -1, state);
                 popfont();
             }
             if(inventorystatus&2 && *tex)
             {
                 float gr = 1, gg = 1, gb = 1, fade = blend*inventorystatusiconblend;
                 if(inventorytone) skewcolour(gr, gg, gb, inventorytone);
-                sy += drawitem(tex, x, y-sy, width, 0, false, true, gr, gg, gb, fade);
+                sy += drawitem(tex, x, y-sy, s, 0, false, true, gr, gg, gb, fade);
             }
         }
         if(inventorygameinfo)
@@ -2753,7 +2754,7 @@ namespace hud
                 float amt = millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f);
                 flashcolour(gr, gg, gb, 0.f, 1.f, 1.f, amt);
             }
-            #define ADDMODE(a) sy += drawitem(a, x, y-sy, width, 0, false, true, gr, gg, gb, fade);
+            #define ADDMODE(a) sy += drawitem(a, x, y-sy, s, 0, false, true, gr, gg, gb, fade);
             if(game::focus->state != CS_EDITING && !m_dm(game::gamemode) && ((alive && inventorygameinfo&1) || over)) ADDMODEICON(game::gamemode, game::mutators)
             if(over && m_multi(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_MULTI))) ADDMODE(modemultitex)
             if(over && m_ffa(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_FFA))) ADDMODE(modeffatex)
@@ -2802,7 +2803,7 @@ namespace hud
     int drawinventory(int w, int h, int edge, int top, int bottom, float blend)
     {
         int cx[2] = { edge, w-edge }, cy[2] = { h-edge-bottom, h-edge-bottom }, left = edge,
-            cs = int(inventorysize*w), cr = edge/2, cc = 0, bf = blend*255, bs = (w-edge*2)/2;
+            csl = int(inventoryleft*w), csr = int(inventoryright*w), cr = edge/2, cc = 0, bf = blend*255, bs = (w-edge*2)/2;
         if(!texpaneltimer)
         {
             if(totalmillis-laststats >= statrate)
@@ -2856,9 +2857,9 @@ namespace hud
             case 0:
             {
                 bool found = false;
-                if((cc = drawhealth(cx[i], cy[i], cs, fade, interm)) > 0) { cy[i] -= cc+cr; found = true; }
-                if(!interm && (cc = drawtimer(cx[i], cy[i], cs, fade)) > 0) { cy[i] -= cc+cr; found = true; }
-                if(found) left += cs-cs/4;
+                if((cc = drawhealth(cx[i], cy[i], csl, fade, interm)) > 0) { cy[i] -= cc+cr; found = true; }
+                if(!interm && (cc = drawtimer(cx[i], cy[i], csl, fade)) > 0) { cy[i] -= cc+cr; found = true; }
+                if(found) left += csl;
                 break;
             }
             case 1:
@@ -2876,8 +2877,8 @@ namespace hud
                         else if(amt > 0.5f) col = "\fc";
                         else if(amt > 0.25f) col = "\fy";
                         else col = "\fo";
-                        drawprogress(cx[i], cm+cs, 0, 1, cs, false, 1, 1, 1, fade*0.25f, 1);
-                        cm += drawprogress(cx[i], cm+cs, 1-amt, amt, cs, false, 1, 1, 1, fade, 1, "super", "%s%d", col, int(millis/1000.f));
+                        drawprogress(cx[i], cm+csr, 0, 1, csr, false, 1, 1, 1, fade*0.25f, 1);
+                        cm += drawprogress(cx[i], cm+csr, 1-amt, amt, csr, false, 1, 1, 1, fade, 1, "super", "%s%d", col, int(millis/1000.f));
                     }
                 }
                 else
@@ -2901,16 +2902,16 @@ namespace hud
                     if(m_fight(game::gamemode))
                     {
                         int count = game::player1->state == CS_SPECTATOR ? inventoryscorespec : inventoryscore;
-                        if(count && ((cc = drawscore(cx[i], cm, cs, (h-edge*2)/2, fade, count)) > 0)) cm += cc+cr;
+                        if(count && ((cc = drawscore(cx[i], cm, csr, (h-edge*2)/2, fade, count)) > 0)) cm += cc+cr;
                     }
                 }
                 if(texpaneltimer) break;
-                if((cc = drawselection(cx[i], cy[i], cs, cm, fade)) > 0) cy[i] -= cc+cr;
+                if((cc = drawselection(cx[i], cy[i], csr, cm, fade)) > 0) cy[i] -= cc+cr;
                 if(inventorygame)
                 {
-                    if(m_capture(game::gamemode) && ((cc = capture::drawinventory(cx[i], cy[i], cs, cm, fade)) > 0)) cy[i] -= cc+cr;
-                    else if(m_defend(game::gamemode) && ((cc = defend::drawinventory(cx[i], cy[i], cs, cm, fade)) > 0)) cy[i] -= cc+cr;
-                    else if(m_bomber(game::gamemode) && ((cc = bomber::drawinventory(cx[i], cy[i], cs, cm, fade)) > 0)) cy[i] -= cc+cr;
+                    if(m_capture(game::gamemode) && ((cc = capture::drawinventory(cx[i], cy[i], csr, cm, fade)) > 0)) cy[i] -= cc+cr;
+                    else if(m_defend(game::gamemode) && ((cc = defend::drawinventory(cx[i], cy[i], csr, cm, fade)) > 0)) cy[i] -= cc+cr;
+                    else if(m_bomber(game::gamemode) && ((cc = bomber::drawinventory(cx[i], cy[i], csr, cm, fade)) > 0)) cy[i] -= cc+cr;
                 }
                 break;
             }
@@ -3148,7 +3149,7 @@ namespace hud
             pushfont("huge");
             const char *col = teamnotices >= 2 ? "\fs\fzyS" : "";
             int tf = int(255*hudblend*noticeblend), tr = 255, tg = 255, tb = 255,
-                tw = int((hudwidth-(int(hudsize*edgesize)*2+int(hudsize*inventorysize)*2))/noticescale);
+                tw = int((hudwidth-(int(hudsize*edgesize)*2+int(hudsize*inventoryleft)+(hudsize*inventoryright)))/noticescale);
             if(noticestone) skewcolour(tr, tg, tb, noticestone);
             if(m_trial(game::gamemode)) ty += draw_textx("%sTime Trial", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1, col);
             else if(!m_team(game::gamemode, game::mutators)) ty += draw_textx("%sFree-for-all %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1, col, m_bomber(game::gamemode) ? "Bomber-ball" : "Deathmatch");
