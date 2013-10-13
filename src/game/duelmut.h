@@ -195,7 +195,7 @@ struct duelservmode : servmode
 
     void update()
     {
-        if(interm || !hasgameinfo || gamewait || numclients(-1, true, A_BOT) <= 1) return;
+        if(!canplay() || numclients(-1, true, A_BOT) <= 1) return;
         if(dueltime >= 0)
         {
             if(gamemillis >= dueltime && !duelqueue.empty())

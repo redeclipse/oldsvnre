@@ -428,7 +428,7 @@ namespace server
     bool canplay(bool chk = true)
     {
         if(!demoplayback && !m_demo(gamemode))
-            if(!chk || !hasgameinfo || gamewait || !timeremaining || interm) return false;
+            if(!chk || !hasgameinfo || gamewait || interm) return false;
         return true;
     }
 
@@ -597,7 +597,7 @@ namespace server
 
         bool spawnqueue(bool all = false, bool needinfo = true)
         {
-            return m_fight(gamemode) && !m_trial(gamemode) && !m_duke(gamemode, mutators) && G(maxalive) > 0 && (!needinfo || (hasgameinfo && !gamewait)) && (!all || G(maxalivequeue)) && numclients() > 1;
+            return m_fight(gamemode) && !m_trial(gamemode) && !m_duke(gamemode, mutators) && G(maxalive) > 0 && (!needinfo || canplay()) && (!all || G(maxalivequeue)) && numclients() > 1;
         }
 
         void queue(clientinfo *ci, bool msg = true, bool wait = true, bool top = false)
@@ -674,7 +674,7 @@ namespace server
                 if(delay && ci->state.respawnwait(gamemillis, delay)) return false;
                 if(spawnqueue() && playing.find(ci) < 0)
                 {
-                    if(!hasgameinfo || gamewait) return false;
+                    if(!canplay()) return false;
                     if(G(maxalivequeue) && spawnq.find(ci) < 0) queue(ci);
                     int x = max(int(G(maxalive)*G(maxplayers)), max(int(numclients()*G(maxalivethreshold)), G(maxaliveminimum)));
                     if(m_team(gamemode, mutators))
