@@ -452,7 +452,7 @@ int playsound(int n, const vec &pos, physent *d, int flags, int vol, int maxrad,
                 {
                     int lowest = -1;
                     loopv(sounds) if(sounds[i].chan >= 0 && !(sounds[i].flags&SND_NOCULL) && !(sounds[i].flags&SND_MAP) && sounds[i].pos.dist(camera1->o) > sounds[i].minrad)
-                        if((nocull || sounds[i].curvol < cvol) && (!sounds.inrange(lowest) || sounds[i].curvol < sounds[lowest].curvol))
+                        if((nocull || sounds[i].curvol < cvol) && (lowest < 0 || sounds[i].curvol < sounds[lowest].curvol))
                             lowest = i;
                     if(sounds.inrange(lowest))
                     {
