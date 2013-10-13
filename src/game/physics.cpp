@@ -842,31 +842,43 @@ namespace physics
     void modifyinput(gameent *d, vec &m, bool wantsmove, int millis)
     {
         bool onfloor = d->physstate >= PHYS_SLOPE || d->onladder || liquidcheck(d), jetting = jetpack(d);
-        if(impulsemeter && millis)
+        if(impulsemeter)
         {
-            #define impchk (!impulsemeter || d->impulse[IM_METER]+len <= impulsemeter)
             bool quickpace = pacing(d, false);
             if(quickpace && impulsepacing > 0)
             {
-                int len = int(ceilf(millis*impulsepacing));
-                if(len > 0 && impchk)
+                int timeslice = millis+d->impulse[IM_COLPACE], len = int(timeslice*impulsepacing);
+                if(len > 0)
                 {
-                    d->impulse[IM_METER] += len;
-                    d->impulse[IM_REGEN] = lastmillis;
-                }
-                else quickpace = d->action[AC_PACING] = false;
-            }
-            if(jetting)
-            {
-                if(m_jet(game::gamemode, game::mutators) && impulsejet > 0)
-                {
-                    int len = int(ceilf(millis*impulsejet));
-                    if(len > 0 && impchk)
+                    if(d->impulse[IM_METER]+len <= impulsemeter)
                     {
                         d->impulse[IM_METER] += len;
                         d->impulse[IM_REGEN] = lastmillis;
+                        d->impulse[IM_COLPACE] = 0;
                     }
-                    else jetting = d->action[AC_JUMP] = false;
+                    else quickpace = d->action[AC_PACING] = false;
+                }
+                else d->impulse[IM_COLPACE] += millis;
+            }
+            if(jetting)
+            {
+                if(m_jet(game::gamemode, game::mutators))
+                {
+                    if(impulsejet > 0)
+                    {
+                        int timeslice = millis+d->impulse[IM_COLJET], len = int(timeslice*impulsejet);
+                        if(len > 0)
+                        {
+                            if(d->impulse[IM_METER]+len <= impulsemeter)
+                            {
+                                d->impulse[IM_METER] += len;
+                                d->impulse[IM_REGEN] = lastmillis;
+                                d->impulse[IM_COLJET] = 0;
+                            }
+                            else jetting = d->action[AC_JUMP] = false;
+                        }
+                        else d->impulse[IM_COLJET] += millis;
+                    }
                 }
                 else jetting = d->action[AC_JUMP] = false;
             }
@@ -897,7 +909,6 @@ namespace physics
                 }
             }
         }
-
         if(m_jet(game::gamemode, game::mutators) && jetting)
         {
             if(d->o.z >= hdr.worldsize) m.z = min(m.z, 0-(millis/jetdecay));
