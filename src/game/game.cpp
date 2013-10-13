@@ -238,8 +238,8 @@ namespace game
 
     VAR(IDF_PERSIST, playerhint, 0, 3, 3);
     VAR(IDF_PERSIST, playerhinttone, -1, CTONE_TEAMED, CTONE_MAX-1);
-    FVAR(IDF_PERSIST, playerhintblend, 0, 0.3f, 1);
-    FVAR(IDF_PERSIST, playerhintscale, 0, 0.7f, 1); // scale blend depending on health
+    FVAR(IDF_PERSIST, playerhintblend, 0, 0.2f, 1);
+    FVAR(IDF_PERSIST, playerhintscale, 0, 0.8f, 1); // scale blend depending on health
     FVAR(IDF_PERSIST, playerhintsize, 0, 1.2f, 2);
     FVAR(IDF_PERSIST, playerhintfadeat, 0, 64, FVAR_MAX);
     FVAR(IDF_PERSIST, playerhintfadecut, 0, 8, FVAR_MAX);
@@ -3093,7 +3093,7 @@ namespace game
 
     void renderabovehead(gameent *d, float trans)
     {
-        vec pos = d->abovehead(d->state != CS_DEAD ? 2 : -2);
+        vec pos = d->abovehead(d->state != CS_DEAD && d->state != CS_WAITING ? 1 : -1);
         float blend = aboveheadblend*trans;
         if(aboveheadnames && d != player1)
         {
