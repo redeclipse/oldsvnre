@@ -154,7 +154,10 @@ namespace defend
 
     int drawinventory(int x, int y, int s, int m, float blend)
     {
-        int sy = 0;
+        int sy = 0, numflags = st.flags.length();
+        float rescale = 1;
+        for(int iters = numflags; iters > 0 && y-int((numflags-1)*s*hud::inventoryskew)-s < m; iters--) rescale *= 0.9f;
+        int size = int(s*rescale);
         loopv(st.flags)
         {
             if(y-sy-s < m) break;
@@ -178,16 +181,16 @@ namespace defend
                 else if(millis <= 1000) skew += (1.f-skew)-(clamp(float(millis)/1000.f, 0.f, 1.f)*(1.f-skew));
                 int oldy = y-sy;
                 if(hasflag || f.enemy)
-                    sy += hud::drawitem(hud::pointtex, x, oldy, s, 0, true, false, c.r, c.g, c.b, blend, skew, "super", "%s%d%%", hasflag ? (f.owner && f.enemy == game::focus->team ? "\fy" : (occupy < 1.f ? "\fc" : "\fg")) : "\fw", int(occupy*100.f));
-                else sy += hud::drawitem(hud::pointtex, x, oldy, s, 0, true, false, c.r, c.g, c.b, blend, skew);
+                    sy += hud::drawitem(hud::pointtex, x, oldy, size, 0, true, false, c.r, c.g, c.b, blend, skew, "super", "%s%d%%", hasflag ? (f.owner && f.enemy == game::focus->team ? "\fy" : (occupy < 1.f ? "\fc" : "\fg")) : "\fw", int(occupy*100.f));
+                else sy += hud::drawitem(hud::pointtex, x, oldy, size, 0, true, false, c.r, c.g, c.b, blend, skew);
                 if(f.enemy)
                 {
                     vec c2 = vec::hexcolor(TEAM(f.enemy, colour));
-                    hud::drawitem(hud::attacktex, x, oldy, s, 0.5f, true, false, c2.r, c2.g, c2.b, blend, skew);
-                    hud::drawitembar(x, oldy, s, false, c.r, c.g, c.b, blend, skew, occupy);
+                    hud::drawitem(hud::attacktex, x, oldy, size, 0.5f, true, false, c2.r, c2.g, c2.b, blend, skew);
+                    hud::drawitembar(x, oldy, size, false, c.r, c.g, c.b, blend, skew, occupy);
                 }
                 else if(f.owner)
-                    hud::drawitem(hud::teamtexname(f.owner), x, oldy, s, 0.5f, true, false, c1.r, c1.g, c1.b, blend, skew);
+                    hud::drawitem(hud::teamtexname(f.owner), x, oldy, size, 0.5f, true, false, c1.r, c1.g, c1.b, blend, skew);
             }
         }
         return sy;
