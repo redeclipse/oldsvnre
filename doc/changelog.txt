@@ -1,3 +1,33 @@
+The development version changelog is an ongoing work and should be reasonably
+complete covering changes made up to revision:
+5579
+If you update the changelog with changes made beyond this point, and consider
+it to resonably cover all previous changes, please update the above revision
+number.
+
+* Only add items which you think are interesting to others, ignore those which
+  you think might not be
+
+* Please do create, update, remove and improve any entries and section titles
+  as needed
+
+* In general The ordering of sections is intented to keep items which are
+  interesting to players at the top, followed by modders, server admins, etc.
+  - The ordering of the entries themselves is arbitrary, loosely chronological
+
+* The "Additional fixed bugs" section is intended to cover all items (however
+  small) which have a ticket number that have been closed and
+  - Are bugs which existed in the previous release which have now been fixed
+  or
+  - Are small enough to not warrant a note in any of the other sections
+
+* For purely numerical changes to variables it can be convenient to use the
+  instructions given at http://www.redeclipse.net/wiki/Vars_Changes to get a
+  before-after view
+
+* This and all the above changelog hints should be removed prior to release
+
+
 = Red Eclipse Development version =
 Gameplay:
 
