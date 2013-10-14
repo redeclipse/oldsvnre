@@ -1632,6 +1632,8 @@ static int partcolour(int c, int p, int x)
 }
 void makeparticle(const vec &o, attrvector &attr)
 {
+    bool oldemit = emit;
+    if(attr[11]) emit = true;
     switch(attr[0])
     {
         case 0: //fire
@@ -1725,6 +1727,7 @@ void makeparticle(const vec &o, attrvector &attr)
             part_textcopy(o, ds);
             break;
     }
+    emit = oldemit;
 }
 
 void updateparticles()

@@ -8,6 +8,7 @@ namespace entities
     VAR(IDF_PERSIST, showentmodels, 0, 1, 2);
     VAR(IDF_PERSIST, showentdescs, 0, 2, 3);
     VAR(IDF_PERSIST, showentinfo, 0, 21, 127);
+    VAR(IDF_PERSIST, showentattrinfo, 0, 7, 7);
 
     VAR(IDF_PERSIST, showentdir, 0, 1, 3); // 0 = off, 1 = only selected, 2 = always when editing, 3 = always in editmode
     VAR(IDF_PERSIST, showentradius, 0, 1, 3);
@@ -2351,7 +2352,23 @@ namespace entities
                 }
                 if(attrname && *attrname)
                 {
-                    defformatstring(s)("%s%d:%s:%d", hastop ? "\fw" : "\fa", k+1, attrname, e.attrs[k]);
+                    string attrval; attrval[0] = 0;
+                    if(showentattrinfo&1)
+                    {
+                        defformatstring(s)("[\fs\fy%d\fS]", k+1);
+                        concatstring(attrval, s);
+                    }
+                    if(showentattrinfo&2)
+                    {
+                        if(*attrval) concatstring(attrval, " ");
+                        concatstring(attrval, attrname);
+                    }
+                    if(showentattrinfo&4)
+                    {
+                        if(*attrval) concatstring(attrval, " = ");
+                        defformatstring(s)("%d", e.attrs[k]);
+                    }
+                    defformatstring(s)("%s%s", hastop ? "\fw" : "\fa", attrval);
                     part_textcopy(pos.add(off), s, hastop ? PART_TEXT_ONTOP : PART_TEXT);
                 }
             }
