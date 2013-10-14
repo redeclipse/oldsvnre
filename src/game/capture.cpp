@@ -304,9 +304,9 @@ namespace capture
                     flagpos.z += iterflags[f.owner->clientnum]*2;
                     iterflags[f.owner->clientnum]++;
                 }
-                defformatstring(info)("<super>%s flag", TEAM(f.team, name));
-                part_textcopy(flagpos, info, PART_TEXT, 1, TEAM(f.team, colour), 2, blend);
-                flagpos.z += 2.5f;
+                //defformatstring(info)("<super>%s flag", TEAM(f.team, name));
+                //part_textcopy(flagpos, info, PART_TEXT, 1, TEAM(f.team, colour), 2, blend);
+                //flagpos.z += 2.5f;
                 if(!game::intermission && (f.droptime || (m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team)))
                 {
                     float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(capturedelay), 0.f, 1.f) : clamp((lastmillis-f.taketime)/float(captureprotectdelay), 0.f, 1.f);
@@ -322,7 +322,7 @@ namespace capture
             vec above = f.above;
             above.z += !f.owner && !f.droptime ? enttype[AFFINITY].radius*2/3 : 3;
             blend = camera1->o.distrange(above, enttype[AFFINITY].radius, enttype[AFFINITY].radius/8);
-            defformatstring(info)("<super>%s %s", TEAM(f.team, name), !f.owner && !f.droptime ? "flag" : "base");
+            defformatstring(info)("<super>%s base", TEAM(f.team, name));
             part_textcopy(above, info, PART_TEXT, 1, TEAM(f.team, colour), 2, blend);
             above.z += 2.5f;
             if(!game::intermission && (f.droptime || (m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team)))
