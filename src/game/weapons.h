@@ -587,7 +587,7 @@ WPVAR(0, zooms, 0, 1,
     0,          0,          0,          0,          0,          0,          0,          1,          0,          0,          0
 );
 
-#define WRS(a,b,c,d)         ((a)*(m_limited(c, d) ? G(b##limited) : G(b##scale)))
+#define WRS(a,b,c,d)         ((a)*(m_sweaps(c, d) ? G(b##limited) : G(b##scale)))
 #define WX(k,a,b,c,d,e,f)    (!m_insta(d, e) || m_loadout(d, e) || (a) != W_RIFLE ? WRS(WF(k, a, b, c)*f, radial, d, e) : 0)
 #define WSP(a,b,c,d,e,f)     (!m_insta(c, d) || m_loadout(c, d) || (a) != W_RIFLE ? clamp(max(W2(a, spread, b), f*0.5f)*(e), W2(a, spreadmin, b), W2(a, spreadmax, b) > 0 ? W2(a, spreadmax, b) : FVAR_MAX) : 0.f)
 #define WSND(a,b)            (weaptype[a].sound+(b))

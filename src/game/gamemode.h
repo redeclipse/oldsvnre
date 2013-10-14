@@ -272,8 +272,7 @@ extern mutstypes mutstype[];
 #define m_gsp(a,b)          (m_gsp1(a,b) || m_gsp2(a,b) || m_gsp3(a,b))
 
 #define m_team(a,b)         (m_multi(a, b) || !m_ffa(a, b))
-#define m_sweaps(a,b)       (m_insta(a, b) || m_medieval(a, b) || m_kaboom(a, b))
-#define m_limited(a,b)      (m_insta(a, b) || m_medieval(a, b))
+#define m_sweaps(a,b)       (m_insta(a, b) || m_medieval(a, b) || m_kaboom(a, b) || m_trial(a))
 #define m_special(a,b)      (m_sweaps(a, b) || !m_classic(a, b))
 #define m_loadout(a,b)      (!m_classic(a, b) && !m_sweaps(a, b))
 #define m_duke(a,b)         (m_duel(a, b) || m_survivor(a, b))
@@ -296,7 +295,7 @@ extern mutstypes mutstype[];
 #define m_xdelay(a,b)       (m_play(a) ? (m_trial(a) ? G(trialdelay) : (m_bomber(a) ? G(bomberdelay) : (m_insta(a, b) ? G(instadelay) : G(spawndelay)))) : 0)
 #define m_delay(a,b)        (m_duke(a,b) ? 0 : m_xdelay(a, b))
 #define m_protect(a,b)      (m_duke(a,b) ? G(duelprotect) : (m_insta(a, b) ? G(instaprotect) : G(spawnprotect)))
-#define m_noitems(a,b)      (m_trial(a) || G(itemsallowed) < (m_limited(a,b) ? 2 : 1))
+#define m_noitems(a,b)      (m_trial(a) || G(itemsallowed) < (m_sweaps(a, b) ? 2 : 1))
 #ifdef MEK
 #define m_health(a,b,c)     (m_insta(a,b) ? 1 : CLASS(c, health))
 #define m_armour(a,b,c)     (m_insta(a,b) ? 0 : CLASS(c, armour))
