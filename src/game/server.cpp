@@ -1601,7 +1601,7 @@ namespace server
                             loopvj(tc[i])
                             {
                                 clientinfo *cp = tc[i][j];
-                                if(G(teambalanceswap) && cp->swapteam && cp->swapteam == team) { id = j; break; }
+                                if(m_swapteam(gamemode, mutators) && cp->swapteam && cp->swapteam == team) { id = j; break; }
                                 switch(G(teambalancestyle))
                                 {
                                     case 1: if(id < 0 || tc[i][id]->state.timeplayed > cp->state.timeplayed) id = j; break;
@@ -1609,7 +1609,7 @@ namespace server
                                     case 3: if(id < 0 || tc[i][id]->state.frags > cp->state.frags) id = j; break;
                                     case 0: default: if(id < 0) id = j; break;
                                 }
-                                if(!G(teambalancestyle) && !G(teambalanceswap)) break;
+                                if(!G(teambalancestyle) && !m_swapteam(gamemode, mutators)) break;
                             }
                             if(id >= 0)
                             {
@@ -5564,7 +5564,17 @@ namespace server
                 case N_SWITCHTEAM:
                 {
                     int team = getint(p);
-                    if(!m_team(gamemode, mutators) || ci->state.actortype >= A_ENEMY || team == ci->team) break;
+                    if(!m_team(gamemode, mutators) || ci->state.actortype >= A_ENEMY) break;
+                    if(team == ci->team || !isteam(gamemode, mutators, T_FIRST, team))
+                    {
+                        if(ci->swapteam)
+                        {
+                            if(m_swapteam(gamemode, mutators))
+                                srvmsgft(-1, CON_EVENT, "\fy%s no longer wishes to swap to team %s", colourname(ci), colourteam(ci->swapteam));
+                            ci->swapteam = T_NEUTRAL;
+                        }
+                        break;
+                    }
                     uint ip = getclientip(ci->clientnum);
                     if(ip && checkipinfo(control, ipinfo::LIMIT, ip) && !checkipinfo(control, ipinfo::ALLOW, ip) && !haspriv(ci, G(limitlock), "change teams while limited")) break;
                     int newteam = requestswap(ci, team);
