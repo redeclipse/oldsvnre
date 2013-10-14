@@ -117,8 +117,7 @@ namespace hud
 
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, healthtex, "<grey>textures/hud/health", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, healthbgtex, "<grey>textures/hud/healthbg", 3);
-    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, armourtex, "<grey>textures/hud/impulse", 3);
-    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, armourbgtex, "<grey>textures/hud/impulsebg", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, armourtex, "<grey>textures/hud/armour", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, impulsetex, "<grey>textures/hud/impulse", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, impulsebgtex, "<grey>textures/hud/impulsebg", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, inventorytex, "<grey>textures/hud/inventory", 3);
@@ -311,6 +310,12 @@ namespace hud
     FVAR(IDF_PERSIST, inventoryhealthbarbottom, 0, 0.0859375f, 1); // ends at this offset
     FVAR(IDF_PERSIST, inventoryhealthbgglow, 0, 0.05f, 1);
     FVAR(IDF_PERSIST, inventoryhealthbgblend, 0, 0.5f, 1);
+    VAR(IDF_PERSIST, inventoryarmour, 0, 3, 3); // relies on inventory health!
+    VAR(IDF_PERSIST, inventoryarmourflash, 0, 1, 1);
+    FVAR(IDF_PERSIST, inventoryarmourblend, 0, 1, 1);
+    FVAR(IDF_PERSIST, inventoryarmourthrob, 0, 0.035f, 1);
+    FVAR(IDF_PERSIST, inventoryarmourbartop, 0, 0.09375f, 1); // starts from this offset
+    FVAR(IDF_PERSIST, inventoryarmourbarbottom, 0, 0.0859375f, 1); // ends at this offset
 
     VAR(IDF_PERSIST, inventoryimpulse, 0, 2, 3); // 0 = off, 1 = text, 2 = bar, 3 = both
     VAR(IDF_PERSIST, inventoryimpulseflash, 0, 1, 1);
@@ -2197,10 +2202,11 @@ namespace hud
     const struct barstep
     {
         float amt, r, g, b;
-    } barsteps[3][4] = {
+    } barsteps[4][4] = {
         { { 0, 1, 1, 1 }, { 0.35f, 0.75f, 0.75f, 0.75f }, { 0.65f, 0.65f, 0.65f, 0.65f }, { 1, 1, 1, 1 } },
         { { 0, 0.75f, 0, 0 }, { 0.35f, 1, 0.5f, 0 }, { 0.65f, 1, 1, 0 }, { 1, 0, 1, 0 } },
-        { { 0, 1, 0.25f, 0.25f }, { 0.35f, 1, 0, 1 }, { 0.65f, 0.25f, 0.25f, 1 }, { 1, 0, 1, 1 } }
+        { { 0, 1, 0.25f, 0.25f }, { 0.35f, 1, 0, 1 }, { 0.65f, 0.25f, 0.25f, 1 }, { 1, 0, 1, 1 } },
+        { { 0, 0.5f, 0, 0 }, { 0.35f, 0.25f, 0.f, 0.5f }, { 0.65f, 0.25f, 0.25f, 0.75f }, { 1, 0.75f, 0.75f, 1 } }
     };
 
     int drawitembar(int x, int y, float size, bool left, float r, float g, float b, float fade, float skew, float amt, int type)
@@ -2209,7 +2215,7 @@ namespace hud
         Texture *t = textureload(inventorybartex, 3);
         float q = clamp(skew, 0.f, 1.f), cr = left ? r : r*q, cg = left ? g : g*q, cb = left ? b : b*q, s = size*skew,
               w = float(t->w)/float(t->h)*s, btoff = 1-inventorybarbottom, middle = btoff-inventorybartop;
-        int sx = int(w), sy = int(s), so = int(sx*inventorybaroffset), cx = left ? x-so : x-sx+so, cy = y-sy+int(sy*inventorybartop), cw = sx, ch = int(sy*middle), id = clamp(type, 0, 2);
+        int sx = int(w), sy = int(s), so = int(sx*inventorybaroffset), cx = left ? x-so : x-sx+so, cy = y-sy+int(sy*inventorybartop), cw = sx, ch = int(sy*middle), id = clamp(type, 0, 3);
         glBindTexture(GL_TEXTURE_2D, t->id);
         glBegin(GL_TRIANGLE_STRIP);
         const float margin = 0.1f;
@@ -2511,8 +2517,8 @@ namespace hud
 
     int drawbar(int x, int y, int w, int h, int type, float top, float bottom, float fade, float amt, const char *tex, const char *bgtex, int tone, float bgglow, float blend, float pulse, float throb)
     {
-        int offset = int(w*throb), id = clamp(type, 0, 2);
-        if(*bgtex)
+        int offset = int(w*throb), id = clamp(type, 0, 3);
+        if(bgtex && *bgtex)
         {
             int glow = 0;
             float gr = 1, gg = 1, gb = 1, gf = fade*blend;
@@ -2577,30 +2583,55 @@ namespace hud
             if(inventoryhealth)
             {
                 float fade = blend*inventoryhealthblend;
-                int heal = m_health(game::gamemode, game::mutators, game::focus->model);
-                float pulse = inventoryhealthflash && game::focus->health < heal ? float(heal-game::focus->health)/float(heal) : 0.f,
-                    throb = inventoryhealththrob > 0 && regentime && game::focus->lastregen && lastmillis-game::focus->lastregen <= regentime ? clamp((lastmillis-game::focus->lastregen)/float(regentime/2), 0.f, 2.f) : 0.f;
+                int heal = m_health(game::gamemode, game::mutators, game::focus->model), arm = m_armour(game::gamemode, game::mutators, game::focus->model);
+                float hpulse = inventoryhealthflash ? clamp((heal-game::focus->health)/float(heal), 0.f, 1.f) : 0.f,
+                      hthrob = inventoryhealththrob > 0 && regentime && game::focus->lastregen && lastmillis-game::focus->lastregen <= regentime ? clamp((lastmillis-game::focus->lastregen)/float(regentime/2), 0.f, 2.f) : 0.f,
+                      apulse = inventoryarmourflash ? clamp((arm-game::focus->armour)/float(arm), 0.f, 1.f) : 0.f;
                 if(inventoryhealth&2)
-                    sy += drawbar(x, y, s, size, 1, inventoryhealthbartop, inventoryhealthbarbottom, fade, clamp(game::focus->health/float(heal), 0.0f, 1.0f), healthtex, healthbgtex, inventorytone, inventoryhealthbgglow, inventoryhealthbgblend, pulse, (throb > 1.f ? 1.f-throb : throb)*inventoryhealththrob);
+                {
+                    sy += drawbar(x, y, s, size, 1, inventoryhealthbartop, inventoryhealthbarbottom, fade, clamp(game::focus->health/float(heal), 0.f, 1.f), healthtex, healthbgtex, inventorytone, inventoryhealthbgglow, inventoryhealthbgblend, hpulse, (hthrob > 1.f ? 1.f-hthrob : hthrob)*inventoryhealththrob);
+                    if(inventoryarmour&2 && arm)
+                        drawbar(x, y, s, size, 3, inventoryarmourbartop, inventoryarmourbarbottom, fade, clamp(game::focus->armour/float(arm), 0.f, 1.f), armourtex, NULL, inventorytone, inventoryhealthbgglow, inventoryhealthbgblend, apulse, 0);
+                }
                 if(inventoryhealth&1)
                 {
                     float gr = 1, gg = 1, gb = 1;
-                    if(pulse > 0)
+                    if(hpulse > 0)
                     {
                         int millis = lastmillis%1000;
-                        float amt = (millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f))*pulse;
+                        float amt = (millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f))*hpulse;
                         flashcolour(gr, gg, gb, 1.f, 0.f, 0.f, amt);
                     }
                     pushfont("super");
-                    int ty = draw_textx("%d", x+s/2, y-sy+(inventoryhealth&2 ? size/2 : 0), int(gr*255), int(gg*255), int(gb*255), int(fade*255), TEXT_CENTER_UP, -1, -1, max(game::focus->health, 0));
+                    int ty = inventoryhealth&2 ? 0-size/2-FONTH/2 : 0;
+                    ty += draw_textx("%d", x+s/2, y-sy-ty, int(gr*255), int(gg*255), int(gb*255), int(fade*255), TEXT_CENTER_UP, -1, -1, max(game::focus->health, 0));
                     popfont();
                     if(!(inventoryhealth&2))
                     {
                         pushfont("reduced");
                         ty += draw_textx("health", x+s/2, y-sy-ty, 255, 255, 255, int(fade*255), TEXT_CENTER_UP, -1, -1);
                         popfont();
-                        sy += ty;
                     }
+                    if(inventoryarmour&1 && arm)
+                    {
+                        gr = gg = gb = 1;
+                        if(apulse > 0)
+                        {
+                            int millis = lastmillis%1000;
+                            float amt = (millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f))*apulse;
+                            flashcolour(gr, gg, gb, 1.f, 0.f, 0.f, amt);
+                        }
+                        pushfont(inventoryhealth&1 ? "default" : "emphasis");
+                        ty += draw_textx("%d", x+s/2, y-sy-ty, int(gr*255), int(gg*255), int(gb*255), int(fade*255), TEXT_CENTER_UP, -1, -1, max(game::focus->armour, 0));
+                        popfont();
+                        if(!(inventoryhealth&2))
+                        {
+                            pushfont("reduced");
+                            ty += draw_textx("armour", x+s/2, y-sy-ty, 255, 255, 255, int(fade*255), TEXT_CENTER_UP, -1, -1);
+                            popfont();
+                        }
+                    }
+                    if(!(inventoryhealth)&2) sy += ty;
                 }
             }
             if(game::focus->actortype < A_ENEMY && physics::allowimpulse(game::focus) && impulsemeter && impulsecost && inventoryimpulse)
@@ -2621,7 +2652,7 @@ namespace hud
                     if(!(inventoryimpulse&2))
                     {
                         pushfont("super");
-                        int ty = draw_textx("%d%%", x+s/2, y-sy+(inventoryimpulse&2 ? size/2 : 0), int(gr*255), int(gg*255), int(gb*255), int(fade*255), TEXT_CENTER_UP, -1, -1, int(span*100));
+                        int ty = draw_textx("%d%%", x+s/2, y-sy+(inventoryimpulse&2 ? size/2+FONTH/2 : 0), int(gr*255), int(gg*255), int(gb*255), int(fade*255), TEXT_CENTER_UP, -1, -1, int(span*100));
                         popfont();
                         pushfont("reduced");
                         ty += draw_textx("impulse", x+s/2, y-sy-ty, 255, 255, 255, int(fade*255), TEXT_CENTER_UP, -1, -1);

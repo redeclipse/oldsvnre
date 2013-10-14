@@ -1963,7 +1963,7 @@ namespace server
     void sendspawn(clientinfo *ci)
     {
         servstate &gs = ci->state;
-        int weap = -1, health = 0;
+        int weap = -1, health = 0, armour = -1;
         if(ci->state.actortype >= A_ENEMY)
         {
             bool hasent = sents.inrange(ci->state.spawnpoint) && sents[ci->state.spawnpoint].type == ACTOR;
@@ -1976,9 +1976,10 @@ namespace server
                 health = G(enemystrength) != 1 ? max(int(amt*G(enemystrength)), 1) : amt;
             }
             if(!isweap(weap)) weap = rnd(W_MAX-1)+1;
+            armour = actor[ci->state.actortype].armour;
         }
         int spawn = pickspawn(ci);
-        gs.spawnstate(gamemode, mutators, weap, health, 0);
+        gs.spawnstate(gamemode, mutators, weap, health, armour);
         sendf(ci->clientnum, 1, "ri9i3vv", N_SPAWNSTATE, ci->clientnum, spawn, gs.state, gs.points, gs.frags, gs.deaths, gs.health, gs.armour, gs.cptime, gs.cplaps, gs.weapselect, W_MAX, &gs.ammo[0], W_MAX, &gs.reloads[0]);
         gs.lastrespawn = gs.lastspawn = gamemillis;
     }
