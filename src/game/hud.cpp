@@ -2603,7 +2603,7 @@ namespace hud
                         flashcolour(gr, gg, gb, 1.f, 0.f, 0.f, amt);
                     }
                     pushfont("super");
-                    int ty = inventoryhealth&2 ? 0-size/2-FONTH/2 : 0;
+                    int ty = inventoryhealth&2 ? 0-size/2-(inventoryarmour&1 && arm ? FONTH/4 : 0) : 0;
                     ty += draw_textx("%d", x+s/2, y-sy-ty, int(gr*255), int(gg*255), int(gb*255), int(fade*255), TEXT_CENTER_UP, -1, -1, max(game::focus->health, 0));
                     popfont();
                     if(!(inventoryhealth&2))
@@ -2652,7 +2652,7 @@ namespace hud
                     if(!(inventoryimpulse&2))
                     {
                         pushfont("super");
-                        int ty = draw_textx("%d%%", x+s/2, y-sy+(inventoryimpulse&2 ? size/2+FONTH/2 : 0), int(gr*255), int(gg*255), int(gb*255), int(fade*255), TEXT_CENTER_UP, -1, -1, int(span*100));
+                        int ty = draw_textx("%d%%", x+s/2, y-sy+(inventoryimpulse&2 ? size/2 : 0), int(gr*255), int(gg*255), int(gb*255), int(fade*255), TEXT_CENTER_UP, -1, -1, int(span*100));
                         popfont();
                         pushfont("reduced");
                         ty += draw_textx("impulse", x+s/2, y-sy-ty, 255, 255, 255, int(fade*255), TEXT_CENTER_UP, -1, -1);
