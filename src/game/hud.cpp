@@ -169,10 +169,10 @@ namespace hud
     FVAR(IDF_PERSIST, waitbordersize, 0, 0.05f, 1);
     FVAR(IDF_PERSIST, waitborderblend, 0, 0.9f, 1);
 
-    VAR(IDF_PERSIST, bgborder, 0, BORDERP_ALL, BORDERP_ALL);
-    VAR(IDF_PERSIST|IDF_HEX, bgbordertone, -CTONE_MAX, 0x080000, 0xFFFFFF);
-    FVAR(IDF_PERSIST, bgbordersize, 0, 0.05f, 1);
-    FVAR(IDF_PERSIST, bgborderblend, 0, 0.5f, 1);
+    VAR(IDF_PERSIST, backgroundborder, 0, BORDERP_ALL, BORDERP_ALL);
+    VAR(IDF_PERSIST|IDF_HEX, backgroundbordertone, -CTONE_MAX, 0x080000, 0xFFFFFF);
+    FVAR(IDF_PERSIST, backgroundbordersize, 0, 0.05f, 1);
+    FVAR(IDF_PERSIST, backgroundborderblend, 0, 0.5f, 1);
 
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, bordertoptex, "<grey>textures/hud/border", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, borderbottomtex, "<grey><rotate:2>textures/hud/border", 3);
@@ -2453,12 +2453,12 @@ namespace hud
             const char *hudtexs[W_MAX] = {
                 meleetex, pistoltex, swordtex, shotguntex, smgtex, flamertex, plasmatex, rifletex, grenadetex, minetex, rockettex
             };
-            int sweap = m_weapon(game::gamemode, game::mutators);
+            int sweap = m_weapon(game::gamemode, game::mutators), lastweap = game::focus->getlastweap(sweap);
             loopi(W_MAX) if((i != W_MELEE || sweap == W_MELEE || game::focus->weapselect == W_MELEE || !inventoryhidemelee) && game::focus->holdweap(i, sweap, lastmillis))
             {
                 if(y-sy-s < m) break;
                 float size = s, skew = 0.f;
-                if((game::focus->weapstate[i] == W_S_SWITCH || game::focus->weapstate[i] == W_S_USE) && (i != game::focus->weapselect || i != game::focus->lastweap))
+                if((game::focus->weapstate[i] == W_S_SWITCH || game::focus->weapstate[i] == W_S_USE) && (i != game::focus->weapselect || i != lastweap))
                 {
                     float amt = clamp(float(lastmillis-game::focus->weaplast[i])/float(game::focus->weapwait[i]), 0.f, 1.f);
                     if(i != game::focus->weapselect) skew = game::focus->hasweap(i, sweap) ? 1.f-(amt*(1.f-inventoryskew)) : 1.f-amt;
@@ -3016,11 +3016,11 @@ namespace hud
     void drawspecborder(int w, int h, int type, int &top, int &bottom)
     {
         if(type < 0 || type >= BORDER_MAX) return;
-        int btype[BORDER_MAX] = { playborder, editborder, specborder, waitborder, bgborder };
+        int btype[BORDER_MAX] = { playborder, editborder, specborder, waitborder, backgroundborder };
         if(!btype[type]) return;
-        int bcolour[BORDER_MAX] = { playbordertone, editbordertone, specbordertone, waitbordertone, bgbordertone };
-        float bsize[BORDER_MAX] = { playbordersize, editbordersize, specbordersize, waitbordersize, bgbordersize },
-              bfade[BORDER_MAX] = { playborderblend, editborderblend, specborderblend, waitborderblend, bgborderblend };
+        int bcolour[BORDER_MAX] = { playbordertone, editbordertone, specbordertone, waitbordertone, backgroundbordertone };
+        float bsize[BORDER_MAX] = { playbordersize, editbordersize, specbordersize, waitbordersize, backgroundbordersize },
+              bfade[BORDER_MAX] = { playborderblend, editborderblend, specborderblend, waitborderblend, backgroundborderblend };
         int s = int(h*0.5f*bsize[type]);
         if(!s) return;
         vec col = vec(1, 1, 1);

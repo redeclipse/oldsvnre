@@ -1920,11 +1920,12 @@ namespace game
             if(!col && isweap(d->weapselect))
             {
                 col = W(d->weapselect, colour);
-                if(isweap(d->lastweap) && (d->weapstate[d->weapselect] == W_S_USE || d->weapstate[d->weapselect] == W_S_SWITCH))
+                int lastweap = d->getlastweap(m_weapon(gamemode, mutators));
+                if(isweap(lastweap) && d->weapselect != lastweap && (d->weapstate[d->weapselect] == W_S_USE || d->weapstate[d->weapselect] == W_S_SWITCH))
                 {
                     float amt = (lastmillis-d->weaplast[d->weapselect])/float(d->weapwait[d->weapselect]);
                     int r2 = (col>>16), g2 = ((col>>8)&0xFF), b2 = (col&0xFF),
-                        c = W(d->lastweap, colour), r1 = (c>>16), g1 = ((c>>8)&0xFF), b1 = (c&0xFF),
+                        c = W(lastweap, colour), r1 = (c>>16), g1 = ((c>>8)&0xFF), b1 = (c&0xFF),
                         r3 = clamp(int((r1*(1-amt))+(r2*amt)), 0, 255),
                         g3 = clamp(int((g1*(1-amt))+(g2*amt)), 0, 255),
                         b3 = clamp(int((b1*(1-amt))+(b2*amt)), 0, 255);
@@ -3239,13 +3240,13 @@ namespace game
                     case W_S_SWITCH:
                     case W_S_USE:
                     {
-                        int millis = lastmillis-d->weaplast[weap], off = d->weapwait[weap]/3;
+                        int millis = lastmillis-d->weaplast[weap], off = d->weapwait[weap]/3, lastweap = d->getlastweap(m_weapon(gamemode, mutators));
                         if(millis <= off)
                         {
-                            if(!d->hasweap(d->lastweap, m_weapon(gamemode, mutators))) showweap = false;
+                            if(!d->hasweap(lastweap, m_weapon(gamemode, mutators))) showweap = false;
                             else
                             {
-                                weap = d->lastweap;
+                                weap = lastweap;
                                 weapscale = 1-(millis/float(off));
                             }
                         }

@@ -380,7 +380,7 @@ namespace entities
             d->ammo[weap] = d->reloads[weap] = -1;
             if(d->weapselect != weap)
             {
-                d->lastweap = d->weapselect;
+                d->addlastweap(d->weapselect);
                 d->weapselect = weap;
             }
         }

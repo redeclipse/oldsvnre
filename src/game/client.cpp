@@ -1586,7 +1586,7 @@ namespace client
         {
             d->weapreset(true);
             int weap = getint(p);
-            d->lastweap = d->weapselect = isweap(weap) ? weap : W_MELEE;
+            d->weapselect = isweap(weap) ? weap : W_MELEE;
             loopi(W_MAX) d->ammo[i] = getint(p);
             loopi(W_MAX) d->reloads[i] = getint(p);
         }

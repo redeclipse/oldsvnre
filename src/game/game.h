@@ -489,17 +489,18 @@ static inline void modecheck(int &mode, int &muts, int trying = 0)
 struct gamestate
 {
     int health, armour, ammo[W_MAX], entid[W_MAX], reloads[W_MAX], colour, model;
-    int lastweap, weapselect, weapload[W_MAX], weapshot[W_MAX], weapstate[W_MAX], weapwait[W_MAX], weaplast[W_MAX];
+    int weapselect, weapload[W_MAX], weapshot[W_MAX], weapstate[W_MAX], weapwait[W_MAX], weaplast[W_MAX];
     int lastdeath, lastspawn, lastrespawn, lastpain, lastregen, lastbuff, lastres[WR_MAX], lastrestime[WR_MAX];
     int actortype, spawnpoint, ownernum, skill, points, frags, deaths, cpmillis, cptime, cplaps;
     bool quarantine;
     string vanity;
-    vector<int> loadweap;
+    vector<int> loadweap, lastweap;
     gamestate() : colour(0), model(0), weapselect(W_MELEE), lastdeath(0), lastspawn(0), lastrespawn(0), lastpain(0), lastregen(0), lastbuff(0),
         actortype(A_PLAYER), spawnpoint(-1), ownernum(-1), skill(0), points(0), frags(0), deaths(0), cpmillis(0), cptime(0), cplaps(0), quarantine(false)
     {
         setvanity();
         loadweap.shrink(0);
+        lastweap.shrink(0);
         resetresidual();
     }
     ~gamestate() {}
@@ -542,9 +543,29 @@ struct gamestate
         return weap == weapselect || millis-weaplast[weap] < weapwait[weap] || hasweap(weap, sweap);
     }
 
+    void addlastweap(int weap)
+    {
+        lastweap.add(weap);
+        if(lastweap.length() >= W_MAX) lastweap.remove(0);
+    }
+
+    int getlastweap(int sweap, int exclude = -1)
+    {
+        loopvrev(lastweap)
+        {
+            if(lastweap[i] == exclude) continue;
+            else if(hasweap(lastweap[i], sweap)) return lastweap[i];
+        }
+        return -1;
+    }
+
     int bestweap(int sweap, bool last = false)
     {
-        if(last && hasweap(lastweap, sweap)) return lastweap;
+        if(last)
+        {
+            int w = getlastweap(sweap);
+            if(hasweap(w, sweap)) return w;
+        }
         loopirev(W_MAX) if(hasweap(i, sweap, 3)) return i; // reloadable first
         loopirev(W_MAX) if(hasweap(i, sweap, 1)) return i; // carriable second
         loopirev(W_MAX) if(hasweap(i, sweap, 0)) return i; // any just to bail us out
@@ -561,7 +582,8 @@ struct gamestate
     int drop(int sweap)
     {
         if(hasweap(weapselect, sweap, 1)) return weapselect;
-        if(hasweap(lastweap, sweap, 1)) return lastweap;
+        int w = getlastweap(sweap, weapselect);
+        if(hasweap(w, sweap, 1)) return w;
         loopi(W_MAX) if(hasweap(i, sweap, 1)) return i;
         return -1;
     }
@@ -574,6 +596,7 @@ struct gamestate
             weapwait[i] = weaplast[i] = weapload[i] = weapshot[i] = 0;
             if(full) ammo[i] = entid[i] = reloads[i] = -1;
         }
+        lastweap.shrink(0);
     }
 
     void setweapstate(int weap, int state, int delay, int millis)
@@ -587,8 +610,8 @@ struct gamestate
     {
         if(isweap(weap))
         {
-            lastweap = weapselect;
-            setweapstate(lastweap, W_S_SWITCH, delay, millis);
+            lastweap.add(weapselect);
+            setweapstate(weapselect, W_S_SWITCH, delay, millis);
             weapselect = weap;
             setweapstate(weap, state, delay, millis);
         }
@@ -740,7 +763,7 @@ struct gamestate
         if(actortype >= A_ENEMY)
         {
             loadweap.shrink(0);
-            lastweap = weapselect = sweap;
+            weapselect = sweap;
         }
         else
         {
@@ -786,12 +809,12 @@ struct gamestate
                     ammo[aweap[j]] = max(1, W(aweap[j], max));
                     reloads[aweap[j]] = 0;
                 }
-                lastweap = weapselect = aweap[0]; // if '0' isn't present, maxcarry isn't doing its job
+                weapselect = aweap[0]; // if '0' isn't present, maxcarry isn't doing its job
             }
             else
             {
                 loadweap.shrink(0);
-                lastweap = weapselect = sweap;
+                weapselect = sweap;
             }
         }
         health = heal ? heal : m_health(gamemode, mutators, model);
