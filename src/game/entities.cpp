@@ -2355,7 +2355,7 @@ namespace entities
                     string attrval; attrval[0] = 0;
                     if(showentattrinfo&1)
                     {
-                        defformatstring(s)("[\fs\fy%d\fS]", k+1);
+                        defformatstring(s)("\fs\fy%d\fS:", k+1);
                         concatstring(attrval, s);
                     }
                     if(showentattrinfo&2)
@@ -2366,7 +2366,8 @@ namespace entities
                     if(showentattrinfo&4)
                     {
                         if(*attrval) concatstring(attrval, " = ");
-                        defformatstring(s)("%d", e.attrs[k]);
+                        defformatstring(s)("\fs\fc%d\fS", e.attrs[k]);
+                        concatstring(attrval, s);
                     }
                     defformatstring(s)("%s%s", hastop ? "\fw" : "\fa", attrval);
                     part_textcopy(pos.add(off), s, hastop ? PART_TEXT_ONTOP : PART_TEXT);
