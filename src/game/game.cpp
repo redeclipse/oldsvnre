@@ -1296,21 +1296,24 @@ namespace game
                     if(WF(WK(flags), weap, hitpush, WS(flags)) != 0)
                     {
                         float amt = scale*WRS(flags&HIT_WAVE || !hithurts(flags) ? wavepushscale : (d->health <= 0 ? deadpushscale : hitpushscale), push, gamemode, mutators);
+                        bool doquake = hithurts(flags);
                         if(d == v)
                         {
                             float modify = WF(WK(flags), weap, selfdamage, WS(flags))*G(selfdamagescale);
                             if(modify != 0) amt *= 1/modify;
+                            else doquake = false;
                         }
                         else if(m_team(gamemode, mutators) && d->team == v->team)
                         {
                             float modify = WF(WK(flags), weap, teamdamage, WS(flags))*G(teamdamagescale);
                             if(modify != 0) amt *= 1/modify;
+                            else doquake = false;
                         }
                         float hit = WF(WK(flags), weap, hitpush, WS(flags))*amt;
                         if(hit != 0)
                         {
                             d->vel.add(vec(dir).mul(hit));
-                            d->quake = min(d->quake+max(int(hit), 1), quakelimit);
+                            if(doquake) d->quake = min(d->quake+max(int(hit), 1), quakelimit);
                         }
                     }
                 }

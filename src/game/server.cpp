@@ -3529,6 +3529,12 @@ namespace server
             if(m_expert(gamemode, mutators) && !hithead(flags)) nodamage++;
         }
 
+        if(isweap(weap) && (WF(WK(flags), weap, residualundo, WS(flags))&WR(BURN)) && m->state.burning(gamemillis, G(burntime)))
+        {
+            m->state.lastres[WR_BURN] = m->state.lastrestime[WR_BURN] = 0;
+            sendf(-1, 1, "ri3", N_SPHY, m->clientnum, SPHY_EXTINGUISH);
+        }
+
         if(nodamage || !hithurts(realflags))
         {
             realflags &= ~HIT_CLEAR;
