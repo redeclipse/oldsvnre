@@ -36,7 +36,6 @@ Data Assets:
  * New wakawaka sound
 
 Multiplayer & Servers:
- * Distributed Master Servers
  * Show time since last server ping reply
  * Added chat filter
 
