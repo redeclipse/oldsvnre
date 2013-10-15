@@ -126,10 +126,10 @@ namespace entities
                     case 15: addentinfo("smoke plume"); break;
                     case 6: addentinfo("progress versus"); break;
                     case 5: addentinfo("progress"); break;
-                    case 32: addentinfo("lensflare (plain)"); break;
-                    case 33: addentinfo("lensflare (sparkle)"); break;
-                    case 34: addentinfo("lensflare (sun)"); break;
-                    case 35: addentinfo("lensflare (sparklesun)"); break;
+                    case 32: addentinfo("lensflare-plain"); break;
+                    case 33: addentinfo("lensflare-sparkle"); break;
+                    case 34: addentinfo("lensflare-sun"); break;
+                    case 35: addentinfo("lensflare-sparklesun"); break;
                     default: break;
                 }
                 switch(attr[0])
@@ -138,21 +138,25 @@ namespace entities
                     {
                         if(attr[1] >= 256)
                         {
+                            bool hasval = true;
                             int val = attr[1]-256;
                             switch(val%32)
                             {
                                 case 0: case 1: case 2: addentinfo("circle"); break;
-                                case 3: case 4: case 5: addentinfo("cylinder"); break;
-                                case 6: case 7: case 8: case 9: case 10: case 11: addentinfo("cone"); break;
-                                case 12: case 13: case 14: addentinfo("plane"); break;
-                                case 15: case 16: case 17: case 18: case 19: case 20: addentinfo("line"); break;
-                                case 21: default: addentinfo("sphere"); break;
+                                case 3: case 4: case 5: addentinfo("cylinder-shell"); break;
+                                case 6: case 7: case 8: case 9: case 10: case 11: addentinfo("cone-shell"); break;
+                                case 12: case 13: case 14: addentinfo("plane-volume"); break;
+                                case 15: case 16: case 17: case 18: case 19: case 20: addentinfo("line-volume"); break;
+                                case 21: case 22: case 23: hasval = false; addentinfo("sphere"); break;
+                                case 24: case 25: case 26: addentinfo("plane-flat"); break;
+                                default: hasval = false; addentinfo("default"); break;
                             }
-                            switch(val%3)
+                            if(hasval) switch(val%3)
                             {
                                 case 0: addentinfo("x-axis"); break;
                                 case 1: addentinfo("y-axis"); break;
                                 case 2: addentinfo("z-axis"); break;
+                                default: break;
                             }
                             if(val%64 >= 32) addentinfo("inverted");
                             break;
