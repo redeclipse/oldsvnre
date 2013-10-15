@@ -1342,13 +1342,19 @@ namespace game
         d->lastregen = 0;
         d->lastpain = lastmillis;
         d->state = CS_DEAD;
-        if(style&FRAG_OBLITERATE) d->obliterated = true;
-        if(style&FRAG_HEADSHOT) d->headless = true;
-        bool burning = burn(d, weap, flags), bleeding = bleed(d, weap, flags), shocking = shock(d, weap, flags), isfocus = d == focus || v == focus,
-             isme = d == player1 || v == player1, allowanc = obitannounce && (obitannounce >= 2 || isfocus) && (m_fight(gamemode) || isme) && v->actortype < A_ENEMY;
-        int anc = d == focus && allowanc ? S_V_FRAGGED : -1, dth = d->actortype >= A_ENEMY || d->obliterated ? S_SPLOSH : S_DEATH, curmat = material&MATF_VOLUME;
+        d->obliterated = (style&FRAG_OBLITERATE)!=0;
+        d->headless = (style&FRAG_HEADSHOT)!=0;
+        bool burning = burn(d, weap, flags), bleeding = bleed(d, weap, flags), shocking = shock(d, weap, flags),
+             isfocus = d == focus || v == focus, isme = d == player1 || v == player1,
+             allowanc = obitannounce && (obitannounce >= 2 || isfocus) && (m_fight(gamemode) || isme) && v->actortype < A_ENEMY;
+        int anc = d == focus && allowanc ? S_V_FRAGGED : -1, dth = d->actortype >= A_ENEMY || d->obliterated ? S_SPLOSH : S_DEATH,
+            curmat = material&MATF_VOLUME;
         if(d != player1) d->resetinterp();
-        if(!isme) { loopv(log) if(log[i] == player1) { isme = true; break; } }
+        if(!isme) loopv(log) if(log[i] == player1)
+        {
+            isme = true;
+            break;
+        }
         formatstring(d->obit)("%s ", colourname(d));
         if(d != v && v->lastattacker == d->clientnum) v->lastattacker = -1;
         d->lastattacker = v->clientnum;
@@ -1552,7 +1558,7 @@ namespace game
                 {
                     concatstring(d->obit, " for \fs\fzrwfirst blood\fS");
                     v->addicon(eventicon::FIRSTBLOOD, lastmillis, eventiconfade, 0);
-                    if(!override && allowanc)
+                    if(allowanc)
                     {
                         anc = S_V_FIRSTBLOOD;
                         override = true;
@@ -1603,8 +1609,16 @@ namespace game
         }
         if(d != v)
         {
-            if(showobitdists >= (d != player1 ? 2 : 1)) { defformatstring(obitx)(" \fs\fo@\fy%.2f\fom\fS", v->o.dist(d->o)/8.f); concatstring(d->obit, obitx); }
-            if(showobithpleft >= (d != player1 ? 2 : 1)) { defformatstring(obitx)(" (\fs\fc%d\fS)", v->health); concatstring(d->obit, obitx); }
+            if(showobitdists >= (d != player1 ? 2 : 1))
+            {
+                defformatstring(obitx)(" \fs\fo@\fy%.2f\fom\fS", v->o.dist(d->o)/8.f);
+                concatstring(d->obit, obitx);
+            }
+            if(showobithpleft >= (d != player1 ? 2 : 1))
+            {
+                defformatstring(obitx)(" (\fs\fc%d\fS)", v->health);
+                concatstring(d->obit, obitx);
+            }
         }
         if(!log.empty())
         {
@@ -1617,7 +1631,11 @@ namespace game
                 else concatstring(d->obit, log.length() > 1 && i == log.length()-1 ? " + " : (i ? " + " : " "));
                 if(log[i]->actortype >= A_ENEMY) concatstring(d->obit, "a ");
                 concatstring(d->obit, colourname(log[i]));
-                if(showobithpleft >= (d != player1 ? 2 : 1)) { defformatstring(obitx)(" (\fs\fc%d\fS)", log[i]->health); concatstring(d->obit, obitx); }
+                if(showobithpleft >= (d != player1 ? 2 : 1))
+                {
+                    defformatstring(obitx)(" (\fs\fc%d\fS)", log[i]->health);
+                    concatstring(d->obit, obitx);
+                }
             }
         }
         if(d != v)
