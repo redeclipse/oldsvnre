@@ -493,7 +493,7 @@ void rendereditcursor()
 
     if(showpastegrid && localedit && localedit->copy)
     {
-        glColor3ub(30, 0, 30);
+        glColor3ub(0, 192, 192);
         boxs3D(havesel ? sel.o.tovec() : lu.tovec(), localedit->copy->s.tovec(), havesel ? sel.grid : gridsize);
     }
 
