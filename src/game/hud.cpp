@@ -1559,7 +1559,6 @@ namespace hud
 
     void drawlast()
     {
-        glReadPixels(screen->w/2, screen->h/2, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, &pixel.v[0]);
         if(!progressing && showhud)
         {
             glMatrixMode(GL_PROJECTION);
@@ -3245,6 +3244,8 @@ namespace hud
 
     void drawhud(bool noview)
     {
+        glReadPixels(screen->w/2, screen->h/2, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, &pixel.v[0]);
+
         glLoadIdentity();
         glOrtho(0, hudwidth, hudheight, 0, -1, 1);
 
