@@ -3,6 +3,18 @@ namespace hud
 {
     const int NUMSTATS = 11;
     int damageresidue = 0, hudwidth = 0, hudheight = 0, lastteam = 0, lastnewgame = 0, laststats = 0, prevstats[NUMSTATS] = {0}, curstats[NUMSTATS] = {0};
+    bvec pixel;
+
+    ICOMMAND(0, getpixel, "b", (int *n), {
+        switch(*n)
+        {
+            case -1: conoutft(CON_SELF, "pixel: 0x%.6X (%d, %d, %d)", pixel.tohexcolor(), pixel.r, pixel.g, pixel.b); break;
+            case 0: intret(pixel.r); break;
+            case 1: intret(pixel.g); break;
+            case 2: intret(pixel.b); break;
+            case 3: default: intret(pixel.tohexcolor()); break;
+        }
+    });
 
     #include "compass.h"
     vector<int> teamkills;
@@ -1547,6 +1559,7 @@ namespace hud
 
     void drawlast()
     {
+        glReadPixels(screen->w/2, screen->h/2, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, &pixel.v[0]);
         if(!progressing && showhud)
         {
             glMatrixMode(GL_PROJECTION);
@@ -2863,17 +2876,18 @@ namespace hud
                 cy[1] -= draw_textx("ond:%d va:%d gl:%d(%d) oq:%d", cx[1], cy[1], 255, 255, 255, bf, TEXT_RIGHT_UP, -1, bs, allocnodes*8, allocva, curstats[4], curstats[5], curstats[6]);
                 cy[1] -= draw_textx("wtr:%dk(%d%%) wvt:%dk(%d%%) evt:%dk eva:%dk", cx[1], cy[1], 255, 255, 255, bf, TEXT_RIGHT_UP, -1, bs, wtris/1024, curstats[0], wverts/1024, curstats[1], curstats[2], curstats[3]);
                 cy[1] -= draw_textx("ents:%d(%d) wp:%d lm:%d rp:%d pvs:%d", cx[1], cy[1], 255, 255, 255, bf, TEXT_RIGHT_UP, -1, bs, entities::ents.length(), entgroup.length(), ai::waypoints.length(), lightmaps.length(), curstats[7], getnumviewcells());
-                if(game::focus->state == CS_EDITING)
+                if(game::player1->state == CS_EDITING)
                 {
                     cy[1] -= draw_textx("cube:%s%d corner:%d orient:%d grid:%d%s", cx[1], cy[1], 255, 255, 255, bf, TEXT_RIGHT_UP, -1, bs,
                             selchildcount<0 ? "1/" : "", abs(selchildcount), sel.corner, sel.orient, sel.grid, showmat && selchildmat > 0 ? getmaterialdesc(selchildmat, " mat:") : "");
                     cy[1] -= draw_textx("sel:%d,%d,%d %d,%d,%d (%d,%d,%d,%d)", cx[1], cy[1], 255, 255, 255, bf, TEXT_RIGHT_UP, -1, bs,
                             sel.o.x, sel.o.y, sel.o.z, sel.s.x, sel.s.y, sel.s.z,
                                 sel.cx, sel.cxs, sel.cy, sel.cys);
-                    cy[1] -= draw_textx("pos:%d,%d,%d yaw:%d pitch:%d", cx[1], cy[1], 255, 255, 255, bf, TEXT_RIGHT_UP, -1, bs,
-                            (int)game::focus->o.x, (int)game::focus->o.y, (int)game::focus->o.z,
-                            (int)game::focus->yaw, (int)game::focus->pitch);
                 }
+                cy[1] -= draw_textx("pos:%d,%d,%d yaw:%d pitch:%d", cx[1], cy[1], 255, 255, 255, bf, TEXT_RIGHT_UP, -1, bs,
+                        (int)camera1->o.x, (int)camera1->o.y, (int)camera1->o.z,
+                        (int)camera1->yaw, (int)camera1->pitch);
+                cy[1] -= draw_textx("0x%.6X (%d, %d, %d)", cx[1], cy[1], 255, 255, 255, bf, TEXT_RIGHT_UP, -1, bs, pixel.tohexcolor(), pixel.r, pixel.g, pixel.b);
             }
             popfont();
         }

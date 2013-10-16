@@ -1131,6 +1131,12 @@ struct bvec
     bvec &sub(int n) { x -= n; y -= n; z -= n; return *this; }
     bvec &add(const bvec &v) { x += v.x; y += v.y; z += v.z; return *this; }
     bvec &sub(const bvec &v) { x -= v.x; y -= v.y; z -= v.z; return *this; }
+    bvec &min(const bvec &o)   { x = ::min(x, o.x); y = ::min(y, o.y); z = ::min(z, o.z); return *this; }
+    bvec &max(const bvec &o)   { x = ::max(x, o.x); y = ::max(y, o.y); z = ::max(z, o.z); return *this; }
+    bvec &min(int f)        { x = ::min(int(x), f); y = ::min(int(y), f); z = ::min(int(z), f); return *this; }
+    bvec &max(int f)        { x = ::max(int(x), f); y = ::max(int(y), f); z = ::max(int(z), f); return *this; }
+    bvec &abs() { x = fabs(x); y = fabs(y); z = fabs(z); return *this; }
+    bvec &clamp(int l, int h) { x = ::clamp(int(x), l, h); y = ::clamp(int(y), l, h); z = ::clamp(int(z), l, h); return *this; }
 
     vec tovec() const { return vec(x*(2.0f/255.0f)-1.0f, y*(2.0f/255.0f)-1.0f, z*(2.0f/255.0f)-1.0f); }
 
@@ -1148,8 +1154,9 @@ struct bvec
 
     void flip() { x -= 128; y -= 128; z -= 128; }
 
-    static bvec fromcolor(const vec &v) { return bvec(uchar(v.x*255.0f), uchar(v.y*255.0f), uchar(v.z*255.0f)); }
-    vec tocolor() const { return vec(x*(1.0f/255.0f), y*(1.0f/255.0f), z*(1.0f/255.0f)); }
+    static bvec fromcolor(const vec &v) { return bvec(uchar(v.r*255.0f), uchar(v.g*255.0f), uchar(v.b*255.0f)); }
+    vec tocolor() const { return vec(r*(1.0f/255.0f), g*(1.0f/255.0f), b*(1.0f/255.0f)); }
+    int tohexcolor() { return ((::clamp(int(r), 0, 255))<<16)|((::clamp(int(g), 0, 255))<<8)|(::clamp(int(b), 0, 255)); }
 };
 
 struct glmatrixf
