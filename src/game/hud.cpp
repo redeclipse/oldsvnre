@@ -3,18 +3,6 @@ namespace hud
 {
     const int NUMSTATS = 11;
     int damageresidue = 0, hudwidth = 0, hudheight = 0, lastteam = 0, lastnewgame = 0, laststats = 0, prevstats[NUMSTATS] = {0}, curstats[NUMSTATS] = {0};
-    bvec pixel;
-
-    ICOMMAND(0, getpixel, "b", (int *n), {
-        switch(*n)
-        {
-            case -1: conoutft(CON_SELF, "pixel: 0x%.6X (%d, %d, %d)", pixel.tohexcolor(), pixel.r, pixel.g, pixel.b); break;
-            case 0: intret(pixel.r); break;
-            case 1: intret(pixel.g); break;
-            case 2: intret(pixel.b); break;
-            case 3: default: intret(pixel.tohexcolor()); break;
-        }
-    });
 
     #include "compass.h"
     vector<int> teamkills;
@@ -2886,7 +2874,6 @@ namespace hud
                 cy[1] -= draw_textx("pos:%d,%d,%d yaw:%d pitch:%d", cx[1], cy[1], 255, 255, 255, bf, TEXT_RIGHT_UP, -1, bs,
                         (int)camera1->o.x, (int)camera1->o.y, (int)camera1->o.z,
                         (int)camera1->yaw, (int)camera1->pitch);
-                cy[1] -= draw_textx("0x%.6X (%d, %d, %d)", cx[1], cy[1], 255, 255, 255, bf, TEXT_RIGHT_UP, -1, bs, pixel.tohexcolor(), pixel.r, pixel.g, pixel.b);
             }
             popfont();
         }
@@ -3244,8 +3231,6 @@ namespace hud
 
     void drawhud(bool noview)
     {
-        glReadPixels(screen->w/2, screen->h/2, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, &pixel.v[0]);
-
         glLoadIdentity();
         glOrtho(0, hudwidth, hudheight, 0, -1, 1);
 

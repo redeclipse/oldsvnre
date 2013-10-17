@@ -835,6 +835,32 @@ void progress(float bar1, const char *text1, float bar2, const char *text2)
     progressing = false;
 }
 
+
+int nextpixel = 0;
+bvec pixel(0, 0, 0);
+char *pixelact = NULL;
+
+ICOMMAND(0, printpixel, "", (void), conoutft(CON_SELF, "pixel = 0x%.6X (%d, %d, %d)", pixel.tohexcolor(), pixel.r, pixel.g, pixel.b));
+ICOMMAND(0, getpixel, "i", (int *n), {
+    switch(*n)
+    {
+        case 1: intret(pixel.r); break;
+        case 2: intret(pixel.g); break;
+        case 3: intret(pixel.b); break;
+        case 0: default: intret(pixel.tohexcolor()); break;
+    }
+});
+
+void readpixel(char *act)
+{
+    if(nextpixel) return;
+    if(!editmode) { conoutf("\froperation only allowed in edit mode"); return; }
+    if(pixelact) delete[] pixelact;
+    pixelact = act && *act ? newstring(act) : NULL;
+    nextpixel = 1;
+}
+ICOMMAND(0, readpixel, "s", (char *act), readpixel(act));
+
 VAR(0, numcpus, 1, 1, 16);
 
 int main(int argc, char **argv)
@@ -1051,6 +1077,21 @@ int main(int argc, char **argv)
                 renderedframe = true;
                 swapbuffers();
                 inbetweenframes = true;
+            }
+            if(nextpixel)
+            {
+                nextpixel++;
+                if(editmode && nextpixel > 1)
+                {
+                    glReadPixels(screen->w/2, screen->h/2, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, &pixel.v[0]);
+                    if(pixelact) execute(pixelact);
+                }
+                if(!editmode || nextpixel > 1)
+                {
+                    if(pixelact) delete[] pixelact;
+                    pixelact = NULL;
+                    nextpixel = 0;
+                }
             }
             setcaption(game::gametitle(), game::gametext());
         }
