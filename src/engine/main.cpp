@@ -836,7 +836,7 @@ void progress(float bar1, const char *text1, float bar2, const char *text2)
 }
 
 
-int nextpixel = 0;
+bool pixeling = false;
 bvec pixel(0, 0, 0);
 char *pixelact = NULL;
 
@@ -853,11 +853,11 @@ ICOMMAND(0, getpixel, "i", (int *n), {
 
 void readpixel(char *act)
 {
-    if(nextpixel) return;
+    if(pixeling) return;
     if(!editmode) { conoutf("\froperation only allowed in edit mode"); return; }
     if(pixelact) delete[] pixelact;
     pixelact = act && *act ? newstring(act) : NULL;
-    nextpixel = 1;
+    pixeling = true;
 }
 ICOMMAND(0, readpixel, "s", (char *act), readpixel(act));
 
@@ -1078,20 +1078,16 @@ int main(int argc, char **argv)
                 swapbuffers();
                 inbetweenframes = true;
             }
-            if(nextpixel)
+            if(pixeling)
             {
-                nextpixel++;
-                if(editmode && nextpixel > 1)
+                if(editmode)
                 {
                     glReadPixels(screen->w/2, screen->h/2, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, &pixel.v[0]);
                     if(pixelact) execute(pixelact);
                 }
-                if(!editmode || nextpixel > 1)
-                {
-                    if(pixelact) delete[] pixelact;
-                    pixelact = NULL;
-                    nextpixel = 0;
-                }
+                if(pixelact) delete[] pixelact;
+                pixelact = NULL;
+                pixeling = false;
             }
             setcaption(game::gametitle(), game::gametext());
         }
