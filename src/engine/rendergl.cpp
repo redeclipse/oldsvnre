@@ -2273,8 +2273,6 @@ void drawnoview()
     glDisable(GL_TEXTURE_2D);
 }
 
-extern int nextpixel;
-
 void drawviewtype(int targtype)
 {
     curview = targtype;
@@ -2382,7 +2380,7 @@ void drawviewtype(int targtype)
 
     glDisable(GL_TEXTURE_2D);
     notextureshader->set();
-    if(editmode && !nextpixel)
+    if(editmode && !pixeling)
     {
         glEnable(GL_DEPTH_TEST);
         glDepthMask(GL_FALSE);
@@ -2404,7 +2402,7 @@ void drawviewtype(int targtype)
     glOrtho(0, w, h, 0, -1, 1);
     glColor3f(1, 1, 1);
 
-    if(!nextpixel || !editmode)
+    if(!pixeling || !editmode)
     {
         extern int debugsm;
         if(debugsm)

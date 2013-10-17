@@ -588,7 +588,7 @@ enum
 };
 extern int initing, fullscreen, numcpus;
 void setfullscreen(bool enable, bool force = false);
-extern bool progressing;
+extern bool progressing, pixeling;
 extern float loadprogress, progresspart, progressamt;
 extern char *progresstitle, *progresstext;
 extern void progress(float bar1 = 0, const char *text1 = NULL, float bar2 = 0, const char *text2 = NULL);
