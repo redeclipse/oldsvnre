@@ -1817,7 +1817,7 @@ namespace projs
             proj.norm = norm;
             if(d)
             {
-                if(proj.norm.iszero()) proj.norm = vec(proj.o).sub(d->center()).normalize();
+                /*if(proj.norm.iszero())*/ proj.norm = vec(proj.o).sub(d->center()).normalize();
                 if(proj.norm.iszero()) proj.norm = vec(proj.vel).normalize().neg();
                 if((d->type == ENT_AI || d->type == ENT_PLAYER) && proj.projcollide&IMPACT_PLAYER && proj.projcollide&STICK_PLAYER)
                 {
