@@ -2273,6 +2273,8 @@ void drawnoview()
     glDisable(GL_TEXTURE_2D);
 }
 
+extern int nextpixel;
+
 void drawviewtype(int targtype)
 {
     curview = targtype;
@@ -2380,7 +2382,7 @@ void drawviewtype(int targtype)
 
     glDisable(GL_TEXTURE_2D);
     notextureshader->set();
-    if(editmode)
+    if(editmode && !nextpixel)
     {
         glEnable(GL_DEPTH_TEST);
         glDepthMask(GL_FALSE);
@@ -2402,33 +2404,36 @@ void drawviewtype(int targtype)
     glOrtho(0, w, h, 0, -1, 1);
     glColor3f(1, 1, 1);
 
-    extern int debugsm;
-    if(debugsm)
+    if(!nextpixel || !editmode)
     {
-        extern void viewshadowmap();
-        viewshadowmap();
-    }
+        extern int debugsm;
+        if(debugsm)
+        {
+            extern void viewshadowmap();
+            viewshadowmap();
+        }
 
-    extern int debugglare;
-    if(debugglare)
-    {
-        extern void viewglaretex();
-        viewglaretex();
-    }
+        extern int debugglare;
+        if(debugglare)
+        {
+            extern void viewglaretex();
+            viewglaretex();
+        }
 
-    extern int debugdepthfx;
-    if(debugdepthfx)
-    {
-        extern void viewdepthfxtex();
-        viewdepthfxtex();
-    }
+        extern int debugdepthfx;
+        if(debugdepthfx)
+        {
+            extern void viewdepthfxtex();
+            viewdepthfxtex();
+        }
 
-    glEnable(GL_TEXTURE_2D);
-    defaultshader->set();
-    hud::drawhud();
-    rendertexturepanel(w, h);
-    hud::drawlast();
-    glDisable(GL_TEXTURE_2D);
+        glEnable(GL_TEXTURE_2D);
+        defaultshader->set();
+        hud::drawhud();
+        rendertexturepanel(w, h);
+        hud::drawlast();
+        glDisable(GL_TEXTURE_2D);
+    }
 
     renderedgame = false;
 
