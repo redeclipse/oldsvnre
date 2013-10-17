@@ -25,12 +25,14 @@ struct cmenu : cstate
 {
     Texture *icon;
     vector<caction> actions;
-    cmenu() : icon(NULL) {}
+    bool keep;
+    cmenu() : icon(NULL), keep(false) {}
     ~cmenu() { reset(); }
     void reset()
     {
         loopvrev(actions) actions.remove(i);
         actions.shrink(0);
+        keep = false;
     }
 
     int locate(const char code)
@@ -113,6 +115,8 @@ ICOMMAND(0, compass, "sss", (char *n, char *a, char *b), if(curcompass)
         if(code) addaction(n, code, a);
     }
 });
+
+ICOMMAND(0, keepcompass, "", (void), if(curcompass) curcompass->keep = true);
 
 void showcmenu(const char *name)
 {
@@ -212,6 +216,7 @@ bool runcmenu(int idx)
     cmenu *oldcompass = curcompass;
     if(curcompass)
     {
+        curcompass->keep = false;
         if(idx < 0)
         {
             foundmenu = true;
@@ -222,7 +227,7 @@ bool runcmenu(int idx)
             foundmenu = interactive = true;
             execute(curcompass->actions[idx].contents);
             interactive = false;
-            if(oldcompass == curcompass) clearcmenu();
+            if(oldcompass == curcompass && !curcompass->keep) clearcmenu();
         }
     }
     return foundmenu;
