@@ -2725,6 +2725,11 @@ namespace server
     #include "duelmut.h"
     #include "aiman.h"
 
+    bool needswait()
+    {
+        return m_fight(gamemode) && G(waitforplayers) && numclients() > 1;
+    }
+
     void changemap(const char *name, int mode, int muts)
     {
         hasgameinfo = maprequest = mapsending = shouldcheckvotes = firstblood = false;
@@ -2734,7 +2739,7 @@ namespace server
         oldtimelimit = G(timelimit);
         timeremaining = G(timelimit) ? G(timelimit)*60 : -1;
         gamelimit = G(timelimit) ? timeremaining*1000 : 0;
-        gamewait = m_fight(gamemode) && G(waitforplayers) && numclients() ? totalmillis : 0;
+        gamewait = needswait() ? totalmillis : 0;
         inovertime = false;
         sents.shrink(0);
         scores.shrink(0);
@@ -4460,7 +4465,7 @@ namespace server
 
         if(gamewait)
         {
-            if(interm || !m_fight(gamemode) || !G(waitforplayers) || totalmillis-gamewait >= G(waitforplayers) || !numclients()) gamewait = 0;
+            if(interm || !needswait() || totalmillis-gamewait >= G(waitforplayers)) gamewait = 0;
             else
             {
                 int numwait = 0;

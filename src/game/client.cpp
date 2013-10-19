@@ -1566,7 +1566,7 @@ namespace client
         else
         {
             d->state = getint(p);
-            if(game::maptime > 0 && d->state == CS_ALIVE && waitplayers) waitplayers = false;
+            if(d->state == CS_ALIVE && waitplayers) waitplayers = false;
         }
         d->points = getint(p);
         d->frags = getint(p);
