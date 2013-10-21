@@ -1,7 +1,7 @@
 // server-side ai manager
 namespace aiman
 {
-    int oldbotskillmin = -1, oldbotskillmax = -1, oldcoopskillmin = -1, oldcoopskillmax = -1, oldenemyskillmin = -1, oldenemyskillmax = -1,
+    int dorefresh = 0, oldbotskillmin = -1, oldbotskillmax = -1, oldcoopskillmin = -1, oldcoopskillmax = -1, oldenemyskillmin = -1, oldenemyskillmax = -1,
         oldbotbalance = -2, oldnumplayers = -1, oldbotlimit = -1, oldbotoffset = 0, oldenemylimit = -1;
     float oldcoopbalance = -1, oldcoopmultibalance = -1;
 
@@ -317,6 +317,11 @@ namespace aiman
     { // clear and remove all ai immediately
         loopvrev(clients) if(!type || (type == 2 ? clients[i]->state.actortype >= A_ENEMY : clients[i]->state.actortype == A_BOT))
             deleteai(clients[i]);
+    }
+
+    void poke()
+    {
+        dorefresh = max(dorefresh, G(airefreshdelay));
     }
 
     void checkai()

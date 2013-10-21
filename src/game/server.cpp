@@ -385,7 +385,6 @@ namespace server
     };
 
     namespace aiman {
-        int dorefresh = 0;
         extern bool addai(int type, int ent = -1, int skill = -1);
         extern void deleteai(clientinfo *ci);
         extern bool delai(int type, bool skip = true);
@@ -394,6 +393,7 @@ namespace server
         extern void checkskills();
         extern void clearai(int type = 0);
         extern void checkai();
+        extern void poke();
     }
 
     string smapname;
@@ -1955,7 +1955,7 @@ namespace server
         setupitems(true);
         setupspawns(true);
         hasgameinfo = true;
-        aiman::dorefresh = max(aiman::dorefresh, G(airefreshdelay));
+        aiman::poke();
     }
 
     void sendspawn(clientinfo *ci)
@@ -2543,7 +2543,7 @@ namespace server
                 if(smode) smode->entergame(ci);
                 mutate(smuts, mut->entergame(ci));
             }
-            if(ci->state.actortype == A_PLAYER) aiman::dorefresh = max(aiman::dorefresh, G(airefreshdelay)); // get the ai to reorganise
+            if(ci->state.actortype == A_PLAYER) aiman::poke();
         }
         if(flags&TT_INFO) sendf(-1, 1, "ri3", N_SETTEAM, ci->clientnum, ci->team);
     }
@@ -2747,7 +2747,7 @@ namespace server
         if(smode) smode->reset(false);
         mutate(smuts, mut->reset(false));
         aiman::clearai();
-        aiman::dorefresh = max(aiman::dorefresh, G(airefreshdelay));
+        aiman::poke();
         mapcrc = 0;
         const char *reqmap = name && *name ? name : pickmap(smapname, gamemode, mutators);
 #ifdef STANDALONE // interferes with savemap on clients, in which case we can just use the auto-request
@@ -4333,7 +4333,7 @@ namespace server
             ci->state.quarantine = quarantine;
             ci->state.timeplayed += lastmillis-ci->state.lasttimeplayed;
             setteam(ci, T_NEUTRAL, TT_INFO);
-            aiman::dorefresh = max(aiman::dorefresh, G(airefreshdelay));
+            aiman::poke();
         }
         else if(ci->state.state == CS_SPECTATOR && !val)
         {
@@ -4345,7 +4345,7 @@ namespace server
             ci->state.lasttimeplayed = lastmillis;
             ci->state.quarantine = false;
             waiting(ci, DROP_RESET);
-            aiman::dorefresh = max(aiman::dorefresh, G(airefreshdelay));
+            aiman::poke();
         }
         return true;
     }
@@ -4525,7 +4525,7 @@ namespace server
                 aiman::removeai(ci, complete);
                 if(!complete)
                 {
-                    aiman::dorefresh = max(aiman::dorefresh, G(airefreshdelay));
+                    aiman::poke();
                     swapteam(ci, ci->team);
                 }
                 loopv(clients) if(clients[i] != ci)
@@ -4881,7 +4881,7 @@ namespace server
         else if(m_edit(gamemode))
         {
             ci->ready = true;
-            aiman::dorefresh = max(aiman::dorefresh, G(airefreshdelay));
+            aiman::poke();
         }
     }
 
@@ -5118,7 +5118,7 @@ namespace server
                     if(!ci->ready)
                     {
                         ci->ready = true;
-                        aiman::dorefresh = max(aiman::dorefresh, G(airefreshdelay));
+                        aiman::poke();
                     }
                     if(strcmp(text, smapname))
                     {
