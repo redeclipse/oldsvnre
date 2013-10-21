@@ -602,7 +602,7 @@ namespace server
 
         void queue(clientinfo *ci, bool msg = true, bool wait = true, bool top = false)
         {
-            if(spawnqueue(true) && ci->online && ci->state.state != CS_SPECTATOR && ci->state.state != CS_EDITING && ci->state.actortype < A_ENEMY)
+            if(spawnqueue(true) && ci->online && ci->state.actortype < A_ENEMY && ci->state.state != CS_SPECTATOR && ci->state.state != CS_EDITING)
             {
                 int n = spawnq.find(ci);
                 playing.removeobj(ci);
@@ -1408,22 +1408,20 @@ namespace server
                     best = i+T_FIRST;
                     result = false;
                 }
-                else if(best >= 0 && cs.total == teamscore(best).total)
-                    result = true;
+                else if(cs.total == teamscore(best).total) result = true;
             }
         }
         else
         {
             int best = -1;
-            loopv(clients) if(clients[i]->state.actortype < A_ENEMY)
+            loopv(clients) if(clients[i]->state.actortype < A_ENEMY && clients[i]->state.state != CS_SPECTATOR)
             {
                 if(best < 0 || clients[i]->state.points > clients[best]->state.points)
                 {
                     best = i;
                     result = false;
                 }
-                else if(best >= 0 && clients[i]->state.points == clients[best]->state.points)
-                    result = true;
+                else if(clients[i]->state.points == clients[best]->state.points) result = true;
             }
         }
         return result;
