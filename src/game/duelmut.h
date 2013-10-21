@@ -28,7 +28,7 @@ struct duelservmode : servmode
 
     void queue(clientinfo *ci, bool pos = true, bool top = false, bool wait = true)
     {
-        if(ci->state.state != CS_SPECTATOR && ci->state.state != CS_EDITING && ci->state.actortype < A_ENEMY)
+        if(ci->state.actortype < A_ENEMY && ci->state.state != CS_SPECTATOR)
         {
             int n = duelqueue.find(ci);
             if(top)

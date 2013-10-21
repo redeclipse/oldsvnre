@@ -68,12 +68,12 @@ namespace hud
 
     static inline bool playersort(const gameent *a, const gameent *b)
     {
-        if(a->state == CS_SPECTATOR)
+        if(a->state == CS_SPECTATOR || a->state == CS_EDITING)
         {
-            if(b->state == CS_SPECTATOR) return strcmp(a->name, b->name) < 0;
+            if(b->state == CS_SPECTATOR || b->state == CS_EDITING) return strcmp(a->name, b->name) < 0;
             else return false;
         }
-        else if(b->state == CS_SPECTATOR) return true;
+        else if(b->state == CS_SPECTATOR || b->state == CS_EDITING) return true;
         if(m_laptime(game::gamemode, game::mutators))
         {
             if((a->cptime && !b->cptime) || (a->cptime && b->cptime && a->cptime < b->cptime)) return true;
