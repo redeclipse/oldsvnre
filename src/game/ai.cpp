@@ -960,7 +960,9 @@ namespace ai
             if(iswaypoint(entid))
             {
                 vec feet = d->feetpos();
-                if(!actor[d->actortype].canjump && epos.z-d->feetpos().z >= JUMPMIN) epos.z = feet.z;
+                float zoff = epos.z-d->feetpos().z;
+                if(!actor[d->actortype].canjump && zoff >= JUMPMIN) epos.z = feet.z;
+                else if(actor[d->actortype].canjump && d->airtime(lastmillis) >= 25 && zoff <= -JUMPMIN) epos.z = feet.z;
                 d->ai->spot = epos;
                 d->ai->targnode = entid;
                 return !check || feet.squaredist(epos) > MINWPDIST*MINWPDIST ? 1 : 2;
@@ -1078,7 +1080,7 @@ namespace ai
         int airtime = d->airtime(lastmillis);
         bool sequenced = d->ai->blockseq || d->ai->targseq, offground = airtime && !physics::liquidcheck(d) && !d->onladder,
              jet = airtime > 100 && !d->turnside && off.z >= JUMPMIN && physics::canjet(d),
-             impulse = airtime > (locked ? 50 : 150) && !d->turnside && (locked || off.z >= JUMPMIN) && physics::canimpulse(d, IM_A_BOOST, false) && !physics::jetpack(d),
+             impulse = airtime > (locked ? 100 : 250) && !d->turnside && (locked || off.z >= JUMPMIN) && physics::canimpulse(d, IM_A_BOOST, false) && !physics::jetpack(d),
              jumper = !offground && (locked || sequenced || off.z >= JUMPMIN || (d->actortype == A_BOT && lastmillis >= d->ai->jumprand)),
              jump = (impulse || jet || jumper) && (jet || lastmillis >= d->ai->jumpseed);
         if(jump)
@@ -1104,7 +1106,7 @@ namespace ai
         }
         if(jumper && d->action[AC_JUMP])
         {
-            int seed = (111-d->skill)*(d->onladder || d->inliquid ? 2 : 4);
+            int seed = (111-d->skill)*(d->onladder || d->inliquid ? 2 : 5);
             d->ai->jumpseed = lastmillis+seed+rnd(seed);
             seed *= b.idle == 1 ? 1000 : 100;
             d->ai->jumprand = lastmillis+seed+rnd(seed);
