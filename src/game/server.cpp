@@ -3764,7 +3764,8 @@ namespace server
             ci->state.cpnodes.shrink(0);
             sendf(-1, 1, "ri3", N_CHECKPOINT, ci->clientnum, -1);
         }
-        else if(!m_nopoints(gamemode, mutators)) givepoints(ci, smode ? smode->points(ci, ci) : -1);
+        else if(!m_nopoints(gamemode, mutators) && ci->state.actortype == A_PLAYER)
+            givepoints(ci, smode ? smode->points(ci, ci) : -1);
         ci->state.deaths++;
         dropitems(ci, actor[ci->state.actortype].living ? DROP_DEATH : DROP_EXPIRE);
         if(G(burntime) && flags&HIT_BURN)
