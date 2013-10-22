@@ -361,6 +361,7 @@ namespace projs
     {
         if(proj.stuck)
         {
+            if(init) proj.vel = vec(0, 0, 0);
             if(proj.stick)
             {
                 if(proj.stick->state != CS_ALIVE)
@@ -396,21 +397,21 @@ namespace projs
     {
         if(proj.projtype != PRJ_SHOT || (proj.owner && proj.local))
         {
-            proj.vel = vec(0, 0, 0);
+            proj.stick = d;
             proj.sticknrm = proj.norm;
             proj.stuck = proj.lastbounce = lastmillis ? lastmillis : 1;
             vec fwd = dir.iszero() ? vec(proj.vel).normalize() : dir;
-            if(!fwd.iszero()) loopi(max(int(proj.radius), 100))
+            if(!fwd.iszero()) loopi(20)
             {
                 proj.o.sub(fwd);
-                if(!collide(&proj, dir, 0.f, proj.projcollide&COLLIDE_DYNENT) && !collideinside && !hitplayer) break;
+                if(!collide(&proj, vec(0, 0, 0), 0.f, proj.projcollide&COLLIDE_DYNENT) && !collideinside && (proj.stick ? hitplayer != proj.stick : !hitplayer))
+                    break;
             }
-            if(d)
+            if(proj.stick)
             {
-                proj.stick = d;
                 proj.stickpos = vec(proj.o).sub(d->center());
-                proj.stickpos.rotate_around_z(-d->yaw*RAD);
-                proj.sticknrm.rotate_around_z(-d->yaw*RAD);
+                proj.stickpos.rotate_around_z(-proj.stick->yaw*RAD);
+                proj.sticknrm.rotate_around_z(-proj.stick->yaw*RAD);
             }
             else proj.stickpos = proj.o;
             if(updatesticky(proj, true) && proj.projtype == PRJ_SHOT)
@@ -427,8 +428,7 @@ namespace projs
             projs[i]->stuck = projs[i]->lastbounce = lastmillis ? lastmillis : 1;
             projs[i]->sticknrm = norm;
             projs[i]->stickpos = pos;
-            if(f) projs[i]->stick = f;
-            else
+            if(!(projs[i]->stick = f))
             {
                 projs[i]->o = pos;
                 projs[i]->stick = NULL;
