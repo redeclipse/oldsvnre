@@ -1660,13 +1660,11 @@ namespace server
                     return false;
                 break;
             }
-#ifdef MEK
             case HEALTH: case ARMOUR:
             {
                 if(m_insta(gamemode, mutators) || (sents[i].attrs[3] && sents[i].attrs[3] != triggerid) || !m_check(sents[i].attrs[1], sents[i].attrs[2], gamemode, mutators)) return false;
                 break;
             }
-#endif
             default: break;
         }
         return true;
@@ -4129,13 +4127,11 @@ namespace server
                 }
                 break;
             }
-#ifdef MEK
             case HEALTH:
             {
                 ammoamt = healthamt[attr];
                 break;
             }
-#endif
             default: break;
         }
         setspawn(ent, false, true);

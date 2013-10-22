@@ -256,12 +256,8 @@ namespace game
     VAR(IDF_PERSIST, footstepsoundmaxrad, -1, -1, 255);
 
     VAR(IDF_PERSIST, nogore, 0 , 0, 2); // turns off all gore, 0 = off, 1 = replace, 2 = remove
-#ifndef MEK
     VAR(IDF_PERSIST, forceplayermodel, -1, -1, PLAYERTYPES-1);
-#endif
-#ifdef VANITY
     VAR(IDF_PERSIST, vanitymodels, 0, 1, 1);
-#endif
     VAR(IDF_PERSIST, headlessmodels, 0, 1, 1);
     VAR(IDF_PERSIST, autoloadweap, 0, 0, 1); // 0 = off, 1 = auto-set loadout weapons
     SVAR(IDF_PERSIST, favloadweaps, "");
@@ -299,7 +295,6 @@ namespace game
     const char *gametitle() { return connected() ? server::gamename(gamemode, mutators) : "ready"; }
     const char *gametext() { return connected() ? mapname : "not connected"; }
 
-#ifdef VANITY
     void vanityreset()
     {
         loopvrev(vanities) vanities.remove(i);
@@ -392,7 +387,6 @@ namespace game
         }
         return file;
     }
-#endif
 
     bool allowspec(gameent *d, int level, int cn = -1)
     {
@@ -1664,7 +1658,7 @@ namespace game
         }
         vec pos = d->wantshitbox() ? d->head : d->headpos();
         pos.z -= d->zradius*0.125f;
-#ifdef VANITY
+
         if(vanitymodels && d->headless && !nogore && headlessmodels && *d->vanity)
         {
             if(d->vitems.empty()) vanitybuild(d);
@@ -1677,7 +1671,7 @@ namespace game
                 found[vanities[d->vitems[k]].type]++;
             }
         }
-#endif
+
         if(actor[d->actortype].living && nogore != 2 && gibscale > 0)
         {
             int gib = clamp(max(damage, 10)/10, 1, 20), amt = int((rnd(gib)+gib)*gibscale);
@@ -2905,7 +2899,7 @@ namespace game
 
     void renderclient(gameent *d, int third, float trans, float size, int team, modelattach *attachments, bool secondary, int animflags, int animdelay, int lastaction, bool early)
     {
-#ifdef MEK
+#if 0
         const char *mdl = playertypes[0][third];
         if(d->actortype >= A_ENEMY) mdl = actor[d->actortype%A_MAX].playermodel[third];
         else mdl = playertypes[d->model%PLAYERTYPES][third];
@@ -3314,7 +3308,6 @@ namespace game
         if(!early && third == 1 && d->actortype < A_ENEMY && !shadowmapping && !envmapping) renderabovehead(d, trans);
         const char *weapmdl = showweap && isweap(weap) ? (third ? weaptype[weap].vwep : weaptype[weap].hwep) : "";
         int ai = 0;
-#ifdef VANITY
         modelattach a[1+VANITYMAX+12];
         if(vanitymodels && third && *d->vanity)
         {
@@ -3342,14 +3335,7 @@ namespace game
                 }
             }
         }
-#else
-        modelattach a[1+12];
-#endif
-#ifdef MEK
-        bool hasweapon = false; // TEMP
-#else
         bool hasweapon = showweap && *weapmdl;
-#endif
         if(hasweapon) a[ai++] = modelattach("tag_weapon", weapmdl, weapflags, weapaction, trans, weapscale*size);
         if(rendernormally && (early || d != focus))
         {
@@ -3391,7 +3377,7 @@ namespace game
                 float radius = d->height*playerhintsize, fade = blend*playerhintblend;
                 if(playerhintscale > 0)
                 {
-                    float per = d->health/float(m_maxhealth(gamemode, mutators, d->state.model));
+                    float per = d->health/float(m_health(gamemode, mutators, d->model));
                     fade = (fade*(1.f-playerhintscale))+(fade*per*playerhintscale);
                     if(fade > 1)
                     {

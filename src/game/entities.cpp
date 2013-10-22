@@ -233,7 +233,6 @@ namespace entities
                 }
                 break;
             }
-#ifdef MEK
             case HEALTH:
             {
                 if(attr[0] >= 0 && attr[0] < HEALTH_MAX)
@@ -254,7 +253,6 @@ namespace entities
                 if(full) addmodeinfo(attr[1], attr[2]);
                 break;
             }
-#endif
             case MAPMODEL:
             {
                 mapmodelinfo *mmi = getmminfo(attr[0]);
@@ -342,13 +340,9 @@ namespace entities
         switch(type)
         {
             case AFFINITY: return "props/flag";
-#ifdef MEK
             case PLAYERSTART: return playertypes[0][1];
             case HEALTH: return "props/health";
             case ARMOUR: return "props/armour";
-#else
-            case PLAYERSTART: return actor[A_PLAYER].playermodel[1];
-#endif
             case WEAPON:
             {
                 int sweap = m_weapon(game::gamemode, game::mutators), attr1 = w_attr(game::gamemode, game::mutators, attr[0], sweap);
@@ -1029,7 +1023,6 @@ namespace entities
                 while(e.attrs[0] < W_OFFSET) e.attrs[0] += W_MAX-W_OFFSET; // don't allow superimposed weaps
                 while(e.attrs[0] >= W_MAX) e.attrs[0] -= W_MAX-W_OFFSET;
                 break;
-#ifdef MEK
             case HEALTH:
                 while(e.attrs[0] < 0) e.attrs[0] += HEALTH_MAX;
                 while(e.attrs[0] >= HEALTH_MAX) e.attrs[0] -= HEALTH_MAX;
@@ -1038,7 +1031,6 @@ namespace entities
                 while(e.attrs[0] < 0) e.attrs[0] += ARMOUR_MAX;
                 while(e.attrs[0] >= ARMOUR_MAX) e.attrs[0] -= ARMOUR_MAX;
                 break;
-#endif
             case PLAYERSTART:
                 while(e.attrs[0] < 0) e.attrs[0] += T_ALL;
                 while(e.attrs[0] >= T_ALL) e.attrs[0] -= T_ALL;
@@ -1958,13 +1950,8 @@ namespace entities
             progress(i/float(ents.length()), "updating entities...");
             if(mtype == MAP_MAPZ && gver <= 212)
             {
-#ifdef MEK
                 if(e.type == HEALTH) e.type = NOTUSED;
                 else if(e.type == ARMOUR)
-#else
-                if(e.type == DUMMY1) e.type = NOTUSED;
-                else if(e.type == DUMMY2)
-#endif
                 {
                     ai::oldwaypoint &o = ai::oldwaypoints.add();
                     o.o = e.o;

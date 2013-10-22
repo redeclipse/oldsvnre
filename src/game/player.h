@@ -101,19 +101,6 @@ const int mapbals[T_TOTAL][T_TOTAL] = {
 extern const int mapbals[T_TOTAL][T_TOTAL];
 #endif
 
-#ifdef MEK
-#define PLAYERTYPES 4
-#ifdef GAMEWORLD
-const char *playertypes[PLAYERTYPES][5] = {
-    { "actors/mek1/hwep",    "actors/mek1",    "actors/mek1",   "mek1",   "light" },
-    { "actors/mek2/hwep",    "actors/mek2",    "actors/mek2",   "mek2",   "medium" },
-    { "actors/mek3/hwep",    "actors/mek3",    "actors/mek3",   "mek3",   "flyer" },
-    { "actors/mek4/hwep",    "actors/mek4",    "actors/mek4"    ,   "mek4",   "heavy" },
-};
-#else
-extern const char *playertypes[PLAYERTYPES][4]; //3
-#endif
-
 #define CLASSES(a,b1,b2,c1,c2,c3,c4,c5) \
     GSVAR(0, class##a##name, #a); \
     GVAR(0, class##a##health, 0, b1, VAR_MAX); \
@@ -123,6 +110,19 @@ extern const char *playertypes[PLAYERTYPES][4]; //3
     GFVAR(0, class##a##height, 0, c3, FVAR_MAX); \
     GFVAR(0, class##a##weight, 0, c4, FVAR_MAX); \
     GFVAR(0, class##a##speed, 0, c5, FVAR_MAX);
+
+#ifdef MEK
+#define PLAYERTYPES 4
+#ifdef GAMEWORLD
+const char *playertypes[PLAYERTYPES][5] = {
+    { "actors/mek1/hwep",    "actors/mek1",    "actors/mek1",   "mek1",   "light" },
+    { "actors/mek2/hwep",    "actors/mek2",    "actors/mek2",   "mek2",   "medium" },
+    { "actors/mek3/hwep",    "actors/mek3",    "actors/mek3",   "mek3",   "flyer" },
+    { "actors/mek4/hwep",    "actors/mek4",    "actors/mek4",   "mek4",   "heavy" },
+};
+#else
+extern const char *playertypes[PLAYERTYPES][5]; //3
+#endif
 
 //      name    health  armour  xrad    yrad    height  weight      speed
 CLASSES(mek1,   300,    80,     6,      6,      16,     200,        80); // light
@@ -141,26 +141,33 @@ CLASSES(mek4,   500,    200,    6,      6,      16,     350,        40); // heav
 #endif
 #define CLASS(id,name)           (*class_stat_##name[max(id,0)%PLAYERTYPES])
 #endif
-CLASSDEF(char *, name);
-CLASSDEF(int, health);
-CLASSDEF(int, armour);
-CLASSDEF(float, xradius);
-CLASSDEF(float, yradius);
-CLASSDEF(float, height);
-CLASSDEF(float, weight);
-CLASSDEF(float, speed);
 #else // FPS
 #define PLAYERTYPES 2
 #ifdef GAMEWORLD
 const char *playertypes[PLAYERTYPES][5] = {
     { "actors/player/male/hwep",      "actors/player/male",     "actors/player/male/body",      "actors/player/male/headless",      "male" },
-    { "actors/player/female/hwep",    "actors/player/female",   "actors/player/male/body",      "actors/player/female/headless",      "female" }
+    { "actors/player/female/hwep",    "actors/player/female",   "actors/player/male/body",      "actors/player/female/headless",    "female" }
 };
 #else
-extern const char *playertypes[PLAYERTYPES][3];
+extern const char *playertypes[PLAYERTYPES][5];
+#endif
+
+//      name    health  armour  xrad    yrad    height  weight      speed
+CLASSES(male,   100,    0,      3,      3,      14,     200,        50);
+CLASSES(female, 100,    0,      3,      3,      14,     200,        50);
+#ifdef GAMESERVER
+#define CLASSDEF(proto,name)     proto *sv_class_stat_##name[] = { &sv_classmale##name, &sv_classfemale##name };
+#define CLASS(id,name)           (*sv_class_stat_##name[max(id,0)%PLAYERTYPES])
+#else
+#ifdef GAMEWORLD
+#define CLASSDEF(proto,name)     proto *class_stat_##name[] = { &classmale##name, &classfemale##name };
+#else
+#define CLASSDEF(proto,name)     extern proto *class_stat_##name[];
+#endif
+#define CLASS(id,name)           (*class_stat_##name[max(id,0)%PLAYERTYPES])
 #endif
 #endif
-#ifdef VANITY
+
 #define VANITYMAX 16
 struct vanityfile
 {
@@ -211,4 +218,11 @@ vector<vanitys> vanities;
 #else
 extern vector<vanitys> vanities;
 #endif
-#endif
+CLASSDEF(char *, name);
+CLASSDEF(int, health);
+CLASSDEF(int, armour);
+CLASSDEF(float, xradius);
+CLASSDEF(float, yradius);
+CLASSDEF(float, height);
+CLASSDEF(float, weight);
+CLASSDEF(float, speed);

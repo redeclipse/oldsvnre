@@ -961,8 +961,8 @@ namespace ai
             {
                 vec feet = d->feetpos();
                 float zoff = epos.z-d->feetpos().z;
-                if(!actor[d->actortype].canjump && zoff >= JUMPMIN) epos.z = feet.z;
-                else if(actor[d->actortype].canjump && d->airtime(lastmillis) >= 25 && zoff <= -JUMPMIN) epos.z = feet.z;
+                if((!actor[d->actortype].canjump || !jumpallowed) && zoff >= JUMPMIN) epos.z = feet.z;
+                else if(jumpallowed && actor[d->actortype].canjump && d->airtime(lastmillis) >= 25 && zoff <= -JUMPMIN) epos.z = feet.z;
                 d->ai->spot = epos;
                 d->ai->targnode = entid;
                 return !check || feet.squaredist(epos) > MINWPDIST*MINWPDIST ? 1 : 2;
@@ -1258,7 +1258,8 @@ namespace ai
         game::fixrange(d->ai->targyaw, d->ai->targpitch);
         if(!result) game::scaleyawpitch(d->yaw, d->pitch, d->ai->targyaw, d->ai->targpitch, frame, frame*0.5f);
 
-        if(actor[d->actortype].canjump && (!d->ai->dontmove || b.idle)) jumpto(d, b, d->ai->spot, locked || b.type == AI_S_PURSUE || d->health <= m_health(game::gamemode, game::mutators, d->model)/3);
+        if(actor[d->actortype].canjump && jumpallowed && (!d->ai->dontmove || b.idle))
+            jumpto(d, b, d->ai->spot, locked || b.type == AI_S_PURSUE || d->health <= m_health(game::gamemode, game::mutators, d->model)/3);
         if(d->actortype == A_BOT || d->actortype == A_GRUNT)
         {
             if(d->action[AC_PACING] != (physics::allowimpulse(d, IM_A_SPRINT) && (!impulsemeter || impulsepacing == 0 || impulseregenpacing > 0)))

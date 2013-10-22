@@ -184,11 +184,6 @@ GVAR(0, campaignghost, 0, 0, 1); // 0 = all players are solid, 1 = all players a
 GVAR(0, trialghost, 0, 1, 1); // 0 = all players are solid, 1 = all players are ghosts
 GVAR(0, gauntletghost, 0, 2, 2); // 0 = all players are solid, 1 = all players are ghosts, 2 = team mates are ghosts
 
-#ifndef MEK
-GVAR(0, spawnhealth, 0, 100, VAR_MAX);
-GVAR(0, spawnarmour, 0, 0, VAR_MAX);
-#endif
-
 GFVAR(0, maxhealth, 0, 1.5f, FVAR_MAX);
 GFVAR(0, maxhealthvampire, 0, 3.0f, FVAR_MAX);
 
@@ -392,6 +387,7 @@ GVAR(0, jetdelay, 0, 250, VAR_MAX); // minimum time between jetpack
 GFVAR(0, jetheight, 0, 0, FVAR_MAX); // jetpack maximum height off ground
 GFVAR(0, jetdecay, 1, 15, FVAR_MAX); // decay rate of one unit per this many ms
 
+GVAR(0, jumpallowed, 0, 1, 1); // if jumping is allowed
 GFVAR(0, jumpspeed, FVAR_NONZERO, 110, FVAR_MAX); // extra velocity to add when jumping
 GFVAR(0, impulsespeed, FVAR_NONZERO, 90, FVAR_MAX); // extra velocity to add when impulsing
 GFVAR(0, impulselimit, 0, 0, FVAR_MAX); // maximum impulse speed

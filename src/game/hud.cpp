@@ -2365,10 +2365,8 @@ namespace hud
         {
             case PLAYERSTART: return playertex; break;
             case AFFINITY: return flagtex; break;
-#ifdef MEK
             case HEALTH: return healthtex; break;
             case ARMOUR: return armourtex; break;
-#endif
             case WEAPON:
             {
                 const char *weaptexs[W_MAX] = {
