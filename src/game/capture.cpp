@@ -594,7 +594,7 @@ namespace capture
             if(!ai::badhealth(d)) while(!taken.empty())
             {
                 int flag = taken.length() > 2 ? rnd(taken.length()) : 0;
-                if(ai::makeroute(d, b, st.flags[taken[flag]].pos()))
+                if(ai::makeroute(d, b, aiflagpos(d, st.flags[taken[flag]])))
                 {
                     d->ai->switchstate(b, ai::AI_S_PURSUE, ai::AI_T_AFFINITY, taken[flag]);
                     return true;
@@ -624,7 +624,7 @@ namespace capture
                 float mindist = enttype[AFFINITY].radius*4; mindist *= mindist;
                 loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && !e->ai && e->state == CS_ALIVE && ai::owner(d) == ai::owner(e))
                 {
-                    if(targets.find(e->clientnum) < 0 && (f.owner == e || e->feetpos().squaredist(f.pos()) <= mindist))
+                    if(targets.find(e->clientnum) < 0 && (f.owner == e || e->feetpos().squaredist(aiflagpos(d, f)) <= mindist))
                         targets.add(e->clientnum);
                 }
             }
@@ -648,10 +648,10 @@ namespace capture
                 { // defend the flag
                     ai::interest &n = interests.add();
                     n.state = ai::AI_S_DEFEND;
-                    n.node = ai::closestwaypoint(f.pos(), ai::CLOSEDIST, true);
+                    n.node = ai::closestwaypoint(aiflagpos(d, f), ai::CLOSEDIST, true);
                     n.target = j;
                     n.targtype = ai::AI_T_AFFINITY;
-                    n.score = pos.squaredist(f.pos())/(!regen ? 100.f : 1.f);
+                    n.score = pos.squaredist(aiflagpos(d, f))/(!regen ? 100.f : 1.f);
                     n.tolerance = 0.25f;
                     n.team = true;
                 }
@@ -662,10 +662,10 @@ namespace capture
                 { // attack the flag
                     ai::interest &n = interests.add();
                     n.state = d->actortype == A_BOT ? ai::AI_S_PURSUE : ai::AI_S_DEFEND;
-                    n.node = ai::closestwaypoint(f.pos(), ai::CLOSEDIST, true);
+                    n.node = ai::closestwaypoint(aiflagpos(d, f), ai::CLOSEDIST, true);
                     n.target = j;
                     n.targtype = ai::AI_T_AFFINITY;
-                    n.score = pos.squaredist(f.pos());
+                    n.score = pos.squaredist(aiflagpos(d, f));
                     n.tolerance = 0.25f;
                     n.team = true;
                 }
@@ -715,7 +715,7 @@ namespace capture
                     float mindist = enttype[AFFINITY].radius*4; mindist *= mindist;
                     loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && !e->ai && e->state == CS_ALIVE && ai::owner(d) == ai::owner(e))
                     {
-                        if(targets.find(e->clientnum) < 0 && (f.owner == e || e->feetpos().squaredist(f.pos()) <= mindist))
+                        if(targets.find(e->clientnum) < 0 && (f.owner == e || e->feetpos().squaredist(aiflagpos(d, f)) <= mindist))
                             targets.add(e->clientnum);
                     }
                     if(!targets.empty())
@@ -734,14 +734,14 @@ namespace capture
                 loopv(st.flags)
                 { // get out of the way of the returnee!
                     capturestate::flag &g = st.flags[i];
-                    if(pos.squaredist(g.pos()) <= mindist)
+                    if(pos.squaredist(aiflagpos(d, g)) <= mindist)
                     {
                         if(g.owner && ai::owner(g.owner) == ai::owner(d) && !walk) walk = 1;
-                        if(g.droptime && ai::makeroute(d, b, g.pos())) return true;
+                        if(g.droptime && ai::makeroute(d, b, aiflagpos(d, g))) return true;
                     }
                 }
             }
-            return ai::defense(d, b, f.pos(), enttype[AFFINITY].radius, enttype[AFFINITY].radius*walk*8, walk);
+            return ai::defense(d, b, aiflagpos(d, f), enttype[AFFINITY].radius, enttype[AFFINITY].radius*walk*8, walk);
         }
         return false;
     }
@@ -751,18 +751,13 @@ namespace capture
         if(st.flags.inrange(b.target) && d->actortype == A_BOT)
         {
             capturestate::flag &f = st.flags[b.target];
-            if(f.team != ai::owner(d))
+            if(f.owner)
             {
-                if(f.owner)
-                {
-                    if(d == f.owner) return aihomerun(d, b);
-                    else if(ai::owner(d) != ai::owner(f.owner)) return ai::violence(d, b, f.owner, 4);
-                    else return ai::defense(d, b, f.pos());
-                }
-                return ai::makeroute(d, b, f.pos());
+                if(d == f.owner) return aihomerun(d, b);
+                else if(ai::owner(d) != ai::owner(f.owner)) return ai::violence(d, b, f.owner, 4);
+                else return ai::defense(d, b, aiflagpos(d, f));
             }
-            else if(!m_gsp3(game::gamemode, game::mutators))
-                loopv(st.flags) if(st.flags[i].owner == d) return ai::makeroute(d, b, f.owner == d ? f.spawnloc : f.pos());
+            if(f.team != ai::owner(d)) return ai::makeroute(d, b, aiflagpos(d, f));
         }
         return false;
     }
