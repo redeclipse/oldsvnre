@@ -7,7 +7,6 @@
 #define GAMEID              "fps"
 #define GAMEVERSION         220
 #define DEMO_MAGIC          "RED_ECLIPSE_DEMO"
-#define VANITY              1
 #elif defined(MEK)
 #define GAMEID              "mek"
 #define GAMEVERSION         220
@@ -48,11 +47,7 @@ enum                                // entity types
     NOTUSED = ET_EMPTY, LIGHT = ET_LIGHT, MAPMODEL = ET_MAPMODEL, PLAYERSTART = ET_PLAYERSTART, ENVMAP = ET_ENVMAP, PARTICLES = ET_PARTICLES,
     MAPSOUND = ET_SOUND, LIGHTFX = ET_LIGHTFX, SUNLIGHT = ET_SUNLIGHT, WEAPON = ET_GAMESPECIFIC,
     TELEPORT, ACTOR, TRIGGER, PUSHER, AFFINITY, CHECKPOINT,
-#ifdef MEK
     HEALTH, ARMOUR,
-#else
-    DUMMY1, DUMMY2,
-#endif
     MAXENTTYPES
 };
 
@@ -64,10 +59,8 @@ enum { TA_MANUAL = 0, TA_AUTO, TA_ACTION, TA_MAX };
 #define TRIGSTATE(a,b)  (b%2 ? !a : a)
 
 enum { CP_RESPAWN = 0, CP_START, CP_FINISH, CP_LAST, CP_MAX };
-#ifdef MEK
-enum { HEALTH_SMALL = 0, HEALTH_REGULAR, HEALTH_LARGE, HEALTH_MAX };
-enum { ARMOUR_SMALL = 0, ARMOUR_REGULAR, ARMOUR_LARGE, ARMOUR_MAX };
-#endif
+enum { HEALTH_SHARD = 0, HEALTH_SMALL, HEALTH_REGULAR, HEALTH_LARGE, HEALTH_MAX };
+enum { ARMOUR_SHARD = 0, ARMOUR_SMALL, ARMOUR_REGULAR, ARMOUR_LARGE, ARMOUR_MAX };
 
 enum { TELE_NOAFFIN = 0, TELE_MAX };
 
@@ -195,7 +188,6 @@ enttypes enttype[] = {
             false,  true,   false,      true,       false,
                 "checkpoint",   { "radius", "yaw",      "pitch",    "modes",    "muts",     "id",       "type",     "sound" }
     },
-#ifdef MEK
     {
         HEALTH,         2,          59,     24,     EU_ITEM,    4,          1,          3,
             0, 0,
@@ -210,29 +202,11 @@ enttypes enttype[] = {
             false,  true,   true,      false,      false,
                 "armour",       { "type",   "modes",    "muts",     "id" }
     }
-#else
-    {
-        DUMMY1,         1,          48,     0,      EU_NONE,    4,          -1,         -1,
-            0, 0, 0,
-            true,   false,  false,      false,      false,
-                "dummy1",       { "" }
-    },
-    {
-        DUMMY2,         0,          1,      16,     EU_NONE,    2,          -1,         -1,
-            0, 0, 0,
-            true,   false,  false,      false,      false,
-                "dummy2",     { "" }
-    }
-#endif
 };
-#ifdef MEK
-int healthamt[HEALTH_MAX] = { 25, 50, 100 }, armouramt[ARMOUR_MAX] = { 25, 50, 100 };
-#endif
+int healthamt[HEALTH_MAX] = { 10, 25, 50, 100 }, armouramt[ARMOUR_MAX] = { 10, 25, 50, 100 };
 #else
 extern enttypes enttype[];
-#ifdef MEK
 extern int healthamt[HEALTH_MAX], armouramt[ARMOUR_MAX];
-#endif
 #endif
 
 enum
@@ -700,7 +674,6 @@ struct gamestate
                 entid[attr] = id;
                 break;
             }
-#ifdef MEK
             case HEALTH:
             {
                 int value = ammoamt >= 0 ? ammoamt : healthamt[attr];
@@ -713,7 +686,6 @@ struct gamestate
                 armour = max(armour + value, CLASS(model, armour));
                 break;
             }
-#endif
             default: break;
         }
     }
@@ -767,13 +739,11 @@ struct gamestate
         }
         else
         {
-#ifndef MEK
             if(sweap != W_MELEE)
             {
                 ammo[W_MELEE] = max(1, W(W_MELEE, max));
                 reloads[W_MELEE] = 0;
             }
-#endif
             if(sweap != W_GRENADE && G(spawngrenades) >= (m_insta(gamemode, mutators) || m_trial(gamemode) ? 2 : 1))
             {
                 ammo[W_GRENADE] = max(1, W(W_GRENADE, max));
@@ -996,16 +966,13 @@ struct gameent : dynent, gamestate
     void setparams(bool reset = false, int gamemode = 0, int mutators = 0)
     {
         int type = clamp(actortype, 0, int(A_MAX-1));
-#ifdef MEK
         if(type >= A_ENEMY)
         {
-#endif
             speed = actor[type].speed;
             xradius = actor[type].xradius*curscale;
             yradius = actor[type].yradius*curscale;
             zradius = height = actor[type].height*curscale;
             weight = actor[type].weight*curscale;
-#ifdef MEK
         }
         else
         {
@@ -1015,7 +982,6 @@ struct gameent : dynent, gamestate
             zradius = height = CLASS(model, height)*curscale;
             weight = CLASS(model, weight)*curscale;
         }
-#endif
         radius = max(xradius, yradius);
         aboveeye = curscale;
     }
@@ -1637,10 +1603,7 @@ namespace game
 {
     extern int gamemode, mutators, nextmode, nextmuts, timeremaining, maptime, lastzoom, lasttvcam, lasttvchg, spectvtime, waittvtime,
             bloodfade, bloodsize, bloodsparks, debrisfade, eventiconfade, eventiconshort,
-            announcefilter, dynlighteffects, aboveheadnames, followthirdperson, nogore,
-#ifndef MEK
-            forceplayermodel,
-#endif
+            announcefilter, dynlighteffects, aboveheadnames, followthirdperson, nogore, forceplayermodel,
             playerovertone, playerundertone, playerdisplaytone, playereffecttone, follow, specmode, spectvfollow, spectvfollowing;
     extern float bloodscale, debrisscale, aboveitemiconsize;
     extern bool intermission, zooming;
@@ -1656,12 +1619,9 @@ namespace game
     };
     extern avatarent avatarmodel, bodymodel;
 
-#ifdef VANITY
     extern void vanityreset();
     extern void vanitybuild(gameent *d);
     extern const char *vanityfname(gameent *d, int n, bool proj = false);
-#endif
-
     extern bool followswitch(int n, bool other = false);
     extern vector<cament *> cameras;
     extern int numwaiting();

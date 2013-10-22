@@ -953,7 +953,7 @@ namespace physics
         else
         {
             impulseplayer(d, onfloor, jetting);
-            if(onfloor && d->action[AC_JUMP])// && (d->ai || !(impulsemethod&1) || !d->action[AC_CROUCH]))
+            if(onfloor && d->action[AC_JUMP] && jumpallowed)// && (d->ai || !(impulsemethod&1) || !d->action[AC_CROUCH]))
             {
                 float force = jumpvel(d, true);
                 if(force > 0)

@@ -31,12 +31,10 @@ namespace projs
     FVAR(IDF_PERSIST, gibsliquidcoast, 0, 2, 10000);
     FVAR(IDF_PERSIST, gibsweight, -10000, 150, 10000);
 
-#ifdef VANITY
     FVAR(IDF_PERSIST, vanityelasticity, -10000, 0.5f, 10000);
     FVAR(IDF_PERSIST, vanityrelativity, -10000, 0.95f, 10000);
     FVAR(IDF_PERSIST, vanityliquidcoast, 0, 2, 10000);
     FVAR(IDF_PERSIST, vanityweight, -10000, 100, 10000);
-#endif
 
     FVAR(IDF_PERSIST, debriselasticity, -10000, 0.6f, 10000);
     FVAR(IDF_PERSIST, debrisliquidcoast, 0, 1.7f, 10000);
@@ -1003,14 +1001,12 @@ namespace projs
                         return;
                     }
                 }
-#ifdef VANITY
                 proj.mdl = game::vanityfname(proj.owner, proj.weap, true);
                 proj.reflectivity = 0.f;
                 proj.elasticity = vanityelasticity;
                 proj.relativity = vanityrelativity;
                 proj.liquidcoast = vanityliquidcoast;
                 proj.weight = vanityweight;
-#endif
                 proj.vel.add(vec(rnd(21)-10, rnd(21)-10, rnd(61)+10));
                 proj.projcollide = BOUNCE_GEOM|BOUNCE_PLAYER;
                 proj.escaped = !proj.owner || proj.owner->state != CS_ALIVE;

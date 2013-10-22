@@ -408,7 +408,6 @@ namespace client
         styles.deletearrays();
     }
 
-#ifdef VANITY
     void getvitem(gameent *d, int n, int v)
     {
         if(n < 0) intret(d->vitems.length());
@@ -422,7 +421,6 @@ namespace client
     }
     ICOMMAND(0, getplayervanity, "", (), result(game::player1->vanity));
     ICOMMAND(0, getplayervitem, "bi", (int *n, int *v), getvitem(game::player1, *n, *v));
-#endif
 
     ICOMMAND(0, mastermode, "i", (int *val), addmsg(N_MASTERMODE, "ri", *val));
     ICOMMAND(0, getplayername, "", (), result(game::player1->name));
@@ -470,10 +468,7 @@ namespace client
         }
     }
     VARF(IDF_PERSIST, playermodel, 0, 0, PLAYERTYPES-1, setplayermodel(playermodel));
-
-#ifdef VANITY
     SVARF(IDF_PERSIST, playervanity, "", if(game::player1->setvanity(playervanity)) sendplayerinfo = true;);
-#endif
 
     int teamname(const char *team)
     {
@@ -568,7 +563,6 @@ namespace client
     }
     ICOMMAND(0, getmodelname, "iiN", (int *mdl, int *idx, int *numargs), result(getmodelname(*mdl, *numargs >= 2 ? *idx : 4)));
 
-#ifdef VANITY
     const char *getclientvanity(int cn)
     {
         gameent *d = game::getclient(cn);
@@ -582,7 +576,6 @@ namespace client
         if(d) getvitem(d, n, v);
     }
     ICOMMAND(0, getclientvitem, "ibi", (int *cn, int *n, int *v), getclientvitem(*cn, *n, *v));
-#endif
 
     const char *getclienthost(int cn)
     {
