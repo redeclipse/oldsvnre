@@ -747,11 +747,14 @@ namespace ai
     {
         //d->ai->clear(true); // ensure they're clean
         if(check(d, b) || find(d, b)) return 1;
-        if(target(d, b, 4, false)) return 1;
-        if(target(d, b, 4, true)) return 1;
+        if(!passive())
+        {
+            if(target(d, b, 4, false)) return 1;
+            if(target(d, b, 4, true)) return 1;
+        }
         if(actor[d->actortype].canmove && randomnode(d, b, CLOSEDIST, 1e16f))
         {
-            d->ai->switchstate(b, rnd(3) ? AI_S_INTEREST : AI_S_DEFEND, AI_T_NODE, d->ai->route[0]);
+            d->ai->switchstate(b, AI_S_INTEREST, AI_T_NODE, d->ai->route[0]);
             return 1;
         }
         return 0; // but don't pop the state
@@ -762,13 +765,6 @@ namespace ai
         if(d->state != CS_ALIVE) return 0;
         switch(b.targtype)
         {
-            case AI_T_NODE:
-            {
-                if(check(d, b)) return 1;
-                if(iswaypoint(b.target))
-                    return defense(d, b, waypoints[b.target].o) ? 1 : 0;
-                break;
-            }
             case AI_T_ENTITY:
             {
                 if(check(d, b)) return 1;
@@ -800,7 +796,13 @@ namespace ai
                 if(e && e->state == CS_ALIVE) return defense(d, b, e->feetpos()) ? 1 : 0;
                 break;
             }
-            default: break;
+            default:
+            {
+                if(check(d, b)) return 1;
+                if(iswaypoint(b.target))
+                    return defense(d, b, waypoints[b.target].o) ? 1 : 0;
+                break;
+            }
         }
         return 0;
     }
@@ -810,14 +812,6 @@ namespace ai
         if(d->state != CS_ALIVE || !actor[d->actortype].canmove) return 0;
         switch(b.targtype)
         {
-            case AI_T_NODE: // this is like a wait state without sitting still..
-            {
-                if(check(d, b) || find(d, b)) return 1;
-                if(target(d, b, 4, true)) return 1;
-                if(iswaypoint(b.target) && vec(waypoints[b.target].o).sub(d->feetpos()).magnitude() > CLOSEDIST)
-                    return makeroute(d, b, waypoints[b.target].o) ? 1 : 0;
-                break;
-            }
             case AI_T_ENTITY:
             {
                 if(entities::ents.inrange(b.target))
@@ -868,7 +862,14 @@ namespace ai
                 }
                 break;
             }
-            default: break;
+            default: // this is like a wait state without sitting still..
+            {
+                if(check(d, b) || find(d, b)) return 1;
+                if(target(d, b, 4, true)) return 1;
+                if(iswaypoint(b.target) && vec(waypoints[b.target].o).sub(d->feetpos()).magnitude() >= RETRYDIST)
+                    return makeroute(d, b, waypoints[b.target].o) ? 1 : 0;
+                break;
+            }
         }
         return 0;
     }
@@ -878,13 +879,6 @@ namespace ai
         if(d->state != CS_ALIVE) return 0;
         switch(b.targtype)
         {
-            case AI_T_NODE:
-            {
-                if(check(d, b)) return 1;
-                if(iswaypoint(b.target))
-                    return defense(d, b, waypoints[b.target].o) ? 1 : 0;
-                break;
-            }
             case AI_T_AFFINITY:
             {
 #ifdef CAMPAIGN
@@ -920,7 +914,13 @@ namespace ai
                 }
                 break;
             }
-            default: break;
+            default:
+            {
+                if(check(d, b)) return 1;
+                if(iswaypoint(b.target))
+                    return defense(d, b, waypoints[b.target].o) ? 1 : 0;
+                break;
+            }
         }
         return 0;
     }
@@ -1076,8 +1076,8 @@ namespace ai
         vec off = vec(pos).sub(d->feetpos());
         int airtime = d->airtime(lastmillis);
         bool sequenced = d->ai->blockseq || d->ai->targseq, offground = airtime && !physics::liquidcheck(d) && !d->onladder,
-             jet = airtime > 250 && !d->turnside && off.z >= JUMPMIN && physics::canjet(d),
-             impulse = airtime > 500 && !d->turnside && off.z >= JUMPMIN && physics::canimpulse(d, IM_A_BOOST, false) && !physics::jetpack(d),
+             jet = airtime > 100 && !d->turnside && off.z >= JUMPMIN && physics::canjet(d),
+             impulse = airtime > (locked ? 50 : 250) && !d->turnside && (locked || off.z >= JUMPMIN) && physics::canimpulse(d, IM_A_BOOST, false) && !physics::jetpack(d),
              jumper = !offground && (locked || sequenced || off.z >= JUMPMIN || (d->actortype == A_BOT && lastmillis >= d->ai->jumprand)),
              jump = (impulse || jet || jumper) && (jet || lastmillis >= d->ai->jumpseed);
         if(jump)
@@ -1103,14 +1103,14 @@ namespace ai
         }
         if(jumper && d->action[AC_JUMP])
         {
-            int seed = (111-d->skill)*(d->onladder || d->inliquid ? 3 : 5);
+            int seed = (111-d->skill)*(d->onladder || d->inliquid || locked ? 2 : 4);
             d->ai->jumpseed = lastmillis+seed+rnd(seed);
             seed *= b.idle == 1 ? 1000 : 100;
             d->ai->jumprand = lastmillis+seed+rnd(seed);
         }
         if(!sequenced && !d->onladder && airtime)
         {
-            if(airtime > 300 && !d->turnside && (d->skill >= 100 || !rnd(101-d->skill)) && physics::canimpulse(d, IM_A_PARKOUR, true))
+            if(airtime > (locked ? 250 : 500) && !d->turnside && (d->skill >= 100 || !rnd(101-d->skill)) && physics::canimpulse(d, IM_A_PARKOUR, true))
                 d->action[AC_SPECIAL] = true;
             else if(!passive() && lastmillis-d->ai->lastmelee >= (201-d->skill)*5 && d->canmelee(m_weapon(game::gamemode, game::mutators), lastmillis))
             {
@@ -1250,7 +1250,7 @@ namespace ai
         game::fixrange(d->ai->targyaw, d->ai->targpitch);
         if(!result) game::scaleyawpitch(d->yaw, d->pitch, d->ai->targyaw, d->ai->targpitch, frame, frame*0.5f);
 
-        if(actor[d->actortype].canjump && (!d->ai->dontmove || b.idle)) jumpto(d, b, d->ai->spot, locked);
+        if(actor[d->actortype].canjump && (!d->ai->dontmove || b.idle)) jumpto(d, b, d->ai->spot, locked || physics::carryaffinity(d) || d->health <= m_health(game::gamemode, game::mutators, d->model)/3);
         if(d->actortype == A_BOT || d->actortype == A_GRUNT)
         {
             if(d->action[AC_PACING] != (physics::allowimpulse(d, IM_A_SPRINT) && (!impulsemeter || impulsepacing == 0 || impulseregenpacing > 0)))
