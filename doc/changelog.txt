@@ -1,6 +1,6 @@
 The development version changelog is an ongoing work and should be reasonably
 complete covering changes made up to revision:
-5579
+5647 (07/27/13)
 If you update the changelog with changes made beyond this point, and consider
 it to resonably cover all previous changes, please update the above revision
 number.
@@ -57,19 +57,27 @@ Interface & Menus:
  * Added variables for showing distance and health left when killed
    (/showobitdists /showobithpleft)
  * Added /nogore variable for disabling gore effects
+ * Added third person key to controls menu
+ * Added higher resolutions to display menu
 
 Modding & Mapmaking:
 
 Data Assets:
- * New vanity items (Stratocaster, foxears, crown)
- * New chiptune music
+ * New vanity items
+   - Stratocaster
+   - Fox Ears
+   - Crown
+   - Shoulder armor
+   - Panda
  * New wakawaka sound
 
 Multiplayer & Servers:
  * Show time since last server ping reply
  * Added chat filter
+ * Wait for players to be ready before starting the game
 
 Core & Install:
+ * ENet updated to v1.3.8
  * Fixed desktop entry icon field
  * Improve irc connection stability
 
