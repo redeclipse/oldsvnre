@@ -1144,7 +1144,12 @@ namespace ai
             d->ai->dontmove = true;
             d->ai->spot = vec(0, 0, 0);
         }
-        else if(hunt(d, b)) game::getyawpitch(d->feetpos(), d->ai->spot, d->ai->targyaw, d->ai->targpitch);
+        else if(hunt(d, b))
+        {
+            vec fp = d->feetpos();
+            game::getyawpitch(fp, d->ai->spot, d->ai->targyaw, d->ai->targpitch);
+            if(d->ai->route.length() <= 1 && d->ai->spot.squaredist(fp) <= MINWPDIST*MINWPDIST) d->ai->dontmove = true;
+        }
         else
         {
             if(d->blocked && (!d->ai->lastturn || lastmillis-d->ai->lastturn >= 1000))
