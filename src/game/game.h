@@ -1710,7 +1710,7 @@ namespace entities
     extern int showentdescs, simpleitems;
     extern vector<extentity *> ents;
     extern int lastenttype[MAXENTTYPES], lastusetype[EU_MAX];
-    extern bool execitem(int n, dynent *d, vec &pos, float radius, float dist);
+    extern bool execitem(int n, dynent *d, vec &pos, float dist);
     extern bool collateitems(dynent *d, vec &pos, float radius, vector<actitem> &actitems);
     extern void checkitems(dynent *d);
     extern void putitems(packetbuf &p);

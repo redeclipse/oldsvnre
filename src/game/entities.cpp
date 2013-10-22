@@ -14,7 +14,7 @@ namespace entities
     VAR(IDF_PERSIST, showentradius, 0, 1, 3);
     VAR(IDF_PERSIST, showentlinks, 0, 1, 3);
     VAR(IDF_PERSIST, showentinterval, 0, 32, VAR_MAX);
-    VAR(IDF_PERSIST, showentdist, 0, 256, VAR_MAX);
+    VAR(IDF_PERSIST, showentdist, 0, 512, VAR_MAX);
     FVAR(IDF_PERSIST, showentsize, 0, 2, FVAR_MAX);
 
     VAR(IDF_PERSIST, simpleitems, 0, 0, 2); // 0 = items are models, 1 = items are icons, 2 = items are off and only halos appear
@@ -585,7 +585,7 @@ namespace entities
     }
     ICOMMAND(0, exectrigger, "i", (int *n), if(identflags&IDF_WORLD) runtriggers(*n, trigger ? trigger : game::player1));
 
-    bool execitem(int n, dynent *d, vec &pos, float radius, float dist)
+    bool execitem(int n, dynent *d, vec &pos, float dist)
     {
         gameentity &e = *(gameentity *)ents[n];
         switch(enttype[e.type].usetype)
@@ -638,7 +638,6 @@ namespace entities
                         if(e.links[i] != n && ents.inrange(e.links[i]) && ents[e.links[i]]->type == e.type)
                             teleports.add(e.links[i]);
                     if(teleports.empty()) break;
-                    bool teleported = false;
                     vec orig = d->o, ovel = d->vel;
                     float oyaw = d->yaw, opitch = d->pitch;
                     while(!teleports.empty())
@@ -697,8 +696,7 @@ namespace entities
                                 }
                             }
                             else if(gameent::is(d)) warpragdoll(d, d->vel, vec(f.o).sub(e.o));
-                            teleported = true;
-                            break;
+                            return false;
                         }
                         d->o = orig;
                         d->vel = ovel;
@@ -706,7 +704,7 @@ namespace entities
                         d->pitch = opitch;
                         teleports.remove(r); // must've really sucked, try another one
                     }
-                    if(d->state == CS_ALIVE && !teleported)
+                    if(d->state == CS_ALIVE)
                     {
                         if(gameent::is(d)) game::suicide((gameent *)d, HIT_SPAWN);
                         else if(projent::is(d))
@@ -835,7 +833,7 @@ namespace entities
                     }
                     default: break;
                 }
-                if(ents.inrange(ent) && execitem(ent, d, pos, radius, dist)) tried = true;
+                if(ents.inrange(ent) && execitem(ent, d, pos, dist)) tried = true;
                 actitems.pop();
             }
             if(tried && gameent::is(d))
