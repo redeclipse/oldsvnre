@@ -1216,8 +1216,6 @@ namespace projs
         if(ejectfade && weaptype[weap].eject && *weaptype[weap].eprj) loopi(clamp(sub, 1, W2(weap, sub, WS(flags))))
             create(from, from, local, d, PRJ_EJECT, rnd(ejectfade)+ejectfade, 0, delay, rnd(weaptype[weap].espeed)+weaptype[weap].espeed, 0, weap, -1, flags);
 
-        if(d->actortype >= A_BOT && d->skill <= 100 && (!W2(weap, fullauto, WS(flags)) || attackdelay >= PHYSMILLIS))
-            attackdelay += int(ceilf(attackdelay*(10.f/d->skill)));
         d->setweapstate(weap, WS(flags) ? W_S_SECONDARY : W_S_PRIMARY, attackdelay, lastmillis);
         d->ammo[weap] = max(d->ammo[weap]-sub-offset, 0);
         d->weapshot[weap] = sub;
