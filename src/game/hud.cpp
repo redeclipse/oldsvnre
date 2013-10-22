@@ -1232,8 +1232,7 @@ namespace hud
         {
             vec pos = game::focus->headpos();
             gameent *d = game::intersectclosest(pos, worldpos, game::focus);
-            if(d && d->type == ENT_PLAYER && d->team == game::focus->team)
-                index = POINTER_TEAM;
+            if(d && d->actortype < A_ENEMY && d->team == game::focus->team) index = POINTER_TEAM;
             else index = POINTER_HAIR;
         }
         else index = POINTER_HAIR;

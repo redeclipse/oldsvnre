@@ -320,7 +320,7 @@ namespace defend
                 {
                     gameent *d = NULL, *e = NULL;
                     int numdyns = game::numdynents();
-                    loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && e->type == ENT_PLAYER && insideaffinity(b, e))
+                    loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && e->actortype < A_ENEMY && insideaffinity(b, e))
                         if((d = e) == game::focus) break;
                     game::announcef(S_V_FLAGSECURED, CON_SELF, d, true, "\fateam %s secured \fw%s", game::colourteam(owner), b.name);
                     part_textcopy(vec(b.o).add(vec(0, 0, enttype[AFFINITY].radius)), "<super>\fzZeSECURED", PART_TEXT, game::eventiconfade, TEAM(owner, colour), 3, 1, -10);
@@ -332,7 +332,7 @@ namespace defend
             {
                 gameent *d = NULL, *e = NULL;
                 int numdyns = game::numdynents();
-                loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && e->type == ENT_PLAYER && insideaffinity(b, e))
+                loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && e->actortype < A_ENEMY && insideaffinity(b, e))
                     if((d = e) == game::focus) break;
                 game::announcef(S_V_FLAGOVERTHROWN, CON_SELF, d, true, "\fateam %s overthrew \fw%s", game::colourteam(enemy), b.name);
                 part_textcopy(vec(b.o).add(vec(0, 0, enttype[AFFINITY].radius)), "<super>\fzZeOVERTHROWN", PART_TEXT, game::eventiconfade, TEAM(enemy, colour), 3, 1, -10);

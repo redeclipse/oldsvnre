@@ -757,7 +757,7 @@ namespace capture
                 else if(ai::owner(d) != ai::owner(f.owner)) return ai::violence(d, b, f.owner, 4);
                 else return ai::defense(d, b, aiflagpos(d, f));
             }
-            if(f.team != ai::owner(d)) return ai::makeroute(d, b, aiflagpos(d, f));
+            if(f.team != ai::owner(d) || f.droptime) return ai::makeroute(d, b, aiflagpos(d, f));
         }
         return false;
     }
