@@ -440,7 +440,7 @@ namespace projs
 
     bool checkitems(projent &proj, vector<toolent> &list, const vec &ray = vec(0, 0, 0), float dist = 0.f, bool teleport = false)
     {
-        float closedist = 1e16f, radius = max(proj.radius, 1.f);
+        float closedist = 1e16f;
         int closeent = -1;
         loopv(list)
         {
@@ -454,23 +454,11 @@ namespace projs
             float test = 1e16f;
             if(ray.iszero())
             {
-                vec to = vec(ray).mul(dist).add(proj.o);
-                float x1 = floor(min(proj.o.x, to.x)), y1 = floor(min(proj.o.y, to.y)),
-                      x2 = ceil(max(proj.o.x, to.x)), y2 = ceil(max(proj.o.y, to.y));
-                if(list[i].o.x+list[i].radius >= x1 && list[i].o.y+list[i].radius >= y1 && list[i].o.x-list[i].radius <= x2 && list[i].o.y-list[i].radius <= y2)
-                {
-                    vec bottom(list[i].o), top(list[i].o);
-                    bottom.z -= list[i].radius;
-                    top.z += list[i].radius;
-                    if(!linecylinderintersect(proj.o, to, bottom, top, list[i].radius, test)) continue;
-                    //test *= proj.o.dist(to);
-                    //if(test < 0) continue;
-                }
-                else continue;
+                if(!raysphereintersect(list[i].o, list[i].radius, proj.o, ray, test) || test > dist) continue;
             }
             else
             {
-                test = proj.o.dist(list[i].o)-radius;
+                test = proj.o.dist(list[i].o);
                 if(test > list[i].radius) continue;
             }
 
@@ -482,7 +470,7 @@ namespace projs
         }
         if(entities::ents.inrange(closeent))
         {
-            entities::execitem(closeent, &proj, proj.o, radius, closedist);
+            entities::execitem(closeent, &proj, proj.o, closedist);
             return true;
         }
         return false;
@@ -1350,8 +1338,8 @@ namespace projs
         {
             float yaw, pitch;
             vectoyawpitch(vec(proj.vel).normalize(), yaw, pitch);
-            part_create(PART_EDIT_ONTOP, 1, proj.o, 0x22FFFF, proj.radius);
-            part_dir(proj.o, yaw, pitch, max(proj.vel.magnitude(), proj.radius+2), 2, 1, 1, 0x22FFFF);
+            part_radius(proj.o, vec(proj.radius, proj.radius, proj.radius), 2, 1, 1, 0x22FFFF);
+            part_dir(proj.o, yaw, pitch, max(proj.vel.magnitude(), proj.radius+2), 2, 1, 1, 0xFF22FF);
         }
         switch(proj.projtype)
         {
