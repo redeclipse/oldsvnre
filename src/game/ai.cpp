@@ -1077,7 +1077,7 @@ namespace ai
         int airtime = d->airtime(lastmillis);
         bool sequenced = d->ai->blockseq || d->ai->targseq, offground = airtime && !physics::liquidcheck(d) && !d->onladder,
              jet = airtime > 100 && !d->turnside && off.z >= JUMPMIN && physics::canjet(d),
-             impulse = airtime > (locked ? 50 : 250) && !d->turnside && (locked || off.z >= JUMPMIN) && physics::canimpulse(d, IM_A_BOOST, false) && !physics::jetpack(d),
+             impulse = airtime > (locked ? 50 : 150) && !d->turnside && (locked || off.z >= JUMPMIN) && physics::canimpulse(d, IM_A_BOOST, false) && !physics::jetpack(d),
              jumper = !offground && (locked || sequenced || off.z >= JUMPMIN || (d->actortype == A_BOT && lastmillis >= d->ai->jumprand)),
              jump = (impulse || jet || jumper) && (jet || lastmillis >= d->ai->jumpseed);
         if(jump)
@@ -1103,7 +1103,7 @@ namespace ai
         }
         if(jumper && d->action[AC_JUMP])
         {
-            int seed = (111-d->skill)*(d->onladder || d->inliquid || locked ? 2 : 4);
+            int seed = (111-d->skill)*(d->onladder || d->inliquid ? 2 : 4);
             d->ai->jumpseed = lastmillis+seed+rnd(seed);
             seed *= b.idle == 1 ? 1000 : 100;
             d->ai->jumprand = lastmillis+seed+rnd(seed);
@@ -1250,7 +1250,7 @@ namespace ai
         game::fixrange(d->ai->targyaw, d->ai->targpitch);
         if(!result) game::scaleyawpitch(d->yaw, d->pitch, d->ai->targyaw, d->ai->targpitch, frame, frame*0.5f);
 
-        if(actor[d->actortype].canjump && (!d->ai->dontmove || b.idle)) jumpto(d, b, d->ai->spot, locked || physics::carryaffinity(d) || d->health <= m_health(game::gamemode, game::mutators, d->model)/3);
+        if(actor[d->actortype].canjump && (!d->ai->dontmove || b.idle)) jumpto(d, b, d->ai->spot, locked || b.type == AI_S_PURSUE || d->health <= m_health(game::gamemode, game::mutators, d->model)/3);
         if(d->actortype == A_BOT || d->actortype == A_GRUNT)
         {
             if(d->action[AC_PACING] != (physics::allowimpulse(d, IM_A_SPRINT) && (!impulsemeter || impulsepacing == 0 || impulseregenpacing > 0)))
