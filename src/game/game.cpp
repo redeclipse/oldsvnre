@@ -1338,7 +1338,6 @@ namespace game
 
     void killed(int weap, int flags, int damage, gameent *d, gameent *v, vector<gameent *> &log, int style, int material)
     {
-        if(d->type != ENT_PLAYER && d->type != ENT_AI) return;
         d->lastregen = 0;
         d->lastpain = lastmillis;
         d->state = CS_DEAD;
@@ -2457,7 +2456,7 @@ namespace game
             loopv(players) if(players[i])
             {
                 gameent *d = players[i];
-                if((d->type != ENT_PLAYER && d->type != ENT_AI) || d->actortype >= A_ENEMY) continue;
+                if(d->actortype >= A_ENEMY) continue;
                 cament *c = cameras.add(new cament);
                 c->o = d->headpos();
                 c->type = cament::PLAYER;
@@ -3045,7 +3044,7 @@ namespace game
 
         int flags = MDL_LIGHT|MDL_LIGHTFX;
         if(d != focus && !(anim&ANIM_RAGDOLL)) flags |= MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_CULL_QUERY;
-        if(d->type == ENT_PLAYER)
+        if(d->actortype < A_ENEMY)
         {
             if(!early && third) flags |= MDL_FULLBRIGHT;
         }
@@ -3315,7 +3314,7 @@ namespace game
                 animdelay = 300;
             }
         }
-        if(!early && third == 1 && d->type == ENT_PLAYER && !shadowmapping && !envmapping) renderabovehead(d, trans);
+        if(!early && third == 1 && d->actortype < A_ENEMY && !shadowmapping && !envmapping) renderabovehead(d, trans);
         const char *weapmdl = showweap && isweap(weap) ? (third ? weaptype[weap].vwep : weaptype[weap].hwep) : "";
         int ai = 0;
 #ifdef VANITY

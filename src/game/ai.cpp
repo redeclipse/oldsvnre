@@ -225,6 +225,7 @@ namespace ai
         }
 
         if((d->actortype = at) >= A_ENEMY) d->type = ENT_AI;
+        d->aiclip = true;
         d->setname(name);
         d->spawnpoint = et;
         d->ownernum = on;
