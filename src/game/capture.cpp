@@ -525,6 +525,12 @@ namespace capture
         dropaffinity(d);
     }
 
+    vec &aiflagpos(gameent *d, capturestate::flag &f)
+    {
+        if(f.droptime || f.owner != d) return f.pos();
+        return f.spawnloc;
+    }
+
     bool aihomerun(gameent *d, ai::aistate &b)
     {
         if(!m_gsp3(game::gamemode, game::mutators))
@@ -532,19 +538,24 @@ namespace capture
             vec pos = d->feetpos();
             loopk(2)
             {
-                int goal = -1;
+                int closest = -1;
+                float closedist = 1e16f;
                 loopv(st.flags)
                 {
-                    capturestate::flag &g = st.flags[i];
-                    if(g.team == ai::owner(d) && (k || ((!g.owner || g.owner == d) && !g.droptime)) &&
-                        (!st.flags.inrange(goal) || g.pos().squaredist(pos) < st.flags[goal].pos().squaredist(pos)))
+                    capturestate::flag &f = st.flags[i];
+                    if(f.team == d->team && (k || ((!f.owner || f.owner == d) && !f.droptime)))
                     {
-                        goal = i;
+                        float dist = aiflagpos(d, f).squaredist(pos);
+                        if(!st.flags.inrange(closest) || dist < closedist)
+                        {
+                            closest = i;
+                            closedist = dist;
+                        }
                     }
                 }
-                if(st.flags.inrange(goal) && ai::makeroute(d, b, st.flags[goal].pos()))
+                if(st.flags.inrange(closest) && ai::makeroute(d, b, aiflagpos(d, st.flags[closest])))
                 {
-                    d->ai->switchstate(b, ai::AI_S_PURSUE, ai::AI_T_AFFINITY, goal);
+                    d->ai->switchstate(b, ai::AI_S_PURSUE, ai::AI_T_AFFINITY, closest);
                     return true;
                 }
             }
