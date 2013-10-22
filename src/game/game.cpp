@@ -586,16 +586,13 @@ namespace game
                 }
                 if(d == focus) resetfollow();
             }
-            else if(maptime > 0)
+            else if(maptime > 0 && gameent::is(d) && d->actortype < A_ENEMY)
             {
-                if((gameent::is(d)) && d->actortype < A_ENEMY)
-                {
-                    cament *c = cameras.add(new cament);
-                    c->o = d->headpos();
-                    c->type = cament::PLAYER;
-                    c->id = d->clientnum;
-                    c->player = d;
-                }
+                cament *c = cameras.add(new cament);
+                c->o = d->headpos();
+                c->type = cament::PLAYER;
+                c->id = d->clientnum;
+                c->player = d;
             }
         }
         else
