@@ -40,6 +40,8 @@ namespace hud
     VAR(IDF_PERSIST, scoretimer, 0, 1, 2);
     VAR(IDF_PERSIST, scorelaps, 0, 1, 2);
     VAR(IDF_PERSIST, scorefrags, 0, 2, 2);
+    VAR(IDF_PERSIST, scoredeaths, 0, 2, 2);
+    VAR(IDF_PERSIST, scoreratios, 0, 0, 2);
     VAR(IDF_PERSIST, scoreclientnum, 0, 1, 1);
     VAR(IDF_PERSIST, scorebotinfo, 0, 0, 1);
     VAR(IDF_PERSIST, scorespectators, 0, 1, 1);
@@ -535,6 +537,27 @@ namespace hud
                             uicenterlist(g, uipad(g, 1, g.text("frags", 0xFFFFFF)));
                             loopscoregroup(uicenterlist(g, {
                                 uipad(g, 0.5f, g.textf("%d", 0xFFFFFF, NULL, 0, o->frags))
+                            }));
+                        });
+                    }
+
+                    if(scoredeaths && (scoredeaths >= 2 || m_dm(game::gamemode)))
+                    {
+                        uilist(g, {
+                            uicenterlist(g, uipad(g, 1, g.text("deaths", 0xFFFFFF)));
+                            loopscoregroup(uicenterlist(g, {
+                                uipad(g, 0.5f, g.textf("%d", 0xFFFFFF, NULL, 0, o->deaths))
+                            }));
+                        });
+                    }
+
+                    if(scoreratios && (scoreratios >= 2 || m_dm(game::gamemode)))
+                    {
+                        uilist(g, {
+                            uicenterlist(g, uipad(g, 1, g.text("ratio", 0xFFFFFF)));
+                            loopscoregroup(uicenterlist(g, {
+                                float ratio = o->frags >= o->deaths ? (o->frags/float(max(o->deaths, 1))) : -(o->deaths/float(max(o->frags, 1)));
+                                uipad(g, 0.5f, g.textf("%.1f\fs\fa:\fS%.1f", 0xFFFFFF, NULL, 0, ratio >= 0 ? ratio : 1.f, ratio >= 0 ? 1.f : -ratio))
                             }));
                         });
                     }
