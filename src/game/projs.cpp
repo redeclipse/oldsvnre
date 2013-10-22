@@ -1174,7 +1174,7 @@ namespace projs
         if(attackdelay >= 5)
         {
             int colour = WHCOL(d, weap, partcol, WS(flags));
-            float muz = muzzleblend;
+            float muz = muzzleblend*W2(weap, partblend, WS(flags));
             if(d == game::focus) muz *= muzzlefade;
             const struct weapfxs
             {
