@@ -123,7 +123,7 @@ namespace hud
         loopi(numdyns)
         {
             gameent *o = (gameent *)game::iterdynents(i);
-            if(!o || o->actortype < A_ENEMY || (!scoreconnecting && !o->name[0])) continue;
+            if(!o || o->actortype >= A_ENEMY || (!scoreconnecting && !o->name[0])) continue;
             if(o->state == CS_SPECTATOR)
             {
                 if(o != game::player1 || !client::demoplayback) spectators.add(o);
