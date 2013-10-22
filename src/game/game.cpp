@@ -1422,7 +1422,7 @@ namespace game
                         { "impaled by", "impaled by" },
                         { "filled with lead by", "shot by" },
                         { "spliced apart by", "shot by" },
-                        { "fireballed by", "burned by" },
+                        { "snuffed out by", "burned by" },
                         { "shown the light by", "melted by" },
                         { "given laser burn by", "lasered by" },
                         { "blown to pieces by", "blown up by" },
