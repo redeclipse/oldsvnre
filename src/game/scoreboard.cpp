@@ -629,24 +629,16 @@ namespace hud
                         uilist(g, {
                             uicenterlist(g, uipad(g, 0.125f, g.strut(1)));
                             loopscoregroup(uicenterlist(g, {
-                                uipad(g, 0.125f, {
-                                    if(!m_team(game::gamemode, game::mutators) || o->team != game::focus->team)
-                                    {
-                                        if(game::focus->dominating.find(o) >= 0) g.text("", 0, dominatedtex, TEAM(sg.team, colour));
-                                        else if(game::focus->dominated.find(o) >= 0) g.text("", 0, dominatingtex, TEAM(sg.team, colour));
-                                        else g.strut(1);
-                                    }
-                                    else g.strut(1);
-                                });
-                            }));
-                        });
-                        uilist(g, {
-                            uicenterlist(g, uipad(g, 0.125f, g.strut(1)));
-                            loopscoregroup(uicenterlist(g, {
                                 const char *status = questiontex;
                                 switch(o->state)
                                 {
-                                    case CS_ALIVE: status = playertex; break;
+                                    case CS_ALIVE:
+                                    {
+                                        if(game::player1->dominating.find(o) >= 0) status = dominatedtex;
+                                        else if(game::player1->dominated.find(o) >= 0) status = dominatingtex;
+                                        else status = playertex;
+                                        break;
+                                    }
                                     case CS_DEAD: status = deadtex; break;
                                     case CS_WAITING: status = waitingtex; break;
                                     case CS_EDITING: status = editingtex; break;
