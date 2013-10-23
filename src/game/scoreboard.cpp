@@ -459,9 +459,9 @@ namespace hud
                         loopk(numgroups)
                         {
                             scoregroup &sg = *groups[k];
-                            if(k && sg.team && m_team(game::gamemode, game::mutators)) g.space(0.5f);
+                            if(k && sg.team && m_team(game::gamemode, game::mutators)) g.space(1);
                             uicenterlist(g, {
-                                int bgcolor = sg.team && m_fight(game::gamemode) && m_team(game::gamemode, game::mutators) ? TEAM(sg.team, colour) : 0x333333;
+                                int bgcolor = vec::hexcolor(sg.team && m_fight(game::gamemode) && m_team(game::gamemode, game::mutators) ? TEAM(sg.team, colour) : TEAM(T_NEUTRAL, colour)).mul(0.5f).tohexcolor();
                                 if(sg.team && m_team(game::gamemode, game::mutators))
                                 {
                                     g.pushlist();
@@ -652,7 +652,8 @@ namespace hud
                     });
                     if(scorespectators && spectators.length())
                     {
-                        g.space(0.5f);
+                        g.spring();
+                        g.space(1);
                         uifont(g, "little", uicenterlist(g, {
                             uicenterlist(g, {
                                 bool pushed = false;
