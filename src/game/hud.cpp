@@ -1718,7 +1718,6 @@ namespace hud
                             ident *id = idents.access(idname);
                             if(id)
                             {
-                                pushfont("reduced");
                                 mkstring(idtype);
                                 if(id->flags&IDF_CLIENT || id->flags&IDF_SERVER)
                                 {
@@ -1776,11 +1775,18 @@ namespace hud
                                         break;
                                     }
                                 }
+
                                 if(id->desc)
                                     tz += draw_textx("\fa%s", tq, ty+tz, 255, 255, 255, int(255*fullconblend*fade), concenter ? TEXT_CENTERED : TEXT_LEFT_JUSTIFY, -1, tt, id->desc);
                                 if(id->usage)
                                     tz += draw_textx("usage: \fa/%s %s", tq, ty+tz, 255, 255, 255, int(255*fullconblend*fade), concenter ? TEXT_CENTERED : TEXT_LEFT_JUSTIFY, -1, tt, id->name, id->usage);
-                                popfont();
+
+                                if(id->type == ID_ALIAS)
+                                {
+                                    pushfont("consub");
+                                    tz += draw_textx("\facontents: \fw%s", tq, ty+tz, 255, 255, 255, int(255*fullconblend*fade), concenter ? TEXT_CENTERED : TEXT_LEFT_JUSTIFY, -1, tt, id->getstr());
+                                    popfont();
+                                }
                             }
                         }
                     }
