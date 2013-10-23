@@ -711,7 +711,7 @@ bool ircaddsockets(ENetSocket &maxsock, ENetSocketSet &readset, ENetSocketSet &w
                 // fall-through
             case IRC_ONLINE:
             case IRC_CONN:
-                maxsock == ENET_SOCKET_NULL ? maxsock : max(maxsock, n->sock);
+                maxsock = maxsock == ENET_SOCKET_NULL ? n->sock : max(maxsock, n->sock);
                 ENET_SOCKETSET_ADD(readset, n->sock);
                 numsocks++;
                 break;
