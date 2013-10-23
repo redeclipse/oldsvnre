@@ -1,6 +1,6 @@
 The development version changelog is an ongoing work and should be reasonably
 complete covering changes made up to revision:
-5647 (07/27/13)
+5786 (09/09/13)
 If you update the changelog with changes made beyond this point, and consider
 it to resonably cover all previous changes, please update the above revision
 number.
@@ -30,12 +30,16 @@ number.
 
 = Red Eclipse Development version =
 Gameplay:
+ * Ragdolls now twitch when they're under the influence of shock residual
 
 Weapons:
  * Sword damage and secondary attack speed increased
  * Decrease pistol firing rate to disable benefits of auto-fire scripts
- * Flamer secondary now explodes instead of sticks on direct hit
-   (reduces overall damage)
+ * Rifle has faster reload time, slightly increased wavepush,
+   slightly higher delay between shots
+ * Flamer has higher ammo capacity, secondary fire changed to airblast, 
+   used to damage enemies and put out teammates that are on fire
+ * Grenades have smaller explode radius, back to v1.3 behaviour
 
 Modes & Mutators:
  * Updated king-dtf rotation for balance
@@ -47,20 +51,38 @@ Modes & Mutators:
  * Enable interactions with affinities
 
 Maps:
- * Steel Rat, added to trial rotation
- * Abuse, new map (added from mapversion r4)
+ * Time-trial
+   - Absorption - new time-trial map by Unnamed
+   - Amplification - new time-trial map by Unnamed
+   - Relax - new time-trial map by Bonifarz
+   - Steel Rat - added to trial rotation
+   - War Depot - new time-trial map by TristamK
+ * Other game modes
+   - Abuse - new map by ballist1c
+   - Condensation - new map by Unnamed
+   - Echo2k - remix of Echo by Ulukai
+   - Emission - nem map by Unnamed
+   - Enyo - new map by Ulukai
+   - Insidious - new map by ballist1c
+   - LongestYard2k - remix of LongestYard by John_III and ballist1c
 
 Interface & Menus:
  * Added /spectvfollow for aiming camera to certain player whilst
    maintaining normal spectv camera selections
- * Updated edit menu
  * Added variables for showing distance and health left when killed
    (/showobitdists /showobithpleft)
  * Added /nogore variable for disabling gore effects
  * Added third person key to controls menu
  * Added higher resolutions to display menu
+ * Better inventory score
 
 Modding & Mapmaking:
+ * Updated edit menu
+ * When selecting an entity, its properties are now numbered
+ * Added /moveselwaypoints to move selected waypoints around
+ * Added texture set by Unnamed
+ * Specscale of pk02 textures corrected
+ * Glow colours inherit texture palette if not defined in shader parameters
 
 Data Assets:
  * New vanity items
@@ -75,21 +97,39 @@ Multiplayer & Servers:
  * Show time since last server ping reply
  * Added chat filter
  * Wait for players to be ready before starting the game
+ * Players can now request a username for use in the profile menu
+   to prevent other players impersonating you,
+   see http://forum.freegamedev.net/viewtopic.php?f=72&t=4340
+ * Pause server sorting while hovering over items in the server list
 
 Core & Install:
- * ENet updated to v1.3.8
+ * ENet updated to v1.3.10
+ * Automake 1.11
  * Fixed desktop entry icon field
- * Improve irc connection stability
+ * Improve IRC connection stability
 
-Additional fixed bugs:
- * #510 - server dependency on data
- * #509 - Users with account info are denied access to password-protected
-   servers
+Additional noteworthy fixed bugs:
+ * #449 - Ability to make current settings default (/savevars)
  * #505 - Picking up an item instantly completes reload cycle
  * #506 - Garbled output when selecting weapon loadout
- * #449 - Ability to make current settings default (/savevars)
+ * #509 - Users with account info are denied access to password-protected servers
+ * #510 - server dependency on data
  * #520 - Start menu icon has the wrong .exe selected
  * #524 - redeclipse.net shortlink for files on trac
+ * #540 - On maps with too little goals for bomber-ball 
+          switching to hold fails when touchdown is selected
+ * #545 - Time-trial "dnf" ranks ahead of any completed time in final standings
+ * #556 - Time-trial time not displayed in top-right of screen
+ * #558 - Scoring anomalies
+ * #563 - Duel displays a comma too much in match info
+ * #569 - Incorrect grenade collision
+ * #574 - Scoring events can take place after the match is over
+ * #575 - GUIs can be used to cheat
+ * #576 - After dying in resize mode, camera move speed is affected by player size
+ * #577 - Disconnecting while alive in a survivor game leads to excessive scores
+ * #581 - vpalette correction for multi team palettes in 2-team games
+ * #589 - Nickname is overlayed by time in ffa-timetrial
+ * #591 - Time overlays time in time-trial
 
 
 = Red Eclipse 1.4 =
