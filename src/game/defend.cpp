@@ -392,6 +392,7 @@ namespace defend
                     n.score = pos.squaredist(f.o)/(!regen ? 100.f : 1.f);
                     n.tolerance = 0.25f;
                     n.team = true;
+                    n.acttype = ai::AI_A_PROTECT;
                 }
             }
         }

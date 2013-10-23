@@ -171,7 +171,8 @@ namespace ai
         AI_A_IDLE,
         AI_A_LOCKON,
         AI_A_PROTECT,
-        AI_A_HASTE
+        AI_A_HASTE,
+        AI_A_MAX
     };
 
     struct interest

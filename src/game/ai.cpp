@@ -378,6 +378,7 @@ namespace ai
                     return false;
                 }
             }
+            if(!b.override && dist > guard*guard) b.acttype = AI_A_HASTE;
         }
         b.override = false;
         return true;
@@ -492,6 +493,7 @@ namespace ai
             n.score = e->o.squaredist(d->o)/(force ? 1e8f : (hasweap(d, d->ai->weappref) ? 1.f : 0.5f));
             n.tolerance = 0.25f;
             n.team = true;
+            n.acttype = AI_A_PROTECT;
         }
     }
 
@@ -583,12 +585,14 @@ namespace ai
                             n.state = AI_S_DEFEND;
                             n.target = n.node = randomnode(d, b, entities::ents[i]->o, CLOSEDIST, FARDIST);
                             n.score = entities::ents[i]->o.squaredist(d->feetpos())/100.f;
+                            n.acttype = AI_A_PROTECT;
                         }
                         else
                         {
                             n.state = AI_S_PURSUE;
                             n.target = n.node = closestwaypoint(entities::ents[i]->o, CLOSEDIST, true);
                             n.score = entities::ents[i]->o.squaredist(d->feetpos())/100.f;
+                            n.acttype = AI_A_HASTE;
                         }
                         n.targtype = AI_T_NODE;
                         n.tolerance = 0.5f;
@@ -1080,8 +1084,8 @@ namespace ai
         int airtime = d->airtime(lastmillis);
         bool sequenced = d->ai->blockseq || d->ai->targseq, offground = airtime && !physics::liquidcheck(d) && !d->onladder,
              jet = airtime > 100 && !d->turnside && off.z >= JUMPMIN && physics::canjet(d),
-             impulse = airtime > (b.acttype >= AI_A_LOCKON ? 100 : 250) && !d->turnside && (b.acttype >= AI_A_LOCKON || off.z >= JUMPMIN) && physics::canimpulse(d, IM_A_BOOST, false) && !physics::jetpack(d),
-             jumper = !offground && (b.acttype >= AI_A_LOCKON || sequenced || off.z >= JUMPMIN || (d->actortype == A_BOT && lastmillis >= d->ai->jumprand)),
+             impulse = airtime > (b.acttype >= AI_A_LOCKON ? 100 : 250) && !d->turnside && (b.acttype >= AI_A_LOCKON || off.z >= JUMPMIN) && physics::canimpulse(d, IM_A_BOOST, false) && !physics::jetpack(d) && impulsemeter-d->impulse[IM_METER] >= impulsecost,
+             jumper = !offground && (b.acttype == AI_A_LOCKON || sequenced || off.z >= JUMPMIN || (d->actortype == A_BOT && lastmillis >= d->ai->jumprand)),
              jump = (impulse || jet || jumper) && (jet || lastmillis >= d->ai->jumpseed);
         if(jump)
         {
@@ -1106,9 +1110,9 @@ namespace ai
         }
         if(jumper && d->action[AC_JUMP])
         {
-            int seed = (111-d->skill)*(d->onladder || d->inliquid ? 3 : 6);
+            int seed = (111-d->skill)*(b.acttype == AI_A_LOCKON || b.acttype == AI_A_HASTE ? 2 : (d->onladder || d->inliquid || b.acttype == AI_A_PROTECT ? 4 : 8));
             d->ai->jumpseed = lastmillis+seed+rnd(seed);
-            seed *= b.acttype == AI_A_IDLE ? 1000 : (b.acttype == AI_A_NORMAL ? 100 : 50);
+            seed *= b.acttype == AI_A_IDLE ? 500 : 100;
             d->ai->jumprand = lastmillis+seed+rnd(seed);
         }
         if(!sequenced && !d->onladder && airtime)
@@ -1145,7 +1149,7 @@ namespace ai
         if(b.acttype == AI_A_IDLE || !actor[d->actortype].canmove)
         {
             d->ai->dontmove = true;
-            d->ai->spot = vec(0, 0, 0);
+            d->ai->spot = fp;
         }
         else if(hunt(d, b))
         {
@@ -1259,8 +1263,9 @@ namespace ai
         game::fixrange(d->ai->targyaw, d->ai->targpitch);
         if(!result) game::scaleyawpitch(d->yaw, d->pitch, d->ai->targyaw, d->ai->targpitch, frame, frame*0.5f);
 
-        if(b.acttype == AI_A_NORMAL && d->health <= m_health(game::gamemode, game::mutators, d->model)/3) b.acttype = AI_A_HASTE;
-        if(actor[d->actortype].canjump && jumpallowed && !d->ai->dontmove) jumpto(d, b, d->ai->spot);
+        if(b.acttype == AI_A_NORMAL && (d->health <= m_health(game::gamemode, game::mutators, d->model)/3 || (iswaypoint(d->ai->targnode) && obstacles.find(d->ai->targnode, d))))
+            b.acttype = AI_A_HASTE;
+        if(actor[d->actortype].canjump && jumpallowed) jumpto(d, b, d->ai->spot);
         if(d->actortype == A_BOT || d->actortype == A_GRUNT)
         {
             if(d->action[AC_PACING] != (physics::allowimpulse(d, IM_A_SPRINT) && (!impulsemeter || impulsepacing == 0 || impulseregenpacing > 0)))
@@ -1474,7 +1479,7 @@ namespace ai
                         else d->ai->blockseq = 0; // waiting, so just try again..
                         break;
                 }
-                if(aidebug >= 6 && dbgfocus(d))
+                if(aidebug >= 7 && dbgfocus(d))
                     conoutf("%s blocked %dms sequence %d", game::colourname(d), d->ai->blocktime, d->ai->blockseq);
             }
         }
@@ -1499,7 +1504,7 @@ namespace ai
                         else d->ai->blockseq = 0; // waiting, so just try again..
                         break;
                 }
-                if(aidebug >= 6 && dbgfocus(d))
+                if(aidebug >= 7 && dbgfocus(d))
                     conoutf("%s targeted %d too long %dms sequence %d", game::colourname(d), d->ai->targnode, d->ai->targtime, d->ai->targseq);
             }
         }
@@ -1690,6 +1695,8 @@ namespace ai
         "wait", "defend", "pursue", "interest"
     }, *sttypes[AI_T_MAX+1] = {
         "none", "node", "actor", "affinity", "entity", "drop"
+    }, *attypes[AI_A_MAX] = {
+        "normal", "idle", "lockon", "protect", "haste"
     };
     void render()
     {
@@ -1718,11 +1725,12 @@ namespace ai
                 loopvrev(d->ai->state)
                 {
                     aistate &b = d->ai->state[i];
-                    defformatstring(s)("%s%s (%s) %s:%d",
-                        top ? "<default>\fg" : "<sub>\fy",
+                    defformatstring(s)("%s%s (%s) %s:%d (\fs%s%s\fS)",
+                        top ? "<default>\fg" : "<sub>\fa",
                         stnames[b.type],
                         timestr(lastmillis-b.millis),
-                        sttypes[b.targtype+1], b.target
+                        sttypes[b.targtype+1], b.target,
+                        top ? "\fc" : "\fw", attypes[b.acttype]
                     );
                     part_textcopy(pos, s);
                     pos.z += 2;
