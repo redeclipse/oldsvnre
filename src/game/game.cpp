@@ -261,7 +261,7 @@ namespace game
     VAR(IDF_PERSIST, headlessmodels, 0, 1, 1);
     VAR(IDF_PERSIST, autoloadweap, 0, 0, 1); // 0 = off, 1 = auto-set loadout weapons
     SVAR(IDF_PERSIST, favloadweaps, "");
-    FVAR(IDF_PERSIST, twitchspeed, 0, 20, FVAR_MAX);
+    FVAR(IDF_PERSIST, twitchspeed, 0, 10, FVAR_MAX);
 
     bool needname(gameent *d)
     {
@@ -3492,7 +3492,7 @@ namespace game
                     q = q*0.75f;
                 }
             }
-            if(rendernormally && d->ragdoll && twitchspeed > 0) twitchragdoll(d, twitchspeed*pc*rnd(100)/80.f);
+            if(rendernormally && d->ragdoll && twitchspeed > 0) twitchragdoll(d, twitchspeed*pc*blend*rnd(100)/80.f);
         }
     }
 
