@@ -266,7 +266,7 @@ namespace weapons
         {
             from = d->muzzlepos(weap, secondary);
             to = targ;
-
+#if 0
             vec unitv;
             float dist = to.dist(from, unitv);
             if(dist > 0) unitv.div(dist);
@@ -295,7 +295,7 @@ namespace weapons
                     to.add(from);
                 }
             }
-
+#endif
             int rays = W2(weap, rays, secondary), x = 0;
             if(rays > 1 && W2(weap, power, secondary) && scale < 1) rays = int(ceilf(rays*scale));
             float m = accmod(d, W(d->weapselect, zooms) && secondary, &x);
