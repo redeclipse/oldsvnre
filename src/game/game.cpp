@@ -2736,10 +2736,7 @@ namespace game
                     else if(*musicfile) playmusic(musicfile, type >= 4 ? "music" : NULL);
                 }
             }
-        }
-        if(needname(player1) && !menuactive()) showgui("profile", -1);
-        if(connected())
-        {
+            if(needname(player1) && !menuactive()) showgui("profile", -1);
             player1->conopen = commandmillis > 0 || hud::hasinput(true);
             checkoften(player1, true);
             loopv(players) if(players[i]) checkoften(players[i], players[i]->ai != NULL);
@@ -2770,7 +2767,7 @@ namespace game
             otherplayers();
             if(needloadout(player1) && !menuactive()) showgui("loadout", -1);
         }
-        else if(!menuactive()) showgui("main", -1);
+        else if(!menuactive()) showgui(needname(player1) ? "profile" : "main", -1);
 
         gets2c();
         adjustscaled(hud::damageresidue, hud::damageresiduefade);
