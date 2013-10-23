@@ -3371,14 +3371,14 @@ namespace game
             if(d != focus && playerhint&(d->team != focus->team ? 2 : 1))
             {
                 vec c = vec::hexcolor(getcolour(d, playerhinttone));
-                float radius = d->height*playerhintsize, fade = blend*playerhintblend;
+                float height = d->height*playerhintsize, fade = blend*playerhintblend;
                 if(playerhintscale > 0)
                 {
                     float per = d->health/float(m_health(gamemode, mutators, d->model));
                     fade = (fade*(1.f-playerhintscale))+(fade*per*playerhintscale);
                     if(fade > 1)
                     {
-                        radius *= 1.f+(fade-1.f);
+                        height *= 1.f+(fade-1.f);
                         fade = 1;
                     }
                 }
@@ -3387,11 +3387,11 @@ namespace game
                     int millis = lastmillis%1000;
                     float amt = millis <= 500 ? 1.f-(millis/500.f) : (millis-500)/500.f;
                     flashcolour(c.r, c.g, c.b, 1.f, 1.f, 1.f, amt);
-                    radius += radius*amt*0.1f;
+                    height += height*amt*0.1f;
                 }
-                vec o = d->center(), offset = vec(o).sub(camera1->o).rescale(radius/2);
+                vec o = d->center(), offset = vec(o).sub(camera1->o).rescale(d->radius/2);
                 offset.z = max(offset.z, -1.0f);
-                part_create(PART_HINT_BOLD_SOFT, 1, offset.add(o), c.tohexcolor(), radius, fade*camera1->o.distrange(o, playerhintfadeat, playerhintfadecut));
+                part_create(PART_HINT_BOLD_SOFT, 1, offset.add(o), c.tohexcolor(), height, fade*camera1->o.distrange(o, playerhintfadeat, playerhintfadecut));
             }
             float minz = d == focus && !third && firstpersonbodyfeet >= 0 && d->wantshitbox() ? camera1->o.z-firstpersonbodyfeet : 0.f;
             if(d->hasmelee(lastmillis, true, physics::sliding(d, true), d->physstate >= PHYS_SLOPE || d->onladder || physics::liquidcheck(d))) loopi(2)
