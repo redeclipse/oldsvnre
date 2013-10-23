@@ -1087,15 +1087,14 @@ struct gameent : dynent, gamestate
         if(foot < 0 || foot > 1) return feetpos();
         if(toe[foot] == vec(-1, -1, -1))
         {
-            float amt = ((lastmillis%1000)-500)/500.f;
+            int millis = lastmillis%500;
+            float amt = millis > 250 ? (500-millis)/250.f : millis/250.f;
             vec dir, right;
             vecfromyawpitch(yaw, pitch, 1, 0, dir);
             vecfromyawpitch(yaw, pitch, 0, foot ? 1 : -1, right);
             dir.mul(radius*0.5f);
-            right.mul(radius*0.5f);
+            right.mul(radius*(!move && strafe ? amt-0.5f : 0.5f));
             dir.z -= height*0.6f+(height*0.4f*(foot ? 1-amt : amt));
-            dir.x *= foot ? 1-amt : amt;
-            dir.y *= foot ? 1-amt : amt;
             toe[foot] = vec(o).add(dir).add(right);
         }
         return toe[foot];
