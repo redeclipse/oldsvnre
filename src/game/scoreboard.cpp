@@ -51,6 +51,7 @@ namespace hud
     VAR(IDF_PERSIST|IDF_HEX, scorehilight, 0, 0x888888, 0xFFFFFF);
     VAR(IDF_PERSIST, scoreimage, 0, 1, 1);
     FVAR(IDF_PERSIST, scoreimagesize, FVAR_NONZERO, 6, 10);
+    VAR(IDF_PERSIST, scorebgfx, 0, 0, 1);
 
     static bool scoreson = false, scoresoff = false, shownscores = false;
     static int menustart = 0, menulastpress = 0;
@@ -270,7 +271,7 @@ namespace hud
 
     void renderscoreboard(guient &g, bool firstpass)
     {
-        g.start(menustart, menuscale, NULL, false, false);
+        g.start(menustart, menuscale, NULL, false, false, scorebgfx!=0);
         int numgroups = groupplayers();
         uilist(g, {
             uicenterlist(g, {
@@ -410,6 +411,17 @@ namespace hud
                         SEARCHBINDCACHE(scoreboardkey)("showscores", 1);
                         uicenterlist(g, uifont(g, "little", g.textf("%s %s to close this window", 0xFFFFFF, NULL, 0, scoresoff ? "Release" : "Press", scoreboardkey)));
                         uicenterlist(g, uifont(g, "tiny", g.textf("Double-tap to keep the window open", 0xFFFFFF, NULL, 0)));
+
+                        if(m_play(game::gamemode) && game::player1->state != CS_SPECTATOR && (game::intermission || scoresinfo))
+                        {
+                            float ratio = game::player1->frags >= game::player1->deaths ? (game::player1->frags/float(max(game::player1->deaths, 1))) : -(game::player1->deaths/float(max(game::player1->frags, 1)));
+                            uicenterlist(g, uifont(g, "little", {
+                                g.textf("\fs\fg%d\fS %s / \fs\fg%d\fS %s (\fs\fy%.1f\fS:\fs\fy%.1f\fS) \fs\fg%d\fS damage", 0xFFFFFF, NULL, 0,
+                                    game::player1->frags, game::player1->frags != 1 ? "frags" : "frag",
+                                    game::player1->deaths, game::player1->deaths != 1 ? "deaths" : "death", ratio >= 0 ? ratio : 1.f, ratio >= 0 ? 1.f : -ratio,
+                                    game::player1->totaldamage);
+                            }));
+                        }
                     }));
                 });
             });
@@ -465,14 +477,15 @@ namespace hud
                                 if(sg.team && m_team(game::gamemode, game::mutators))
                                 {
                                     g.pushlist();
-                                    uilist(g, {
+                                    uilist(g, uifont(g, "default", {
                                         g.background(bgcolor);
-                                        if(m_defend(game::gamemode) && ((defendlimit && sg.total >= defendlimit) || sg.total == INT_MAX))
-                                            g.textf("%s: WIN", 0xFFFFFF, teamtexname(sg.team), TEAM(sg.team, colour), TEAM(sg.team, name));
-                                        else if(m_laptime(game::gamemode, game::mutators)) g.textf("%s: %s", 0xFFFFFF, teamtexname(sg.team), TEAM(sg.team, colour), TEAM(sg.team, name), sg.total ? timestr(sg.total) : "\fadnf");
-                                        else g.textf("%s: %d", 0xFFFFFF, teamtexname(sg.team), TEAM(sg.team, colour), TEAM(sg.team, name), sg.total);
+                                        g.textf("team %s", 0xFFFFFF, teamtexname(sg.team), TEAM(sg.team, colour), TEAM(sg.team, name));
                                         g.spring();
-                                    });
+                                        if(m_defend(game::gamemode) && ((defendlimit && sg.total >= defendlimit) || sg.total == INT_MAX)) g.text("WINNER", 0xFFFFFF);
+                                        else if(m_laptime(game::gamemode, game::mutators)) g.textf("best: %s", 0xFFFFFF, NULL, 0, sg.total ? timestr(sg.total) : "\fadnf");
+                                        else g.textf("points: %d", 0xFFFFFF, NULL, 0, sg.total);
+                                        g.space(1);
+                                    }));
                                     g.pushlist();
                                 }
 
@@ -652,21 +665,20 @@ namespace hud
                     });
                     if(scorespectators && spectators.length())
                     {
-                        g.spring();
                         g.space(1);
                         uifont(g, "little", uicenterlist(g, {
                             uicenterlist(g, {
                                 bool pushed = false;
                                 loopv(spectators)
                                 {
-                                    if(!(i%5))
+                                    if(!(i%4))
                                     {
                                         if(pushed) g.poplist();
                                         g.pushlist();
                                         pushed = true;
                                     }
                                     gameent *o = spectators[i];
-                                    uipad(g, 0.125f, uicenterlist(g, {
+                                    uipad(g, 0.25f, uicenterlist(g, {
                                         if(o == game::player1 && scorehilight) g.background(scorehilight);
                                         if(scoreclientnum || game::player1->privilege >= PRIV_ELEVATED)
                                             g.textf("%s [%d]", 0xFFFFFF, NULL, 0, game::colourname(o, NULL, true, false), o->clientnum);
@@ -680,17 +692,6 @@ namespace hud
                 });
             });
         });
-        if(m_play(game::gamemode) && game::player1->state != CS_SPECTATOR && (game::intermission || scoresinfo))
-        {
-            float ratio = game::player1->frags >= game::player1->deaths ? (game::player1->frags/float(max(game::player1->deaths, 1))) : -(game::player1->deaths/float(max(game::player1->frags, 1)));
-            g.space(0.5f);
-            uicenterlist(g, uifont(g, "reduced", {
-                g.textf("\fs\fg%d\fS %s, \fs\fg%d\fS %s, \fs\fy%.1f\fS:\fs\fy%.1f\fS ratio, \fs\fg%d\fS damage", 0xFFFFFF, NULL, 0,
-                    game::player1->frags, game::player1->frags != 1 ? "frags" : "frag",
-                    game::player1->deaths, game::player1->deaths != 1 ? "deaths" : "death", ratio >= 0 ? ratio : 1.f, ratio >= 0 ? 1.f : -ratio,
-                    game::player1->totaldamage);
-            }));
-        }
         g.end();
     }
 

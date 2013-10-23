@@ -21,7 +21,7 @@ VAR(IDF_PERSIST, guiscaletime, 0, 250, VAR_MAX);
 VAR(IDF_PERSIST|IDF_HEX, guibgcolour, -1, 0x888888, 0xFFFFFF);
 VAR(IDF_PERSIST|IDF_HEX, guibordercolour, -1, 0x181818, 0xFFFFFF);
 
-static bool needsinput = false, hastitle = true;
+static bool needsinput = false, hastitle = true, hasbgfx = true;
 
 #include "textedit.h"
 struct gui : guient
@@ -850,7 +850,7 @@ struct gui : guient
         //uiorigin = vec(0.5f - (guibound[0]*2)*uiscale.x, 0.5f + (h-guibound[1]*2)*uiscale.y, 0);
     }
 
-    void start(int starttime, float initscale, int *tab, bool allowinput, bool wantstitle)
+    void start(int starttime, float initscale, int *tab, bool allowinput, bool wantstitle, bool wantsbgfx)
     {
         initscale *= 0.025f;
         basescale = initscale;
@@ -858,6 +858,7 @@ struct gui : guient
             uiscale.x = uiscale.y = uiscale.z = guiscaletime ? min(basescale*(totalmillis-starttime)/float(guiscaletime), basescale) : basescale;
         needsinput = allowinput;
         hastitle = wantstitle;
+        hasbgfx = wantsbgfx;
         passthrough = !allowinput;
         fontdepth = 0;
         gui::pushfont("reduced");
@@ -882,7 +883,7 @@ struct gui : guient
                 y -= guibound[1]*3/2;
                 h += guibound[1]*3/2;
             }
-            if(guibgcolour >= 0)
+            if(hasbgfx && guibgcolour >= 0)
             {
                 notextureshader->set();
                 glDisable(GL_TEXTURE_2D);
@@ -890,7 +891,7 @@ struct gui : guient
                 defaultshader->set();
                 glEnable(GL_TEXTURE_2D);
             }
-            if(guibordercolour >= 0)
+            if(hasbgfx && guibordercolour >= 0)
             {
                 lineshader->set();
                 glDisable(GL_TEXTURE_2D);
@@ -1085,7 +1086,7 @@ namespace UI
         fieldsactive = false;
 
         needsinput = false;
-        hastitle = true;
+        hastitle = hasbgfx = true;
 
         if(!guis.empty())
         {

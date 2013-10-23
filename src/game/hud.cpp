@@ -653,7 +653,7 @@ namespace hud
 
     bool hasinput(bool pass, bool focus)
     {
-        if(pass && (game::intermission || game::focus->state != CS_ALIVE)) pass = false;
+        //if(pass && (game::intermission || game::focus->state != CS_ALIVE)) pass = false;
         if(focus && (commandmillis > 0 || curcompass)) return true;
         return UI::active(pass);
     }

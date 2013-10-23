@@ -534,7 +534,7 @@ struct guient
 {
     virtual ~guient() {}
 
-    virtual void start(int starttime, float basescale, int *tab = NULL, bool allowinput = true, bool wantstitle = true) = 0;
+    virtual void start(int starttime, float basescale, int *tab = NULL, bool allowinput = true, bool wantstitle = true, bool wantsbgfx = true) = 0;
     virtual void end() = 0;
 
     virtual int text(const char *text, int color, const char *icon = NULL, int icolor = 0xFFFFFF) = 0;
