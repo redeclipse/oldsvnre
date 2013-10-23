@@ -2731,7 +2731,7 @@ namespace server
         hasgameinfo = maprequest = mapsending = shouldcheckvotes = firstblood = false;
         stopdemo();
         changemode(gamemode = mode, mutators = muts);
-        curbalance = nextbalance = gamemillis = interm = 0;
+        curbalance = nextbalance = lastteambalance = nextteambalance = gamemillis = interm = 0;
         oldtimelimit = G(timelimit);
         timeremaining = G(timelimit) ? G(timelimit)*60 : -1;
         gamelimit = G(timelimit) ? timeremaining*1000 : 0;
