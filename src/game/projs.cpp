@@ -1018,6 +1018,25 @@ namespace projs
             default: break;
         }
         if(proj.projtype != PRJ_SHOT) updatebb(proj, true);
+        proj.spawntime = lastmillis;
+        proj.hit = NULL;
+        proj.hitflags = HITFLAG_NONE;
+        proj.movement = 1;
+        if(proj.owner && (proj.projtype != PRJ_SHOT || (!proj.child && !WK(proj.flags) && !weaptype[proj.weap].traced)))
+        {
+            vec eyedir = vec(proj.o).sub(proj.owner->o);
+            float eyedist = eyedir.magnitude();
+            if(eyedist > 0)
+            {
+                eyedir.normalize();
+                float blocked = tracecollide(&proj, proj.owner->o, eyedir, eyedist, RAY_CLIPMAT|RAY_ALPHAPOLY, false);
+                if(blocked >= 0)
+                {
+                    proj.o = proj.from = vec(eyedir).mul(blocked-max(proj.radius, 1e-3f)).add(proj.owner->o);
+                    proj.to = vec(eyedir).mul(blocked).add(proj.owner->o);
+                }
+            }
+        }
         if(proj.projtype != PRJ_SHOT || !weaptype[proj.weap].traced)
         {
             vec dir = vec(proj.to).sub(proj.o);
@@ -1043,21 +1062,6 @@ namespace projs
                 rel.add(proj.inertia.mul(proj.relativity));
             }
             proj.vel = vec(rel).add(vec(dir).mul(physics::movevelocity(&proj)));
-        }
-        proj.spawntime = lastmillis;
-        proj.hit = NULL;
-        proj.hitflags = HITFLAG_NONE;
-        proj.movement = 1;
-        if(proj.owner && (proj.projtype != PRJ_SHOT || (!proj.child && !WK(proj.flags) && !weaptype[proj.weap].traced)))
-        {
-            vec eyedir = vec(proj.o).sub(proj.owner->o);
-            float eyedist = eyedir.magnitude();
-            if(eyedist > 0)
-            {
-                eyedir.normalize();
-                float blocked = tracecollide(&proj, proj.owner->o, eyedir, eyedist, RAY_CLIPMAT|RAY_ALPHAPOLY, false);
-                if(blocked >= 0) proj.o = vec(eyedir).mul(blocked-1e-3f).add(proj.owner->o);
-            }
         }
         if(proj.projtype != PRJ_SHOT) spherecheck(proj);
         proj.resetinterp();
