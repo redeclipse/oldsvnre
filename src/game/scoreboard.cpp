@@ -49,6 +49,8 @@ namespace hud
     VAR(IDF_PERSIST, scorehostinfo, 0, 0, 1);
     VAR(IDF_PERSIST, scoreicons, 0, 1, 1);
     VAR(IDF_PERSIST|IDF_HEX, scorehilight, 0, 0x888888, 0xFFFFFF);
+    VAR(IDF_PERSIST, scoreimage, 0, 1, 1);
+    FVAR(IDF_PERSIST, scoreimagesize, FVAR_NONZERO, 6, 10);
 
     static bool scoreson = false, scoresoff = false, shownscores = false;
     static int menustart = 0, menulastpress = 0;
@@ -300,10 +302,13 @@ namespace hud
                             }));
                         }
                     }));
-                    g.space(0.5f);
-                    uicenterlist(g, {
-                        g.image(NULL, 8, true);
-                    });
+                    if(scoreimage)
+                    {
+                        g.space(0.5f);
+                        uicenterlist(g, {
+                            g.image(NULL, scoreimagesize, true);
+                        });
+                    }
                     g.space(0.5f);
                     uicenterlist(g, uicenterlist(g, {
                         if(game::player1->quarantine)
@@ -395,10 +400,10 @@ namespace hud
                                 });
                             }
 
-                            if(m_edit(game::gamemode) && (game::focus->state != CS_EDITING || shownotices >= 4))
+                            if(m_edit(game::gamemode) && (game::player1->state != CS_EDITING || shownotices >= 4))
                             {
                                 SEARCHBINDCACHE(editkey)("edittoggle", 1);
-                                uicenterlist(g, uifont(g, "reduced", g.textf("Press %s to %s editmode", 0xFFFFFF, NULL, 0, editkey, game::focus->state != CS_EDITING ? "enter" : "exit")));
+                                uicenterlist(g, uifont(g, "reduced", g.textf("Press %s to %s editmode", 0xFFFFFF, NULL, 0, editkey, game::player1->state != CS_EDITING ? "enter" : "exit")));
                             }
                         }
 
