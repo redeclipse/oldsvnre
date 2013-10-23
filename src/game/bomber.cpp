@@ -598,14 +598,14 @@ namespace bomber
             }
             if(st.flags.inrange(goal) && ai::makeroute(d, b, st.flags[goal].pos()))
             {
-                d->ai->switchstate(b, ai::AI_S_PURSUE, ai::AI_T_AFFINITY, goal);
+                d->ai->switchstate(b, ai::AI_S_PURSUE, ai::AI_T_AFFINITY, goal, ai::AI_A_HASTE);
                 return true;
             }
         }
 	    if(b.type == ai::AI_S_PURSUE && b.targtype == ai::AI_T_NODE) return true; // we already did this..
 		if(ai::randomnode(d, b, ai::ALERTMIN, 1e16f))
 		{
-            d->ai->switchstate(b, ai::AI_S_PURSUE, ai::AI_T_NODE, d->ai->route[0]);
+            d->ai->switchstate(b, ai::AI_S_PURSUE, ai::AI_T_NODE, d->ai->route[0], ai::AI_A_HASTE);
             return true;
 		}
         return false;
@@ -634,7 +634,7 @@ namespace bomber
                 int flag = taken.length() > 2 ? rnd(taken.length()) : 0;
                 if(ai::makeroute(d, b, st.flags[taken[flag]].pos()))
                 {
-                    d->ai->switchstate(b, ai::AI_S_PURSUE, ai::AI_T_AFFINITY, taken[flag]);
+                    d->ai->switchstate(b, ai::AI_S_PURSUE, ai::AI_T_AFFINITY, taken[flag], ai::AI_A_HASTE);
                     return true;
                 }
                 else taken.remove(flag);
@@ -694,6 +694,7 @@ namespace bomber
                     n.score = pos.squaredist(f.pos())/(!regen ? 100.f : 1.f);
                     n.tolerance = f.team != owner ? 0.5f : 0.25f;
                     n.team = true;
+                    n.acttype = ai::AI_A_PROTECT;
                 }
             }
             else if(isbomberaffinity(f))
@@ -724,6 +725,7 @@ namespace bomber
                         n.score = d->o.squaredist(t->o);
                         n.tolerance = 0.5f;
                         n.team = team;
+                        if(team) n.acttype = ai::AI_A_PROTECT;
                     }
                 }
             }
@@ -803,8 +805,11 @@ namespace bomber
                 }
                 return ai::makeroute(d, b, f.pos());
             }
-            else if(isbombertarg(f, ai::owner(d)))
-                loopv(st.flags) if(st.flags[i].owner == d) return ai::makeroute(d, b, f.pos());
+            else if(isbombertarg(f, ai::owner(d))) loopv(st.flags) if(st.flags[i].owner == d && ai::makeroute(d, b, f.pos()))
+            {
+                b.acttype = ai::AI_A_HASTE;
+                return true;
+            }
         }
         return false;
     }

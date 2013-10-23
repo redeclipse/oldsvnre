@@ -165,21 +165,30 @@ namespace ai
         AI_T_MAX
     };
 
+    enum
+    {
+        AI_A_NORMAL = 0,
+        AI_A_IDLE,
+        AI_A_LOCKON,
+        AI_A_PROTECT,
+        AI_A_HASTE
+    };
+
     struct interest
     {
-        int state, node, target, targtype;
+        int state, node, target, targtype, acttype;
         float score, tolerance;
         bool team;
-        interest() : state(-1), node(-1), target(-1), targtype(-1), score(0.f), tolerance(1.f), team(false) {}
+        interest() : state(-1), node(-1), target(-1), targtype(-1), acttype(AI_A_NORMAL), score(0.f), tolerance(1.f), team(false) {}
         ~interest() {}
     };
 
     struct aistate
     {
-        int type, millis, targtype, target, idle;
+        int type, millis, targtype, target, acttype;
         bool override;
 
-        aistate(int m, int t, int r = -1, int v = -1) : type(t), millis(m), targtype(r), target(v)
+        aistate(int m, int t, int r = -1, int v = -1, int a = AI_A_NORMAL) : type(t), millis(m), targtype(r), target(v), acttype(a)
         {
             reset();
         }
@@ -187,7 +196,7 @@ namespace ai
 
         void reset()
         {
-            idle = 0;
+            acttype = AI_A_NORMAL;
             override = false;
         }
     };
@@ -253,9 +262,9 @@ namespace ai
             }
         }
 
-        aistate &addstate(int t, int r = -1, int v = -1)
+        aistate &addstate(int t, int r = -1, int v = -1, int a = AI_A_NORMAL)
         {
-            return state.add(aistate(lastmillis, t, r, v));
+            return state.add(aistate(lastmillis, t, r, v, a));
         }
 
         void removestate(int index = -1)
@@ -271,16 +280,17 @@ namespace ai
             return state.last();
         }
 
-        aistate &switchstate(aistate &b, int t, int r = -1, int v = -1)
+        aistate &switchstate(aistate &b, int t, int r = -1, int v = -1, int a = AI_A_NORMAL)
         {
             if((b.type == t && b.targtype == r) || (b.type == AI_S_INTEREST && b.targtype == AI_T_NODE))
             {
                 b.millis = lastmillis;
                 b.target = v;
+                b.acttype = a;
                 b.reset();
                 return b;
             }
-            return addstate(t, r, v);
+            return addstate(t, r, v, a);
         }
     };
 
