@@ -21,6 +21,7 @@
 				<Option projectLibDirsRelation="1" />
 				<Compiler>
 					<Add option="-fomit-frame-pointer" />
+					<Add option="-ffast-math" />
 					<Add option="-O3" />
 					<Add option="-Wall" />
 					<Add option="-m32" />
@@ -158,6 +159,7 @@
 				<Option projectLibDirsRelation="1" />
 				<Compiler>
 					<Add option="-fomit-frame-pointer" />
+					<Add option="-ffast-math" />
 					<Add option="-O3" />
 					<Add option="-Wall" />
 					<Add option="-m32" />
@@ -243,6 +245,7 @@
 				<Option projectLibDirsRelation="1" />
 				<Compiler>
 					<Add option="-fomit-frame-pointer" />
+					<Add option="-ffast-math" />
 					<Add option="-O3" />
 					<Add option="-Wall" />
 					<Add option="-m64" />
@@ -381,6 +384,7 @@
 				<Option projectLibDirsRelation="1" />
 				<Compiler>
 					<Add option="-fomit-frame-pointer" />
+					<Add option="-ffast-math" />
 					<Add option="-O3" />
 					<Add option="-Wall" />
 					<Add option="-m64" />
@@ -466,6 +470,7 @@
 				<Option projectLibDirsRelation="1" />
 				<Compiler>
 					<Add option="-fomit-frame-pointer" />
+					<Add option="-ffast-math" />
 					<Add option="-O3" />
 					<Add option="-Wall" />
 					<Add option="-fsigned-char" />
@@ -507,6 +512,7 @@
 				<Option projectLibDirsRelation="1" />
 				<Compiler>
 					<Add option="-fomit-frame-pointer" />
+					<Add option="-ffast-math" />
 					<Add option="-O3" />
 					<Add option="-Wall" />
 					<Add option="-fsigned-char" />
