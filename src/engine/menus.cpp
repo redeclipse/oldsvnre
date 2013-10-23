@@ -15,9 +15,9 @@ struct menu : guicb
     char *name, *header;
     uint *contents, *initscript;
     int passes, menutab, menustart;
-    bool world, useinput, usetitle;
+    bool world, useinput, usetitle, usebgfx;
 
-    menu() : name(NULL), header(NULL), contents(NULL), initscript(NULL), passes(0), menutab(0), menustart(0), world(false), useinput(true), usetitle(true) {}
+    menu() : name(NULL), header(NULL), contents(NULL), initscript(NULL), passes(0), menutab(0), menustart(0), world(false), useinput(true), usetitle(true), usebgfx(true) {}
 
     void gui(guient &g, bool firstpass)
     {
@@ -30,7 +30,7 @@ struct menu : guicb
             if(world && passes) { WITHWORLD(execute(initscript)); }
             else execute(initscript);
         }
-        cgui->start(menustart, menuscale, &menutab, useinput, usetitle);
+        cgui->start(menustart, menuscale, &menutab, useinput, usetitle, usebgfx);
         cgui->tab(header ? header : name);
         if(contents)
         {
@@ -201,6 +201,12 @@ void guishowtitle(int *n)
 {
     if(!cmenu) return;
     cmenu->usetitle = *n ? true : false;
+}
+
+void guishowbgfx(int *n)
+{
+    if(!cmenu) return;
+    cmenu->usebgfx = *n ? true : false;
 }
 
 void guistayopen(uint *contents)
@@ -584,6 +590,7 @@ COMMAND(0, guitext, "ssii");
 COMMANDN(0, cleargui, cleargui_, "i");
 ICOMMAND(0, showgui, "si", (const char *s, int *n), showgui(s, *n));
 COMMAND(0, guishowtitle, "i");
+COMMAND(0, guishowbgfx, "i");
 COMMAND(0, guistayopen, "e");
 COMMAND(0, guinohitfx, "e");
 
@@ -758,7 +765,7 @@ void progressmenu()
     menu *m = menus.access("loading");
     if(m)
     {
-        m->usetitle = m->useinput = false;
+        m->usetitle = m->useinput = m->usebgfx = false;
         UI::addcb(m);
     }
     else conoutf("cannot find menu 'loading'");
