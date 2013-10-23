@@ -555,7 +555,7 @@ namespace capture
                 }
                 if(st.flags.inrange(closest) && ai::makeroute(d, b, aiflagpos(d, st.flags[closest])))
                 {
-                    d->ai->switchstate(b, ai::AI_S_PURSUE, ai::AI_T_AFFINITY, closest);
+                    d->ai->switchstate(b, ai::AI_S_PURSUE, ai::AI_T_AFFINITY, closest, ai::AI_A_HASTE);
                     return true;
                 }
             }
@@ -563,7 +563,7 @@ namespace capture
 	    if(b.type == ai::AI_S_PURSUE && b.targtype == ai::AI_T_NODE) return true; // we already did this..
 		if(ai::randomnode(d, b, ai::ALERTMIN, 1e16f))
 		{
-            d->ai->switchstate(b, ai::AI_S_PURSUE, ai::AI_T_NODE, d->ai->route[0]);
+            d->ai->switchstate(b, ai::AI_S_PURSUE, ai::AI_T_NODE, d->ai->route[0], ai::AI_A_HASTE);
             return true;
 		}
         return false;
@@ -596,7 +596,7 @@ namespace capture
                 int flag = taken.length() > 2 ? rnd(taken.length()) : 0;
                 if(ai::makeroute(d, b, aiflagpos(d, st.flags[taken[flag]])))
                 {
-                    d->ai->switchstate(b, ai::AI_S_PURSUE, ai::AI_T_AFFINITY, taken[flag]);
+                    d->ai->switchstate(b, ai::AI_S_PURSUE, ai::AI_T_AFFINITY, taken[flag], ai::AI_A_HASTE);
                     return true;
                 }
                 else taken.remove(flag);
@@ -654,6 +654,7 @@ namespace capture
                     n.score = pos.squaredist(aiflagpos(d, f))/(!regen ? 100.f : 1.f);
                     n.tolerance = 0.25f;
                     n.team = true;
+                    n.acttype = ai::AI_A_PROTECT;
                 }
             }
             else
@@ -683,6 +684,7 @@ namespace capture
                         n.score = d->o.squaredist(t->o);
                         n.tolerance = 0.25f;
                         n.team = team;
+                        if(team) n.acttype = ai::AI_A_PROTECT;
                     }
                 }
             }
@@ -751,13 +753,21 @@ namespace capture
         if(st.flags.inrange(b.target) && d->actortype == A_BOT)
         {
             capturestate::flag &f = st.flags[b.target];
-            if(f.owner)
+            if(f.team != ai::owner(d))
             {
-                if(d == f.owner) return aihomerun(d, b);
-                else if(ai::owner(d) != ai::owner(f.owner)) return ai::violence(d, b, f.owner, 4);
-                else return ai::defense(d, b, aiflagpos(d, f));
+                if(f.owner)
+                {
+                    if(d == f.owner) return aihomerun(d, b);
+                    else if(ai::owner(d) != ai::owner(f.owner)) return ai::violence(d, b, f.owner, 4);
+                    else return ai::defense(d, b, aiflagpos(d, f));
+                }
+                return ai::makeroute(d, b, aiflagpos(d, f));
             }
-            if(f.team != ai::owner(d) || f.droptime) return ai::makeroute(d, b, aiflagpos(d, f));
+            else loopv(st.flags) if(st.flags[i].owner == d && ai::makeroute(d, b, aiflagpos(d, f)))
+            {
+                b.acttype = ai::AI_A_HASTE;
+                return true;
+            }
         }
         return false;
     }
