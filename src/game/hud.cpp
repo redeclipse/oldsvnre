@@ -169,7 +169,7 @@ namespace hud
     FVAR(IDF_PERSIST, waitbordersize, 0, 0.05f, 1);
     FVAR(IDF_PERSIST, waitborderblend, 0, 0.9f, 1);
 
-    VAR(IDF_PERSIST, backgroundborder, 0, BORDERP_ALL, BORDERP_ALL);
+    VAR(IDF_PERSIST, backgroundborder, 0, 0, BORDERP_ALL);
     VAR(IDF_PERSIST|IDF_HEX, backgroundbordertone, -CTONE_MAX, 0x080000, 0xFFFFFF);
     FVAR(IDF_PERSIST, backgroundbordersize, 0, 0.05f, 1);
     FVAR(IDF_PERSIST, backgroundborderblend, 0, 0.5f, 1);

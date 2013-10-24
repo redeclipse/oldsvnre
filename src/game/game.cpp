@@ -40,7 +40,7 @@ namespace game
 
     void stopmapmusic()
     {
-        if(connected() && maptime > 0 && !intermission) musicdone(true);
+        if(connected() && !client::loadingmap && !intermission) musicdone(true);
     }
     VARF(IDF_PERSIST, musictype, 0, 1, 6, stopmapmusic()); // 0 = no in-game music, 1 = map music (or random if none), 2 = always random, 3 = map music (silence if none), 4-5 = same as 1-2 but pick new tracks when done, 6 = always use theme song
     VARF(IDF_PERSIST, musicedit, -1, 0, 6, stopmapmusic()); // same as above for editmode, -1 = use musictype
@@ -580,7 +580,7 @@ namespace game
                 }
                 if(d == focus) resetfollow();
             }
-            else if(maptime > 0 && gameent::is(d) && d->actortype < A_ENEMY)
+            else if(!client::loadingmap && gameent::is(d) && d->actortype < A_ENEMY)
             {
                 cament *c = cameras.add(new cament);
                 c->o = d->headpos();
@@ -703,7 +703,7 @@ namespace game
 
     void respawned(gameent *d, bool local, int ent)
     { // remote clients wait until first position update to process this
-        if(maptime > 0 && client::waitplayers) client::waitplayers = false;
+        if(!client::loadingmap && client::waitplayers) client::waitplayers = false;
         if(local)
         {
             d->state = CS_ALIVE;
@@ -2713,6 +2713,7 @@ namespace game
                 if(type != 6) musicdone(false);
                 RUNWORLD("on_start");
                 resetcamera();
+                client::loadingmap = false;
                 return;
             }
             else if(!nosound && mastervol && musicvol && type && !playingmusic())

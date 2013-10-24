@@ -27,7 +27,7 @@ namespace physics
     bool allowimpulse(physent *d, int type)
     {
         if(d && gameent::is(d))
-            return (type ? impulseallowed&type : impulseallowed != 0) && (impulsestyle || m_jet(game::gamemode, game::mutators));
+            return jumpallowed && (type ? impulseallowed&type : impulseallowed != 0) && (impulsestyle || m_jet(game::gamemode, game::mutators));
         return false;
     }
 
@@ -49,7 +49,7 @@ namespace physics
         if((gameent::is(d)) && d->state == CS_ALIVE && m_jet(game::gamemode, game::mutators))
         {
             gameent *e = (gameent *)d;
-            if(e->physstate == PHYS_FALL && !e->onladder && (!e->impulse[IM_TIME] || lastmillis-e->impulse[IM_TIME] > jetdelay))
+            if((!jumpallowed || e->physstate == PHYS_FALL) && !e->onladder && (!e->impulse[IM_TIME] || lastmillis-e->impulse[IM_TIME] > jetdelay))
                 return true;
         }
         return false;
@@ -428,7 +428,7 @@ namespace physics
     bool movepitch(physent *d)
     {
         if(d->type == ENT_CAMERA || d->state == CS_EDITING || d->state == CS_SPECTATOR) return true;
-        if(d->onladder || (d->inliquid && (liquidcheck(d) || d->pitch < 0.f)) || jetpack(d) || PHYS(gravity) == 0) return true;
+        if(d->onladder || (d->inliquid && jumpallowed && (liquidcheck(d) || d->pitch < 0.f)) || jetpack(d) || PHYS(gravity) == 0) return true;
         return false;
     }
 
@@ -953,7 +953,7 @@ namespace physics
         else
         {
             impulseplayer(d, onfloor, jetting);
-            if(onfloor && d->action[AC_JUMP] && jumpallowed)// && (d->ai || !(impulsemethod&1) || !d->action[AC_CROUCH]))
+            if(onfloor && d->action[AC_JUMP] && (jetting || jumpallowed))// && (d->ai || !(impulsemethod&1) || !d->action[AC_CROUCH]))
             {
                 float force = jumpvel(d, true);
                 if(force > 0)
@@ -968,7 +968,8 @@ namespace physics
                     d->resetphys();
                     d->impulse[IM_JUMP] = lastmillis;
                     if(m_jet(game::gamemode, game::mutators) && !allowimpulse(d, IM_A_BOOST)) d->doimpulse(0, IM_T_BOOST, lastmillis);
-                    d->action[AC_JUMP] = onfloor = false;
+                    onfloor = false;
+                    if(jumpallowed) d->action[AC_JUMP] = false;
                     client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_JUMP);
                     playsound(S_JUMP, d->o, d);
                     regularshape(PART_SMOKE, int(d->radius), 0x222222, 21, 20, 250, d->feetpos(), 1, 1, -10, 0, 10.f);
@@ -982,7 +983,7 @@ namespace physics
                 d->o = oldpos;
                 if(collided && hitplayer && gameent::is(hitplayer))
                 {
-                    d->action[AC_SPECIAL] = false;
+                    //d->action[AC_SPECIAL] = false;
                     d->resetjump();
                     impulseplayer(d, onfloor, jetting, true);
                     if(d->turnside)
