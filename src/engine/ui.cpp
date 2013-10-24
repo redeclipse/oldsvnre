@@ -191,7 +191,7 @@ struct gui : guient
     //use to set min size (useful when you have progress bars)
     void strut(float size) { layout(isvertical() ? int(size*guibound[0]) : 0, isvertical() ? 0 : int(size*guibound[1])); }
     //add space between list items
-    void space(float size) { layout(isvertical() ? 0 : size*guibound[0], isvertical() ? size*guibound[1] : 0); }
+    void space(float size) { layout(isvertical() ? 0 : int(size*guibound[0]), isvertical() ? int(size*guibound[1]) : 0); }
 
     void pushfont(const char *font) { ::pushfont(font); fontdepth++; }
     void popfont() { if(fontdepth) { ::popfont(); fontdepth--; } }
