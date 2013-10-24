@@ -358,6 +358,14 @@ void guifont(char *font, uint *body)
     }
 }
 
+float guitextwidth(char *text, char *font)
+{
+    if(font && *font) pushfont(font);
+    float width = text_width(text)/float(guibound[0]);
+    if(font && *font) popfont();
+    return width;
+}
+
 template<class T> static void updateval(char *var, T val, char *onchange)
 {
     ident *id = writeident(var);
@@ -594,8 +602,6 @@ COMMAND(0, guishowbgfx, "i");
 COMMAND(0, guistayopen, "e");
 COMMAND(0, guinohitfx, "e");
 
-ICOMMAND(0, guicount, "", (), intret(menustack.length()));
-
 COMMAND(0, guilist, "e");
 COMMAND(0, guibody, "esse");
 COMMAND(0, guititle, "s");
@@ -617,6 +623,9 @@ COMMAND(0, guitab, "s");
 COMMAND(0, guifield, "sisiis");
 COMMAND(0, guikeyfield, "sisiis");
 COMMAND(0, guieditor, "siiiiis");
+
+ICOMMAND(0, guicount, "", (), intret(menustack.length()));
+ICOMMAND(0, guitextwidth, "ss", (char *text, char *font), floatret(guitextwidth(text, font)));
 
 void guiplayerpreview(int *model, int *color, int *team, int *weap, char *vanity, char *action, float *scale, int *overlaid, float *size, float *blend, char *altact)
 {
