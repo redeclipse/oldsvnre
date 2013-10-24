@@ -185,7 +185,13 @@ namespace bomber
             if(!entities::ents.inrange(f.ent) || !f.enabled) continue;
             int millis = lastmillis-f.displaytime;
             vec colour = pulsecolour();
-            float skew = hud::inventoryskew;
+            float skew = hud::inventoryskew, wait = f.droptime ? clamp((lastmillis-f.droptime)/float(bomberresetdelay), 0.f, 1.f) : (f.owner ? clamp((lastmillis-f.taketime)/float(carrytime), 0.f, 1.f) : 1.f);
+            if(!game::intermission && (f.droptime || (f.owner && carrytime)) && wait > 0.5f)
+            {
+                int delay = wait > 0.7f ? (wait > 0.85f ? 150 : 300) : 600, millis = lastmillis%(delay*2);
+                float amt = (millis <= delay ? millis/float(delay) : 1.f-((millis-delay)/float(delay)));
+                flashcolour(colour.r, colour.g, colour.b, 1.f, 0.f, 0.f, amt);
+            }
             if(f.owner || f.droptime)
             {
                 if(f.owner == game::focus)
@@ -197,7 +203,6 @@ namespace bomber
                 else skew = 1;
             }
             else if(millis <= 1000) skew += ((1.f-skew)-(clamp(float(millis)/1000.f, 0.f, 1.f)*(1.f-skew)));
-            float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(bomberresetdelay), 0.f, 1.f) : (f.owner ? clamp((lastmillis-f.taketime)/float(carrytime), 0.f, 1.f) : 1.f);
             int oldy = y-sy;
             if(!game::intermission && (f.owner || f.droptime))
                 sy += hud::drawitem(hud::bombtex, x, oldy, s, 0, true, false, colour.x, colour.y, colour.z, blend, skew, "super", "%d%%", int(wait*100.f));
@@ -210,16 +215,7 @@ namespace bomber
             else if(f.droptime) hud::drawitem(hud::bombdroptex, x, oldy, s, 0.5f, true, false, 0.25f, 1.f, 1.f, blend, skew);
             if(!game::intermission)
             {
-                if(f.droptime || (f.owner && carrytime))
-                {
-                    if(wait > 0.5f)
-                    {
-                        int delay = wait > 0.7f ? (wait > 0.85f ? 150 : 300) : 600, millis = lastmillis%(delay*2);
-                        float amt = (millis <= delay ? millis/float(delay) : 1.f-((millis-delay)/float(delay)));
-                        flashcolour(colour.r, colour.g, colour.b, 1.f, 0.f, 0.f, amt);
-                    }
-                    hud::drawitembar(x, oldy, s, false, colour.r, colour.g, colour.b, blend, skew, wait);
-                }
+                if(f.droptime || (f.owner && carrytime)) hud::drawitembar(x, oldy, s, false, colour.r, colour.g, colour.b, blend, skew, wait);
                 if(f.owner == game::focus && m_team(game::gamemode, game::mutators) && bomberlockondelay && f.owner->action[AC_AFFINITY] && lastmillis-f.owner->actiontime[AC_AFFINITY] >= bomberlockondelay)
                 {
                     gameent *e = game::getclient(findtarget(f.owner));
