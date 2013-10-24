@@ -136,8 +136,6 @@ Multiplayer & Servers:
    servertype to simplify setting up local games
 
 Core & Install:
- * ENet updated to v1.3.10
- * Automake 1.11
  * Fixed desktop entry icon field
  * Improve IRC connection stability
 
