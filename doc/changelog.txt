@@ -1,6 +1,8 @@
 The development version changelog is an ongoing work and should be reasonably
 complete covering changes made up to revision:
-5786 (09/09/13)
+
+6124 (10/24/13)
+
 If you update the changelog with changes made beyond this point, and consider
 it to resonably cover all previous changes, please update the above revision
 number.
@@ -31,9 +33,19 @@ number.
 = Red Eclipse Development version =
 Gameplay:
  * Ragdolls now twitch when they're under the influence of shock residual
+ * Show player distance when fragged
+ * Added /playerhint variable to make players have a team colored glow 
+   over them to make it more clear to which team they belong
+ * Improved AI for CTF and DAC games more evasive when endangered
+ * Better physics and bounce sounds for affinities
+ * Footstep sounds
+ * Fixed spawn queue in Time-Trial
+ * Auto team balancing
+ * Bomber-Ball throwing originates from head for more consistent throwing
 
 Weapons:
- * Sword damage and secondary attack speed increased
+ * Sword damage and secondary attack speed increased,
+   now uses negative kickpush to propel the player forward slightly
  * Decrease pistol firing rate to disable benefits of auto-fire scripts
  * Rifle has faster reload time, slightly increased wavepush,
    slightly higher delay between shots
@@ -42,11 +54,11 @@ Weapons:
  * Grenades have smaller explode radius, back to v1.3 behaviour
 
 Modes & Mutators:
- * Updated king-dtf rotation for balance
- * Disable debris in kaboom
- * Always pick one spawn for alpha team in gauntlet
- * Resize more in resize
- * Steal more life in vampire
+ * Rebranded Defend-The-Flag to Defend-And-Control
+ * Disable debris in Kaboom
+ * Always pick one spawn for alpha team in Gauntlet
+ * Resize more in Resize
+ * Steal more life in Vampire
  * Increased buffing timeout tolerances when defending affinities
  * Enable interactions with affinities
 
@@ -55,7 +67,7 @@ Maps:
    - Absorption - new time-trial map by Unnamed
    - Amplification - new time-trial map by Unnamed
    - Relax - new time-trial map by Bonifarz
-   - Steel Rat - added to trial rotation
+   - Steel Rat - added to time-trial rotation
    - War Depot - new time-trial map by TristamK
  * Other game modes
    - Abuse - new map by ballist1c
@@ -65,6 +77,8 @@ Maps:
    - Enyo - new map by Ulukai
    - Insidious - new map by ballist1c
    - LongestYard2k - remix of LongestYard by John_III and ballist1c
+   - Tarnished - new map by Boognish
+   - Testchamber - retextured by Quinton Reeves
 
 Interface & Menus:
  * Added /spectvfollow for aiming camera to certain player whilst
@@ -75,14 +89,23 @@ Interface & Menus:
  * Added third person key to controls menu
  * Added higher resolutions to display menu
  * Better inventory score
+ * Added borders on screen while waiting / spectating,
+   these can be controlled from options menu
+ * Fancy keyboard / mouse button rendering
+ * Ability to cancel a swapteam request
+ * Scoreboard redesign / improvements
+ * Bomber-Ball in inventory and its itembar flash red
 
 Modding & Mapmaking:
  * Updated edit menu
  * When selecting an entity, its properties are now numbered
  * Added /moveselwaypoints to move selected waypoints around
- * Added texture set by Unnamed
  * Specscale of pk02 textures corrected
  * Glow colours inherit texture palette if not defined in shader parameters
+ * Cubescript commands for retrieving entity information
+ * 0 + mousewheel = entproperty 9
+ * Ability to read the color of the pixel under the crosshair in stats,
+   or use the /getpixel command
 
 Data Assets:
  * New vanity items
@@ -92,6 +115,14 @@ Data Assets:
    - Shoulder armor
    - Panda
  * New wakawaka sound
+ * New model for control points used in defend-and-control and Bomber-Ball
+ * Added texture set by Unnamed
+ * Added lava texture by Nobiax, applied in maps Hinder, Nova, Tower
+ * New mapmodels by Nobiax
+   - Plastic barrel, cardboard, pipes, trash can
+   - Ivy, weeds, grasses, bushes, tree, snowpine, cactus, rocks
+   - Fuel can, gaz tank
+   - Concrete barriers
 
 Multiplayer & Servers:
  * Show time since last server ping reply
@@ -101,6 +132,8 @@ Multiplayer & Servers:
    to prevent other players impersonating you,
    see http://forum.freegamedev.net/viewtopic.php?f=72&t=4340
  * Pause server sorting while hovering over items in the server list
+ * Added a "server type" field to the maps menu when offline to change 
+   servertype to simplify setting up local games
 
 Core & Install:
  * ENet updated to v1.3.10
@@ -119,6 +152,7 @@ Additional noteworthy fixed bugs:
  * #540 - On maps with too little goals for bomber-ball 
           switching to hold fails when touchdown is selected
  * #545 - Time-trial "dnf" ranks ahead of any completed time in final standings
+ * #549 - Allow remaining time to be shown on HUD
  * #556 - Time-trial time not displayed in top-right of screen
  * #558 - Scoring anomalies
  * #563 - Duel displays a comma too much in match info
@@ -129,7 +163,21 @@ Additional noteworthy fixed bugs:
  * #577 - Disconnecting while alive in a survivor game leads to excessive scores
  * #581 - vpalette correction for multi team palettes in 2-team games
  * #589 - Nickname is overlayed by time in ffa-timetrial
+ * #590 - Sort players in player list by scoreboard standings
  * #591 - Time overlays time in time-trial
+ * #597 - Recently played or out-of-rotation maps cannot be voted
+ * #599 - Multiple teamkill adjustments by the same player in the same match 
+          are overcompensated
+ * #601 - Plasma particle spawns too close to screen
+ * #610 - Spectate in time-trial without losing checkpoints
+ * #613 - Bug when selecting "demo" mode during or after another game
+ * #615 - Remove "with 1 health left" in instagib duel
+ * #617 - When a shot hits multiple players, only one pop-up number appears
+ * #618 - Standing on a teleport exit causes death
+ * #620 - Local mod privileges with normal registered user keys
+ * #628 - Various entity properties lost when added to clipboard in editmode
+ * #636 - Survivor first match bots only
+ * #640 - Mines can be thrown inside walls to frag everyone on the map
 
 
 = Red Eclipse 1.4 =
