@@ -3,7 +3,7 @@
 namespace client
 {
     bool sendplayerinfo = false, sendcrcinfo = false, sendgameinfo = false, isready = false, remote = false,
-        demoplayback = false, needsmap = false, gettingmap = false, waitplayers = false;
+        demoplayback = false, needsmap = false, gettingmap = false, waitplayers = false, loadingmap = false;
     int lastping = 0, sessionid = 0, lastplayerinfo = 0;
     string connectpass = "";
     int needclipboard = -1;
@@ -16,6 +16,7 @@ namespace client
 
     int state() { return game::player1->state; }
     ICOMMAND(0, getplayerstate, "", (), intret(state()));
+    ICOMMAND(0, isloadingmap, "", (), intret(lightmapping ? 2 : (loadingmap ? 1 : 0)));
 
     int maxmsglen() { return G(messagelength); }
 
@@ -35,7 +36,7 @@ namespace client
 
     int waiting(bool state)
     {
-        if(!connected(false) || !isready || game::maptime <= 0 || (state && needsmap)) // && otherclients()
+        if(!connected(false) || !isready || loadingmap || (state && needsmap)) // && otherclients()
             return state && needsmap ? (gettingmap ? 3 : 2) : 1;
         return 0;
     }
@@ -1094,6 +1095,7 @@ namespace client
             return;
         }
         else if(demoendless) demoendless = 0;
+        loadingmap = true;
         if(m_capture(game::gamemode)) capture::reset();
         else if(m_defend(game::gamemode)) defend::reset();
         else if(m_bomber(game::gamemode)) bomber::reset();

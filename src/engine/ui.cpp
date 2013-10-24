@@ -621,8 +621,7 @@ struct gui : guient
         }
         else
         {
-            extern GLuint lmprogtex;
-            if(lmprogtex)
+            if(lightmapping && lmprogtex)
             {
                 float scale = float(size)/256; //scale and preserve aspect ratio
                 xs = 256*scale; ys = 256*scale;

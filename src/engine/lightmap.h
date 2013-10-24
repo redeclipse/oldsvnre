@@ -70,6 +70,7 @@ struct LightMap
 };
 
 extern vector<LightMap> lightmaps;
+extern GLuint lmprogtex;
 
 struct LightMapTexture
 {
@@ -139,6 +140,6 @@ extern volatile bool check_calclight_lmprog;
 extern void check_calclight_canceled();
 extern void fixlightmapnormals();
 extern void fixrotatedlightmaps();
- 
+
 extern int lightmapping;
 
