@@ -502,7 +502,7 @@ struct gui : guient
                 if(fieldtype == FIELDKEY) e->clear();
                 useeditor(e->name, initmode, true, initval, parent);
                 e->mark(false);
-                fieldmode = fieldtype;
+                if(fieldmode != FIELDCOMMIT && fieldmode != FIELDABORT) fieldmode = fieldtype;
             }
             if(hit && editing && (mouseaction[0]&GUI_PRESSED)!=0 && fieldtype==FIELDEDIT)
                 e->hit(int(floor(hitx-(curx+wpad/2))), int(floor(hity-(cury+hpad/2))), (mouseaction[0]&GUI_DRAGGED)!=0); //mouse request position
