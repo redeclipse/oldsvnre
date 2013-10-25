@@ -104,9 +104,8 @@ Modding & Mapmaking:
  * Glow colours inherit texture palette if not defined in shader parameters
  * Cubescript commands for retrieving entity information
  * 0 + mousewheel = entproperty 9
- * Ability to read the color of the pixel under the crosshair in stats,
-   or use the /getpixel command
-
+ * Ability to read the color of the pixel under crosshair by pressing "\"
+ 
 Data Assets:
  * New vanity items
    - Stratocaster
