@@ -418,12 +418,12 @@ namespace bomber
             f.reset();
             f.team = team;
             f.ent = ent;
-            f.enabled = enabled ? 1 : 0;
+            f.enabled = enabled != 0;
             f.spawnloc = f.render = f.above = spawnloc;
             f.render.z += 2;
             physics::droptofloor(f.render);
             if(f.render.z >= f.above.z-1) f.above.z += f.render.z-(f.above.z-1);
-            if(owner >= 0) st.takeaffinity(i, game::getclient(owner), lastmillis);
+            if(owner >= 0) st.takeaffinity(i, game::newclient(owner), lastmillis);
             else if(dropped) st.dropaffinity(i, droploc, inertia, lastmillis);
         }
     }
