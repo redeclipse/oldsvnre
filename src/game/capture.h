@@ -38,7 +38,7 @@ struct capturestate
 #else
             owner = lastowner = NULL;
             proj = NULL;
-            displaytime = pickuptime = movetime = 0;
+            displaytime = pickuptime = movetime = viewtime = interptime = 0;
 #endif
             team = T_NEUTRAL;
             taketime = droptime = 0;

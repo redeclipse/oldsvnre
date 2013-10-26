@@ -42,7 +42,7 @@ struct bomberstate
 #else
             owner = lastowner = NULL;
             proj = NULL;
-            displaytime = pickuptime = movetime = inittime = viewtime = rendertime = 0;
+            displaytime = pickuptime = movetime = inittime = viewtime = rendertime = interptime = 0;
             viewpos = renderpos = vec(-1, -1, -1);
 #endif
             team = T_NEUTRAL;
