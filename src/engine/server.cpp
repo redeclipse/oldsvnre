@@ -1499,7 +1499,11 @@ void setlocations(bool wanthome)
     addpackagedir("data");
     defformatstring(gamedata)("game/%s", server::gameid());
     addpackagedir(gamedata);
-    execfile("version.cfg", false, EXEC_VERSION|EXEC_BUILTIN);
+    if(!execfile("version.cfg", false, EXEC_VERSION|EXEC_BUILTIN))
+    {
+        fatal("cannot find version.cfg, please make sure you have the game data installed");
+        return;
+    }
     if(wanthome)
     {
 #if defined(WIN32)
