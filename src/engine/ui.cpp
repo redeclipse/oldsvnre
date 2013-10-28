@@ -19,7 +19,7 @@ VAR(IDF_PERSIST, guilinesize, 1, 36, 128);
 VAR(IDF_PERSIST, guisepsize, 1, 10, 128);
 VAR(IDF_PERSIST, guiscaletime, 0, 250, VAR_MAX);
 VAR(IDF_PERSIST|IDF_HEX, guibgcolour, -1, 0x888888, 0xFFFFFF);
-VAR(IDF_PERSIST|IDF_HEX, guibordercolour, -1, 0x181818, 0xFFFFFF);
+VAR(IDF_PERSIST|IDF_HEX, guibordercolour, -1, -1, 0xFFFFFF);
 
 static bool needsinput = false, hastitle = true, hasbgfx = true;
 
