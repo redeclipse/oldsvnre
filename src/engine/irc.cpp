@@ -92,7 +92,7 @@ void ircsend(ircnet *n, const char *msg, ...)
 {
     if(!n) return;
     defvformatstring(str, msg, msg);
-    if(n->sock == ENET_SOCKET_NULL) return;
+    if(n->sock == ENET_SOCKET_NULL || !*msg) return; // don't spew \n
     if(verbose >= 2) console(0, "[%s] >>> %s", n->name, str);
     concatstring(str, "\n");
     ENetBuffer buf;

@@ -238,8 +238,8 @@ namespace game
 
     VAR(IDF_PERSIST, playerhint, 0, 3, 3);
     VAR(IDF_PERSIST, playerhinttone, -1, CTONE_TEAMED, CTONE_MAX-1);
-    FVAR(IDF_PERSIST, playerhintblend, 0, 0.2f, 1);
-    FVAR(IDF_PERSIST, playerhintscale, 0, 0.8f, 1); // scale blend depending on health
+    FVAR(IDF_PERSIST, playerhintblend, 0, 0.1f, 1);
+    FVAR(IDF_PERSIST, playerhintscale, 0, 0.7f, 1); // scale blend depending on health
     FVAR(IDF_PERSIST, playerhintsize, 0, 1.2f, 2);
     FVAR(IDF_PERSIST, playerhintfadeat, 0, 64, FVAR_MAX);
     FVAR(IDF_PERSIST, playerhintfadecut, 0, 8, FVAR_MAX);
@@ -265,7 +265,7 @@ namespace game
 
     bool needname(gameent *d)
     {
-        if(!d || *d->name || client::waiting()) return false;
+        if(!d || *d->name) return false; // || client::waiting()) return false;
         return true;
     }
     ICOMMAND(0, needname, "b", (int *cn), intret(needname(*cn >= 0 ? getclient(*cn) : player1) ? 1 : 0));
