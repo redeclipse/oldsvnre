@@ -93,7 +93,7 @@ void ircsend(ircnet *n, const char *msg, ...)
     if(!n) return;
     defvformatstring(str, msg, msg);
     if(n->sock == ENET_SOCKET_NULL || !*msg) return; // don't spew \n
-    if(verbose >= 2) console(0, "[%s] >>> %s", n->name, str);
+    console(0, "[%s] >>> %s", n->name, str);
     concatstring(str, "\n");
     ENetBuffer buf;
     uchar ubuf[512];
@@ -535,6 +535,12 @@ void ircprocess(ircnet *n, char *user[3], int g, int numargs, char *w[])
             ircsend(n, "PONG %d", clocktime);
         }
     }
+    else if(!strcasecmp(w[g], "ERROR"))
+    {
+        if(numargs > g+1) ircprintf(n, 4, NULL, "%s ERROR %s", user[0], w[g+1]);
+        else ircprintf(n, 4, NULL, "%s ERROR", user[0]);
+        n->state = IRC_QUIT;
+    }
     else
     {
         int numeric = *w[g] && *w[g] >= '0' && *w[g] <= '9' ? atoi(w[g]) : 0, off = 0;
@@ -709,8 +715,7 @@ bool ircaddsockets(ENetSocket &maxsock, ENetSocketSet &readset, ENetSocketSet &w
             case IRC_WAIT:
                 ENET_SOCKETSET_ADD(writeset, n->sock);
                 // fall-through
-            case IRC_ONLINE:
-            case IRC_CONN:
+            case IRC_ONLINE: case IRC_CONN: case IRC_QUIT:
                 maxsock = maxsock == ENET_SOCKET_NULL ? n->sock : max(maxsock, n->sock);
                 ENET_SOCKETSET_ADD(readset, n->sock);
                 numsocks++;
@@ -735,8 +740,7 @@ void ircchecksockets(ENetSocketSet &readset, ENetSocketSet &writeset)
                     else n->state = IRC_ATTEMPT;
                 }
                 break;
-            case IRC_ONLINE:
-            case IRC_CONN:
+            case IRC_ONLINE: case IRC_CONN: case IRC_QUIT:
                 if(ENET_SOCKETSET_CHECK(readset, n->sock)) switch(ircrecv(n))
                 {
                     case -3: ircdiscon(n, "read error"); break;
@@ -752,7 +756,7 @@ void ircchecksockets(ENetSocketSet &readset, ENetSocketSet &writeset)
                     }
                 }
                 break;
-        }
+         }
     }
 }
 
@@ -829,11 +833,8 @@ void ircslice()
                     }
                     break;
                 }
-                default:
-                {
-                    ircdiscon(n, "encountered unknown connection state");
-                    break;
-                }
+                case IRC_QUIT: ircdiscon(n, "closing link"); break;
+                default: ircdiscon(n, "encountered unknown connection state"); break;
             }
         }
         else if(!n->lastattempt || clocktime-n->lastattempt >= 60) ircestablish(n);
