@@ -428,7 +428,7 @@ void ircprocess(ircnet *n, char *user[3], int g, int numargs, char *w[])
                             ircprintf(n, 4, g ? w[g+1] : NULL, "\fr%s requests: %s %s", user[0], q, r);
 
                             if(!strcasecmp(q, "VERSION"))
-                                ircsend(n, "NOTICE %s :\vVERSION %s v%s-%s %d bit (%s), %s\v", user[0], versionname, versionstring, CUR_PLATFORM, CUR_ARCH, versionrelease, versionurl);
+                                ircsend(n, "NOTICE %s :\vVERSION %s v%s-%s %d bit (%s)%s%s\v", user[0], versionname, versionstring, CUR_PLATFORM, CUR_ARCH, versionrelease, *versionurl ? ", " : "", versionurl);
                             else if(!strcasecmp(q, "PING")) // eh, echo back
                                 ircsend(n, "NOTICE %s :\vPING %s\v", user[0], r);
                         }
@@ -699,7 +699,7 @@ void irccleanup()
     loopv(ircnets) if(ircnets[i]->sock != ENET_SOCKET_NULL)
     {
         ircnet *n = ircnets[i];
-        ircsend(n, "QUIT :%s, %s", versionname, versionurl);
+        ircsend(n, "QUIT :%s%s%s", versionname, *versionurl ? ", " : "", versionurl);
         ircdiscon(n, "shutdown");
     }
 }

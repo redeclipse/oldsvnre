@@ -3111,7 +3111,7 @@ namespace hud
         }
         y = h-bottom-FONTH/2;
         y -= draw_textx("v%s-%s %d bit (%s)", w-FONTH, y, 255, 255, 255, 255, TEXT_RIGHT_UP, -1, -1, versionstring, CUR_PLATFORM, CUR_ARCH, versionrelease);
-        y -= draw_textx("%s", w-FONTH, y, 255, 255, 255, 255, TEXT_RIGHT_UP, -1, -1, versionurl);
+        if(*versionurl) y -= draw_textx("%s", w-FONTH, y, 255, 255, 255, 255, TEXT_RIGHT_UP, -1, -1, versionurl);
         popfont();
     }
 
