@@ -231,7 +231,7 @@ endif
 install: install-client install-server
 
 CC= $(CXX) -x c
-ENET_CFLAGS= -Ienet/include -O3 -fomit-frame-pointer $(shell enet/check_cflags.sh $(CC))
+ENET_CFLAGS:= -Ienet/include -O3 -fomit-frame-pointer $(shell enet/check_cflags.sh $(CC))
 ENET_OBJS= \
 	enet/callbacks.o \
 	enet/host.o \
