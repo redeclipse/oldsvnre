@@ -73,7 +73,7 @@ CLIENT_INCLUDES= $(INCLUDES) -Iinclude
 CLIENT_LIBS= -mwindows $(STD_LIBS) -L$(WINBIN) -L$(WINLIB) -lSDL -lSDL_image -lSDL_mixer -lzlib1 -lopengl32 -lenet -lws2_32 -lwinmm
 else
 CLIENT_INCLUDES= $(INCLUDES) -I/usr/X11R6/include `sdl-config --cflags`
-CLIENT_LIBS= -Lenet/.libs -lenet -L/usr/X11R6/lib -lX11 `sdl-config --libs` -lSDL_image -lSDL_mixer -lz -lGL
+CLIENT_LIBS= -Lenet -lenet -L/usr/X11R6/lib -lX11 `sdl-config --libs` -lSDL_image -lSDL_mixer -lz -lGL
 endif
 ifeq ($(PLATFORM),Linux)
 CLIENT_LIBS+= -lrt
@@ -148,7 +148,7 @@ SERVER_INCLUDES= -DSTANDALONE $(INCLUDES) -Iinclude
 SERVER_LIBS= -mwindows $(STD_LIBS) -L$(WINBIN) -L$(WINLIB) -lzlib1 -lenet -lws2_32 -lwinmm
 else
 SERVER_INCLUDES= -DSTANDALONE $(INCLUDES)
-SERVER_LIBS= -Lenet/.libs -lenet -lz
+SERVER_LIBS= -Lenet -lenet -lz
 endif
 SERVER_OBJS= \
 	shared/crypto-standalone.o \
@@ -161,24 +161,9 @@ SERVER_OBJS= \
 	engine/server-standalone.o \
 	game/server-standalone.o
 
-LIBENET= enet/.libs/libenet.a
-
-TEMP_INCLUDES:=$(INCLUDES)
-include enet/Makefile.am
-INCLUDES=$(TEMP_INCLUDES)
+LIBENET= enet/libenet.a
 
 default: all
-
-enet/Makefile: enet/configure
-	cd enet; ./configure --enable-shared=no --enable-static=yes
-
-$(LIBENET): enet/Makefile $(enetinclude_HEADERS:%=enet/%) $(libenet_la_SOURCES:%=enet/%)
-	$(MAKE) -C enet/ all
-
-libenet: $(LIBENET)
-
-clean-enet: enet/Makefile
-	$(MAKE) -C enet/ clean
 
 clean-client:
 	@rm -fv $(CLIENT_PCH) $(CLIENT_OBJS) $(APPCLIENT)$(BIN_SUFFIX)
@@ -244,6 +229,22 @@ install-cube2font: cube2font
 endif
 
 install: install-client install-server
+
+CC= $(CXX) -x c
+ENET_CFLAGS= -Ienet/include -O3 -fomit-frame-pointer $(shell enet/check_cflags.sh $(CC))
+ENET_OBJS= \
+	enet/callbacks.o \
+	enet/host.o \
+	enet/list.o \
+	enet/packet.o \
+	enet/peer.o \
+	enet/protocol.o \
+	enet/unix.o \
+	enet/win32.o
+$(ENET_OBJS): CFLAGS += $(ENET_CFLAGS)
+$(LIBENET): $(ENET_OBJS)
+	$(AR) rcs $@ $(ENET_OBJS)
+libenet: $(LIBENET)
 
 depend:
 	makedepend -Y -Ishared -Iengine -Igame $(subst .o,.cpp,$(CLIENT_OBJS))
