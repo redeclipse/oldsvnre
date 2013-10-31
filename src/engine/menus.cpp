@@ -774,7 +774,7 @@ void progressmenu()
     menu *m = menus.access("loading");
     if(m)
     {
-        m->usetitle = m->useinput = m->usebgfx = false;
+        m->usetitle = m->useinput = false;
         UI::addcb(m);
     }
     else conoutf("cannot find menu 'loading'");

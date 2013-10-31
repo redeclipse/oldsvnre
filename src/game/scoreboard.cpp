@@ -51,7 +51,7 @@ namespace hud
     VAR(IDF_PERSIST|IDF_HEX, scorehilight, 0, 0x888888, 0xFFFFFF);
     VAR(IDF_PERSIST, scoreimage, 0, 1, 1);
     FVAR(IDF_PERSIST, scoreimagesize, FVAR_NONZERO, 6, 10);
-    VAR(IDF_PERSIST, scorebgfx, 0, 0, 1);
+    VAR(IDF_PERSIST, scorebgfx, 0, 1, 1);
 
     static bool scoreson = false, scoresoff = false, shownscores = false;
     static int menustart = 0, menulastpress = 0;
