@@ -1855,7 +1855,7 @@ namespace game
         resetcursor();
         if(!empty)
         {
-            conoutft(CON_SELF, "\fs%s\fS by \fs%s\fS, playing: \fs\fa%s\fS", *maptitle ? maptitle : "Untitled", *mapauthor ? mapauthor : "Unknown", server::gamename(gamemode, mutators));
+            conoutft(CON_SELF, "\fs%s\fS by \fs%s\fS (\fs\fy%s\fS)", *maptitle ? maptitle : "Untitled", *mapauthor ? mapauthor : "Unknown", server::gamename(gamemode, mutators));
             preload();
         }
         // reset perma-state
