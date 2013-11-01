@@ -416,7 +416,7 @@ namespace hud
                         {
                             float ratio = game::player1->frags >= game::player1->deaths ? (game::player1->frags/float(max(game::player1->deaths, 1))) : -(game::player1->deaths/float(max(game::player1->frags, 1)));
                             uicenterlist(g, uifont(g, "little", {
-                                g.textf("\fs\fg%d\fS %s / \fs\fg%d\fS %s (\fs\fy%.1f\fS:\fs\fy%.1f\fS) \fs\fg%d\fS damage", 0xFFFFFF, NULL, 0,
+                                g.textf("\fs\fg%d\fS %s, \fs\fg%d\fS %s (\fs\fy%.1f\fS:\fs\fy%.1f\fS) \fs\fg%d\fS damage", 0xFFFFFF, NULL, 0,
                                     game::player1->frags, game::player1->frags != 1 ? "frags" : "frag",
                                     game::player1->deaths, game::player1->deaths != 1 ? "deaths" : "death", ratio >= 0 ? ratio : 1.f, ratio >= 0 ? 1.f : -ratio,
                                     game::player1->totaldamage);
@@ -492,7 +492,7 @@ namespace hud
                                 uilist(g, {
                                     uicenterlist(g, uipad(g, 0.25f, g.strut(1)));
                                     loopscoregroup(uicenterlist(g, {
-                                        uipad(g, 0.25f, uicenterlist(g, g.textf("\f[%d]\f($priv%stex)", 0xFFFFFF, NULL, 0, game::findcolour(o), hud::privname(o->privilege, o->actortype))));
+                                        uipad(g, 0.25f, uicenterlist(g, g.textf("\f($priv%stex)", game::findcolour(o), NULL, 0, hud::privname(o->privilege, o->actortype))));
                                     }));
                                 });
 
@@ -647,7 +647,7 @@ namespace hud
                                                 case CS_EDITING: status = editingtex; break;
                                                 default: break; // spectators shouldn't be here
                                             }
-                                            uipad(g, 0.125f, g.text("", 0, status, TEAM(sg.team, colour)));
+                                            uipad(g, 0.125f, g.textf("\f(%s)", TEAM(sg.team, colour), NULL, 0, status));
                                         }));
                                     });
                                 }

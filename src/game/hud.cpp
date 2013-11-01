@@ -3069,7 +3069,13 @@ namespace hud
     {
         glColor4f(1, 1, 1, 1);
 
-        Texture *t = textureload(backgroundtex, 3);
+        Texture *t = NULL;
+        if(*mapname)
+        {
+            defformatstring(tex)("<blur:2>%s", mapname);
+            t = textureload(tex, 3, true, false);
+        }
+        if(!t || t == notexture) t = textureload(backgroundtex, 3);
         glBindTexture(GL_TEXTURE_2D, t->id);
         drawtexture(0, 0, w, h);
 
