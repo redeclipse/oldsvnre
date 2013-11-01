@@ -819,7 +819,7 @@ void progress(float bar1, const char *text1, float bar2, const char *text2)
     interceptkey(SDLK_UNKNOWN); // keep the event queue awake to avoid 'beachball' cursor
     #endif
 
-    setsvar("progresstitle", text1 ? text1 : "loading..");
+    setsvar("progresstitle", text1 ? text1 : "please wait..");
     setfvar("progressamt", bar1);
     setsvar("progresstext", text2 ? text2 : "");
     setfvar("progresspart", bar2);
@@ -1088,6 +1088,13 @@ int main(int argc, char **argv)
                 if(pixelact) delete[] pixelact;
                 pixelact = NULL;
                 pixeling = false;
+            }
+            if(*progresstitle || progressamt > 0)
+            {
+                setsvar("progresstitle", "");
+                setsvar("progresstext", "");
+                setfvar("progressamt", 0.f);
+                setfvar("progresspart", 0.f);
             }
             setcaption(game::gametitle(), game::gametext());
         }
