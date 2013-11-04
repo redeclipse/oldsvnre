@@ -230,22 +230,8 @@ endif
 
 install: install-client install-server
 
-ifeq (,$(findstring MINGW,$(PLATFORM)))
-CC= $(CXX) -x c
-ENET_CFLAGS:= -Ienet/include -O3 -fomit-frame-pointer $(shell enet/check_cflags.sh $(CC))
-ENET_OBJS= \
-	enet/callbacks.o \
-	enet/host.o \
-	enet/list.o \
-	enet/packet.o \
-	enet/peer.o \
-	enet/protocol.o \
-	enet/unix.o \
-	enet/win32.o
-$(ENET_OBJS): CFLAGS += $(ENET_CFLAGS)
-$(LIBENET): $(ENET_OBJS)
-	$(AR) rcs $@ $(ENET_OBJS)
-endif
+$(LIBENET):
+	$(MAKE) -C enet
 
 depend:
 	makedepend -Y -Ishared -Iengine -Igame $(subst .o,.cpp,$(CLIENT_OBJS))
