@@ -2668,7 +2668,7 @@ namespace server
         setteam(ci, T_NEUTRAL, TT_INFOSM);
     }
 
-    enum { ALST_FIRST = 0, ALST_TRY, ALST_SPAWN, ALST_SPEC, ALST_EDIT, ALST_WALK, ALST_MAX };
+    enum { ALST_TRY = 0, ALST_SPAWN, ALST_SPEC, ALST_EDIT, ALST_WALK, ALST_MAX };
 
     //bool crclocked(clientinfo *ci)
     //{
@@ -2682,7 +2682,6 @@ namespace server
         if(!ci) return false;
         switch(n)
         {
-            case ALST_FIRST: if(ci->state.state == CS_SPECTATOR || gamemode >= G_EDITMODE) return false; // first spawn, falls through
             case ALST_TRY: // try spawn
             {
                 if(ci->state.quarantine) return false;
@@ -2781,16 +2780,10 @@ namespace server
 
         if(m_local(gamemode)) kicknonlocalclients(DISC_PRIVATE);
 
-        loopv(clients) clients[i]->mapchange(true);
         loopv(clients)
         {
-            clientinfo *ci = clients[i];
-            if(allowstate(ci, ALST_FIRST))
-            {
-                ci->state.state = CS_DEAD;
-                waiting(ci, DROP_RESET);
-            }
-            else spectator(ci);
+            clients[i]->mapchange(true);
+            spectator(clients[i]);
         }
 
         if(m_fight(gamemode) && G(maphistory))
@@ -5086,6 +5079,7 @@ namespace server
                     if(!ci || ci->state.actortype > A_PLAYER) break;
                     if(!allowstate(ci, val ? ALST_EDIT : ALST_WALK) && !haspriv(ci, G(editlock), val ? "enter editmode" : "exit editmode"))
                     {
+                        if(G(serverdebug)) srvmsgf(ci->clientnum, "sync error: unable to switch state %s - %d [%d, %d]", colourname(ci), ci->state.state, ci->state.lastdeath, gamemillis);
                         spectator(ci);
                         break;
                     }
@@ -5149,7 +5143,11 @@ namespace server
                         checkmaps();
                     }
                     #endif
-                    if(!allowstate(cp, ALST_TRY)) break;
+                    if(!allowstate(cp, ALST_TRY))
+                    {
+                        if(G(serverdebug)) srvmsgf(cp->clientnum, "sync error: unable to spawn %s - %d [%d, %d]", colourname(cp), cp->state.state, cp->state.lastdeath, gamemillis);
+                        break;
+                    }
                     if(smode) smode->canspawn(cp, true);
                     mutate(smuts, mut->canspawn(cp, true));
                     cp->state.state = CS_DEAD;
@@ -5188,7 +5186,12 @@ namespace server
                 {
                     int lcn = getint(p);
                     clientinfo *cp = (clientinfo *)getinfo(lcn);
-                    if(!hasclient(cp, ci) || !allowstate(cp, ALST_SPAWN)) break;
+                    if(!hasclient(cp, ci)) break;
+                    if(!allowstate(cp, ALST_SPAWN))
+                    {
+                        if(G(serverdebug)) srvmsgf(cp->clientnum, "sync error: unable to spawn %s - %d [%d, %d]", colourname(cp), cp->state.state, cp->state.lastdeath, gamemillis);
+                        break;
+                    }
                     cp->state.lastrespawn = -1;
                     cp->state.state = CS_ALIVE;
                     if(smode) smode->spawned(cp);
@@ -5589,7 +5592,10 @@ namespace server
                     if(ci->state.state == CS_SPECTATOR)
                     {
                         if(!allowstate(ci, ALST_TRY) && !haspriv(ci, G(speclock), "exit spectator"))
+                        {
+                            if(G(serverdebug)) srvmsgf(ci->clientnum, "sync error: unable to spawn %s - %d [%d, %d]", colourname(ci), ci->state.state, ci->state.lastdeath, gamemillis);
                             break;
+                        }
                         if(!spectate(ci, false)) break;
                         reset = false;
                     }
@@ -5911,9 +5917,16 @@ namespace server
                 {
                     int sn = getint(p), val = getint(p);
                     clientinfo *cp = (clientinfo *)getinfo(sn);
-                    if(!cp || cp->state.actortype > A_PLAYER || (val ? cp->state.state == CS_SPECTATOR : cp->state.state != CS_SPECTATOR)) break;
-                    if((sn != sender || !allowstate(cp, val ? ALST_SPEC : ALST_TRY)) && !haspriv(ci, G(speclock), sn != sender ? "control other players" : (val ? "enter spectator" : "exit spectator")))
+                    if(!cp || cp->state.actortype > A_PLAYER || (val ? cp->state.state == CS_SPECTATOR : cp->state.state != CS_SPECTATOR))
+                    {
+                        if(G(serverdebug)) srvmsgf(cp->clientnum, "sync error: unable to modify spectator %s - %d [%d, %d]", colourname(cp), cp->state.state, cp->state.lastdeath, gamemillis);
                         break;
+                    }
+                    if((sn != sender || !allowstate(cp, val ? ALST_SPEC : ALST_TRY)) && !haspriv(ci, G(speclock), sn != sender ? "control other players" : (val ? "enter spectator" : "exit spectator")))
+                    {
+                        if(G(serverdebug)) srvmsgf(cp->clientnum, "sync error: unable to modify spectator %s - %d [%d, %d]", colourname(cp), cp->state.state, cp->state.lastdeath, gamemillis);
+                        break;
+                    }
                     bool spec = val != 0, quarantine = cp != ci && val != 0 && val == 2, wasq = cp->state.quarantine;
                     spectate(cp, spec, quarantine);
                     if(quarantine && cp->state.quarantine)
