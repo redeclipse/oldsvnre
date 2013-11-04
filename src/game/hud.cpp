@@ -39,14 +39,14 @@ namespace hud
     COMMAND(0, toggleconsole, "");
 
     VAR(IDF_PERSIST, titlefade, 0, 1000, 10000);
-    VAR(IDF_PERSIST, tvmodefade, 0, 1000, VAR_MAX);
-    VAR(IDF_PERSIST, spawnfade, 0, 500, VAR_MAX);
+    VAR(IDF_PERSIST, tvmodefade, 0, 250, VAR_MAX);
+    VAR(IDF_PERSIST, spawnfade, 0, 250, VAR_MAX);
 
-    VAR(IDF_PERSIST, commandfade, 0, 200, VAR_MAX);
+    VAR(IDF_PERSIST, commandfade, 0, 250, VAR_MAX);
     FVAR(IDF_PERSIST, commandfadeamt, 0, 0.5f, 1);
     FVAR(IDF_PERSIST, commandfadeskew, 0, 0, 1);
     FVAR(IDF_PERSIST, commandscale, FVAR_NONZERO, 1, FVAR_MAX);
-    VAR(IDF_PERSIST, uifade, 0, 200, VAR_MAX);
+    VAR(IDF_PERSIST, uifade, 0, 250, VAR_MAX);
     FVAR(IDF_PERSIST, uifadeamt, 0, 0.5f, 1);
 
     int conskip = 0;
@@ -59,7 +59,7 @@ namespace hud
 
     VAR(IDF_PERSIST, consize, 0, 5, 100);
     VAR(IDF_PERSIST, contime, 0, 30000, VAR_MAX);
-    VAR(IDF_PERSIST, confade, 0, 1000, VAR_MAX);
+    VAR(IDF_PERSIST, confade, 0, 500, VAR_MAX);
     VAR(IDF_PERSIST, conoverflow, 0, 5, VAR_MAX);
     VAR(IDF_PERSIST, concenter, 0, 0, 1);
     VAR(IDF_PERSIST, confilter, 0, 1, 1);
@@ -69,7 +69,7 @@ namespace hud
     SVAR(IDF_PERSIST, condateformat, "%H:%M:%S");
     VAR(IDF_PERSIST, chatconsize, 0, 5, 100);
     VAR(IDF_PERSIST, chatcontime, 0, 30000, VAR_MAX);
-    VAR(IDF_PERSIST, chatconfade, 0, 2000, VAR_MAX);
+    VAR(IDF_PERSIST, chatconfade, 0, 1000, VAR_MAX);
     VAR(IDF_PERSIST, chatconoverflow, 0, 5, VAR_MAX);
     VAR(IDF_PERSIST, chatcondate, 0, 0, 1);
     FVAR(IDF_PERSIST, chatconblend, 0, 1, 1);
