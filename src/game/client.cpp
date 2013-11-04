@@ -516,6 +516,7 @@ namespace client
 
     void edittoggled(bool edit)
     {
+        if(!edit && (game::maptime <= 0 || game::player1->state != CS_EDITING)) return;
         game::player1->editspawn(game::gamemode, game::mutators);
         game::player1->state = edit ? CS_EDITING : (m_edit(game::gamemode) ? CS_ALIVE : CS_DEAD);
         game::player1->o = camera1->o;
