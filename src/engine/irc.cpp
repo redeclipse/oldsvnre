@@ -828,7 +828,11 @@ void ircslice()
                     }
                     else if(clocktime-n->lastactivity >= 120)
                     {
-                        if(!n->lastping) ircsend(n, "PING %d", clocktime);
+                        if(!n->lastping)
+                        {
+                            ircsend(n, "PING %d", clocktime);
+                            n->lastping = clocktime;
+                        }
                         else if(clocktime-n->lastping >= 120) ircdiscon(n, "connection timed out");
                     }
                     break;
