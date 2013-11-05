@@ -2497,7 +2497,7 @@ namespace game
         }
         if(!found) spectvfollow = spectvfollowing = -1;
         camrefresh(cam);
-        #define stvf(z) (intermission ? spectvinterm##z : (spectvfollowing >= 0 ? spectvfollow##z : spectv##z))
+        #define stvf(z) (intermission || client::waitplayers ? spectvinterm##z : (spectvfollowing >= 0 ? spectvfollow##z : spectv##z))
         if(forced)
         {
             camupdate(cam, amt, renew, true);
