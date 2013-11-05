@@ -121,12 +121,10 @@ namespace game
 
     VAR(IDF_PERSIST, spectvtime, 1000, 10000, VAR_MAX);
     VAR(IDF_PERSIST, spectvmintime, 1000, 1000, VAR_MAX);
-    VAR(IDF_PERSIST, spectvmaxtime, 0, 20000, VAR_MAX);
+    VAR(IDF_PERSIST, spectvmaxtime, 0, 15000, VAR_MAX);
     VAR(IDF_PERSIST, spectvspeed, 1, 500, VAR_MAX);
     VAR(IDF_PERSIST, spectvyawspeed, 1, 500, VAR_MAX);
     VAR(IDF_PERSIST, spectvpitchspeed, 1, 500, VAR_MAX);
-    FVAR(IDF_PERSIST, spectvmindist, 0, 0, FVAR_MAX);
-    FVAR(IDF_PERSIST, spectvmaxdist, 0, 128, FVAR_MAX);
     FVAR(IDF_PERSIST, spectvrotate, FVAR_MIN, 45, FVAR_MAX); // rotate style, < 0 = absolute angle, 0 = scaled, > 0 = scaled with max angle
     FVAR(IDF_PERSIST, spectvyawscale, FVAR_MIN, 1, 1000);
     FVAR(IDF_PERSIST, spectvpitchscale, FVAR_MIN, 1, 1000);
@@ -135,6 +133,18 @@ namespace game
     VAR(IDF_PERSIST, spectvdead, 0, 1, 2); // 0 = never, 1 = in all but duel/survivor, 2 = always
     VAR(IDF_PERSIST, spectvfirstperson, 0, 0, 2); // 0 = aim in direction followed player is facing, 1 = aim in direction determined by spectv when dead, 2 = always aim in direction
     VAR(IDF_PERSIST, spectvthirdperson, 0, 2, 2); // 0 = aim in direction followed player is facing, 1 = aim in direction determined by spectv when dead, 2 = always aim in direction
+
+    VAR(IDF_PERSIST, spectvintermtime, 1000, 10000, VAR_MAX);
+    VAR(IDF_PERSIST, spectvintermmintime, 1000, 5000, VAR_MAX);
+    VAR(IDF_PERSIST, spectvintermmaxtime, 0, 20000, VAR_MAX);
+    VAR(IDF_PERSIST, spectvintermspeed, 1, 500, VAR_MAX);
+    VAR(IDF_PERSIST, spectvintermyawspeed, 1, 500, VAR_MAX);
+    VAR(IDF_PERSIST, spectvintermpitchspeed, 1, 500, VAR_MAX);
+    FVAR(IDF_PERSIST, spectvintermrotate, FVAR_MIN, 45, FVAR_MAX); // rotate style, < 0 = absolute angle, 0 = scaled, > 0 = scaled with max angle
+    FVAR(IDF_PERSIST, spectvintermyawscale, FVAR_MIN, 1, 1000);
+    FVAR(IDF_PERSIST, spectvintermpitchscale, FVAR_MIN, 1, 1000);
+    FVAR(IDF_PERSIST, spectvintermyawthresh, 0, 0, 360);
+    FVAR(IDF_PERSIST, spectvintermpitchthresh, 0, 0, 180);
 
     VARF(0, spectvfollow, -1, -1, VAR_MAX, spectvfollowing = spectvfollow); // attempts to always keep this client in view
     VAR(0, spectvfollowself, 0, 1, 2); // if we are not spectating, spectv should show us; 0 = off, 1 = not duel/survivor, 2 = always
@@ -149,6 +159,9 @@ namespace game
     FVAR(IDF_PERSIST, spectvfollowpitchscale, FVAR_MIN, 1, 1000);
     FVAR(IDF_PERSIST, spectvfollowyawthresh, 0, 0, 360);
     FVAR(IDF_PERSIST, spectvfollowpitchthresh, 0, 0, 180);
+
+    FVAR(IDF_PERSIST, spectvmindist, 0, 0, FVAR_MAX);
+    FVAR(IDF_PERSIST, spectvmaxdist, 0, 128, FVAR_MAX);
 
     VAR(IDF_PERSIST, deathcamstyle, 0, 2, 2); // 0 = no follow, 1 = follow attacker, 2 = follow self
     VAR(IDF_PERSIST, deathcamspeed, 0, 500, VAR_MAX);
@@ -2484,7 +2497,7 @@ namespace game
         }
         if(!found) spectvfollow = spectvfollowing = -1;
         camrefresh(cam);
-        #define stvf(z) (spectvfollowing >= 0 ? spectvfollow##z : spectv##z)
+        #define stvf(z) (intermission ? spectvinterm##z : (spectvfollowing >= 0 ? spectvfollow##z : spectv##z))
         if(forced)
         {
             camupdate(cam, amt, renew, true);
