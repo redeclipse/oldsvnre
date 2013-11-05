@@ -75,7 +75,11 @@ namespace weapons
         if(game::intermission || (!local && (d == game::player1 || d->ai))) return false;
         if(local)
         {
-            if(!d->canreload(weap, m_weapon(game::gamemode, game::mutators), false, lastmillis)) return false;
+            if(!d->canreload(weap, m_weapon(game::gamemode, game::mutators), false, lastmillis))
+            {
+                if(d->weapstate[weap] == W_S_POWER) d->setweapstate(weap, W_S_WAIT, 100, lastmillis);
+                return false;
+            }
             client::addmsg(N_RELOAD, "ri3", d->clientnum, lastmillis-game::maptime, weap);
             int oldammo = d->ammo[weap];
             ammo = min(max(d->ammo[weap], 0) + W(weap, add), W(weap, max));
