@@ -901,7 +901,7 @@ void save_config(char *mname)
 }
 ICOMMAND(0, savemapconfig, "s", (char *mname), if(!(identflags&IDF_WORLD)) save_config(*mname ? mname : mapname));
 
-VARF(IDF_PERSIST, mapshotsize, 0, 256, INT_MAX-1, mapshotsize -= mapshotsize%2);
+VARF(IDF_PERSIST, mapshotsize, 0, 512, INT_MAX-1, mapshotsize -= mapshotsize%2);
 
 void save_mapshot(char *mname)
 {
