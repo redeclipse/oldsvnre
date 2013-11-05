@@ -937,10 +937,11 @@ namespace server
         {
             static string defaultmap;
             defaultmap[0] = 0;
-            vector<char *> maps, prev;
+            vector<char *> maps;
             explodelist(map, maps);
             if(*sv_previousmaps)
             {
+                vector<char *> prev;
                 explodelist(sv_previousmaps, prev);
                 loopvj(prev) loopvrev(maps) if(strcmp(prev[j], maps[i]))
                 {
