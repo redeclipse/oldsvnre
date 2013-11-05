@@ -177,7 +177,12 @@ void showgui(const char *name, int tab)
     if(!m) return;
     int pos = menustack.find(m);
     if(pos<0) pushgui(m, -1, tab);
-    else restoregui(pos, tab);
+    else if(pos < menustack.length()-1) restoregui(pos, tab);
+    else
+    {
+        m->menutab = tab;
+        return;
+    }
     playsound(S_GUIPRESS, camera1->o, camera1, SND_FORCED);
 }
 
