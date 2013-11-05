@@ -933,6 +933,31 @@ namespace server
     {
         const char *map = G(defaultmap);
         if(!map || !*map) map = choosemap(suggest, mode, muts, G(rotatemaps));
+        else if(strchr(map, ' '))
+        {
+            static string defaultmap;
+            defaultmap[0] = 0;
+            vector<char *> maps, prev;
+            explodelist(map, maps);
+            if(*sv_previousmaps)
+            {
+                explodelist(sv_previousmaps, prev);
+                loopvj(prev) loopvrev(maps) if(strcmp(prev[j], maps[i]))
+                {
+                    delete[] maps[i];
+                    maps.remove(i);
+                    if(maps.length() <= 1) break;
+                }
+                prev.deletearrays();
+            }
+            if(!maps.empty())
+            {
+                int r = rnd(maps.length());
+                copystring(defaultmap, maps[r]);
+            }
+            maps.deletearrays();
+            map = *defaultmap ? defaultmap : choosemap(suggest, mode, muts, G(rotatemaps));
+        }
         return map && *map ? map : "maps/untitled";
     }
 
@@ -979,7 +1004,7 @@ namespace server
     {
         setpause(false);
         setmod(sv_botoffset, 0);
-        if(*sv_previousmaps) setmods(sv_previousmaps, "");
+        //if(*sv_previousmaps) setmods(sv_previousmaps, "");
         if(G(resetmmonend)) { mastermode = MM_OPEN; resetallows(); }
         if(G(resetbansonend)) resetbans();
         if(G(resetmutesonend)) resetmutes();
@@ -2746,7 +2771,7 @@ namespace server
         aiman::clearai();
         aiman::poke();
         mapcrc = 0;
-        const char *reqmap = name && *name ? name : pickmap(smapname, gamemode, mutators);
+        const char *reqmap = name && *name ? name : pickmap(NULL, gamemode, mutators);
 #ifdef STANDALONE // interferes with savemap on clients, in which case we can just use the auto-request
         loopi(SENDMAP_MAX)
         {
@@ -2786,11 +2811,11 @@ namespace server
             spectator(clients[i]);
         }
 
-        if(m_fight(gamemode) && G(maphistory))
+        if(m_fight(gamemode))
         {
             vector<char> buf;
             buf.put(smapname, strlen(smapname));
-            if(*sv_previousmaps && numclients())
+            if(*sv_previousmaps && G(maphistory) && numclients())
             {
                 vector<char *> prev;
                 explodelist(sv_previousmaps, prev);
