@@ -3077,6 +3077,8 @@ namespace hud
         }
         if(!t || t == notexture) t = textureload(backgroundtex, 3);
         glBindTexture(GL_TEXTURE_2D, t->id);
+        //float ts = (w>h ? h/float(w) : w/float(h))*0.5f, tx = w>h ? 0.f : ts, ty = w>h ? ts : 0.f, tw = w>h ? 1.f : 1-ts, th = w>h ? 1-ts : 1.f;
+        //drawquad(0, 0, w, h, tx, ty, tw, th);
         drawtexture(0, 0, w, h);
 
         drawspecborder(w, h, BORDER_BG, top, bottom);
