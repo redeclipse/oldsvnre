@@ -408,7 +408,7 @@ namespace ai
         if(passive() || (d->ai->enemy >= 0 && lastmillis-d->ai->enemymillis >= (111-d->skill)*50)) return false;
         if(e && targetable(d, e))
         {
-            if(pursue)
+            if(pursue || d->dominating.find(e))
             {
                 if((b.targtype != AI_T_AFFINITY || !(pursue%2)) && makeroute(d, b, e->lastnode))
                     d->ai->switchstate(b, AI_S_PURSUE, AI_T_ACTOR, e->clientnum, b.targtype != AI_T_AFFINITY ? AI_A_NORMAL : AI_A_HASTE);
@@ -454,7 +454,11 @@ namespace ai
                     if(!(c.targ = targetable(d, e))) continue;
                     c.pos = getaimpos(d, e, altfire(d, e));
                     c.dist = c.pos.squaredist(dp);
-                    if(d->dominating.find(c.d) >= 0) t = &c; // REVENGE
+                    if(d->dominating.find(c.d) >= 0)
+                    {
+                        t = &c;
+                        break; // REVENGE
+                    }
                     else if((!t || c.dist < t->dist) && (mindist <= 0 || c.dist <= mindist))
                     {
                         if(!(c.see = force || cansee(d, dp, c.pos, d->actortype >= A_ENEMY))) continue;
@@ -654,7 +658,7 @@ namespace ai
     {
         if(d != e)
         {
-            if(d->ai && (d->actortype >= A_ENEMY || hithurts(flags) || d->ai->enemy < 0)) // see if this ai is interested in a grudge
+            if(d->ai && (d->actortype >= A_ENEMY || hithurts(flags) || d->ai->enemy < 0 || d->dominating.find(e))) // see if this ai is interested in a grudge
             {
                 aistate &b = d->ai->getstate();
                 violence(d, b, e, d->actortype != A_BOT || weaptype[d->weapselect].melee ? 1 : 0);
@@ -664,7 +668,7 @@ namespace ai
             if(checkothers(targets, d, AI_S_DEFEND, AI_T_ACTOR, d->clientnum, true))
             {
                 gameent *t;
-                loopv(targets) if((t = game::getclient(targets[i])) && t->ai && t->actortype == A_BOT && (hithurts(flags) || !game::getclient(t->ai->enemy)))
+                loopv(targets) if((t = game::getclient(targets[i])) && t->ai && t->actortype == A_BOT && (hithurts(flags) || t->ai->enemy < 0 || t->dominating.find(e)))
                 {
                     aistate &c = t->ai->getstate();
                     violence(t, c, e, weaptype[d->weapselect].melee ? 1 : 0);
@@ -1143,11 +1147,13 @@ namespace ai
         int result = 0, skmod = max(101-d->skill, 1);
         float frame = d->skill <= 100 ? float(lastmillis-d->ai->lastrun)/float(skmod*10) : 1;
         if(!actor[d->actortype].canstrafe && d->skill <= 100) frame *= 2;
+        if(d->dominating.length()) frame *= 1+d->dominating.length();
         vec dp = d->headpos(), fp = d->feetpos();
 
         d->action[AC_SPECIAL] = d->ai->dontmove = false;
         if(b.acttype == AI_A_IDLE || !actor[d->actortype].canmove)
         {
+            frame *= 2;
             d->ai->dontmove = true;
             d->ai->spot = fp;
         }
@@ -1260,11 +1266,17 @@ namespace ai
         }
         if(result < 3) d->action[AC_PRIMARY] = d->action[AC_SECONDARY] = false;
 
+        if(!m_insta(game::gamemode, game::mutators))
+        {
+            if(b.acttype == AI_A_NORMAL && (d->health <= m_health(game::gamemode, game::mutators, d->model)/3 || (iswaypoint(d->ai->targnode) && obstacles.find(d->ai->targnode, d))))
+                b.acttype = AI_A_HASTE;
+            if(b.acttype == AI_A_HASTE) frame *= 2+(max(m_health(game::gamemode, game::mutators, d->model)/3, 1)/float(max(d->health, 1)));
+        }
+        else frame *= 2;
+
         game::fixrange(d->ai->targyaw, d->ai->targpitch);
         if(!result) game::scaleyawpitch(d->yaw, d->pitch, d->ai->targyaw, d->ai->targpitch, frame, frame*0.5f);
 
-        if(b.acttype == AI_A_NORMAL && (d->health <= m_health(game::gamemode, game::mutators, d->model)/3 || (iswaypoint(d->ai->targnode) && obstacles.find(d->ai->targnode, d))))
-            b.acttype = AI_A_HASTE;
         if(actor[d->actortype].canjump && jumpallowed) jumpto(d, b, d->ai->spot);
         if(d->actortype == A_BOT || d->actortype == A_GRUNT)
         {
@@ -1636,7 +1648,7 @@ namespace ai
             else if(d->state == CS_ALIVE && run)
             {
                 bool result = false;
-                c.acttype = AI_A_NORMAL;
+                c.acttype = m_insta(game::gamemode, game::mutators) ? AI_A_HASTE : AI_A_NORMAL;
                 switch(c.type)
                 {
                     case AI_S_WAIT: result = dowait(d, c); break;
