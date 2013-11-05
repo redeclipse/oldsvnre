@@ -120,14 +120,14 @@ namespace game
     FVAR(IDF_PERSIST, followtvpitchthresh, 0, 0, 180);
 
     VAR(IDF_PERSIST, spectvtime, 1000, 10000, VAR_MAX);
-    VAR(IDF_PERSIST, spectvmintime, 1000, 5000, VAR_MAX);
+    VAR(IDF_PERSIST, spectvmintime, 1000, 1000, VAR_MAX);
     VAR(IDF_PERSIST, spectvmaxtime, 0, 20000, VAR_MAX);
     VAR(IDF_PERSIST, spectvspeed, 1, 500, VAR_MAX);
     VAR(IDF_PERSIST, spectvyawspeed, 1, 500, VAR_MAX);
-    VAR(IDF_PERSIST, spectvpitchspeed, 1, 350, VAR_MAX);
+    VAR(IDF_PERSIST, spectvpitchspeed, 1, 500, VAR_MAX);
     FVAR(IDF_PERSIST, spectvmindist, 0, 0, FVAR_MAX);
     FVAR(IDF_PERSIST, spectvmaxdist, 0, 128, FVAR_MAX);
-    FVAR(IDF_PERSIST, spectvrotate, FVAR_MIN, 0, FVAR_MAX); // rotate style, < 0 = absolute angle, 0 = scaled, > 0 = scaled with max angle
+    FVAR(IDF_PERSIST, spectvrotate, FVAR_MIN, 45, FVAR_MAX); // rotate style, < 0 = absolute angle, 0 = scaled, > 0 = scaled with max angle
     FVAR(IDF_PERSIST, spectvyawscale, FVAR_MIN, 1, 1000);
     FVAR(IDF_PERSIST, spectvpitchscale, FVAR_MIN, 1, 1000);
     FVAR(IDF_PERSIST, spectvyawthresh, 0, 0, 360);
@@ -144,7 +144,7 @@ namespace game
     VAR(IDF_PERSIST, spectvfollowspeed, 1, 500, VAR_MAX);
     VAR(IDF_PERSIST, spectvfollowyawspeed, 1, 500, VAR_MAX);
     VAR(IDF_PERSIST, spectvfollowpitchspeed, 1, 350, VAR_MAX);
-    FVAR(IDF_PERSIST, spectvfollowrotate, FVAR_MIN, 0, FVAR_MAX); // rotate style, < 0 = absolute angle, 0 = scaled, > 0 = scaled with max angle
+    FVAR(IDF_PERSIST, spectvfollowrotate, FVAR_MIN, 45, FVAR_MAX); // rotate style, < 0 = absolute angle, 0 = scaled, > 0 = scaled with max angle
     FVAR(IDF_PERSIST, spectvfollowyawscale, FVAR_MIN, 1, 1000);
     FVAR(IDF_PERSIST, spectvfollowpitchscale, FVAR_MIN, 1, 1000);
     FVAR(IDF_PERSIST, spectvfollowyawthresh, 0, 0, 360);
@@ -222,7 +222,7 @@ namespace game
     FVAR(IDF_PERSIST, gibscale, 0, 1, 1000);
     VAR(IDF_PERSIST, gibfade, 1, 5000, VAR_MAX);
     FVAR(IDF_PERSIST, impulsescale, 0, 1, 1000);
-    VAR(IDF_PERSIST, impulsefade, 0, 350, VAR_MAX);
+    VAR(IDF_PERSIST, impulsefade, 0, 400, VAR_MAX);
     VAR(IDF_PERSIST, ragdolleffect, 2, 500, VAR_MAX);
 
     VAR(IDF_PERSIST, playerovertone, -1, CTONE_TEAM, CTONE_MAX-1);
@@ -261,7 +261,7 @@ namespace game
     VAR(IDF_PERSIST, headlessmodels, 0, 1, 1);
     VAR(IDF_PERSIST, autoloadweap, 0, 0, 1); // 0 = off, 1 = auto-set loadout weapons
     SVAR(IDF_PERSIST, favloadweaps, "");
-    FVAR(IDF_PERSIST, twitchspeed, 0, 10, FVAR_MAX);
+    FVAR(IDF_PERSIST, twitchspeed, 0, 8, FVAR_MAX);
 
     bool needname(gameent *d)
     {
