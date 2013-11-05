@@ -125,7 +125,7 @@ namespace game
     VAR(IDF_PERSIST, spectvspeed, 1, 500, VAR_MAX);
     VAR(IDF_PERSIST, spectvyawspeed, 1, 500, VAR_MAX);
     VAR(IDF_PERSIST, spectvpitchspeed, 1, 500, VAR_MAX);
-    FVAR(IDF_PERSIST, spectvrotate, FVAR_MIN, 45, FVAR_MAX); // rotate style, < 0 = absolute angle, 0 = scaled, > 0 = scaled with max angle
+    FVAR(IDF_PERSIST, spectvrotate, FVAR_MIN, 0, FVAR_MAX); // rotate style, < 0 = absolute angle, 0 = scaled, > 0 = scaled with max angle
     FVAR(IDF_PERSIST, spectvyawscale, FVAR_MIN, 1, 1000);
     FVAR(IDF_PERSIST, spectvpitchscale, FVAR_MIN, 1, 1000);
     FVAR(IDF_PERSIST, spectvyawthresh, 0, 0, 360);
@@ -140,7 +140,7 @@ namespace game
     VAR(IDF_PERSIST, spectvintermspeed, 1, 500, VAR_MAX);
     VAR(IDF_PERSIST, spectvintermyawspeed, 1, 500, VAR_MAX);
     VAR(IDF_PERSIST, spectvintermpitchspeed, 1, 500, VAR_MAX);
-    FVAR(IDF_PERSIST, spectvintermrotate, FVAR_MIN, 45, FVAR_MAX); // rotate style, < 0 = absolute angle, 0 = scaled, > 0 = scaled with max angle
+    FVAR(IDF_PERSIST, spectvintermrotate, FVAR_MIN, 0, FVAR_MAX); // rotate style, < 0 = absolute angle, 0 = scaled, > 0 = scaled with max angle
     FVAR(IDF_PERSIST, spectvintermyawscale, FVAR_MIN, 1, 1000);
     FVAR(IDF_PERSIST, spectvintermpitchscale, FVAR_MIN, 1, 1000);
     FVAR(IDF_PERSIST, spectvintermyawthresh, 0, 0, 360);
