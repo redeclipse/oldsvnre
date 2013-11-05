@@ -57,7 +57,7 @@ namespace hud
     }
     COMMANDN(0, conskip, setconskip, "i");
 
-    VAR(IDF_PERSIST, consize, 0, 5, 100);
+    VAR(IDF_PERSIST, consize, 1, 5, 100);
     VAR(IDF_PERSIST, contime, 0, 30000, VAR_MAX);
     VAR(IDF_PERSIST, confade, 0, 500, VAR_MAX);
     VAR(IDF_PERSIST, conoverflow, 0, 5, VAR_MAX);
@@ -67,7 +67,7 @@ namespace hud
     FVAR(IDF_PERSIST, conblend, 0, 0.6f, 1);
     FVAR(IDF_PERSIST, conscale, FVAR_NONZERO, 1, FVAR_MAX);
     SVAR(IDF_PERSIST, condateformat, "%H:%M:%S");
-    VAR(IDF_PERSIST, chatconsize, 0, 5, 100);
+    VAR(IDF_PERSIST, chatconsize, 1, 5, 100);
     VAR(IDF_PERSIST, chatcontime, 0, 30000, VAR_MAX);
     VAR(IDF_PERSIST, chatconfade, 0, 1000, VAR_MAX);
     VAR(IDF_PERSIST, chatconoverflow, 0, 5, VAR_MAX);
@@ -1580,55 +1580,52 @@ namespace hud
         if(type >= 2)
         {
             int numl = chatconsize, numo = chatconsize+chatconoverflow;
-            if(numl)
+            loopvj(conlines) if(conlines[j].type >= CON_CHAT)
             {
-                loopvj(conlines) if(conlines[j].type >= CON_CHAT)
+                int len = !full && conlines[j].type > CON_CHAT ? chatcontime/2 : chatcontime;
+                if(full || totalmillis-conlines[j].reftime <= len+chatconfade)
                 {
-                    int len = !full && conlines[j].type > CON_CHAT ? chatcontime/2 : chatcontime;
-                    if(full || totalmillis-conlines[j].reftime <= len+chatconfade)
+                    if(refs.length() >= numl)
                     {
-                        if(refs.length() >= numl)
+                        if(refs.length() >= numo)
                         {
-                            if(refs.length() >= numo)
+                            if(full) break;
+                            bool found = false;
+                            loopvrev(refs) if(conlines[refs[i]].reftime+(conlines[refs[i]].type > CON_CHAT ? chatcontime/2 : chatcontime) < conlines[j].reftime+len)
                             {
-                                if(full) break;
-                                bool found = false;
-                                loopvrev(refs) if(conlines[refs[i]].reftime+(conlines[refs[i]].type > CON_CHAT ? chatcontime/2 : chatcontime) < conlines[j].reftime+len)
-                                {
-                                    refs.remove(i);
-                                    found = true;
-                                    break;
-                                }
-                                if(!found) continue;
+                                refs.remove(i);
+                                found = true;
+                                break;
                             }
-                            conlines[j].reftime = min(conlines[j].reftime, totalmillis-len);
+                            if(!found) continue;
                         }
-                        refs.add(j);
+                        conlines[j].reftime = min(conlines[j].reftime, totalmillis-len);
                     }
+                    refs.add(j);
                 }
-                glPushMatrix();
-                glScalef(chatconscale, chatconscale, 1);
-                int tx = int(x/chatconscale), ty = int(y/chatconscale),
-                    ts = int(s/chatconscale), tr = tx+FONTW;
-                tz = int(tz/chatconscale);
-                loopvj(refs)
-                {
-                    int len = !full && conlines[refs[j]].type > CON_CHAT ? chatcontime/2 : chatcontime;
-                    float f = full || !chatconfade ? 1.f : clamp(((len+chatconfade)-(totalmillis-conlines[refs[j]].reftime))/float(chatconfade), 0.f, 1.f),
-                        g = conlines[refs[j]].type > CON_CHAT ? conblend : chatconblend;
-                    if(chatcondate && *chatcondateformat)
-                        tz += draw_textx("%s %s", tr, ty-tz, 255, 255, 255, int(255*fade*f*g), TEXT_LEFT_UP, -1, ts, gettime(conlines[refs[j]].realtime, chatcondateformat), conlines[refs[j]].cref)*f;
-                    else tz += draw_textx("%s", tr, ty-tz, 255, 255, 255, int(255*fade*f*g), TEXT_LEFT_UP, -1, ts, conlines[refs[j]].cref)*f;
-                }
-                glPopMatrix();
-                tz = int(tz*chatconscale);
             }
+            glPushMatrix();
+            glScalef(chatconscale, chatconscale, 1);
+            int tx = int(x/chatconscale), ty = int(y/chatconscale),
+                ts = int(s/chatconscale), tr = tx+FONTW;
+            tz = int(tz/chatconscale);
+            loopvj(refs)
+            {
+                int len = !full && conlines[refs[j]].type > CON_CHAT ? chatcontime/2 : chatcontime;
+                float f = full || !chatconfade ? 1.f : clamp(((len+chatconfade)-(totalmillis-conlines[refs[j]].reftime))/float(chatconfade), 0.f, 1.f),
+                    g = conlines[refs[j]].type > CON_CHAT ? conblend : chatconblend;
+                if(chatcondate && *chatcondateformat)
+                    tz += draw_textx("%s %s", tr, ty-tz, 255, 255, 255, int(255*fade*f*g), TEXT_LEFT_UP, -1, ts, gettime(conlines[refs[j]].realtime, chatcondateformat), conlines[refs[j]].cref)*f;
+                else tz += draw_textx("%s", tr, ty-tz, 255, 255, 255, int(255*fade*f*g), TEXT_LEFT_UP, -1, ts, conlines[refs[j]].cref)*f;
+            }
+            glPopMatrix();
+            tz = int(tz*chatconscale);
         }
         else
         {
-            int numl = consize, numo = consize+conoverflow;
-            if(numl)
+            if((showconsole && showhud) || commandmillis > 0)
             {
+                int numl = consize, numo = consize+conoverflow;
                 loopvj(conlines) if(type ? conlines[j].type >= (confilter && !full ? CON_LO : 0) && conlines[j].type <= CON_HI : conlines[j].type >= (confilter && !full ? CON_LO : 0))
                 {
                     int len = conlines[j].type >= CON_CHAT ? (!full && conlines[j].type > CON_CHAT ? chatcontime/2 : chatcontime) : (!full && conlines[j].type < CON_IMPORTANT ? contime/2 : contime),
@@ -3326,13 +3323,9 @@ namespace hud
             left += drawheadsup(hudwidth, hudheight, edge, top, bottom, fade);
             if(!texpaneltimer && !game::tvmode() && !client::waiting() && !hasinput(false)) drawevents(fade);
         }
-        if(UI::ready && showconsole && showhud)
-        {
-            drawconsole(showconsole < 2 || noview ? 0 : 1, hudwidth, hudheight, edge*2, edge+top, hudwidth-edge*2, consolefade);
-            if(showconsole >= 2 && !noview)
-                drawconsole(2, hudwidth, hudheight, left, hudheight-edge-bottom, showfps >= 2 || showstats >= (m_edit(game::gamemode) ? 1 : 2) ? (hudwidth-left*2)/2-edge*4 : ((hudwidth-left*2)/2-edge*4)*2, consolefade);
-        }
-
+        drawconsole(showconsole < 2 || noview ? 0 : 1, hudwidth, hudheight, edge*2, edge+top, hudwidth-edge*2, consolefade);
+        if(showconsole >= 2 && !noview && showconsole && showhud)
+            drawconsole(2, hudwidth, hudheight, left, hudheight-edge-bottom, showfps >= 2 || showstats >= (m_edit(game::gamemode) ? 1 : 2) ? (hudwidth-left*2)/2-edge*4 : ((hudwidth-left*2)/2-edge*4)*2, consolefade);
         glDisable(GL_BLEND);
     }
 
