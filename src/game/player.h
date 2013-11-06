@@ -91,44 +91,48 @@ struct score
 #define valteam(a,b)    (a >= b && a <= T_TOTAL)
 
 #ifdef GAMESERVER
-const int mapbals[T_TOTAL][T_TOTAL] = {
+int mapbals[T_TOTAL][T_TOTAL] = {
     { T_ALPHA, T_OMEGA, T_KAPPA, T_SIGMA },
     { T_OMEGA, T_ALPHA, T_SIGMA, T_KAPPA },
     { T_KAPPA, T_SIGMA, T_ALPHA, T_OMEGA },
     { T_SIGMA, T_KAPPA, T_OMEGA, T_ALPHA }
 };
 #else
-extern const int mapbals[T_TOTAL][T_TOTAL];
+extern int mapbals[T_TOTAL][T_TOTAL];
 #endif
 
-#define CLASSES(a,b1,b2,c1,c2,c3,c4,c5) \
+#define CLASSES(a,b1,b2,c1,c2) \
     GSVAR(0, class##a##name, #a); \
     GVAR(0, class##a##health, 0, b1, VAR_MAX); \
     GVAR(0, class##a##armour, 0, b2, VAR_MAX); \
-    GFVAR(0, class##a##xradius, 0, c1, FVAR_MAX); \
-    GFVAR(0, class##a##yradius, 0, c2, FVAR_MAX); \
-    GFVAR(0, class##a##height, 0, c3, FVAR_MAX); \
-    GFVAR(0, class##a##weight, 0, c4, FVAR_MAX); \
-    GFVAR(0, class##a##speed, 0, c5, FVAR_MAX);
+    GFVAR(0, class##a##weight, 0, c1, FVAR_MAX); \
+    GFVAR(0, class##a##speed, 0, c2, FVAR_MAX);
 
 #ifdef MEK
 #define PLAYERTYPES 4
-#ifdef GAMEWORLD
+#ifdef GAMESERVER
 const char *playertypes[PLAYERTYPES][5] = {
     { "actors/mek1/hwep",    "actors/mek1",    "actors/mek1",   "actors/mek1",      "light" },
     { "actors/mek2/hwep",    "actors/mek2",    "actors/mek2",   "actors/mek2",      "medium" },
     { "actors/mek3/hwep",    "actors/mek3",    "actors/mek3",   "actors/mek3",      "flyer" },
     { "actors/mek4/hwep",    "actors/mek4",    "actors/mek4",   "actors/mek4",      "heavy" },
 };
+float playerdims[PLAYERTYPES][3] = {
+    { 6,      6,      16 },
+    { 6,      6,      16 },
+    { 6,      6,      16 },
+    { 6,      6,      16 },
+};
 #else
-extern const char *playertypes[PLAYERTYPES][5]; //3
+extern const char *playertypes[PLAYERTYPES][5];
+extern float playerdims[PLAYERTYPES][3];
 #endif
 
-//      name    health  armour  xrad    yrad    height  weight      speed
-CLASSES(mek1,   300,    80,     6,      6,      16,     200,        80); // light
-CLASSES(mek2,   400,    100,    6,      6,      16,     300,        60); // medium
-CLASSES(mek3,   330,    90,     6,      6,      16,     250,        70); // flyer
-CLASSES(mek4,   500,    200,    6,      6,      16,     350,        40); // heavy
+//      name    health  armour  weight      speed
+CLASSES(mek1,   300,    80,     200,        80); // light
+CLASSES(mek2,   400,    100,    300,        60); // medium
+CLASSES(mek3,   330,    90,     250,        70); // flyer
+CLASSES(mek4,   500,    200,    350,        40); // heavy
 
 #ifdef GAMESERVER
 #define CLASSDEF(proto,name)     proto *sv_class_stat_##name[] = { &sv_classmek1##name, &sv_classmek2##name, &sv_classmek3##name, &sv_classmek4##name };
@@ -143,24 +147,28 @@ CLASSES(mek4,   500,    200,    6,      6,      16,     350,        40); // heav
 #endif
 #else // FPS
 #define PLAYERTYPES 2
-#ifdef GAMEWORLD
+#ifdef GAMESERVER
 const char *playertypes[PLAYERTYPES][5] = {
     { "actors/player/male/hwep",      "actors/player/male",     "actors/player/male/body",      "actors/player/male/headless",      "male" },
     { "actors/player/female/hwep",    "actors/player/female",   "actors/player/male/body",      "actors/player/female/headless",    "female" }
 };
+float playerdims[PLAYERTYPES][3] = {
+    { 3,      3,      14 },
+    { 3,      3,      14 },
+};
 #else
 extern const char *playertypes[PLAYERTYPES][5];
+extern float playerdims[PLAYERTYPES][3];
 #endif
 
-//      name    health  armour  xrad    yrad    height  weight      speed
-CLASSES(male,   100,    0,      3,      3,      14,     200,        50);
-CLASSES(female, 100,    0,      3,      3,      14,     200,        50);
+//      name    health  armour  weight      speed
+CLASSES(player, 100,    0,      200,        50);
 #ifdef GAMESERVER
-#define CLASSDEF(proto,name)     proto *sv_class_stat_##name[] = { &sv_classmale##name, &sv_classfemale##name };
+#define CLASSDEF(proto,name)     proto *sv_class_stat_##name[] = { &sv_classplayer##name, &sv_classplayer##name };
 #define CLASS(id,name)           (*sv_class_stat_##name[max(id,0)%PLAYERTYPES])
 #else
 #ifdef GAMEWORLD
-#define CLASSDEF(proto,name)     proto *class_stat_##name[] = { &classmale##name, &classfemale##name };
+#define CLASSDEF(proto,name)     proto *class_stat_##name[] = { &classplayer##name, &classplayer##name };
 #else
 #define CLASSDEF(proto,name)     extern proto *class_stat_##name[];
 #endif
@@ -221,8 +229,5 @@ extern vector<vanitys> vanities;
 CLASSDEF(char *, name);
 CLASSDEF(int, health);
 CLASSDEF(int, armour);
-CLASSDEF(float, xradius);
-CLASSDEF(float, yradius);
-CLASSDEF(float, height);
 CLASSDEF(float, weight);
 CLASSDEF(float, speed);
