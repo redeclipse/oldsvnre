@@ -935,7 +935,6 @@ struct gameent : dynent, gamestate
     {
         state = CS_DEAD;
         type = ENT_PLAYER;
-        aiclip = false;
         copystring(hostname, "unknown");
         name[0] = handle[0] = info[0] = obit[0] = 0;
         removesounds();
