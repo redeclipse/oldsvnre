@@ -51,7 +51,7 @@ namespace hud
     VAR(IDF_PERSIST|IDF_HEX, scorehilight, 0, 0x888888, 0xFFFFFF);
     VAR(IDF_PERSIST, scoreimage, 0, 1, 1);
     FVAR(IDF_PERSIST, scoreimagesize, FVAR_NONZERO, 6, 10);
-    VAR(IDF_PERSIST, scorebgfx, 0, 1, 1);
+    VAR(IDF_PERSIST, scorebgfx, 0, 0, 1);
 
     static bool scoreson = false, scoresoff = false, shownscores = false;
     static int menustart = 0, menulastpress = 0;
@@ -283,7 +283,7 @@ namespace hud
                             int len = strlen(mapauthor);
                             uicenterlist(g, uifont(g, (len >= 48 ? (len >= 56 ? "tiny" : "little") : "reduced"), g.textf("by %s", 0xFFFFFF, NULL, 0, mapauthor)));
                         }
-                        uicenterlist(g, uifont(g, "reduced", {
+                        uicenterlist(g, uifont(g, "little", {
                             g.textf("\fy%s", 0xFFFFFF, NULL, 0, server::gamename(game::gamemode, game::mutators, 0, 32));
                             if((m_play(game::gamemode) || client::demoplayback) && game::timeremaining >= 0)
                             {
@@ -308,12 +308,12 @@ namespace hud
                     }));
                     if(scoreimage)
                     {
-                        g.space(0.5f);
+                        g.space(0.25f);
                         uicenterlist(g, {
                             g.image(NULL, scoreimagesize, true);
                         });
                     }
-                    g.space(0.5f);
+                    g.space(0.25f);
                     uicenterlist(g, uicenterlist(g, {
                         if(game::player1->quarantine)
                         {
@@ -430,6 +430,7 @@ namespace hud
             });
             g.space(2);
             uicenterlist(g, {
+                g.strut(20);
                 uicenter(g, {
                     #define loopscoregroup(b) \
                     { \
