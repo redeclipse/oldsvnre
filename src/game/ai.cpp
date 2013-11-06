@@ -225,7 +225,7 @@ namespace ai
         }
 
         if((d->actortype = at) >= A_ENEMY) d->type = ENT_AI;
-        d->aiclip = true;
+
         d->setname(name);
         d->spawnpoint = et;
         d->ownernum = on;
@@ -1133,7 +1133,7 @@ namespace ai
 
     bool lockon(gameent *d, gameent *e, float maxdist, bool check)
     {
-        if(!passive() && check && !d->blocked)
+        if(!passive() && check && !d->blocked && (d->inmaterial&MATF_CLIP) != MAT_AICLIP)
         {
             vec dir = vec(e->o).sub(d->o);
             float xydist = dir.x*dir.x+dir.y*dir.y, zdist = dir.z*dir.z, mdist = maxdist*maxdist, ddist = d->radius*d->radius+e->radius*e->radius;
@@ -1164,7 +1164,7 @@ namespace ai
         }
         else
         {
-            if(d->blocked && (!d->ai->lastturn || lastmillis-d->ai->lastturn >= 1000))
+            if((d->blocked || (d->inmaterial&MATF_CLIP) == MAT_AICLIP) && (!d->ai->lastturn || lastmillis-d->ai->lastturn >= 1000))
             {
                 d->ai->targyaw += 90+rnd(180);
                 d->ai->lastturn = lastmillis;
@@ -1468,7 +1468,7 @@ namespace ai
 
     void timeouts(gameent *d, aistate &b)
     {
-        if(d->blocked)
+        if(d->blocked || (d->inmaterial&MATF_CLIP) == MAT_AICLIP)
         {
             d->ai->blocktime += lastmillis-d->ai->lastrun;
             if(d->ai->blocktime > (d->ai->blockseq+1)*250)

@@ -922,8 +922,6 @@ namespace physics
             }
         }
 
-        if(d->actortype > A_PLAYER) d->aiclip = false;
-
         if(d->turnside && (!allowimpulse(d, IM_A_PARKOUR) || d->impulse[IM_TYPE] != IM_T_SKATE || (impulseskate && lastmillis-d->impulse[IM_TIME] > impulseskate) || d->vel.magnitude() <= 1))
             d->turnside = 0;
 
@@ -1116,7 +1114,6 @@ namespace physics
             weapons::doshot(d, d->o, W_MELEE, true, true);
         if(!found && d->turnside) d->turnside = 0;
         d->action[AC_DASH] = false;
-        if(d->actortype > A_PLAYER) d->aiclip = true;
     }
 
     void modifymovement(gameent *d, vec &m, bool local, bool wantsmove, int millis)
