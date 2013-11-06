@@ -959,18 +959,18 @@ struct gameent : dynent, gamestate
         int type = clamp(actortype, 0, int(A_MAX-1));
         if(type >= A_ENEMY)
         {
-            speed = actor[type].speed;
             xradius = actor[type].xradius*curscale;
             yradius = actor[type].yradius*curscale;
             zradius = height = actor[type].height*curscale;
+            speed = actor[type].speed;
             weight = actor[type].weight*curscale;
         }
         else
         {
+            xradius = playerdims[model][0]*curscale;
+            yradius = playerdims[model][1]*curscale;
+            zradius = height = playerdims[model][2]*curscale;
             speed = CLASS(model, speed);
-            xradius = CLASS(model, xradius)*curscale;
-            yradius = CLASS(model, yradius)*curscale;
-            zradius = height = CLASS(model, height)*curscale;
             weight = CLASS(model, weight)*curscale;
         }
         radius = max(xradius, yradius);
