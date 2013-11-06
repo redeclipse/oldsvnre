@@ -1866,11 +1866,7 @@ namespace game
         physics::reset();
         resetworld();
         resetcursor();
-        if(!empty)
-        {
-            conoutft(CON_SELF, "\fs%s\fS by \fs%s\fS (\fs\fy%s\fS)", *maptitle ? maptitle : "Untitled", *mapauthor ? mapauthor : "Unknown", server::gamename(gamemode, mutators));
-            preload();
-        }
+        if(!empty) preload();
         // reset perma-state
         gameent *d;
         int numdyns = numdynents();

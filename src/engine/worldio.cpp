@@ -833,7 +833,7 @@ void save_config(char *mname)
         }
     }
     if(vars) h->printf("\n");
-    if(verbose >= 2) conoutf("\fawrote %d variable values", vars);
+    if(verbose >= 2) conoutf("wrote %d variable values", vars);
 
     int aliases = 0;
     loopv(ids)
@@ -851,7 +851,7 @@ void save_config(char *mname)
         }
     }
     if(aliases) h->printf("\n");
-    if(verbose >= 2) conoutf("\fasaved %d aliases", aliases);
+    if(verbose >= 2) conoutf("saved %d aliases", aliases);
 
     // texture slots
     int nummats = sizeof(materialslots)/sizeof(materialslots[0]);
@@ -866,14 +866,14 @@ void save_config(char *mname)
                 break;
         }
     }
-    if(verbose) conoutf("\fasaved %d material slots", nummats);
+    if(verbose) conoutf("saved %d material slots", nummats);
 
     loopv(slots)
     {
         progress(i/float(slots.length()), "saving texture slots...");
         saveslotconfig(h, *slots[i], i);
     }
-    if(verbose) conoutf("\fasaved %d texture slots", slots.length());
+    if(verbose) conoutf("saved %d texture slots", slots.length());
 
     loopv(mapmodels)
     {
@@ -881,7 +881,7 @@ void save_config(char *mname)
         h->printf("mmodel %s\n", escapestring(mapmodels[i].name));
     }
     if(mapmodels.length()) h->printf("\n");
-    if(verbose) conoutf("\fasaved %d mapmodel slots", mapmodels.length());
+    if(verbose) conoutf("saved %d mapmodel slots", mapmodels.length());
 
     loopv(mapsounds)
     {
@@ -894,10 +894,10 @@ void save_config(char *mname)
         h->printf("\n");
     }
     if(mapsounds.length()) h->printf("\n");
-    if(verbose) conoutf("\fasaved %d mapsound slots", mapsounds.length());
+    if(verbose) conoutf("saved %d mapsound slots", mapsounds.length());
 
     delete h;
-    if(verbose) conoutf("\fasaved config %s", fname);
+    if(verbose) conoutf("saved config %s", fname);
 }
 ICOMMAND(0, savemapconfig, "s", (char *mname), if(!(identflags&IDF_WORLD)) save_config(*mname ? mname : mapname));
 
@@ -1006,7 +1006,7 @@ void save_world(const char *mname, bool nodata, bool forcesave)
         }
     });
 
-    if(verbose) conoutf("\fasaved %d variables", vars);
+    if(verbose) conoutf("saved %d variables", vars);
 
     // texture slots
     f->putlil<ushort>(texmru.length());
@@ -1047,15 +1047,15 @@ void save_world(const char *mname, bool nodata, bool forcesave)
 
                 f->putlil<int>(links.length());
                 loopvj(links) f->putlil<int>(links[j]); // aligned index
-                if(verbose >= 2) conoutf("\faentity %s (%d) saved %d links", entities::findname(e.type), i, links.length());
+                if(verbose >= 2) conoutf("entity %s (%d) saved %d links", entities::findname(e.type), i, links.length());
             }
             count++;
         }
     }
-    if(verbose) conoutf("\fasaved %d entities", count);
+    if(verbose) conoutf("saved %d entities", count);
 
     savevslots(f, numvslots);
-    if(verbose) conoutf("\fasaved %d vslots", numvslots);
+    if(verbose) conoutf("saved %d vslots", numvslots);
 
     progress(0, "saving octree...");
     savec(worldroot, ivec(0, 0, 0), hdr.worldsize>>1, f, nodata);
@@ -1074,22 +1074,22 @@ void save_world(const char *mname, bool nodata, bool forcesave)
             }
             f->write(lm.data, lm.bpp*LM_PACKW*LM_PACKH);
         }
-        if(verbose) conoutf("\fasaved %d lightmaps", lightmaps.length());
+        if(verbose) conoutf("saved %d lightmaps", lightmaps.length());
         if(getnumviewcells()>0)
         {
             progress(0, "saving PVS...");
             savepvs(f);
-            if(verbose) conoutf("\fasaved %d PVS view cells", getnumviewcells());
+            if(verbose) conoutf("saved %d PVS view cells", getnumviewcells());
         }
         if(shouldsaveblendmap())
         {
             progress(0, "saving blendmap...");
             saveblendmap(f);
-            if(verbose) conoutf("\fasaved blendmap");
+            if(verbose) conoutf("saved blendmap");
         }
     }
     delete f;
-    conoutf("\fasaved map %s v.%d:%d (r%d) in %.1f secs", mapname, hdr.version, hdr.gamever, hdr.revision, (SDL_GetTicks()-savingstart)/1000.0f);
+    conoutf("saved %s (\fs%s\fS by \fs%s\fS) v.%d:%d (r%d) in %.1f secs", mapname, *maptitle ? maptitle : "Untitled", *mapauthor ? mapauthor : "Unknown", hdr.version, hdr.gamever, hdr.revision, (SDL_GetTicks()-savingstart)/1000.0f);
     if(istempname(mapname)) setnames(&mapname[5], MAP_MAPZ);
 }
 
@@ -1233,7 +1233,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                 maptype = MAP_MAPZ;
 
                 if(hdr.version <= 24) copystring(hdr.gameid, "bfa", 4); // all previous maps were bfa-fps
-                if(verbose) conoutf("\faloading v%d map from %s game v%d", hdr.version, hdr.gameid, hdr.gamever);
+                if(verbose) conoutf("loading v%d map from %s game v%d", hdr.version, hdr.gameid, hdr.gamever);
 
                 if(hdr.version >= 25 || (hdr.version == 24 && hdr.gamever >= 44))
                 {
@@ -1327,7 +1327,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                         }
                     }
                     identflags &= ~IDF_WORLD;
-                    if(verbose) conoutf("\faloaded %d variables", vars);
+                    if(verbose) conoutf("loaded %d variables", vars);
                 }
                 sanevars();
 
@@ -1498,7 +1498,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                     if(verbose) conoutf("\frWARNING: loading OCTA v%d map from %s game, ignoring game specific data", hdr.version, hdr.gameid);
                     samegame = false;
                 }
-                else if(verbose) conoutf("\faloading OCTA v%d map from %s game", hdr.version, hdr.gameid);
+                else if(verbose) conoutf("loading OCTA v%d map from %s game", hdr.version, hdr.gameid);
 
                 if(hdr.version>=16)
                 {
@@ -1598,7 +1598,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                     int links = f->getlil<int>();
                     e.links.add(0, links);
                     loopk(links) e.links[k] = f->getlil<int>();
-                    if(verbose >= 2) conoutf("\faentity %s (%d) loaded %d link(s)", entities::findname(e.type), i, links);
+                    if(verbose >= 2) conoutf("entity %s (%d) loaded %d link(s)", entities::findname(e.type), i, links);
                 }
 
                 if(maptype == MAP_OCTA && e.type == ET_PARTICLES && e.attrs[0] >= 11)
@@ -1643,7 +1643,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                 if(verbose && !insideworld(e.o) && e.type != ET_LIGHT && e.type != ET_LIGHTFX && e.type != ET_SUNLIGHT)
                     conoutf("\frWARNING: ent outside of world: enttype[%s] index %d (%f, %f, %f)", entities::findname(e.type), i, e.o.x, e.o.y, e.o.z);
             }
-            if(verbose) conoutf("\faloaded %d entities", hdr.numents);
+            if(verbose) conoutf("loaded %d entities", hdr.numents);
             if(maptype == MAP_OCTA && sunlight)
             {
                 extentity &e = *ents.add(entities::newent());
@@ -1697,7 +1697,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                 if(hdr.numpvs > 0) loadpvs(f);
                 if(hdr.blendmap) loadblendmap(f);
 
-                if(verbose) conoutf("\faloaded %d lightmaps", hdr.lightmaps);
+                if(verbose) conoutf("loaded %d lightmaps", hdr.lightmaps);
             }
 
             progress(0, "initialising entities...");
@@ -1746,7 +1746,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
             preloadusedmapmodels(true);
 
             delete f;
-            conoutf("\faloaded map %s v.%d:%d (r%d) in %.1f secs", mapname, hdr.version, hdr.gamever, hdr.revision, (SDL_GetTicks()-loadingstart)/1000.0f);
+            conoutf("loaded %s (\fs%s\fS by \fs%s\fS) v.%d:%d(r%d) [%.1fs]", mapname, *maptitle ? maptitle : "Untitled", *mapauthor ? mapauthor : "Unknown", hdr.version, hdr.gamever, hdr.revision, (SDL_GetTicks()-loadingstart)/1000.0f);
 
             progress(0, "checking world...");
             if((maptype == MAP_OCTA && hdr.version <= 25) || (maptype == MAP_MAPZ && hdr.version <= 26))
