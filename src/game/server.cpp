@@ -1989,15 +1989,10 @@ namespace server
         if(ci->state.actortype >= A_ENEMY)
         {
             bool hasent = sents.inrange(ci->state.spawnpoint) && sents[ci->state.spawnpoint].type == ACTOR;
-            if(m_insta(gamemode, mutators) && !m_loadout(gamemode, mutators)) weap = m_weapon(gamemode, mutators);
+            if(m_sweaps(gamemode, mutators)) weap = m_weapon(gamemode, mutators);
             else weap = hasent && sents[ci->state.spawnpoint].attrs[6] > 0 ? sents[ci->state.spawnpoint].attrs[6]-1 : actor[ci->state.actortype].weap;
-            if(!m_insta(gamemode, mutators))
-            {
-                int heal = hasent && sents[ci->state.spawnpoint].attrs[7] > 0 ? sents[ci->state.spawnpoint].attrs[7] : actor[ci->state.actortype].health,
-                    amt = heal/2+rnd(heal);
-                health = G(enemystrength) != 1 ? max(int(amt*G(enemystrength)), 1) : amt;
-            }
-            if(!isweap(weap)) weap = rnd(W_MAX-1)+1;
+            if(!m_insta(gamemode, mutators)) health = max(int((hasent && sents[ci->state.spawnpoint].attrs[7] > 0 ? sents[ci->state.spawnpoint].attrs[7] : actor[ci->state.actortype].health)*G(enemystrength)), 1);
+            if(!isweap(weap)) weap = -1; // let spawnstate figure it out
             armour = actor[ci->state.actortype].armour;
         }
         int spawn = pickspawn(ci);

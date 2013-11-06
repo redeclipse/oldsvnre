@@ -732,60 +732,52 @@ struct gamestate
             ammo[sweap] = max(1, W(sweap, max));
             reloads[sweap] = 0;
         }
-        if(actortype >= A_ENEMY)
+        if(sweap != W_MELEE)
         {
-            loadweap.shrink(0);
-            weapselect = sweap;
+            ammo[W_MELEE] = max(1, W(W_MELEE, max));
+            reloads[W_MELEE] = 0;
+        }
+        if(sweap != W_GRENADE && G(spawngrenades) >= (m_insta(gamemode, mutators) || m_trial(gamemode) ? 2 : 1))
+        {
+            ammo[W_GRENADE] = max(1, W(W_GRENADE, max));
+            reloads[W_GRENADE] = 0;
+        }
+        if(sweap != W_MINE && (m_kaboom(gamemode, mutators) || G(spawnmines) >= (m_insta(gamemode, mutators) || m_trial(gamemode) ? 2 : 1)))
+        {
+            ammo[W_MINE] = max(1, W(W_MINE, max));
+            reloads[W_MINE] = 0;
+        }
+        if(actortype < A_ENEMY && m_loadout(gamemode, mutators))
+        {
+            vector<int> aweap;
+            loopj(G(maxcarry))
+            {
+                if(!loadweap.inrange(j)) aweap.add(0);
+                else if(loadweap[j] < W_OFFSET || loadweap[j] >= W_ITEM || hasweap(loadweap[j], sweap))
+                {
+                    int r = rnd(W_ITEM-W_OFFSET)+W_OFFSET; // random
+                    int iters = 0;
+                    while(hasweap(r, sweap) || !m_check(W(r, modes), W(r, muts), gamemode, mutators))
+                    {
+                        if(++iters > W_MAX)
+                        {
+                            r = 0;
+                            break;
+                        }
+                        if(++r >= W_ITEM) r = W_OFFSET;
+                    }
+                    aweap.add(r);
+                }
+                else aweap.add(loadweap[j]);
+                ammo[aweap[j]] = max(1, W(aweap[j], max));
+                reloads[aweap[j]] = 0;
+            }
+            weapselect = aweap[0]; // if '0' isn't present, maxcarry isn't doing its job
         }
         else
         {
-            if(sweap != W_MELEE)
-            {
-                ammo[W_MELEE] = max(1, W(W_MELEE, max));
-                reloads[W_MELEE] = 0;
-            }
-            if(sweap != W_GRENADE && G(spawngrenades) >= (m_insta(gamemode, mutators) || m_trial(gamemode) ? 2 : 1))
-            {
-                ammo[W_GRENADE] = max(1, W(W_GRENADE, max));
-                reloads[W_GRENADE] = 0;
-            }
-            if(sweap != W_MINE && (m_kaboom(gamemode, mutators) || G(spawnmines) >= (m_insta(gamemode, mutators) || m_trial(gamemode) ? 2 : 1)))
-            {
-                ammo[W_MINE] = max(1, W(W_MINE, max));
-                reloads[W_MINE] = 0;
-            }
-            if(m_loadout(gamemode, mutators))
-            {
-                vector<int> aweap;
-                loopj(G(maxcarry))
-                {
-                    if(!loadweap.inrange(j)) aweap.add(0);
-                    else if(loadweap[j] < W_OFFSET || loadweap[j] >= W_ITEM || hasweap(loadweap[j], sweap))
-                    {
-                        int r = rnd(W_ITEM-W_OFFSET)+W_OFFSET; // random
-                        int iters = 0;
-                        while(hasweap(r, sweap) || !m_check(W(r, modes), W(r, muts), gamemode, mutators))
-                        {
-                            if(++iters > W_MAX)
-                            {
-                                r = 0;
-                                break;
-                            }
-                            if(++r >= W_ITEM) r = W_OFFSET;
-                        }
-                        aweap.add(r);
-                    }
-                    else aweap.add(loadweap[j]);
-                    ammo[aweap[j]] = max(1, W(aweap[j], max));
-                    reloads[aweap[j]] = 0;
-                }
-                weapselect = aweap[0]; // if '0' isn't present, maxcarry isn't doing its job
-            }
-            else
-            {
-                loadweap.shrink(0);
-                weapselect = sweap;
-            }
+            loadweap.shrink(0);
+            weapselect = sweap;
         }
         health = heal ? heal : m_health(gamemode, mutators, model);
         armour = armr >= 0 ? armr : m_armour(gamemode, mutators, model);

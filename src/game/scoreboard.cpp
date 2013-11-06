@@ -284,23 +284,26 @@ namespace hud
                             uicenterlist(g, uifont(g, (len >= 48 ? (len >= 56 ? "tiny" : "little") : "reduced"), g.textf("by %s", 0xFFFFFF, NULL, 0, mapauthor)));
                         }
                         uicenterlist(g, uifont(g, "reduced", {
-                            defformatstring(gname)("%s", server::gamename(game::gamemode, game::mutators, 0, 32));
-                            g.textf("%s", 0xFFFFFF, NULL, 0, gname);
+                            g.textf("\fy%s", 0xFFFFFF, NULL, 0, server::gamename(game::gamemode, game::mutators, 0, 32));
                             if((m_play(game::gamemode) || client::demoplayback) && game::timeremaining >= 0)
                             {
-                                if(game::intermission) g.textf(", \fs\fyintermission\fS", 0xFFFFFF, NULL, 0);
-                                else if(client::waitplayers) g.textf(", \fs\fywaiting\fS", 0xFFFFFF, NULL, 0);
+                                if(game::intermission) g.textf(", \fs\fointermission\fS", 0xFFFFFF, NULL, 0);
+                                else if(client::waitplayers) g.textf(", \fs\fowaiting\fS", 0xFFFFFF, NULL, 0);
                                 else if(paused) g.textf(", \fs\fopaused\fS", 0xFFFFFF, NULL, 0);
                                 else if(game::timeremaining) g.textf(", \fs\fg%s\fS remain", 0xFFFFFF, NULL, 0, timestr(game::timeremaining, 2));
                             }
                         }));
                         if(*connectname)
                         {
-                            uicenterlist(g, uifont(g, (strlen(serverdesc) >= 32 ? "tiny" : "little"), {
-                                g.textf("\fdon ", 0xFFFFFF, NULL, 0);
-                                if(*serverdesc) g.textf("%s ", 0xFFFFFF, NULL, 0, serverdesc);
-                                g.textf("\fd(\fa%s:[%d]\fd)", 0xFFFFFF, NULL, 0, connectname, connectport);
+                            uicenterlist(g, uifont(g, "little", {
+                                g.textf("\faon: \fw%s:[%d]", 0xFFFFFF, NULL, 0, connectname, connectport);
                             }));
+                            if(*serverdesc)
+                            {
+                                uicenterlist(g, uifont(g, (strlen(serverdesc) >= 32 ? "tiny" : "little"), {
+                                    g.textf("\"\fs%s\fS\"", 0xFFFFFF, NULL, 0, serverdesc);
+                                }));
+                            }
                         }
                     }));
                     if(scoreimage)
