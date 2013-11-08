@@ -353,6 +353,16 @@ void guispring(int *weight)
     if(cgui) cgui->spring(max(*weight, 1));
 }
 
+void guivisible(uint *body)
+{
+    if(cgui && cgui->visible()) execute(body);
+}
+
+void guivisibletab(uint *body)
+{
+    if(cgui && cgui->visibletab()) execute(body);
+}
+
 void guifont(char *font, uint *body)
 {
     if(cgui)
@@ -614,6 +624,8 @@ COMMAND(0, guibar, "");
 COMMAND(0, guibackground, "ii");
 COMMAND(0, guistrut,"fi");
 COMMAND(0, guispring, "i");
+COMMAND(0, guivisible, "e");
+COMMAND(0, guivisibletab, "e");
 COMMAND(0, guifont,"se");
 COMMAND(0, guiimage,"ssfiss");
 COMMAND(0, guislice,"ssfffsss");
