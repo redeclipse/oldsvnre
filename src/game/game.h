@@ -1594,7 +1594,7 @@ namespace game
     extern int gamemode, mutators, nextmode, nextmuts, timeremaining, maptime, lastzoom, lasttvcam, lasttvchg, spectvtime, waittvtime,
             bloodfade, bloodsize, bloodsparks, debrisfade, eventiconfade, eventiconshort,
             announcefilter, dynlighteffects, aboveheadnames, followthirdperson, nogore, forceplayermodel,
-            playerovertone, playerundertone, playerdisplaytone, playereffecttone, follow, specmode, spectvfollow, spectvfollowing;
+            playerovertone, playerundertone, playerdisplaytone, playereffecttone, playerteamtone, follow, specmode, spectvfollow, spectvfollowing;
     extern float bloodscale, debrisscale, aboveitemiconsize;
     extern bool intermission, zooming;
     extern vec swaypush, swaydir;
