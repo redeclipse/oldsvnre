@@ -20,6 +20,7 @@ VAR(IDF_PERSIST, guisepsize, 1, 10, 128);
 VAR(IDF_PERSIST, guiscaletime, 0, 250, VAR_MAX);
 VAR(IDF_PERSIST|IDF_HEX, guibgcolour, -1, 0x888888, 0xFFFFFF);
 VAR(IDF_PERSIST|IDF_HEX, guibordercolour, -1, -1, 0xFFFFFF);
+SVAR(0, guistatustext, "");
 
 static bool needsinput = false, hastitle = true, hasbgfx = true;
 
@@ -39,7 +40,7 @@ struct gui : guient
     static int ty, tx, tpos, *tcurrent, tcolor; //tracking tab size and position since uses different layout method...
 
     void allowhitfx(bool on) { hitfx = on; }
-    static inline bool visibletab() { return !tcurrent || tpos == *tcurrent; }
+    bool visibletab() { return !tcurrent || tpos == *tcurrent; }
     bool visible() { return !guilayoutpass && visibletab(); }
 
     //tab is always at top of page
@@ -929,6 +930,39 @@ struct gui : guient
         }
         else
         {
+            if(*guistatustext)
+            {
+                gui::pushfont("little");
+                int w = text_width(guistatustext)+guibound[0]*2, h = guibound[1]/2+FONTH, x = -w/2, y = guibound[1]*5/3;
+                if(hasbgfx && guibgcolour >= 0)
+                {
+                    notextureshader->set();
+                    glDisable(GL_TEXTURE_2D);
+                    hud::drawblend(x, y, w, h, (guibgcolour>>16)/255.f, ((guibgcolour>>8)&0xFF)/255.f, (guibgcolour&0xFF)/255.f, true);
+                    defaultshader->set();
+                    glEnable(GL_TEXTURE_2D);
+                }
+                if(hasbgfx && guibordercolour >= 0)
+                {
+                    lineshader->set();
+                    glDisable(GL_TEXTURE_2D);
+                    glDisable(GL_BLEND);
+                    glColor3ub(guibordercolour>>16, (guibordercolour>>8)&0xFF, guibordercolour&0xFF);
+                    glBegin(GL_LINE_LOOP);
+                    glVertex2f(x, y);
+                    glVertex2f(x+w, y);
+                    glVertex2f(x+w, y+h);
+                    glVertex2f(x, y+h);
+                    glEnd();
+                    defaultshader->set();
+                    glEnable(GL_TEXTURE_2D);
+                    glEnable(GL_BLEND);
+                }
+                x += guibound[0];
+                y += guibound[1]/4;
+                draw_text(guistatustext, x, y);
+                gui::popfont();
+            }
             if(needsinput && hastitle) uibuttons();
             glPopMatrix();
         }
@@ -1058,6 +1092,7 @@ namespace UI
     {
         bool p = active(false);
         if(isopen != p) uimillis = (isopen = p) ? totalmillis : -totalmillis;
+        setsvar("guistatustext", "", true);
         setsvar("guirollovername", "", true);
         setsvar("guirolloveraction", "", true);
         setsvar("guirolloverimgpath", "", true);
