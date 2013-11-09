@@ -155,22 +155,22 @@ namespace hud
     FVAR(IDF_PERSIST, playborderblend, 0, 0.5f, 1);
 
     VAR(IDF_PERSIST, editborder, 0, 0, BORDERP_ALL);
-    VAR(IDF_PERSIST|IDF_HEX, editbordertone, -CTONE_MAX, 0x000000, 0xFFFFFF);
+    VAR(IDF_PERSIST|IDF_HEX, editbordertone, -CTONE_MAX, 0, 0xFFFFFF);
     FVAR(IDF_PERSIST, editbordersize, 0, 0.05f, 1);
     FVAR(IDF_PERSIST, editborderblend, 0, 0.9f, 1);
 
     VAR(IDF_PERSIST, specborder, 0, BORDERP_ALL, BORDERP_ALL);
-    VAR(IDF_PERSIST|IDF_HEX, specbordertone, -CTONE_MAX, 0x000000, 0xFFFFFF);
+    VAR(IDF_PERSIST|IDF_HEX, specbordertone, -CTONE_MAX, 0, 0xFFFFFF);
     FVAR(IDF_PERSIST, specbordersize, 0, 0.05f, 1);
     FVAR(IDF_PERSIST, specborderblend, 0, 0.9f, 1);
 
     VAR(IDF_PERSIST, waitborder, 0, BORDERP_ALL, BORDERP_ALL);
-    VAR(IDF_PERSIST|IDF_HEX, waitbordertone, -CTONE_MAX, 0x000000, 0xFFFFFF);
+    VAR(IDF_PERSIST|IDF_HEX, waitbordertone, -CTONE_MAX, 0, 0xFFFFFF);
     FVAR(IDF_PERSIST, waitbordersize, 0, 0.05f, 1);
     FVAR(IDF_PERSIST, waitborderblend, 0, 0.9f, 1);
 
     VAR(IDF_PERSIST, backgroundborder, 0, 0, BORDERP_ALL);
-    VAR(IDF_PERSIST|IDF_HEX, backgroundbordertone, -CTONE_MAX, 0x080000, 0xFFFFFF);
+    VAR(IDF_PERSIST|IDF_HEX, backgroundbordertone, -CTONE_MAX, 0, 0xFFFFFF);
     FVAR(IDF_PERSIST, backgroundbordersize, 0, 0.05f, 1);
     FVAR(IDF_PERSIST, backgroundborderblend, 0, 0.5f, 1);
 
@@ -3023,8 +3023,8 @@ namespace hud
               bfade[BORDER_MAX] = { playborderblend, editborderblend, specborderblend, waitborderblend, backgroundborderblend };
         int s = int(h*0.5f*bsize[type]);
         if(!s) return;
-        vec col = vec(1, 1, 1);
-        skewcolour(col.x, col.y, col.z, bcolour[type]);
+        vec col = vec(0, 0, 0);
+        if(bcolour[type]) skewcolour(col.x, col.y, col.z, bcolour[type]);
         glColor4f(col.r, col.g, col.b, bfade[type]);
         loopi(BORDERP_MAX) if(btype[type]&(1<<i))
         {
@@ -3048,7 +3048,7 @@ namespace hud
                 switch(i)
                 {
                     case BORDERP_TOP: drawblend(0, 0, w, s, col.r, col.g, col.b, true); break;
-                    case BORDERP_BOTTOM: drawblend(0, h-s, w, s, 0, 0, 0, true); break;
+                    case BORDERP_BOTTOM: drawblend(0, h-s, w, s, col.r, col.g, col.b, true); break;
                     default: break;
                 }
                 usetexturing(true);
