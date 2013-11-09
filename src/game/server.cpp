@@ -1126,24 +1126,33 @@ namespace server
         return privnames[clamp(priv, 0, PRIV_MAX-1)];
     }
 
-    const char *colourname(clientinfo *ci, char *name = NULL, bool icon = true, bool dupname = true)
+    const char *colourname(clientinfo *ci, char *name = NULL, bool icon = true, bool dupname = true, int colour = 3)
     {
         if(!name) name = ci->name;
         static string colored; colored[0] = 0; string colortmp;
-        concatstring(colored, "\fs");
+        if(colour) concatstring(colored, "\fs");
         if(icon)
         {
-            formatstring(colortmp)("\f[%d]\f($priv%stex)", findcolour(ci), privnamex(ci->privilege, ci->state.actortype));
+            if(colour&1)
+            {
+                formatstring(colortmp)("\f[%d]", findcolour(ci));
+                concatstring(colored, colortmp);
+            }
+            formatstring(colortmp)("\f($priv%stex)", privnamex(ci->privilege, ci->state.actortype));
             concatstring(colored, colortmp);
         }
-        formatstring(colortmp)("\f[%d]%s", TEAM(ci->team, colour), name);
-        concatstring(colored, colortmp);
+        if(colour&2)
+        {
+            formatstring(colortmp)("\f[%d]", TEAM(ci->team, colour));
+            concatstring(colored, colortmp);
+        }
+        concatstring(colored, name);
         if(!name[0] || (ci->state.actortype < A_ENEMY && dupname && duplicatename(ci, name)))
         {
             formatstring(colortmp)("%s[%d]", name[0] ? " " : "", ci->clientnum);
             concatstring(colored, colortmp);
         }
-        concatstring(colored, "\fS");
+        if(colour) concatstring(colored, "\fS");
         return colored;
     }
 

@@ -1986,24 +1986,33 @@ namespace game
         }
     }
 
-    const char *colourname(gameent *d, char *name, bool icon, bool dupname)
+    const char *colourname(gameent *d, char *name, bool icon, bool dupname, int colour)
     {
         if(!name) name = d->name;
         static string colored; colored[0] = 0; string colortmp;
-        concatstring(colored, "\fs");
+        if(colour) concatstring(colored, "\fs");
         if(icon)
         {
-            formatstring(colortmp)("\f[%d]\f($priv%stex)", findcolour(d), hud::privname(d->privilege, d->actortype));
+            if(colour&1)
+            {
+                formatstring(colortmp)("\f[%d]", findcolour(d));
+                concatstring(colored, colortmp);
+            }
+            formatstring(colortmp)("\f($priv%stex)", hud::privname(d->privilege, d->actortype));
             concatstring(colored, colortmp);
         }
-        formatstring(colortmp)("\f[%d]%s", TEAM(d->team, colour), name);
-        concatstring(colored, colortmp);
+        if(colour&2)
+        {
+            formatstring(colortmp)("\f[%d]", TEAM(d->team, colour));
+            concatstring(colored, colortmp);
+        }
+        concatstring(colored, name);
         if(!name[0] || (d->actortype < A_ENEMY && dupname && duplicatename(d, name)))
         {
             formatstring(colortmp)("%s[%d]", name[0] ? " " : "", d->clientnum);
             concatstring(colored, colortmp);
         }
-        concatstring(colored, "\fS");
+        if(colour) concatstring(colored, "\fS");
         return colored;
     }
 
