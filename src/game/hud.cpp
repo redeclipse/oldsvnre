@@ -3067,7 +3067,7 @@ namespace hud
         glColor4f(1, 1, 1, 1);
 
         Texture *t = NULL;
-        if(*mapname)
+        if(*mapname && strcmp(mapname, "maps/untitled"))
         {
             defformatstring(tex)("<blur:2>%s", mapname);
             t = textureload(tex, 3, true, false);
