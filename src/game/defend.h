@@ -42,7 +42,7 @@ struct defendstate
         {
             noenemy();
             owner = kinship;
-            owners = 0;
+            owners = points = 0;
 #ifndef GAMESERVER
             hasflag = false;
             lasthad = 0;
@@ -124,14 +124,12 @@ struct defendstate
     };
 
     vector<flag> flags;
-    int secured;
 
-    defendstate() : secured(0) {}
+    defendstate() { reset(); }
 
     void reset()
     {
         flags.shrink(0);
-        secured = 0;
     }
 
     void addaffinity(const vec &o, int team, int ent, const char *name)

@@ -1593,8 +1593,8 @@ namespace server
             {
                 clientinfo *cp = clients[i];
                 if(!cp->team || cp->state.state == CS_SPECTATOR || cp->state.actortype > A_PLAYER) continue;
-                cp->state.timeplayed += lastmillis-cp->state.lasttimeplayed;
-                cp->state.lasttimeplayed = lastmillis;
+                cp->state.timeplayed += totalmillis-cp->state.lasttimeplayed;
+                cp->state.lasttimeplayed = totalmillis;
                 tc[cp->team-T_FIRST].add(cp);
                 numplaying++;
             }
@@ -2474,8 +2474,8 @@ namespace server
                 clientinfo *oi = clients[i];
                 if(oi->clientnum != ci->clientnum && getclientip(oi->clientnum) == ip && !strcmp(oi->name, ci->name))
                 {
-                    oi->state.timeplayed += lastmillis-oi->state.lasttimeplayed;
-                    oi->state.lasttimeplayed = lastmillis;
+                    oi->state.timeplayed += totalmillis-oi->state.lasttimeplayed;
+                    oi->state.lasttimeplayed = totalmillis;
                     static savedscore curscore;
                     curscore.save(oi->state);
                     return &curscore;
@@ -2509,7 +2509,7 @@ namespace server
 
     void savescore(clientinfo *ci)
     {
-        ci->state.timeplayed += lastmillis - ci->state.lasttimeplayed;
+        ci->state.timeplayed += totalmillis-ci->state.lasttimeplayed;
         savedscore *sc = findscore(ci, true);
         if(sc)
         {
@@ -2630,8 +2630,8 @@ namespace server
                     return team; // swapteam
                 if(ci->state.actortype > A_PLAYER || (ci->state.actortype == A_PLAYER && cp->state.actortype == A_PLAYER))
                 { // remember: ai just balance teams
-                    cp->state.timeplayed += lastmillis-cp->state.lasttimeplayed;
-                    cp->state.lasttimeplayed = lastmillis;
+                    cp->state.timeplayed += totalmillis-cp->state.lasttimeplayed;
+                    cp->state.lasttimeplayed = totalmillis;
                     ts.score += cp->state.score/float(max(cp->state.timeplayed, 1));
                     ts.clients++;
                 }
@@ -3646,11 +3646,12 @@ namespace server
                         logs = 0;
                         loopv(v->state.fragmillis)
                         {
-                            if(lastmillis-v->state.fragmillis[i] > G(multikilldelay)) v->state.fragmillis.remove(i--);
+                            if(gamemillis-v->state.fragmillis[i] > G(multikilldelay)) v->state.fragmillis.remove(i--);
                             else logs++;
                         }
                         if(!logs) v->state.rewards[0] &= ~FRAG_MULTI;
-                        v->state.fragmillis.add(lastmillis); logs++;
+                        v->state.fragmillis.add(gamemillis);
+                        logs++;
                         if(logs >= 2)
                         {
                             int offset = clamp(logs-2, 0, 2), type = 1<<(FRAG_MKILL+offset); // double, triple, multi..
@@ -3659,7 +3660,6 @@ namespace server
                                 style |= type;
                                 v->state.rewards[0] |= type;
                                 pointvalue += (G(multikillbonus) ? offset+1 : 1)*G(multikillpoints);
-                                //loopv(v->state.fragmillis) v->state.fragmillis[i] = lastmillis;
                             }
                         }
                     }
@@ -4342,7 +4342,7 @@ namespace server
             sendf(-1, 1, "ri3", N_SPECTATOR, ci->clientnum, quarantine ? 2 : 1);
             ci->state.state = CS_SPECTATOR;
             ci->state.quarantine = quarantine;
-            ci->state.timeplayed += lastmillis-ci->state.lasttimeplayed;
+            ci->state.timeplayed += totalmillis-ci->state.lasttimeplayed;
             setteam(ci, T_NEUTRAL, TT_INFO);
             aiman::poke();
         }
@@ -4353,7 +4353,7 @@ namespace server
             if(smode) smode->entergame(ci);
             mutate(smuts, mut->entergame(ci));
             ci->state.state = CS_DEAD;
-            ci->state.lasttimeplayed = lastmillis;
+            ci->state.lasttimeplayed = totalmillis;
             ci->state.quarantine = false;
             waiting(ci, DROP_RESET);
             aiman::poke();
@@ -4875,7 +4875,7 @@ namespace server
 
         ci->connected = true;
         ci->needclipboard = totalmillis ? totalmillis : 1;
-        ci->state.lasttimeplayed = lastmillis;
+        ci->state.lasttimeplayed = totalmillis;
 
         sendwelcome(ci);
         if(restorescore(ci)) sendresume(ci);
