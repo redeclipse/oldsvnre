@@ -89,7 +89,7 @@ namespace aiman
                 ci->state.spawnpoint = ent;
                 ci->state.skill = clamp(s, 1, 101);
                 clients.add(ci);
-                ci->state.lasttimeplayed = lastmillis;
+                ci->state.lasttimeplayed = totalmillis;
                 ci->state.colour = rnd(0xFFFFFF);
                 ci->state.model = rnd(PLAYERTYPES);
                 ci->state.setvanity(ci->state.model ? G(botfemalevanities) : G(botmalevanities)); // the first slot is special

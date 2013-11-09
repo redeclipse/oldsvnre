@@ -493,4 +493,5 @@ GVAR(0, spreepoints, 0, 1, VAR_MAX);
 GVAR(0, spreebreaker, 0, 1, VAR_MAX);
 GVAR(0, dominatecount, 0, 5, VAR_MAX);
 GVAR(0, dominatepoints, 0, 1, VAR_MAX);
+GVAR(0, dominatehandicap, 0, 1, 1);
 GVAR(0, revengepoints, 0, 1, VAR_MAX);

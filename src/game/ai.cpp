@@ -1145,7 +1145,7 @@ namespace ai
     int process(gameent *d, aistate &b)
     {
         int result = 0, skmod = max(101-d->skill, 1);
-        float frame = d->skill <= 100 ? float(lastmillis-d->ai->lastrun)/float(skmod*10) : 1;
+        float frame = d->skill <= 100 ? ((lastmillis-d->ai->lastrun)*gamespeed/100.f)/float(skmod*10) : 1;
         if(!actor[d->actortype].canstrafe && d->skill <= 100) frame *= 2;
         if(d->dominating.length()) frame *= 1+d->dominating.length();
         vec dp = d->headpos(), fp = d->feetpos();

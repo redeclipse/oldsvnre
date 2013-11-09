@@ -98,7 +98,7 @@ struct captureservmode : capturestate, servmode
         if(!canplay(hasflaginfo) || !flags.inrange(i) || ci->state.state!=CS_ALIVE || !ci->team || ci->state.actortype >= A_ENEMY) return;
         flag &f = flags[i];
         if(f.owner >= 0 || (f.team == ci->team && (f.nextreset || m_gsp2(gamemode, mutators) || (m_gsp1(gamemode, mutators) && !f.droptime)))) return;
-        if(f.lastowner == ci->clientnum && f.droptime && (G(capturepickupdelay) < 0 || lastmillis-f.droptime <= max(G(capturepickupdelay), 500))) return;
+        if(f.lastowner == ci->clientnum && f.droptime && (G(capturepickupdelay) < 0 || gamemillis-f.droptime <= max(G(capturepickupdelay), 500))) return;
         if(m_gsp1(gamemode, mutators) && f.team == ci->team)
         {
             capturestate::returnaffinity(i, gamemillis);

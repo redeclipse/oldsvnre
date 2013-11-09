@@ -130,7 +130,7 @@ struct bomberservmode : bomberstate, servmode
         if(!canplay(hasflaginfo) || !flags.inrange(i) || ci->state.state!=CS_ALIVE || ci->state.actortype >= A_ENEMY) return;
         flag &f = flags[i];
         if(!isbomberaffinity(f) || f.owner >= 0 || !f.enabled) return;
-        if(f.lastowner == ci->clientnum && f.droptime && (G(bomberpickupdelay) < 0 || lastmillis-f.droptime <= max(G(bomberpickupdelay), 500))) return;
+        if(f.lastowner == ci->clientnum && f.droptime && (G(bomberpickupdelay) < 0 || gamemillis-f.droptime <= max(G(bomberpickupdelay), 500))) return;
         bomberstate::takeaffinity(i, ci->clientnum, gamemillis);
         if(!m_nopoints(gamemode, mutators) && (!f.droptime || f.lastowner != ci->clientnum)) givepoints(ci, G(bomberpickuppoints));
         sendf(-1, 1, "ri3", N_TAKEAFFIN, ci->clientnum, i);
