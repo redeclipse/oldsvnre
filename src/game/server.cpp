@@ -4220,7 +4220,7 @@ namespace server
 
     int requestswap(clientinfo *ci, int team)
     {
-        if(!allowteam(ci, team, T_FIRST))
+        if(!allowteam(ci, team, T_FIRST, numclients() > 1))
         {
             if(team && m_swapteam(gamemode, mutators) && ci->team != team && ci->state.actortype == A_PLAYER && ci->swapteam != team && canplay())
             {
@@ -5603,8 +5603,8 @@ namespace server
                 case N_SWITCHTEAM:
                 {
                     int team = getint(p);
-                    if(!m_team(gamemode, mutators) || ci->state.actortype >= A_ENEMY) break;
-                    if(team == ci->team || !isteam(gamemode, mutators, T_FIRST, team))
+                    if(!m_team(gamemode, mutators) || ci->state.actortype >= A_ENEMY || !isteam(gamemode, mutators, team, T_FIRST)) break;
+                    if(team == ci->team)
                     {
                         if(ci->swapteam)
                         {
@@ -5975,9 +5975,9 @@ namespace server
                 case N_SETTEAM:
                 {
                     int who = getint(p), team = getint(p);
-                    if(who<0 || who>=getnumclients() || !haspriv(ci, G(teamlock), "change the team of others")) break;
                     clientinfo *cp = (clientinfo *)getinfo(who);
-                    if(!cp || cp == ci || !m_team(gamemode, mutators) || m_local(gamemode) || cp->state.actortype >= A_ENEMY) break;
+                    if(!cp || !m_team(gamemode, mutators) || m_local(gamemode) || cp->state.actortype >= A_ENEMY) break;
+                    if(who<0 || who>=getnumclients() || !haspriv(ci, G(teamlock), "change the team of others")) break;
                     if(cp->state.state == CS_SPECTATOR || !allowteam(cp, team, T_FIRST, false)) break;
                     setteam(cp, team, TT_RESETX);
                     break;
