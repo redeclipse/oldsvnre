@@ -497,13 +497,13 @@ namespace hud
                                     g.pushlist();
                                     uilist(g, uifont(g, "default", {
                                         if(scorebgrows) g.background(bgcolor);
-                                        g.space(0.5f);
+                                        g.space(0.25f);
                                         g.textf("team %s", 0xFFFFFF, teamtexname(sg.team), TEAM(sg.team, colour), TEAM(sg.team, name));
                                         g.spring();
                                         if(m_defend(game::gamemode) && ((defendlimit && sg.total >= defendlimit) || sg.total == INT_MAX)) g.text("WINNER", 0xFFFFFF);
                                         else if(m_laptime(game::gamemode, game::mutators)) g.textf("best: %s", 0xFFFFFF, NULL, 0, sg.total ? timestr(sg.total) : "\fadnf");
                                         else g.textf("points: %d", 0xFFFFFF, NULL, 0, sg.total);
-                                        g.space(0.5f);
+                                        g.space(0.25f);
                                     }));
                                     g.pushlist();
                                 }
@@ -521,7 +521,7 @@ namespace hud
 
                                 uilist(g, {
                                     uilist(g, {
-                                        if(scorebgrows > 1) g.background(bgcolor);
+                                        if(scorebgrows > 1) g.background(bgc2);
                                         uicenter(g, uipad(g, 0.25f, g.space(1); g.strut(1)));
                                     });
                                     loopscoregroup(uilist(g, {
@@ -533,7 +533,7 @@ namespace hud
 
                                 uilist(g, {
                                     uilist(g, {
-                                        if(scorebgrows > 1) g.background(bgcolor);
+                                        if(scorebgrows > 1) g.background(bgc2);
                                         uicenter(g, uipad(g, namepad, uicenterlist(g, g.text("name", 0xFFFFFF))));
                                     });
                                     loopscoregroup(uilist(g, {
@@ -547,7 +547,7 @@ namespace hud
                                 {
                                     uilist(g, {
                                         uilist(g, {
-                                            if(scorebgrows > 1) g.background(bgcolor);
+                                            if(scorebgrows > 1) g.background(bgc2);
                                             uicenter(g, uipad(g, 1, g.text("points", 0xFFFFFF)));
                                         });
                                         loopscoregroup(uilist(g, {
@@ -564,7 +564,7 @@ namespace hud
                                     {
                                         uilist(g, {
                                             uilist(g, {
-                                                if(scorebgrows > 1) g.background(bgcolor);
+                                                if(scorebgrows > 1) g.background(bgc2);
                                                 uicenter(g, uipad(g, 4, g.text("best", 0xFFFFFF)));
                                             });
                                             loopscoregroup(uilist(g, {
@@ -578,7 +578,7 @@ namespace hud
                                     {
                                         uilist(g, {
                                             uilist(g, {
-                                                if(scorebgrows > 1) g.background(bgcolor);
+                                                if(scorebgrows > 1) g.background(bgc2);
                                                 uicenter(g, uipad(g, 4, g.text("laps", 0xFFFFFF)));
                                             });
                                             loopscoregroup(uilist(g, {
@@ -594,7 +594,7 @@ namespace hud
                                 {
                                     uilist(g, {
                                         uilist(g, {
-                                            if(scorebgrows > 1) g.background(bgcolor);
+                                            if(scorebgrows > 1) g.background(bgc2);
                                             uicenter(g, uipad(g, 1, g.text("frags", 0xFFFFFF)));
                                         });
                                         loopscoregroup(uilist(g, {
@@ -609,7 +609,7 @@ namespace hud
                                 {
                                     uilist(g, {
                                         uilist(g, {
-                                            if(scorebgrows > 1) g.background(bgcolor);
+                                            if(scorebgrows > 1) g.background(bgc2);
                                             uicenter(g, uipad(g, 1, g.text("deaths", 0xFFFFFF)));
                                         });
                                         loopscoregroup(uilist(g, {
@@ -624,7 +624,7 @@ namespace hud
                                 {
                                     uilist(g, {
                                         uilist(g, {
-                                            if(scorebgrows > 1) g.background(bgcolor);
+                                            if(scorebgrows > 1) g.background(bgc2);
                                             uicenter(g, uipad(g, 1, g.text("ratio", 0xFFFFFF)));
                                         });
                                         loopscoregroup(uilist(g, {
@@ -640,7 +640,7 @@ namespace hud
                                 {
                                     uilist(g, {
                                         uilist(g, {
-                                            if(scorebgrows > 1) g.background(bgcolor);
+                                            if(scorebgrows > 1) g.background(bgc2);
                                             uicenter(g, uipad(g, 2, g.text("pj", 0xFFFFFF)));
                                         });
                                         loopscoregroup(uilist(g, {
@@ -655,7 +655,7 @@ namespace hud
                                 {
                                     uilist(g, {
                                         uilist(g, {
-                                            if(scorebgrows > 1) g.background(bgcolor);
+                                            if(scorebgrows > 1) g.background(bgc2);
                                             uicenter(g, uipad(g, 2, g.text("ping", 0xFFFFFF)));
                                         });
                                         loopscoregroup(uilist(g, {
@@ -670,7 +670,7 @@ namespace hud
                                 {
                                     uilist(g, {
                                         uilist(g, {
-                                            if(scorebgrows > 1) g.background(bgcolor);
+                                            if(scorebgrows > 1) g.background(bgc2);
                                             uicenter(g, uipad(g, 1, g.text("cn", 0xFFFFFF)));
                                         });
                                         loopscoregroup(uilist(g, {
@@ -685,7 +685,7 @@ namespace hud
                                 {
                                     uilist(g, {
                                         uilist(g, {
-                                            if(scorebgrows > 1) g.background(bgcolor);
+                                            if(scorebgrows > 1) g.background(bgc2);
                                             uicenter(g, uipad(g, 1, g.text("sk", 0xFFFFFF)));
                                         });
                                         loopscoregroup(uilist(g, {
@@ -702,7 +702,7 @@ namespace hud
                                 {
                                     uilist(g, {
                                         uilist(g, {
-                                            if(scorebgrows > 1) g.background(bgcolor);
+                                            if(scorebgrows > 1) g.background(bgc2);
                                             uicenter(g, uipad(g, handlepad, g.space(1); g.strut(1)));
                                         });
                                         loopscoregroup(uilist(g, {
@@ -716,7 +716,7 @@ namespace hud
                                 {
                                     uilist(g, {
                                         uilist(g, {
-                                           if(scorebgrows > 1) g.background(bgcolor);
+                                           if(scorebgrows > 1) g.background(bgc2);
                                            uicenter(g, uipad(g, hostpad, g.space(1); g.strut(1)));
                                         });
                                         loopscoregroup(uilist(g, {
@@ -730,7 +730,7 @@ namespace hud
                                 {
                                     uilist(g, {
                                         uilist(g, {
-                                            if(scorebgrows > 1) g.background(bgcolor);
+                                            if(scorebgrows > 1) g.background(bgc2);
                                             uicenter(g, uipad(g, 0.125f, g.space(1); g.strut(1)));
                                         });
                                         loopscoregroup(uilist(g, {
@@ -753,7 +753,7 @@ namespace hud
                                 }
                                 uilist(g, {
                                     uilist(g, {
-                                        if(scorebgrows > 1) g.background(bgcolor);
+                                        if(scorebgrows > 1) g.background(bgc2);
                                         uicenter(g, uipad(g, 0.25f, g.space(1); g.strut(1)));
                                     });
                                     loopscoregroup(uilist(g, {
