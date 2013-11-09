@@ -431,13 +431,14 @@ int playsound(int n, const vec &pos, physent *d, int flags, int vol, int maxrad,
         if(!oldhook || !issound(*oldhook) || (n != sounds[*oldhook].slotnum && strcmp(slot->name, gamesounds[sounds[*oldhook].slotnum].name)))
             oldhook = NULL;
 
+        vec o = d ? game::camerapos(d) : pos;
         int cvol = 0, cpan = 0, v = vol > 0 && vol < 256 ? vol : (flags&SND_CLAMPED ? 64 : 255),
             x = maxrad > 0 ? maxrad : (flags&SND_CLAMPED ? getworldsize() : (slot->maxrad > 0 ? slot->maxrad : soundmaxrad)),
             y = minrad >= 0 ? minrad : (flags&SND_CLAMPED ? 32 : (slot->minrad >= 0 ? slot->minrad : soundminrad)),
-            mat = lookupmaterial(pos);
+            mat = lookupmaterial(o);
 
         bool liquid = isliquid(lookupmaterial(camera1->o)&MATF_VOLUME);
-        calcvol(flags, v, slot->vol, x, y, pos, &cvol, &cpan, liquid || isliquid(mat&MATF_VOLUME));
+        calcvol(flags, v, slot->vol, x, y, o, &cvol, &cpan, liquid || isliquid(mat&MATF_VOLUME));
         bool nocull = flags&SND_NOCULL || (d && game::camerapos(d).dist(camera1->o) <= minrad);
 
         if(nocull || cvol > 0)
@@ -479,7 +480,7 @@ int playsound(int n, const vec &pos, physent *d, int flags, int vol, int maxrad,
                 s.ends = ends;
                 s.slotnum = n;
                 s.owner = d;
-                s.pos = s.oldpos = pos;
+                s.pos = s.oldpos = o;
                 s.curvol = cvol;
                 s.curpan = cpan;
                 s.chan = chan;
