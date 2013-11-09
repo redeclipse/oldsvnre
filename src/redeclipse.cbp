@@ -293,7 +293,6 @@
 				<Option projectResourceIncludeDirsRelation="1" />
 				<Option projectLibDirsRelation="1" />
 				<Compiler>
-					<Add option="-O3" />
 					<Add option="-Wall" />
 					<Add option="-g" />
 					<Add option="-m64" />
@@ -1353,6 +1352,18 @@
 			<Option target="redeclipse_server-amd64" />
 			<Option target="redeclipse_server-amd64-dbg" />
 		</Unit>
+		<Unit filename="game/playerdef.h">
+			<Option target="redeclipse-x86" />
+			<Option target="redeclipse-x86-dbg" />
+			<Option target="redeclipse-x86-prof" />
+			<Option target="redeclipse_server-x86" />
+			<Option target="redeclipse_server-x86-dbg" />
+			<Option target="redeclipse-amd64" />
+			<Option target="redeclipse-amd64-dbg" />
+			<Option target="redeclipse-amd64-prof" />
+			<Option target="redeclipse_server-amd64" />
+			<Option target="redeclipse_server-amd64-dbg" />
+		</Unit>
 		<Unit filename="game/projs.cpp">
 			<Option target="redeclipse-x86" />
 			<Option target="redeclipse-x86-dbg" />
@@ -1374,6 +1385,18 @@
 			<Option target="redeclipse-x86-dbg" />
 			<Option target="redeclipse_server-x86" />
 			<Option target="redeclipse-x86-prof" />
+			<Option target="redeclipse_server-x86-dbg" />
+			<Option target="redeclipse-amd64" />
+			<Option target="redeclipse-amd64-dbg" />
+			<Option target="redeclipse-amd64-prof" />
+			<Option target="redeclipse_server-amd64" />
+			<Option target="redeclipse_server-amd64-dbg" />
+		</Unit>
+		<Unit filename="game/teamdef.h">
+			<Option target="redeclipse-x86" />
+			<Option target="redeclipse-x86-dbg" />
+			<Option target="redeclipse-x86-prof" />
+			<Option target="redeclipse_server-x86" />
 			<Option target="redeclipse_server-x86-dbg" />
 			<Option target="redeclipse-amd64" />
 			<Option target="redeclipse-amd64-dbg" />

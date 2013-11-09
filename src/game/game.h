@@ -677,13 +677,13 @@ struct gamestate
             case HEALTH:
             {
                 int value = ammoamt >= 0 ? ammoamt : healthamt[attr];
-                health = max(health + value, CLASS(model, health));
+                health = max(health + value, PLAYER(model, health));
                 break;
             }
             case ARMOUR:
             {
                 int value = ammoamt >= 0 ? ammoamt : armouramt[attr];
-                armour = max(armour + value, CLASS(model, armour));
+                armour = max(armour + value, PLAYER(model, armour));
                 break;
             }
             default: break;
@@ -970,8 +970,8 @@ struct gameent : dynent, gamestate
             xradius = playerdims[model][0]*curscale;
             yradius = playerdims[model][1]*curscale;
             zradius = height = playerdims[model][2]*curscale;
-            speed = CLASS(model, speed);
-            weight = CLASS(model, weight)*curscale;
+            speed = PLAYER(model, speed);
+            weight = PLAYER(model, weight)*curscale;
         }
         radius = max(xradius, yradius);
         aboveeye = curscale;
