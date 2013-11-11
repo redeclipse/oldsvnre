@@ -21,7 +21,7 @@ soundslot::~soundslot() { DELETEA(name); }
 
 sound::sound() : hook(NULL) { reset(); }
 sound::~sound() {}
-bool sound::playing() { return chan >= 0 && Mix_Playing(chan); }
+bool sound::playing() { return chan >= 0 && (Mix_Playing(chan) || Mix_Paused(chan)); }
 void sound::reset()
 {
     pos = oldpos = vec(-1, -1, -1);
