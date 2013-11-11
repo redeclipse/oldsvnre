@@ -198,7 +198,6 @@ struct duelservmode : servmode
         if(!canplay() || numclients(-1, true, A_BOT) <= 1) return;
         if(dueltime >= 0)
         {
-            if(duelqueue.empty()) return;
             if(dueltime && ((dueltime -= curtime) <= 0)) dueltime = 0;
             if(!dueltime)
             {

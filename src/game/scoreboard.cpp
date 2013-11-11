@@ -770,7 +770,7 @@ namespace hud
                                         pushed = true;
                                     }
                                     gameent *o = spectators[i];
-                                    uilist(g, {
+                                    uilistv(g, 2, uipad(g, 0.25f, uilist(g, {
                                         loopj(3) g.border(scorehilight && o == game::player1 ? scorehilight : 0x000000, 0, 0, -(j+1), -(j+1));
                                         if(scorebgrows > 2) g.background(i%2 ? bgc2 : bgc1);
                                         uipad(g, 0.025f, uilist(g, uipad(g, 0.25f, uicenterlist(g, {
@@ -778,7 +778,7 @@ namespace hud
                                                 g.textf("%s [%d]", 0xFFFFFF, NULL, 0, game::colourname(o, NULL, true, false), o->clientnum);
                                             else g.textf("%s ", 0xFFFFFF, NULL, 0, game::colourname(o));
                                         }))));
-                                    });
+                                    })));
                                 }
                                 if(pushed) g.poplist();
                             });
