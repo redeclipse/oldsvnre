@@ -593,7 +593,7 @@ namespace game
     void announce(int idx, gameent *d, bool forced)
     {
         if(idx < 0) return;
-        physent *t = !d || d == game::player1 || forced ? camera1 : d;
+        physent *t = !d || d == player1 || forced ? camera1 : d;
         int *chan = d && !forced ? &d->aschan : &announcerchan;
         loopv(anclist) if(anclist[i].idx == idx && anclist[i].chan == chan) return; // skip duplicates
         if(issound(*chan))
@@ -870,10 +870,9 @@ namespace game
                         adddynlight(entities::ents[i]->o, float(max(entities::ents[i]->attrs[0], enttype[entities::ents[i]->type].radius)), vec::hexcolor(TEAM(T_ALPHA, colour)), 0, 0, DL_KEEP);
                 }
             }
-            gameent *d = NULL;
-            int numdyns = numdynents();
-            loopi(numdyns) if((d = (gameent *)iterdynents(i)) != NULL)
+            loopv(players) if(players[i])
             {
+                gameent *d = players[i];
                 if(d->state == CS_ALIVE && isweap(d->weapselect))
                 {
                     bool last = lastmillis-d->weaplast[d->weapselect] > 0,
@@ -1799,12 +1798,10 @@ namespace game
         if(!d) return;
         if(d->name[0] && client::showpresence >= (client::waiting(false) ? 2 : 1) && (d->actortype == A_PLAYER || ai::showaiinfo))
             conoutft(CON_EVENT, "\fo%s (%s) left the game (%s)", colourname(d), d->hostname, reason >= 0 ? disc_reasons[reason] : "normal");
-        gameent *e = NULL;
-        int numdyns = numdynents();
-        loopi(numdyns) if((e = (gameent *)iterdynents(i)))
+        loopv(players) if(players[i])
         {
-            e->dominating.removeobj(d);
-            e->dominated.removeobj(d);
+            players[i]->dominating.removeobj(d);
+            players[i]->dominated.removeobj(d);
         }
         specreset(d, true);
         client::unignore(d->clientnum);
@@ -1912,10 +1909,8 @@ namespace game
         resetcursor();
         if(!empty) preload();
         // reset perma-state
-        gameent *d;
-        int numdyns = numdynents();
-        loopi(numdyns) if((d = (gameent *)iterdynents(i)) && (gameent::is(d)))
-            d->mapchange(lastmillis, m_health(gamemode, mutators, d->model), m_armour(gamemode, mutators, d->model));
+        loopv(players) if(players[i])
+            players[i]->mapchange(lastmillis, m_health(gamemode, mutators, d->model), m_armour(gamemode, mutators, d->model));
         if(!client::demoplayback && m_loadout(gamemode, mutators) && autoloadweap && *favloadweaps)
             chooseloadweap(player1, favloadweaps);
         entities::spawnplayer(player1); // prevent the player from being in the middle of nowhere
@@ -1929,12 +1924,12 @@ namespace game
 
     gameent *intersectclosest(vec &from, vec &to, gameent *at)
     {
-        gameent *best = NULL, *o;
+        gameent *best = NULL;
         float bestdist = 1e16f;
-        int numdyns = numdynents();
-        loopi(numdyns) if((o = (gameent *)iterdynents(i)))
+        loopv(players) if(players[i])
         {
-            if(!o || o==at || o->state!=CS_ALIVE || !physics::issolid(o, at)) continue;
+            gameent *o = players[i];
+            if(o == at || o->state != CS_ALIVE || !physics::issolid(o, at)) continue;
             float dist;
             if(intersect(o, from, to, dist) && dist < bestdist)
             {
@@ -2911,13 +2906,13 @@ namespace game
             else findorientation(focus->o, focus->yaw, focus->pitch, worldpos);
             if(pthird)
             {
-                gameent *best = NULL, *o;
+                gameent *best = NULL;
                 float bestdist = 1e16f;
-                int numdyns = numdynents();
-                loopi(numdyns) if((o = (gameent *)iterdynents(i)))
+                loopv(players) if(players[i])
                 {
-                    if(!o || o==focus || o->state!=CS_ALIVE || !physics::issolid(o, focus)) continue;
-                    float dist;
+                    gameent *o = players[i];
+                    if(!o || o == focus || o->state != CS_ALIVE || !physics::issolid(o, focus)) continue;
+                    float dist = 1e16f;
                     if(intersect(o, camera1->o, worldpos, dist) && dist < bestdist)
                     {
                         best = o;
@@ -3566,18 +3561,16 @@ namespace game
     void render()
     {
         startmodelbatches();
-        gameent *d;
-        int numdyns = numdynents();
-        loopi(numdyns) if((d = (gameent *)iterdynents(i)) && d != focus) renderplayer(d, 1, opacity(d, true), d->curscale);
+        loopv(players) if(players[i] && players[i] != focus) renderplayer(players[i], 1, opacity(players[i], true), players[i]->curscale);
         entities::render();
         projs::render();
         if(m_capture(gamemode)) capture::render();
         else if(m_defend(gamemode)) defend::render();
         else if(m_bomber(gamemode)) bomber::render();
         ai::render();
-        if(rendernormally) loopi(numdyns) if((d = (gameent *)iterdynents(i)) && d != focus) d->cleartags();
+        if(rendernormally) loopv(players) if(players[i] && players[i] != focus) players[i]->cleartags();
         endmodelbatches();
-        if(rendernormally) loopi(numdyns) if((d = (gameent *)iterdynents(i)) && d != focus) rendercheck(d);
+        if(rendernormally) loopv(players) if(players[i] && players[i] != focus) rendercheck(players[i]);
     }
 
     void renderavatar(bool early, bool project)
