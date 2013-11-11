@@ -274,9 +274,10 @@ namespace ai
     int checkothers(vector<int> &targets, gameent *d, int state, int targtype, int target, bool teams, int *members)
     { // checks the states of other ai for a match
         targets.setsize(0);
-        loopv(game::players) if(game::players[i])
+        gameent *e = NULL;
+        int numdyns = game::numdynents();
+        loopi(numdyns) if((e = (gameent *)game::iterdynents(i)))
         {
-            gameent *e = game::players[i];
             if(targets.find(e->clientnum) >= 0) continue;
             if(teams)
             {
@@ -338,12 +339,12 @@ namespace ai
     bool enemy(gameent *d, aistate &b, const vec &pos, float guard, int pursue, bool force, bool retry = false)
     {
         if(passive() || (d->ai->enemy >= 0 && lastmillis-d->ai->enemymillis >= (111-d->skill)*50)) return false;
-        gameent *t = NULL;
+        gameent *t = NULL, *e = NULL;
         vec dp = d->headpos();
         float mindist = guard*guard, bestdist = 1e16f;
-        loopv(game::players) if(game::players[i] && targetable(d, game::players[i]))
+        int numdyns = game::numdynents();
+        loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && targetable(d, e))
         {
-            gameent *e = game::players[i];
             vec ep = getaimpos(d, e, altfire(d, e));
             float dist = ep.squaredist(dp);
             if(dist < bestdist && (force || dist <= mindist || cansee(d, dp, ep, d->actortype >= A_ENEMY)))
@@ -448,9 +449,10 @@ namespace ai
         static vector<targcache> targets;
         targets.setsize(0);
         vec dp = d->headpos();
-        loopv(game::players) if(game::players[i] && targetable(d, game::players[i]))
+        gameent *e = NULL;
+        int numdyns = game::numdynents();
+        loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && targetable(d, e))
         {
-            gameent *e = game::players[i];
             targcache &c = targets.add();
             c.d = e;
             c.pos = getaimpos(d, e, altfire(d, e));
@@ -468,10 +470,10 @@ namespace ai
 
     void assist(gameent *d, aistate &b, vector<interest> &interests, bool all = false, bool force = false)
     {
-        loopv(game::players) if(game::players[i] && game::players[i] != d && (all || game::players[i]->actortype == A_PLAYER))
+        gameent *e = NULL;
+        int numdyns = game::numdynents();
+        loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && e != d && (all || e->actortype == A_PLAYER) && owner(d) == owner(e))
         {
-            gameent *e = game::players[i];
-            if(owner(d) != owner(e)) continue;
             interest &n = interests.add();
             n.state = AI_S_DEFEND;
             n.node = e->lastnode;
@@ -1551,9 +1553,11 @@ namespace ai
     {
         float guessradius = max(actor[A_PLAYER].xradius, actor[A_PLAYER].yradius);
         obstacles.clear();
-        loopv(game::players) if(game::players[i])
+        int numdyns = game::numdynents();
+        loopi(numdyns)
         {
-            gameent *d = game::players[i];
+            gameent *d = (gameent *)game::iterdynents(i);
+            if(!d) continue; // || d->actortype >= A_ENEMY) continue;
             if(d->state != CS_ALIVE || !physics::issolid(d)) continue;
             obstacles.avoidnear(d, d->o.z + d->aboveeye + 1, d->feetpos(), guessradius + d->radius + 1);
         }

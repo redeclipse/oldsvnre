@@ -2150,15 +2150,15 @@ namespace hud
         }
         if(chkcond(radarplayers, radarplayerfilter != 3 || m_duke(game::gamemode, game::mutators) || m_edit(game::gamemode))) // 4
         {
-            int style = radarstyle != 2 ? radarstyle : 1, others[T_MAX] = {0};
+            gameent *d = NULL;
+            int numdyns = game::numdynents(), style = radarstyle != 2 ? radarstyle : 1, others[T_MAX] = {0};
             if(radarplayerduke && game::focus->state == CS_ALIVE && m_survivor(game::gamemode, game::mutators))
             {
-                loopv(game::players) if(game::players[i] && game::players[i]->state == CS_ALIVE && game::players[i]->actortype < A_ENEMY)
-                    others[game::players[i]->team]++;
+                loopi(numdyns) if((d = (gameent *)game::iterdynents(i)) && d->state == CS_ALIVE && d->actortype < A_ENEMY)
+                    others[d->team]++;
             }
-            loopv(game::players) if(game::players[i] && game::players[i]->state != CS_SPECTATOR && game::players[i]->actortype < A_ENEMY)
+            loopi(numdyns) if((d = (gameent *)game::iterdynents(i)) && d->state != CS_SPECTATOR && d->actortype < A_ENEMY)
             {
-                gameent *d = game::players[i];
                 bool force = false;
                 if(radarplayerduke && game::focus->state == CS_ALIVE)
                 {

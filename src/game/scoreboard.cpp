@@ -122,9 +122,10 @@ namespace hud
     {
         int numgroups = 0;
         spectators.shrink(0);
-        loopv(game::players) if(game::players[i])
+        int numdyns = game::numdynents();
+        loopi(numdyns)
         {
-            gameent *o = game::players[i];
+            gameent *o = (gameent *)game::iterdynents(i);
             if(!o || o->actortype >= A_ENEMY || (!scoreconnecting && !o->name[0])) continue;
             if(o->state == CS_SPECTATOR)
             {
