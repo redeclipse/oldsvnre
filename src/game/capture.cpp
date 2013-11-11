@@ -509,6 +509,7 @@ namespace capture
         game::announcef(f.team == d->team ? S_V_FLAGSECURED : S_V_FLAGPICKUP, CON_SELF, d, true, "\fa%s %s the %s flag", game::colourname(d), f.team == d->team ? "secured" : (f.droptime ? "picked up" : "stole"), game::colourteam(f.team, "flagtex"));
         entities::execlink(NULL, f.ent, false);
         st.takeaffinity(i, d, lastmillis);
+        if(d->ai) aihomerun(d, d->ai->state.last());
     }
 
     void checkaffinity(dynent *e)
@@ -546,7 +547,7 @@ namespace capture
                     if(f.team == d->team && (k || ((!f.owner || f.owner == d) && !f.droptime)))
                     {
                         float dist = aiflagpos(d, f).squaredist(pos);
-                        if(!st.flags.inrange(closest) || dist < closedist)
+                        if(closest < 0 || dist < closedist)
                         {
                             closest = i;
                             closedist = dist;

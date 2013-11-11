@@ -549,14 +549,56 @@ namespace game
             playsound(S_ERROR, d->o, d, SND_FORCED, -1, -1, -1, &errorchan);
     }
 
-    void announce(int idx, gameent *d, bool forced)
+    int announcerchan = -1;
+    struct ancbuf
     {
-        if(idx >= 0)
+        int idx;
+        gameent *d;
+        bool forced;
+
+        bool play()
         {
             physent *t = !d || d == focus || forced ? camera1 : d;
-            playsound(idx, t->o, t, t != camera1 ? SND_IMPORT : SND_FORCED, -1, -1, -1, d && !forced ? &d->aschan : NULL);
+            int *chan = d && !forced ? &d->aschan : &announcerchan;
+            if(!issound(*chan))
+            {
+                playsound(idx, t->o, t, t != camera1 ? SND_IMPORT : SND_FORCED, -1, -1, -1, chan);
+                return true;
+            }
+            return false;
         }
+    };
+    vector<ancbuf> anclist;
+
+    VAR(IDF_PERSIST, announcebuffer, 1, 10, VAR_MAX);
+
+    void removeannounceall()
+    {
+        loopvrev(anclist) anclist.remove(i);
+        if(issound(announcerchan)) removesound(announcerchan);
     }
+
+    void removeannounce(gameent *d)
+    {
+        loopvrev(anclist) if(anclist[i].d == d) anclist.remove(i);
+    }
+
+    void checkannounce()
+    {
+        while(anclist.length() > announcebuffer) anclist.pop();
+        loopv(anclist) if(anclist[i].play()) anclist.removeunordered(i--);
+    }
+
+    void announce(int idx, gameent *d, bool forced)
+    {
+        if(idx < 0) return;
+        ancbuf &a = anclist.add();
+        a.idx = idx;
+        a.d = d;
+        a.forced = forced;
+        checkannounce();
+    }
+
     void announcef(int idx, int targ, gameent *d, bool forced, const char *msg, ...)
     {
         if(targ >= 0 && msg && *msg)
@@ -564,7 +606,7 @@ namespace game
             defvformatstring(text, msg, msg);
             conoutft(targ == CON_INFO && d == player1 ? CON_SELF : targ, "%s", text);
         }
-        announce(idx, d, forced);
+        if(idx >= 0) announce(idx, d, forced);
     }
     ICOMMAND(0, announce, "iiisN", (int *idx, int *targ, int *cn, int *forced, char *s, int *numargs), (*numargs >= 5 ? announcef(*numargs >= 1 ? *idx : -1, *numargs >= 2 ? *targ : CON_MESG, *numargs >= 3 ? getclient(*cn) : NULL, *numargs >= 4 ? *forced!=0 : false, "\fw%s", s) : announcef(*numargs >= 1 ? *idx : -1, *numargs >= 2 ? *targ : CON_MESG, *numargs >= 3 ? getclient(*cn) : NULL, *numargs >= 4 ? *forced!=0 : false, NULL)));
 
@@ -1203,9 +1245,14 @@ namespace game
     };
     vector<damagemerge> damagemerges;
 
+    void removedamagemergeall()
+    {
+        loopvrev(damagemerges) damagemerges.remove(i);
+    }
+
     void removedamagemerges(gameent *d)
     {
-        loopvrev(damagemerges) if(damagemerges[i].d == d || damagemerges[i].v == d) damagemerges.removeunordered(i);
+        loopvrev(damagemerges) if(damagemerges[i].d == d || damagemerges[i].v == d) damagemerges.remove(i);
     }
 
     void pushdamagemerge(gameent *d, gameent *v, int weap, int damage, int flags)
@@ -1757,6 +1804,7 @@ namespace game
         client::clearvotes(d);
         projs::remove(d);
         removedamagemerges(d);
+        removeannounce(d);
         if(m_capture(gamemode)) capture::removeplayer(d);
         else if(m_defend(gamemode)) defend::removeplayer(d);
         else if(m_bomber(gamemode)) bomber::removeplayer(d);
@@ -1848,6 +1896,8 @@ namespace game
         ai::startmap(name, reqname, empty);
         intermission = false;
         maptime = hud::lastnewgame = 0;
+        removedamagemergeall();
+        removeannounceall();
         projs::reset();
         physics::reset();
         resetworld();
@@ -2521,7 +2571,7 @@ namespace game
             }
             if(reset)
             {
-                cameras.sort(cament::camsort);
+                cameras.sort(cament::compare);
                 loopv(cameras) if(cameras[i]->ignore) cameras[i]->ignore = false;
                 cam = cameras[0];
                 lasttvcam = lastmillis;
@@ -2775,14 +2825,14 @@ namespace game
                 if(needname(player1)) showgui("profile", -1);
                 else if(needloadout(player1)) showgui("loadout", -1);
             }
+            checkannounce();
+            flushdamagemerges();
         }
         else if(!menuactive()) showgui(needname(player1) ? "profile" : "main", -1);
-
         gets2c();
         adjustscaled(hud::damageresidue, hud::damageresiduefade);
         if(connected())
         {
-            flushdamagemerges();
             checkcamera();
             if(player1->state == CS_DEAD || player1->state == CS_WAITING)
             {

@@ -530,6 +530,7 @@ namespace bomber
             entities::execlink(NULL, f.ent, false);
         }
         st.takeaffinity(i, d, lastmillis);
+        if(d->ai) aihomerun(d, d->ai->state.last());
     }
 
     void checkaffinity(dynent *e)
@@ -589,7 +590,7 @@ namespace bomber
             loopv(st.flags)
             {
                 bomberstate::flag &g = st.flags[i];
-                if(isbombertarg(g, ai::owner(d)) && (!st.flags.inrange(goal) || g.pos().squaredist(pos) < st.flags[goal].pos().squaredist(pos)))
+                if(isbombertarg(g, ai::owner(d)) && (goal < 0 || g.pos().squaredist(pos) < st.flags[goal].pos().squaredist(pos)))
                     goal = i;
             }
             if(st.flags.inrange(goal) && ai::makeroute(d, b, st.flags[goal].pos()))
