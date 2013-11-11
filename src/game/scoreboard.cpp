@@ -287,13 +287,11 @@ namespace hud
                         }
                         uicenterlist(g, uifont(g, "little", {
                             g.textf("\fy%s", 0xFFFFFF, NULL, 0, server::gamename(game::gamemode, game::mutators, 0, 32));
+                            if(game::intermission) g.text(", \fs\fointermission\fS", 0xFFFFFF);
+                            else if(client::waitplayers) g.text(", \fs\fowaiting\fS", 0xFFFFFF);
+                            else if(paused) g.text(", \fs\fopaused\fS", 0xFFFFFF);
                             if((m_play(game::gamemode) || client::demoplayback) && game::timeremaining >= 0)
-                            {
-                                if(game::intermission) g.textf(", \fs\fointermission\fS", 0xFFFFFF, NULL, 0);
-                                else if(client::waitplayers) g.textf(", \fs\fowaiting\fS", 0xFFFFFF, NULL, 0);
-                                else if(paused) g.textf(", \fs\fopaused\fS", 0xFFFFFF, NULL, 0);
-                                else if(game::timeremaining) g.textf(", \fs\fg%s\fS remain", 0xFFFFFF, NULL, 0, timestr(game::timeremaining, 2));
-                            }
+                                g.textf(", \fs\fg%s\fS remain", 0xFFFFFF, NULL, 0, timestr(game::timeremaining, 2));
                         }));
                         if(*connectname)
                         {
@@ -319,19 +317,19 @@ namespace hud
                     uicenterlist(g, uicenterlist(g, {
                         if(game::player1->quarantine)
                         {
-                            uicenterlist(g, uifont(g, "default", g.textf("You are \fzoyQUARANTINED", 0xFFFFFF, NULL, 0)));
-                            uicenterlist(g, uifont(g, "reduced", g.textf("Please await instructions from a moderator", 0xFFFFFF, NULL, 0)));
+                            uicenterlist(g, uifont(g, "default", g.text("You are \fzoyQUARANTINED", 0xFFFFFF)));
+                            uicenterlist(g, uifont(g, "reduced", g.text("Please await instructions from a moderator", 0xFFFFFF)));
                         }
                         if(client::demoplayback)
                         {
                             uicenterlist(g, {
-                                uifont(g, "default", g.textf("Demo Playback in Progress", 0xFFFFFF, NULL, 0));
+                                uifont(g, "default", g.text("Demo Playback in Progress", 0xFFFFFF));
                             });
                         }
                         else if(client::waitplayers)
                         {
                             uicenterlist(g, {
-                                uifont(g, "default", g.textf("Waiting for players", 0xFFFFFF, NULL, 0));
+                                uifont(g, "default", g.text("Waiting for players", 0xFFFFFF));
                             });
                         }
                         if(!game::intermission && !client::demoplayback)
@@ -344,13 +342,13 @@ namespace hud
                                 if(delay || m_duke(game::gamemode, game::mutators) || (m_fight(game::gamemode) && maxalive > 0))
                                 {
                                     uicenterlist(g, uifont(g, "default", {
-                                        if(client::waitplayers || m_duke(game::gamemode, game::mutators)) g.textf("Queued for new round", 0xFFFFFF, NULL, 0);
+                                        if(client::waitplayers || m_duke(game::gamemode, game::mutators)) g.text("Queued for new round", 0xFFFFFF);
                                         else if(delay) g.textf("%s: Down for \fs\fy%s\fS", 0xFFFFFF, NULL, 0, game::player1->state == CS_WAITING ? "Please Wait" : "Fragged", timestr(delay, -1));
                                         else if(game::player1->state == CS_WAITING && m_fight(game::gamemode) && maxalive > 0 && maxalivequeue)
                                         {
                                             int n = game::numwaiting();
                                             if(n) g.textf("Waiting for \fs\fy%d\fS %s", 0xFFFFFF, NULL, 0, n, n != 1 ? "players" : "player");
-                                            else g.textf("You are \fs\fgnext\fS in the queue", 0xFFFFFF, NULL, 0);
+                                            else g.text("You are \fs\fgnext\fS in the queue", 0xFFFFFF);
                                         }
                                     }));
                                     if(game::player1->state != CS_WAITING && lastmillis-game::player1->lastdeath >= 500)
@@ -358,7 +356,7 @@ namespace hud
                                 }
                                 else
                                 {
-                                    uicenterlist(g, uifont(g, "default", g.textf("Ready to respawn", 0xFFFFFF, NULL, 0)));
+                                    uicenterlist(g, uifont(g, "default", g.text("Ready to respawn", 0xFFFFFF)));
                                     if(game::player1->state != CS_WAITING) uicenterlist(g, uifont(g, "little", g.textf("Press %s to respawn now", 0xFFFFFF, NULL, 0, attackkey)));
                                 }
                                 if(shownotices >= 2)
@@ -415,7 +413,7 @@ namespace hud
 
                         SEARCHBINDCACHE(scoreboardkey)("showscores", 1);
                         uicenterlist(g, uifont(g, "little", g.textf("%s %s to close this window", 0xFFFFFF, NULL, 0, scoresoff ? "Release" : "Press", scoreboardkey)));
-                        uicenterlist(g, uifont(g, "tiny", g.textf("Double-tap to keep the window open", 0xFFFFFF, NULL, 0)));
+                        uicenterlist(g, uifont(g, "tiny", g.text("Double-tap to keep the window open", 0xFFFFFF)));
 
                         if(m_play(game::gamemode) && game::player1->state != CS_SPECTATOR && (game::intermission || scoresinfo))
                         {
@@ -437,14 +435,14 @@ namespace hud
                     #define loopscorelist(b) \
                     { \
                         int _n = sg.players.length(); \
-                        loopi(_n) \
+                        loopi(_n) if(sg.players[i]) \
                         { \
                             b; \
                         } \
                     }
                     #define loopscoregroup(b) \
                     { \
-                        loopv(sg.players) \
+                        loopv(sg.players) if(sg.players[i]) \
                         { \
                             gameent *o = sg.players[i]; \
                             b; \

@@ -576,8 +576,7 @@ struct gui : guient
 
     void text_(const char *text, int x, int y, int color, int alpha, bool shadow, bool force = false)
     {
-        if(FONTH < guibound[1]) y += (guibound[1]-FONTH)/2;
-        else if(FONTH > guibound[1]) y -= (FONTH-guibound[1])/2;
+        if(FONTH != guibound[1]) y += (guibound[1]-FONTH)/2;
         if(shadow) draw_text(text, x+guishadow, y+guishadow, 0x00, 0x00, 0x00, -0xC0*alpha/255);
         draw_text(text, x, y, color>>16, (color>>8)&0xFF, color&0xFF, force ? -alpha : alpha);
     }
