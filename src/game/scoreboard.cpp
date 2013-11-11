@@ -761,7 +761,7 @@ namespace hud
                                 uicenterlist(g, g.text("spectators", 0xFFFFFF));
                                 g.space(0.25f);
                                 bool pushed = false;
-                                loopv(spectators)
+                                loopv(spectators) if(spectators[i])
                                 {
                                     if(!(i%4))
                                     {

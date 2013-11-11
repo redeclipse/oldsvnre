@@ -593,7 +593,7 @@ namespace game
     void announce(int idx, gameent *d, bool forced)
     {
         if(idx < 0) return;
-        physent *t = !d || d == focus || forced ? camera1 : d;
+        physent *t = !d || d == game::player1 || forced ? camera1 : d;
         int *chan = d && !forced ? &d->aschan : &announcerchan;
         loopv(anclist) if(anclist[i].idx == idx && anclist[i].chan == chan) return; // skip duplicates
         if(issound(*chan))
@@ -601,7 +601,7 @@ namespace game
             if(sounds[*chan].slotnum == idx) return; // duplicate is currently playing
             ancbuf &a = anclist.add();
             a.idx = idx;
-            a.t = d;
+            a.t = t;
             a.chan = chan;
         }
         else playsound(idx, t->o, t, t != camera1 ? SND_IMPORT : SND_FORCED, -1, -1, -1, chan);
@@ -614,7 +614,7 @@ namespace game
             defvformatstring(text, msg, msg);
             conoutft(targ == CON_INFO && d == player1 ? CON_SELF : targ, "%s", text);
         }
-        if(idx >= 0) announce(idx, d, forced);
+        announce(idx, d, forced);
     }
     ICOMMAND(0, announce, "iiisN", (int *idx, int *targ, int *cn, int *forced, char *s, int *numargs), (*numargs >= 5 ? announcef(*numargs >= 1 ? *idx : -1, *numargs >= 2 ? *targ : CON_MESG, *numargs >= 3 ? getclient(*cn) : NULL, *numargs >= 4 ? *forced!=0 : false, "\fw%s", s) : announcef(*numargs >= 1 ? *idx : -1, *numargs >= 2 ? *targ : CON_MESG, *numargs >= 3 ? getclient(*cn) : NULL, *numargs >= 4 ? *forced!=0 : false, NULL)));
 
