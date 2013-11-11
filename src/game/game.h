@@ -1470,7 +1470,7 @@ struct cament
         lastyaw = lastpitch = 0;
     }
 
-    static bool camsort(const cament *a, const cament *b)
+    static bool compare(const cament *a, const cament *b)
     {
         if(!a->ignore && b->ignore) return true;
         if(a->ignore && !b->ignore) return false;

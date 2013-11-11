@@ -343,7 +343,7 @@ namespace ai
         vec dp = d->headpos();
         float mindist = guard*guard, bestdist = 1e16f;
         int numdyns = game::numdynents();
-        loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && e != d && targetable(d, e))
+        loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && targetable(d, e))
         {
             vec ep = getaimpos(d, e, altfire(d, e));
             float dist = ep.squaredist(dp);
@@ -405,23 +405,19 @@ namespace ai
 
     bool violence(gameent *d, aistate &b, gameent *e, int pursue)
     {
-        if(passive() || (d->ai->enemy >= 0 && lastmillis-d->ai->enemymillis >= (111-d->skill)*50)) return false;
-        if(e && targetable(d, e))
+        if(passive() || (d->ai->enemy >= 0 && lastmillis-d->ai->enemymillis >= (111-d->skill)*50) || !targetable(d, e)) return false;
+        if(pursue)
         {
-            if(pursue || d->dominating.find(e))
-            {
-                if((b.targtype != AI_T_AFFINITY || !(pursue%2)) && makeroute(d, b, e->lastnode))
-                    d->ai->switchstate(b, AI_S_PURSUE, AI_T_ACTOR, e->clientnum, b.targtype != AI_T_AFFINITY ? AI_A_NORMAL : AI_A_HASTE);
-                else if(pursue >= 3) return false; // can't pursue
-            }
-            if(d->ai->enemy != e->clientnum)
-            {
-                d->ai->enemyseen = d->ai->enemymillis = lastmillis;
-                d->ai->enemy = e->clientnum;
-            }
-            return true;
+            if((b.targtype != AI_T_AFFINITY || !(pursue%2)) && makeroute(d, b, e->lastnode))
+                d->ai->switchstate(b, AI_S_PURSUE, AI_T_ACTOR, e->clientnum, b.targtype != AI_T_AFFINITY ? AI_A_NORMAL : AI_A_HASTE);
+            else if(pursue >= 3) return false; // can't pursue
         }
-        return false;
+        if(d->ai->enemy != e->clientnum)
+        {
+            d->ai->enemyseen = d->ai->enemymillis = lastmillis;
+            d->ai->enemy = e->clientnum;
+        }
+        return true;
     }
 
 
@@ -429,57 +425,46 @@ namespace ai
     {
         gameent *d;
         vec pos;
-        bool targ, see, tried;
+        bool dominated, visible;
         float dist;
 
-        targcache() : d(NULL), pos(0, 0, 0), targ(false), see(false), tried(false), dist(0) {}
+        targcache() : d(NULL), pos(0, 0, 0), dominated(false), visible(false), dist(0) {}
         ~targcache() {}
+
+        static bool tcsort(targcache &a,  targcache &b)
+        {
+            if(a.dominated && !b.dominated) return true;
+            if(!a.dominated && b.dominated) return false;
+            if(a.visible && !b.visible) return true;
+            if(!a.visible && b.visible) return false;
+            if(a.dist > b.dist) return true;
+            if(a.dist < b.dist) return false;
+            return true;
+        }
     };
+
     bool target(gameent *d, aistate &b, int pursue = 0, bool force = false, float mindist = 0.f)
     {
         if(passive()) return false;
-        static vector<targcache> targets; targets.setsize(0);
+        static vector<targcache> targets;
+        targets.setsize(0);
         vec dp = d->headpos();
+        gameent *e = NULL;
         int numdyns = game::numdynents();
-        while(true)
+        loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && targetable(d, e))
         {
-            targcache *t = NULL;
-            if(targets.empty())
-            {
-                gameent *e = NULL;
-                loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) != NULL && e != d)
-                {
-                    targcache &c = targets.add();
-                    c.d = e;
-                    if(!(c.targ = targetable(d, e))) continue;
-                    c.pos = getaimpos(d, e, altfire(d, e));
-                    c.dist = c.pos.squaredist(dp);
-                    if(d->dominating.find(c.d) >= 0)
-                    {
-                        t = &c;
-                        break; // REVENGE
-                    }
-                    else if((!t || c.dist < t->dist) && (mindist <= 0 || c.dist <= mindist))
-                    {
-                        if(!(c.see = force || cansee(d, dp, c.pos, d->actortype >= A_ENEMY))) continue;
-                        t = &c;
-                    }
-                }
-            }
-            else loopv(targets) if(!targets[i].tried && targets[i].targ && targets[i].see)
-            {
-                targcache &c = targets[i];
-                if((!t || c.dist < t->dist) && (mindist <= 0 || c.dist <= mindist)) t = &c;
-            }
-            if(t)
-            {
-                d->ai->enemy = -1;
-                d->ai->enemymillis = d->ai->enemyseen = 0;
-                if(violence(d, b, t->d, pursue)) return true;
-                t->tried = true;
-            }
-            else break;
+            targcache &c = targets.add();
+            c.d = e;
+            c.pos = getaimpos(d, e, altfire(d, e));
+            c.dist = c.pos.squaredist(dp);
+            if(d->dominating.find(c.d) >= 0) c.dominated = true;
+            c.visible = force || cansee(d, dp, c.pos, d->actortype >= A_ENEMY);
         }
+        if(targets.empty()) return false;
+        targets.sort(targcache::tcsort);
+        d->ai->enemy = -1;
+        d->ai->enemymillis = d->ai->enemyseen = 0;
+        loopv(targets) if(violence(d, b, targets[i].d, pursue || targets[i].dominated)) return true;
         return false;
     }
 
@@ -1319,15 +1304,12 @@ namespace ai
 
     bool hasrange(gameent *d, gameent *e, int weap)
     {
-        if(!e) return true;
-        if(targetable(d, e))
+        if(!targetable(d, e)) return false;
+        loopk(2)
         {
-            loopk(2)
-            {
-                vec ep = getaimpos(d, e, k!=0);
-                float dist = ep.squaredist(d->headpos());
-                if(weaprange(d, weap, k!=0, dist)) return true;
-            }
+            vec ep = getaimpos(d, e, k!=0);
+            float dist = ep.squaredist(d->headpos());
+            if(weaprange(d, weap, k!=0, dist)) return true;
         }
         return false;
     }
@@ -1471,12 +1453,13 @@ namespace ai
         if(d->blocked || (d->inmaterial&MATF_CLIP) == MAT_AICLIP)
         {
             d->ai->blocktime += lastmillis-d->ai->lastrun;
-            if(d->ai->blocktime > (d->ai->blockseq+1)*250)
+            if(d->ai->blocktime > (d->ai->blockseq+1)*500)
             {
                 d->ai->blockseq++;
                 switch(d->ai->blockseq)
                 {
-                    case 1: case 2:
+                    case 1: break;
+                    case 2:
                         d->ai->clear(d->ai->blockseq != 1);
                         if(d->ai->blockseq != 1 && iswaypoint(d->ai->targnode))
                         {
@@ -1500,12 +1483,13 @@ namespace ai
         if(iswaypoint(d->ai->targnode) && (d->ai->targnode == d->ai->targlast || d->ai->hasprevnode(d->ai->targnode)))
         {
             d->ai->targtime += lastmillis-d->ai->lastrun;
-            if(d->ai->targtime > (d->ai->targseq+1)*1000)
+            if(d->ai->targtime > (d->ai->targseq+1)*500)
             {
                 d->ai->targseq++;
                 switch(d->ai->targseq)
                 {
-                    case 1: case 2:
+                    case 1: break;
+                    case 2:
                         d->ai->clear(d->ai->targseq != 1);
                         if(iswaypoint(d->ai->targnode) && !d->ai->hasprevnode(d->ai->targnode))
                             d->ai->addprevnode(d->ai->targnode);
