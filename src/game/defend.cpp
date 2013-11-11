@@ -318,10 +318,9 @@ namespace defend
             {
                 if(b.owner != owner)
                 {
-                    gameent *d = NULL, *e = NULL;
-                    int numdyns = game::numdynents();
-                    loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && e->actortype < A_ENEMY && insideaffinity(b, e))
-                        if((d = e) == game::focus) break;
+                    gameent *d = NULL;
+                    loopv(game::players) if(game::players[i] && game::players[i]->actortype < A_ENEMY && insideaffinity(b, game::players[i]))
+                        if((d = game::players[i]) == game::focus) break;
                     game::announcef(S_V_FLAGSECURED, CON_SELF, d, true, "\fateam %s secured \fw%s", game::colourteam(owner), b.name);
                     part_textcopy(vec(b.o).add(vec(0, 0, enttype[AFFINITY].radius)), "<super>\fzZeSECURED", PART_TEXT, game::eventiconfade, TEAM(owner, colour), 3, 1, -10);
                     if(game::dynlighteffects) adddynlight(b.o, enttype[AFFINITY].radius*2, vec::hexcolor(TEAM(owner, colour)).mul(2.f), 500, 250);
@@ -330,10 +329,9 @@ namespace defend
             }
             else if(b.owner)
             {
-                gameent *d = NULL, *e = NULL;
-                int numdyns = game::numdynents();
-                loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && e->actortype < A_ENEMY && insideaffinity(b, e))
-                    if((d = e) == game::focus) break;
+                gameent *d = NULL;
+                loopv(game::players) if(game::players[i] && game::players[i]->actortype < A_ENEMY && insideaffinity(b, game::players[i]))
+                    if((d = game::players[i]) == game::focus) break;
                 game::announcef(S_V_FLAGOVERTHROWN, CON_SELF, d, true, "\fateam %s overthrew \fw%s", game::colourteam(enemy), b.name);
                 part_textcopy(vec(b.o).add(vec(0, 0, enttype[AFFINITY].radius)), "<super>\fzZeOVERTHROWN", PART_TEXT, game::eventiconfade, TEAM(enemy, colour), 3, 1, -10);
                 if(game::dynlighteffects) adddynlight(b.o, enttype[AFFINITY].radius*2, vec::hexcolor(TEAM(enemy, colour)).mul(2.f), 500, 250);
@@ -375,12 +373,14 @@ namespace defend
                 ai::checkothers(targets, d, ai::AI_S_DEFEND, ai::AI_T_AFFINITY, j, true);
                 gameent *e = NULL;
                 bool regen = !m_regen(game::gamemode, game::mutators) || d->health >= m_health(game::gamemode, game::mutators, d->model);
-                int numdyns = game::numdynents();
-                loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && !e->ai && e->state == CS_ALIVE && ai::owner(d) == ai::owner(e))
+                loopv(game::players) if(game::players[i])
                 {
-                    vec ep = e->feetpos();
-                    if(targets.find(e->clientnum) < 0 && ep.squaredist(f.o) <= (enttype[AFFINITY].radius*enttype[AFFINITY].radius))
-                        targets.add(e->clientnum);
+                    if(!e->ai && e->state == CS_ALIVE && ai::owner(d) == ai::owner(e))
+                    {
+                        vec ep = e->feetpos();
+                        if(targets.find(e->clientnum) < 0 && ep.squaredist(f.o) <= (enttype[AFFINITY].radius*enttype[AFFINITY].radius))
+                            targets.add(e->clientnum);
+                    }
                 }
                 if((!regen && f.owner == ai::owner(d)) || (targets.empty() && (f.owner != ai::owner(d) || f.enemy)))
                 {
@@ -412,14 +412,16 @@ namespace defend
                 ai::checkothers(targets, d, ai::AI_S_DEFEND, ai::AI_T_AFFINITY, b.target, true);
                 if(d->actortype == A_BOT)
                 {
-                    gameent *e = NULL;
-                    int numdyns = game::numdynents();
                     float mindist = enttype[AFFINITY].radius*4; mindist *= mindist;
-                    loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && !e->ai && e->state == CS_ALIVE && ai::owner(d) == ai::owner(e))
+                    loopv(game::players) if(game::players[i])
                     {
-                        vec ep = e->feetpos();
-                        if(targets.find(e->clientnum) < 0 && ep.squaredist(f.o) <= mindist)
-                            targets.add(e->clientnum);
+                        gameent *e = game::players[i];
+                        if(!e->ai && e->state == CS_ALIVE && ai::owner(d) == ai::owner(e))
+                        {
+                            vec ep = e->feetpos();
+                            if(targets.find(e->clientnum) < 0 && ep.squaredist(f.o) <= mindist)
+                                targets.add(e->clientnum);
+                        }
                     }
                 }
                 if(!targets.empty())

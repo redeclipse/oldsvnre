@@ -2283,13 +2283,12 @@ namespace projs
                         int stucktime = lastmillis-proj.stuck, stuckdelay = WF(WK(proj.flags), proj.weap, proxdelay, WS(proj.flags));
                         if(stuckdelay && stuckdelay > stucktime) dist *= stucktime/float(stuckdelay);
                         if(dist <= 1e-6f) proxim = 0;
-                        int numdyns = game::numdynents();
                         gameent *oldstick = proj.stick;
                         proj.stick = NULL;
-                        loopj(numdyns)
+                        loopvj(game::players) if(game::players[j])
                         {
-                            dynent *f = game::iterdynents(j);
-                            if(!f || f->state != CS_ALIVE || !physics::issolid(f, &proj, true, false)) continue;
+                            gameent *f = game::players[j];
+                            if(f->state != CS_ALIVE || !physics::issolid(f, &proj, true, false)) continue;
                             if(radial && radialeffect(f, proj, HIT_BURN, expl)) proj.lastradial = lastmillis;
                             if(proxim == 1 && !proj.beenused && f != oldstick)
                             {

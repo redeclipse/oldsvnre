@@ -39,22 +39,22 @@ namespace bomber
     int findtarget(gameent *d)
     {
         vec dest;
-        gameent *e = NULL;
         float bestangle = 1e16f, bestdist = 1e16f;
         int best = -1;
-        int numdyns = game::numdynents();
         loopk(d->actortype != A_PLAYER ? 4 : 2)
         {
             if(bombertargetintersect)
             {
                 findorientation(d->o, d->yaw, d->pitch, dest);
-                if((e = game::intersectclosest(d->o, dest, d)) && e->team == d->team && e->state == CS_ALIVE && (k%2 || e->actortype != A_BOT))
+                gameent *e = game::intersectclosest(d->o, dest, d);
+                if(e && e->team == d->team && e->state == CS_ALIVE && (k%2 || e->actortype != A_BOT))
                     return e->clientnum;
             }
             float fx = k >= 2 ? 360 : (d->ai ? d->ai->views[0] : curfov), fy = k >= 2 ? 360 : (d->ai ? d->ai->views[1] : fovy);
-            loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && e->team == d->team && e->state == CS_ALIVE && (k%2 || e->actortype != A_BOT))
+            loopv(game::players) if(game::players[i] && game::players[i]->state == CS_ALIVE)
             {
-                if(getsight(d->o, d->yaw, d->pitch, e->o, dest, 1e16f, fx, fy))
+                gameent *e = game::players[i];
+                if(e->team == d->team && (k%2 || e->actortype != A_BOT) && getsight(d->o, d->yaw, d->pitch, e->o, dest, 1e16f, fx, fy))
                 {
                     vec dir = vec(e->o).sub(d->o);
                     float dist = dir.magnitude();
@@ -656,12 +656,11 @@ namespace bomber
             ai::checkothers(targets, d, home || d->actortype != A_BOT ? ai::AI_S_DEFEND : ai::AI_S_PURSUE, ai::AI_T_AFFINITY, j, true);
             if(d->actortype == A_BOT)
             {
-                gameent *e = NULL;
-                int numdyns = game::numdynents();
                 float mindist = enttype[AFFINITY].radius*4; mindist *= mindist;
-                loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && !e->ai && e->state == CS_ALIVE && owner == ai::owner(e))
+                loopv(game::players) if(game::players[i])
                 {
-                    if(targets.find(e->clientnum) < 0 && (f.owner == e || e->feetpos().squaredist(f.pos()) <= mindist))
+                    gameent *e = game::players[i];
+                    if(!e->ai && e->state == CS_ALIVE && owner == ai::owner(e) && targets.find(e->clientnum) < 0 && (f.owner == e || e->feetpos().squaredist(f.pos()) <= mindist))
                         targets.add(e->clientnum);
                 }
             }
@@ -671,7 +670,7 @@ namespace bomber
                 if(f.owner || f.droptime || targets.empty()) guard = true;
                 else if(d->hasweap(d->ai->weappref, m_weapon(game::gamemode, game::mutators)))
                 { // see if we can relieve someone who only has a piece of crap
-                    gameent *t;
+                    gameent *t = NULL;
                     loopvk(targets) if((t = game::getclient(targets[k])))
                     {
                         if((t->ai && !t->hasweap(t->ai->weappref, m_weapon(game::gamemode, game::mutators))) || (!t->ai && t->weapselect < W_OFFSET))
@@ -750,12 +749,11 @@ namespace bomber
                     static vector<int> targets; // build a list of others who are interested in this
                     targets.setsize(0);
                     ai::checkothers(targets, d, ai::AI_S_DEFEND, ai::AI_T_AFFINITY, b.target, true);
-                    gameent *e = NULL;
-                    int numdyns = game::numdynents();
                     float mindist = enttype[AFFINITY].radius*4; mindist *= mindist;
-                    loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && !e->ai && e->state == CS_ALIVE && ai::owner(d) == ai::owner(e))
+                    loopv(game::players) if(game::players[i])
                     {
-                        if(targets.find(e->clientnum) < 0 && (f.owner == e || e->feetpos().squaredist(f.pos()) <= mindist))
+                        gameent *e = game::players[i];
+                        if(!e->ai && e->state == CS_ALIVE && ai::owner(d) == ai::owner(e) && targets.find(e->clientnum) < 0 && (f.owner == e || e->feetpos().squaredist(f.pos()) <= mindist))
                             targets.add(e->clientnum);
                     }
                     if(!targets.empty())

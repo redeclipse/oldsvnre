@@ -620,12 +620,11 @@ namespace capture
             ai::checkothers(targets, d, home || d->actortype != A_BOT ? ai::AI_S_DEFEND : ai::AI_S_PURSUE, ai::AI_T_AFFINITY, j, true);
             if(d->actortype == A_BOT)
             {
-                gameent *e = NULL;
-                int numdyns = game::numdynents();
                 float mindist = enttype[AFFINITY].radius*4; mindist *= mindist;
-                loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && !e->ai && e->state == CS_ALIVE && ai::owner(d) == ai::owner(e))
+                loopv(game::players) if(game::players[i])
                 {
-                    if(targets.find(e->clientnum) < 0 && (f.owner == e || e->feetpos().squaredist(aiflagpos(d, f)) <= mindist))
+                    gameent *e = game::players[i];
+                    if(!e->ai && e->state == CS_ALIVE && ai::owner(d) == ai::owner(e) && targets.find(e->clientnum) < 0 && (f.owner == e || e->feetpos().squaredist(aiflagpos(d, f)) <= mindist))
                         targets.add(e->clientnum);
                 }
             }
@@ -635,7 +634,7 @@ namespace capture
                 if(f.owner || f.droptime || targets.empty()) guard = true;
                 else if(d->hasweap(d->ai->weappref, m_weapon(game::gamemode, game::mutators)))
                 { // see if we can relieve someone who only has a piece of crap
-                    gameent *t;
+                    gameent *t = NULL;
                     loopvk(targets) if((t = game::getclient(targets[k])))
                     {
                         if((t->ai && !t->hasweap(t->ai->weappref, m_weapon(game::gamemode, game::mutators))) || (!t->ai && t->weapselect < W_OFFSET))
@@ -713,12 +712,11 @@ namespace capture
                     static vector<int> targets; // build a list of others who are interested in this
                     targets.setsize(0);
                     ai::checkothers(targets, d, ai::AI_S_DEFEND, ai::AI_T_AFFINITY, b.target, true);
-                    gameent *e = NULL;
-                    int numdyns = game::numdynents();
                     float mindist = enttype[AFFINITY].radius*4; mindist *= mindist;
-                    loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && !e->ai && e->state == CS_ALIVE && ai::owner(d) == ai::owner(e))
+                    loopv(game::players) if(game::players[i])
                     {
-                        if(targets.find(e->clientnum) < 0 && (f.owner == e || e->feetpos().squaredist(aiflagpos(d, f)) <= mindist))
+                        gameent *e = game::players[i];
+                        if(!e->ai && e->state == CS_ALIVE && ai::owner(d) == ai::owner(e) && targets.find(e->clientnum) < 0 && (f.owner == e || e->feetpos().squaredist(aiflagpos(d, f)) <= mindist))
                             targets.add(e->clientnum);
                     }
                     if(!targets.empty())
