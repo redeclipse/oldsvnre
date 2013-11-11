@@ -858,20 +858,17 @@ namespace hud
                 colourskew(r, g, b, 1.f-amt);
                 break;
             }
-            default: amt = 0; break;
+            default: return;
         }
-        if(amt > 0)
-        {
-            Texture *t = textureload(indicatortex, 3);
-            if(t->type&Texture::ALPHA) glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            else glBlendFunc(GL_ONE, GL_ONE);
-            glBindTexture(GL_TEXTURE_2D, t->id);
-            float val = amt < 0.25f ? amt : (amt > 0.75f ? 1.f-amt : 0.25f);
-            glColor4f(val*4.f, val*4.f, val*4.f, indicatorblend*hudblend*val);
-            drawsized(x-s, y-s, s*2);
-            glColor4f(r, g, b, indicatorblend*hudblend);
-            drawslice(0, clamp(amt, 0.f, 1.f), x, y, s);
-        }
+        Texture *t = textureload(indicatortex, 3);
+        if(t->type&Texture::ALPHA) glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        else glBlendFunc(GL_ONE, GL_ONE);
+        glBindTexture(GL_TEXTURE_2D, t->id);
+        float val = amt < 0.25f ? amt : (amt > 0.75f ? 1.f-amt : 0.25f);
+        glColor4f(val*4.f, val*4.f, val*4.f, indicatorblend*hudblend*val);
+        drawsized(x-s, y-s, s*2);
+        glColor4f(r, g, b, indicatorblend*hudblend);
+        drawslice(0, clamp(amt, 0.f, 1.f), x, y, s);
     }
 
     void vecfromyaw(float yaw, int move, int strafe, vec2 &m)

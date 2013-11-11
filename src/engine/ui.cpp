@@ -18,8 +18,10 @@ VAR(IDF_PERSIST, guiblend, 1, 255, 255);
 VAR(IDF_PERSIST, guilinesize, 1, 36, 128);
 VAR(IDF_PERSIST, guisepsize, 1, 10, 128);
 VAR(IDF_PERSIST, guiscaletime, 0, 250, VAR_MAX);
-VAR(IDF_PERSIST|IDF_HEX, guibgcolour, -1, 0x888888, 0xFFFFFF);
-VAR(IDF_PERSIST|IDF_HEX, guibordercolour, -1, -1, 0xFFFFFF);
+VAR(IDF_PERSIST|IDF_HEX, guibgcolour, -1, 0x000000, 0xFFFFFF);
+FVAR(IDF_PERSIST, guibgblend, 0, 0.5f, 1);
+VAR(IDF_PERSIST|IDF_HEX, guibordercolour, -1, 0x000000, 0xFFFFFF);
+FVAR(IDF_PERSIST, guiborderblend, 0, 0.5f, 1);
 SVAR(0, guistatustext, "");
 
 static bool needsinput = false, hastitle = true, hasbgfx = true;
@@ -603,7 +605,35 @@ struct gui : guient
             list &p = lists[parenth];
             h = p.springs > 0 && !((curdepth-parentdepth)&1) ? lists[p.parent].h : p.h;
         }
-        rect_(curx, cury, w, h);
+        rect_(curx, cury, w, h, false);
+        glEnable(GL_TEXTURE_2D);
+        defaultshader->set();
+    }
+
+    void border(int color, int inheritw, int inherith, int offsetx, int offsety)
+    {
+        if(!visible()) return;
+        glDisable(GL_TEXTURE_2D);
+        lineshader->set();
+        glColor4ub(color>>16, (color>>8)&0xFF, color&0xFF, 0x80);
+        int w = xsize, h = ysize;
+        if(inheritw>0)
+        {
+            int parentw = curlist, parentdepth = 0;
+            for(;parentdepth < inheritw && lists[parentw].parent>=0; parentdepth++)
+                parentw = lists[parentw].parent;
+            list &p = lists[parentw];
+            w = p.springs > 0 && (curdepth-parentdepth)&1 ? lists[p.parent].w : p.w;
+        }
+        if(inherith>0)
+        {
+            int parenth = curlist, parentdepth = 0;
+            for(;parentdepth < inherith && lists[parenth].parent>=0; parentdepth++)
+                parenth = lists[parenth].parent;
+            list &p = lists[parenth];
+            h = p.springs > 0 && !((curdepth-parentdepth)&1) ? lists[p.parent].h : p.h;
+        }
+        rect_(curx+offsetx, cury+offsety, w-offsetx*2, h-offsety*2, true);
         glEnable(GL_TEXTURE_2D);
         defaultshader->set();
     }
@@ -887,7 +917,13 @@ struct gui : guient
             {
                 notextureshader->set();
                 glDisable(GL_TEXTURE_2D);
-                hud::drawblend(x, y, w, h, (guibgcolour>>16)/255.f, ((guibgcolour>>8)&0xFF)/255.f, (guibgcolour&0xFF)/255.f, true);
+                glColor4f((guibgcolour>>16)/255.f, ((guibgcolour>>8)&0xFF)/255.f, (guibgcolour&0xFF)/255.f, guibgblend);
+                glBegin(GL_TRIANGLE_STRIP);
+                glVertex2f(x, y);
+                glVertex2f(x+w, y);
+                glVertex2f(x, y+h);
+                glVertex2f(x+w, y+h);
+                glEnd();
                 defaultshader->set();
                 glEnable(GL_TEXTURE_2D);
             }
@@ -895,8 +931,7 @@ struct gui : guient
             {
                 lineshader->set();
                 glDisable(GL_TEXTURE_2D);
-                glDisable(GL_BLEND);
-                glColor3ub(guibordercolour>>16, (guibordercolour>>8)&0xFF, guibordercolour&0xFF);
+                glColor4f((guibordercolour>>16)/255.f, ((guibordercolour>>8)&0xFF)/255.f, (guibordercolour&0xFF)/255.f, guiborderblend);
                 glBegin(GL_LINE_LOOP);
                 glVertex2f(x, y);
                 glVertex2f(x+w, y);
@@ -905,7 +940,6 @@ struct gui : guient
                 glEnd();
                 defaultshader->set();
                 glEnable(GL_TEXTURE_2D);
-                glEnable(GL_BLEND);
             }
         }
     }
@@ -938,7 +972,13 @@ struct gui : guient
                 {
                     notextureshader->set();
                     glDisable(GL_TEXTURE_2D);
-                    hud::drawblend(x, y, w, h, (guibgcolour>>16)/255.f, ((guibgcolour>>8)&0xFF)/255.f, (guibgcolour&0xFF)/255.f, true);
+                    glColor4f((guibgcolour>>16)/255.f, ((guibgcolour>>8)&0xFF)/255.f, (guibgcolour&0xFF)/255.f, guibgblend);
+                    glBegin(GL_TRIANGLE_STRIP);
+                    glVertex2f(x, y);
+                    glVertex2f(x+w, y);
+                    glVertex2f(x, y+h);
+                    glVertex2f(x+w, y+h);
+                    glEnd();
                     defaultshader->set();
                     glEnable(GL_TEXTURE_2D);
                 }
@@ -946,8 +986,7 @@ struct gui : guient
                 {
                     lineshader->set();
                     glDisable(GL_TEXTURE_2D);
-                    glDisable(GL_BLEND);
-                    glColor3ub(guibordercolour>>16, (guibordercolour>>8)&0xFF, guibordercolour&0xFF);
+                    glColor4f((guibordercolour>>16)/255.f, ((guibordercolour>>8)&0xFF)/255.f, (guibordercolour&0xFF)/255.f, guiborderblend);
                     glBegin(GL_LINE_LOOP);
                     glVertex2f(x, y);
                     glVertex2f(x+w, y);
@@ -956,7 +995,6 @@ struct gui : guient
                     glEnd();
                     defaultshader->set();
                     glEnable(GL_TEXTURE_2D);
-                    glEnable(GL_BLEND);
                 }
                 x += guibound[0];
                 y += guibound[1]/4;
