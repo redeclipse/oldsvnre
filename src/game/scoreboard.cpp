@@ -462,10 +462,10 @@ namespace hud
                             scoregroup &sg = *groups[k];
                             loopscoregroup({
                                 if(scorebotinfo && o->actortype > A_PLAYER) hasbots = true;
-                                namepad = max(namepad, (float)text_width(game::colourname(o, NULL, false, true))/guibound[0]);
+                                namepad = max(namepad, (float)text_width(game::colourname(o, NULL, false, true))/guibound[0]*0.51f);
                                 if(scorehandles && o->handle[0])
                                 {
-                                    handlepad = max(handlepad, (float)text_width(o->handle)/guibound[0]);
+                                    handlepad = max(handlepad, (float)text_width(o->handle)/guibound[0]*0.51f);
                                     hashandle = true;
                                 }
                                 if(scorehostinfo)
@@ -473,7 +473,7 @@ namespace hud
                                     const char *host = scorehost(o);
                                     if(host && *host)
                                     {
-                                        hostpad = max(hostpad, (float)text_width(host)/guibound[0]);
+                                        hostpad = max(hostpad, (float)text_width(host)/guibound[0]*0.51f);
                                         if(o->ownernum != game::player1->clientnum) hashost = true;
                                     }
                                 }
@@ -496,7 +496,7 @@ namespace hud
                                 {
                                     g.pushlist();
                                     uilist(g, uifont(g, "default", {
-                                        if(scorebgrows) g.background(bgc2);
+                                        if(scorebgrows) g.background(bgc1);
                                         g.space(0.15f);
                                         g.textf("team %s", 0xFFFFFF, teamtexname(sg.team), TEAM(sg.team, colour), TEAM(sg.team, name));
                                         g.spring();
