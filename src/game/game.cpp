@@ -554,10 +554,9 @@ namespace game
     {
         int idx;
         physent *t;
-        bool forced;
         int *chan;
 
-        ancbuf() : idx(-1), t(NULL), forced(false), chan(NULL) {}
+        ancbuf() : idx(-1), t(NULL), chan(NULL) {}
         ~ancbuf() {}
 
         bool play()
@@ -603,7 +602,6 @@ namespace game
             ancbuf &a = anclist.add();
             a.idx = idx;
             a.t = d;
-            a.forced = forced;
             a.chan = chan;
         }
         else playsound(idx, t->o, t, t != camera1 ? SND_IMPORT : SND_FORCED, -1, -1, -1, chan);
