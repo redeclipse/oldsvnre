@@ -558,10 +558,10 @@ namespace game
 
         bool play()
         {
-            physent *t = !d || d == focus || forced ? camera1 : d;
             int *chan = d && !forced ? &d->aschan : &announcerchan;
             if(!issound(*chan))
             {
+                physent *t = !d || d == focus || forced ? camera1 : d;
                 playsound(idx, t->o, t, t != camera1 ? SND_IMPORT : SND_FORCED, -1, -1, -1, chan);
                 return true;
             }
@@ -570,7 +570,7 @@ namespace game
     };
     vector<ancbuf> anclist;
 
-    VAR(IDF_PERSIST, announcebuffer, 1, 10, VAR_MAX);
+    VAR(IDF_PERSIST, announcebuffer, 1, 32, VAR_MAX);
 
     void removeannounceall()
     {
@@ -585,13 +585,16 @@ namespace game
 
     void checkannounce()
     {
-        while(anclist.length() > announcebuffer) anclist.pop();
         loopv(anclist) if(anclist[i].play()) anclist.removeunordered(i--);
+        while(anclist.length() > announcebuffer) anclist.pop();
     }
 
     void announce(int idx, gameent *d, bool forced)
     {
         if(idx < 0) return;
+        int *chan = d && !forced ? &d->aschan : &announcerchan;
+        if(issound(*chan) && sounds[*chan].slotnum == idx) return;
+        loopv(anclist) if(anclist[i].idx == idx && anclist[i].d == d) return; // skip duplicates
         ancbuf &a = anclist.add();
         a.idx = idx;
         a.d = d;
