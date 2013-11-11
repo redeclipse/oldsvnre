@@ -553,15 +553,17 @@ namespace game
     struct ancbuf
     {
         int idx;
-        gameent *d;
+        physent *t;
         bool forced;
+        int *chan;
+
+        ancbuf() : idx(-1), t(NULL), forced(false), chan(NULL) {}
+        ~ancbuf() {}
 
         bool play()
         {
-            int *chan = d && !forced ? &d->aschan : &announcerchan;
             if(!issound(*chan))
             {
-                physent *t = !d || d == focus || forced ? camera1 : d;
                 playsound(idx, t->o, t, t != camera1 ? SND_IMPORT : SND_FORCED, -1, -1, -1, chan);
                 return true;
             }
@@ -580,7 +582,7 @@ namespace game
 
     void removeannounce(gameent *d)
     {
-        loopvrev(anclist) if(anclist[i].d == d) anclist.remove(i);
+        loopvrev(anclist) if(anclist[i].t == d) anclist.remove(i);
     }
 
     void checkannounce()
@@ -592,14 +594,19 @@ namespace game
     void announce(int idx, gameent *d, bool forced)
     {
         if(idx < 0) return;
+        physent *t = !d || d == focus || forced ? camera1 : d;
         int *chan = d && !forced ? &d->aschan : &announcerchan;
-        if(issound(*chan) && sounds[*chan].slotnum == idx) return;
-        loopv(anclist) if(anclist[i].idx == idx && anclist[i].d == d) return; // skip duplicates
-        ancbuf &a = anclist.add();
-        a.idx = idx;
-        a.d = d;
-        a.forced = forced;
-        checkannounce();
+        loopv(anclist) if(anclist[i].idx == idx && anclist[i].chan == chan) return; // skip duplicates
+        if(issound(*chan))
+        {
+            if(sounds[*chan].slotnum == idx) return; // duplicate is currently playing
+            ancbuf &a = anclist.add();
+            a.idx = idx;
+            a.t = d;
+            a.forced = forced;
+            a.chan = chan;
+        }
+        else playsound(idx, t->o, t, t != camera1 ? SND_IMPORT : SND_FORCED, -1, -1, -1, chan);
     }
 
     void announcef(int idx, int targ, gameent *d, bool forced, const char *msg, ...)
