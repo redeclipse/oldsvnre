@@ -581,7 +581,7 @@ namespace game
 
     void removeannounce(gameent *d)
     {
-        loopvrev(anclist) if(anclist[i].t == d) anclist.remove(i);
+        loopvrev(anclist) if(anclist[i].chan == &d->aschan) anclist.remove(i);
     }
 
     void checkannounce()
@@ -595,10 +595,19 @@ namespace game
         if(idx < 0) return;
         physent *t = !d || d == game::player1 || forced ? camera1 : d;
         int *chan = d && !forced ? &d->aschan : &announcerchan;
-        loopv(anclist) if(anclist[i].idx == idx && anclist[i].chan == chan) return; // skip duplicates
+        bool inuse = false;
         if(issound(*chan))
         {
             if(sounds[*chan].slotnum == idx) return; // duplicate is currently playing
+            inuse = true;
+        }
+        loopv(anclist) if(anclist[i].chan == chan)
+        {
+            if(anclist[i].idx == idx) return; // skip duplicates
+            inuse = true;
+        }
+        if(inuse)
+        {
             ancbuf &a = anclist.add();
             a.idx = idx;
             a.t = t;
