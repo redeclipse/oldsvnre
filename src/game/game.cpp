@@ -586,7 +586,7 @@ namespace game
 
     void checkannounce()
     {
-        loopv(anclist) if(anclist[i].play()) anclist.removeunordered(i--);
+        loopv(anclist) if(anclist[i].play()) anclist.remove(i--);
         while(anclist.length() > announcebuffer) anclist.pop();
     }
 
