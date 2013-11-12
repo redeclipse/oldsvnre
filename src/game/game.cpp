@@ -571,7 +571,7 @@ namespace game
     };
     vector<ancbuf> anclist;
 
-    VAR(IDF_PERSIST, announcebuffer, 1, 32, VAR_MAX);
+    VAR(IDF_PERSIST, announcebuffer, 1, 64, VAR_MAX);
 
     void removeannounceall()
     {
