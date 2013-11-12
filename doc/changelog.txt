@@ -1,7 +1,7 @@
 The development version changelog is an ongoing work and should be reasonably
 complete covering changes made up to revision:
 
-6167 (11/05/13)
+6215 (11/15/13)
 
 If you update the changelog with changes made beyond this point, and consider
 it to resonably cover all previous changes, please update the above revision
@@ -69,19 +69,18 @@ Maps:
    - Amplification - new time-trial map by Unnamed
    - Relax - new time-trial map by Bonifarz
    - Steel Rat - added to time-trial rotation
+   - Testchamber - retextured by Quinton Reeves
    - War Depot - new time-trial map by TristamK
  * Other game modes
    - Abuse - new map by ballist1c
+   - Campgrounds - new map by ballist1c and Greaserpirate
    - Canyon - new map by restcoser
    - Condensation - new map by Unnamed
    - Echo2k - remix of Echo by Ulukai
-   - Emission - nem map by Unnamed
    - Enyo - new map by Ulukai
    - Insidious - new map by ballist1c
    - LongestYard2k - remix of LongestYard by John_III and ballist1c
    - Octavus - new map by Ricky Thomson
-   - Tarnished - new map by Boognish
-   - Testchamber - retextured by Quinton Reeves
 
 Interface & Menus:
  * Added /spectvfollow for aiming camera to certain player whilst
@@ -96,8 +95,10 @@ Interface & Menus:
    these can be controlled from options menu
  * Fancy keyboard / mouse button rendering
  * Ability to cancel a swapteam request
- * Scoreboard redesign / improvements
+ * Slicker menus, tips and rollover help text
+ * Scoreboard redesign and better colouring
  * New loading screen
+ * Map preview size bumped to 512x512
  * Bomber-Ball in inventory and its itembar flash red
 
 Modding & Mapmaking:
@@ -137,6 +138,7 @@ Multiplayer & Servers:
  * Pause server sorting while hovering over items in the server list
  * Added a "server type" field to the maps menu when offline to change 
    servertype to simplify setting up local games
+ * Players will have to accept guidelines before playing online
 
 Core & Install:
  * Fixed desktop entry icon field
@@ -181,6 +183,7 @@ Additional noteworthy fixed bugs:
  * #628 - Various entity properties lost when added to clipboard in editmode
  * #636 - Survivor first match bots only
  * #640 - Mines can be thrown inside walls to frag everyone on the map
+ * #648 - onslaught enemies are handled inconsistently under weapon-forcing mutators
 
 
 = Red Eclipse 1.4 =
