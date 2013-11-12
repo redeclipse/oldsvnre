@@ -13,6 +13,7 @@ namespace client
     VAR(IDF_PERSIST, showpresence, 0, 1, 2); // 0 = never show join/leave, 1 = show only during game, 2 = show when connecting/disconnecting
     VAR(IDF_PERSIST, showteamchange, 0, 1, 2); // 0 = never show, 1 = show only when switching between, 2 = show when entering match too
     VAR(IDF_PERSIST, showservervariables, 0, 0, 1); // determines if variables set by the server are printed to the console
+    VAR(IDF_PERSIST, showmapvotes, 0, 1, 3); // shows map votes, 1 = only mid-game (not intermision), 2 = at all times, 3 = verbose
 
     int state() { return game::player1->state; }
     ICOMMAND(0, getplayerstate, "", (), intret(state()));
@@ -97,7 +98,7 @@ namespace client
         if(found)
         {
             if(!mapvotes.empty()) mapvotes.sort(mapvote::compare);
-            if(msg && d == game::player1) conoutft(CON_EVENT, "%s cleared their previous vote", game::colourname(d));
+            if(msg && showmapvotes >= (d == game::player1 ? 2 : 3)) conoutft(CON_EVENT, "%s cleared their previous vote", game::colourname(d));
         }
     }
 
@@ -124,7 +125,7 @@ namespace client
         }
         m->players.add(d);
         mapvotes.sort(mapvote::compare);
-        if(!isignored(d->clientnum))
+        if(showmapvotes >= (game::intermission ? 2 : 1) && !isignored(d->clientnum))
         {
             SEARCHBINDCACHE(votekey)("showgui maps 2", 0);
             conoutft(CON_EVENT, "%s suggests: \fs\fy%s\fS on \fs\fo%s\fS, press %s to vote", game::colourname(d), server::gamename(mode, muts), text, votekey);
