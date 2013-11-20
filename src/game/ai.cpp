@@ -14,8 +14,10 @@ namespace ai
     VAR(0, aipassive, 0, 0, 1);
 
     VARF(0, showwaypoints, 0, 0, 1, if(showwaypoints) getwaypoints());
-    VAR(0, showwaypointsdrop, 0, 1, 1);
-    VAR(0, showwaypointsradius, 0, 256, VAR_MAX);
+
+    VAR(IDF_PERSIST, showwaypointsdrop, 0, 1, 1);
+    VAR(IDF_PERSIST, showwaypointsradius, 0, 256, VAR_MAX);
+    VAR(IDF_PERSIST|IDF_HEX, showwaypointscolour, 0, 0xFF00FF, 0xFFFFFF);
 
     VAR(IDF_PERSIST, aideadfade, 0, 10000, VAR_MAX);
     VAR(IDF_PERSIST, showaiinfo, 0, 0, 2); // 0/1 = shows/hides bot join/parts, 2 = show more verbose info
@@ -1771,7 +1773,7 @@ namespace ai
         if(showwaypoints || (dropwaypoints && showwaypointsdrop) || aidebug >= 7)
         {
             vector<int> close;
-            int len = waypoints.length();
+            int len = waypoints.length(), col = vec::hexcolor(showwaypointscolour).mul(0.5f).tohexcolor();
             if(showwaypointsradius)
             {
                 findwaypointswithin(camera1->o, 0, showwaypointsradius, close);
@@ -1781,7 +1783,7 @@ namespace ai
             {
                 int idx = showwaypointsradius ? close[i] : i;
                 waypoint &w = waypoints[idx];
-                if(!w.haslinks()) part_create(PART_EDIT, 1, w.o, 0xFFFF00, 1.f);
+                if(!w.haslinks()) part_create(PART_EDIT, 1, w.o, showwaypointscolour, 1.f);
                 else loopj(MAXWAYPOINTLINKS)
                 {
                      int link = w.links[j];
@@ -1789,7 +1791,7 @@ namespace ai
                      waypoint &v = waypoints[link];
                      bool both = false;
                      loopk(MAXWAYPOINTLINKS) if(v.links[k] == idx) { both = true; break; }
-                     part_trace(w.o, v.o, 1, 1, 1, both ? 0xAA44CC : 0x660088);
+                     part_trace(w.o, v.o, 1, 1, 1, both ? showwaypointscolour : col);
                 }
             }
             if(game::player1->state == CS_ALIVE && iswaypoint(game::player1->lastnode))
