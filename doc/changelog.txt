@@ -1,7 +1,7 @@
 The development version changelog is an ongoing work and should be reasonably
 complete covering changes made up to revision:
 
-6215 (11/15/13)
+6225 (11/20/13)
 
 If you update the changelog with changes made beyond this point, and consider
 it to resonably cover all previous changes, please update the above revision
@@ -81,6 +81,10 @@ Maps:
    - Insidious - new map by ballist1c
    - LongestYard2k - remix of LongestYard by John_III and ballist1c
    - Octavus - new map by Ricky Thomson
+ * Out of rotation
+   - Pumpstation
+   - Star Libido
+   - Echo
 
 Interface & Menus:
  * Added /spectvfollow for aiming camera to certain player whilst
