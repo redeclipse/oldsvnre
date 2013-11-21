@@ -1685,7 +1685,7 @@ namespace physics
         }
     }
 
-    bool droptofloor(vec &o, float radius, float height)
+    bool droptofloor(vec &o, int type, float radius, float height)
     {
         static struct dropent : physent
         {
@@ -1698,6 +1698,7 @@ namespace physics
             }
         } d;
         d.o = o;
+        d.type = type;
         if(!insideworld(d.o))
         {
             if(d.o.z < hdr.worldsize) return false;

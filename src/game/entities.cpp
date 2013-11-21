@@ -1164,7 +1164,7 @@ namespace entities
             switch(ents[ent]->type)
             {
                 case ACTOR: if(d->type == ENT_PLAYER) break;
-                case CHECKPOINT: physics::droptofloor(pos);
+                case CHECKPOINT: physics::droptofloor(pos, ENT_DUMMY);
                 case PLAYERSTART:
                     if(tryspawn(d, pos, ents[ent]->attrs[1], ents[ent]->attrs[2])) return;
                     break;
