@@ -1476,7 +1476,8 @@ namespace server
         {
             if(newlimit)
             {
-                if(limit) gamelimit += (limit-oldtimelimit)*60000;
+                if(limit && oldtimelimit) gamelimit += (limit-oldtimelimit)*60000;
+                else if(limit) gamelimit = max(gamemillis, limit*60000);
                 oldtimelimit = limit;
             }
             if(timeremaining)
