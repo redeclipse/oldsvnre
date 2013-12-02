@@ -36,7 +36,7 @@ namespace hud
 
     VAR(IDF_PERSIST, scorepj, 0, 0, 1);
     VAR(IDF_PERSIST, scoreping, 0, 1, 1);
-    VAR(IDF_PERSIST, scorepoints, 0, 1, 1);
+    VAR(IDF_PERSIST, scorepoints, 0, 1, 2);
     VAR(IDF_PERSIST, scoretimer, 0, 1, 2);
     VAR(IDF_PERSIST, scorelaps, 0, 1, 2);
     VAR(IDF_PERSIST, scorefrags, 0, 2, 2);
@@ -540,7 +540,7 @@ namespace hud
                                     }));
                                 });
 
-                                if(scorepoints)
+                                if(scorepoints >= (m_trial(game::gamemode) || m_gauntlet(game::gamemode) ? 2 : 1))
                                 {
                                     uilist(g, {
                                         uilist(g, {
@@ -584,7 +584,7 @@ namespace hud
                                     }
                                 }
 
-                                if(scorefrags && (scorefrags >= 2 || m_dm(game::gamemode)))
+                                if(scorefrags >= (!m_dm(game::gamemode) ? 2 : 1))
                                 {
                                     uilist(g, {
                                         uilist(g, {
@@ -598,7 +598,7 @@ namespace hud
                                     });
                                 }
 
-                                if(scoredeaths && (scoredeaths >= 2 || m_dm(game::gamemode)))
+                                if(scoredeaths >= (!m_dm(game::gamemode) ? 2 : 1))
                                 {
                                     uilist(g, {
                                         uilist(g, {
@@ -612,7 +612,7 @@ namespace hud
                                     });
                                 }
 
-                                if(scoreratios && (scoreratios >= 2 || m_dm(game::gamemode)))
+                                if(scoreratios >= (!m_dm(game::gamemode) ? 2 : 1))
                                 {
                                     uilist(g, {
                                         uilist(g, {
