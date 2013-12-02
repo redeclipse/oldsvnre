@@ -261,7 +261,7 @@ namespace server
     {
         uint ip;
         string name;
-        int points, score, frags, spree, rewards, timeplayed, deaths, shotdamage, damage;
+        int points, score, frags, spree, rewards, timeplayed, deaths, shotdamage, damage, cptime, cplaps;
         int warnings[WARN_MAX][2];
         vector<teamkill> teamkills;
         bool quarantine;
@@ -278,6 +278,8 @@ namespace server
             teamkills = gs.teamkills;
             shotdamage = gs.shotdamage;
             damage = gs.damage;
+            cptime = gs.cptime;
+            cplaps = gs.cplaps;
             loopi(WARN_MAX) loopj(2) warnings[i][j] = gs.warnings[i][j];
             quarantine = gs.quarantine;
         }
@@ -294,13 +296,15 @@ namespace server
             gs.teamkills = teamkills;
             gs.shotdamage = shotdamage;
             gs.damage = damage;
+            gs.cptime = cptime;
+            gs.cplaps = cplaps;
             loopi(WARN_MAX) loopj(2) gs.warnings[i][j] = warnings[i][j];
             gs.quarantine = quarantine;
         }
 
         void mapchange()
         {
-            points = frags = spree = rewards = deaths = shotdamage = damage = 0;
+            points = frags = spree = rewards = deaths = shotdamage = damage = cptime = cplaps = 0;
             teamkills.shrink(0);
         }
     };
