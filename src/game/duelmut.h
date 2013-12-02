@@ -161,6 +161,13 @@ struct duelservmode : servmode
         }
     }
 
+    void shrink()
+    {
+        allowed.shrink(0);
+        playing.shrink(0);
+        respawns.shrink(0);
+    }
+
     void clear()
     {
         duelcheck = dueldeath = -1;
@@ -188,20 +195,20 @@ struct duelservmode : servmode
             }
         }
         loopv(clients) queue(clients[i], false, !reset && clients[i]->state.state == CS_ALIVE, reset || G(duelreset) || clients[i]->state.state != CS_ALIVE);
-        allowed.shrink(0);
-        playing.shrink(0);
-        respawns.shrink(0);
+        shrink();
     }
 
     void update()
     {
-        if(!canplay() || numclients(-1, true, A_BOT) <= 1) return;
+        if(!canplay()) return;
         if(dueltime >= 0)
         {
             if(dueltime && ((dueltime -= curtime) <= 0)) dueltime = 0;
             if(!dueltime)
             {
+                shrink();
                 int wants = max(numteams(gamemode, mutators), 2);
+                loopv(clients) if(clients[i]->state.state != CS_SPECTATOR && clients[i]->state.state != CS_ALIVE) queue(clients[i], false);
                 loopv(duelqueue)
                 {
                     if(m_duel(gamemode, mutators) && playing.length() >= wants) break;
@@ -256,11 +263,7 @@ struct duelservmode : servmode
                     dueltime = dueldeath = -1;
                     duelcheck = gamemillis+5000;
                 }
-                else
-                {
-                    playing.shrink(0);
-                    allowed.shrink(0);
-                }
+                else shrink();
             }
         }
         else if(duelround > 0)
@@ -398,10 +401,8 @@ struct duelservmode : servmode
         duelround = duelwins = 0;
         duelwinner = -1;
         duelcheck = dueldeath = -1;
-        allowed.shrink(0);
-        playing.shrink(0);
+        shrink();
         duelqueue.shrink(0);
-        respawns.shrink(0);
     }
 } duelmutator;
 #endif
