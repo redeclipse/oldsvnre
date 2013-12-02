@@ -205,58 +205,62 @@ struct duelservmode : servmode
                 loopv(duelqueue)
                 {
                     if(m_duel(gamemode, mutators) && playing.length() >= wants) break;
-                    clientinfo *ci = duelqueue[i];
-                    if(!checkready(ci)) continue; // they are not ready yet.
-                    if(ci->state.state != CS_ALIVE)
+                    if(!checkready(duelqueue[i])) continue; // they are not ready yet.
+                    if(duelqueue[i]->state.state != CS_ALIVE)
                     {
-                        if(ci->state.state != CS_WAITING) waiting(ci, DROP_RESET);
+                        if(duelqueue[i]->state.state != CS_WAITING) waiting(duelqueue[i], DROP_RESET);
                         if(m_duel(gamemode, mutators) && m_team(gamemode, mutators))
                         {
                             bool skip = false;
-                            loopvj(playing) if(ci->team == playing[j]->team) { skip = true; break; }
+                            loopvj(playing) if(duelqueue[i]->team == playing[j]->team) { skip = true; break; }
                             if(skip) continue;
                         }
-                        if(allowed.find(ci) < 0) allowed.add(ci);
                     }
-                    else
-                    {
-                        ci->state.lastregen = gamemillis;
-                        ci->state.resetresidual();
-                        ci->state.health = m_health(gamemode, mutators, ci->state.model);
-                        ci->state.armour = m_armour(gamemode, mutators, ci->state.model);
-                        sendf(-1, 1, "ri5", N_REGEN, ci->clientnum, ci->state.health, ci->state.armour, 0); // amt = 0 regens impulse
-                    }
-                    playing.add(ci);
-                    if(m_affinity(gamemode)) respawns.add(ci);
+                    playing.add(duelqueue[i]);
                 }
-                loopv(playing) duelqueue.removeobj(playing[i]);
                 if(playing.length() >= wants)
                 {
                     if(smode) smode->layout();
                     mutate(smuts, mut->layout());
-                    loopv(duelqueue) position(duelqueue[i], i);
                     duelround++;
-                    string fight; fight[0] = 0;
+                    mkstring(fight);
                     if(m_duel(gamemode, mutators))
                     {
-                        string names; names[0] = 0;
-                        int cnt = min(wants, 4);
-                        loopi(cnt)
+                        mkstring(names);
+                        loopv(playing)
                         {
                             concatstring(names, colourname(playing[i]));
-                            if(i == cnt-1) break;
-                            else if(i == cnt-2) concatstring(names, " and ");
+                            if(i == wants-1) break;
+                            else if(i == wants-2) concatstring(names, " and ");
                             else concatstring(names, ", ");
                         }
                         formatstring(fight)("\fyduel between %s, round \fs\fr#%d\fS", names, duelround);
                     }
-                    else if(m_survivor(gamemode, mutators))
-                        formatstring(fight)("\fysurvivor, round \fs\fr#%d\fS", duelround);
+                    else if(m_survivor(gamemode, mutators)) formatstring(fight)("\fysurvivor, round \fs\fr#%d\fS", duelround);
+                    loopv(playing)
+                    {
+                        if(playing[i]->state.state == CS_ALIVE)
+                        {
+                            playing[i]->state.lastregen = gamemillis;
+                            playing[i]->state.resetresidual();
+                            playing[i]->state.health = m_health(gamemode, mutators, playing[i]->state.model);
+                            playing[i]->state.armour = m_armour(gamemode, mutators, playing[i]->state.model);
+                            sendf(-1, 1, "ri5", N_REGEN, playing[i]->clientnum, playing[i]->state.health, playing[i]->state.armour, 0); // amt = 0 regens impulse
+                        }
+                        else if(allowed.find(playing[i]) < 0) allowed.add(playing[i]);
+                        duelqueue.removeobj(playing[i]);
+                        if(m_affinity(gamemode)) respawns.add(playing[i]);
+                    }
+                    loopv(duelqueue) position(duelqueue[i], i);
                     ancmsgft(-1, S_V_FIGHT, CON_INFO, fight);
                     dueltime = dueldeath = -1;
                     duelcheck = gamemillis+5000;
                 }
-                else loopv(clients) if(playing.find(clients[i]) < 0) queue(clients[i], false);
+                else
+                {
+                    playing.shrink(0);
+                    allowed.shrink(0);
+                }
             }
         }
         else if(duelround > 0)
