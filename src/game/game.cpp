@@ -1878,7 +1878,7 @@ namespace game
                 int n = d->loadweap.find(items[i]);
                 d->loadweap[i] = n < 0 || n >= i ? items[i] : 0;
             }
-            client::addmsg(N_LOADW, "ri3v", d->clientnum, respawn ? 1 : 0, d->loadweap.length(), d->loadweap.length(), d->loadweap.getbuf());
+            client::addmsg(N_LOADW, "ri3v", d->clientnum, respawn && !m_duke(gamemode, mutators) ? 1 : 0, d->loadweap.length(), d->loadweap.length(), d->loadweap.getbuf());
             vector<char> value, msg;
             loopi(r)
             {
@@ -1899,7 +1899,11 @@ namespace game
             const char *msgstr = msg.getbuf(), *valstr = value.getbuf();
             if(valstr && *valstr) setsvar("favloadweaps", value.getbuf(), true);
             if(d == player1 && echo && msgstr && *msgstr)
+            {
                 conoutft(CON_SELF, "weapon selection is now: %s", msgstr);
+                if(respawn && m_duke(gamemode, mutators))
+                    conoutft(CON_SELF, "skipping request to respawn while playing %s", m_duel(gamemode, mutators) ? "duel" : "survivor");
+            }
         }
         else conoutft(CON_MESG, "\foweapon selection is not currently available");
     }
