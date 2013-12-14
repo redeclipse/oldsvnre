@@ -192,7 +192,7 @@ void purgemasterclient(int n)
 {
     masterclient &c = *masterclients[n];
     enet_socket_destroy(c.socket);
-    conoutf("master peer %s disconnected", c.name);
+    if(verbose) conoutf("master peer %s disconnected", c.name);
     delete masterclients[n];
     masterclients.remove(n);
 }
@@ -425,7 +425,7 @@ void checkmaster()
             c->lastactivity = totalmillis ? totalmillis : 1;
             masterclients.add(c);
             enet_address_get_host_ip(&c->address, c->name, sizeof(c->name));
-            conoutf("master peer %s connected", c->name);
+            if(verbose) conoutf("master peer %s connected", c->name);
         }
     }
 
