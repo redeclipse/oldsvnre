@@ -12,7 +12,7 @@
     $app['targets'] = array('home' => array('name' => '', 'url' => '/', 'alturl' => '', 'nav' => -1, 'redir' => 0));
 
     // nav items should be in reverse order for the top navbar 
-    $app['targets']['download'] = array('name' => 'Download', 'url' => 'http://sourceforge.net/p/redeclipse/files/'.$app['releasefile'].'/', 'alturl' => 'http://sourceforge.net/p/redeclipse/files/', 'nav' => 1, 'redir' => 1);
+    $app['targets']['download'] = array('name' => 'Download', 'url' => 'http://sourceforge.net/projects/redeclipse/files/'.$app['releasefile'].'/', 'alturl' => 'http://sourceforge.net/projects/redeclipse/files/', 'nav' => 1, 'redir' => 1);
     $app['targets']['tracker'] = array('name' => 'Tracker', 'url' => 'http://sourceforge.net/p/redeclipse/tickets/', 'alturl' => 'http://sourceforge.net/p/redeclipse/tickets/search/?q=', 'nav' => 1, 'redir' => 1);
     $app['targets']['chat'] = array('name' => 'Chat', 'url' => 'http://webchat.freenode.net/?channels=redeclipse', 'alturl' => '', 'nav' => 1, 'redir' => 1);
     $app['targets']['forum'] = array('name' => 'Forum', 'url' => 'http://forum.freegamedev.net/viewforum.php?f=53', 'alturl' => 'http://forum.freegamedev.net/viewforum.php?f=53&t=', 'nav' => 1, 'redir' => 1);

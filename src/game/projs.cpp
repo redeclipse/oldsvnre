@@ -695,9 +695,9 @@ namespace projs
             float yaw, pitch;
             vectoyawpitch(dir, yaw, pitch);
             if((yaw += 180) >= 360) yaw -= 360;
-            loopi(20) loopj(8) loopk(8)
+            loopi(10) loopj(8) loopk(8)
             {
-                proj.o.add(vec((int(yaw+k*45)%360)*RAD, j*45*RAD).mul(proj.radius*i/10.f));
+                proj.o.add(vec((int(yaw+k*45)%360)*RAD, j*45*RAD).mul(proj.radius*i));
                 if(insideworld(proj.o) && !collide(&proj, dir, 0, false))
                 {
                     if(rev) proj.vel = vec(proj.o).sub(orig).normalize().mul(max(max(proj.vel.magnitude()*proj.elasticity, 1.f), proj.minspeed));

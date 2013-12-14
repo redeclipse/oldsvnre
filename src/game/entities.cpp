@@ -638,7 +638,7 @@ namespace entities
                     {
                         int r = e.type == TELEPORT ? rnd(teleports.length()) : 0, q = teleports[r];
                         gameentity &f = *(gameentity *)ents[q];
-                        d->o = vec(f.o).add(projent::is(d) || f.attrs[5] >= 3 ? vec(orig).sub(e.o) : vec(0, 0, d->height*0.5f));
+                        d->o = vec(f.o).add(f.attrs[5] >= 3 ? vec(orig).sub(e.o) : vec(0, 0, d->height*0.5f));
                         float mag = max(vec(d->vel).add(d->falling).magnitude(), f.attrs[2] ? float(f.attrs[2]) : 50.f),
                               yaw = f.attrs[0] < 0 ? (lastmillis/5)%360 : f.attrs[0], pitch = f.attrs[1];
                         game::fixrange(yaw, pitch);
@@ -663,7 +663,7 @@ namespace entities
                         }
                         game::fixrange(d->yaw, d->pitch);
                         if(f.attrs[5] >= 6) d->vel = vec(d->yaw*RAD, d->pitch*RAD).mul(mag);
-                        if(physics::entinmap(d, true)) // entinmap first for getting position
+                        if(physics::entinmap(d, gameent::is(d))) // entinmap first for getting position
                         {
                             f.lastemit = lastmillis;
                             d->setused(n, lastmillis);
