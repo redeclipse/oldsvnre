@@ -216,6 +216,8 @@ void checkmasterpongs()
                 c.lastpong = totalmillis ? totalmillis : 1;
                 c.listserver = true;
                 c.shouldping = false;
+                masteroutf(c, "echo \"ping reply confirmed, server is now listed\"\n");
+                conoutf("master peer %s responded to ping request successfully",  c.name);
                 break;
             }
         }
@@ -387,7 +389,7 @@ void checkmaster()
             {
                 c.listserver = false;
                 c.shouldping = false;
-                masteroutf(c, "echo \"ping attempts failed, your server will not be listed\n");
+                masteroutf(c, "error \"ping attempts failed, server will not be listed\n");
             }
         }
         if(c.isserver && c.lastcontrol < controlversion)
