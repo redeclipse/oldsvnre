@@ -25,7 +25,7 @@ h4 { font: bold 21px Trebuchet MS, Arial, Helvetica, sans-serif; color: #FFFFFF;
 #footer a:hover { color: #FFFFFF; text-decoration: underline; }
 #copyright { font-size: 10px; color: #999999; margin: 0px; padding: 2px 0px 8px 20px; float: left; height: 32px; width: 960px; text-align: left; }
 #copyright p { margin: 0px; padding: 4px 0px 0px 0px; }
-#sflogo { margin: -2px 10px 10px 10px; float: right; padding: 10px; }
+#ftlogo { margin: -2px 10px 10px 10px; float: right; padding: 10px; }
 #video { background: url(/bits/sprite.png) no-repeat center -300px; margin: 0px; padding: 0 0 10px 0; float: left; width: 980px; }
 #video object { margin: 0px; padding: 0px; }
 #player { margin: 0px 20px 0px 0px; padding: 0px; float: right; height: 308px; width: 500px; }

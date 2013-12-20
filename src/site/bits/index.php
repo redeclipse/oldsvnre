@@ -22,8 +22,7 @@
     $app['targets']['project'] = array('name' => 'Project', 'url' => 'http://sourceforge.net/p/redeclipse/', 'alturl' => '', 'nav' => -1, 'redir' => 1);
     $app['targets']['svn'] = array('name' => 'SVN', 'url' => 'http://sourceforge.net/p/redeclipse/svn/', 'alturl' => 'http://sourceforge.net/p/redeclipse/svn/', 'nav' => -1, 'redir' => 1);
     $app['targets']['ticket'] = array('name' => 'Tickets', 'url' => 'http://sourceforge.net/p/redeclipse/tickets/', 'alturl' => 'http://sourceforge.net/p/redeclipse/tickets/', 'nav' => -1, 'redir' => 1);
-    $app['targets']['old'] = array('name' => 'OldSVN', 'url' => 'http://sourceforge.net/p/bloodfrontier/svn/', 'alturl' => 'http://sourceforge.net/p/bloodfrontier/svn/', 'nav' => -1, 'redir' => 1);
-    $app['targets']['repo'] = array('name' => 'Repo', 'url' => 'http://sourceforge.net/p/redeclipse/svn/HEAD/tree/', 'alturl' => 'http://sourceforge.net/p/redeclipse/svn/HEAD/tree/', 'nav' => -1, 'redir' => 1);
+    $app['targets']['repo'] = array('name' => 'Repo', 'url' => 'http://svn.icculus.org/redeclipse/', 'alturl' => 'http://svn.icculus.org/redeclipse/', 'nav' => -1, 'redir' => 1);
 
     $app['targets']['facebook'] = array('name' => 'Facebook', 'url' => 'http://www.facebook.com/redeclipse.net', 'nav' => 0, 'redir' => 1);
     $app['targets']['youtube'] = array('name' => 'Youtube', 'url' => 'http://www.youtube.com/results?search_query=%22Red%20Eclipse%22', 'alturl' => 'http://www.youtube.com/results?search_query=%22Red%20Eclipse%22+', 'nav' => 0, 'redir' => 1);
@@ -238,11 +237,6 @@
             </div>
             <div class="endrightblock">&nbsp;</div>
             <div id="footer">
-                <div id="sflogo">
-                    <a href="/project">
-                        <img src="http://sflogo.sourceforge.net/sflogo.php?group_id=326559&amp;type=8" alt="Get Red Eclipse at SourceForge" title="Get Red Eclipse at SourceForge" width="80" height="15" border="0" />
-                    </a>
-                </div>
                 <a href="/download">Download</a>, <a href="/chat">Chat</a>, <a href="/forum">Discuss</a>, <a href="/wiki">Learn More</a>, or <a href="/tracker">Report a Bug</a> today.
             </div>
             <div id="copyright" align="center">
