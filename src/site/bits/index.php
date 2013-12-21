@@ -34,7 +34,7 @@
     $app['targets']['chakra'] = array('name' => 'Chakra', 'url' => 'http://www.chakra-project.org/packages/index.php?act=search&subdir=&sortby=date&order=descending&searchpattern=redeclipse', 'nav' => -1, 'redir' => 1);
     $app['targets']['slackware'] = array('name' => 'Slackware', 'url' => 'http://slackbuilds.org/repository/14.0/games/redeclipse/', 'nav' => -1, 'redir' => 1);
     $app['targets']['gentoo'] = array('name' => 'Gentoo', 'url' => 'http://git.overlays.gentoo.org/gitweb/?p=proj/gamerlay.git;a=tree;f=games-fps/redeclipse;h=3487897cbfb5a353ed5dae6add04d888b6cf8ae7;hb=HEAD', 'nav' => -1, 'redir' => 1);
-    
+
     $app['platforms'] = array('windows' => 0, 'linux' => 0, 'macosx' => 0, 'arch' => 1, 'chakra' => 1, 'slackware' => 1, 'gentoo' => 1);
 
     $app['targets']['apply'] = array('name' => 'Apply', 'url' => 'http://docs.google.com/forms/d/1ZuvNFCIivYY_b5YLpCa_pnsbdR4oRdPplIkcbBexCDU/viewform', 'nav' => -1, 'redir' => 1);
@@ -197,7 +197,7 @@
                                 $c = false;
                             }
                             $k = $i < 10 ? "00".$i."" : "0".$i."";
-                            echo "<a href=\"/bits/images/".$k.".jpg\"><img src=\"/bits/thumbs/".$k.".jpg\" width=\"184\" height=\"138\" border=\"0\" alt=\"Screenshot ".$k."\" /></a>";
+                            echo "<a href=\"/bits/images/".$k.".jpg\"><img src=\"/bits/thumbs/".$k.".jpg\" width=\"180\" height=\"102\" border=\"0\" alt=\"Screenshot ".$k."\" /></a>";
                             if ($j == 4) {
                                 echo "</li>";
                                 $c = true;
@@ -221,19 +221,6 @@
             <div class="rightblock">
                 <h4>Support Us</h4>
                 <p id="donatemsg">Red Eclipse is developed by volunteers, and you get it free of charge; your contributions keep this project alive. You're encouraged to get involved with the community and help evolve the game.</p>
-            </div>
-            <div class="endrightblock">&nbsp;</div>
-            <div class="rightblock">
-                <ul>
-<?php               foreach ($app['targets'] as $key => $targ) {
-                        if ($key != "" && $targ['name'] != "" && $targ['nav'] == 0) {
-                            echo "<li><a href=\"/". $key ."\" class='info'><span id=\"". $key ."\">&nbsp;</span><span class=\"bubble\">on ". $targ['name'] ."</span></a></li>";
-                        }
-                    } ?>
-                </ul>
-				<div class="fb-like" data-href="http://www.redeclipse.net/" data-send="true" data-layout="button_count" data-width="132" data-show-faces="true" data-colorscheme="dark"></div>
-				<a href="https://twitter.com/share" class="twitter-share-button" data-lang="en">Tweet</a><br/>
-				<g:plusone size="medium" annotation="bubble" width="90"></g:plusone>
             </div>
             <div class="endrightblock">&nbsp;</div>
             <div id="footer">
