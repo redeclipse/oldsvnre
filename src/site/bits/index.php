@@ -16,7 +16,7 @@
     $app['targets']['tracker'] = array('name' => 'Tracker', 'url' => 'http://sourceforge.net/p/redeclipse/tickets/', 'alturl' => 'http://sourceforge.net/p/redeclipse/tickets/search/?q=', 'nav' => 1, 'redir' => 1);
     $app['targets']['chat'] = array('name' => 'Chat', 'url' => 'http://webchat.freenode.net/?channels=redeclipse', 'alturl' => '', 'nav' => 1, 'redir' => 1);
     $app['targets']['forum'] = array('name' => 'Forum', 'url' => 'http://forum.freegamedev.net/viewforum.php?f=53', 'alturl' => 'http://forum.freegamedev.net/viewforum.php?f=53&t=', 'nav' => 1, 'redir' => 1);
-    $app['targets']['wiki'] = array('name' => 'Wiki', 'url' => 'http://sourceforge.net/apps/mediawiki/redeclipse/index.php?title=Main_Page', 'alturl' => 'http://sourceforge.net/apps/mediawiki/redeclipse/index.php?title=', 'nav' => 1, 'redir' => 1);
+    $app['targets']['wiki'] = array('name' => 'Wiki', 'url' => 'http://redeclipse.net/wiki/', 'alturl' => 'http://redeclipse.net/wiki/', 'nav' => 1, 'redir' => 1);
     $app['targets']['servers'] = array('name' => 'Servers', 'url' => 'http://redflare.ofthings.net/', 'alturl' => 'http://redflare.ofthings.net/', 'nav' => 1, 'redir' => 1);
 
     $app['targets']['project'] = array('name' => 'Project', 'url' => 'http://sourceforge.net/p/redeclipse/', 'alturl' => '', 'nav' => -1, 'redir' => 1);
@@ -38,11 +38,11 @@
     $app['platforms'] = array('windows' => 0, 'linux' => 0, 'macosx' => 0, 'arch' => 1, 'chakra' => 1, 'slackware' => 1, 'gentoo' => 1);
 
     $app['targets']['apply'] = array('name' => 'Apply', 'url' => 'http://docs.google.com/forms/d/1ZuvNFCIivYY_b5YLpCa_pnsbdR4oRdPplIkcbBexCDU/viewform', 'nav' => -1, 'redir' => 1);
-    $app['targets']['guidelines'] = array('name' => 'Guidelines', 'url' => 'http://sourceforge.net/apps/mediawiki/redeclipse/index.php?title=Multiplayer_Guidelines', 'nav' => -1, 'redir' => 1);
-    $app['targets']['faq'] = array('name' => 'FAQ', 'url' => 'http://sourceforge.net/apps/mediawiki/redeclipse/index.php?title=FAQ_for_Red_Eclipse', 'nav' => -1, 'redir' => 1);
-    $app['targets']['trademark'] = array('name' => 'Trademark', 'url' => 'http://sourceforge.net/apps/mediawiki/redeclipse/index.php?title=Trademark_Policy', 'nav' => -1, 'redir' => 1);
-    $app['targets']['install'] = array('name' => 'Install', 'url' => 'http://sourceforge.net/apps/mediawiki/redeclipse/index.php?title=How_to_install', 'nav' => -1, 'redir' => 1);
-    $app['targets']['devel'] = array('name' => 'Devel', 'url' => 'http://sourceforge.net/apps/mediawiki/redeclipse/index.php?title=Obtain_development_version', 'nav' => -1, 'redir' => 1);
+    $app['targets']['guidelines'] = array('name' => 'Guidelines', 'url' => 'http://redeclipse.net/wiki/Multiplayer_Guidelines', 'nav' => -1, 'redir' => 1);
+    $app['targets']['faq'] = array('name' => 'FAQ', 'url' => 'http://redeclipse.net/wiki/FAQ_for_Red_Eclipse', 'nav' => -1, 'redir' => 1);
+    $app['targets']['trademark'] = array('name' => 'Trademark', 'url' => 'http://redeclipse.net/wiki/Trademark_Policy', 'nav' => -1, 'redir' => 1);
+    $app['targets']['install'] = array('name' => 'Install', 'url' => 'http://redeclipse.net/wiki/How_to_install', 'nav' => -1, 'redir' => 1);
+    $app['targets']['devel'] = array('name' => 'Devel', 'url' => 'http://redeclipse.net/wiki/Obtain_development_version', 'nav' => -1, 'redir' => 1);
     $app['targets']['license'] = array('name' => 'License', 'url' => 'http://sourceforge.net/p/redeclipse/svn/HEAD/tree/license.txt', 'nav' => -1, 'redir' => 1);
     $app['targets']['readme'] = array('name' => 'Credits', 'url' => 'http://sourceforge.net/p/redeclipse/svn/HEAD/tree/readme.txt', 'nav' => -1, 'redir' => 1);
 
