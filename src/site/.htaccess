@@ -1,18 +1,18 @@
-RewriteEngine On
-Options +FollowSymLinks -Multiviews
+#php5_value upload_max_filesize 8M
+#php5_value post_max_size 8M
 
 RewriteEngine on
-RewriteCond %{HTTP_HOST} ^redeclipse.sourceforge.net$ [OR,NC]
-RewriteCond %{HTTP_HOST} ^redeclipse.net$
-RewriteRule ^(.*)$ http://www.redeclipse.net/$1 [R=301,L,NC]
+RewriteCond %{HTTP_HOST} ^www.redeclipse.net$ [OR,NC]
+RewriteCond %{HTTP_HOST} ^play.redeclipse.net$
+RewriteRule ^(.*)$ http://redeclipse.net/$1 [R=301,L,NC]
 
-RewriteRule ^(servers|wiki|forum|chat|svn|old|devel|tracker|ticket|repo|donate|project|google|facebook|youtube|desura|aur|chakra|guidelines|faq|trademark|license|readme)/(.+)$ /bits/index.php?target=$1&title=$2 [QSA,L,NC]
-RewriteRule ^(servers|wiki|forum|download|chat|svn|old|devel|tracker|repo|ticket|donate|project|google|facebook|youtube|desura|aur|chakra|guidelines|faq|trademark|license|readme)$ /bits/index.php?target=$1 [QSA,L,NC]
+RewriteRule ^/?wiki(/.*)?$ %{DOCUMENT_ROOT}/mediawiki/index.php [QSA,L,NC]
+
+RewriteRule ^(servers|forum|chat|svn|old|devel|tracker|ticket|repo|donate|project|google|facebook|youtube|desura|aur|chakra|guidelines|faq|trademark|license|readme)/(.+)$ /bits/index.php?target=$1&title=$2 [QSA,L,NC]
+RewriteRule ^(servers|forum|download|chat|svn|old|devel|tracker|repo|ticket|donate|project|google|facebook|youtube|desura|aur|chakra|guidelines|faq|trademark|license|readme)$ /bits/index.php?target=$1 [QSA,L,NC]
 RewriteRule ^(home)$ /bits/index.php?target=$1 [QSA,L,NC]
 RewriteRule ^(irc)$ /bits/index.php?target=chat [QSA,L,NC]
 RewriteRule ^(forums)$ /bits/index.php?target=forum [QSA,L,NC]
-RewriteRule ^(files)/(.+)$ /bits/index.php?target=repo&title=$2 [QSA,L,NC]
-RewriteRule ^(files)$ /bits/index.php?target=repo [QSA,L,NC]
 
 RewriteRule ^favicon.ico$ /bits/favicon.ico [QSA,L,NC]
 RewriteRule ^$ /bits/index.php [QSA,L,NC]
