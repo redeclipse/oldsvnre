@@ -72,8 +72,6 @@ void setupmaster()
         if(enet_socket_set_option(mastersocket, ENET_SOCKOPT_NONBLOCK, 1) < 0) fatal("failed to make master server socket non-blocking");
         if(!setuppingsocket(&address)) fatal("failed to create ping socket");
         starttime = clocktime;
-        char *ct = ctime(&starttime);
-        if(strchr(ct, '\n')) *strchr(ct, '\n') = '\0';
         conoutf("master server started on %s:[%d]", *masterip ? masterip : "localhost", masterport);
     }
 }
