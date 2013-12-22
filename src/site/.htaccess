@@ -1,5 +1,7 @@
-#php5_value upload_max_filesize 8M
-#php5_value post_max_size 8M
+Options -Indexes
+
+php_value upload_max_filesize 8M
+php_value post_max_size 8M
 
 RewriteEngine on
 RewriteCond %{HTTP_HOST} ^www.redeclipse.net$ [OR,NC]
@@ -8,8 +10,8 @@ RewriteRule ^(.*)$ http://redeclipse.net/$1 [R=301,L,NC]
 
 RewriteRule ^/?wiki(/.*)?$ %{DOCUMENT_ROOT}/mediawiki/index.php [QSA,L,NC]
 
-RewriteRule ^(servers|forum|chat|svn|old|devel|tracker|ticket|repo|donate|project|google|facebook|youtube|desura|aur|chakra|guidelines|faq|trademark|license|readme)/(.+)$ /bits/index.php?target=$1&title=$2 [QSA,L,NC]
-RewriteRule ^(servers|forum|download|chat|svn|old|devel|tracker|repo|ticket|donate|project|google|facebook|youtube|desura|aur|chakra|guidelines|faq|trademark|license|readme)$ /bits/index.php?target=$1 [QSA,L,NC]
+RewriteRule ^(servers|forum|chat|svn|old|devel|tracker|ticket|repo|donate|project|google|facebook|youtube|desura|aur|chakra|guidelines|faq|trademark|license|readme|apply)/(.+)$ /bits/index.php?target=$1&title=$2 [QSA,L,NC]
+RewriteRule ^(servers|forum|download|chat|svn|old|devel|tracker|repo|ticket|donate|project|google|facebook|youtube|desura|aur|chakra|guidelines|faq|trademark|license|readme|apply)$ /bits/index.php?target=$1 [QSA,L,NC]
 RewriteRule ^(home)$ /bits/index.php?target=$1 [QSA,L,NC]
 RewriteRule ^(irc)$ /bits/index.php?target=chat [QSA,L,NC]
 RewriteRule ^(forums)$ /bits/index.php?target=forum [QSA,L,NC]
