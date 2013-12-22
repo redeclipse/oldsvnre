@@ -134,15 +134,9 @@ void reqauth(masterclient &c, uint id, char *name)
 {
     purgeauths(c);
 
-    char *ct = ctime(&clocktime);
-    if(ct)
-    {
-        char *newline = strchr(ct, '\n');
-        if(newline) *newline = '\0';
-    }
     string ip;
     if(enet_address_get_host_ip(&c.address, ip, sizeof(ip)) < 0) copystring(ip, "-");
-    conoutf("%s: attempting \"%s\" as %u from %s\n", ct ? ct : "-", name, id, ip);
+    conoutf("attempting \"%s\" as %u from %s\n", name, id, ip);
 
     authuser *u = authusers.access(name);
     if(!u)
