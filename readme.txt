@@ -36,21 +36,12 @@ directly. We try to maintain a standard of friendly behaviour in our
 community, so don't be afraid to speak up and have your say in building this
 game for us all :)
 
-= Support Us =
-
-Red Eclipse is developed by volunteers, and you get it free of charge; your
-donations go toward ongoing costs which keep this project alive.
-
-Donate: http://www.redeclipse.net/donate
-
 = Get Involved =
 
 You're encouraged to help the project by joining in with the rest of the
 community to make a better project! You can do this by participating
 in our Community, or using the SVN (Subversion) repository, and reporting
-any issues, ideas, suggestions, or comments you might have. If you are
-feeling particularly generous, you can donate and help support our
-development efforts!
+any issues, ideas, suggestions, or comments you might have.
 
 We chat via IRC in the channel #redeclipse on irc.freenode.net,
 if you don't have an IRC client you can use http://www.redeclipse.net/chat
