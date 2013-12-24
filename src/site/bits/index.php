@@ -13,16 +13,13 @@
 
     // nav items should be in reverse order for the top navbar 
     $app['targets']['download'] = array('name' => 'Download', 'url' => 'http://sourceforge.net/projects/redeclipse/files/'.$app['releasefile'].'/', 'alturl' => 'http://sourceforge.net/projects/redeclipse/files/', 'nav' => 1, 'redir' => 1);
-    $app['targets']['tracker'] = array('name' => 'Tracker', 'url' => 'http://sourceforge.net/p/redeclipse/tickets/', 'alturl' => 'http://sourceforge.net/p/redeclipse/tickets/search/?q=', 'nav' => 1, 'redir' => 1);
+    //$app['targets']['tracker'] = array('name' => 'Tracker', 'url' => 'http://redeclipse.net/trac/', 'alturl' => 'http://redeclipse.net/trac/', 'nav' => 1, 'redir' => 1);
     $app['targets']['chat'] = array('name' => 'Chat', 'url' => 'http://webchat.freenode.net/?channels=redeclipse', 'alturl' => '', 'nav' => 1, 'redir' => 1);
     $app['targets']['forum'] = array('name' => 'Forum', 'url' => 'http://forum.freegamedev.net/viewforum.php?f=53', 'alturl' => 'http://forum.freegamedev.net/viewforum.php?f=53&t=', 'nav' => 1, 'redir' => 1);
     $app['targets']['wiki'] = array('name' => 'Wiki', 'url' => 'http://redeclipse.net/wiki/', 'alturl' => 'http://redeclipse.net/wiki/', 'nav' => 1, 'redir' => 1);
     $app['targets']['servers'] = array('name' => 'Servers', 'url' => 'http://redflare.ofthings.net/', 'alturl' => 'http://redflare.ofthings.net/', 'nav' => 1, 'redir' => 1);
-
-    $app['targets']['project'] = array('name' => 'Project', 'url' => 'http://sourceforge.net/p/redeclipse/', 'alturl' => '', 'nav' => -1, 'redir' => 1);
-    $app['targets']['svn'] = array('name' => 'SVN', 'url' => 'http://sourceforge.net/p/redeclipse/svn/', 'alturl' => 'http://sourceforge.net/p/redeclipse/svn/', 'nav' => -1, 'redir' => 1);
-    $app['targets']['ticket'] = array('name' => 'Tickets', 'url' => 'http://sourceforge.net/p/redeclipse/tickets/', 'alturl' => 'http://sourceforge.net/p/redeclipse/tickets/', 'nav' => -1, 'redir' => 1);
-    $app['targets']['repo'] = array('name' => 'Repo', 'url' => 'http://svn.icculus.org/redeclipse/', 'alturl' => 'http://svn.icculus.org/redeclipse/', 'nav' => -1, 'redir' => 1);
+    //$app['targets']['ticket'] = array('name' => 'Tickets', 'url' => 'http://redeclipse.net/trac/tickets/', 'alturl' => 'http://redeclipse.net/trac/tickets/', 'nav' => -1, 'redir' => 1);
+    $app['targets']['svn'] = array('name' => 'SVN', 'url' => 'http://svn.icculus.org/redeclipse/', 'alturl' => 'http://svn.icculus.org/redeclipse/', 'nav' => -1, 'redir' => 1);
 
     $app['targets']['facebook'] = array('name' => 'Facebook', 'url' => 'http://www.facebook.com/redeclipse.net', 'nav' => 0, 'redir' => 1);
     $app['targets']['youtube'] = array('name' => 'Youtube', 'url' => 'http://www.youtube.com/results?search_query=%22Red%20Eclipse%22', 'alturl' => 'http://www.youtube.com/results?search_query=%22Red%20Eclipse%22+', 'nav' => 0, 'redir' => 1);
@@ -43,8 +40,8 @@
     $app['targets']['trademark'] = array('name' => 'Trademark', 'url' => 'http://redeclipse.net/wiki/Trademark_Policy', 'nav' => -1, 'redir' => 1);
     $app['targets']['install'] = array('name' => 'Install', 'url' => 'http://redeclipse.net/wiki/How_to_install', 'nav' => -1, 'redir' => 1);
     $app['targets']['devel'] = array('name' => 'Devel', 'url' => 'http://redeclipse.net/wiki/Obtain_development_version', 'nav' => -1, 'redir' => 1);
-    $app['targets']['license'] = array('name' => 'License', 'url' => 'http://sourceforge.net/p/redeclipse/svn/HEAD/tree/license.txt', 'nav' => -1, 'redir' => 1);
-    $app['targets']['readme'] = array('name' => 'Credits', 'url' => 'http://sourceforge.net/p/redeclipse/svn/HEAD/tree/readme.txt', 'nav' => -1, 'redir' => 1);
+    $app['targets']['license'] = array('name' => 'License', 'url' => 'http://redeclipse.net/wiki/License', 'nav' => -1, 'redir' => 1);
+    $app['targets']['readme'] = array('name' => 'Readme', 'url' => 'http://redeclipse.net/wiki/Readme', 'nav' => -1, 'redir' => 1);
 
     function checkarg($arg = "", $def = "") {
         return isset($_GET[$arg]) && $_GET[$arg] != "" ? $_GET[$arg] : $def;
