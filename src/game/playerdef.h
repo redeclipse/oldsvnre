@@ -1,6 +1,6 @@
 #ifdef MEK
 #ifdef GAMESERVER
-    #define PPVAR(flags, name, mn, mx, w00, w01, w02, w03, w04) \
+    #define PPVAR(flags, name, mn, mx, w00, w01, w02, w03) \
         GVAR(flags, mek1##name, mn, w00, mx); \
         GVAR(flags, mek2##name, mn, w01, mx); \
         GVAR(flags, mek3##name, mn, w02, mx); \
@@ -12,7 +12,7 @@
             &sv_mek4##name \
         };
 
-    #define PPFVAR(flags, name, mn, mx, w00, w01, w02, w03, w04) \
+    #define PPFVAR(flags, name, mn, mx, w00, w01, w02, w03) \
         GFVAR(flags, mek1##name, mn, w00, mx); \
         GFVAR(flags, mek2##name, mn, w01, mx); \
         GFVAR(flags, mek3##name, mn, w02, mx); \
@@ -24,7 +24,7 @@
             &sv_mek4##name \
         };
 
-    #define PPSVAR(flags, name, w00, w01, w02, w03, w04) \
+    #define PPSVAR(flags, name, w00, w01, w02, w03) \
         GSVAR(flags, mek1##name, w00); \
         GSVAR(flags, mek2##name, w01); \
         GSVAR(flags, mek3##name, w02); \
@@ -40,7 +40,7 @@
     #define PLAYERSTR(a,actor,attr)    defformatstring(a)("sv_%s%s", playertypes[actor][4], #attr)
 #else
 #ifdef GAMEWORLD
-    #define PPVAR(flags, name, mn, mx, w00, w01, w02, w03, w04) \
+    #define PPVAR(flags, name, mn, mx, w00, w01, w02, w03) \
         GVAR(flags, mek1##name, mn, w00, mx); \
         GVAR(flags, mek2##name, mn, w01, mx); \
         GVAR(flags, mek3##name, mn, w02, mx); \
@@ -52,7 +52,7 @@
             &mek4##name \
         };
 
-    #define PPFVAR(flags, name, mn, mx, w00, w01, w02, w03, w04) \
+    #define PPFVAR(flags, name, mn, mx, w00, w01, w02, w03) \
         GFVAR(flags, mek1##name, mn, w00, mx); \
         GFVAR(flags, mek2##name, mn, w01, mx); \
         GFVAR(flags, mek3##name, mn, w02, mx); \
@@ -64,7 +64,7 @@
             &mek4##name \
         };
 
-    #define PPSVAR(flags, name, w00, w01, w02, w03, w04) \
+    #define PPSVAR(flags, name, w00, w01, w02, w03) \
         GSVAR(flags, mek1##name, w00); \
         GSVAR(flags, mek2##name, w01); \
         GSVAR(flags, mek3##name, w02); \
@@ -76,19 +76,19 @@
             &mek4##name \
         };
 #else
-    #define PPVAR(flags, name, mn, mx, w00, w01, w02, w03, w04) \
+    #define PPVAR(flags, name, mn, mx, w00, w01, w02, w03) \
         GVAR(flags, mek1##name, mn, w00, mx); \
         GVAR(flags, mek2##name, mn, w01, mx); \
         GVAR(flags, mek3##name, mn, w02, mx); \
         GVAR(flags, mek4##name, mn, w03, mx); \
         extern int *actor_stat_##name[];
-    #define PPFVAR(flags, name, mn, mx, w00, w01, w02, w03, w04) \
+    #define PPFVAR(flags, name, mn, mx, w00, w01, w02, w03) \
         GFVAR(flags, mek1##name, mn, w00, mx); \
         GFVAR(flags, mek2##name, mn, w01, mx); \
         GFVAR(flags, mek3##name, mn, w02, mx); \
         GFVAR(flags, mek4##name, mn, w03, mx); \
         extern float *actor_stat_##name[];
-    #define PPSVAR(flags, name, w00, w01, w02, w03, w04) \
+    #define PPSVAR(flags, name, w00, w01, w02, w03) \
         GSVAR(flags, mek1##name, w00); \
         GSVAR(flags, mek2##name, w01); \
         GSVAR(flags, mek3##name, w02); \
