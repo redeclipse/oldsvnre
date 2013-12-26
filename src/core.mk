@@ -242,6 +242,7 @@ all: client server
 
 include system-install.mk
 include dist.mk
+include wiki.mk
 
 engine/engine.h.gch: shared/cube.h.gch
 
