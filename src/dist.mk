@@ -388,7 +388,7 @@ wiki-commands: ../doc/wiki-commands.txt
 
 wiki-aliases: ../doc/wiki-aliases.txt
 
-wiki-all: ../doc/wiki-all-vars-commands.txt $(wiki-weapon-pages) ../doc/wiki-non-weapons.txt ../doc/wiki-client-and-admin.txt ../doc/wiki-textures.txt ../doc/wiki-world.txt ../doc/wiki-commands.txt ../doc/wiki-aliases.txt
+wiki-all: ../doc/wiki-all-vars-commands.txt $(weapon-wiki-pages) ../doc/wiki-non-weapons.txt ../doc/wiki-client-and-admin.txt ../doc/wiki-textures.txt ../doc/wiki-world.txt ../doc/wiki-commands.txt ../doc/wiki-aliases.txt
 
 wiki-clean:
 	rm -f ../doc/varsinfo-*.txt ../doc/wiki-*.txt
