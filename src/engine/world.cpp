@@ -341,17 +341,20 @@ void makeundoent()
 // e         entity, currently edited ent
 // n         int,   index to currently edited ent
 #define addimplicit(f)  { if(entgroup.empty() && enthover>=0) { entadd(enthover); undonext = (enthover != oldhover); f; entgroup.drop(); } else f; }
-#define entedit(i, f) \
+#define enteditv(i, f, v) \
 { \
-    entfocus(i, \
-    removeentity(n);  \
-    f; \
-    if(e.type!=ET_EMPTY) { addentity(n); } \
-    entities::editent(n)); \
+    entfocusv(i, \
+    { \
+        removeentity(n);  \
+        f; \
+        if(e.type!=ET_EMPTY) { addentity(n); } \
+        entities::editent(n); \
+    }, v); \
 }
-#define addgroup(exp)   { loopv(entities::getents()) entfocus(i, if(exp) entadd(n)); }
+#define entedit(i, f)   enteditv(i, f, entities::getents())
+#define addgroup(exp)   { vector<extentity *> &ents = entities::getents(); loopv(ents) entfocusv(i, if(exp) entadd(n), ents); }
 #define setgroup(exp)   { entcancel(); addgroup(exp); }
-#define groupeditloop(f){ entlooplevel++; int _ = efocus; loopv(entgroup) entedit(entgroup[i], f); efocus = _; entlooplevel--; }
+#define groupeditloop(f){ vector<extentity *> &ents = entities::getents(); entlooplevel++; int _ = efocus; loopv(entgroup) enteditv(entgroup[i], f, ents); efocus = _; entlooplevel--; }
 #define groupeditpure(f){ if(entlooplevel>0) { entedit(efocus, f); } else groupeditloop(f); }
 #define groupeditundo(f){ makeundoent(); groupeditpure(f); }
 #define groupedit(f)    { addimplicit(groupeditundo(f)); }
