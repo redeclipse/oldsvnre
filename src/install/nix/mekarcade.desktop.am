@@ -7,3 +7,4 @@ Comment=Meka shooter built on Red Eclipse set in the 34th century that aims to e
 Icon="@APPNAME@"
 Exec="@APPNAME@"
 Categories=Game;ActionGame;
+Keywords=fps,action,multiplayer,play,mech,mapeditor
