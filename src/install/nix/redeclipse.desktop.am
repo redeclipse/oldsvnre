@@ -23,3 +23,4 @@ Comment[sv]=Förstapersonsskjutare med rörlig spelstil och inbyggd baneditor.
 Icon=@APPNAME@
 Exec=@APPNAME@
 Categories=Game;ActionGame;
+Keywords=fps,action,multiplayer,play,arena,mapeditor
