@@ -34,9 +34,9 @@ number.
 Gameplay:
  * Ragdolls now twitch when they're under the influence of shock residual
  * Show player distance when fragged
- * Added /playerhint variable to make players have a team colored glow 
+ * Added /playerhint variable to make players have a team colored glow
    over them to make it more clear to which team they belong
- * Improved AI for CTF and DAC games more evasive when endangered
+ * Improved AI for CTF and DAC games, making bots more evasive when endangered
  * Better physics and bounce sounds for affinities
  * Footstep sounds
  * Fixed spawn queue in Time-Trial
@@ -49,7 +49,7 @@ Weapons:
  * Decrease pistol firing rate to disable benefits of auto-fire scripts
  * Rifle has faster reload time, slightly increased wavepush,
    slightly higher delay between shots
- * Flamer has higher ammo capacity, secondary fire changed to airblast, 
+ * Flamer has higher ammo capacity, secondary fire changed to airblast,
    used to damage enemies and put out teammates that are on fire
  * Grenades have smaller explode radius, back to v1.3 behaviour
  * Ability to cancel a cook event (e.g. grenades) by pressing reload
@@ -114,7 +114,7 @@ Modding & Mapmaking:
  * Cubescript commands for retrieving entity information
  * 0 + mousewheel = entproperty 9
  * Ability to read the color of the pixel under crosshair by pressing "\"
- 
+
 Data Assets:
  * New vanity items
    - Stratocaster
@@ -140,7 +140,7 @@ Multiplayer & Servers:
    to prevent other players impersonating you,
    see http://forum.freegamedev.net/viewtopic.php?f=72&t=4340
  * Pause server sorting while hovering over items in the server list
- * Added a "server type" field to the maps menu when offline to change 
+ * Added a "server type" field to the maps menu when offline to change
    servertype to simplify setting up local games
  * Players will have to accept guidelines before playing online
 
@@ -157,7 +157,7 @@ Additional noteworthy fixed bugs:
  * #510 - server dependency on data
  * #520 - Start menu icon has the wrong .exe selected
  * #524 - redeclipse.net shortlink for files on trac
- * #540 - On maps with too little goals for bomber-ball 
+ * #540 - On maps with too little goals for bomber-ball
           switching to hold fails when touchdown is selected
  * #545 - Time-trial "dnf" ranks ahead of any completed time in final standings
  * #549 - Allow remaining time to be shown on HUD
@@ -175,7 +175,7 @@ Additional noteworthy fixed bugs:
  * #590 - Sort players in player list by scoreboard standings
  * #591 - Time overlays time in time-trial
  * #597 - Recently played or out-of-rotation maps cannot be voted
- * #599 - Multiple teamkill adjustments by the same player in the same match 
+ * #599 - Multiple teamkill adjustments by the same player in the same match
           are overcompensated
  * #601 - Plasma particle spawns too close to screen
  * #610 - Spectate in time-trial without losing checkpoints
