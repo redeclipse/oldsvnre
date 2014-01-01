@@ -13,7 +13,7 @@
 
     // nav items should be in reverse order for the top navbar 
     $app['targets']['download'] = array('name' => 'Download', 'url' => 'http://sourceforge.net/projects/redeclipse/files/'.$app['releasefile'].'/', 'alturl' => 'http://sourceforge.net/projects/redeclipse/files/', 'nav' => 1, 'redir' => 1);
-    //$app['targets']['tracker'] = array('name' => 'Tracker', 'url' => 'http://redeclipse.net/trac/', 'alturl' => 'http://redeclipse.net/trac/', 'nav' => 1, 'redir' => 1);
+    $app['targets']['tracker'] = array('name' => 'Tracker', 'url' => 'http://forum.freegamedev.net/viewtopic.php?f=74&t=5192', 'alturl' => 'http://forum.freegamedev.net/viewtopic.php?f=74&t=5192', 'nav' => 1, 'redir' => 1);
     $app['targets']['chat'] = array('name' => 'Chat', 'url' => 'http://webchat.freenode.net/?channels=redeclipse', 'alturl' => '', 'nav' => 1, 'redir' => 1);
     $app['targets']['forum'] = array('name' => 'Forum', 'url' => 'http://forum.freegamedev.net/viewforum.php?f=53', 'alturl' => 'http://forum.freegamedev.net/viewforum.php?f=53&t=', 'nav' => 1, 'redir' => 1);
     $app['targets']['wiki'] = array('name' => 'Wiki', 'url' => 'http://redeclipse.net/wiki/', 'alturl' => 'http://redeclipse.net/wiki/', 'nav' => 1, 'redir' => 1);
