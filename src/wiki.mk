@@ -11,6 +11,30 @@ wiki-contributors: ../doc/wiki-contributors.txt
 
 wiki-guidelines: ../doc/wiki-guidelines.txt
 
+../doc/wiki-manpage-%.txt: ../doc/man/%.am
+	# first substitute all placeholders via sed
+	# then convert to mediawiki syntax in two steps
+	# then via sed remove the "Content-type" header
+	# and remove the end links from the "Section" header
+	# and remove some separators and stray single-chars
+	# and remove some unneeded parts of the tail end
+	# then squeeze all multiple empty lines
+	sed -e 's,@LIBEXECDIR@,$(patsubst $(DESTDIR)%,%,$(libexecdir)),g' \
+		-e 's,@DATADIR@,$(patsubst $(DESTDIR)%,%,$(datadir)),g' \
+		-e 's,@DOCDIR@,$(patsubst $(DESTDIR)%,%,$(docdir)),g' \
+		-e 's,@APPNAME@,$(appname),g' \
+		-e 's,@CAPPNAME@,$(cappname),g' $< | \
+		man2html | \
+		pandoc -f html -t mediawiki | \
+		sed -e '1,2d' \
+			-e 's/\(^Section:[^[]*\).*/\1/' \
+			-e '/-----/d' \
+			-e '/^.$$/d' \
+			-e '/== SEE ALSO ==/,$$d' | \
+		cat -s > $@
+
+wiki-manpages: ../doc/wiki-manpage-$(APPNAME).6.txt ../doc/wiki-manpage-$(APPNAME)-server.6.txt
+
 ../doc/varsinfo-all.txt: install-client
 	RE_TEMPHOME="$$(mktemp -d)"; \
 		../redeclipse.sh -h"$$RE_TEMPHOME" -df0 -w640 -dh480 -du0 -x"writevarsinfo; quit"; \
