@@ -121,7 +121,7 @@ too.
 * "Korsi" - Maps
 * "4rson" - Maps and Support
 * Slawek "VibrantWave" Blauciak - Ambient Sounds
-* "SkiingPenguins" - Skyboxes
+* Zachery "SkiingPenguins" Slocum - Skyboxes
 * "Fleeky" - Models
 * "fluxord" - Crosshairs
 * Kurt "Kurtis84" Kessler - Textures
