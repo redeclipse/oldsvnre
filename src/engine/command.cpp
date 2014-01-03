@@ -3216,6 +3216,8 @@ ICOMMAND(0, strstr, "ss", (char *a, char *b), { char *s = strstr(a, b); intret(s
 ICOMMAND(0, strlen, "s", (char *s), intret(strlen(s)));
 ICOMMAND(0, strcode, "si", (char *s, int *i), intret(*i > 0 ? (memchr(s, 0, *i) ? 0 : uchar(s[*i])) : uchar(s[0])));
 ICOMMAND(0, codestr, "i", (int *i), { char *s = newstring(1); s[0] = char(*i); s[1] = '\0'; stringret(s); });
+ICOMMAND(0, struni, "si", (char *s, int *i), intret(*i > 0 ? (memchr(s, 0, *i) ? 0 : cube2uni(s[*i])) : cube2uni(s[0])));
+ICOMMAND(0, unistr, "i", (int *i), { char *s = newstring(1); s[0] = uni2cube(*i); s[1] = '\0'; stringret(s); });
 
 #define STRMAPCOMMAND(name, map) \
     ICOMMAND(0, name, "s", (char *s), \
