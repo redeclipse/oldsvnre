@@ -6,13 +6,13 @@ Copyright: Omitted
 License: Omitted
 
 Files: *
-Copyright: 2009-2013, Red Eclipse Team
+Copyright: 2009-2014, Red Eclipse Team
 License: CC-BY-SA-3.0+
 
 Files: src/*
-Copyright: 2001-2013, Wouter van Oortmerssen, Lee Salzman, Mike Dysart,
+Copyright: 2001-2014, Wouter van Oortmerssen, Lee Salzman, Mike Dysart,
            Robert Pointon, Quinton Reeves
-           2009-2013, Quinton Reeves, Lee Salzman
+           2009-2014, Quinton Reeves, Lee Salzman
 License: Zlib
 
 Files: doc/trademark.txt
