@@ -131,15 +131,16 @@ struct duelservmode : servmode
 
     void scoreaffinity(clientinfo *ci, bool win)
     {
-        if(!m_affinity(gamemode) || dueltime >= 0 || duelround <= 0 || !win) return;
+        if(!m_affinity(gamemode) || dueltime >= 0 || duelround <= 0) return;
         respawns.shrink(0);
+        #define scoredteam(x,y) (win ? x != y : x == y)
         loopv(clients) if(clients[i]->state.actortype < A_ENEMY) switch(clients[i]->state.state)
         {
             case CS_ALIVE:
-                if(playing.find(clients[i]) < 0 || clients[i]->team != ci->team) queue(clients[i], false);
+                if(playing.find(clients[i]) < 0 || scoredteam(clients[i]->team, ci->team)) queue(clients[i], false);
                 break;
             case CS_DEAD:
-                if(playing.find(clients[i]) < 0 || clients[i]->team != ci->team)
+                if(playing.find(clients[i]) < 0 || scoredteam(clients[i]->team, ci->team))
                 {
                     queue(clients[i], false);
                     break;
@@ -149,7 +150,7 @@ struct duelservmode : servmode
                 duelcheck = gamemillis+1000;
                 break;
             case CS_WAITING:
-                if(playing.find(clients[i]) < 0 || clients[i]->team != ci->team)
+                if(playing.find(clients[i]) < 0 || scoredteam(clients[i]->team, ci->team))
                 {
                     queue(clients[i], false);
                     break;
