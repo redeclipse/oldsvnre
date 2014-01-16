@@ -46,7 +46,7 @@ namespace projs
     FVAR(IDF_PERSIST, ejectweight, -10000, 180, 10000);
 
     VAR(IDF_PERSIST, projtrails, 0, 1, 1);
-    VAR(IDF_PERSIST, projtraildelay, 1, 15, VAR_MAX);
+    VAR(IDF_PERSIST, projtraildelay, 2, 10, VAR_MAX);
     VAR(IDF_PERSIST, projtraillength, 1, 350, VAR_MAX);
     VAR(IDF_PERSIST, projhints, 0, 1, 6);
     VAR(IDF_PERSIST, projfirehint, 0, 1, 1);
@@ -1425,11 +1425,11 @@ namespace projs
                         float fluc = 1.f+(interval ? (interval <= 500 ? interval/500.f : (1000-interval)/500.f) : 0.f);
                         part_create(PART_PLASMA_SOFT, 1, proj.o, FWCOL(H, partcol, proj), WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags))+fluc, trans);
                         if(projhints) part_create(PART_HINT_SOFT, 1, proj.o, projhint(proj.owner, FWCOL(H, partcol, proj)), WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags))*projhintsize+fluc, projhintblend*trans);
-                        if(projtrails && lastmillis-proj.lasteffect >= projtraildelay)
+                        if(projtrails && lastmillis-proj.lasteffect >= projtraildelay/2)
                         {
-                            part_create(PART_FIREBALL_SOFT, max(projtraillength/2, 1), proj.o, FWCOL(H, partcol, proj), WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags))*0.5f, 0.85f*trans, -5);
-                            part_create(PART_SMOKE_LERP, projtraillength, proj.o, 0x222222, WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags)), trans, -10);
-                            proj.lasteffect = lastmillis - (lastmillis%projtraildelay);
+                            part_create(PART_FIREBALL_SOFT, max(projtraillength, 1), proj.o, FWCOL(H, partcol, proj), WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags))*0.5f, 0.85f*trans, -5);
+                            part_create(PART_SMOKE_LERP, projtraillength*2, proj.o, 0x222222, WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags)), trans, -10);
+                            proj.lasteffect = lastmillis - (lastmillis%(projtraildelay/2));
                         }
                         break;
                     }
