@@ -1016,7 +1016,7 @@ namespace game
         return total;
     }
 
-    float opacity(gameent *d, bool third = true)
+    float opacity(gameent *d, bool third)
     {
         float total = d == focus ? (third ? (d != player1 ? followblend : thirdpersonblend) : firstpersonblend) : playerblend;
         if(physics::isghost(d, focus)) total *= playerghost;
