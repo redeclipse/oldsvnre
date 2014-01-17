@@ -252,6 +252,11 @@ namespace capture
         }
     }
 
+    FVAR(IDF_PERSIST, followflagblend, 0, 0.5f, 1);
+    FVAR(IDF_PERSIST, thirdflagblend, 0, 0.5f, 1);
+    FVAR(IDF_PERSIST, firstflagblend, 0, 1, 1);
+    FVAR(IDF_PERSIST, freeflagblend, 0, 1, 1);
+
     void render()
     {
         static vector<int> numflags, iterflags; // dropped/owned
@@ -273,7 +278,7 @@ namespace capture
             if(!entities::ents.inrange(f.ent)) continue;
             vec pos = f.pos(true);
             float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(capturedelay), 0.f, 1.f) : ((m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team) ? clamp((lastmillis-f.taketime)/float(captureprotectdelay), 0.f, 1.f) : 0.f),
-                  blend = !f.owner && (!f.droptime || m_gsp2(game::gamemode, game::mutators)) && f.team == game::focus->team ? camera1->o.distrange(pos, enttype[AFFINITY].radius, enttype[AFFINITY].radius/8) : 1.f;
+                  blend = (!f.owner && (!f.droptime || m_gsp2(game::gamemode, game::mutators)) && f.team == game::focus->team ? camera1->o.distrange(pos, enttype[AFFINITY].radius, enttype[AFFINITY].radius/8) : 1.f)*(f.owner && f.owner == game::focus ? (game::thirdpersonview(true) ? (f.owner != game::player1 ? followflagblend : thirdflagblend) : firstflagblend) : freeflagblend);
             entitylight *light = &entities::ents[f.ent]->light;
             vec effect = vec::hexcolor(TEAM(f.team, colour));
             int colour = effect.tohexcolor();
