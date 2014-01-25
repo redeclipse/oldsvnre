@@ -114,8 +114,7 @@ export DIST_MAKEFILE
 		-cf - $(DISTFILES:%=../%) | (mkdir $@/; cd $@/ ; tar -xpf -)
 	printf '%s\n' "$$DIST_MAKEFILE" >$@/src/Makefile
 	$(MAKE) -C $@/src clean
-	-$(MAKE) -C $@/src/enet distclean
-	rm -rf $@/src/enet/autom4te.cache/
+	$(MAKE) -C $@/src/enet clean
 	rm -f $@/data/misc/largeandincharge.png
 
 distdir: ../$(dirname)
