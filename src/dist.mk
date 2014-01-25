@@ -37,6 +37,7 @@ SRC_FILES= \
 	src/dpiaware.manifest \
 	src/system-install.mk \
 	src/$(APPNAME).* \
+	src/wiki.mk \
 	src/install/nix/$(APPNAME)* \
 	src/install/win/*
 
