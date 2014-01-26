@@ -54,15 +54,6 @@
 
 #include <enet/enet.h>
 
-#ifdef __sun__
-#undef sun
-#undef MAXNAMELEN
-#ifdef queue
-  #undef queue
-#endif
-#define queue __squeue
-#endif
-
 #include "tools.h"
 #include "command.h"
 #include "geom.h"
