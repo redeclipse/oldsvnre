@@ -326,7 +326,7 @@ extern void alias(const char *name, const char *action);
 extern void alias(const char *name, tagval &v);
 extern void worldalias(const char *name, const char *action);
 extern const char *getalias(const char *name);
-extern void loopiter(ident *id, identstack &stack, tagval &v);
+extern void loopiter(ident *id, identstack &stack, const tagval &v);
 extern void loopend(ident *id, identstack &stack);
 
 #define loopstart(id, stack) if((id)->type != ID_ALIAS) return; identstack stack;
