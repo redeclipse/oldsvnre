@@ -2428,7 +2428,7 @@ ICOMMAND(0, pushif, "rte", (ident *id, tagval *v, uint *code),
     }
 });
 
-void loopiter(ident *id, identstack &stack, tagval &v)
+void loopiter(ident *id, identstack &stack, const tagval &v)
 {
     if(id->stack != &stack)
     {
