@@ -2868,9 +2868,8 @@ namespace hud
                             sel.o.x, sel.o.y, sel.o.z, sel.s.x, sel.s.y, sel.s.z,
                                 sel.cx, sel.cxs, sel.cy, sel.cys);
                 }
-                cy[1] -= draw_textx("pos:%d,%d,%d yaw:%d pitch:%d", cx[1], cy[1], 255, 255, 255, bf, TEXT_RIGHT_UP, -1, bs,
-                        (int)camera1->o.x, (int)camera1->o.y, (int)camera1->o.z,
-                        (int)camera1->yaw, (int)camera1->pitch);
+                cy[1] -= draw_textx("pos:%.2f,%.2f,%.2f yaw:%.2f pitch:%.2f", cx[1], cy[1], 255, 255, 255, bf, TEXT_RIGHT_UP, -1, bs,
+                        camera1->o.x, camera1->o.y, camera1->o.z, camera1->yaw, camera1->pitch);
             }
             popfont();
         }
