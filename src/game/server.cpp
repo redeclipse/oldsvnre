@@ -1914,7 +1914,7 @@ namespace server
             if(!m_edit(gamemode))
             {
                 if(!cplayers) cplayers = totalspawns ? totalspawns : 1;
-                int np = G(numplayers) ? G(numplayers) : cplayers, mp = G(maxplayers) ? G(maxplayers) : np*5/2;
+                int np = G(numplayers) ? G(numplayers) : cplayers, mp = G(maxplayers) ? G(maxplayers) : np*3;
                 if(m_fight(gamemode) && m_team(gamemode, mutators))
                 {
                     int offt = np%numt, offq = mp%numt;
