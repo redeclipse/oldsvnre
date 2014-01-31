@@ -440,10 +440,10 @@ GFVAR(0, impulseregenslide, 0, 0, FVAR_MAX); // impulse regen sliding modifier
 GVAR(0, impulseregendelay, 0, 350, VAR_MAX); // delay before impulse regens
 GVAR(0, impulseregenjetdelay, -1, -1, VAR_MAX); // delay before impulse regens after jetting, -1 = must touch ground
 
-GFVAR(0, inairspread, 0, 2, FVAR_MAX);
-GFVAR(0, movespread, 0, 1, FVAR_MAX);
-GFVAR(0, impulsespread, 0, 1, FVAR_MAX);
 GFVAR(0, stillspread, 0, 0, FVAR_MAX);
+GFVAR(0, movespread, 0, 1, FVAR_MAX);
+GFVAR(0, impulsespread, 0, 2, FVAR_MAX);
+GFVAR(0, inairspread, 0, 3, FVAR_MAX);
 
 GVAR(0, quakefade, 0, 250, VAR_MAX);
 GVAR(0, quakewobble, 1, 18, VAR_MAX);
