@@ -1,4 +1,4 @@
-Options -Indexes +ExecCGI
+Options -Indexes
 
 php_value upload_max_filesize 8M
 php_value post_max_size 8M
@@ -10,11 +10,7 @@ RewriteRule ^(.*)$ http://redeclipse.net/$1 [R=301,L,NC]
 
 RewriteRule ^/?wiki(/.*)?$ %{DOCUMENT_ROOT}/mediawiki/index.php [QSA,L,NC]
 
-RewriteRule ^(servers|forum|chat|svn|tracker|project|google|facebook|youtube|desura|aur|chakra|guidelines|faq|trademark|license|readme|apply)/(.+)$ /bits/index.php?target=$1&title=$2 [QSA,L,NC]
-RewriteRule ^(servers|forum|download|chat|svn|tracker|project|google|facebook|youtube|desura|aur|chakra|guidelines|faq|trademark|license|readme|apply)$ /bits/index.php?target=$1 [QSA,L,NC]
-RewriteRule ^(home)$ /bits/index.php?target=$1 [QSA,L,NC]
-RewriteRule ^(irc)$ /bits/index.php?target=chat [QSA,L,NC]
-RewriteRule ^(forums)$ /bits/index.php?target=forum [QSA,L,NC]
-
+RewriteRule ^(download|svn|google|facebook|youtube)/(.+)$ /bits/index.php?target=$1&title=$2 [QSA,L,NC]
+RewriteRule ^(servers|download|chat|svn|google|facebook|youtube|desura|aur|chakra|install|devel|guidelines|faq|trademark|license|readme|apply)$ /bits/index.php?target=$1 [QSA,L,NC]
 RewriteRule ^favicon.ico$ /bits/favicon.ico [QSA,L,NC]
 RewriteRule ^$ /bits/index.php [QSA,L,NC]

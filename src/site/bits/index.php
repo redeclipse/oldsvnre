@@ -13,12 +13,10 @@
 
     // nav items should be in reverse order for the top navbar 
     $app['targets']['download'] = array('name' => 'Download', 'url' => 'http://sourceforge.net/projects/redeclipse/files/'.$app['releasefile'].'/', 'alturl' => 'http://sourceforge.net/projects/redeclipse/files/', 'nav' => 1, 'redir' => 1);
-    $app['targets']['tracker'] = array('name' => 'Tracker', 'url' => 'http://forum.freegamedev.net/viewtopic.php?f=74&t=5192', 'alturl' => 'http://forum.freegamedev.net/viewtopic.php?f=74&t=5192', 'nav' => 1, 'redir' => 1);
     $app['targets']['chat'] = array('name' => 'Chat', 'url' => 'http://webchat.freenode.net/?channels=redeclipse', 'alturl' => '', 'nav' => 1, 'redir' => 1);
     $app['targets']['forum'] = array('name' => 'Forum', 'url' => 'http://forum.freegamedev.net/viewforum.php?f=53', 'alturl' => 'http://forum.freegamedev.net/viewforum.php?f=53&t=', 'nav' => 1, 'redir' => 1);
     $app['targets']['wiki'] = array('name' => 'Wiki', 'url' => 'http://redeclipse.net/wiki/', 'alturl' => 'http://redeclipse.net/wiki/', 'nav' => 1, 'redir' => 1);
     $app['targets']['servers'] = array('name' => 'Servers', 'url' => 'http://redflare.ofthings.net/', 'alturl' => 'http://redflare.ofthings.net/', 'nav' => 1, 'redir' => 1);
-    //$app['targets']['ticket'] = array('name' => 'Tickets', 'url' => 'http://redeclipse.net/trac/tickets/', 'alturl' => 'http://redeclipse.net/trac/tickets/', 'nav' => -1, 'redir' => 1);
     $app['targets']['svn'] = array('name' => 'SVN', 'url' => 'http://svn.icculus.org/redeclipse/', 'alturl' => 'http://svn.icculus.org/redeclipse/?view=rev&revision=', 'nav' => -1, 'redir' => 1);
 
     $app['targets']['facebook'] = array('name' => 'Facebook', 'url' => 'http://www.facebook.com/redeclipse.net', 'nav' => 0, 'redir' => 1);
@@ -221,11 +219,11 @@
             </div>
             <div class="endrightblock">&nbsp;</div>
             <div id="footer">
-                <a href="/download">Download</a>, <a href="/chat">Chat</a>, <a href="/forum">Discuss</a>, <a href="/wiki">Learn More</a>, or <a href="/tracker">Report a Bug</a> today.
+                <a href="/download">Download</a>, <a href="/chat">Chat</a>, <a href="/forum">Discuss</a>, or <a href="/wiki">Learn More</a> today.
             </div>
             <div id="copyright" align="center">
-                <p>Red Eclipse, Copyright (C) 2009-2013 Quinton Reeves, Lee Salzman</p>
-                <p>Cube Engine 2, Copyright (C) 2001-2013 Wouter van Oortmerssen, Lee Salzman, Mike Dysart, Robert Pointon, and Quinton Reeves</p>
+                <p>Red Eclipse, Copyright (C) 2009-2014 Quinton Reeves, Lee Salzman</p>
+                <p>Cube Engine 2, Copyright (C) 2001-2014 Wouter van Oortmerssen, Lee Salzman, Mike Dysart, Robert Pointon, and Quinton Reeves</p>
             </div>
         </div>
     </body>
