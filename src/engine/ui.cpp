@@ -19,7 +19,7 @@ VAR(IDF_PERSIST, guilinesize, 1, 36, 128);
 VAR(IDF_PERSIST, guisepsize, 1, 10, 128);
 VAR(IDF_PERSIST, guiscaletime, 0, 250, VAR_MAX);
 VAR(IDF_PERSIST|IDF_HEX, guibgcolour, -1, 0x000000, 0xFFFFFF);
-FVAR(IDF_PERSIST, guibgblend, 0, 0.5f, 1);
+FVAR(IDF_PERSIST, guibgblend, 0, 0.75f, 1);
 VAR(IDF_PERSIST|IDF_HEX, guibordercolour, -1, 0x000000, 0xFFFFFF);
 FVAR(IDF_PERSIST, guiborderblend, 0, 0.5f, 1);
 SVAR(0, guistatustext, "");
@@ -63,10 +63,8 @@ struct gui : guient
         }
         if(color) tcolor = color;
         if(!name) name = intstr(tpos);
-        defformatstring(tabtitle)("\fs\fd[\fS%s%s%s\fs\fd]\fS", visible() ? " " : "", name, visible() ? " " : "");
-        bool vis = visibletab();
-        gui::pushfont(vis ? "super" : "default");
-        int w = text_width(tabtitle);
+        gui::pushfont("super");
+        int w = text_width(name);
         if(guilayoutpass)
         {
             ty = max(ty, ysize);
@@ -75,33 +73,98 @@ struct gui : guient
         else
         {
             cury = -ysize;
-            int x1 = curx + tx + guibound[0], x2 = x1 + w, y1 = cury - guibound[1]*2, y2 = cury - guibound[1]*2 + FONTH, alpha = guiblend;
-            if(vis) { tcolor = 0xFFFFFF; alpha = 255; }
-            else if(tcurrent && hitx>=x1 && hity>=y1 && hitx<x2 && hity<y2)
+            int x1 = curx+tx, x2 = x1+w+guibound[0]*2, y1 = cury-guibound[1]*2, y2 = cury-guibound[1]/2, alpha = guiblend;
+            if(!visibletab())
             {
-                if(!guiclicktab || mouseaction[0]&GUI_UP) *tcurrent = tpos; // switch tab
-                tcolor = 0xFF4444;
-                alpha = max(guiblend, 200);
+                if(tcurrent && hitx>=x1 && hity>=y1 && hitx<x2 && hity<y2)
+                {
+                    if(!guiclicktab || mouseaction[0]&GUI_UP) *tcurrent = tpos; // switch tab
+                    tcolor = 0xFF4444;
+                    alpha = max(guiblend, 200);
+                }
+                else tcolor = vec::hexcolor(tcolor).mul(0.5f).tohexcolor();
             }
-            text_(tabtitle, x1, y1, tcolor, alpha, visible());
+            if(hasbgfx && guibgcolour >= 0)
+            {
+                notextureshader->set();
+                glDisable(GL_TEXTURE_2D);
+                glColor4f((guibgcolour>>16)/255.f, ((guibgcolour>>8)&0xFF)/255.f, (guibgcolour&0xFF)/255.f, guibgblend);
+                glBegin(GL_TRIANGLE_STRIP);
+                glVertex2f(x1, y1);
+                glVertex2f(x2, y1);
+                glVertex2f(x1, y2);
+                glVertex2f(x2, y2);
+                glEnd();
+                defaultshader->set();
+                glEnable(GL_TEXTURE_2D);
+            }
+            if(hasbgfx && guibordercolour >= 0)
+            {
+                lineshader->set();
+                glDisable(GL_TEXTURE_2D);
+                glColor4f((guibordercolour>>16)/255.f, ((guibordercolour>>8)&0xFF)/255.f, (guibordercolour&0xFF)/255.f, guiborderblend);
+                glBegin(GL_LINE_LOOP);
+                glVertex2f(x1, y1);
+                glVertex2f(x2, y1);
+                glVertex2f(x2, y2);
+                glVertex2f(x1, y2);
+                glEnd();
+                defaultshader->set();
+                glEnable(GL_TEXTURE_2D);
+            }
+            x1 += guibound[0];
+            y1 += guibound[1]-FONTH/2;
+            text_(name, x1, y1, tcolor, alpha, visible());
         }
-        tx += w + guibound[0]*2;
+        tx += w+guibound[0]*3;
         gui::popfont();
     }
 
     void uibuttons()
     {
-        int x = curx+max(xsize-guibound[1]*2/3, tx), y = -ysize-guibound[1]*2;
+        if(guilayoutpass) return;
+        cury = -ysize;
+        int x1 = curx+max(xsize-guibound[1]*2, tx), x2 = x1+guibound[1]*2, y1 = cury-guibound[1]*2, y2 = cury-guibound[1]/2;
         #define uibtn(a,b) \
         { \
             bool hit = false; \
-            if(hitx>=x && hity>=y && hitx<x+guibound[1] && hity<y+guibound[1]) \
+            if(hitx>=x1 && hity>=y1 && hitx<x2 && hity<y2) \
             { \
                 if(mouseaction[0]&GUI_UP) { b; } \
                 hit = true; \
             } \
-            icon_(a, false, x, y, guibound[1], !hit, hit ? 0xFF0000 : 0xFFFFFF); \
-            y += guibound[1]*3/2; \
+            if(hasbgfx && guibgcolour >= 0) \
+            { \
+                notextureshader->set(); \
+                glDisable(GL_TEXTURE_2D); \
+                glColor4f((guibgcolour>>16)/255.f, ((guibgcolour>>8)&0xFF)/255.f, (guibgcolour&0xFF)/255.f, guibgblend); \
+                glBegin(GL_TRIANGLE_STRIP); \
+                glVertex2f(x1, y1); \
+                glVertex2f(x2, y1); \
+                glVertex2f(x1, y2); \
+                glVertex2f(x2, y2); \
+                glEnd(); \
+                defaultshader->set(); \
+                glEnable(GL_TEXTURE_2D); \
+            } \
+            if(hasbgfx && guibordercolour >= 0) \
+            { \
+                lineshader->set(); \
+                glDisable(GL_TEXTURE_2D); \
+                glColor4f((guibordercolour>>16)/255.f, ((guibordercolour>>8)&0xFF)/255.f, (guibordercolour&0xFF)/255.f, guiborderblend); \
+                glBegin(GL_LINE_LOOP); \
+                glVertex2f(x1, y1); \
+                glVertex2f(x2, y1); \
+                glVertex2f(x2, y2); \
+                glVertex2f(x1, y2); \
+                glEnd(); \
+                defaultshader->set(); \
+                glEnable(GL_TEXTURE_2D); \
+            } \
+            x1 += guibound[1]/2; \
+            y1 += guibound[1]/4; \
+            icon_(a, false, x1, y1, guibound[1], !hit, hit ? 0xFF0000 : 0xFFFFFF); \
+            y1 += guibound[1]*3/2; \
         }
         if(!exittex) exittex = textureload(guiexittex, 3, true, false); \
         uibtn(exittex, cleargui(1));
@@ -906,12 +969,14 @@ struct gui : guient
             glPushMatrix();
             glTranslatef(uiorigin.x, uiorigin.y, uiorigin.z);
             glScalef(uiscale.x, uiscale.y, uiscale.z);
-            int x = curx-guibound[0]*2, y = cury-guibound[1], w = xsize+guibound[0]*4, h = ysize+guibound[1]*2;
+            int x = curx-guibound[0]*1, y = cury-guibound[1]/2, w = xsize+guibound[0]*2, h = ysize+guibound[1];
+            #if 0
             if(hastitle)
             {
                 y -= guibound[1]*3/2;
                 h += guibound[1]*3/2;
             }
+            #endif
             if(hasbgfx && guibgcolour >= 0)
             {
                 notextureshader->set();
@@ -966,7 +1031,7 @@ struct gui : guient
             if(*guistatustext)
             {
                 gui::pushfont("little");
-                int w = text_width(guistatustext)+guibound[0]*2, h = guibound[1]/2+FONTH, x = -w/2, y = guibound[1]*5/3;
+                int w = text_width(guistatustext)+guibound[0]*2, h = guibound[1]/2+FONTH, x = -w/2, y = guibound[1];
                 if(hasbgfx && guibgcolour >= 0)
                 {
                     notextureshader->set();
