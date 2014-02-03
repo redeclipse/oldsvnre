@@ -5577,6 +5577,9 @@ namespace server
                         else if(totalmillis-ci->lastplayerinfo < G(setinfowait)) allow = false;
                         if(!allow)
                         {
+                            getstring(text, p);
+                            loopi(2) getint(p);
+                            getstring(text, p);
                             sendinitclientself(ci);
                             break;
                         }
