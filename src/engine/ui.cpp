@@ -19,7 +19,7 @@ VAR(IDF_PERSIST, guilinesize, 1, 36, 128);
 VAR(IDF_PERSIST, guisepsize, 1, 10, 128);
 VAR(IDF_PERSIST, guiscaletime, 0, 250, VAR_MAX);
 VAR(IDF_PERSIST|IDF_HEX, guibgcolour, -1, 0x000000, 0xFFFFFF);
-FVAR(IDF_PERSIST, guibgblend, 0, 0.75f, 1);
+FVAR(IDF_PERSIST, guibgblend, 0, 0.5f, 1);
 VAR(IDF_PERSIST|IDF_HEX, guibordercolour, -1, 0x000000, 0xFFFFFF);
 FVAR(IDF_PERSIST, guiborderblend, 0, 0.5f, 1);
 SVAR(0, guistatustext, "");
