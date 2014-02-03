@@ -113,7 +113,7 @@ struct gui : guient
                 glEnable(GL_TEXTURE_2D);
             }
             x1 += guibound[0];
-            y1 += guibound[1]-FONTH/2;
+            y1 += guibound[1]-FONTH/3*2;
             text_(name, x1, y1, tcolor, alpha, visible());
         }
         tx += w+guibound[0]*3;
@@ -124,7 +124,7 @@ struct gui : guient
     {
         if(guilayoutpass) return;
         cury = -ysize;
-        int x1 = curx+max(xsize-guibound[1]*2, tx), x2 = x1+guibound[1]*2, y1 = cury-guibound[1]*2, y2 = cury-guibound[1]/2;
+        int x1 = curx+max(xsize-guibound[1]*3/2, tx), x2 = x1+guibound[1]*2, y1 = cury-guibound[1]*2, y2 = cury-guibound[1]/2;
         #define uibtn(a,b) \
         { \
             bool hit = false; \
