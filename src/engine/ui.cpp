@@ -21,7 +21,7 @@ VAR(IDF_PERSIST, guiscaletime, 0, 250, VAR_MAX);
 VAR(IDF_PERSIST|IDF_HEX, guibgcolour, -1, 0x000000, 0xFFFFFF);
 FVAR(IDF_PERSIST, guibgblend, 0, 0.5f, 1);
 VAR(IDF_PERSIST|IDF_HEX, guibordercolour, -1, 0x000000, 0xFFFFFF);
-FVAR(IDF_PERSIST, guiborderblend, 0, 0.5f, 1);
+FVAR(IDF_PERSIST, guiborderblend, 0, 1.f, 1);
 SVAR(0, guistatustext, "");
 
 static bool needsinput = false, hastitle = true, hasbgfx = true;
