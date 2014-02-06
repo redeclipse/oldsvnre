@@ -1009,7 +1009,6 @@ namespace server
     {
         setpause(false);
         setmod(sv_botoffset, 0);
-        //if(*sv_previousmaps) setmods(sv_previousmaps, "");
         if(G(resetmmonend)) { mastermode = MM_OPEN; resetallows(); }
         if(G(resetbansonend)) resetbans();
         if(G(resetmutesonend)) resetmutes();
@@ -2822,11 +2821,11 @@ namespace server
             spectator(clients[i]);
         }
 
-        if(!demoplayback && m_fight(gamemode))
+        if(!demoplayback && m_fight(gamemode) && numclients())
         {
             vector<char> buf;
             buf.put(smapname, strlen(smapname));
-            if(*sv_previousmaps && G(maphistory) && numclients())
+            if(*sv_previousmaps && G(maphistory))
             {
                 vector<char *> prev;
                 explodelist(sv_previousmaps, prev);
@@ -2852,6 +2851,7 @@ namespace server
             const char *str = buf.getbuf();
             if(*str) setmods(sv_previousmaps, str);
         }
+        else setmods(sv_previousmaps, "");
 
         if(numclients())
         {
