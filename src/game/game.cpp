@@ -481,13 +481,12 @@ namespace game
             case 1: if(physics::sliding(player1, true) || (player1->airmillis && (!zooming || !lastzoom || player1->airtime(lastmillis) >= zoomlocktime || player1->impulse[IM_JUMP]))) break;
             case 0: default: return true; break;
         }
-        zoomset(false, 0);
         return false;
     }
 
     bool inzoom()
     {
-        if(zoomallow() && lastzoom && (zooming || lastmillis-lastzoom <= zoomtime))
+        if(lastzoom && (zooming || lastmillis-lastzoom <= zoomtime))
             return true;
         return false;
     }
@@ -495,7 +494,7 @@ namespace game
 
     bool inzoomswitch()
     {
-        if(zoomallow() && lastzoom && ((zooming && lastmillis-lastzoom >= zoomtime/2) || (!zooming && lastmillis-lastzoom <= zoomtime/2)))
+        if(lastzoom && ((zooming && lastmillis-lastzoom >= zoomtime/2) || (!zooming && lastmillis-lastzoom <= zoomtime/2)))
             return true;
         return false;
     }
@@ -2825,11 +2824,10 @@ namespace game
                     if(state == W_S_PRIMARY || state == W_S_SECONDARY || (state == W_S_RELOAD && lastmillis-player1->weaplast[player1->weapselect] >= max(player1->weapwait[player1->weapselect]-zoomtime, 1)))
                         state = W_S_IDLE;
                 }
-                if(zooming && (!W(player1->weapselect, zooms) || state != W_S_IDLE)) zoomset(false, lastmillis);
-                else if(W(player1->weapselect, zooms) && state == W_S_IDLE && zooming != player1->action[AC_SECONDARY])
-                    zoomset(player1->action[AC_SECONDARY], lastmillis);
+                if(zooming && (!W(player1->weapselect, zooms) || state != W_S_IDLE || !zoomallow())) zoomset(false, lastmillis);
+                else if(W(player1->weapselect, zooms) && zooming != player1->action[AC_SECONDARY]) zoomset(player1->action[AC_SECONDARY], lastmillis);
             }
-            else if(zooming) zoomset(false, lastmillis);
+            else if(zooming) zoomset(false, 0);
 
             physics::update();
             ai::navigate();
