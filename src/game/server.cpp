@@ -2137,6 +2137,7 @@ namespace server
         srvoutf(4, "\fydemo playback finished");
         loopv(clients) sendwelcome(clients[i]);
         startintermission(true);
+        resetgamevars(true, true);
     }
 
     void setupdemoplayback()
@@ -2821,7 +2822,7 @@ namespace server
             spectator(clients[i]);
         }
 
-        if(m_fight(gamemode))
+        if(!demoplayback && m_fight(gamemode))
         {
             vector<char> buf;
             buf.put(smapname, strlen(smapname));
