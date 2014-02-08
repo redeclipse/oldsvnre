@@ -1394,6 +1394,12 @@ void resettextures(int n)
         delete s;
     }
     slots.setsize(limit);
+    while(vslots.length())
+    {
+        VSlot *vs = vslots.last();
+        if(vs->slot != &dummyslot || vs->changed) break;
+        delete vslots.pop();
+    }
 }
 
 ICOMMAND(0, texturereset, "i", (int *n), if(editmode || identflags&IDF_WORLD) resettextures(*n););
