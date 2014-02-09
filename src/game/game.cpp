@@ -471,9 +471,19 @@ namespace game
         zooming = on;
     }
 
+    bool zoomvalid()
+    {
+        if(W(player1->weapselect, zooms))
+        {
+            int state = player1->weapstate[player1->weapselect];
+            return state == W_S_IDLE || state == W_S_PRIMARY || state == W_S_SECONDARY || state == W_S_POWER;
+        }
+        return false;
+    }
+
     bool zoomallow()
     {
-        if(W(player1->weapselect, zooms)) switch(zoomlock)
+        if(zoomvalid()) switch(zoomlock)
         {
             case 4: if(!physics::iscrouching(player1)) break;
             case 3: if(player1->physstate != PHYS_FLOOR) break;
@@ -2818,14 +2828,10 @@ namespace game
             if(!allowmove(player1)) player1->stopmoving(player1->state < CS_SPECTATOR);
             if(player1->state == CS_ALIVE)
             {
-                int state = player1->weapstate[player1->weapselect];
-                if(W(player1->weapselect, zooms))
-                {
-                    if(state == W_S_PRIMARY || state == W_S_SECONDARY || (state == W_S_RELOAD && lastmillis-player1->weaplast[player1->weapselect] >= max(player1->weapwait[player1->weapselect]-zoomtime, 1)))
-                        state = W_S_IDLE;
-                }
-                if(zooming && (!W(player1->weapselect, zooms) || state != W_S_IDLE || !zoomallow())) zoomset(false, lastmillis);
-                else if(W(player1->weapselect, zooms) && zooming != player1->action[AC_SECONDARY]) zoomset(player1->action[AC_SECONDARY], lastmillis);
+                bool allow = zoomallow();
+                if(zooming && !allow) zoomset(false, lastmillis);
+                else if(allow && zooming != player1->action[AC_SECONDARY])
+                    zoomset(player1->action[AC_SECONDARY], lastmillis);
             }
             else if(zooming) zoomset(false, 0);
 

@@ -2919,7 +2919,7 @@ namespace hud
                             if(game::intermission) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fointermission\fS");
                             else if(client::waitplayers) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fowaiting\fS");
                             else if(paused) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fopaused\fS", 0xFFFFFF);
-                            else if(game::timeremaining) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fg%s\fS", timestr(game::timeremaining, 2));
+                            else if(game::timeremaining && timelimit) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fg%s\fS", timestr(game::timeremaining, 2));
                         }
                     }
                     if(texpaneltimer) break;
@@ -3183,9 +3183,9 @@ namespace hud
             int tf = int(255*hudblend*noticeblend), tr = 255, tg = 255, tb = 255,
                 tw = int((hudwidth-(int(hudsize*edgesize)*2+int(hudsize*inventoryleft)+(hudsize*inventoryright)))/noticescale);
             if(noticestone) skewcolour(tr, tg, tb, noticestone);
-            if(m_trial(game::gamemode)) ty += draw_textx("%sTime Trial", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1, col);
-            else if(!m_team(game::gamemode, game::mutators)) ty += draw_textx("%sFree-for-all %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1, col, m_bomber(game::gamemode) ? "Bomber-ball" : "Deathmatch");
-            else ty += draw_textx("%sYou are on team %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, col, game::colourteam(game::focus->team));
+            if(m_trial(game::gamemode)) ty -= draw_textx("%sTime Trial", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1, col);
+            else if(!m_team(game::gamemode, game::mutators)) ty -= draw_textx("%sFree-for-all %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1, col, m_bomber(game::gamemode) ? "Bomber-ball" : "Deathmatch");
+            else ty -= draw_textx("%sYou are on team %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, col, game::colourteam(game::focus->team));
             popfont();
             glPopMatrix();
             ty *= noticescale;

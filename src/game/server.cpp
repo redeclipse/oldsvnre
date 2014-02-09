@@ -2480,7 +2480,7 @@ namespace server
     savedscore *findscore(clientinfo *ci, bool insert)
     {
         uint ip = getclientip(ci->clientnum);
-        if(!ip) return 0;
+        if(!ip) return NULL;
         if(!insert)
         {
             loopv(clients)
@@ -2501,7 +2501,7 @@ namespace server
             savedscore &sc = savedscores[i];
             if(sc.ip == ip && !strcmp(sc.name, ci->name)) return &sc;
         }
-        if(!insert) return 0;
+        if(!insert) return NULL;
         savedscore &sc = savedscores.add();
         sc.ip = ip;
         copystring(sc.name, ci->name);
