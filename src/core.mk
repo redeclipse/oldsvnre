@@ -64,11 +64,7 @@ INSTDIR=../bin/x86
 override CXX+= -m32
 override WINDRES+= -F pe-i386
 endif
-ifneq (,$(findstring TDM,$(PLATFORM)))
-STD_LIBS=
-else
 STD_LIBS= -static-libgcc -static-libstdc++
-endif
 CLIENT_INCLUDES= $(INCLUDES) -Iinclude
 CLIENT_LIBS= -mwindows $(STD_LIBS) -L$(WINBIN) -L$(WINLIB) -lSDL -lSDL_image -lSDL_mixer -lzlib1 -lopengl32 -lenet -lws2_32 -lwinmm
 else
