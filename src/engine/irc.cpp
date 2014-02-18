@@ -1,5 +1,8 @@
 #include "engine.h"
 
+VAR(0, ircfilter, 0, 2, 2);
+VAR(0, ircverbose, 0, 0, 2);
+
 vector<ircnet *> ircnets;
 
 ircnet *ircfind(const char *name)
@@ -45,7 +48,7 @@ void ircprintf(ircnet *n, int relay, const char *target, const char *msg, ...)
         n->updated |= IRCUP_MSG;
         #endif
     }
-    console(0, "%s %s", s, str); // console is not used to relay
+    if(ircverbose) console(0, "%s %s", s, str); // console is not used to relay
 }
 
 void ircestablish(ircnet *n)
@@ -93,7 +96,7 @@ void ircsend(ircnet *n, const char *msg, ...)
     if(!n) return;
     defvformatstring(str, msg, msg);
     if(n->sock == ENET_SOCKET_NULL || !*msg) return; // don't spew \n
-    console(0, "[%s] >>> %s", n->name, str);
+    if(ircverbose >= 2) console(0, "[%s] >>> %s", n->name, str);
     concatstring(str, "\n");
     ENetBuffer buf;
     uchar ubuf[512];
@@ -112,8 +115,6 @@ void ircsend(ircnet *n, const char *msg, ...)
         enet_socket_send(n->sock, NULL, &buf, 1);
     }
 }
-
-VAR(0, ircfilter, 0, 2, 2);
 
 void converttext(char *dst, const char *src)
 {
