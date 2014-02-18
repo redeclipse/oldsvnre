@@ -6,14 +6,15 @@
 #define SERVER_TIME (35*60*1000)
 #define AUTH_TIME (30*1000)
 #define DUP_LIMIT 16
-#define PING_TIME 3000
-#define PING_RETRY 5
 
 VAR(0, masterserver, 0, 0, 1);
 VAR(0, masterport, 1, MASTER_PORT, VAR_MAX);
 SVAR(0, masterip, "");
 SVAR(0, masterscriptclient, "");
 SVAR(0, masterscriptserver, "");
+
+VAR(0, masterpingdelay, 1000, 3000, VAR_MAX);
+VAR(0, masterpingtries, 1, 5, VAR_MAX);
 
 struct authuser
 {
@@ -213,8 +214,8 @@ void checkmasterpongs()
                 c.lastpong = totalmillis ? totalmillis : 1;
                 c.listserver = true;
                 c.shouldping = false;
-                masteroutf(c, "echo \"ping reply confirmed, server is now listed\"\n");
-                conoutf("master peer %s responded to ping request successfully",  c.name);
+                masteroutf(c, "echo \"ping reply confirmed (on port %d), server is now listed\"\n", addr.port);
+                conoutf("master peer %s responded to ping request on port %d successfully",  c.name, addr.port);
                 break;
             }
         }
@@ -300,17 +301,17 @@ bool checkmasterclientinput(masterclient &c)
                 c.numpings = 0;
                 c.lastcontrol = controlversion;
                 loopv(control) if(control[i].flag == ipinfo::LOCAL)
-                    masteroutf(c, "%s %u %u %s\n", ipinfotypes[control[i].type], control[i].ip, control[i].mask, control[i].reason);
+                    masteroutf(c, "%s %u %u \"%s\"\n", ipinfotypes[control[i].type], control[i].ip, control[i].mask, control[i].reason);
                 if(c.isserver)
                 {
-                    masteroutf(c, "echo \"server updated, sending ping request\"\n");
-                    conoutf("master peer %s updated server info",  c.name);
+                    masteroutf(c, "echo \"server updated (port %d), sending ping request (on port %d)\"\n", c.port, c.port+1);
+                    conoutf("master peer %s updated server info (%d)",  c.name, c.port);
                 }
                 else
                 {
                     if(*masterscriptserver) masteroutf(c, "%s\n", masterscriptserver);
-                    masteroutf(c, "echo \"server registered, sending ping request\"\n");
-                    conoutf("master peer %s registered as a server",  c.name);
+                    masteroutf(c, "echo \"server registered (port %d), sending ping request (on port %d)\"\n", c.port, c.port+1);
+                    conoutf("master peer %s registered as a server (%d)", c.name, c.port);
                 }
                 c.isserver = true;
             }
@@ -369,9 +370,9 @@ void checkmaster()
     {
         masterclient &c = *masterclients[i];
         if(c.authreqs.length()) purgeauths(c);
-        if(c.shouldping && (!c.lastping || ((!c.lastpong || ENET_TIME_GREATER(c.lastping, c.lastpong)) && ENET_TIME_DIFFERENCE(totalmillis, c.lastping) > PING_TIME)))
+        if(c.shouldping && (!c.lastping || ((!c.lastpong || ENET_TIME_GREATER(c.lastping, c.lastpong)) && ENET_TIME_DIFFERENCE(totalmillis, c.lastping) > uint(masterpingdelay))))
         {
-            if(c.numpings < PING_RETRY)
+            if(c.numpings < masterpingtries)
             {
                 static const uchar ping[] = { 1 };
                 ENetBuffer buf;
@@ -386,7 +387,7 @@ void checkmaster()
             {
                 c.listserver = false;
                 c.shouldping = false;
-                masteroutf(c, "error \"ping attempts failed, server will not be listed\n");
+                masteroutf(c, "error \"ping attempts failed (tried %d times on port %d), server will not be listed\n", c.numpings, c.port+1);
             }
         }
         if(c.isserver && c.lastcontrol < controlversion)
