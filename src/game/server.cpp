@@ -260,7 +260,7 @@ namespace server
     struct savedscore
     {
         uint ip;
-        string name;
+        string name, handle;
         int points, score, frags, spree, rewards, timeplayed, deaths, shotdamage, damage, cptime, cplaps;
         int warnings[WARN_MAX][2];
         vector<teamkill> teamkills;
@@ -2477,34 +2477,39 @@ namespace server
         checkvotes();
     }
 
+    bool scorecmp(clientinfo *ci, uint ip, const char *name, const char *handle, uint clientip)
+    {
+        if(ci->handle[0] && !strcmp(handle, ci->handle)) return true;
+        if(ip && clientip == ip && !strcmp(name, ci->name)) return true;
+        return false;
+    }
+
     savedscore *findscore(clientinfo *ci, bool insert)
     {
         uint ip = getclientip(ci->clientnum);
-        if(!ip) return NULL;
-        if(!insert)
+        if(!ip && !ci->handle[0]) return NULL;
+        if(!insert) loopv(clients)
         {
-            loopv(clients)
+            clientinfo *oi = clients[i];
+            if(oi->clientnum != ci->clientnum && scorecmp(ci, ip, oi->name, oi->handle, getclientip(oi->clientnum)))
             {
-                clientinfo *oi = clients[i];
-                if(oi->clientnum != ci->clientnum && getclientip(oi->clientnum) == ip && !strcmp(oi->name, ci->name))
-                {
-                    oi->state.timeplayed += totalmillis-oi->state.lasttimeplayed;
-                    oi->state.lasttimeplayed = totalmillis;
-                    static savedscore curscore;
-                    curscore.save(oi->state);
-                    return &curscore;
-                }
+                oi->state.timeplayed += totalmillis-oi->state.lasttimeplayed;
+                oi->state.lasttimeplayed = totalmillis;
+                static savedscore curscore;
+                curscore.save(oi->state);
+                return &curscore;
             }
         }
         loopv(savedscores)
         {
             savedscore &sc = savedscores[i];
-            if(sc.ip == ip && !strcmp(sc.name, ci->name)) return &sc;
+            if(scorecmp(ci, ip, sc.name, sc.handle, sc.ip)) return &sc;
         }
         if(!insert) return NULL;
         savedscore &sc = savedscores.add();
-        sc.ip = ip;
         copystring(sc.name, ci->name);
+        copystring(sc.handle, ci->handle);
+        sc.ip = ip;
         return &sc;
     }
 
