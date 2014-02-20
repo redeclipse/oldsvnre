@@ -258,12 +258,7 @@ namespace auth
                 local = true;
             }
         }
-        if(n > PRIV_NONE)
-        {
-            loopvrev(clients) if(clients[i] != ci && clients[i]->handle[0] && !strcmp(clients[i]->handle, name))
-                disconnect_client(clients[i]->clientnum, DISC_TIMEOUT);
-            setprivilege(ci, 1, n, true, local);
-        }
+        if(n > PRIV_NONE) setprivilege(ci, 1, n, true, local);
         else ci->authname[0] = 0;
         if(ci->connectauth)
         {
