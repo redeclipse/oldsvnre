@@ -4897,6 +4897,11 @@ namespace server
         ci->needclipboard = totalmillis ? totalmillis : 1;
         ci->state.lasttimeplayed = totalmillis;
 
+        if(ci->handle[0]) // kick old logins
+        {
+            loopvrev(clients) if(clients[i] != ci && clients[i]->handle[0] && !strcmp(clients[i]->handle, ci->handle))
+                disconnect_client(clients[i]->clientnum, DISC_KICK);
+        }
         sendwelcome(ci);
         if(restorescore(ci)) sendresume(ci);
         sendinitclient(ci);
