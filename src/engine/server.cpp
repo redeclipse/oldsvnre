@@ -1276,8 +1276,10 @@ int setupserversockets()
         serverhost = enet_host_create(&address, server::reserveclients(), server::numchannels(), 0, serveruprate);
         if(!serverhost)
         {
-            conoutf("\frcould not create server socket");
-#ifndef STANDALONE
+#ifdef STANDALONE
+            fatal("could not create server socket on port %d", serverport);
+#else
+            conoutf("\frcould not create server socket on port %d", serverport);
             setvar("servertype", 0);
 #endif
             return servertype;
@@ -1297,8 +1299,10 @@ int setupserversockets()
         }
         if(pongsock == ENET_SOCKET_NULL)
         {
-            conoutf("\frcould not create server info socket, publicity disabled");
-#ifndef STANDALONE
+#ifdef STANDALONE
+            fatal("could not create server info socket on port %d", serverport+1);
+#else
+            conoutf("\frcould not create server info socket on port %d, publicity disabled", serverport+1);
             setvar("servertype", 1);
 #endif
             return servertype;
