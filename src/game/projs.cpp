@@ -1612,31 +1612,23 @@ namespace projs
                     case W_FLAMER: case W_GRENADE: case W_MINE: case W_ROCKET:
                     { // all basically explosions
                         float expl = WX(WK(proj.flags), proj.weap, explode, WS(proj.flags), game::gamemode, game::mutators, proj.curscale*proj.lifesize);
-                        if(type == W_FLAMER)
+                        if(type != W_FLAMER) part_create(PART_PLASMA_SOFT, projtraillength*(type != W_ROCKET ? 2 : 3), proj.o, FWCOL(H, partcol, proj), max(expl*0.5f, 0.5f), 0.5f*WF(WK(proj.flags), proj.weap, partblend, WS(proj.flags))); // corona
+                        if(expl > 0)
                         {
-                            if(expl <= 0) expl = WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags));
-                            part_create(PART_SMOKE_LERP_SOFT, projtraillength, proj.o, 0x666666, expl*0.75f, (0.25f+(rnd(50)/100.f))*WF(WK(proj.flags), proj.weap, partblend, WS(proj.flags)), -5);
+                            int len = type != W_ROCKET ? 500 : 750;
+                            if(type != W_FLAMER) part_explosion(proj.o, expl, PART_EXPLOSION, len, FWCOL(H, explcol, proj), 1.f, WF(WK(proj.flags), proj.weap, partblend, WS(proj.flags)));
+                            part_splash(PART_SPARK, 20, len*2, proj.o, FWCOL(H, partcol, proj), 0.75f, WF(WK(proj.flags), proj.weap, partblend, WS(proj.flags)), 1, 0, expl, 20);
+                            if(WF(WK(proj.flags), proj.weap, wavepush, WS(proj.flags)) >= 1)
+                                part_explosion(proj.o, expl*WF(WK(proj.flags), proj.weap, wavepush, WS(proj.flags)), PART_SHOCKWAVE, len/2, projhint(proj.owner, FWCOL(H, explcol, proj)), 1.f, 0.5f*WF(WK(proj.flags), proj.weap, partblend, WS(proj.flags))*projhintblend);
                         }
-                        else
+                        else expl = WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags));
+                        part_create(PART_SMOKE_LERP_SOFT, projtraillength*(type != W_ROCKET ? 3 : 4), proj.o, 0x444444, expl*0.75f, 0.75f*WF(WK(proj.flags), proj.weap, partblend, WS(proj.flags)), type != W_FLAMER ? -15 : -10);
+                        if(type != W_FLAMER && !m_kaboom(game::gamemode, game::mutators) && game::nogore != 2 && game::debrisscale > 0)
                         {
-                            part_create(PART_PLASMA_SOFT, projtraillength*(type != W_ROCKET ? 2 : 3), proj.o, FWCOL(H, partcol, proj), max(expl*0.5f, 0.5f), 0.5f*WF(WK(proj.flags), proj.weap, partblend, WS(proj.flags))); // corona
-                            if(expl > 0)
-                            {
-                                int len = type != W_ROCKET ? 500 : 750;
-                                part_explosion(proj.o, expl, PART_EXPLOSION, len, FWCOL(H, explcol, proj), 1.f, WF(WK(proj.flags), proj.weap, partblend, WS(proj.flags)));
-                                part_splash(PART_SPARK, 20, len*2, proj.o, FWCOL(H, partcol, proj), 0.75f, WF(WK(proj.flags), proj.weap, partblend, WS(proj.flags)), 1, 0, expl, 20);
-                                if(WF(WK(proj.flags), proj.weap, wavepush, WS(proj.flags)) >= 1)
-                                    part_explosion(proj.o, expl*WF(WK(proj.flags), proj.weap, wavepush, WS(proj.flags)), PART_SHOCKWAVE, len/2, projhint(proj.owner, FWCOL(H, explcol, proj)), 1.f, 0.5f*WF(WK(proj.flags), proj.weap, partblend, WS(proj.flags))*projhintblend);
-                            }
-                            else expl = WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags));
-                            part_create(PART_SMOKE_LERP_SOFT, projtraillength*(type != W_ROCKET ? 3 : 4), proj.o, 0x333333, expl*0.75f, 0.75f*WF(WK(proj.flags), proj.weap, partblend, WS(proj.flags)), -15);
-                            if(!m_kaboom(game::gamemode, game::mutators) && game::nogore != 2 && game::debrisscale > 0)
-                            {
-                                int debris = rnd(type != W_ROCKET ? 5 : 10)+5, amt = int((rnd(debris)+debris+1)*game::debrisscale);
-                                loopi(amt) create(proj.o, vec(proj.o).add(proj.vel), true, NULL, PRJ_DEBRIS, rnd(game::debrisfade)+game::debrisfade, 0, rnd(501), rnd(101)+50, 0, proj.weap, 0, proj.flags);
-                            }
-                            adddecal(DECAL_ENERGY, proj.o, proj.norm, expl*0.75f, bvec::fromcolor(FWCOL(P, explcol, proj)));
+                            int debris = rnd(type != W_ROCKET ? 5 : 10)+5, amt = int((rnd(debris)+debris+1)*game::debrisscale);
+                            loopi(amt) create(proj.o, vec(proj.o).add(proj.vel), true, NULL, PRJ_DEBRIS, rnd(game::debrisfade)+game::debrisfade, 0, rnd(501), rnd(101)+50, 0, proj.weap, 0, proj.flags);
                         }
+                        adddecal(DECAL_ENERGY, proj.o, proj.norm, expl*0.75f, bvec::fromcolor(FWCOL(P, explcol, proj)));
                         if(type != W_FLAMER || WK(proj.flags) || W2(proj.weap, fragweap, WS(proj.flags))%W_MAX != W_FLAMER)
                         {
                             loopi(type != W_ROCKET ? 5 : 10)

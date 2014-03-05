@@ -542,37 +542,39 @@ namespace server
         DROP_DEATH = DROP_WEAPONS|DROP_KAMIKAZE, DROP_EXPIRE = DROP_WEAPONS|DROP_EXPLODE, DROP_RESET = DROP_WEAPONS|DROP_WCLR
     };
 
-    void dropweapon(clientinfo *ci, servstate &ts, int flags, int weap, vector<droplist> &drop)
+    void dropweapon(clientinfo *ci, int flags, int weap, vector<droplist> &drop)
     {
-        if(isweap(weap) && weap != m_weapon(gamemode, mutators) && ts.hasweap(weap, m_weapon(gamemode, mutators)) && sents.inrange(ts.entid[weap]))
+        if(isweap(weap) && weap != m_weapon(gamemode, mutators) && ci->state.hasweap(weap, m_weapon(gamemode, mutators)) && sents.inrange(ci->state.entid[weap]))
         {
-            setspawn(ts.entid[weap], false);
+            setspawn(ci->state.entid[weap], false);
             droplist &d = drop.add();
             d.weap = weap;
-            d.ent = ts.entid[weap];
-            d.ammo = ts.ammo[weap];
-            d.reloads = ts.reloads[weap];
-            ts.dropped.add(d.ent, d.ammo, d.reloads);
-            ts.entid[weap] = -1;
-            if(flags&DROP_WCLR) ts.ammo[weap] = ts.reloads[weap] = -1;
+            d.ent = ci->state.entid[weap];
+            d.ammo = ci->state.ammo[weap];
+            d.reloads = ci->state.reloads[weap];
+            ci->state.dropped.add(d.ent, d.ammo, d.reloads);
+            ci->state.entid[weap] = -1;
+            if(flags&DROP_WCLR) ci->state.ammo[weap] = ci->state.reloads[weap] = -1;
         }
     }
 
-    void dropitems(clientinfo *ci, int flags = DROP_RESET)
+    bool dropitems(clientinfo *ci, int flags = DROP_RESET)
     {
-        servstate &ts = ci->state;
+        bool kamikaze = false;
         vector<droplist> drop;
-        if(flags&DROP_EXPLODE || (flags&DROP_KAMIKAZE && G(kamikaze) && (G(kamikaze) > 2 || (ts.hasweap(W_GRENADE, m_weapon(gamemode, mutators)) && (G(kamikaze) > 1 || ts.weapselect == W_GRENADE)))))
+        if(flags&DROP_EXPLODE || (flags&DROP_KAMIKAZE && G(kamikaze) && (G(kamikaze) > 2 || (ci->state.hasweap(W_GRENADE, m_weapon(gamemode, mutators)) && (G(kamikaze) > 1 || ci->state.weapselect == W_GRENADE)))))
         {
             ci->state.weapshots[W_GRENADE][0].add(1);
             droplist &d = drop.add();
             d.weap = W_GRENADE;
             d.ent = d.ammo = d.reloads = -1;
             if(!(flags&DROP_EXPLODE)) takeammo(ci, W_GRENADE, W2(W_GRENADE, sub, false));
+            kamikaze = true;
         }
-        if(flags&DROP_WEAPONS) loopi(W_MAX) dropweapon(ci, ts, flags, i, drop);
+        if(flags&DROP_WEAPONS) loopi(W_MAX) dropweapon(ci, flags, i, drop);
         if(!drop.empty())
             sendf(-1, 1, "ri3iv", N_DROP, ci->clientnum, -1, drop.length(), drop.length()*sizeof(droplist)/sizeof(int), drop.getbuf());
+        return kamikaze;
     }
 
     struct vampireservmode : servmode
@@ -3636,7 +3638,6 @@ namespace server
                     if(v != m) isteamkill = true;
                 }
                 else pointvalue = 0; // no penalty
-                if(flags&HIT_HEAD) style |= FRAG_HEADSHOT;
             }
             else if(v != m && v->state.actortype < A_ENEMY)
             {
@@ -3790,6 +3791,8 @@ namespace server
             mutate(smuts, if(!mut->damage(ci, ci, ci->state.health, -1, flags, material)) { return; });
         }
         ci->state.spree = 0;
+        ci->state.deaths++;
+        bool kamikaze = dropitems(ci, actor[ci->state.actortype].living ? DROP_DEATH : DROP_EXPIRE);
         if(m_checkpoint(gamemode) && !(flags&HIT_SPEC) && (!flags || m_gauntlet(gamemode) || ci->state.cpnodes.length() == 1))
         { // reset if suicided, hasn't reached another checkpoint yet
             ci->state.cpmillis = 0;
@@ -3797,9 +3800,11 @@ namespace server
             sendf(-1, 1, "ri3", N_CHECKPOINT, ci->clientnum, -1);
         }
         else if(!m_nopoints(gamemode, mutators) && ci->state.actortype == A_PLAYER)
-            givepoints(ci, smode ? smode->points(ci, ci) : -1);
-        ci->state.deaths++;
-        dropitems(ci, actor[ci->state.actortype].living ? DROP_DEATH : DROP_EXPIRE);
+        {
+            int pointvalue = smode ? smode->points(ci, ci) : -1;
+            if(kamikaze) pointvalue *= G(teamkillpenalty);
+            givepoints(ci, pointvalue);
+        }
         if(G(burntime) && flags&HIT_BURN)
         {
             ci->state.lastres[WR_BURN] = ci->state.lastrestime[WR_BURN] = gamemillis;
@@ -5283,7 +5288,11 @@ namespace server
                     loopj(ev->num)
                     {
                         if(p.overread()) break;
-                        if(j >= 100) { loopk(3) getint(p); continue; }
+                        if(j >= 100 || !havecn)
+                        {
+                            loopk(4) getint(p);
+                            continue;
+                        }
                         shotmsg &s = ev->shots.add();
                         s.id = getint(p);
                         loopk(3) s.pos[k] = getint(p);
@@ -5300,7 +5309,7 @@ namespace server
                 }
 
                 case N_DROP:
-                { // gee this looks familiar
+                {
                     int lcn = getint(p), id = getint(p), weap = getint(p);
                     clientinfo *cp = (clientinfo *)getinfo(lcn);
                     if(!hasclient(cp, ci)) break;
@@ -5325,7 +5334,7 @@ namespace server
                     break;
                 }
 
-                case N_DESTROY: // cn millis weap flags id radial hits
+                case N_DESTROY:
                 {
                     int lcn = getint(p), millis = getint(p);
                     clientinfo *cp = (clientinfo *)getinfo(lcn);
@@ -5354,7 +5363,7 @@ namespace server
                     break;
                 }
 
-                case N_STICKY: // cn millis weap flags id target norm pos
+                case N_STICKY:
                 {
                     int lcn = getint(p), millis = getint(p);
                     clientinfo *cp = (clientinfo *)getinfo(lcn);
@@ -5733,13 +5742,27 @@ namespace server
                             sents[n].spawned = false; // wait a bit then load 'em up
                             sents[n].millis = gamemillis;
                             sents[n].attrs.add(0, clamp(numattr, type >= 0 && type < MAXENTTYPES ? enttype[type].numattrs : 0, MAXENTATTRS));
-                            loopk(numattr) { if(p.overread()) break; int attr = getint(p); if(sents[n].attrs.inrange(k)) sents[n].attrs[k] = attr; }
-                            if(enttype[type].syncpos) loopj(3) { if(p.overread()) break; sents[n].o[j] = getint(p)/DMF; }
+                            loopk(numattr)
+                            {
+                                if(p.overread()) break;
+                                int attr = getint(p);
+                                if(sents[n].attrs.inrange(k)) sents[n].attrs[k] = attr;
+                            }
+                            if(enttype[type].syncpos) loopj(3)
+                            {
+                                if(p.overread()) break;
+                                sents[n].o[j] = getint(p)/DMF;
+                            }
                             if(enttype[type].synckin)
                             {
                                 int numkin = getint(p);
                                 sents[n].kin.add(0, clamp(numkin, 0, MAXENTKIN));
-                                loopk(numkin) { if(p.overread()) break; int kin = getint(p); if(sents[n].kin.inrange(k)) sents[n].kin[k] = kin; }
+                                loopk(numkin)
+                                {
+                                    if(p.overread()) break;
+                                    int kin = getint(p);
+                                    if(sents[n].kin.inrange(k)) sents[n].kin[k] = kin;
+                                }
                             }
                         }
                         else
@@ -5976,7 +5999,7 @@ namespace server
                         if(G(serverdebug)) srvmsgf(cp->clientnum, "sync error: unable to modify spectator %s - %d [%d, %d]", colourname(cp), cp->state.state, cp->state.lastdeath, gamemillis);
                         break;
                     }
-                    bool spec = val != 0, quarantine = cp != ci && val != 0 && val == 2, wasq = cp->state.quarantine;
+                    bool spec = val != 0, quarantine = cp != ci && val == 2, wasq = cp->state.quarantine;
                     spectate(cp, spec, quarantine);
                     if(quarantine && cp->state.quarantine)
                     {
