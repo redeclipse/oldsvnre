@@ -3801,7 +3801,7 @@ namespace server
         }
         else if(!m_nopoints(gamemode, mutators) && ci->state.actortype == A_PLAYER)
         {
-            int pointvalue = smode ? smode->points(ci, ci) : -1;
+            int pointvalue = (smode ? smode->points(ci, ci) : -1)*G(fragbonus);
             if(kamikaze) pointvalue *= G(teamkillpenalty);
             givepoints(ci, pointvalue);
         }
