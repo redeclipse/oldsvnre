@@ -133,6 +133,14 @@ inline char *copystring(char *d, const char *s, size_t len = MAXSTRLEN)
     return d;
 }
 inline char *concatstring(char *d, const char *s, size_t len = MAXSTRLEN) { size_t used = strlen(d); return used < len ? copystring(d+used, s, len-used) : d; }
+inline char *prependstring(char *d, const char *s, size_t len = MAXSTRLEN)
+{
+    size_t slen = min(strlen(s), len);
+    memmove(&d[slen], d, min(len - slen, strlen(d) + 1));
+    memcpy(d, s, slen);
+    d[len-1] = 0;
+    return d;
+}
 
 struct stringformatter
 {
@@ -1180,10 +1188,9 @@ template <class T, int SIZE> struct reversequeue : queue<T, SIZE>
     const T &operator[](int offset) const { return queue<T, SIZE>::added(offset); }
 };
 
-inline char *newstring(size_t l) { return new char[l+1]; }
+inline char *newstring(size_t l)                { return new char[l+1]; }
 inline char *newstring(const char *s, size_t l) { return copystring(newstring(l), s, l+1); }
-inline char *newstring(const char *s) { return newstring(s, strlen(s));          }
-inline char *newstringbuf(const char *s) { return newstring(s, MAXSTRLEN-1);       }
+inline char *newstring(const char *s)           { size_t l = strlen(s); char *d = newstring(l); memcpy(d, s, l+1); return d; }
 
 #if defined(WIN32) && !defined(__GNUC__)
 #ifdef _DEBUG

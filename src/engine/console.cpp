@@ -10,40 +10,32 @@ char *commandaction = NULL, *commandicon = NULL;
 enum { CF_COMPLETE = 1<<0, CF_EXECUTE = 1<<1, CF_MESSAGE = 1<<2 };
 int commandflags = 0, commandpos = -1, commandcolour = 0;
 
+#define CONSTRLEN 512
+
 void conline(int type, const char *sf, int n)
 {
-    char *buf = conlines.length() >= MAXCONLINES ? conlines.remove().cref : newstringbuf("");
+    char *buf = conlines.length() >= MAXCONLINES ? conlines.remove().cref : newstring("", CONSTRLEN-1);
     cline &cl = conlines.add();
     cl.type = type;
     cl.cref = buf;
     cl.reftime = cl.outtime = totalmillis;
     cl.realtime = clocktime;
 
-    int c = 0;
-    #define addcref(d) { cl.cref[c] = d; c++; }
     if(n)
     {
-        addcref(' ');
-        addcref(' ');
-        concatstring(cl.cref, sf);
-    }
-    addcref(0);
-    concatstring(cl.cref, sf);
-
-    if(n)
-    {
-        string sd;
+        copystring(cl.cref, "  ", CONSTRLEN);
+        concatstring(cl.cref, sf, CONSTRLEN);
         loopj(2)
         {
             int off = n+j;
             if(conlines.inrange(off))
             {
-                if(j) formatstring(sd)("%s\fs", conlines[off].cref);
-                else formatstring(sd)("\fS%s", conlines[off].cref);
-                copystring(conlines[off].cref, sd);
+                if(j) concatstring(conlines[off].cref, "\fs", CONSTRLEN);
+                else prependstring(conlines[off].cref, "\fS", CONSTRLEN);
             }
         }
     }
+    else copystring(cl.cref, sf, CONSTRLEN);
 }
 
 // keymap is defined externally in keymap.cfg
