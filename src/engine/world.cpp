@@ -993,7 +993,7 @@ bool emptymap(int scale, bool force, char *mname, bool nocfg)   // main empty wo
     clearworldvars();
     resetmap(nocfg);
     setnames(mname, MAP_MAPZ);
-    strncpy(hdr.head, "MAPZ", 4);
+    memcpy(hdr.head, "MAPZ", 4);
 
     hdr.version = MAPVERSION;
     hdr.gamever = server::getver(1);

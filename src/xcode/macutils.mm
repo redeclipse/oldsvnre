@@ -4,7 +4,13 @@
 // -- copied from tools.h -- including the full file introduces too many problems
 #define MAXSTRLEN 512
 typedef char string[MAXSTRLEN];
-inline char *copystring(char *d, const char *s, size_t len = MAXSTRLEN) { strncpy(d, s, len); d[len-1] = 0; return d; }
+inline char *copystring(char *d, const char *s, size_t len = MAXSTRLEN)
+{
+    size_t slen = min(strlen(s)+1, len);
+    memcpy(d, s, slen);
+    d[slen-1] = 0;
+    return d;
+}
 // --
 
 char *mac_pasteconsole(int *cblen)

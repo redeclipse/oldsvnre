@@ -236,7 +236,7 @@ static const char *debugline(const char *p, const char *fmt)
         {
             static string buf;
             char color[] = { '\0', '\0', '\0' };
-            if(fmt[0] == '\f') { strncpy(color, fmt, 2); fmt += strlen(color); }
+            if(fmt[0] == '\f') { memcpy(color, fmt, 2); fmt += strlen(color); }
             if(sourcefile) formatstring(buf)("%s%s:%d: %s", color, sourcefile, num, fmt);
             else formatstring(buf)("%s%d: %s", color, num, fmt);
             return buf;

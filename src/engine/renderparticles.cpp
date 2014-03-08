@@ -322,7 +322,7 @@ struct textrenderer : sharedlistrenderer
         {
             const char *start = text;
             while(*text && *text != '>') text++;
-            if(*text) { int len = text-(start+1); strncpy(font, start+1, len); font[len] = 0; text++; }
+            if(*text) { int len = text-(start+1); memcpy(font, start+1, len); font[len] = 0; text++; }
             else text = start;
         }
         float xoff = -text_width(text)/2;

@@ -949,14 +949,16 @@ void save_world(const char *mname, bool nodata, bool forcesave)
 
     savemapprogress = 0;
     progress(0, "saving map..");
-    strncpy(hdr.head, "MAPZ", 4);
+    memcpy(hdr.head, "MAPZ", 4);
     hdr.version = MAPVERSION;
     hdr.headersize = sizeof(mapz);
     hdr.gamever = server::getver(1);
     hdr.numents = 0;
     hdr.numvslots = numvslots;
     hdr.revision++;
-    strncpy(hdr.gameid, server::gameid(), 4);
+    string gameid;
+    copystring(gameid, server::gameid());
+    memcpy(hdr.gameid, gameid, 4);
 
     const vector<extentity *> &ents = entities::getents();
     loopv(ents)
@@ -1428,7 +1430,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                 progress(0, "please wait..");
                 maptype = MAP_OCTA;
 
-                strncpy(hdr.head, ohdr.head, 4);
+                memcpy(hdr.head, ohdr.head, 4);
                 hdr.gamever = 0; // sauer has no gamever
                 hdr.worldsize = ohdr.worldsize;
                 if(hdr.worldsize > 1<<18) hdr.worldsize = 1<<18;
@@ -1491,7 +1493,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                     f->read(gameid, len+1);
                 }
                 else copystring(gameid, "fps");
-                strncpy(hdr.gameid, gameid, 4);
+                memcpy(hdr.gameid, gameid, 4);
 
                 if(!server::canload(hdr.gameid))
                 {
