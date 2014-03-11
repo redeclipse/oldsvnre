@@ -177,6 +177,7 @@ GVAR(0, radardistlimit, 0, 0, VAR_MAX); // forces the radar to this distance max
 GVAR(0, balancemaps, -1, -1, 1); // determined if map team balancing is used: -1 = map default, 0 = off, 1 = on
 GVAR(0, balancedelay, 0, 10000, 30000); // before mapbalance forces
 GVAR(0, balancenospawn, 0, 1, 1); // prevent respawning when waiting to balance
+GVAR(0, balanceduke, 0, 0, 1); // enable in duel/survivor
 
 #ifdef CAMPAIGN
 GVAR(0, campaignghost, 0, 0, 1); // 0 = all players are solid, 1 = all players are ghosts
@@ -251,6 +252,7 @@ GVAR(0, teamdamage, 0, 1, 2); // 0 = off, 1 = non-bots damage team, 2 = all play
 GFVAR(0, teamdamagescale, FVAR_MIN, 1, FVAR_MAX); // 0 = off, anything else = scale for damage
 
 GVAR(0, teambalance, 0, 4, 4); // 0 = off, 1 = by number then rank, 2 = by rank then number, 3 = by number and enforce, 4 = number, enforce, and reassign
+GVAR(0, teambalanceduel, 0, 0, 1); // allow teambalance in duel
 GVAR(0, teambalanceplaying, 2, 2, VAR_MAX); // min players before teambalance 4 reassignments occur
 GVAR(0, teambalanceamt, 2, 2, VAR_MAX); // max-min offset before teambalance 4 reassignments occur
 GVAR(0, teambalancewait, 10000, 60000, VAR_MAX); // how long before teambalance 4 can happen again
