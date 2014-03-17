@@ -1866,7 +1866,7 @@ namespace client
                 case N_GAMEINFO:
                 {
                     int n;
-                    while((n = getint(p)) != -1) entities::setspawn(n, getint(p));
+                    while(p.remaining() && (n = getint(p)) != -1) entities::setspawn(n, getint(p));
                     sendgameinfo = false;
                     break;
                 }
