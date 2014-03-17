@@ -5211,7 +5211,12 @@ namespace server
                     int lcn = getint(p), r = getint(p), n = getint(p);
                     clientinfo *cp = (clientinfo *)getinfo(lcn);
                     vector<int> items;
-                    loopk(n) items.add(getint(p));
+                    loopk(n)
+                    {
+                        int w = getint(p);
+                        if(p.overread()) break;
+                        if(n <= W_LOADOUT) items.add(w);
+                    }
                     if(!hasclient(cp, ci) || !m_loadout(gamemode, mutators)) break;
                     cp->state.loadweap.shrink(0);
                     loopvk(items) cp->state.loadweap.add(items[k]);
@@ -5688,6 +5693,7 @@ namespace server
                     int n;
                     while((n = getint(p)) != -1)
                     {
+                        if(p.overread()) break;
                         getstring(text, p);
                         defformatstring(cmdname)("sv_%s", text);
                         ident *id = idents.access(cmdname);
@@ -5719,7 +5725,7 @@ namespace server
                                     id->changed();
                                     break;
                                 }
-                                default: return;
+                                default: break;
                             }
                         }
                         else switch(n)
