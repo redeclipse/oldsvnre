@@ -163,7 +163,7 @@ struct gui : guient
             } \
             x1 += guibound[1]/2; \
             y1 += guibound[1]/4; \
-            icon_(a, false, x1, y1, guibound[1], !hit, hit ? 0xFF0000 : 0xFFFFFF); \
+            icon_(a, false, x1, y1, guibound[1], !hit, hit ? 0xFFFFFF : 0x888888); \
             y1 += guibound[1]*3/2; \
         }
         if(!exittex) exittex = textureload(guiexittex, 3, true, false); \
