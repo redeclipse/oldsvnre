@@ -1470,7 +1470,7 @@ namespace server
     void checklimits()
     {
         if(!m_fight(gamemode)) return;
-        int limit = inovertime ? max(G(overtimelimit), 1) : G(timelimit), numt = numteams(gamemode, mutators);
+        int limit = inovertime ? G(overtimelimit) : G(timelimit), numt = numteams(gamemode, mutators);
         bool newlimit = limit != oldtimelimit, newtimer = gamemillis-curtime>0 && gamemillis/1000!=(gamemillis-curtime)/1000,
              iterate = newlimit || newtimer, wasinovertime = inovertime;
         if(iterate)
