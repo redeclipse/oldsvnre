@@ -13,4 +13,4 @@ Red Eclipse, a fun-filled new take on the casual first person arena shooter, mak
 
 Even more, our community has been slowly, but surely, growing. We would like to thank each and every person who has contributed to or supported the project so far. Without their time and dedication, Red Eclipse would not even be a fraction of what it is today.
 
-As always, you can download Red Eclipse from http://www.redeclipse.net/
+As always, you can download Red Eclipse from http://redeclipse.net/
