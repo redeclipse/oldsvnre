@@ -135,13 +135,14 @@ void purgeauths(masterclient &c)
     if(expired > 0) c.authreqs.remove(0, expired);
 }
 
-void reqauth(masterclient &c, uint id, const char *name, const char *hostname)
+void reqauth(masterclient &c, uint id, char *name, char *hostname)
 {
     purgeauths(c);
 
-    string ip;
+    string ip, host;
     if(enet_address_get_host_ip(&c.address, ip, sizeof(ip)) < 0) copystring(ip, "-");
-    conoutf("attempting \"%s\" (%u) from %s on server %s\n", name, id, hostname, ip);
+    copystring(host, hostname && *hostname ? hostname : "-");
+    conoutf("attempting \"%s\" (%u) from %s on server %s\n", name, id, host, ip);
 
     authuser *u = authusers.access(name);
     if(!u)
@@ -154,7 +155,7 @@ void reqauth(masterclient &c, uint id, const char *name, const char *hostname)
     a.user = u;
     a.reqtime = totalmillis;
     a.id = id;
-    copystring(a.hostname, hostname);
+    copystring(a.hostname, host);
     uint seed[3] = { uint(starttime), uint(totalmillis), randomMT() };
     static vector<char> buf;
     buf.setsize(0);
@@ -343,7 +344,7 @@ bool checkmasterclientinput(masterclient &c)
         }
         if(c.isserver || c.isquick)
         {
-            if(!strcmp(w[0], "reqauth")) { reqauth(c, uint(atoi(w[1])), w[2], w[3][0] ? w[3] : "-"); found = true; }
+            if(!strcmp(w[0], "reqauth")) { reqauth(c, uint(atoi(w[1])), w[2], w[3]); found = true; }
             if(!strcmp(w[0], "confauth")) { confauth(c, uint(atoi(w[1])), w[2]); found = true; }
         }
         if(w[0] && !found)
