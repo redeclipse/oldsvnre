@@ -250,7 +250,7 @@ WPFVARM(0, fragoffset, 0, FVAR_MAX,
     4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       1.0f,       4.0f,       1.0f,       2.0f,
     4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       1.0f,       4.0f,       1.0f,       2.0f
 );
-WPVARM(0, fragrays, 0, VAR_MAX,
+WPVARM(0, fragrays, 0, MAXPARAMS,
     5,          5,          5,          5,          5,          5,          5,          5,          25,         30,         35,
     5,          5,          5,          20,         15,         5,          5,          5,          25,         10,         35
 );
@@ -435,7 +435,7 @@ WPFVARK(0, radius, FVAR_NONZERO, FVAR_MAX,
     1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       2.0f,       1.0f,       1.0f,       1.0f,       1.0f,
     1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       2.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f
 );
-WPVARM(0, rays, 0, VAR_MAX,
+WPVARM(0, rays, 0, MAXPARAMS,
     1,          1,          1,          20,         1,          1,          1,          1,          1,          1,          1,
     1,          5,          1,          1,          1,          1,          1,          1,          1,          1,          1
 );

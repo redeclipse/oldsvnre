@@ -230,7 +230,8 @@ struct defendservmode : defendstate, servmode
                 loopj(3) o[j] = getint(p)/DMF;
                 string name;
                 getstring(name, p);
-                if(!hasflaginfo) addaffinity(o, kin, ent, name);
+                if(p.overread()) break;
+                if(!hasflaginfo && i < MAXPARAMS) addaffinity(o, kin, ent, name);
             }
             if(!hasflaginfo)
             {

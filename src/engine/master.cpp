@@ -28,6 +28,7 @@ struct authreq
     uint id;
     void *answer;
     authuser *user;
+    string hostname;
 };
 
 struct masterclient
@@ -134,13 +135,13 @@ void purgeauths(masterclient &c)
     if(expired > 0) c.authreqs.remove(0, expired);
 }
 
-void reqauth(masterclient &c, uint id, char *name)
+void reqauth(masterclient &c, uint id, const char *name, const char *hostname)
 {
     purgeauths(c);
 
     string ip;
     if(enet_address_get_host_ip(&c.address, ip, sizeof(ip)) < 0) copystring(ip, "-");
-    conoutf("attempting \"%s\" as %u from %s\n", name, id, ip);
+    conoutf("attempting \"%s\" (%u) from %s on server %s\n", name, id, hostname, ip);
 
     authuser *u = authusers.access(name);
     if(!u)
@@ -153,6 +154,7 @@ void reqauth(masterclient &c, uint id, char *name)
     a.user = u;
     a.reqtime = totalmillis;
     a.id = id;
+    copystring(a.hostname, hostname);
     uint seed[3] = { uint(starttime), uint(totalmillis), randomMT() };
     static vector<char> buf;
     buf.setsize(0);
@@ -172,12 +174,12 @@ void confauth(masterclient &c, uint id, const char *val)
         if(checkchallenge(val, c.authreqs[i].answer))
         {
             masteroutf(c, "succauth %u \"%s\" \"%s\"\n", id, c.authreqs[i].user->name, c.authreqs[i].user->flags);
-            conoutf("succeeded %u (%s [%s]) from %s\n", id, c.authreqs[i].user->name, c.authreqs[i].user->flags, ip);
+            conoutf("succeeded \"%s\" [%s] (%u) from %s on server %s\n", c.authreqs[i].user->name, c.authreqs[i].user->flags, id, c.authreqs[i].hostname, ip);
         }
         else
         {
             masteroutf(c, "failauth %u\n", id);
-            conoutf("failed %u (%s) from %s\n", id, c.authreqs[i].user->name, ip);
+            conoutf("failed \"%s\" (%u) from %s on server %s\n", c.authreqs[i].user->name, id, c.authreqs[i].hostname, ip);
         }
         freechallenge(c.authreqs[i].answer);
         c.authreqs.remove(i--);
@@ -341,7 +343,7 @@ bool checkmasterclientinput(masterclient &c)
         }
         if(c.isserver || c.isquick)
         {
-            if(!strcmp(w[0], "reqauth")) { reqauth(c, uint(atoi(w[1])), w[2]); found = true; }
+            if(!strcmp(w[0], "reqauth")) { reqauth(c, uint(atoi(w[1])), w[2], w[3][0] ? w[3] : "-"); found = true; }
             if(!strcmp(w[0], "confauth")) { confauth(c, uint(atoi(w[1])), w[2]); found = true; }
         }
         if(w[0] && !found)

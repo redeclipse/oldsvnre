@@ -266,7 +266,8 @@ struct captureservmode : capturestate, servmode
                 int team = getint(p), ent = getint(p);
                 vec o;
                 loopj(3) o[j] = getint(p)/DMF;
-                if(!hasflaginfo) addaffinity(o, team, ent);
+                if(p.overread()) break;
+                if(!hasflaginfo && i < MAXPARAMS) addaffinity(o, team, ent);
             }
             if(!hasflaginfo)
             {

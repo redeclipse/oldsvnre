@@ -303,6 +303,7 @@ namespace defend
             string name;
             getstring(name, p);
             if(p.overread()) break;
+            if(i >= MAXPARAMS) continue;
             while(!st.flags.inrange(i)) st.flags.add();
             st.initaffinity(i, kin, ent, o, owner, enemy, converted, name);
         }

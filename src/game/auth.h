@@ -92,7 +92,7 @@ namespace auth
             return;
         }
         if(!ci->connectauth) srvmsgftforce(ci->clientnum, CON_EVENT, "\fyplease wait, requesting credential match..");
-        requestmasterf("reqauth %u %s\n", ci->authreq, ci->authname);
+        requestmasterf("reqauth %u %s %s\n", ci->authreq, ci->authname, gethostname(ci->clientnum));
         lastactivity = totalmillis;
     }
 

@@ -373,6 +373,7 @@ namespace bomber
             if(!m_check(e.attrs[3], e.attrs[4], game::gamemode, game::mutators) || !isteam(game::gamemode, game::mutators, e.attrs[0], T_NEUTRAL))
                 continue;
             st.addaffinity(e.o, e.attrs[0], i);
+            if(st.flags.length() >= MAXPARAMS) break;
         }
     }
 
@@ -413,6 +414,7 @@ namespace bomber
                 }
             }
             if(p.overread()) break;
+            if(i >= MAXPARAMS) continue;
             while(!st.flags.inrange(i)) st.flags.add();
             bomberstate::flag &f = st.flags[i];
             f.reset();

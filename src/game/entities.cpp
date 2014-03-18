@@ -846,18 +846,30 @@ namespace entities
 
     void putitems(packetbuf &p)
     {
-        loopv(ents) if(enttype[ents[i]->type].syncs)
+        loopv(ents)
         {
-            gameentity &e = *(gameentity *)ents[i];
-            putint(p, i);
-            putint(p, int(e.type));
-            putint(p, e.attrs.length());
-            loopvj(e.attrs) putint(p, e.attrs[j]);
-            if(enttype[e.type].syncpos) loopj(3) putint(p, int(e.o[j]*DMF));
-            if(enttype[e.type].synckin)
+            if(i >= MAXENTS) break;
+            if(enttype[ents[i]->type].syncs)
             {
-                putint(p, e.kin.length());
-                loopvj(e.kin) putint(p, e.kin[j]);
+                gameentity &e = *(gameentity *)ents[i];
+                putint(p, i);
+                putint(p, int(e.type));
+                putint(p, min(e.attrs.length(), MAXENTATTRS));
+                loopvj(e.attrs)
+                {
+                    if(j >= MAXENTATTRS) break;
+                    putint(p, e.attrs[j]);
+                }
+                if(enttype[e.type].syncpos) loopj(3) putint(p, int(e.o[j]*DMF));
+                if(enttype[e.type].synckin)
+                {
+                    putint(p, min(e.kin.length(), MAXENTKIN));
+                    loopvj(e.kin)
+                    {
+                        if(j >= MAXENTKIN) break;
+                        putint(p, e.kin[j]);
+                    }
+                }
             }
         }
     }
