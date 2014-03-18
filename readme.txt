@@ -5,19 +5,19 @@
 * Parkour, impulse boosts, dashing, and other tricks
 * Favourite gamemodes with an array of mutators and variables
 * Builtin editor lets you create your own maps cooperatively online
-* Free Download from http://www.redeclipse.net/
+* Free Download from http://redeclipse.net/
 
 = About =
 
 Red Eclipse is a fun-filled new take on the casual first person arena shooter, built as a total conversion of Cube Engine 2, which lends itself toward a balanced gameplay, with a general theme of agility in a variety of environments. For more information, please see our Wiki or Forum.
 
-Wiki: http://www.redeclipse.net/wiki
-Forum: http://www.redeclipse.net/forum
+Wiki: http://redeclipse.net/wiki
+Forum: http://redeclipse.net/forum
 
-The project is a Free and Open Source game, built on Cube Engine 2 using SDL and OpenGL which allows it to be ported to many platforms; you can download a package for Windows, GNU/Linux, BSD, or grab a development copy from our Subversion repository and live on the bleeding edge.
+The project is a Free and Open Source game, built on Cube Engine 2 using SDL and OpenGL which allows it to be ported to many platforms; you can download a package for Windows, GNU/Linux, BSD, and Mac OSX; or grab a development copy from our Subversion repository and live on the bleeding edge.
 
-Download: http://www.redeclipse.net/download
-Subversion: http://www.redeclipse.net/devel
+Download: http://redeclipse.net/download
+Subversion: http://redeclipse.net/devel
 
 In a true open source by the people for the people nature, we try to work closely with the gaming and open source communities to provide a better overall experience, aiming to create a game environment that is fun and easy to play, while still having elements to master.
 
@@ -44,7 +44,7 @@ The project is Free and Open Source meaning that you can both use it for free, a
 == Contributors and Supporters ==
 
 * Adam "lycanfox" Hobson
-* Alex "ZeroKnight" George - Design, Testing and Support
+* Alex "ZeroKnight" George - Design/Testing, Support
 * Anup "DOS_WARRIOR" Debnath
 * Cameron "Rhubarb" Dawdy
 * Christopher "Dratz-_C" Dratz
@@ -52,19 +52,19 @@ The project is Free and Open Source meaning that you can both use it for free, a
 * Corey "c0rdawg" Maher
 * Daniel "Imerion" Eriksson
 * David "srbs" Forrest
-* Derek "Favorito" Ponicki - Maps, Textures, Design and Testing
-* Derek "JoJo" Stegall - Maps, Models, Textures, HUD, Sound FX, Design and Testing
+* Derek "Favorito" Ponicki - Maps, Textures, Design/Testing
+* Derek "JoJo" Stegall - Maps, Models, Textures, HUD, Sound FX, Design/Testing
 * Eddie "skedz4u" Webb
 * Gaming Tilt
 * Henrik "ahven" Pihl
-* Jacinta "cinta" Hall - Design, Testing, Support, and making babies.
-* Jeff "Architect" Cope - Design and Testing
-* Jeroen "appleflap" Boukens - Textures, Design and Testing
+* Jacinta "cinta" Hall - Design/Testing, Support, and making babies.
+* Jeff "Architect" Cope - Design/Testing
+* Jeroen "appleflap" Boukens - Textures, Design/Testing
 * Jonathan "Ulukai" De Nil - Maps, Testing, Support
-* Jonathan "W!ck3d" Roels - Maps, Textures, Design and Testing
+* Jonathan "W!ck3d" Roels - Maps, Textures, Design/Testing
 * Joseph "ballist1c" Calabria - Maps
 * Joshua "JDWhyte" Dwight
-* Joshua L. "Verbalshadow" Blocher - Some source artwork, Design and Testing
+* Joshua L. "Verbalshadow" Blocher - Some source artwork, Design/Testing
 * Kevin "Hirato" Meyer - Development Assistance, Design/Testing
 * Kirill "TristamK" Kolesnikov - Maps
 * Kurt "Kurtis84" Kessler - Textures
@@ -74,11 +74,10 @@ The project is Free and Open Source meaning that you can both use it for free, a
 * Martin "arand" Werner - Documentation, Legal Drafting, Cross-Dist Support, Open Source Checks, and much more.
 * Matt "greaserpirate" Kalt - Maps
 * Maxim "acerspyro" Therrien - UI elements
-* Mike "mikeplus64" Ledger - Maps, Models, Weapons, Textures, HUD, Design and Testing
+* Mike "mikeplus64" Ledger - Maps, Models, Weapons, Textures, HUD, Design/Testing
 * Mikhail "Agustis" Kashin
 * Nick "Fatal_Glory" Watts
 * Petri Lukkarinen
-* RaZgRiZ - Textures and Cubescript maintenance
 * Ricky Thomson "unixfreak" - Maps
 * Riidom Li - Models
 * Rob "Lloir" Shannon
@@ -95,7 +94,6 @@ The project is Free and Open Source meaning that you can both use it for free, a
 * Viktor "Unnamed" Hahn
 * Wayne Bennett
 * Zachery "SkiingPenguins" Slocum - Skyboxes
-
 * "4rson" - Maps and Support
 * "Boognish" - Maps
 * "CD Xbow"
@@ -106,6 +104,7 @@ The project is Free and Open Source meaning that you can both use it for free, a
 * "John_III" - Maps and Models
 * "Korsi" - Maps
 * "Raiden" - Maps
+* "RaZgRiZ" - Textures and Cubescript maintenance
 * "bonifarz"
 * "fbt"
 * "fluxord" - Crosshairs
