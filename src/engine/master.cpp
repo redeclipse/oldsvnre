@@ -142,14 +142,15 @@ void reqauth(masterclient &c, uint id, char *name, char *hostname)
     string ip, host;
     if(enet_address_get_host_ip(&c.address, ip, sizeof(ip)) < 0) copystring(ip, "-");
     copystring(host, hostname && *hostname ? hostname : "-");
-    conoutf("attempting \"%s\" (%u) from %s on server %s\n", name, id, host, ip);
 
     authuser *u = authusers.access(name);
     if(!u)
     {
         masteroutf(c, "failauth %u\n", id);
+        conoutf("failed \"%s\" (%u) from %s on server %s (NOTFOUND)\n", name, id, host, ip);
         return;
     }
+    conoutf("attempting \"%s\" (%u) from %s on server %s\n", name, id, host, ip);
 
     authreq &a = c.authreqs.add();
     a.user = u;
@@ -180,7 +181,7 @@ void confauth(masterclient &c, uint id, const char *val)
         else
         {
             masteroutf(c, "failauth %u\n", id);
-            conoutf("failed \"%s\" (%u) from %s on server %s\n", c.authreqs[i].user->name, id, c.authreqs[i].hostname, ip);
+            conoutf("failed \"%s\" (%u) from %s on server %s (BADKEY)\n", c.authreqs[i].user->name, id, c.authreqs[i].hostname, ip);
         }
         freechallenge(c.authreqs[i].answer);
         c.authreqs.remove(i--);
