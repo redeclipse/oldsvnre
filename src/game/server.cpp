@@ -3926,7 +3926,7 @@ namespace server
                     int f = W2(weap, fragweap, WS(flags));
                     if(f >= 0)
                     {
-                        int w = f%W_MAX, r = W2(weap, fragrays, WS(flags));
+                        int w = f%W_MAX, r = min(W2(weap, fragrays, WS(flags)), MAXPARAMS);
                         loopi(r) gs.weapshots[w][f >= W_MAX ? 1 : 0].add(-id);
                     }
                 }
@@ -5293,7 +5293,7 @@ namespace server
                     loopj(ev->num)
                     {
                         if(p.overread()) break;
-                        if(j >= 100 || !havecn)
+                        if(j >= MAXPARAMS || !havecn)
                         {
                             loopk(4) getint(p);
                             continue;
@@ -5304,7 +5304,7 @@ namespace server
                     }
                     if(havecn)
                     {
-                        int rays = W2(ev->weap, rays, WS(ev->flags));
+                        int rays = min(W2(ev->weap, rays, WS(ev->flags)), MAXPARAMS);
                         if(rays > 1 && W2(ev->weap, power, WS(ev->flags))) rays = int(ceilf(rays*ev->scale/float(W2(ev->weap, power, WS(ev->flags)))));
                         while(ev->shots.length() > rays) ev->shots.remove(rnd(ev->shots.length()));
                         cp->addevent(ev);
@@ -5767,7 +5767,7 @@ namespace server
                                 {
                                     if(p.overread()) break;
                                     int kin = getint(p);
-                                    if(sents[n].kin.inrange(k)) sents[n].kin[k] = kin;
+                                    if(k < MAXENTKIN && sents[n].kin.inrange(k)) sents[n].kin[k] = kin;
                                 }
                             }
                         }
@@ -6070,22 +6070,35 @@ namespace server
 
                 case N_EDITENT:
                 {
-                    int n = getint(p), oldtype = NOTUSED;
-                    bool tweaked = false;
+                    int n = getint(p), oldtype = NOTUSED, newtype = NOTUSED;
+                    bool tweaked = false, inrange = n < MAXENTS;
                     loopk(3) getint(p);
+                    if(p.overread()) break;
                     if(sents.inrange(n)) oldtype = sents[n].type;
-                    else while(sents.length() <= n) sents.add();
-                    if((sents[n].type = getint(p)) != oldtype) tweaked = true;
-                    int numattrs = getint(p);
-                    while(sents[n].attrs.length() < max(5, numattrs)) sents[n].attrs.add(0);
-                    loopk(numattrs) sents[n].attrs[k] = getint(p);
-                    if(oldtype == PLAYERSTART || sents[n].type == PLAYERSTART) setupspawns(true);
-                    hasgameinfo = true;
-                    QUEUE_MSG;
-                    if(tweaked && enttype[sents[n].type].usetype != EU_NONE)
+                    else if(inrange) while(sents.length() <= n) sents.add();
+                    if((newtype = getint(p)) != oldtype && inrange)
                     {
-                        if(enttype[sents[n].type].usetype == EU_ITEM) setspawn(n, true, true, true);
-                        if(sents[n].type == TRIGGER) setuptriggers(true);
+                        sents[n].type = newtype;
+                        tweaked = true;
+                    }
+                    int numattrs = getint(p), realattrs =  min(max(5, numattrs), MAXENTATTRS);
+                    if(inrange) while(sents[n].attrs.length() < realattrs) sents[n].attrs.add(0);
+                    loopk(numattrs)
+                    {
+                        int attr = getint(p);
+                        if(p.overread()) break;
+                        if(inrange && k < MAXENTATTRS) sents[n].attrs[k] = attr;
+                    }
+                    if(inrange)
+                    {
+                        if(oldtype == PLAYERSTART || sents[n].type == PLAYERSTART) setupspawns(true);
+                        hasgameinfo = true;
+                        QUEUE_MSG;
+                        if(tweaked && enttype[sents[n].type].usetype != EU_NONE)
+                        {
+                            if(enttype[sents[n].type].usetype == EU_ITEM) setspawn(n, true, true, true);
+                            if(sents[n].type == TRIGGER) setuptriggers(true);
+                        }
                     }
                     break;
                 }

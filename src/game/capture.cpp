@@ -368,6 +368,7 @@ namespace capture
             if(!m_check(e.attrs[3], e.attrs[4], game::gamemode, game::mutators) || !isteam(game::gamemode, game::mutators, e.attrs[0], T_FIRST))
                 continue;
             st.addaffinity(e.o, e.attrs[0], i);
+            if(st.flags.length() >= MAXPARAMS) break;
         }
     }
 
@@ -408,6 +409,7 @@ namespace capture
                 }
             }
             if(p.overread()) break;
+            if(i >= MAXPARAMS) continue;
             while(!st.flags.inrange(i)) st.flags.add();
             capturestate::flag &f = st.flags[i];
             f.reset();
