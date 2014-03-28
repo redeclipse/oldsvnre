@@ -31,7 +31,7 @@ We chat via IRC in the channel #redeclipse on irc.freenode.net, if you don't hav
 
 = Open Source =
 
-The project is Free and Open Source meaning that you can both use it for free, and you can be apart of it by contributing in whatever way you can. These are people who have helped shape Red Eclipse into what you see today, and they are regular people just like you who volunteer their time or donate in the spirit of making a really cool game, your name could be here too.
+The project is Free and Open Source meaning that you can both use it for free, and you can be a part of it by contributing in whatever way you can. These are people who have helped shape Red Eclipse into what you see today, and they are regular people just like you who volunteer their time or donate in the spirit of making a really cool game, your name could be here too.
 
 == Developers ==
 
