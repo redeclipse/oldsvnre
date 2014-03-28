@@ -14,7 +14,8 @@ static bool fieldsactive = false;
 
 VAR(IDF_PERSIST, guishadow, 0, 2, 8);
 VAR(IDF_PERSIST, guiclicktab, 0, 1, 1);
-VAR(IDF_PERSIST, guiblend, 1, 255, 255);
+VAR(IDF_PERSIST, guitextblend, 1, 255, 255);
+VAR(IDF_PERSIST, guitextfade, 1, 200, 255);
 VAR(IDF_PERSIST, guilinesize, 1, 36, 128);
 VAR(IDF_PERSIST, guisepsize, 1, 10, 128);
 VAR(IDF_PERSIST, guiscaletime, 0, 250, VAR_MAX);
@@ -23,6 +24,7 @@ FVAR(IDF_PERSIST, guibgblend, 0, 0.5f, 1);
 VAR(IDF_PERSIST|IDF_HEX, guibordercolour, -1, 0x000000, 0xFFFFFF);
 FVAR(IDF_PERSIST, guiborderblend, 0, 1.f, 1);
 SVAR(0, guistatustext, "");
+FVAR(IDF_PERSIST, guihoverscale, 0, 0.3f, 1);
 
 static bool needsinput = false, hastitle = true, hasbgfx = true;
 
@@ -73,14 +75,14 @@ struct gui : guient
         else
         {
             cury = -ysize;
-            int x1 = curx+tx, x2 = x1+w+guibound[0]*2, y1 = cury-guibound[1]*2, y2 = cury-guibound[1]/2, alpha = guiblend;
+            int x1 = curx+tx, x2 = x1+w+guibound[0]*2, y1 = cury-guibound[1]*2, y2 = cury-guibound[1]/2, alpha = guitextblend;
             if(!visibletab())
             {
                 if(tcurrent && hitx>=x1 && hity>=y1 && hitx<x2 && hity<y2)
                 {
                     if(!guiclicktab || mouseaction[0]&GUI_UP) *tcurrent = tpos; // switch tab
                     tcolor = 0xFF4444;
-                    alpha = max(guiblend, 200);
+                    alpha = max(alpha, guitextfade);
                 }
                 else tcolor = vec::hexcolor(tcolor).mul(0.5f).tohexcolor();
             }
@@ -163,7 +165,7 @@ struct gui : guient
             } \
             x1 += guibound[1]/2; \
             y1 += guibound[1]/4; \
-            icon_(a, false, x1, y1, guibound[1], !hit, hit ? 0xFFFFFF : 0x888888); \
+            icon_(a, false, x1, y1, guibound[1], hit, 0xFFFFFF); \
             y1 += guibound[1]*3/2; \
         }
         if(!exittex) exittex = textureload(guiexittex, 3, true, false); \
@@ -476,7 +478,7 @@ struct gui : guient
                 py = y + space/2 - FONTH/2;
             }
             if(hit && hitfx) { forcecolor = true; color = 0xFF4444; }
-            text_(label, px, py, color, hit && hitfx ? 255 : guiblend, hit && mouseaction[0]&GUI_DOWN, forcecolor);
+            text_(label, px, py, color, hit && hitfx ? guitextblend : guitextfade, hit && mouseaction[0]&GUI_DOWN, forcecolor);
             if(hit)
             {
                 if(mouseaction[0]&GUI_PRESSED)
@@ -702,7 +704,9 @@ struct gui : guient
 
     void icon_(Texture *t, bool overlaid, int x, int y, int size, bool hit, int icolor)
     {
+        static const float tc[4][2] = { { 0, 0 }, { 1, 0 }, { 1, 1 }, { 0, 1 } };
         float xs = 0, ys = 0;
+        int textureid = -1;
         if(t)
         {
             float scale = float(size)/max(t->xs, t->ys); //scale and preserve aspect ratio
@@ -710,7 +714,7 @@ struct gui : guient
             ys = t->ys*scale;
             x += int((size-xs)/2);
             y += int((size-ys)/2);
-            glBindTexture(GL_TEXTURE_2D, t->id);
+            textureid = t->id;
         }
         else
         {
@@ -720,7 +724,7 @@ struct gui : guient
                 xs = 256*scale; ys = 256*scale;
                 x += int((size-xs)/2);
                 y += int((size-ys)/2);
-                glBindTexture(GL_TEXTURE_2D, lmprogtex);
+                textureid = lmprogtex;
             }
             else
             {
@@ -730,7 +734,7 @@ struct gui : guient
                 xs = t->xs*scale; ys = t->ys*scale;
                 x += int((size-xs)/2);
                 y += int((size-ys)/2);
-                glBindTexture(GL_TEXTURE_2D, t->id);
+                textureid = t->id;
             }
         }
         float xi = x, yi = y, xpad = 0, ypad = 0;
@@ -743,9 +747,22 @@ struct gui : guient
             xs -= 2*xpad;
             ys -= 2*ypad;
         }
-        static const float tc[4][2] = { { 0, 0 }, { 1, 0 }, { 1, 1 }, { 0, 1 } };
+        if(hit && hitfx)
+        {
+            float offx = xs*guihoverscale, offy = ys*guihoverscale;
+            if(!hovertex) hovertex = textureload(guihovertex, 3, true, false);
+            glBindTexture(GL_TEXTURE_2D, hovertex->id);
+            glColor3f(1.f, 1.f, 1.f);
+            glBegin(GL_TRIANGLE_STRIP);
+            glTexCoord2fv(tc[0]); glVertex2f(xi-offx,    yi-offy);
+            glTexCoord2fv(tc[1]); glVertex2f(xi+xs+offx, yi-offy);
+            glTexCoord2fv(tc[3]); glVertex2f(xi-offx,    yi+ys+offy);
+            glTexCoord2fv(tc[2]); glVertex2f(xi+xs+offx, yi+ys+offy);
+            glEnd();
+        }
+        glBindTexture(GL_TEXTURE_2D, textureid);
         vec color = vec::hexcolor(icolor);
-        if(hit && hitfx && !overlaid) color.div(2);
+        //if(hit && hitfx && !overlaid) color.div(2);
         glColor3fv(color.v);
         glBegin(GL_TRIANGLE_STRIP);
         glTexCoord2fv(tc[0]); glVertex2f(xi,    yi);
@@ -868,7 +885,7 @@ struct gui : guient
         if(text && *text)
         {
             int w = text_width(text);
-            text_(text, x+s/2-w/2, y+s/2-FONTH/2, 0xFFFFFF, guiblend, false);
+            text_(text, x+s/2-w/2, y+s/2-FONTH/2, 0xFFFFFF, guitextblend, false);
         }
     }
 
@@ -913,17 +930,17 @@ struct gui : guient
             if(icon)
             {
                 const char *tname = strstr(icon, "textures/") ? icon : makerelpath("textures", icon);
-                icon_(textureload(tname, 3, true, false), false, x, cury, guibound[1], faded && clickable && !hit, icolor);
+                icon_(textureload(tname, 3, true, false), false, x, cury, guibound[1], clickable && hit, icolor);
                 x += guibound[1];
             }
             if(icon && text) x += 8;
-            if(text) text_(text, x, cury, color, (hit && hitfx) || !faded || !clickable ? 255 : guiblend, hit && clickable, forcecolor);
+            if(text) text_(text, x, cury, color, (hit && hitfx) || !faded || !clickable ? guitextblend : guitextfade, hit && clickable, forcecolor);
         }
         if(font && *font) gui::popfont();
         return layout(w, h);
     }
 
-    static Texture *overlaytex, *slidertex, *exittex;
+    static Texture *overlaytex, *slidertex, *exittex, *hovertex;
 
     vec uiorigin, uiscale;
     guicb *cb;
@@ -1073,10 +1090,11 @@ struct gui : guient
     }
 };
 
-Texture *gui::overlaytex = NULL, *gui::slidertex = NULL, *gui::exittex = NULL;
+Texture *gui::overlaytex = NULL, *gui::slidertex = NULL, *gui::exittex = NULL, *gui::hovertex = NULL;
 TVARN(IDF_PERSIST|IDF_PRELOAD, guioverlaytex, "textures/guioverlay", gui::overlaytex, 0);
 TVARN(IDF_PERSIST|IDF_PRELOAD, guislidertex, "textures/guislider", gui::slidertex, 0);
-TVARN(IDF_PERSIST|IDF_PRELOAD, guiexittex, "textures/exit", gui::exittex, 0);
+TVARN(IDF_PERSIST|IDF_PRELOAD, guiexittex, "textures/guiexit", gui::exittex, 0);
+TVARN(IDF_PERSIST|IDF_PRELOAD, guihovertex, "textures/guihover", gui::hovertex, 0);
 
 vector<gui::list> gui::lists;
 float gui::basescale, gui::maxscale = 1, gui::hitx, gui::hity;
