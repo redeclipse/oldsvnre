@@ -93,7 +93,7 @@ WPSVAR(0, name,
     "melee",    "pistol",   "sword",    "shotgun",  "smg",      "flamer",   "plasma",   "rifle",    "grenade",  "mine",     "rocket"
 );
 WPVAR(0, add, 1, VAR_MAX,
-    1,          10,         1,          2,          35,         40,         20,         6,          1,          1,          1
+    1,          10,         1,          2,          50,         50,         20,         6,          1,          1,          1
 );
 WPFVARM(0, aidist, 0, FVAR_MAX,
     16.0f,      256.0f,     48.0f,      128.0f,     512.0f,     64.0f,      128.0f,     768.0f,     384.0f,     128.0f,     1024.0f,
@@ -347,7 +347,7 @@ WPFVARK(0, liquidcoast, 0, FVAR_MAX,
     0.0f,       2.0f,       0.0f,       2.0f,       2.0f,       1.0f,       1.0f,       2.0f,       2.0f,       2.0f,       2.0f
 );
 WPVAR(0, max, 1, VAR_MAX,
-    1,          10,          1,         8,          35,         40,         20,         6,          2,          2,          1
+    1,          10,          1,         8,          50,         50,         20,         6,          2,          2,          1
 );
 WPFVARK(0, minspeed, 0, FVAR_MAX,
     0.0f,       0.0f,       0.0f,       25.0f,      25.0f,      1.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,
