@@ -551,6 +551,7 @@ struct gui : guient
         char *result = NULL;
         if(visible())
         {
+            bool clrs = fieldtype == FIELDKEY;
             e->rendered = true;
             if(focus && e->unfocus) focus = false;
             bool hit = ishit(w, h) && e->mode!=EDITORREADONLY;
@@ -561,13 +562,14 @@ struct gui : guient
                 if(hit)
                 {
                     focus = true;
+                    if(mouseaction[0]&GUI_ALT) clrs = true;
                     if(e->unfocus) e->unfocus = false;
                 }
                 else if(editing) fieldmode = FIELDCOMMIT;
             }
             if(focus)
             {
-                if(fieldtype == FIELDKEY) e->clear();
+                if(clrs) e->clear();
                 useeditor(e->name, initmode, true, initval, parent);
                 e->mark(false);
                 if(fieldmode != FIELDCOMMIT && fieldmode != FIELDABORT) fieldmode = fieldtype;
