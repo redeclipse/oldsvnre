@@ -504,17 +504,24 @@ namespace bomber
         st.returnaffinity(i, lastmillis, value!=0, isreset);
     }
 
+    VAR(IDF_PERSIST, showbomberdists, 0, 2, 2); // 0 = off, 1 = self only, 2 = all
     void scoreaffinity(gameent *d, int relay, int goal, int score)
     {
         if(!st.flags.inrange(relay) || !st.flags.inrange(goal)) return;
         bomberstate::flag &f = st.flags[relay], &g = st.flags[goal];
+        string extra; extra[0] = 0;
+        if(showbomberdists >= (d != game::player1 ? 2 : 1))
+        {
+            if(f.droptime) formatstring(extra)(" from \fs\fy%.2f\fom\fS", f.droppos.dist(d->o)/8.f);
+            else copystring(extra, " with a \fs\fytouchdown\fS");
+        }
         affinityeffect(goal, d->team, g.spawnloc, f.spawnloc, 3, "DESTROYED");
         destroyaffinity(g.spawnloc);
         entities::execlink(NULL, f.ent, false);
         entities::execlink(NULL, g.ent, false);
         hud::teamscore(d->team).total = score;
         defformatstring(gteam)("%s", game::colourteam(g.team, "bombtex"));
-        game::announcef(S_V_BOMBSCORE, CON_SELF, d, true, "\fa%s destroyed the %s base for team %s (score: \fs\fc%d\fS, time taken: \fs\fc%s\fS)", game::colourname(d), gteam, game::colourteam(d->team), score, timestr(lastmillis-f.inittime));
+        game::announcef(S_V_BOMBSCORE, CON_SELF, d, true, "\fa%s destroyed the %s base for team %s%s (score: \fs\fc%d\fS, time taken: \fs\fc%s\fS)", game::colourname(d), gteam, game::colourteam(d->team), extra, score, timestr(lastmillis-f.inittime));
         st.returnaffinity(relay, lastmillis, false);
     }
 

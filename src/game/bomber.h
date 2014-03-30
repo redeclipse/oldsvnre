@@ -22,7 +22,7 @@ struct bomberstate
         gameent *owner, *lastowner;
         projent *proj;
         int displaytime, pickuptime, movetime, inittime, viewtime, rendertime, interptime;
-        vec viewpos, renderpos, interppos, render, above;
+        vec droppos, viewpos, renderpos, interppos, render, above;
         entitylight light;
 #endif
 
@@ -43,7 +43,7 @@ struct bomberstate
             owner = lastowner = NULL;
             proj = NULL;
             displaytime = pickuptime = movetime = inittime = viewtime = rendertime = interptime = 0;
-            viewpos = renderpos = vec(-1, -1, -1);
+            viewpos = renderpos = droppos = vec(-1, -1, -1);
 #endif
             team = T_NEUTRAL;
             taketime = droptime = 0;
@@ -180,6 +180,7 @@ struct bomberstate
         f.owner = -1;
         f.votes.shrink(0);
 #else
+        f.droppos = o;
         f.pickuptime = 0;
         f.movetime = t;
         if(!f.inittime) f.inittime = t;
