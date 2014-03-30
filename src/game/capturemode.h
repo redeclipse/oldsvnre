@@ -223,21 +223,29 @@ struct captureservmode : capturestate, servmode
     void checkclient(clientinfo *ci)
     {
         if(!canplay(hasflaginfo) || ci->state.state != CS_ALIVE || m_insta(gamemode, mutators)) return;
-        #define capturebuffx(a) (G(capturebuffing)&a && owner && owner->team == ci->team && ci->state.o.dist(owner->state.o) <= G(capturebuffarea))
-        #define capturebuff1    (G(capturebuffing)&1 && f.team == ci->team && (owner ? (owner->clientnum == ci->clientnum || capturebuffx(4)): (!f.droptime || m_gsp2(gamemode, mutators)) && ci->state.o.dist(f.droptime ? f.droploc : f.spawnloc) <= G(capturebuffarea)))
-        #define capturebuff2    (G(capturebuffing)&2 && f.team != ci->team && owner && (owner->clientnum == ci->clientnum || capturebuffx(8)))
+        bool buff = false;
         if(G(capturebuffing)) loopv(flags)
         {
             flag &f = flags[i];
             clientinfo *owner = f.owner >= 0 ? (clientinfo *)getinfo(f.owner) : NULL;
-            if(capturebuff1 || capturebuff2)
+            if(f.team == ci->team)
             {
-                if(!ci->state.lastbuff) sendf(-1, 1, "ri4", N_SPHY, ci->clientnum, SPHY_BUFF, 1);
-                ci->state.lastbuff = gamemillis;
-                return;
+                if((G(capturebuffing)&1 || G(capturebuffing)&2) && !owner && (!f.droptime || m_gsp2(gamemode, mutators) || G(capturebuffing)&2) && ci->state.o.dist(f.droptime ? f.droploc : f.spawnloc) <= G(capturebuffarea)) { buff = true; break; }
+                if(G(capturebuffing)&4 && owner && ci == owner) { buff = true; break; }
+                if(G(capturebuffing)&8 && owner && owner->team == ci->team && ci->state.o.dist(owner->state.o) <= G(capturebuffarea)) { buff = true; break; }
+            }
+            else
+            {
+                if(G(capturebuffing)&16 && ci == owner) { buff = true; break; }
+                if(G(capturebuffing)&32 && owner && owner->team == ci->team && ci->state.o.dist(owner->state.o) <= G(capturebuffarea)) { buff = true; break; }
             }
         }
-        if(ci->state.lastbuff && (!G(capturebuffing) || gamemillis-ci->state.lastbuff > G(capturebuffdelay)))
+        if(buff)
+        {
+            if(!ci->state.lastbuff) sendf(-1, 1, "ri4", N_SPHY, ci->clientnum, SPHY_BUFF, 1);
+            ci->state.lastbuff = gamemillis;
+        }
+        else if(ci->state.lastbuff && (!G(capturebuffing) || gamemillis-ci->state.lastbuff > G(capturebuffdelay)))
         {
             ci->state.lastbuff = 0;
             sendf(-1, 1, "ri4", N_SPHY, ci->clientnum, SPHY_BUFF, 0);
