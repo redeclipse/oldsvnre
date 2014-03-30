@@ -149,6 +149,7 @@ namespace bomber
                     pushfont("emphasis");
                     ty += draw_textx("Holding: \fs\f[%d]\f(%s)bomb\fS", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, pulsecols[PULSE_DISCO][clamp((lastmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)], hud::bombtex)*hud::noticescale;
                     popfont();
+                    bool important = false;
                     if(carrytime)
                     {
                         int delay = carrytime-(lastmillis-f.taketime);
@@ -161,12 +162,13 @@ namespace bomber
                             ty += draw_textx("Killing enemies resets fuse timer", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED)*hud::noticescale;
                             popfont();
                         }
+                        if(delay <= carrytime/4) important = true;
                     }
                     if(game::focus == game::player1)
                     {
                         SEARCHBINDCACHE(altkey)("affinity", 0, "\f{\fs\fzuy", "\fS}");
-                        pushfont("reduced");
-                        ty += draw_textx("Press %s to throw", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, altkey)*hud::noticescale;
+                        pushfont(important ? "emphasis" : "reduced");
+                        ty += draw_textx(important ? "\fs\fzuyPress %s to throw\fS" : "Press %s to throw", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, altkey)*hud::noticescale;
                         popfont();
                     }
                     break;
