@@ -679,6 +679,7 @@ struct filestream : stream
 
     int read(void *buf, int len) { return (int)fread(buf, 1, len, file); }
     int write(const void *buf, int len) { return (int)fwrite(buf, 1, len, file); }
+    bool flush() { return !fflush(file); }
     int getchar() { return fgetc(file); }
     bool putchar(int c) { return fputc(c, file)!=EOF; }
     bool getline(char *str, int len) { return fgets(str, len, file)!=NULL; }
@@ -855,7 +856,7 @@ struct gzstream : stream
         {
             int err = zfile.avail_out > 0 ? deflate(&zfile, Z_FINISH) : Z_OK;
             if(err != Z_OK && err != Z_STREAM_END) break;
-            flush();
+            flushbuf();
             if(err == Z_STREAM_END) break;
         }
         uchar trailer[8] =
@@ -959,17 +960,20 @@ struct gzstream : stream
         return len - zfile.avail_out;
     }
 
-    bool flush()
+    bool flushbuf(bool full = false)
     {
+        if(full) deflate(&zfile, Z_SYNC_FLUSH);
         if(zfile.next_out && zfile.avail_out < BUFSIZE)
         {
-            if(file->write(buf, BUFSIZE - zfile.avail_out) != int(BUFSIZE - zfile.avail_out))
+            if(file->write(buf, BUFSIZE - zfile.avail_out) != int(BUFSIZE - zfile.avail_out) || (full && !file->flush()))
                 return false;
         }
         zfile.next_out = buf;
         zfile.avail_out = BUFSIZE;
         return true;
     }
+
+    bool flush() { return flushbuf(true); }
 
     int write(const void *buf, int len)
     {
@@ -978,7 +982,7 @@ struct gzstream : stream
         zfile.avail_in = len;
         while(zfile.avail_in > 0)
         {
-            if(!zfile.avail_out && !flush()) { stopwriting(); break; }
+            if(!zfile.avail_out && !flushbuf()) { stopwriting(); break; }
             int err = deflate(&zfile, Z_NO_FLUSH);
             if(err != Z_OK) { stopwriting(); break; }
         }
@@ -1155,6 +1159,8 @@ struct utf8stream : stream
         pos += next;
         return next;
     }
+
+    bool flush() { return file->flush(); }
 };
 
 stream *openrawfile(const char *filename, const char *mode)
