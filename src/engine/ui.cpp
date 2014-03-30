@@ -3,7 +3,7 @@
 int uimillis = -1;
 
 VAR(IDF_READONLY, guilayoutpass, 1, 0, -1);
-static bool actionon = false;
+bool guiactionon = false;
 int mouseaction[2] = {0}, guibound[2] = {0};
 
 static float firstx, firsty;
@@ -1142,7 +1142,7 @@ namespace UI
                 if(active()) return true;
                 break;
             case -3: mouseaction[0] |= GUI_ALT;
-            case -1: mouseaction[0] |= (actionon=isdown) ? GUI_DOWN : GUI_UP;
+            case -1: mouseaction[0] |= (guiactionon=isdown) ? GUI_DOWN : GUI_UP;
                 if(isdown) { firstx = gui::hitx; firsty = gui::hity; }
                 if(active()) return true;
                 break;
@@ -1221,7 +1221,7 @@ namespace UI
 
     void render()
     {
-        if(actionon) mouseaction[0] |= GUI_PRESSED;
+        if(guiactionon) mouseaction[0] |= GUI_PRESSED;
 
         gui::reset();
         guis.shrink(0);

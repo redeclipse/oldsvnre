@@ -714,6 +714,7 @@ extern bool limitsky();
 
 // gui
 extern int mouseaction[2], guibound[2];
+extern bool guiactionon;
 
 extern void progressmenu();
 extern void mainmenu();

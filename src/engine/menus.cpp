@@ -24,7 +24,11 @@ struct menu : guicb
         cgui = &g;
         cmenu = this;
         guipasses = passes;
-        if(!passes) world = (identflags&IDF_WORLD)!=0;
+        if(!passes)
+        {
+            world = (identflags&IDF_WORLD)!=0;
+            guiactionon = false;
+        }
         if(initscript)
         {
             if(world && passes) { WITHWORLD(execute(initscript)); }
@@ -41,7 +45,7 @@ struct menu : guicb
         guipasses = -1;
         cmenu = NULL;
         cgui = NULL;
-        passes++;
+        if((++passes) <= 0) passes = 1;
     }
 
     virtual void clear() {}
