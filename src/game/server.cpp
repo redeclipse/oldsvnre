@@ -3588,7 +3588,7 @@ namespace server
             }
             hurt = min(m->state.health, realdamage);
             m->state.health = min(m->state.health-realdamage, m_maxhealth(gamemode, mutators, m->state.model));
-            if(m->state.health <= m_health(gamemode, mutators, m->state.model)) m->state.lastregen = 0;
+            /*if(m->state.health <= m_health(gamemode, mutators, m->state.model))*/ m->state.lastregen = 0;
             m->state.lastpain = gamemillis;
             v->state.damage += realdamage;
             if(m->state.health <= 0) realflags |= HIT_KILL;

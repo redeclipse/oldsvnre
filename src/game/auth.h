@@ -109,7 +109,7 @@ namespace auth
             srvmsgftforce(ci->clientnum, CON_EVENT, "\foplease wait, still processing previous attempt..");
             return true;
         }
-        filtertext(ci->authname, user, true, true, false, 100);
+        filtertext(ci->authname, user, true, true, true, 100);
         reqauth(ci);
         return true;
     }
