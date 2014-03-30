@@ -99,14 +99,15 @@ static hashtable<char *, authuser> authusers;
 void addauth(char *name, char *flags, char *pubkey, char *email)
 {
     string authname;
-    filtertext(authname, name, true, true, true, 100);
-    if(authusers.access(authname))
+    if(filtertext(authname, name, true, true, true, 100)) name = authname;
+    if(authusers.access(name))
     {
-        conoutf("auth handle \"%s\" already exists, skipping (%s)", authname, email);
+        conoutf("auth handle \"%s\" already exists, skipping (%s)", name, email);
         return;
     }
-    authuser &u = authusers[authname];
-    u.name = newstring(authname);
+    name = newstring(name);
+    authuser &u = authusers[name];
+    u.name = name;
     u.flags = newstring(flags);
     u.pubkey = parsepubkey(pubkey);
     u.email = newstring(email);
