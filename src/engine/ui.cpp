@@ -551,11 +551,10 @@ struct gui : guient
         char *result = NULL;
         if(visible())
         {
-            bool clrs = fieldtype == FIELDKEY;
             e->rendered = true;
             if(focus && e->unfocus) focus = false;
-            bool hit = ishit(w, h) && e->mode!=EDITORREADONLY;
-            bool editing = (fieldmode != FIELDSHOW) && e==currentfocus() && e->mode!=EDITORREADONLY;
+            bool hit = ishit(w, h) && e->mode!=EDITORREADONLY, clrs = fieldtype == FIELDKEY,
+                 editing = (fieldmode != FIELDSHOW) && e==currentfocus() && e->mode!=EDITORREADONLY;
             if(mouseaction[0]&GUI_UP && mergedepth >= 0 && hit) mouseaction[0] &= ~GUI_UP;
             if(mouseaction[0]&GUI_DOWN) //mouse request focus
             {
