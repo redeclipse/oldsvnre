@@ -178,7 +178,7 @@ void renderaction(int idx, int size, Texture *t, char code, const char *name, bo
         if(idx) drawslice(0.5f/8+(idx-2)/float(8), 1/float(8), hudwidth/2, hudheight/2, size);
         else drawsized(hudwidth/2-size*3/8, hudheight/2-size*3/8, size*3/4);
     }
-    if(code) y += draw_textx("[%s]", x, y, r, g, b, int((idx ? 255 : f)*compassblend), compassdir[idx].align, -1, -1, getkeyname(code));
+    if(code) y += draw_textx("\f{%s}", x, y, r, g, b, int((idx ? 255 : f)*compassblend), compassdir[idx].align, -1, -1, getkeyname(code));
     popfont();
     pushfont(!idx || hit ? "emphasis" : "reduced");
     draw_textx("%s", x, y, r, g, b, int(f*compassblend), compassdir[idx].align, -1, -1, name);
@@ -203,7 +203,7 @@ void rendercmenu()
         loopi(curcompass->actions.length()-8)
         {
             caction &c = curcompass->actions[i+8];
-            y += draw_textx("\fs\fa[\fS%s\fs\fa]\fS %s", x, y, 255, 255, 255, int(192*compassblend), TEXT_CENTERED, -1, -1, getkeyname(c.code), c.name);
+            y += draw_textx("\f{%s} %s", x, y, 255, 255, 255, int(192*compassblend), TEXT_CENTERED, -1, -1, getkeyname(c.code), c.name);
             if(y >= maxy) break;
         }
         popfont();
