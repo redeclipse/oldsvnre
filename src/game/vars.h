@@ -126,6 +126,7 @@ GVARF(IDF_ADMIN, rotatemodefilter, 0, G_LIMIT, G_ALL, sv_rotatemodefilter &= ~G_
 GVAR(IDF_ADMIN, rotatemuts, 0, 3, VAR_MAX); // any more than one decreases the chances of it picking
 GVAR(IDF_ADMIN, rotatemutsfilter, 0, G_M_ROTATE, G_M_ALL); // mutators not in this array are filtered out
 GVAR(IDF_ADMIN, rotatemapsfilter, 0, 2, 2); // 0 = off, 1 = filter based on mutators, 2 = also filter based on players
+GVAR(IDF_ADMIN, rotatecycle, 0, 30, VAR_MAX); // 0 = off, else = minutes between forced re-cycles
 
 GVAR(IDF_ADMIN, varslock, 0, PRIV_OPERATOR, PRIV_CREATOR);
 GVAR(IDF_ADMIN, votelock, 0, PRIV_OPERATOR, PRIV_CREATOR);
