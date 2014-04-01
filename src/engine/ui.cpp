@@ -84,7 +84,7 @@ struct gui : guient
                     tcolor = 0xFF4444;
                     alpha = max(alpha, guitextfade);
                 }
-                else tcolor = vec::hexcolor(tcolor).mul(0.5f).tohexcolor();
+                else tcolor = vec::hexcolor(tcolor).mul(0.25f).tohexcolor();
             }
             if(hasbgfx && guibgcolour >= 0)
             {
