@@ -402,7 +402,7 @@ namespace server
 
     string smapname;
     int gamemode = G_EDITMODE, mutators = 0, gamemillis = 0, gamelimit = 0, mastermode = MM_OPEN;
-    int interm = 0, timeremaining = -1, oldtimelimit = -1, gamewait = 0, lastwaitinfo = 0, lastteambalance = 0, nextteambalance = 0;
+    int interm = 0, timeremaining = -1, oldtimelimit = -1, gamewait = 0, lastwaitinfo = 0, lastteambalance = 0, nextteambalance = 0, lastrotatecycle = 0;
     bool hasgameinfo = false, maprequest = false, inovertime = false, updatecontrols = false, mapsending = false, shouldcheckvotes = false, firstblood = false;
     enet_uint32 lastsend = 0;
     stream *mapdata[SENDMAP_MAX] = { NULL };
@@ -1017,6 +1017,7 @@ namespace server
         if(G(resetlimitsonend)) resetlimits();
         if(G(resetvarsonend) || init) resetgamevars(true, true);
         changemap();
+        lastrotatecycle = clocktime;
     }
 
     void start()
@@ -4529,6 +4530,7 @@ namespace server
             if(interm && totalmillis-interm >= 0) startintermission(true); // wait then call for next map
             if(shouldcheckvotes) checkvotes();
         }
+        else if(G(rotatecycle) && clocktime-lastrotatecycle >= G(rotatecycle)*60) cleanup();
         aiman::checkai();
         auth::update();
     }
