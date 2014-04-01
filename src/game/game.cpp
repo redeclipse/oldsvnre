@@ -55,10 +55,11 @@ namespace game
     FVAR(IDF_PERSIST, thirdpersonblend, 0, 1, 1);
     VAR(IDF_PERSIST, thirdpersoninterp, 0, 100, VAR_MAX);
     FVAR(IDF_PERSIST, thirdpersondist, FVAR_NONZERO, 14, 20);
-    FVAR(IDF_PERSIST, thirdpersonside, FVAR_MIN, 14, 20);
-    VAR(IDF_PERSIST, thirdpersoncursor, 0, 2, 2);
+    FVAR(IDF_PERSIST, thirdpersonside, FVAR_MIN, 7, 20);
+    VAR(IDF_PERSIST, thirdpersoncursor, 0, 1, 2);
     FVAR(IDF_PERSIST, thirdpersoncursorx, 0, 0.5f, 1);
     FVAR(IDF_PERSIST, thirdpersoncursory, 0, 0.5f, 1);
+    FVAR(IDF_PERSIST, thirdpersoncursordist, 0, 256, FVAR_MAX);
 
     VARF(0, follow, -1, -1, VAR_MAX, followswitch(0));
 
@@ -2238,8 +2239,9 @@ namespace game
             {
                 case 1:
                 {
-                    vec loc(0, 0, 0);
-                    if(vectocursor(worldpos, loc.x, loc.y, loc.z))
+                    vec loc(0, 0, 0), pos = worldpos, dir = vec(worldpos).sub(focus->o);
+                    if(thirdpersoncursordist > 0 && dir.magnitude() > thirdpersoncursordist) pos = dir.normalize().mul(thirdpersoncursordist).add(focus->o);
+                    if(vectocursor(pos, loc.x, loc.y, loc.z))
                     {
                         float amt = curtime/float(thirdpersoninterp);
                         cursorx = clamp(cursorx+((loc.x-cursorx)*amt), 0.f, 1.f);
