@@ -232,12 +232,12 @@ struct captureservmode : capturestate, servmode
             {
                 if((G(capturebuffing)&1 || G(capturebuffing)&2) && !owner && (!f.droptime || m_gsp2(gamemode, mutators) || G(capturebuffing)&2) && ci->state.o.dist(f.droptime ? f.droploc : f.spawnloc) <= G(capturebuffarea)) { buff = true; break; }
                 if(G(capturebuffing)&4 && owner && ci == owner) { buff = true; break; }
-                if(G(capturebuffing)&8 && owner && owner->team == ci->team && ci->state.o.dist(owner->state.o) <= G(capturebuffarea)) { buff = true; break; }
+                if(G(capturebuffing)&8 && owner && ci != owner && owner->team == ci->team && ci->state.o.dist(owner->state.o) <= G(capturebuffarea)) { buff = true; break; }
             }
             else
             {
                 if(G(capturebuffing)&16 && ci == owner) { buff = true; break; }
-                if(G(capturebuffing)&32 && owner && owner->team == ci->team && ci->state.o.dist(owner->state.o) <= G(capturebuffarea)) { buff = true; break; }
+                if(G(capturebuffing)&32 && owner && ci != owner && owner->team == ci->team && ci->state.o.dist(owner->state.o) <= G(capturebuffarea)) { buff = true; break; }
             }
         }
         if(buff)
