@@ -119,13 +119,18 @@ namespace capture
                 else ty += draw_textx("Buffing: \fs\fo%d%%\fS damage, \fs\fg%d%%\fS shield", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, int(capturebuffdamage*100), int(capturebuffshield*100))*hud::noticescale;
                 popfont();
             }
+            bool ownflag = false;
             static vector<int> pickup, hasflags, taken, droppedflags;
             pickup.setsize(0); hasflags.setsize(0); taken.setsize(0); droppedflags.setsize(0);
             loopv(st.flags)
             {
                 capturestate::flag &f = st.flags[i];
                 if(!entities::ents.inrange(f.ent)) continue;
-                if(f.owner == game::focus) hasflags.add(i);
+                if(f.owner == game::focus)
+                {
+                    hasflags.add(i);
+                    if(f.team == game::focus->team) ownflag = true;
+                }
                 else if(game::focus == game::player1 && canpickup(game::focus, i, true)) pickup.add(i);
                 else if(f.team == game::focus->team)
                 {
@@ -138,6 +143,13 @@ namespace capture
                 pushfont("emphasis");
                 char *str = buildflagstr(hasflags, hasflags.length() <= 3);
                 ty += draw_textx("Holding: \fs%s\fS", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, str)*hud::noticescale;
+                if(capturebuffing&(ownflag ? 8 : 32))
+                {
+                    pushfont("reduced");
+                    if(capturebuffarea > 0) ty += draw_textx("Buffing team-mates within \fs\fy%.2f\fom\fS", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, capturebuffarea/8.f)*hud::noticescale;
+                    else ty += draw_textx("Buffing ALL team-mates", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, capturebuffarea/8.f)*hud::noticescale;
+                    popfont();
+                }
                 popfont();
             }
             if(!pickup.empty())

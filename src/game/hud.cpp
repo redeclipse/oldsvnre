@@ -1294,7 +1294,7 @@ namespace hud
         if(noticestone) skewcolour(tr, tg, tb, noticestone);
 
         if(hastkwarn(game::focus)) // first and foremost
-            ty += draw_textx("\fzryDo NOT shoot team mates", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
+            ty += draw_textx("\fzryDo NOT shoot team-mates", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
 
         if(lastmillis-game::maptime <= noticetitle)
         {
