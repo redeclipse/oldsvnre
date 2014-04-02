@@ -147,7 +147,7 @@ namespace capture
                 {
                     pushfont("reduced");
                     if(capturebuffarea > 0) ty += draw_textx("Buffing team-mates within \fs\fy%.2f\fom\fS", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, capturebuffarea/8.f)*hud::noticescale;
-                    else ty += draw_textx("Buffing ALL team-mates", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, capturebuffarea/8.f)*hud::noticescale;
+                    else ty += draw_textx("Buffing \fs\fyALL\fS team-mates", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1)*hud::noticescale;
                     popfont();
                 }
                 popfont();
