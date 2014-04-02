@@ -204,7 +204,7 @@ struct defendservmode : defendstate, servmode
         if(G(defendbuffing)) loopv(flags)
         {
             flag &b = flags[i];
-            if((defendbuff1 || defendbuff2) && insideaffinity(b, ci->state.o, G(defendbuffarea)))
+            if((defendbuff1 || defendbuff2) && (G(defendbuffarea) ? insideaffinity(b, ci->state.o, G(defendbuffarea)) : true))
             {
                 if(!ci->state.lastbuff) sendf(-1, 1, "ri4", N_SPHY, ci->clientnum, SPHY_BUFF, 1);
                 ci->state.lastbuff = gamemillis;

@@ -304,7 +304,7 @@ struct bomberservmode : bomberstate, servmode
     void checkclient(clientinfo *ci)
     {
         if(!canplay(hasflaginfo) || ci->state.state != CS_ALIVE || m_insta(gamemode, mutators)) return;
-        #define bomberbuff1 (G(bomberbuffing)&1 && isbomberhome(f, ci->team) && ci->state.o.dist(f.spawnloc) <= G(bomberbuffarea))
+        #define bomberbuff1 (G(bomberbuffing)&1 && isbomberhome(f, ci->team) && (G(bomberbuffarea) > 0 ? ci->state.o.dist(f.spawnloc) <= G(bomberbuffarea) : true))
         #define bomberbuff2 (G(bomberbuffing)&2 && isbomberaffinity(f) && f.owner == ci->clientnum)
         if(G(bomberbuffing)) loopv(flags)
         {

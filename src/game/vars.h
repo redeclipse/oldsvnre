@@ -184,7 +184,7 @@ GVAR(0, balanceduke, 0, 0, 1); // enable in duel/survivor
 GVAR(0, campaignghost, 0, 0, 1); // 0 = all players are solid, 1 = all players are ghosts
 #endif
 GVAR(0, trialghost, 0, 1, 1); // 0 = all players are solid, 1 = all players are ghosts
-GVAR(0, gauntletghost, 0, 2, 2); // 0 = all players are solid, 1 = all players are ghosts, 2 = team mates are ghosts
+GVAR(0, gauntletghost, 0, 2, 2); // 0 = all players are solid, 1 = all players are ghosts, 2 = team-mates are ghosts
 
 GFVAR(0, maxhealth, 0, 1.5f, FVAR_MAX);
 GFVAR(0, maxhealthvampire, 0, 3.0f, FVAR_MAX);
