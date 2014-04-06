@@ -1414,7 +1414,7 @@ namespace server
         if(req)
         {
             checkdemorecord(true);
-            if(!maprequest && G(votelimit) && G(votelock) != PRIV_MAX && G(modelock) != PRIV_MAX && G(mapslock) != PRIV_MAX)
+            if(!maprequest && G(votelimit))
             {
                 sendf(-1, 1, "ri", N_NEWGAME);
                 maprequest = true;
@@ -2410,8 +2410,7 @@ namespace server
         }
         if(!hasvote)
         {
-            if(G(modelock) == PRIV_MAX && G(mapslock) == PRIV_MAX && !haspriv(ci, PRIV_MAX, "vote for a new game")) return;
-            else if(G(votelock)) switch(G(votelocktype))
+            if(G(votelock)) switch(G(votelocktype))
             {
                 case 1: if(!haspriv(ci, G(votelock), "vote for a new game")) return; break;
                 case 2:
