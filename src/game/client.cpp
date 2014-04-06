@@ -663,9 +663,8 @@ namespace client
 
     bool ismodelocked(int reqmode, int reqmuts, int askmuts = 0, const char *reqmap = NULL)
     {
-        if(m_local(reqmode) && remote) return true;
-        if(G(modelock) == PRIV_MAX && G(mapslock) == PRIV_MAX && !haspriv(game::player1, PRIV_MAX)) return true;
-        else if(G(votelock)) switch(G(votelocktype))
+        if(!m_game(reqmode) || (m_local(reqmode) && remote)) return true;
+        if(G(votelock)) switch(G(votelocktype))
         {
             case 1: if(!haspriv(game::player1, G(votelock))) return true; break;
             case 2:
@@ -677,9 +676,8 @@ namespace client
                 break;
             case 0: default: break;
         }
-        int rmode = reqmode, rmuts = reqmuts;
-        modecheck(rmode, rmuts, askmuts);
-        if(askmuts && !mutscmp(askmuts, rmuts)) return true;
+        modecheck(reqmode, reqmuts, askmuts);
+        if(askmuts && !mutscmp(askmuts, reqmuts)) return true;
         if(G(modelock)) switch(G(modelocktype))
         {
             case 1: if(!haspriv(game::player1, G(modelock))) return true; break;
