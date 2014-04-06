@@ -245,7 +245,7 @@ struct captureservmode : capturestate, servmode
             if(!ci->state.lastbuff) sendf(-1, 1, "ri4", N_SPHY, ci->clientnum, SPHY_BUFF, 1);
             ci->state.lastbuff = gamemillis;
         }
-        else if(ci->state.lastbuff && (!G(capturebuffing) || gamemillis-ci->state.lastbuff > G(capturebuffdelay)))
+        else if(ci->state.lastbuff && (!G(capturebuffing) || gamemillis-ci->state.lastbuff >= G(capturebuffdelay)))
         {
             ci->state.lastbuff = 0;
             sendf(-1, 1, "ri4", N_SPHY, ci->clientnum, SPHY_BUFF, 0);

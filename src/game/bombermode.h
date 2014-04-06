@@ -316,7 +316,7 @@ struct bomberservmode : bomberstate, servmode
                 return;
             }
         }
-        if(ci->state.lastbuff && (!G(bomberbuffing) || gamemillis-ci->state.lastbuff > G(bomberbuffdelay)))
+        if(ci->state.lastbuff && (!G(bomberbuffing) || gamemillis-ci->state.lastbuff >= G(bomberbuffdelay)))
         {
             ci->state.lastbuff = 0;
             sendf(-1, 1, "ri4", N_SPHY, ci->clientnum, SPHY_BUFF, 0);

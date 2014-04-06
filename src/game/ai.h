@@ -208,10 +208,10 @@ namespace ai
     {
         vector<aistate> state;
         vector<int> route;
-        vec target, spot;
+        vec target, spot, views, aimrnd;
         int weappref, enemy, enemyseen, enemymillis, prevnodes[NUMPREVNODES], targnode, targlast, targtime, targseq,
             lastrun, lastaction, lastcheck, jumpseed, jumprand, blocktime, blockseq, lastaimrnd, lastmelee, lastturn;
-        float targyaw, targpitch, views[3], aimrnd[3];
+        float targyaw, targpitch;
         bool dontmove, tryreset;
 
         aiinfo()

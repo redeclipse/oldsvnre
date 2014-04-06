@@ -211,7 +211,7 @@ struct defendservmode : defendstate, servmode
                 return;
             }
         }
-        if(ci->state.lastbuff && (!G(defendbuffing) || gamemillis-ci->state.lastbuff > G(defendbuffdelay)))
+        if(ci->state.lastbuff && (!G(defendbuffing) || gamemillis-ci->state.lastbuff >= G(defendbuffdelay)))
         {
             ci->state.lastbuff = 0;
             sendf(-1, 1, "ri4", N_SPHY, ci->clientnum, SPHY_BUFF, 0);
