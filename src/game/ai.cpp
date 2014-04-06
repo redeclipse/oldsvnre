@@ -156,6 +156,7 @@ namespace ai
                 loopk(3) d->ai->aimrnd[k] = rndaioffset(e->radius);
                 int dur = (d->skill+10)*10;
                 d->ai->lastaimrnd = lastmillis+dur+rnd(dur);
+                d->ai->aimrnd.mul(e->vel.magnitude()/movespeed);
             }
             loopk(3) o[k] += d->ai->aimrnd[k];
         }
