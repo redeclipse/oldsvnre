@@ -3998,14 +3998,14 @@ namespace server
             }
             else if(gs.weapload[gs.weapselect] > 0)
             {
-                takeammo(ci, gs.weapselect, gs.weapload[gs.weapselect]+sub);
+                takeammo(ci, gs.weapselect, gs.weapload[gs.weapselect]);
                 gs.reloads[gs.weapselect] = max(gs.reloads[gs.weapselect]-1, 0);
-                gs.weapload[gs.weapselect] = -gs.weapload[gs.weapselect];
-                sendf(ci->clientnum, 1, "ri6", N_RELOAD, ci->clientnum, gs.weapselect, gs.weapload[gs.weapselect], gs.ammo[gs.weapselect], gs.reloads[gs.weapselect]);
+                gs.weapload[gs.weapselect] = -gs.weapload[gs.weapselect]; // the client should already do this for themself
+                sendf(-1, 1, "ri6x", N_RELOAD, ci->clientnum, gs.weapselect, gs.weapload[gs.weapselect], gs.ammo[gs.weapselect], gs.reloads[gs.weapselect], ci->clientnum);
             }
             else return;
         }
-        else takeammo(ci, weap, sub);
+        takeammo(ci, weap, sub);
         gs.setweapstate(weap, WS(flags) ? W_S_SECONDARY : W_S_PRIMARY, W2(weap, attackdelay, WS(flags)), millis);
         sendf(-1, 1, "ri8ivx", N_SHOTFX, ci->clientnum, weap, flags, scale, from.x, from.y, from.z, shots.length(), shots.length()*sizeof(shotmsg)/sizeof(int), shots.getbuf(), ci->clientnum);
         gs.weapshot[weap] = sub;
@@ -4033,15 +4033,15 @@ namespace server
             if(!gs.canswitch(weap, m_weapon(gamemode, mutators), millis, (1<<W_S_SWITCH)|(1<<W_S_RELOAD)))
             {
                 if(G(serverdebug)) srvmsgf(ci->clientnum, "sync error: switch [%d] failed - current state disallows it", weap);
-                sendf(ci->clientnum, 1, "ri3", N_WSELECT, ci->clientnum, gs.weapselect);
+                sendf(-1, 1, "ri3", N_WSELECT, ci->clientnum, gs.weapselect);
                 return;
             }
             else if(gs.weapload[gs.weapselect] > 0)
             {
                 takeammo(ci, gs.weapselect, gs.weapload[gs.weapselect]);
                 gs.reloads[gs.weapselect] = max(gs.reloads[gs.weapselect]-1, 0);
-                gs.weapload[gs.weapselect] = -gs.weapload[gs.weapselect];
-                sendf(ci->clientnum, 1, "ri6", N_RELOAD, ci->clientnum, gs.weapselect, gs.weapload[gs.weapselect], gs.ammo[gs.weapselect], gs.reloads[gs.weapselect]);
+                gs.weapload[gs.weapselect] = -gs.weapload[gs.weapselect]; // the client should already do this for themself
+                sendf(-1, 1, "ri6x", N_RELOAD, ci->clientnum, gs.weapselect, gs.weapload[gs.weapselect], gs.ammo[gs.weapselect], gs.reloads[gs.weapselect], ci->clientnum);
             }
             else return;
         }
@@ -4092,13 +4092,13 @@ namespace server
         if(!gs.isalive(gamemillis) || !isweap(weap))
         {
             if(G(serverdebug) >= 3) srvmsgf(ci->clientnum, "sync error: reload [%d] failed - unexpected message", weap);
-            sendf(ci->clientnum, 1, "ri6", N_RELOAD, ci->clientnum, weap, gs.weapload[weap], gs.ammo[weap], gs.reloads[weap]);
+            //sendf(ci->clientnum, 1, "ri6", N_RELOAD, ci->clientnum, weap, gs.weapload[weap], gs.ammo[weap], gs.reloads[weap]);
             return;
         }
         if(!gs.canreload(weap, m_weapon(gamemode, mutators), false, millis))
         {
             if(G(serverdebug)) srvmsgf(ci->clientnum, "sync error: reload [%d] failed - current state disallows it", weap);
-            sendf(ci->clientnum, 1, "ri6", N_RELOAD, ci->clientnum, weap, gs.weapload[weap], gs.ammo[weap], gs.reloads[weap]);
+            //sendf(ci->clientnum, 1, "ri6", N_RELOAD, ci->clientnum, weap, gs.weapload[weap], gs.ammo[weap], gs.reloads[weap]);
             return;
         }
         gs.setweapstate(weap, W_S_RELOAD, W(weap, reloaddelay), millis);
@@ -4134,8 +4134,8 @@ namespace server
             {
                 takeammo(ci, gs.weapselect, gs.weapload[gs.weapselect]);
                 gs.reloads[gs.weapselect] = max(gs.reloads[gs.weapselect]-1, 0);
-                gs.weapload[gs.weapselect] = -gs.weapload[gs.weapselect];
-                sendf(-1, 1, "ri6", N_RELOAD, ci->clientnum, gs.weapselect, gs.weapload[gs.weapselect], gs.ammo[gs.weapselect], gs.reloads[gs.weapselect]);
+                gs.weapload[gs.weapselect] = -gs.weapload[gs.weapselect]; // the client should already do this for themself
+                sendf(-1, 1, "ri6x", N_RELOAD, ci->clientnum, gs.weapselect, gs.weapload[gs.weapselect], gs.ammo[gs.weapselect], gs.reloads[gs.weapselect], ci->clientnum);
             }
             else return;
         }
@@ -5095,21 +5095,25 @@ namespace server
                     if(!hasclient(cp, ci)) break;
                     if(idx == SPHY_POWER)
                     {
-                        gamestate &gs = cp->state;
-                        if(gs.weapstate[gs.weapselect] == W_S_RELOAD && !gs.weapwaited(gs.weapselect, gamemillis))
+                        if(!cp->state.isalive(gamemillis))
                         {
-                            if(!gs.weapwaited(gs.weapselect, gamemillis, (1<<W_S_RELOAD)))
+                            if(G(serverdebug)) srvmsgf(cp->clientnum, "sync error: power [%d] failed - unexpected message", cp->state.weapselect);
+                            break;
+                        }
+                        if(cp->state.weapstate[cp->state.weapselect] == W_S_RELOAD && !cp->state.weapwaited(cp->state.weapselect, gamemillis))
+                        {
+                            if(!cp->state.weapwaited(cp->state.weapselect, gamemillis, (1<<W_S_RELOAD)))
                             {
-                                if(!gs.hasweap(gs.weapselect, m_weapon(gamemode, mutators))) gs.entid[gs.weapselect] = -1; // its gone..
-                                if(G(serverdebug)) srvmsgf(cp->clientnum, "sync error: power [%d] failed - current state disallows it", gs.weapselect);
+                                if(!cp->state.hasweap(cp->state.weapselect, m_weapon(gamemode, mutators))) cp->state.entid[cp->state.weapselect] = -1; // its gone..
+                                if(G(serverdebug)) srvmsgf(cp->clientnum, "sync error: power [%d] failed - current state disallows it", cp->state.weapselect);
                                 break;
                             }
-                            else if(gs.weapload[gs.weapselect] > 0)
+                            else if(cp->state.weapload[cp->state.weapselect] > 0)
                             {
-                                takeammo(cp, gs.weapselect, gs.weapload[gs.weapselect]);
-                                gs.reloads[gs.weapselect] = max(gs.reloads[gs.weapselect]-1, 0);
-                                gs.weapload[gs.weapselect] = -gs.weapload[gs.weapselect];
-                                sendf(-1, 1, "ri6", N_RELOAD, cp->clientnum, gs.weapselect, gs.weapload[gs.weapselect], gs.ammo[gs.weapselect], gs.reloads[gs.weapselect]);
+                                takeammo(cp, cp->state.weapselect, cp->state.weapload[cp->state.weapselect]);
+                                cp->state.reloads[cp->state.weapselect] = max(cp->state.reloads[cp->state.weapselect]-1, 0);
+                                cp->state.weapload[cp->state.weapselect] = -cp->state.weapload[cp->state.weapselect];
+                                sendf(-1, 1, "ri6x", N_RELOAD, cp->clientnum, cp->state.weapselect, cp->state.weapload[cp->state.weapselect], cp->state.ammo[cp->state.weapselect], cp->state.reloads[cp->state.weapselect], cp->clientnum);
                             }
                             else break;
                         }
@@ -5119,8 +5123,11 @@ namespace server
                         if(cp->state.burning(gamemillis, G(burntime))) cp->state.lastres[WR_BURN] = cp->state.lastrestime[WR_BURN] = 0;
                         else break; // don't propogate
                     }
-                    else if((idx == SPHY_BOOST || idx == SPHY_DASH) && (!cp->state.lastboost || gamemillis-cp->state.lastboost > G(impulsedelay)))
+                    else if(idx == SPHY_BOOST || idx == SPHY_DASH)
+                    {
+                        if(!cp->state.isalive(gamemillis) || (cp->state.lastboost && gamemillis-cp->state.lastboost <= G(impulsedelay))) break;
                         cp->state.lastboost = gamemillis;
+                    }
                     QUEUE_MSG;
                     break;
                 }
