@@ -2392,7 +2392,12 @@ namespace server
         clientinfo *ci = (clientinfo *)getinfo(sender);
         modecheck(reqmode, reqmuts);
         if(!ci || !m_game(reqmode) || !reqmap || !*reqmap) return;
-        bool hasvote = false, hasveto = haspriv(ci, G(vetolock)) && (mastermode >= MM_VETO || !numclients(ci->clientnum));
+        if(m_local(reqmode) && !ci->local)
+        {
+            srvmsgft(ci->clientnum, CON_EVENT, "\fraccess denied, you must be a local client to start a %s game", gametype[reqmode].name);
+            return;
+        }
+        bool hasvote = false, hasveto = (mastermode >= MM_VETO && haspriv(ci, G(vetolock))) || !numclients(ci->clientnum);
         if(!hasveto)
         {
             if(ci->lastvote && totalmillis-ci->lastvote <= G(votewait)) return;
@@ -2421,11 +2426,6 @@ namespace server
                     }
                     break;
                 case 0: default: break;
-            }
-            if(m_local(reqmode) && !ci->local)
-            {
-                srvmsgft(ci->clientnum, CON_EVENT, "\fraccess denied, you must be a local client to start a %s game", gametype[reqmode].name);
-                return;
             }
             if(G(modelock)) switch(G(modelocktype))
             {
@@ -3998,14 +3998,14 @@ namespace server
             }
             else if(gs.weapload[gs.weapselect] > 0)
             {
-                takeammo(ci, gs.weapselect, gs.weapload[gs.weapselect]);
+                takeammo(ci, gs.weapselect, gs.weapload[gs.weapselect]+sub);
                 gs.reloads[gs.weapselect] = max(gs.reloads[gs.weapselect]-1, 0);
                 gs.weapload[gs.weapselect] = -gs.weapload[gs.weapselect];
-                sendf(-1, 1, "ri6", N_RELOAD, ci->clientnum, gs.weapselect, gs.weapload[gs.weapselect], gs.ammo[gs.weapselect], gs.reloads[gs.weapselect]);
+                sendf(ci->clientnum, 1, "ri6", N_RELOAD, ci->clientnum, gs.weapselect, gs.weapload[gs.weapselect], gs.ammo[gs.weapselect], gs.reloads[gs.weapselect]);
             }
             else return;
         }
-        takeammo(ci, weap, sub);
+        else takeammo(ci, weap, sub);
         gs.setweapstate(weap, WS(flags) ? W_S_SECONDARY : W_S_PRIMARY, W2(weap, attackdelay, WS(flags)), millis);
         sendf(-1, 1, "ri8ivx", N_SHOTFX, ci->clientnum, weap, flags, scale, from.x, from.y, from.z, shots.length(), shots.length()*sizeof(shotmsg)/sizeof(int), shots.getbuf(), ci->clientnum);
         gs.weapshot[weap] = sub;
@@ -4030,7 +4030,7 @@ namespace server
         }
         if(!gs.canswitch(weap, m_weapon(gamemode, mutators), millis, (1<<W_S_SWITCH)))
         {
-            if(!gs.canswitch(weap, m_weapon(gamemode, mutators), millis, (1<<W_S_RELOAD)))
+            if(!gs.canswitch(weap, m_weapon(gamemode, mutators), millis, (1<<W_S_SWITCH)|(1<<W_S_RELOAD)))
             {
                 if(G(serverdebug)) srvmsgf(ci->clientnum, "sync error: switch [%d] failed - current state disallows it", weap);
                 sendf(ci->clientnum, 1, "ri3", N_WSELECT, ci->clientnum, gs.weapselect);
@@ -4041,7 +4041,7 @@ namespace server
                 takeammo(ci, gs.weapselect, gs.weapload[gs.weapselect]);
                 gs.reloads[gs.weapselect] = max(gs.reloads[gs.weapselect]-1, 0);
                 gs.weapload[gs.weapselect] = -gs.weapload[gs.weapselect];
-                sendf(-1, 1, "ri6", N_RELOAD, ci->clientnum, gs.weapselect, gs.weapload[gs.weapselect], gs.ammo[gs.weapselect], gs.reloads[gs.weapselect]);
+                sendf(ci->clientnum, 1, "ri6", N_RELOAD, ci->clientnum, gs.weapselect, gs.weapload[gs.weapselect], gs.ammo[gs.weapselect], gs.reloads[gs.weapselect]);
             }
             else return;
         }
@@ -4060,7 +4060,7 @@ namespace server
         int sweap = m_weapon(gamemode, mutators);
         if(!gs.candrop(weap, sweap, millis, (1<<W_S_SWITCH)))
         {
-            if(!gs.candrop(weap, sweap, millis, (1<<W_S_RELOAD)))
+            if(!gs.candrop(weap, sweap, millis, (1<<W_S_SWITCH)|(1<<W_S_RELOAD)))
             {
                 if(G(serverdebug)) srvmsgf(ci->clientnum, "sync error: drop [%d] failed - current state disallows it", weap);
                 return;
@@ -4125,7 +4125,7 @@ namespace server
         }
         if(!gs.canuse(sents[ent].type, attr, sents[ent].attrs, sweap, millis, (1<<W_S_SWITCH)))
         {
-            if(!gs.canuse(sents[ent].type, attr, sents[ent].attrs, sweap, millis, (1<<W_S_RELOAD)))
+            if(!gs.canuse(sents[ent].type, attr, sents[ent].attrs, sweap, millis, (1<<W_S_SWITCH)|(1<<W_S_RELOAD)))
             {
                 if(G(serverdebug)) srvmsgf(ci->clientnum, "sync error: use [%d] failed - current state disallows it", ent);
                 return;

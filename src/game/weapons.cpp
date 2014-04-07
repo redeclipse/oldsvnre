@@ -46,7 +46,7 @@ namespace weapons
 
     bool weapselect(gameent *d, int weap, int filter, bool local)
     {
-        if(game::intermission || (!local && (d == game::player1 || d->ai))) return false;
+        if(game::intermission) return false;
         if(local)
         {
             int interrupts = filter;
@@ -72,7 +72,7 @@ namespace weapons
 
     bool weapreload(gameent *d, int weap, int load, int ammo, int reloads, bool local)
     {
-        if(game::intermission || (!local && (d == game::player1 || d->ai))) return false;
+        if(game::intermission) return false;
         if(local)
         {
             if(!d->canreload(weap, m_weapon(game::gamemode, game::mutators), false, lastmillis))
