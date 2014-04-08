@@ -5120,8 +5120,8 @@ namespace server
                     }
                     else if(idx == SPHY_EXTINGUISH)
                     {
-                        if(cp->state.burning(gamemillis, G(burntime))) cp->state.lastres[WR_BURN] = cp->state.lastrestime[WR_BURN] = 0;
-                        else break; // don't propogate
+                        if(!cp->state.burning(gamemillis, G(burntime))) break;
+                        cp->state.lastres[WR_BURN] = cp->state.lastrestime[WR_BURN] = 0;
                     }
                     else if(idx == SPHY_BOOST || idx == SPHY_DASH)
                     {

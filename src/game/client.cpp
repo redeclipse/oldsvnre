@@ -897,6 +897,7 @@ namespace client
         game::mutators = 0;
         loopv(game::players) if(game::players[i]) game::clientdisconnected(i);
         game::waiting.setsize(0);
+        hud::cleanup();
         emptymap(0, true, NULL, true);
         smartmusic(true, false);
         enumerate(idents, ident, id, {
