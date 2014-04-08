@@ -3343,4 +3343,11 @@ namespace hud
         }
         else hudwidth = hudheight = hudsize;
     }
+
+    void cleanup()
+    {
+        teamkills.shrink(0);
+        damagelocs.shrink(0);
+        damageresidue = lastteam = lastnewgame = 0;
+    }
 }
