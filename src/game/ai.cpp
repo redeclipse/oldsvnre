@@ -147,18 +147,17 @@ namespace ai
     vec getaimpos(gameent *d, gameent *e, bool alt)
     {
         vec o = e->headpos();
-        //if(W2(d->weapselect, radial, alt)) o.z -= e->height;
         if(d->skill <= 100)
         {
             if(lastmillis >= d->ai->lastaimrnd)
             {
-                #define rndaioffset(r) ((rnd(int(r*W2(d->weapselect, aiskew, alt)*2)+1)-(r*W2(d->weapselect, aiskew, alt)))/float(max(d->skill, 1)))
-                loopk(3) d->ai->aimrnd[k] = rndaioffset(e->radius);
+                int radius = ceilf(e->radius*W2(d->weapselect, aiskew, alt));
+                float speed = clamp(e->vel.magnitude()/movespeed, 0.f, 1.f), scale = 1-((1-speed)*((101-d->skill)/100.f));
+                loopk(3) d->ai->aimrnd[k] = (rnd((radius*2)+1)-radius)*scale;
                 int dur = (d->skill+10)*10;
                 d->ai->lastaimrnd = lastmillis+dur+rnd(dur);
-                d->ai->aimrnd.mul(e->vel.magnitude()/movespeed);
             }
-            loopk(3) o[k] += d->ai->aimrnd[k];
+            o.add(d->ai->aimrnd);
         }
         return o;
     }
