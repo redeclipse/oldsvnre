@@ -152,7 +152,7 @@ namespace ai
             if(lastmillis >= d->ai->lastaimrnd)
             {
                 int radius = ceilf(e->radius*W2(d->weapselect, aiskew, alt));
-                float speed = clamp(e->vel.magnitude()/movespeed, 0.f, 1.f), scale = 1-((1-speed)*((101-d->skill)/100.f));
+                float speed = clamp(e->vel.magnitude()/movespeed, 0.f, 1.f), scale = speed+((1-speed)*((101-d->skill)/100.f));
                 loopk(3) d->ai->aimrnd[k] = (rnd((radius*2)+1)-radius)*scale;
                 int dur = (d->skill+10)*10;
                 d->ai->lastaimrnd = lastmillis+dur+rnd(dur);
