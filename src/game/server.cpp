@@ -1457,12 +1457,12 @@ namespace server
             int best = -1;
             loopv(clients) if(clients[i]->state.actortype < A_ENEMY && clients[i]->state.state != CS_SPECTATOR)
             {
-                if(best < 0 || clients[i]->state.points > clients[best]->state.points)
+                if(best < 0 || (m_laptime(gamemode, mutators) ? clients[i]->state.cptime > clients[best]->state.cptime : clients[i]->state.points > clients[best]->state.points))
                 {
                     best = i;
                     result = false;
                 }
-                else if(clients[i]->state.points == clients[best]->state.points) result = true;
+                else if(m_laptime(gamemode, mutators) ? clients[i]->state.cptime == clients[best]->state.cptime : clients[i]->state.points == clients[best]->state.points) result = true;
             }
         }
         return result;
