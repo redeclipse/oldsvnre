@@ -1309,6 +1309,8 @@ void updatevabb(vtxarray *va, bool force)
         va->bbmin.min(oe->bbmin);
         va->bbmax.max(oe->bbmax);
     }
+    va->bbmin.max(va->o);
+    va->bbmax.min(ivec(va->o).add(va->size));
 
     if(va->skyfaces)
     {
