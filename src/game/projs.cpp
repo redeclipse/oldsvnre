@@ -607,7 +607,7 @@ namespace projs
                     case W_SHOTGUN: case W_SMG:
                     {
                         part_splash(PART_SPARK, 5, 350, proj.o, FWCOL(H, partcol, proj), 0.35f, 1, 1, 0, 16, 15);
-                        adddecal(DECAL_BULLET, proj.o, proj.norm, WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags))*proj.curscale);
+                        adddecal(DECAL_BULLET, proj.o, proj.norm, max(WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags)), 0.25f)*4*proj.curscale);
                         break;
                     }
                     case W_FLAMER:
@@ -1608,7 +1608,7 @@ namespace projs
                             adddecal(DECAL_SCORCH_SHORT, proj.o, proj.norm, expl*0.5f);
                             adddynlight(proj.o, expl, FWCOL(P, explcol, proj), 150, 10);
                         }
-                        else adddecal(DECAL_BULLET, proj.o, proj.norm, WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags)));
+                        else adddecal(DECAL_BULLET, proj.o, proj.norm, max(WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags)), 0.25f)*4);
                         break;
                     }
                     case W_FLAMER: case W_GRENADE: case W_MINE: case W_ROCKET:
@@ -1623,7 +1623,7 @@ namespace projs
                             if(WF(WK(proj.flags), proj.weap, wavepush, WS(proj.flags)) >= 1)
                                 part_explosion(proj.o, expl*WF(WK(proj.flags), proj.weap, wavepush, WS(proj.flags)), PART_SHOCKWAVE, len/2, projhint(proj.owner, FWCOL(H, explcol, proj)), 1.f, 0.5f*WF(WK(proj.flags), proj.weap, partblend, WS(proj.flags))*projhintblend);
                         }
-                        else expl = WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags));
+                        else expl = max(WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags)), 0.25f)*4;
                         part_create(PART_SMOKE_LERP_SOFT, projtraillength*(type != W_ROCKET ? 3 : 4), proj.o, 0x444444, expl*0.75f, 0.75f*WF(WK(proj.flags), proj.weap, partblend, WS(proj.flags)), type != W_FLAMER ? -15 : -10);
                         if(type != W_FLAMER && !m_kaboom(game::gamemode, game::mutators) && game::nogore != 2 && game::debrisscale > 0)
                         {
@@ -1657,6 +1657,7 @@ namespace projs
                             adddecal(DECAL_SCORCH_SHORT, proj.o, proj.norm, expl*0.5f);
                             adddynlight(proj.o, expl, FWCOL(P, explcol, proj), WS(proj.flags) ? 300 : 100, 10);
                         }
+                        else adddecal(DECAL_BULLET, proj.o, proj.norm, max(WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags)), 0.25f)*4);
                         break;
                     }
                     case W_PLASMA:
@@ -1669,7 +1670,7 @@ namespace projs
                             if(WF(WK(proj.flags), proj.weap, wavepush, WS(proj.flags)) >= 1)
                                 part_explosion(proj.o, expl*WF(WK(proj.flags), proj.weap, wavepush, WS(proj.flags)), PART_SHOCKWAVE, len/2, projhint(proj.owner, FWCOL(H, explcol, proj)), 1.f, 0.25f*WF(WK(proj.flags), proj.weap, partblend, WS(proj.flags))*projhintblend);
                         }
-                        else expl = WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags));
+                        else expl = max(WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags)), 0.25f)*4;
                         part_splash(PART_SPARK, 20, len*2, proj.o, FWCOL(H, partcol, proj), 0.25f, WF(WK(proj.flags), proj.weap, partblend, WS(proj.flags)), 1, 0, expl, 20);
                         part_create(PART_PLASMA_SOFT, len, proj.o, FWCOL(H, partcol, proj), expl*0.75f, 0.5f*WF(WK(proj.flags), proj.weap, partblend, WS(proj.flags)));
                         part_create(PART_ELECTRIC_SOFT, len/2, proj.o, FWCOL(H, partcol, proj), expl*0.375f, WF(WK(proj.flags), proj.weap, partblend, WS(proj.flags)));
@@ -1693,7 +1694,7 @@ namespace projs
                             if(WF(WK(proj.flags), proj.weap, wavepush, WS(proj.flags)) >= 1)
                                 part_explosion(proj.o, expl*WF(WK(proj.flags), proj.weap, wavepush, WS(proj.flags)), PART_SHOCKWAVE, len/2, projhint(proj.owner, FWCOL(H, explcol, proj)), 1.f, 0.5f*WF(WK(proj.flags), proj.weap, partblend, WS(proj.flags))*projhintblend);
                         }
-                        else expl = WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags));
+                        else expl = max(WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags)), 0.25f)*4;
                         part_flare(proj.to, proj.o, len, PART_FLARE, FWCOL(H, partcol, proj), WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags))*proj.curscale, 0.85f*WF(WK(proj.flags), proj.weap, partblend, WS(proj.flags)));
                         if(projhints) part_flare(proj.to, proj.o, len, PART_FLARE, projhint(proj.owner, FWCOL(H, partcol, proj)), WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags))*projhintsize*proj.curscale, projhintblend*WF(WK(proj.flags), proj.weap, partblend, WS(proj.flags)));
                         adddecal(DECAL_SCORCH, proj.o, proj.norm, max(expl, 2.f));
