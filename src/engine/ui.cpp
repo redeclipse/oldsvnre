@@ -1142,9 +1142,9 @@ struct gui : guient
                     gui::popfont();
                 }
             }
-            else if(tooltip)
+            else
             {
-                DELETEA(tooltip);
+                if(tooltip) DELETEA(tooltip);
                 lasttooltip = 0;
             }
             glPopMatrix();
