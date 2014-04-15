@@ -25,8 +25,16 @@ VAR(IDF_PERSIST|IDF_HEX, guibordercolour, -1, 0x000000, 0xFFFFFF);
 FVAR(IDF_PERSIST, guiborderblend, 0, 1.f, 1);
 SVAR(0, guistatustext, "");
 FVAR(IDF_PERSIST, guihoverscale, 0, 0.3f, 1);
+SVAR(0, guitooltiptext, "");
+VAR(IDF_PERSIST, guitooltiptime, 0, 350, VAR_MAX);
+VAR(IDF_PERSIST|IDF_HEX, guitooltipcolour, -1, 0x100000, 0xFFFFFF);
+FVAR(IDF_PERSIST, guitooltipblend, 0, 0.9f, 1);
+VAR(IDF_PERSIST|IDF_HEX, guitooltipbordercolour, -1, 0x100000, 0xFFFFFF);
+FVAR(IDF_PERSIST, guitooltipborderblend, 0, 1.f, 1);
 
 static bool needsinput = false, hastitle = true, hasbgfx = true;
+static char *tooltip = NULL;
+static int lasttooltip = 0;
 
 #include "textedit.h"
 struct gui : guient
@@ -39,7 +47,11 @@ struct gui : guient
     static int curdepth, curlist, xsize, ysize, curx, cury, fontdepth, mergelist, mergedepth;
     static bool hitfx;
 
-    static void reset() { lists.shrink(0); mergelist = mergedepth = -1; }
+    static void reset()
+    {
+        lists.shrink(0);
+        mergelist = mergedepth = -1;
+    }
 
     static int ty, tx, tpos, *tcurrent, tcolor; //tracking tab size and position since uses different layout method...
 
@@ -1084,6 +1096,57 @@ struct gui : guient
                 gui::popfont();
             }
             if(needsinput && hastitle) uibuttons();
+            if(*guitooltiptext)
+            {
+                if(!tooltip || !lasttooltip || strcmp(tooltip, guitooltiptext))
+                {
+                    if(tooltip) DELETEA(tooltip);
+                    tooltip = newstring(guitooltiptext);
+                    lasttooltip = totalmillis;
+                }
+                if(totalmillis-lasttooltip >= guitooltiptime)
+                {
+                    gui::pushfont("little");
+                    int w = text_width(guitooltiptext)+guibound[0]*2, h = guibound[1]/2+FONTH, x = hitx, y = hity-guibound[1]-FONTH/2;
+                    if(hasbgfx && guitooltipcolour >= 0)
+                    {
+                        notextureshader->set();
+                        glDisable(GL_TEXTURE_2D);
+                        glColor4f((guitooltipcolour>>16)/255.f, ((guitooltipcolour>>8)&0xFF)/255.f, (guitooltipcolour&0xFF)/255.f, guitooltipblend);
+                        glBegin(GL_TRIANGLE_STRIP);
+                        glVertex2f(x, y);
+                        glVertex2f(x+w, y);
+                        glVertex2f(x, y+h);
+                        glVertex2f(x+w, y+h);
+                        glEnd();
+                        defaultshader->set();
+                        glEnable(GL_TEXTURE_2D);
+                    }
+                    if(hasbgfx && guitooltipbordercolour >= 0)
+                    {
+                        lineshader->set();
+                        glDisable(GL_TEXTURE_2D);
+                        glColor4f((guitooltipbordercolour>>16)/255.f, ((guitooltipbordercolour>>8)&0xFF)/255.f, (guitooltipbordercolour&0xFF)/255.f, guitooltipborderblend);
+                        glBegin(GL_LINE_LOOP);
+                        glVertex2f(x, y);
+                        glVertex2f(x+w, y);
+                        glVertex2f(x+w, y+h);
+                        glVertex2f(x, y+h);
+                        glEnd();
+                        defaultshader->set();
+                        glEnable(GL_TEXTURE_2D);
+                    }
+                    x += guibound[0];
+                    y += guibound[1]/4;
+                    draw_text(tooltip, x, y);
+                    gui::popfont();
+                }
+            }
+            else if(tooltip)
+            {
+                DELETEA(tooltip);
+                lasttooltip = 0;
+            }
             glPopMatrix();
         }
         poplist();
@@ -1214,6 +1277,7 @@ namespace UI
         bool p = active(false);
         if(isopen != p) uimillis = (isopen = p) ? totalmillis : -totalmillis;
         setsvar("guistatustext", "", true);
+        setsvar("guitooltiptext", "", true);
         setsvar("guirollovername", "", true);
         setsvar("guirolloveraction", "", true);
         setsvar("guirolloverimgpath", "", true);
