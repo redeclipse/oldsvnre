@@ -641,6 +641,50 @@ int getvardef(const char *name, bool rb)
     return 0;
 }
 
+float getfvardef(const char *name, bool rb)
+{
+    ident *id = getident(name);
+    if(!id) return 0.f;
+    switch(id->type)
+    {
+        case ID_VAR: return float((rb ? id->bin : id->def).i);
+        case ID_FVAR: return (rb ? id->bin : id->def).f;
+        case ID_SVAR: return atof((rb ? id->bin : id->def).s);
+        case ID_ALIAS: return id->getfloat();
+        default: break;
+    }
+    return 0.f;
+}
+
+const char *getsvardef(const char *name, bool rb)
+{
+    ident *id = getident(name);
+    if(!id) return "";
+    switch(id->type)
+    {
+        case ID_VAR: return "";
+        case ID_FVAR: return "";
+        case ID_SVAR: return (rb ? id->bin : id->def).s;
+        case ID_ALIAS: return id->getstr();
+        default: break;
+    }
+    return "";
+}
+
+const char *getvardesc(const char *name)
+{
+    ident *id = getident(name);
+    if(!id || !id->desc) return "";
+    return id->desc;
+}
+
+const char *getvarusage(const char *name)
+{
+    ident *id = getident(name);
+    if(!id || !id->usage) return "";
+    return id->usage;
+}
+
 ICOMMAND(0, getvar, "s", (char *n), intret(getvar(n)));
 ICOMMAND(0, getvartype, "s", (char *n), intret(getvartype(n)));
 ICOMMAND(0, getvarflags, "s", (char *n), intret(getvarflags(n)));
@@ -648,7 +692,11 @@ ICOMMAND(0, getvarmin, "s", (char *n), intret(getvarmin(n)));
 ICOMMAND(0, getvarmax, "s", (char *n), intret(getvarmax(n)));
 ICOMMAND(0, getfvarmin, "s", (char *s), floatret(getfvarmin(s)));
 ICOMMAND(0, getfvarmax, "s", (char *s), floatret(getfvarmax(s)));
-ICOMMAND(0, getvardef, "s", (char *n), intret(getvardef(n)));
+ICOMMAND(0, getvardef, "si", (char *n, int *b), intret(getvardef(n, *b!=0)));
+ICOMMAND(0, getfvardef, "si", (char *n, int *b), floatret(getfvardef(n, *b!=0)));
+ICOMMAND(0, getsvardef, "si", (char *n, int *b), result(getsvardef(n, *b!=0)));
+ICOMMAND(0, getvardesc, "s", (char *n), result(getvardesc(n)));
+ICOMMAND(0, getvarusage, "s", (char *n), result(getvarusage(n)));
 
 bool identexists(const char *name) { return idents.access(name)!=NULL; }
 ident *getident(const char *name) { return idents.access(name); }
@@ -3376,6 +3424,40 @@ void getvariable(int num)
     result(text);
 }
 ICOMMAND(0, getvariable, "i", (int *n), getvariable(*n));
+
+void getvarinfo(int n, int types, int notypes, int flags, int noflags, char *str)
+{
+    static vector<ident *> ids[2];
+    static int lastupdate = 0, lasttypes = 0, lastnotypes = 0, lastflags = 0, lastnoflags = 0, curids = 0;
+    if(ids[0].empty() || !lastupdate || types != lasttypes || notypes != lastnotypes || flags != lastflags || noflags != lastnoflags || totalmillis-lastupdate >= 60000)
+    {
+        loopi(2) ids[i].setsize(0);
+        enumerate(idents, ident, id, if((!types || (1<<id.type)&types) && (!notypes || !((1<<id.type)&notypes)) && (!flags || id.flags&flags) && (!noflags || !(id.flags&noflags))) ids[0].add(&id));
+        lastupdate = totalmillis;
+        lasttypes = types;
+        lastnotypes = notypes;
+        lastflags = flags;
+        lastnoflags = noflags;
+        ids[0].sort(ident::compare);
+    }
+    if(str && *str)
+    {
+        static char *laststr = NULL;
+        if(ids[1].empty() || !laststr || strcmp(str, laststr))
+        {
+            ids[1].setsize(0);
+            loopv(ids[0]) if(rigcasestr(ids[0][i]->name, str)) ids[1].add(ids[0][i]);
+            if(laststr) DELETEA(laststr);
+            laststr = newstring(str);
+        }
+        curids = 1;
+    }
+    else curids = 0;
+    if(n < 0) intret(ids[curids].length());
+    else if(ids[curids].inrange(n)) result(ids[curids][n]->name);
+}
+
+ICOMMAND(0, getvarinfo, "biiiis", (int *n, int *w, int *x, int *t, int *o, char *s), getvarinfo(*n, *w, *x, *t, *o, s));
 
 void hexcolour(int *n)
 {

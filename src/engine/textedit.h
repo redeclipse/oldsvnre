@@ -774,3 +774,9 @@ TEXTCOMMAND(textexec, "i", (int *selected), // execute script commands from the 
     delete[] script;
 );
 
+TEXTCOMMAND(textadd, "ss", (char *name, char *str), // loads into named editor if no file assigned and editor has been rendered
+{
+    editor *e = NULL;
+    loopv(editors) if(!strcmp(editors[i]->name, name)) { e = editors[i]; break; }
+    if(e && e->rendered) e->insert(str);
+});
