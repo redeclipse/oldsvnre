@@ -208,8 +208,8 @@ GVAR(0, shocktime, 0, 5500, VAR_MAX);
 GVAR(0, shockdelay, 0, 1000, VAR_MAX);
 GVAR(0, shockdamage, 0, 3, VAR_MAX);
 GFVAR(0, shockstunscale, 0, 0.5f, FVAR_MAX);
-GFVAR(0, shockstunfall, 0, 0.1f, FVAR_MAX);
-GVAR(0, shockstuntime, 0, 1000, VAR_MAX);
+GFVAR(0, shockstunfall, 0, 0.0625f, FVAR_MAX);
+GVAR(0, shockstuntime, 0, 750, VAR_MAX);
 
 GVAR(0, regendelay, 0, 3000, VAR_MAX); // regen after no damage for this long
 GVAR(0, regentime, 0, 1000, VAR_MAX); // regen this often when regenerating normally
@@ -496,5 +496,4 @@ GVAR(0, spreepoints, 0, 1, VAR_MAX);
 GVAR(0, spreebreaker, 0, 1, VAR_MAX);
 GVAR(0, dominatecount, 0, 5, VAR_MAX);
 GVAR(0, dominatepoints, 0, 1, VAR_MAX);
-GVAR(0, dominatehandicap, 0, 1, 1);
 GVAR(0, revengepoints, 0, 1, VAR_MAX);
