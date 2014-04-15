@@ -534,10 +534,10 @@ void guifield(char *var, int *maxlength, char *onchange, int *colour, int *focus
 }
 
 //-ve maxlength indicates a wrapped text field of any (approx 260 chars) length, |maxlength| is the field width
-void guieditor(char *name, int *maxlength, int *height, int *mode, int *colour, int *focus, char *parent)
+void guieditor(char *name, int *maxlength, int *height, int *mode, int *colour, int *focus, char *parent, char *str)
 {
     if(!cgui) return;
-    cgui->field(name, *colour ? *colour : 0xFFFFFF, *maxlength ? *maxlength : 12, *height, NULL, *mode<=0 ? EDITORFOREVER : *mode, *focus!=0, parent);
+    cgui->field(name, *colour ? *colour : 0xFFFFFF, *maxlength ? *maxlength : 12, *height, str && *str ? str : NULL, *mode<=0 ? EDITORFOREVER : *mode, *focus!=0, parent);
     //returns a non-NULL pointer (the currentline) when the user commits, could then manipulate via text* commands
 }
 
@@ -649,7 +649,7 @@ COMMAND(0, guicheckbox, "ssffsi");
 COMMAND(0, guitab, "s");
 COMMAND(0, guifield, "sisiis");
 COMMAND(0, guikeyfield, "sisiis");
-COMMAND(0, guieditor, "siiiiis");
+COMMAND(0, guieditor, "siiiiiss");
 
 ICOMMAND(0, guicount, "", (), intret(menustack.length()));
 ICOMMAND(0, guitextwidth, "ss", (char *text, char *font), floatret(guitextwidth(text, font)));
