@@ -231,12 +231,15 @@ struct editor
     {
         int n = lines.length();
         assert(n != 0);
-        if(cy < 0) cy = 0; else if(cy >= n) cy = n-1;
+        if(cy < 0) cy = 0;
+        else if(cy >= n) cy = n-1;
         int len = lines[cy].len;
-        if(cx < 0) cx = 0; else if(cx > len) cx = len;
+        if(cx < 0) cx = 0;
+        else if(cx > len) cx = len;
         if(mx >= 0)
         {
-            if(my < 0) my = 0; else if(my >= n) my = n-1;
+            if(my < 0) my = 0;
+            else if(my >= n) my = n-1;
             len = lines[my].len;
             if(mx > len) mx = len;
         }
@@ -245,7 +248,7 @@ struct editor
         ex = cx;
         ey = cy;
         if(sy > ey) { swap(sy, ey); swap(sx, ex); }
-        else if(sy==ey && sx > ex) swap(sx, ex);
+        else if(sy == ey && sx > ex) swap(sx, ex);
         return (sx != ex) || (sy != ey);
     }
 
@@ -263,7 +266,7 @@ struct editor
 
     void copyselectionto(editor *b)
     {
-        if(b==this) return;
+        if(b == this) return;
 
         b->clear(NULL);
         int sx, sy, ex, ey;
@@ -396,7 +399,7 @@ struct editor
 
     void insertallfrom(editor *b)
     {
-        if(b==this) return;
+        if(b == this) return;
 
         del();
 
@@ -521,7 +524,7 @@ struct editor
 
     void hit(int hitx, int hity, bool dragged)
     {
-        int maxwidth = linewrap?pixelwidth:-1;
+        int maxwidth = linewrap ? pixelwidth : -1;
         int h = 0;
         for(int i = scrolly; i < lines.length(); i++)
         {
@@ -541,7 +544,7 @@ struct editor
 
     int limitscrolly()
     {
-        int maxwidth = linewrap?pixelwidth:-1;
+        int maxwidth = linewrap ? pixelwidth : -1;
         int slines = lines.length();
         for(int ph = pixelheight; slines > 0 && ph > 0;)
         {
@@ -556,14 +559,13 @@ struct editor
 
     void draw(int x, int y, int color, bool hit)
     {
-        int maxwidth = linewrap?pixelwidth:-1;
-
-        int sx, sy, ex, ey;
+        int maxwidth = linewrap ? pixelwidth : -1, starty = scrolly, sx, sy, ex, ey;
         bool selection = region(sx, sy, ex, ey);
-
-        // fix scrolly so that <cx, cy> is always on screen
-        int starty = scrolly;
-        if(starty==SCROLLEND) { cy = lines.length()-1; starty = 0; }
+        if(starty == SCROLLEND) // fix scrolly so that <cx, cy> is always on screen
+        {
+            cy = lines.length()-1;
+            starty = 0;
+        }
         if(cy < starty) starty = cy;
         else
         {
@@ -573,14 +575,13 @@ struct editor
                 int width, height;
                 text_bounds(lines[i].text, width, height, maxwidth, TEXT_NO_INDENT);
                 h += height;
-                if(h > pixelheight) { starty = i + 1; break; }
+                if(h > pixelheight) { starty = i+1; break; }
             }
         }
 
         if(selection)
         {
-            // convert from cursor coords into pixel coords
-            int psx, psy, pex, pey;
+            int psx, psy, pex, pey; // convert from cursor coords into pixel coords
             text_pos(lines[sy].text, sx, psx, psy, maxwidth, TEXT_NO_INDENT);
             text_pos(lines[ey].text, ex, pex, pey, maxwidth, TEXT_NO_INDENT);
             int maxy = lines.length();
@@ -598,10 +599,18 @@ struct editor
 
             if(ey >= starty && sy <= maxy)
             {
-                // crop top/bottom within window
-                if(sy < starty) { sy = starty; psy = 0; psx = 0; }
-                if(ey > maxy) { ey = maxy; pey = pixelheight - FONTH; pex = pixelwidth; }
-
+                if(sy < starty) // crop top/bottom within window
+                {
+                    sy = starty;
+                    psy = 0;
+                    psx = 0;
+                }
+                if(ey > maxy)
+                {
+                    ey = maxy;
+                    pey = pixelheight-FONTH;
+                    pex = pixelwidth;
+                }
                 notextureshader->set();
                 glDisable(GL_TEXTURE_2D);
                 glColor3f(0.25f, 0.25f, 0.75f);
@@ -648,12 +657,12 @@ struct editor
             {
                 notextureshader->set();
                 glDisable(GL_TEXTURE_2D);
-                glColor3f(0.5f, 0.5f, 0.5f);
+                glColor4f((guifieldbordercolour>>16)/255.f, ((guifieldbordercolour>>8)&0xFF)/255.f, (guifieldbordercolour&0xFF)/255.f, guifieldborderblend);
                 glBegin(GL_TRIANGLE_STRIP);
                 glVertex2f(x,         y+h+FONTH);
                 glVertex2f(x,         y+h+height);
-                glVertex2f(x-FONTW/2, y+h+FONTH);
-                glVertex2f(x-FONTW/2, y+h+height);
+                glVertex2f(x-FONTW/4, y+h+FONTH);
+                glVertex2f(x-FONTW/4, y+h+height);
                 glEnd();
                 glEnable(GL_TEXTURE_2D);
                 defaultshader->set();

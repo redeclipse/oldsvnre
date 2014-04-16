@@ -525,11 +525,11 @@ void guibitfield(char *name, char *var, int *mask, char *onchange, int *colour)
 }
 
 //-ve length indicates a wrapped text field of any (approx 260 chars) length, |length| is the field width
-void guifield(char *var, int *maxlength, char *onchange, int *colour, int *focus, char *parent)
+void guifield(char *var, int *maxlength, char *onchange, int *colour, int *focus, char *parent, int *height)
 {
     if(!cgui) return;
     const char *initval = getsval(var);
-    char *result = cgui->field(var, *colour ? *colour : 0xFFFFFF, *maxlength ? *maxlength : 12, 0, initval, EDITORFOCUSED, *focus!=0, parent);
+    char *result = cgui->field(var, *colour ? *colour : 0xFFFFFF, *maxlength ? *maxlength : 12, *height, initval, EDITORFOCUSED, *focus!=0, parent);
     if(result) updateval(var, result, onchange);
 }
 
@@ -647,7 +647,7 @@ COMMAND(0, guiradio,"ssfsi");
 COMMAND(0, guibitfield, "ssisi");
 COMMAND(0, guicheckbox, "ssffsi");
 COMMAND(0, guitab, "s");
-COMMAND(0, guifield, "sisiis");
+COMMAND(0, guifield, "sisiisi");
 COMMAND(0, guikeyfield, "sisiis");
 COMMAND(0, guieditor, "siiiiiss");
 

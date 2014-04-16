@@ -662,8 +662,8 @@ const char *getsvardef(const char *name, bool rb)
     if(!id) return "";
     switch(id->type)
     {
-        case ID_VAR: return "";
-        case ID_FVAR: return "";
+        case ID_VAR: return intstr((rb ? id->bin : id->def).i);
+        case ID_FVAR: return floatstr((rb ? id->bin : id->def).f);
         case ID_SVAR: return (rb ? id->bin : id->def).s;
         case ID_ALIAS: return id->getstr();
         default: break;

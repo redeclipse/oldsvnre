@@ -19,18 +19,33 @@ VAR(IDF_PERSIST, guitextfade, 1, 200, 255);
 VAR(IDF_PERSIST, guilinesize, 1, 36, 128);
 VAR(IDF_PERSIST, guisepsize, 1, 10, 128);
 VAR(IDF_PERSIST, guiscaletime, 0, 250, VAR_MAX);
+
 VAR(IDF_PERSIST|IDF_HEX, guibgcolour, -1, 0x000000, 0xFFFFFF);
 FVAR(IDF_PERSIST, guibgblend, 0, 0.5f, 1);
 VAR(IDF_PERSIST|IDF_HEX, guibordercolour, -1, 0x000000, 0xFFFFFF);
 FVAR(IDF_PERSIST, guiborderblend, 0, 1.f, 1);
+
 SVAR(0, guistatustext, "");
+
+VAR(IDF_PERSIST|IDF_HEX, guihovercolour, -1, 0xF0C0C0, 0xFFFFFF);
 FVAR(IDF_PERSIST, guihoverscale, 0, 0.3f, 1);
+FVAR(IDF_PERSIST, guihoverblend, 0, 0.9f, 1);
+
+VAR(IDF_PERSIST, guitooltips, 0, 1, 1);
 SVAR(0, guitooltiptext, "");
 VAR(IDF_PERSIST, guitooltiptime, 0, 350, VAR_MAX);
 VAR(IDF_PERSIST|IDF_HEX, guitooltipcolour, -1, 0x100000, 0xFFFFFF);
 FVAR(IDF_PERSIST, guitooltipblend, 0, 0.9f, 1);
 VAR(IDF_PERSIST|IDF_HEX, guitooltipbordercolour, -1, 0x100000, 0xFFFFFF);
 FVAR(IDF_PERSIST, guitooltipborderblend, 0, 1.f, 1);
+
+VAR(IDF_PERSIST|IDF_HEX, guifieldbgcolour, -1, 0x404040, 0xFFFFFF);
+FVAR(IDF_PERSIST, guifieldbgblend, 0, 0.5f, 1);
+VAR(IDF_PERSIST|IDF_HEX, guifieldbordercolour, -1, 0x000000, 0xFFFFFF);
+FVAR(IDF_PERSIST, guifieldborderblend, 0, 1.f, 1);
+
+VAR(IDF_PERSIST|IDF_HEX, guiactivecolour, -1, 0xF02020, 0xFFFFFF);
+FVAR(IDF_PERSIST, guiactiveblend, 0, 1.f, 1);
 
 static bool needsinput = false, hastitle = true, hasbgfx = true;
 static char *tooltip = NULL;
@@ -93,7 +108,7 @@ struct gui : guient
                 if(tcurrent && hitx>=x1 && hity>=y1 && hitx<x2 && hity<y2)
                 {
                     if(!guiclicktab || mouseaction[0]&GUI_UP) *tcurrent = tpos; // switch tab
-                    tcolor = 0xFF4444;
+                    tcolor = guiactivecolour;
                     alpha = max(alpha, guitextfade);
                 }
                 else tcolor = vec::hexcolor(tcolor).mul(0.25f).tohexcolor();
@@ -379,7 +394,7 @@ struct gui : guient
             if(overlaid)
             {
                 if(!overlaytex) overlaytex = textureload(guioverlaytex, 3, true, false);
-                const vec &ocolor = hit && hitfx ? vec(1, 0.25f, 0.25f) : vec(1, 1, 1);
+                const vec &ocolor = hit && hitfx ? vec::hexcolor(guiactivecolour) : vec(1, 1, 1);
                 glColor3fv(ocolor.v);
                 glBindTexture(GL_TEXTURE_2D, overlaytex->id);
                 rect_(xi - xpad, yi - ypad, xs + 2*xpad, ys + 2*ypad, 0);
@@ -433,7 +448,7 @@ struct gui : guient
             if(overlaid)
             {
                 if(!overlaytex) overlaytex = textureload(guioverlaytex, 3, true, false);
-                const vec &ocolor = hit && hitfx ? vec(1, 0.25f, 0.25f) : vec(1, 1, 1);
+                const vec &ocolor = hit && hitfx ? vec::hexcolor(guiactivecolour) : vec(1, 1, 1);
                 glColor3fv(ocolor.v);
                 glBindTexture(GL_TEXTURE_2D, overlaytex->id);
                 rect_(xi - xpad, yi - ypad, xs + 2*xpad, ys + 2*ypad, 0);
@@ -460,11 +475,9 @@ struct gui : guient
         layout(size, size);
     }
 
-    void slider(int &val, int vmin, int vmax, int color, const char *label, bool reverse, bool scroll)
+    int slider(int &val, int vmin, int vmax, int color, const char *label, bool reverse, bool scroll)
     {
-        int x = curx;
-        int y = cury;
-        int space = line_(guilinesize, 1.0f, ishorizontal() ? guibound[0]*3 : guibound[1]);
+        int x = curx, y = cury, space = line_(guilinesize, 1.0f, ishorizontal() ? guibound[0]*3 : guibound[1]);
         if(visible())
         {
             pushfont("emphasis");
@@ -489,7 +502,7 @@ struct gui : guient
                 else px += x + guibound[0]/2 - w/2; //vmin at left
                 py = y + space/2 - FONTH/2;
             }
-            if(hit && hitfx) { forcecolor = true; color = 0xFF4444; }
+            if(hit && hitfx) { forcecolor = true; color = guiactivecolour; }
             text_(label, px, py, color, hit && hitfx ? guitextblend : guitextfade, hit && mouseaction[0]&GUI_DOWN, forcecolor);
             if(hit)
             {
@@ -517,6 +530,7 @@ struct gui : guient
             }
             popfont();
         }
+        return space;
     }
 
     char *field(const char *name, int color, int length, int height, const char *initval, int initmode, bool focus, const char *parent)
@@ -535,26 +549,22 @@ struct gui : guient
         editor *e = useeditor(name, initmode, false, initval, parent); // generate a new editor if necessary
         if(guilayoutpass)
         {
-            if(initval && e->mode==EDITORFOCUSED && (e!=currentfocus() || fieldmode == FIELDSHOW))
-            {
-                if(strcmp(e->lines[0].text, initval)) e->clear(initval);
-            }
-            e->linewrap = (length<0);
-            e->maxx = (e->linewrap) ? -1 : length;
-            e->maxy = (height<=0)?1:-1;
+            if(initval && e->mode == EDITORFOCUSED && (e != currentfocus() || fieldmode == FIELDSHOW) && strcmp(e->lines[0].text, initval)) e->clear(initval);
+            e->linewrap = (length < 0);
+            e->maxx = e->linewrap ? -1 : length;
+            e->maxy = (height <= 0) ? 1 : -1;
             e->pixelwidth = abs(length)*FONTW;
-            if(e->linewrap && e->maxy==1)
+            if(e->linewrap && e->maxy == 1)
             {
                 int temp;
                 text_bounds(e->lines[0].text, temp, e->pixelheight, e->pixelwidth); //only single line editors can have variable height
             }
-            else
-                e->pixelheight = FONTH*max(height, 1);
+            else e->pixelheight = FONTH*max(height, 1);
         }
         int h = e->pixelheight, hpad = 0, w = e->pixelwidth, wpad = guibound[0];
-        if((h+hpad)%guibound[1]) hpad += guibound[1] - (h+hpad)%guibound[1];
+        if((h+hpad)%guibound[1]) hpad += guibound[1]-((h+hpad)%guibound[1]);
         h += hpad;
-        if((w+wpad)%guibound[0]) wpad += guibound[0] - (w+wpad)%guibound[0];
+        if((w+wpad)%guibound[0]) wpad += guibound[0]-((w+wpad)%guibound[0]);
         w += wpad;
 
         bool wasvertical = isvertical();
@@ -565,8 +575,8 @@ struct gui : guient
         {
             e->rendered = true;
             if(focus && e->unfocus) focus = false;
-            bool hit = ishit(w, h) && e->mode!=EDITORREADONLY, clrs = fieldtype == FIELDKEY,
-                 editing = (fieldmode != FIELDSHOW) && e==currentfocus() && e->mode!=EDITORREADONLY;
+            bool hit = ishit(w, h) && e->mode != EDITORREADONLY, clrs = fieldtype == FIELDKEY,
+                 editing = (fieldmode != FIELDSHOW) && e == currentfocus() && e->mode != EDITORREADONLY;
             if(mouseaction[0]&GUI_UP && mergedepth >= 0 && hit) mouseaction[0] &= ~GUI_UP;
             if(mouseaction[0]&GUI_DOWN) //mouse request focus
             {
@@ -585,27 +595,46 @@ struct gui : guient
                 e->mark(false);
                 if(fieldmode != FIELDCOMMIT && fieldmode != FIELDABORT) fieldmode = fieldtype;
             }
-            if(hit && editing && (mouseaction[0]&GUI_PRESSED)!=0 && fieldtype==FIELDEDIT)
+            if(hit && editing && (mouseaction[0]&GUI_PRESSED) && fieldtype == FIELDEDIT)
                 e->hit(int(floor(hitx-(curx+wpad/2))), int(floor(hity-(cury+hpad/2))), (mouseaction[0]&GUI_DRAGGED)!=0); //mouse request position
-            if(editing && (fieldmode==FIELDCOMMIT || fieldmode==FIELDABORT)) // commit field if user pressed enter
+            if(editing && (fieldmode == FIELDCOMMIT || fieldmode == FIELDABORT)) // commit field if user pressed enter
             {
-                if(fieldmode==FIELDCOMMIT) result = e->currentline().text;
-                e->active = (e->mode!=EDITORFOCUSED);
+                if(fieldmode == FIELDCOMMIT) result = e->currentline().text;
+                e->active = (e->mode != EDITORFOCUSED);
                 fieldmode = FIELDSHOW;
             }
             else fieldsactive = true;
 
+            if(guifieldbgcolour >= 0)
+            {
+                notextureshader->set();
+                glDisable(GL_TEXTURE_2D);
+                glColor4f((guifieldbgcolour>>16)/255.f, ((guifieldbgcolour>>8)&0xFF)/255.f, (guifieldbgcolour&0xFF)/255.f, guifieldbgblend);
+                glBegin(GL_TRIANGLE_STRIP);
+                glVertex2f(curx, cury);
+                glVertex2f(curx+w, cury);
+                glVertex2f(curx, cury+h);
+                glVertex2f(curx+w, cury+h);
+                glEnd();
+                glEnable(GL_TEXTURE_2D);
+                defaultshader->set();
+            }
+            if((editing ? guiactivecolour : guifieldbordercolour) >= 0)
+            {
+                lineshader->set();
+                glDisable(GL_TEXTURE_2D);
+                if(editing) glColor4f((guiactivecolour>>16)/255.f, ((guiactivecolour>>8)&0xFF)/255.f, (guiactivecolour&0xFF)/255.f, guiactiveblend);
+                else glColor4f((guifieldbordercolour>>16)/255.f, ((guifieldbordercolour>>8)&0xFF)/255.f, (guifieldbordercolour&0xFF)/255.f, guifieldborderblend);
+                glBegin(GL_LINE_LOOP);
+                glVertex2f(curx, cury);
+                glVertex2f(curx+w, cury);
+                glVertex2f(curx+w, cury+h);
+                glVertex2f(curx, cury+h);
+                glEnd();
+                glEnable(GL_TEXTURE_2D);
+                defaultshader->set();
+            }
             e->draw(curx+wpad/2, cury+hpad/2, color, editing);
-
-            lineshader->set();
-            glDisable(GL_TEXTURE_2D);
-            glDisable(GL_BLEND);
-            if(editing) glColor3f(0.75f, 0.25f, 0.25f);
-            else glColor3ub(color>>16, (color>>8)&0xFF, color&0xFF);
-            rect_(curx, cury, w, h, true);
-            glEnable(GL_TEXTURE_2D);
-            glEnable(GL_BLEND);
-            defaultshader->set();
         }
         else if(e->unfocus) e->unfocus = false;
         layout(w, h);
@@ -765,7 +794,7 @@ struct gui : guient
             float offx = xs*guihoverscale, offy = ys*guihoverscale;
             if(!hovertex) hovertex = textureload(guihovertex, 3, true, false);
             glBindTexture(GL_TEXTURE_2D, hovertex->id);
-            glColor3f(1.f, 1.f, 1.f);
+            glColor4f((guihovercolour>>16)/255.f, ((guihovercolour>>8)&0xFF)/255.f, (guihovercolour&0xFF)/255.f, guihoverblend);
             glBegin(GL_TRIANGLE_STRIP);
             glTexCoord2fv(tc[0]); glVertex2f(xi-offx,    yi-offy);
             glTexCoord2fv(tc[1]); glVertex2f(xi+xs+offx, yi-offy);
@@ -786,7 +815,7 @@ struct gui : guient
         if(overlaid)
         {
             if(!overlaytex) overlaytex = textureload(guioverlaytex, 3, true, false);
-            const vec &ocolor = hit && hitfx ? vec(1, 0.25f, 0.25f) : vec(1, 1, 1);
+            const vec &ocolor = hit && hitfx ? vec::hexcolor(guiactivecolour) : vec(1, 1, 1);
             glColor3fv(ocolor.v);
             glBindTexture(GL_TEXTURE_2D, overlaytex->id);
             rect_(xi - xpad, yi - ypad, xs + 2*xpad, ys + 2*ypad, 0);
@@ -880,7 +909,7 @@ struct gui : guient
         if(overlaid)
         {
             if(!overlaytex) overlaytex = textureload(guioverlaytex, 3, true, false);
-            const vec &ocolor = hit && hitfx ? vec(1.f, 0.25f, 0.25f) : vec(1, 1, 1);
+            const vec &ocolor = hit && hitfx ? vec::hexcolor(guiactivecolour) : vec(1, 1, 1);
             glColor3fv(ocolor.v);
             glBindTexture(GL_TEXTURE_2D, overlaytex->id);
             rect_(xi - xpad, yi - ypad, xs + 2*xpad, ys + 2*ypad, 0);
@@ -938,7 +967,7 @@ struct gui : guient
         if(visible())
         {
             bool hit = ishit(w, FONTH), forcecolor = false;
-            if(hit && hitfx && clickable) { forcecolor = true; color = 0xFF4444; }
+            if(hit && hitfx && clickable) { forcecolor = true; color = guiactivecolour; }
             int x = curx;
             if(icon)
             {
@@ -1096,7 +1125,7 @@ struct gui : guient
                 gui::popfont();
             }
             if(needsinput && hastitle) uibuttons();
-            if(*guitooltiptext)
+            if(guitooltips && *guitooltiptext)
             {
                 if(!tooltip || !lasttooltip || strcmp(tooltip, guitooltiptext))
                 {
