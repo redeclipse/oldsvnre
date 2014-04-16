@@ -1002,19 +1002,13 @@ namespace physics
         bool found = false;
         if(d->turnside || d->action[AC_SPECIAL])
         {
-            const int movements[6][2] = { { 2, 2 }, { 1, 2 }, { 1, -1 }, { 1, 1 }, { 0, 2 }, { -1, 2 } };
-            loopi(d->turnside ? 6 : 4)
+            vec oldpos = d->o, dir;
+            vecfromyawpitch(d->yaw, 0, 1, d->turnside, dir);
+            d->o.add(dir);
+            bool collided = collide(d, dir);
+            d->o = oldpos;
+            if(collided && !hitplayer && !collidewall.iszero())
             {
-                vec oldpos = d->o, dir;
-                int move = movements[i][0], strafe = movements[i][1];
-                if(move == 2) move = d->move > 0 ? d->move : 0;
-                if(strafe == 2) strafe = d->turnside ? d->turnside : d->strafe;
-                if(!move && !strafe) continue;
-                vecfromyawpitch(d->yaw, 0, move, strafe, dir);
-                d->o.add(dir);
-                bool collided = collide(d, dir);
-                d->o = oldpos;
-                if(!collided || hitplayer || collidewall.iszero()) continue;
                 vec face = vec(collidewall).normalize();
                 if(fabs(face.z) <= impulseparkournorm)
                 {
@@ -1066,7 +1060,6 @@ namespace physics
                                 game::footstep(d);
                             }
                         }
-                        break;
                     }
                     else if(d->turnside || parkour)
                     {
@@ -1098,13 +1091,11 @@ namespace physics
                                 game::footstep(d);
                                 found = true;
                             }
-                            break;
                         }
-                        if(side == d->turnside)
+                        else if(side == d->turnside)
                         {
                             (m = rft).normalize(); // re-project and override
                             found = true;
-                            break;
                         }
                     }
                 }
