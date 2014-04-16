@@ -181,7 +181,7 @@ struct editor
         mark(false);
         loopv(lines) lines[i].clear();
         lines.shrink(0);
-        if(init) lines.add().set(init);
+        if(init && *init) lines.add().set(init);
     }
 
     void setfile(const char *fname)
@@ -215,7 +215,7 @@ struct editor
 
     void mark(bool enable)
     {
-        mx = (enable) ? cx : -1;
+        mx = enable ? cx : -1;
         my = cy;
     }
 
@@ -230,7 +230,11 @@ struct editor
     bool region(int &sx, int &sy, int &ex, int &ey)
     {
         int n = lines.length();
-        assert(n != 0);
+        if(!n)
+        {
+            lines.add().set("");
+            n = 1;
+        }
         if(cy < 0) cy = 0;
         else if(cy >= n) cy = n-1;
         int len = lines[cy].len;
@@ -258,9 +262,15 @@ struct editor
     editline &currentline()
     {
         int n = lines.length();
-        assert(n != 0);
-        if(cy < 0) cy = 0; else if(cy >= n) cy = n-1;
-        if(cx < 0) cx = 0; else if(cx > lines[cy].len) cx = lines[cy].len;
+        if(!n)
+        {
+            lines.add().set("");
+            n = 1;
+        }
+        if(cy < 0) cy = 0;
+        else if(cy >= n) cy = n-1;
+        if(cx < 0) cx = 0;
+        else if(cx > lines[cy].len) cx = lines[cy].len;
         return lines[cy];
     }
 
@@ -524,8 +534,7 @@ struct editor
 
     void hit(int hitx, int hity, bool dragged)
     {
-        int maxwidth = linewrap ? pixelwidth : -1;
-        int h = 0;
+        int maxwidth = linewrap ? pixelwidth : -1, h = 0;
         for(int i = scrolly; i < lines.length(); i++)
         {
             int width, height;
@@ -538,14 +547,13 @@ struct editor
                 if(dragged) { mx = x; my = i; } else { cx = x; cy = i; };
                 break;
             }
-           h+=height;
+           h += height;
         }
     }
 
     int limitscrolly()
     {
-        int maxwidth = linewrap ? pixelwidth : -1;
-        int slines = lines.length();
+        int maxwidth = linewrap ? pixelwidth : -1, slines = lines.length();
         for(int ph = pixelheight; slines > 0 && ph > 0;)
         {
             int width, height;
@@ -590,7 +598,7 @@ struct editor
             {
                 int width, height;
                 text_bounds(lines[i].text, width, height, maxwidth, TEXT_NO_INDENT);
-                if(h + height > pixelheight) { maxy = i; break; }
+                if(h+height > pixelheight) { maxy = i; break; }
                 if(i == sy) psy += h;
                 if(i == ey) { pey += h; break; }
                 h += height;
@@ -623,19 +631,19 @@ struct editor
                     glVertex2f(x+psx, y+pey+FONTH);
                 }
                 else
-                {   glVertex2f(x+psx,        y+psy);
-                    glVertex2f(x+psx,        y+psy+FONTH);
+                {   glVertex2f(x+psx, y+psy);
+                    glVertex2f(x+psx, y+psy+FONTH);
                     glVertex2f(x+pixelwidth, y+psy+FONTH);
                     glVertex2f(x+pixelwidth, y+psy);
                     if(pey-psy > FONTH)
                     {
-                        glVertex2f(x,            y+psy+FONTH);
+                        glVertex2f(x, y+psy+FONTH);
                         glVertex2f(x+pixelwidth, y+psy+FONTH);
                         glVertex2f(x+pixelwidth, y+pey);
-                        glVertex2f(x,            y+pey);
+                        glVertex2f(x, y+pey);
                     }
-                    glVertex2f(x,     y+pey);
-                    glVertex2f(x,     y+pey+FONTH);
+                    glVertex2f(x, y+pey);
+                    glVertex2f(x, y+pey+FONTH);
                     glVertex2f(x+pex, y+pey+FONTH);
                     glVertex2f(x+pex, y+pey);
                 }
@@ -650,24 +658,23 @@ struct editor
         {
             int width, height;
             text_bounds(lines[i].text, width, height, maxwidth, TEXT_NO_INDENT);
-            if(h + height > pixelheight) break;
-
-            draw_text(lines[i].text, x, y+h, color>>16, (color>>8)&0xFF, color&0xFF, 0xFF, TEXT_NO_INDENT, hit&&(cy==i)?cx:-1, maxwidth);
+            if(h+height > pixelheight) break;
+            draw_text(lines[i].text, x, y+h, color>>16, (color>>8)&0xFF, color&0xFF, 0xFF, TEXT_NO_INDENT, hit && (cy == i) ? cx : -1, maxwidth);
             if(linewrap && height > FONTH) // line wrap indicator
             {
                 notextureshader->set();
                 glDisable(GL_TEXTURE_2D);
                 glColor4f((guifieldbordercolour>>16)/255.f, ((guifieldbordercolour>>8)&0xFF)/255.f, (guifieldbordercolour&0xFF)/255.f, guifieldborderblend);
                 glBegin(GL_TRIANGLE_STRIP);
-                glVertex2f(x,         y+h+FONTH);
-                glVertex2f(x,         y+h+height);
+                glVertex2f(x, y+h+FONTH);
+                glVertex2f(x, y+h+height);
                 glVertex2f(x-FONTW/4, y+h+FONTH);
                 glVertex2f(x-FONTW/4, y+h+height);
                 glEnd();
                 glEnable(GL_TEXTURE_2D);
                 defaultshader->set();
             }
-            h+=height;
+            h += height;
         }
     }
 };
