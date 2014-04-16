@@ -139,11 +139,11 @@ namespace projs
 
     void hitpush(gameent *d, projent &proj, int flags = 0, float radial = 0, float dist = 0, float scale = 1)
     {
-        if(dist < 1e-6f) dist = 1e-6f;
+        if(dist < 0) dist = 0.f;
         vec dir, middle = d->center();
         dir = vec(middle).sub(proj.o);
         float dmag = dir.magnitude();
-        if(dmag > 1e-3f) dir.div(dmag).normalize();
+        if(dmag > 1e-3f) dir.div(dmag);
         else dir = vec(0, 0, 1);
         if(isweap(proj.weap) && !weaptype[proj.weap].traced && flags&HIT_PROJ)
         { // transfer the momentum
@@ -152,7 +152,7 @@ namespace projs
             {
                 dir.add(vec(proj.vel).div(speed));
                 dmag = dir.magnitude();
-                if(dmag > 1e-3f) dir.div(dmag).normalize();
+                if(dmag > 1e-3f) dir.div(dmag);
                 else dir = vec(0, 0, 1);
             }
         }
