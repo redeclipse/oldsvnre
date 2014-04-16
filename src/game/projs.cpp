@@ -139,20 +139,20 @@ namespace projs
 
     void hitpush(gameent *d, projent &proj, int flags = 0, float radial = 0, float dist = 0, float scale = 1)
     {
-        if(dist < 0) dist = 0.f;
+        if(dist < 1e-6f) dist = 1e-6f;
         vec dir, middle = d->center();
         dir = vec(middle).sub(proj.o);
         float dmag = dir.magnitude();
-        if(dmag > 1e-3f) dir.div(dmag);
+        if(dmag > 1e-3f) dir.div(dmag).normalize();
         else dir = vec(0, 0, 1);
-        if(flags&HIT_PROJ)
+        if(isweap(proj.weap) && !weaptype[proj.weap].traced && flags&HIT_PROJ)
         { // transfer the momentum
             float speed = proj.vel.magnitude();
             if(speed > 1e-6f)
             {
                 dir.add(vec(proj.vel).div(speed));
                 dmag = dir.magnitude();
-                if(dmag > 1e-3f) dir.div(dmag);
+                if(dmag > 1e-3f) dir.div(dmag).normalize();
                 else dir = vec(0, 0, 1);
             }
         }
@@ -2333,7 +2333,7 @@ namespace projs
                 if(!hits.empty())
                     client::addmsg(N_DESTROY, "ri7iv", proj.owner->clientnum, lastmillis-game::maptime, proj.weap, proj.flags, WK(proj.flags) ? -proj.id : proj.id,
                             int(expl*DNF), int(proj.curscale*DNF), hits.length(), hits.length()*sizeof(hitmsg)/sizeof(int), hits.getbuf());
-                if(proj.weap == W_MELEE && WS(proj.flags)) proj.target = NULL;
+                //if(proj.weap == W_MELEE && WS(proj.flags)) proj.target = NULL;
             }
             if(proj.state == CS_DEAD)
             {
