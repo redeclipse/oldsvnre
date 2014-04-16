@@ -1589,7 +1589,19 @@ namespace server
                     {
                         int from = mapbals[oldbalance][k], fromt = from-T_FIRST,
                             to = mapbals[curbalance][k], tot = to-T_FIRST;
-                        loopv(assign[fromt]) setteam(assign[fromt][i], to, (m_balreset(gamemode) ? TT_RESET : 0)|TT_INFO);
+                        loopv(assign[fromt])
+                        {
+                            clientinfo *cp = assign[fromt][i];
+                            if(cp->swapteam)
+                            {
+                                loopj(numt) if(mapbals[oldbalance][j] == cp->swapteam)
+                                {
+                                    cp->swapteam = mapbals[curbalance][j];
+                                    break;
+                                }
+                            }
+                            setteam(cp, to, (m_balreset(gamemode) ? TT_RESET : 0)|TT_INFO, false);
+                        }
                         score &cs = teamscore(from);
                         cs.total = scores[tot];
                         sendf(-1, 1, "ri3", N_SCORE, cs.team, cs.total);
@@ -1657,7 +1669,7 @@ namespace server
                                 int team = chooseteam(cp);
                                 if(team != cp->team)
                                 {
-                                    setteam(cp, team, (m_balreset(gamemode) ? TT_RESET : 0)|TT_INFOSM);
+                                    setteam(cp, team, (m_balreset(gamemode) ? TT_RESET : 0)|TT_INFOSM, false);
                                     tc[i].removeobj(cp);
                                     tc[team-T_FIRST].add(cp);
                                     moved++;
