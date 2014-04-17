@@ -1666,6 +1666,7 @@ namespace server
                             if(id >= 0)
                             {
                                 clientinfo *cp = tc[i][id];
+                                cp->swapteam = T_NEUTRAL; // make them rechoose if necessary
                                 int team = chooseteam(cp);
                                 if(team != cp->team)
                                 {
@@ -1674,7 +1675,6 @@ namespace server
                                     tc[team-T_FIRST].add(cp);
                                     moved++;
                                 }
-                                if(cp->swapteam && cp->swapteam == team) cp->swapteam = T_NEUTRAL;
                             }
                             else break; // won't get any more
                         }
@@ -2564,7 +2564,7 @@ namespace server
     void swapteam(clientinfo *ci, int oldteam, int newteam = T_NEUTRAL, bool swaps = true)
     {
         if(ci->swapteam && (!newteam || ci->swapteam == newteam)) ci->swapteam = T_NEUTRAL;
-        if(ci->state.actortype != A_PLAYER || !oldteam || oldteam == newteam || !m_swapteam(gamemode, mutators) || !swaps) return;
+        if(!swaps || ci->state.actortype != A_PLAYER || !oldteam || oldteam == newteam || !m_swapteam(gamemode, mutators)) return;
         loopv(clients) if(clients[i] && clients[i] != ci)
         {
             clientinfo *cp = clients[i];
