@@ -500,7 +500,7 @@ namespace client
             if(m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
             {
                 int t = teamname(team);
-                if(t != game::player1->team) addmsg(N_SWITCHTEAM, "ri", t);
+                if(isteam(game::gamemode, game::mutators, t, T_FIRST)) addmsg(N_SWITCHTEAM, "ri", t);
             }
             else conoutft(CON_INFO, "\frcan only change teams when actually playing in team games");
         }
