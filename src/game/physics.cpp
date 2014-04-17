@@ -1004,7 +1004,7 @@ namespace physics
         {
             vec oldpos = d->o, dir;
             const int movements[6][2] = { { 2, 2 }, { 1, 2 }, { 1, -1 }, { 1, 1 }, { 0, 2 }, { -1, 2 } };
-            loopi(d->turnside ? 6 : 4)
+            loopi(d->turnside ? 6 : 4) // we do these insane checks so that running along walls works at all times
             {
                 int move = movements[i][0], strafe = movements[i][1];
                 if(move == 2) move = d->move > 0 ? d->move : 0;
