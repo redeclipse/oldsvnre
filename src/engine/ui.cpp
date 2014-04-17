@@ -1217,7 +1217,11 @@ namespace UI
             switch(code)
             {
                 case SDLK_ESCAPE:
-                    if(isdown) fieldmode = FIELDCOMMIT;
+                    if(isdown)
+                    {
+                        fieldmode = FIELDCOMMIT;
+                        e->unfocus = true;
+                    }
                     return true;
             }
             const char *keyname = getkeyname(code);
