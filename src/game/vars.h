@@ -399,21 +399,21 @@ GFVAR(0, jumpspeed, FVAR_NONZERO, 110, FVAR_MAX); // extra velocity to add when 
 GFVAR(0, impulsespeed, FVAR_NONZERO, 90, FVAR_MAX); // extra velocity to add when impulsing
 GFVAR(0, impulselimit, 0, 0, FVAR_MAX); // maximum impulse speed
 GFVAR(0, impulseboost, 0, 1, FVAR_MAX); // thrust modifier
-GFVAR(0, impulseboostredir, 0, 1, 1); // how much of the old velocity is redirected into the new one
+GFVAR(0, impulseboostredir, 0, 1, FVAR_MAX); // how much of the old velocity is redirected into the new one
 GFVAR(0, impulsepower, 0, 1.5f, FVAR_MAX); // power jump modifier
-GFVAR(0, impulsepowerredir, 0, 1, 1); // how much of the old velocity is redirected into the new one
+GFVAR(0, impulsepowerredir, 0, 1, FVAR_MAX); // how much of the old velocity is redirected into the new one
 GFVAR(0, impulsedash, 0, 1.2f, FVAR_MAX); // dashing/powerslide modifier
-GFVAR(0, impulsedashredir, 0, 1, 1); // how much of the old velocity is redirected into the new one
+GFVAR(0, impulsedashredir, 0, 1, FVAR_MAX); // how much of the old velocity is redirected into the new one
 GFVAR(0, impulsejump, 0, 1.1f, FVAR_MAX); // jump modifier
-GFVAR(0, impulsejumpredir, 0, 1, 1); // how much of the old velocity is redirected into the new one
+GFVAR(0, impulsejumpredir, 0, 1, FVAR_MAX); // how much of the old velocity is redirected into the new one
 GFVAR(0, impulsemelee, 0, 0.75f, FVAR_MAX); // melee modifier
-GFVAR(0, impulsemeleeredir, 0, 1, 1); // how much of the old velocity is redirected into the new one
+GFVAR(0, impulsemeleeredir, 0, 1, FVAR_MAX); // how much of the old velocity is redirected into the new one
 GFVAR(0, impulseparkour, 0, 1, FVAR_MAX); // parkour modifier
-GFVAR(0, impulseparkourredir, 0, 1, 1); // how much of the old velocity is redirected into the new one
+GFVAR(0, impulseparkourredir, 0, 1, FVAR_MAX); // how much of the old velocity is redirected into the new one
 GFVAR(0, impulseparkourkick, 0, 1.3f, FVAR_MAX); // parkour kick modifier
-GFVAR(0, impulseparkourkickredir, 0, 1, 1); // how much of the old velocity is redirected into the new one
+GFVAR(0, impulseparkourkickredir, 0, 1, FVAR_MAX); // how much of the old velocity is redirected into the new one
 GFVAR(0, impulseparkourvault, 0, 1.3f, FVAR_MAX); // parkour vault modifier
-GFVAR(0, impulseparkourvaultredir, 0, 1, 1); // how much of the old velocity is redirected into the new one
+GFVAR(0, impulseparkourvaultredir, 0, 1, FVAR_MAX); // how much of the old velocity is redirected into the new one
 GFVAR(0, impulseparkournorm, 0, 0.5f, FVAR_MAX); // minimum parkour surface z normal
 GVAR(0, impulseallowed, 0, IM_A_ALL, IM_A_ALL); // impulse actions allowed; bit: 0 = off, 1 = dash, 2 = boost, 4 = pacing, 8 = parkour
 GVAR(0, impulsestyle, 0, 1, 3); // impulse style; 0 = off, 1 = touch and count, 2 = count only, 3 = freestyle
