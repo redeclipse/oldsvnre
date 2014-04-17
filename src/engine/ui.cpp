@@ -151,9 +151,10 @@ struct gui : guient
 
     void uibuttons()
     {
+        tx += guibound[1]*2+guibound[0]*2; // acts like a tab
         if(guilayoutpass) return;
         cury = -ysize;
-        int x1 = curx+max(xsize-guibound[1]*3/2, tx), x2 = x1+guibound[1]*2, y1 = cury-guibound[1]*2, y2 = cury-guibound[1]/2;
+        int x1 = curx+(xsize-guibound[1]*3/2), x2 = x1+guibound[1]*2, y1 = cury-guibound[1]*2, y2 = cury-guibound[1]/2;
         #define uibtn(a,b) \
         { \
             bool hit = false; \
@@ -1072,6 +1073,7 @@ struct gui : guient
     {
         if(guilayoutpass)
         {
+            if(needsinput && hastitle) uibuttons();
             xsize = max(tx, xsize);
             ysize = max(ty, ysize);
             ysize = max(ysize, guibound[1]);
