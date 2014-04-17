@@ -33,7 +33,7 @@ namespace capture
             if(f.lastowner && (f.lastowner == game::player1 || f.lastowner->ai) && f.proj && (!f.movetime || totalmillis-f.movetime >= 40))
             {
                 f.inertia = f.proj->vel;
-                f.movetime = totalmillis;
+                f.movetime = totalmillis-(totalmillis%40);
                 client::addmsg(N_MOVEAFFIN, "ri8", f.lastowner->clientnum, n, int(f.droploc.x*DMF), int(f.droploc.y*DMF), int(f.droploc.z*DMF), int(f.inertia.x*DMF), int(f.inertia.y*DMF), int(f.inertia.z*DMF));
             }
         }
