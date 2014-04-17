@@ -420,7 +420,7 @@ namespace physics
             else cost = 0;
         }
         float speed = (impulsespeed*amt*scale)+(keep.magnitude()*redir);
-        keep.mul(1-redir);
+        keep.mul(1-min(redir, 1.f));
         if(impulselimit > 0) return min(speed, impulselimit*scale);
         return speed;
     }
