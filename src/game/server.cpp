@@ -3242,7 +3242,7 @@ namespace server
         bool found = false;
         const char *argstr = numargs > 2 ? conc(&args[1], numargs-1, true) : (numargs > 1 ? args[1].getstr() : "");
         if(id && id->flags&IDF_WORLD && identflags&IDF_WORLD) found = true;
-        else if(id && id->flags&IDF_SERVER && id->type!=ID_COMMAND) found = servcmd(numargs, args[0].s, argstr);
+        else if(id && id->flags&IDF_SERVER && id->type != ID_COMMAND) found = servcmd(numargs, args[0].s, argstr);
 #ifndef STANDALONE
         else if(!id || id->flags&IDF_CLIENT) found = client::sendcmd(numargs, args[0].s, argstr);
 #endif
@@ -3256,7 +3256,7 @@ namespace server
         loopv(clients)
         {
             clientinfo *cs = clients[i];
-            if(cs->state.actortype > A_PLAYER || !cs->name[0] || !cs->online || cs->wantsmap) continue;
+            if(cs->state.actortype > A_PLAYER || !cs->name[0] || !cs->online || cs->wantsmap || cs->warned) continue;
             if(!best || cs->state.timeplayed > best->state.timeplayed) best = cs;
         }
         return best;

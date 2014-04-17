@@ -1003,7 +1003,7 @@ namespace physics
         if(d->turnside || d->action[AC_SPECIAL])
         {
             vec oldpos = d->o, dir;
-            vecfromyawpitch(d->yaw, 0, 1, d->turnside, dir);
+            vecfromyawpitch(d->yaw, 0, 1, d->turnside ? d->turnside : d->strafe, dir);
             d->o.add(dir);
             bool collided = collide(d, dir);
             d->o = oldpos;
