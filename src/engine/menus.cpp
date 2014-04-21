@@ -334,6 +334,16 @@ void guitab(char *name)
     if(cgui) cgui->tab(name);
 }
 
+void guistatus(char *str)
+{
+    if(cgui) cgui->setstatus(str);
+}
+
+void guitooltip(char *str)
+{
+    if(cgui) cgui->settooltip(str);
+}
+
 void guibar()
 {
     if(cgui) cgui->separator();
@@ -647,6 +657,8 @@ COMMAND(0, guiradio,"ssfsi");
 COMMAND(0, guibitfield, "ssisi");
 COMMAND(0, guicheckbox, "ssffsi");
 COMMAND(0, guitab, "s");
+COMMAND(0, guistatus, "s");
+COMMAND(0, guitooltip, "s");
 COMMAND(0, guifield, "sisiisi");
 COMMAND(0, guikeyfield, "sisiis");
 COMMAND(0, guieditor, "siiiiiss");

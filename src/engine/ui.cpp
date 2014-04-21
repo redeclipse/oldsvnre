@@ -25,14 +25,11 @@ FVAR(IDF_PERSIST, guibgblend, 0, 0.5f, 1);
 VAR(IDF_PERSIST|IDF_HEX, guibordercolour, -1, 0x000000, 0xFFFFFF);
 FVAR(IDF_PERSIST, guiborderblend, 0, 1.f, 1);
 
-SVAR(0, guistatustext, "");
-
 VAR(IDF_PERSIST|IDF_HEX, guihovercolour, -1, 0xF0C0C0, 0xFFFFFF);
 FVAR(IDF_PERSIST, guihoverscale, 0, 0.3f, 1);
 FVAR(IDF_PERSIST, guihoverblend, 0, 0.9f, 1);
 
 VAR(IDF_PERSIST, guitooltips, 0, 1, 1);
-SVAR(0, guitooltiptext, "");
 VAR(IDF_PERSIST, guitooltiptime, 0, 350, VAR_MAX);
 VAR(IDF_PERSIST|IDF_HEX, guitooltipcolour, -1, 0x100000, 0xFFFFFF);
 FVAR(IDF_PERSIST, guitooltipblend, 0, 0.9f, 1);
@@ -48,7 +45,7 @@ VAR(IDF_PERSIST|IDF_HEX, guiactivecolour, -1, 0xF02020, 0xFFFFFF);
 FVAR(IDF_PERSIST, guiactiveblend, 0, 1.f, 1);
 
 static bool needsinput = false, hastitle = true, hasbgfx = true;
-static char *tooltip = NULL;
+static char *statusstr = NULL, *tooltipstr = NULL, *tooltip = NULL;
 static int lasttooltip = 0;
 
 #include "textedit.h"
@@ -64,6 +61,8 @@ struct gui : guient
 
     static void reset()
     {
+        if(statusstr) DELETEA(statusstr);
+        if(tooltipstr) DELETEA(tooltipstr);
         lists.shrink(0);
         mergelist = mergedepth = -1;
     }
@@ -276,6 +275,20 @@ struct gui : guient
             return layout(w, h);
         }
         return 0;
+    }
+
+    void setstatus(const char *fmt, ...)
+    {
+        if(statusstr) DELETEA(statusstr);
+        defvformatstring(str, fmt, fmt);
+        statusstr = newstring(str);
+    }
+
+    void settooltip(const char *fmt, ...)
+    {
+        if(tooltipstr) DELETEA(statusstr);
+        defvformatstring(str, fmt, fmt);
+        tooltipstr = newstring(str);
     }
 
     int text  (const char *text, int color, const char *icon, int icolor) { return button_(text, color, icon, icolor, false, false); }
@@ -1032,13 +1045,6 @@ struct gui : guient
             glTranslatef(uiorigin.x, uiorigin.y, uiorigin.z);
             glScalef(uiscale.x, uiscale.y, uiscale.z);
             int x = curx-guibound[0], y = cury-guibound[1]/2, w = xsize+guibound[0]*2, h = ysize+guibound[1];
-            #if 0
-            if(hastitle)
-            {
-                y -= guibound[1]*3/2;
-                h += guibound[1]*3/2;
-            }
-            #endif
             if(hasbgfx && guibgcolour >= 0)
             {
                 notextureshader->set();
@@ -1091,10 +1097,10 @@ struct gui : guient
         }
         else
         {
-            if(*guistatustext)
+            if(statusstr && *statusstr)
             {
                 gui::pushfont("little");
-                int w = text_width(guistatustext)+guibound[0]*2, h = guibound[1]/2+FONTH, x = -w/2, y = guibound[1];
+                int w = text_width(statusstr)+guibound[0]*2, h = guibound[1]/2+FONTH, x = -w/2, y = guibound[1];
                 if(hasbgfx && guibgcolour >= 0)
                 {
                     notextureshader->set();
@@ -1125,22 +1131,22 @@ struct gui : guient
                 }
                 x += guibound[0];
                 y += guibound[1]/4;
-                draw_text(guistatustext, x, y);
+                draw_text(statusstr, x, y);
                 gui::popfont();
             }
             if(needsinput && hastitle) uibuttons();
-            if(guitooltips && *guitooltiptext)
+            if(guitooltips && tooltipstr && *tooltipstr)
             {
-                if(!tooltip || !lasttooltip || strcmp(tooltip, guitooltiptext))
+                if(!tooltip || !lasttooltip || strcmp(tooltip, tooltipstr))
                 {
                     if(tooltip) DELETEA(tooltip);
-                    tooltip = newstring(guitooltiptext);
+                    tooltip = newstring(tooltipstr);
                     lasttooltip = totalmillis;
                 }
                 if(totalmillis-lasttooltip >= guitooltiptime)
                 {
                     gui::pushfont("little");
-                    int w = text_width(guitooltiptext)+guibound[0]*2, h = guibound[1]/2+FONTH, x = hitx, y = hity-guibound[1]-FONTH/2;
+                    int w = text_width(tooltipstr)+guibound[0]*2, h = guibound[1]/2+FONTH, x = hitx, y = hity-guibound[1]-FONTH/2;
                     if(hasbgfx && guitooltipcolour >= 0)
                     {
                         notextureshader->set();
@@ -1313,8 +1319,6 @@ namespace UI
     {
         bool p = active(false);
         if(isopen != p) uimillis = (isopen = p) ? totalmillis : -totalmillis;
-        setsvar("guistatustext", "", true);
-        setsvar("guitooltiptext", "", true);
         setsvar("guirollovername", "", true);
         setsvar("guirolloveraction", "", true);
         setsvar("guirolloverimgpath", "", true);
