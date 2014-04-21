@@ -1284,7 +1284,6 @@ int setupserversockets()
 #endif
             return servertype;
         }
-        loopi(server::reserveclients()) serverhost->peers[i].data = NULL;
         limitdupclients();
     }
 
