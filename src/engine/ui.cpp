@@ -102,7 +102,7 @@ struct gui : guient
         else
         {
             cury = -ysize;
-            int x1 = curx+tx, x2 = x1+w+guibound[0]*2, y1 = cury-guibound[1]*2, y2 = cury-guibound[1]/2, alpha = guitextblend;
+            int x1 = curx+tx, x2 = x1+w+guibound[0]*2, y1 = cury-guibound[1]*5/2, y2 = cury-guibound[1], alpha = guitextblend;
             if(!visibletab())
             {
                 if(tcurrent && hitx>=x1 && hity>=y1 && hitx<x2 && hity<y2)
@@ -154,7 +154,7 @@ struct gui : guient
         tx += guibound[1]*2+guibound[0]*2; // acts like a tab
         if(guilayoutpass) return;
         cury = -ysize;
-        int x1 = curx+(xsize-guibound[1]*3/2), x2 = x1+guibound[1]*2, y1 = cury-guibound[1]*2, y2 = cury-guibound[1]/2;
+        int x1 = curx+(xsize-guibound[1]*3/2), x2 = x1+guibound[1]*2, y1 = cury-guibound[1]*5/2, y2 = cury-guibound[1];
         #define uibtn(a,b) \
         { \
             bool hit = false; \
@@ -1016,7 +1016,8 @@ struct gui : guient
         fontdepth = 0;
         gui::pushfont("reduced");
         curdepth = curlist = mergedepth = mergelist = -1;
-        tpos = tx = ty = 0;
+        tpos = ty = 0;
+        tx = -guibound[0];
         tcurrent = tab;
         tcolor = 0xFFFFFF;
         pushlist(false);
@@ -1030,7 +1031,7 @@ struct gui : guient
             glPushMatrix();
             glTranslatef(uiorigin.x, uiorigin.y, uiorigin.z);
             glScalef(uiscale.x, uiscale.y, uiscale.z);
-            int x = curx-guibound[0]*1, y = cury-guibound[1]/2, w = xsize+guibound[0]*2, h = ysize+guibound[1];
+            int x = curx-guibound[0], y = cury-guibound[1]/2, w = xsize+guibound[0]*2, h = ysize+guibound[1];
             #if 0
             if(hastitle)
             {
