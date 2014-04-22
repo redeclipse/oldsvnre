@@ -1827,9 +1827,9 @@ namespace ai
             if(s) w[i] = s;
             else numargs = i;
         }
-        if(*w[0]) loopvk(game::players) if(game::players[k] && game::players[k]->ai)
+        if(*w[0]) loopvj(game::players) if(game::players[j] && game::players[j]->ai)
         {
-            gameent *e = game::players[k];
+            gameent *e = game::players[j];
             if(!m_edit(game::gamemode) && d->team != e->team) continue;
             if(strncmp(w[0], "bots", 4))
             {
