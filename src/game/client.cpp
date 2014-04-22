@@ -984,6 +984,7 @@ namespace client
         }
         conoutft(CON_CHAT, "%s", s);
         if(snd >= 0 && !issound(d->cschan)) playsound(snd, d->o, d, snd != S_CHAT ? 0 : SND_DIRECT, -1, -1, -1, &d->cschan);
+        ai::scanchat(d, flags, text);
     }
 
     void toserver(int flags, char *text)

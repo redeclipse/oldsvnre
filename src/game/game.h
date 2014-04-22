@@ -1498,6 +1498,7 @@ namespace client
     extern void unignore(int cn);
     extern bool isignored(int cn);
     extern void addmsg(int type, const char *fmt = NULL, ...);
+    extern void saytext(gameent *d, int flags, char *text);
     extern void c2sinfo(bool force = false);
     extern bool haspriv(gameent *d, int priv = PRIV_NONE);
 }

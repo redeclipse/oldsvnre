@@ -1643,7 +1643,7 @@ namespace ai
                     case AI_S_INTEREST: result = dointerest(d, c); break;
                     default: result = 0; break;
                 }
-                if(!result && c.type != AI_S_WAIT)
+                if(!result && c.type != AI_S_WAIT && c.owner < 0)
                 {
                     d->ai->removestate(i);
                     cleannext = true;
@@ -1723,12 +1723,14 @@ namespace ai
                 loopvrev(d->ai->state)
                 {
                     aistate &b = d->ai->state[i];
-                    defformatstring(s)("%s%s (%s) %s:%d (\fs%s%s\fS)",
+                    gameent *e = b.owner >= 0 ? game::getclient(b.owner) : NULL;
+                    defformatstring(s)("%s%s (%s) %s:%d (\fs%s%s\fS%s%s%s)",
                         top ? "<default>\fg" : "<sub>\fa",
                         stnames[b.type],
                         timestr(lastmillis-b.millis),
                         sttypes[b.targtype+1], b.target,
-                        top ? "\fc" : "\fw", attypes[b.acttype]
+                        top ? "\fc" : "\fw", attypes[b.acttype],
+                        e ? " [" : "", e ? game::colourname(e) : "", e ? "]" : ""
                     );
                     part_textcopy(pos, s);
                     pos.z += 2;
@@ -1803,4 +1805,108 @@ namespace ai
     {
         loopi(A_TOTAL) loopk(3) preloadmodel(actor[i+A_ENEMY].playermodel[1]);
     }
+
+    void botsay(gameent *d, int flags, const char *fmt, ...)
+    {
+        defvformatstring(msg, fmt, fmt);
+        //client::saytext(d, flags, msg);
+        client::addmsg(N_TEXT, "ri2s", d->clientnum, flags, msg);
+    }
+
+    void scanchat(gameent *d, int flags, const char *text)
+    {
+        if((!m_edit(game::gamemode) && !m_team(game::gamemode, game::mutators)) || flags&SAY_ACTION || d->actortype != A_PLAYER) return;
+        loopvk(game::players) if(game::players[k] && game::players[k]->ai)
+        {
+            gameent *e = game::players[k];
+            if(!m_edit(game::gamemode) && d->team != e->team) continue;
+            if(strncasecmp(text, e->name, strlen(e->name))) continue;
+            const char *p = &text[strlen(e->name)];
+            while(p && (*p == ':' || *p == ';' || *p == ',' || *p == '.' || *p == ' ' || *p == '\t')) p++;
+            if(!p || !*p) continue;
+            const int MAXWORDS = 8;
+            int numargs = MAXWORDS, reply = flags&SAY_TEAM ? SAY_TEAM : SAY_NONE;
+            char *w[MAXWORDS];
+            loopi(MAXWORDS)
+            {
+                w[i] = (char *)"";
+                if(i > numargs) continue;
+                char *s = parsetext(p);
+                if(s) w[i] = s;
+                else numargs = i;
+            }
+            const char *affirm[4] = { "roger", "okay", "will do", "i'm on it" };
+            if(!strcasecmp(w[0], "defend"))
+            {
+                int pos = 1;
+                if(!strcasecmp(w[pos], "the")) pos++;
+                if(!strcasecmp(w[1], "me"))
+                {
+                    e->ai->clear();
+                    e->ai->addstate(AI_S_DEFEND, AI_T_ACTOR, d->clientnum, AI_A_PROTECT, d->clientnum);
+                    botsay(e, reply, "%s: %s, defending you", d->name, affirm[rnd(4)]);
+                }
+                else if(!strcasecmp(w[1], "here"))
+                {
+                    e->ai->clear();
+                    e->ai->addstate(AI_S_DEFEND, AI_T_NODE, e->lastnode, AI_A_PROTECT, d->clientnum);
+                    botsay(e, reply, "%s: %s, defending your position", d->name, affirm[rnd(4)]);
+                }
+                else if(m_capture(game::gamemode))
+                {
+                    if(!strcasecmp(w[pos], "flag"))
+                    {
+                        loopvk(capture::st.flags) if(capture::st.flags[k].team == e->team)
+                        {
+                            e->ai->clear();
+                            e->ai->addstate(AI_S_DEFEND, AI_T_AFFINITY, k, AI_A_HASTE, d->clientnum);
+                            botsay(e, reply, "%s: %s, defending flag #%d", d->name, affirm[rnd(4)], k);
+                            break;
+                        }
+                    }
+                    else botsay(e, reply, "%s: 'me', 'here', or 'flag'");
+                }
+                else botsay(e, reply, "%s: 'me' or 'here'", d->name);
+            }
+            else if(!strcasecmp(w[0], "attack"))
+            {
+                int pos = 1, attack = -1;
+                if(!strcasecmp(w[pos], "the")) pos++;
+                loopv(game::players) if(game::players[i] && game::players[i]->team != e->team && !strcmp(game::players[i]->name, w[pos]))
+                {
+                    attack = i;
+                    break;
+                }
+                if(attack >= 0)
+                {
+                    e->ai->clear();
+                    e->ai->addstate(AI_S_PURSUE, AI_T_ACTOR, attack, AI_A_HASTE, d->clientnum);
+                    botsay(e, reply, "%s: %s, attacking player", d->name, affirm[rnd(4)]);
+                }
+                else if(m_capture(game::gamemode))
+                {
+                    if(!strcasecmp(w[pos], "flag"))
+                    {
+                        loopvk(capture::st.flags) if(capture::st.flags[k].team != e->team)
+                        {
+                            e->ai->clear();
+                            e->ai->addstate(AI_S_PURSUE, AI_T_AFFINITY, k, AI_A_HASTE, d->clientnum);
+                            botsay(e, reply, "%s: %s, attacking flag #%d", d->name, affirm[rnd(4)], k);
+                            break;
+                        }
+                    }
+                    else botsay(e, reply, "%s: name of victim, or 'flag'");
+                }
+                else botsay(e, reply, "%s: name of victim?", d->name);
+            }
+            else if(!strcasecmp(w[0], "reset"))
+            {
+                e->ai->reset(true, false);
+                const char *quip[4] = { "what was i doing again?", "duh... off i go..", "who were you again?", "ummmm... ok right." };
+                botsay(e, reply, "%s: %s, %s", d->name, affirm[rnd(4)], quip[rnd(4)]);
+            }
+            else botsay(e, reply, "%s: 'defend', 'attack', or 'reset'", d->name);
+        }
+    }
+
 }

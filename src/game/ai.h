@@ -186,10 +186,10 @@ namespace ai
 
     struct aistate
     {
-        int type, millis, targtype, target, acttype;
+        int type, millis, targtype, target, acttype, owner;
         bool override;
 
-        aistate(int m, int t, int r = -1, int v = -1, int a = AI_A_NORMAL) : type(t), millis(m), targtype(r), target(v), acttype(a)
+        aistate(int m, int t, int r = -1, int v = -1, int a = AI_A_NORMAL, int o = -1) : type(t), millis(m), targtype(r), target(v), acttype(a), owner(o)
         {
             reset();
         }
@@ -239,11 +239,14 @@ namespace ai
             lastcheck = 0;
         }
 
-        void reset(bool tryit = false)
+        void reset(bool tryit = false, bool keepowner = true)
         {
             clear(tryit);
+            vector<aistate> keep;
+            if(keepowner) loopv(state) if(state[i].owner >= 0) keep.add(state[i]);
             state.setsize(0);
             addstate(AI_S_WAIT);
+            if(keepowner) loopv(keep) state.add(keep[i]);
             tryreset = false;
         }
 
@@ -263,9 +266,9 @@ namespace ai
             }
         }
 
-        aistate &addstate(int t, int r = -1, int v = -1, int a = AI_A_NORMAL)
+        aistate &addstate(int t, int r = -1, int v = -1, int a = AI_A_NORMAL, int o = -1)
         {
-            return state.add(aistate(lastmillis, t, r, v, a));
+            return state.add(aistate(lastmillis, t, r, v, a, o));
         }
 
         void removestate(int index = -1)
@@ -281,13 +284,14 @@ namespace ai
             return state.last();
         }
 
-        aistate &switchstate(aistate &b, int t, int r = -1, int v = -1, int a = AI_A_NORMAL)
+        aistate &switchstate(aistate &b, int t, int r = -1, int v = -1, int a = AI_A_NORMAL, int o = -1)
         {
-            if((b.type == t && b.targtype == r) || (b.type == AI_S_INTEREST && b.targtype == AI_T_NODE))
+            if(((b.type == t && b.targtype == r) || (b.type == AI_S_INTEREST && b.targtype == AI_T_NODE)) && b.owner == o)
             {
                 b.millis = lastmillis;
                 b.target = v;
                 b.acttype = a;
+                b.owner = o;
                 b.reset();
                 return b;
             }
@@ -331,4 +335,6 @@ namespace ai
     extern void think(gameent *d, bool run);
     extern void render();
     extern void preload();
+
+    extern void scanchat(gameent *d, int flags, const char *text);
 };
