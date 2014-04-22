@@ -1857,21 +1857,62 @@ namespace ai
                     e->ai->addstate(AI_S_DEFEND, AI_T_NODE, e->lastnode, AI_A_PROTECT, d->clientnum);
                     botsay(e, reply, "%s: %s, defending your position", d->name, affirm[rnd(4)]);
                 }
-                else if(m_capture(game::gamemode))
+                else
                 {
-                    if(!strcasecmp(w[pos], "flag"))
+                    bool defend = false;
+                    loopv(game::players) if(game::players[i] && game::players[i]->team == e->team && !strcmp(w[pos], game::players[i]->name))
                     {
-                        loopvk(capture::st.flags) if(capture::st.flags[k].team == e->team)
+                        e->ai->clear();
+                        e->ai->addstate(AI_S_DEFEND, AI_T_ACTOR, game::players[i]->clientnum, AI_A_PROTECT, d->clientnum);
+                        botsay(e, reply, "%s: %s, defending %s", d->name, affirm[rnd(4)], game::players[i]->name);
+                        defend = true;
+                        break;
+                    }
+                    if(!defend) switch(game::gamemode)
+                    {
+                        case G_CAPTURE:
                         {
-                            e->ai->clear();
-                            e->ai->addstate(AI_S_DEFEND, AI_T_AFFINITY, k, AI_A_HASTE, d->clientnum);
-                            botsay(e, reply, "%s: %s, defending flag #%d", d->name, affirm[rnd(4)], k);
+                            if(!strcasecmp(w[pos], "flag"))
+                            {
+                                loopvk(capture::st.flags) if(capture::st.flags[k].team == e->team)
+                                {
+                                    e->ai->clear();
+                                    e->ai->addstate(AI_S_DEFEND, AI_T_AFFINITY, k, AI_A_PROTECT, d->clientnum);
+                                    botsay(e, reply, "%s: %s, defending the flag #%d", d->name, affirm[rnd(4)], k);
+                                    break;
+                                }
+                            }
+                            else if(!strcasecmp(w[pos], "base"))
+                            {
+                                loopvk(capture::st.flags) if(capture::st.flags[k].team == e->team)
+                                {
+                                    e->ai->clear();
+                                    e->ai->addstate(AI_S_DEFEND, AI_T_ENTITY, capture::st.flags[k].ent, AI_A_PROTECT, d->clientnum);
+                                    botsay(e, reply, "%s: %s, defending base for the flag #%d", d->name, affirm[rnd(4)], k);
+                                    break;
+                                }
+                            }
+                            else botsay(e, reply, "%s: 'me', 'here', 'flag', 'base', or a player", d->name);
                             break;
                         }
+                        case G_BOMBER:
+                        {
+                            if(!strcasecmp(w[pos], "goal") || !strcasecmp(w[pos], "base"))
+                            {
+                                loopvk(bomber::st.flags) if(!isbomberaffinity(bomber::st.flags[k]) && bomber::st.flags[k].team == e->team)
+                                {
+                                    e->ai->clear();
+                                    e->ai->addstate(AI_S_DEFEND, AI_T_AFFINITY, k, AI_A_PROTECT, d->clientnum);
+                                    botsay(e, reply, "%s: %s, defending the goal #%d", d->name, affirm[rnd(4)], k);
+                                    break;
+                                }
+                            }
+                            else botsay(e, reply, "%s: 'me', 'here', 'goal', or a player", d->name);
+                            break;
+                        }
+                        default: botsay(e, reply, "%s: 'me', 'here', or a player", d->name); break;
                     }
-                    else botsay(e, reply, "%s: 'me', 'here', or 'flag'", d->name);
                 }
-                else botsay(e, reply, "%s: 'me' or 'here'", d->name);
             }
             else if(!strcasecmp(w[1], "attack"))
             {
@@ -1886,9 +1927,9 @@ namespace ai
                     attack = true;
                     break;
                 }
-                if(!attack)
+                if(!attack) switch(game::gamemode)
                 {
-                    if(m_capture(game::gamemode))
+                    case G_CAPTURE:
                     {
                         if(!strcasecmp(w[pos], "flag"))
                         {
@@ -1896,13 +1937,49 @@ namespace ai
                             {
                                 e->ai->clear();
                                 e->ai->addstate(AI_S_PURSUE, AI_T_AFFINITY, k, AI_A_HASTE, d->clientnum);
-                                botsay(e, reply, "%s: %s, attacking flag #%d", d->name, affirm[rnd(4)], k);
+                                botsay(e, reply, "%s: %s, attacking the flag #%d", d->name, affirm[rnd(4)], k);
                                 break;
                             }
                         }
-                        else botsay(e, reply, "%s: name of victim, or 'flag'", d->name);
+                        else if(!strcasecmp(w[pos], "base"))
+                        {
+                            loopvk(capture::st.flags) if(capture::st.flags[k].team != e->team)
+                            {
+                                e->ai->clear();
+                                e->ai->addstate(AI_S_DEFEND, AI_T_ENTITY, capture::st.flags[k].ent, AI_A_HASTE, d->clientnum);
+                                botsay(e, reply, "%s: %s, attacking the flag #%d", d->name, affirm[rnd(4)], k);
+                                break;
+                            }
+                        }
+                        else botsay(e, reply, "%s: 'flag', 'base', or a player", d->name);
+                        break;
                     }
-                    else botsay(e, reply, "%s: name of victim?", d->name);
+                    case G_BOMBER:
+                    {
+                        if(!strcasecmp(w[pos], "goal") || !strcasecmp(w[pos], "base"))
+                        {
+                            loopvk(bomber::st.flags) if(!isbomberaffinity(bomber::st.flags[k]) && bomber::st.flags[k].team != e->team)
+                            {
+                                e->ai->clear();
+                                e->ai->addstate(AI_S_PURSUE, AI_T_AFFINITY, k, AI_A_HASTE, d->clientnum);
+                                botsay(e, reply, "%s: %s, attacking the goal #%d", d->name, affirm[rnd(4)], k);
+                                break;
+                            }
+                        }
+                        else if(!strcasecmp(w[pos], "ball"))
+                        {
+                            loopvk(bomber::st.flags) if(isbomberaffinity(bomber::st.flags[k]))
+                            {
+                                e->ai->clear();
+                                e->ai->addstate(AI_S_PURSUE, AI_T_AFFINITY, k, AI_A_HASTE, d->clientnum);
+                                botsay(e, reply, "%s: %s, attacking the ball #%d", d->name, affirm[rnd(4)], k);
+                                break;
+                            }
+                        }
+                        else botsay(e, reply, "%s: 'goal', 'ball', or a player", d->name);
+                        break;
+                    }
+                    default: botsay(e, reply, "%s: name of player?", d->name); break;
                 }
             }
             else if(!strcasecmp(w[1], "reset"))
