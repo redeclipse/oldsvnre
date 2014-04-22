@@ -1873,7 +1873,7 @@ void vcoastscale(float *value)
     ds.coastscale = clamp(*value, 0.f, 1000.f);
     mpeditvslot(ds, allfaces, sel, true);
 }
-COMMAND(0, vcoastscale, "fff");
+COMMAND(0, vcoastscale, "f");
 
 void vreset()
 {
