@@ -1875,14 +1875,15 @@ namespace ai
             }
             else if(!strcasecmp(w[1], "attack"))
             {
-                int pos = 1;
+                int pos = 2;
                 if(!strcasecmp(w[pos], "the")) pos++;
                 bool attack = false;
-                loopv(game::players) if(game::players[i] && game::players[i]->team != e->team && !strcmp(game::players[i]->name, w[pos]))
+                loopv(game::players) if(game::players[i] && game::players[i]->team != e->team && !strcmp(w[pos], game::players[i]->name))
                 {
                     e->ai->clear();
                     e->ai->addstate(AI_S_PURSUE, AI_T_ACTOR, game::players[i]->clientnum, AI_A_HASTE, d->clientnum);
                     botsay(e, reply, "%s: %s, attacking %s", d->name, affirm[rnd(4)], game::players[i]->name);
+                    attack = true;
                     break;
                 }
                 if(!attack)
