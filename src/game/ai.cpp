@@ -1816,37 +1816,42 @@ namespace ai
     void scanchat(gameent *d, int flags, const char *text)
     {
         if((!m_edit(game::gamemode) && !m_team(game::gamemode, game::mutators)) || flags&SAY_ACTION || d->actortype != A_PLAYER) return;
-        loopvk(game::players) if(game::players[k] && game::players[k]->ai)
+        const int MAXWORDS = 8;
+        int numargs = MAXWORDS, reply = flags&SAY_TEAM ? SAY_TEAM : SAY_NONE;
+        char *w[MAXWORDS];
+        loopi(MAXWORDS)
+        {
+            w[i] = (char *)"";
+            if(i > numargs) continue;
+            char *s = parsetext(text);
+            if(s) w[i] = s;
+            else numargs = i;
+        }
+        if(*w[0]) loopvk(game::players) if(game::players[k] && game::players[k]->ai)
         {
             gameent *e = game::players[k];
             if(!m_edit(game::gamemode) && d->team != e->team) continue;
-            if(strncasecmp(text, e->name, strlen(e->name))) continue;
-            const char *p = &text[strlen(e->name)];
-            while(p && (*p == ':' || *p == ';' || *p == ',' || *p == '.' || *p == ' ' || *p == '\t')) p++;
-            if(!p || !*p) continue;
-            const int MAXWORDS = 8;
-            int numargs = MAXWORDS, reply = flags&SAY_TEAM ? SAY_TEAM : SAY_NONE;
-            char *w[MAXWORDS];
-            loopi(MAXWORDS)
+            if(strncmp(w[0], "bots", 4))
             {
-                w[i] = (char *)"";
-                if(i > numargs) continue;
-                char *s = parsetext(p);
-                if(s) w[i] = s;
-                else numargs = i;
+                if(strncasecmp(w[0], e->name, strlen(e->name))) continue;
+                switch(w[0][strlen(e->name)])
+                {
+                    case 0: case ':': case ',': case ';': break;
+                    default: continue;
+                }
             }
             const char *affirm[4] = { "roger", "okay", "will do", "i'm on it" };
-            if(!strcasecmp(w[0], "defend"))
+            if(!strcasecmp(w[1], "defend"))
             {
-                int pos = 1;
+                int pos = 2;
                 if(!strcasecmp(w[pos], "the")) pos++;
-                if(!strcasecmp(w[1], "me"))
+                if(!strcasecmp(w[pos], "me"))
                 {
                     e->ai->clear();
                     e->ai->addstate(AI_S_DEFEND, AI_T_ACTOR, d->clientnum, AI_A_PROTECT, d->clientnum);
                     botsay(e, reply, "%s: %s, defending you", d->name, affirm[rnd(4)]);
                 }
-                else if(!strcasecmp(w[1], "here"))
+                else if(!strcasecmp(w[pos], "here"))
                 {
                     e->ai->clear();
                     e->ai->addstate(AI_S_DEFEND, AI_T_NODE, e->lastnode, AI_A_PROTECT, d->clientnum);
@@ -1864,42 +1869,42 @@ namespace ai
                             break;
                         }
                     }
-                    else botsay(e, reply, "%s: 'me', 'here', or 'flag'");
+                    else botsay(e, reply, "%s: 'me', 'here', or 'flag'", d->name);
                 }
                 else botsay(e, reply, "%s: 'me' or 'here'", d->name);
             }
-            else if(!strcasecmp(w[0], "attack"))
+            else if(!strcasecmp(w[1], "attack"))
             {
-                int pos = 1, attack = -1;
+                int pos = 1;
                 if(!strcasecmp(w[pos], "the")) pos++;
+                bool attack = false;
                 loopv(game::players) if(game::players[i] && game::players[i]->team != e->team && !strcmp(game::players[i]->name, w[pos]))
                 {
-                    attack = i;
+                    e->ai->clear();
+                    e->ai->addstate(AI_S_PURSUE, AI_T_ACTOR, game::players[i]->clientnum, AI_A_HASTE, d->clientnum);
+                    botsay(e, reply, "%s: %s, attacking %s", d->name, affirm[rnd(4)], game::players[i]->name);
                     break;
                 }
-                if(attack >= 0)
+                if(!attack)
                 {
-                    e->ai->clear();
-                    e->ai->addstate(AI_S_PURSUE, AI_T_ACTOR, attack, AI_A_HASTE, d->clientnum);
-                    botsay(e, reply, "%s: %s, attacking player", d->name, affirm[rnd(4)]);
-                }
-                else if(m_capture(game::gamemode))
-                {
-                    if(!strcasecmp(w[pos], "flag"))
+                    if(m_capture(game::gamemode))
                     {
-                        loopvk(capture::st.flags) if(capture::st.flags[k].team != e->team)
+                        if(!strcasecmp(w[pos], "flag"))
                         {
-                            e->ai->clear();
-                            e->ai->addstate(AI_S_PURSUE, AI_T_AFFINITY, k, AI_A_HASTE, d->clientnum);
-                            botsay(e, reply, "%s: %s, attacking flag #%d", d->name, affirm[rnd(4)], k);
-                            break;
+                            loopvk(capture::st.flags) if(capture::st.flags[k].team != e->team)
+                            {
+                                e->ai->clear();
+                                e->ai->addstate(AI_S_PURSUE, AI_T_AFFINITY, k, AI_A_HASTE, d->clientnum);
+                                botsay(e, reply, "%s: %s, attacking flag #%d", d->name, affirm[rnd(4)], k);
+                                break;
+                            }
                         }
+                        else botsay(e, reply, "%s: name of victim, or 'flag'", d->name);
                     }
-                    else botsay(e, reply, "%s: name of victim, or 'flag'");
+                    else botsay(e, reply, "%s: name of victim?", d->name);
                 }
-                else botsay(e, reply, "%s: name of victim?", d->name);
             }
-            else if(!strcasecmp(w[0], "reset"))
+            else if(!strcasecmp(w[1], "reset"))
             {
                 e->ai->reset(true, false);
                 const char *quip[4] = { "what was i doing again?", "duh... off i go..", "who were you again?", "ummmm... ok right." };
