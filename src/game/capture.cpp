@@ -724,7 +724,7 @@ namespace capture
             if(f.team == ai::owner(d) && f.owner && ai::owner(f.owner) != ai::owner(d))
                 return ai::violence(d, b, f.owner, 4);
             int walk = f.owner && ai::owner(f.owner) != ai::owner(d) ? 1 : 0;
-            if(d->actortype == A_BOT)
+            if(d->actortype == A_BOT && b.owner < 0)
             {
                 bool regen = !m_regen(game::gamemode, game::mutators) || d->health >= m_health(game::gamemode, game::mutators, d->model);
                 if(regen && lastmillis-b.millis >= (201-d->skill)*33)
