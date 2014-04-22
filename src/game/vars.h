@@ -38,7 +38,7 @@ GVAR(IDF_ADMIN, setinfolock, 0, PRIV_NONE, PRIV_CREATOR);
 GVAR(IDF_ADMIN, setinfowait, 0, 10000, VAR_MAX);
 
 GVAR(IDF_ADMIN, demolock, 0, PRIV_OPERATOR, PRIV_CREATOR);
-GVAR(IDF_ADMIN, democount, 1, 5, VAR_MAX);
+GVAR(IDF_ADMIN, democount, 1, 10, VAR_MAX);
 GVAR(IDF_ADMIN, demomaxsize, 1, 16, VAR_MAX);
 GVAR(IDF_ADMIN, demoautorec, 0, 1, 1); // 0 = off, 1 = automatically record demos each match
 GVAR(IDF_ADMIN, demokeep, 0, 0, 1); // 0 = off, 1 = keep demos that don't run to end of match
