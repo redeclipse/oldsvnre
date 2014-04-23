@@ -790,6 +790,7 @@ namespace ai
                 if(check(d, b)) return true;
                 gameent *e = game::getclient(b.target);
                 if(e && e->state == CS_ALIVE) return defense(d, b, e->feetpos());
+                if(b.owner >= 0) return true;
                 break;
             }
             default:
@@ -898,7 +899,7 @@ namespace ai
                 if(e && e->state == CS_ALIVE)
                 {
                     bool alt = altfire(d, e);
-                    if(actor[d->actortype].canmove)
+                    if(actor[d->actortype].canmove || b.owner >= 0)
                         return patrol(d, b, e->feetpos(), weapmindist(d->weapselect, alt), weapmaxdist(d->weapselect, alt));
                     else
                     {
@@ -1610,6 +1611,11 @@ namespace ai
         loopvrev(d->ai->state)
         {
             aistate &c = d->ai->state[i];
+            if(c.owner >= 0)
+            {
+                gameent *e = game::getclient(c.owner);
+                if(!e || e->team != d->team) c.owner = -1;
+            }
             if(cleannext)
             {
                 c.millis = lastmillis;
@@ -1643,7 +1649,7 @@ namespace ai
                     case AI_S_INTEREST: result = dointerest(d, c); break;
                     default: result = 0; break;
                 }
-                if(!result && c.type != AI_S_WAIT && c.owner < 0)
+                if(!result && c.type != AI_S_WAIT)
                 {
                     d->ai->removestate(i);
                     cleannext = true;
@@ -1828,7 +1834,7 @@ namespace ai
             if(s) w[i] = s;
             else numargs = i;
         }
-        if(*w[0]) loopvj(game::players) if(game::players[j] && game::players[j]->ai)
+        if(*w[0]) loopvj(game::players) if(game::players[j] && game::players[j]->actortype == A_BOT && game::players[j]->ai)
         {
             gameent *e = game::players[j];
             if(!m_edit(game::gamemode) && d->team != e->team) continue;
@@ -1924,7 +1930,7 @@ namespace ai
                 bool attack = false;
                 gameent *f = NULL;
                 int numdyns = game::numdynents();
-                loopi(numdyns) if((f = (gameent *)game::iterdynents(i)) && f != e && f->team != e->team && !strcmp(w[pos], f->name))
+                loopi(numdyns) if((f = (gameent *)game::iterdynents(i)) && f != e && f->state == CS_ALIVE && f->team != e->team && !strcmp(w[pos], f->name))
                 {
                     e->ai->clear();
                     e->ai->addstate(AI_S_PURSUE, AI_T_ACTOR, f->clientnum, AI_A_HASTE, d->clientnum);

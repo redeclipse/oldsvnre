@@ -716,7 +716,7 @@ namespace capture
         if(d->actortype == A_BOT)
         {
             if(!m_gsp3(game::gamemode, game::mutators)) loopv(st.flags) if(st.flags[i].owner == d) return aihomerun(d, b);
-            if(d->actortype == A_BOT && m_duke(game::gamemode, game::mutators)) return false;
+            if(d->actortype == A_BOT && m_duke(game::gamemode, game::mutators) && b.owner < 0) return false;
         }
         if(st.flags.inrange(b.target))
         {
@@ -724,26 +724,33 @@ namespace capture
             if(f.team == ai::owner(d) && f.owner && ai::owner(f.owner) != ai::owner(d))
                 return ai::violence(d, b, f.owner, 4);
             int walk = f.owner && ai::owner(f.owner) != ai::owner(d) ? 1 : 0;
-            if(d->actortype == A_BOT && b.owner < 0)
+            if(d->actortype == A_BOT)
             {
-                bool regen = !m_regen(game::gamemode, game::mutators) || d->health >= m_health(game::gamemode, game::mutators, d->model);
-                if(regen && lastmillis-b.millis >= (201-d->skill)*33)
+                if((!m_regen(game::gamemode, game::mutators) || d->health >= m_health(game::gamemode, game::mutators, d->model)) && lastmillis-b.millis >= (201-d->skill)*33)
                 {
-                    static vector<int> targets; // build a list of others who are interested in this
-                    targets.setsize(0);
-                    ai::checkothers(targets, d, ai::AI_S_DEFEND, ai::AI_T_AFFINITY, b.target, true);
-                    gameent *e = NULL;
-                    int numdyns = game::numdynents();
-                    float mindist = enttype[AFFINITY].radius*4; mindist *= mindist;
-                    loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && !e->ai && e->state == CS_ALIVE && ai::owner(d) == ai::owner(e))
+                    if(b.owner < 0)
                     {
-                        if(targets.find(e->clientnum) < 0 && (f.owner == e || e->feetpos().squaredist(aiflagpos(d, f)) <= mindist))
-                            targets.add(e->clientnum);
-                    }
-                    if(!targets.empty())
-                    {
-                        d->ai->tryreset = true; // re-evaluate so as not to herd
-                        return true;
+                        static vector<int> targets; // build a list of others who are interested in this
+                        targets.setsize(0);
+                        ai::checkothers(targets, d, ai::AI_S_DEFEND, ai::AI_T_AFFINITY, b.target, true);
+                        gameent *e = NULL;
+                        int numdyns = game::numdynents();
+                        float mindist = enttype[AFFINITY].radius*4; mindist *= mindist;
+                        loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && !e->ai && e->state == CS_ALIVE && ai::owner(d) == ai::owner(e))
+                        {
+                            if(targets.find(e->clientnum) < 0 && (f.owner == e || e->feetpos().squaredist(aiflagpos(d, f)) <= mindist))
+                                targets.add(e->clientnum);
+                        }
+                        if(!targets.empty())
+                        {
+                            d->ai->tryreset = true; // re-evaluate so as not to herd
+                            return true;
+                        }
+                        else
+                        {
+                            walk = 2;
+                            b.millis = lastmillis;
+                        }
                     }
                     else
                     {
@@ -788,6 +795,7 @@ namespace capture
                 b.acttype = ai::AI_A_HASTE;
                 return true;
             }
+            else if(b.owner >= 0) return ai::makeroute(d, b, aiflagpos(d, f));
         }
         return false;
     }
