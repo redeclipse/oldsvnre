@@ -1861,11 +1861,13 @@ namespace ai
                 else
                 {
                     bool defend = false;
-                    loopv(game::players) if(game::players[i] && game::players[i]->team == e->team && !strcmp(w[pos], game::players[i]->name))
+                    gameent *f = NULL;
+                    int numdyns = game::numdynents();
+                    loopi(numdyns) if((f = (gameent *)game::iterdynents(i)) && f != e && f->team == e->team && !strcmp(w[pos], f->name))
                     {
                         e->ai->clear();
-                        e->ai->addstate(AI_S_DEFEND, AI_T_ACTOR, game::players[i]->clientnum, AI_A_PROTECT, d->clientnum);
-                        botsay(e, reply, "%s: %s, defending %s", d->name, affirm[rnd(4)], game::players[i]->name);
+                        e->ai->addstate(AI_S_DEFEND, AI_T_ACTOR, f->clientnum, AI_A_PROTECT, d->clientnum);
+                        botsay(e, reply, "%s: %s, defending %s", d->name, affirm[rnd(4)], f->name);
                         defend = true;
                         break;
                     }
@@ -1920,11 +1922,13 @@ namespace ai
                 int pos = 2;
                 if(!strcasecmp(w[pos], "the")) pos++;
                 bool attack = false;
-                loopv(game::players) if(game::players[i] && game::players[i]->team != e->team && !strcmp(w[pos], game::players[i]->name))
+                gameent *f = NULL;
+                int numdyns = game::numdynents();
+                loopi(numdyns) if((f = (gameent *)game::iterdynents(i)) && f != e && f->team != e->team && !strcmp(w[pos], f->name))
                 {
                     e->ai->clear();
-                    e->ai->addstate(AI_S_PURSUE, AI_T_ACTOR, game::players[i]->clientnum, AI_A_HASTE, d->clientnum);
-                    botsay(e, reply, "%s: %s, attacking %s", d->name, affirm[rnd(4)], game::players[i]->name);
+                    e->ai->addstate(AI_S_PURSUE, AI_T_ACTOR, f->clientnum, AI_A_HASTE, d->clientnum);
+                    botsay(e, reply, "%s: %s, attacking %s", d->name, affirm[rnd(4)], f->name);
                     attack = true;
                     break;
                 }
