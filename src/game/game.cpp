@@ -1824,7 +1824,11 @@ namespace game
         {
             e->dominating.removeobj(d);
             e->dominated.removeobj(d);
-            if(e->ai) loopvj(e->ai->state) if(e->ai->state[j].owner == cn) e->ai->state[j].owner = -1;
+            if(e->ai) loopvj(e->ai->state)
+            {
+                if(e->ai->state[j].owner == cn) e->ai->state[j].owner = -1;
+                if(e->ai->state[j].targtype == ai::AI_T_ACTOR && e->ai->state[j].target == cn) e->ai->state.remove(j--);
+            }
         }
         specreset(d, true);
         client::unignore(d->clientnum);
