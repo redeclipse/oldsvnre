@@ -2010,12 +2010,12 @@ namespace ai
             else if(!strcasecmp(w[1], "reset"))
             {
                 e->ai->reset(true, false);
-                const char *quip[4] = { "what was i doing again?", "duh... off i go..", "who were you again?", "ummmm... ok right." };
+                const char *quip[4] = { "what was i doing again?", "duh... off i go..", "who were you again?", "ummmm... wtf do i do now?" };
                 botsay(e, reply, "%s: %s, %s", d->name, affirm[rnd(4)], quip[rnd(4)]);
             }
             else botsay(e, reply, "%s: 'defend', 'attack', or 'reset'", d->name);
         }
-        loopi(MAXWORDS) DELETEA(w[i]);
+        loopi(numargs) DELETEA(w[i]);
     }
 
 }

@@ -355,7 +355,7 @@ bool checkmasterclientinput(masterclient &c)
             masteroutf(c, "error \"unknown command %s\"\n", w[0]);
             conoutf("master peer %s (client) sent unknown command: %s",  c.name, w[0]);
         }
-        loopj(numargs) if(w[j]) delete[] w[j];
+        loopi(numargs) DELETEA(w[i]);
     }
     c.inputpos = &c.input[c.inputpos] - p;
     memmove(c.input, p, c.inputpos);
