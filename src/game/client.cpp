@@ -995,8 +995,8 @@ namespace client
             copystring(output, text, messagelength);
             if(flags&SAY_TEAM && !m_team(game::gamemode, game::mutators))
                 flags &= ~SAY_TEAM;
-            saytext(game::player1, flags, output); // TODO: don't print before sending
             addmsg(N_TEXT, "ri2s", game::player1->clientnum, flags, output);
+            saytext(game::player1, flags, output); // TODO: don't print before sending
         }
     }
     ICOMMAND(0, say, "C", (char *s), toserver(SAY_NONE, s));
