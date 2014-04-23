@@ -764,11 +764,7 @@ namespace ai
             case AI_T_ENTITY:
             {
                 if(check(d, b)) return true;
-                if(entities::ents.inrange(b.target))
-                {
-                    gameentity &e = *(gameentity *)entities::ents[b.target];
-                    return defense(d, b, e.o);
-                }
+                if(entities::ents.inrange(b.target)) return defense(d, b, entities::ents[b.target]->o);
                 break;
             }
             case AI_T_AFFINITY:
@@ -789,15 +785,17 @@ namespace ai
             {
                 if(check(d, b)) return true;
                 gameent *e = game::getclient(b.target);
-                if(e && e->state == CS_ALIVE) return defense(d, b, e->feetpos());
-                if(b.owner >= 0) return true;
+                if(e && ai::owner(d) == ai::owner(e))
+                {
+                    if(e->state == CS_ALIVE) return defense(d, b, e->feetpos());
+                    if(b.owner >= 0) return patrol(d, b, d->feetpos());
+                }
                 break;
             }
             default:
             {
                 if(check(d, b)) return true;
-                if(iswaypoint(b.target))
-                    return defense(d, b, waypoints[b.target].o);
+                if(iswaypoint(b.target)) return defense(d, b, waypoints[b.target].o);
                 break;
             }
         }
@@ -896,26 +894,28 @@ namespace ai
                 if(passive()) return false;
                 //if(check(d, b)) return true;
                 gameent *e = game::getclient(b.target);
-                if(e && e->state == CS_ALIVE)
+                if(e && ai::owner(d) != ai::owner(e))
                 {
-                    bool alt = altfire(d, e);
-                    if(actor[d->actortype].canmove || b.owner >= 0)
-                        return patrol(d, b, e->feetpos(), weapmindist(d->weapselect, alt), weapmaxdist(d->weapselect, alt));
-                    else
+                    if(e->state == CS_ALIVE)
                     {
-                        vec dp = d->headpos(), ep = getaimpos(d, e, alt);
-                        if(cansee(d, dp, ep, d->actortype >= A_ENEMY) || (e->clientnum == d->ai->enemy && d->ai->enemyseen && lastmillis-d->ai->enemyseen <= (d->skill*10)+1000))
-                            return true;
-                        return false;
+                        bool alt = altfire(d, e);
+                        if(!actor[d->actortype].canmove)
+                        {
+                            vec dp = d->headpos(), ep = getaimpos(d, e, alt);
+                            if(cansee(d, dp, ep, d->actortype >= A_ENEMY) || (e->clientnum == d->ai->enemy && d->ai->enemyseen && lastmillis-d->ai->enemyseen <= (d->skill*10)+1000))
+                                return true;
+                            return false;
+                        }
+                        return patrol(d, b, e->feetpos(), weapmindist(d->weapselect, alt), weapmaxdist(d->weapselect, alt));
                     }
+                    if(b.owner >= 0) return patrol(d, b, d->feetpos());
                 }
                 break;
             }
             default:
             {
                 if(check(d, b)) return true;
-                if(iswaypoint(b.target))
-                    return defense(d, b, waypoints[b.target].o);
+                if(iswaypoint(b.target)) return defense(d, b, waypoints[b.target].o);
                 break;
             }
         }
