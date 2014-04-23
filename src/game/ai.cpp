@@ -11,7 +11,7 @@ namespace ai
 #ifdef CAMPAIGN
     VAR(0, aicampaign, 0, 0, 1);
 #endif
-    VAR(0, aipassive, 0, 0, 1);
+    VAR(0, aipassive, 0, 0, 2); // 0 = off, 1 = passive to humans, 2 = completely passive
 
     VARF(0, showwaypoints, 0, 0, 1, if(showwaypoints) getwaypoints());
 
@@ -22,7 +22,17 @@ namespace ai
     VAR(IDF_PERSIST, aideadfade, 0, 10000, VAR_MAX);
     VAR(IDF_PERSIST, showaiinfo, 0, 0, 2); // 0/1 = shows/hides bot join/parts, 2 = show more verbose info
 
-    bool passive() { return aipassive || m_edit(game::gamemode); }
+    bool passive(gameent *d = NULL)
+    {
+        if(m_edit(game::gamemode)) return true;
+        switch(aipassive)
+        {
+            case 2: return true;
+            case 1: if(d && d->actortype == A_PLAYER) return true;
+            case 0: default: break;
+        }
+        return false;
+    }
     bool dbgfocus(gameent *d)  { return d->ai && (!aidebugfocus || d == game::focus || (aidebugfocus != 2 && !game::focus->ai)); }
 
     void startmap(const char *name, const char *reqname, bool empty)    // called just after a map load
@@ -75,7 +85,7 @@ namespace ai
 
     bool targetable(gameent *d, gameent *e, bool solid)
     {
-        if(d && e && d != e && !passive() && e->state == CS_ALIVE && (!solid || physics::issolid(e, d)))
+        if(d && e && d != e && !passive(e) && e->state == CS_ALIVE && (!solid || physics::issolid(e, d)))
         {
             int dt = owner(d), et = owner(e);
             if(dt == T_ENEMY && et == T_ENEMY) return false;
@@ -891,10 +901,9 @@ namespace ai
 
             case AI_T_ACTOR:
             {
-                if(passive()) return false;
                 //if(check(d, b)) return true;
                 gameent *e = game::getclient(b.target);
-                if(e && ai::owner(d) != ai::owner(e))
+                if(e && targetable(d, e))
                 {
                     if(e->state == CS_ALIVE)
                     {
