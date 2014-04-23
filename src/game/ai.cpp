@@ -378,7 +378,7 @@ namespace ai
             float dist = feet.squaredist(pos);
             if(walk == 2 || b.override || (walk && dist <= guard*guard) || !makeroute(d, b, pos))
             { // run away and back to keep ourselves busy
-                if(!b.override && randomnode(d, b, pos, guard, wander))
+                if(!b.override && wander > 0 && randomnode(d, b, pos, guard, wander))
                 {
                     b.override = true;
                     return true;
@@ -387,7 +387,12 @@ namespace ai
                 {
                     b.override = false;
                     if(!retry) return patrol(d, b, pos, guard, wander, walk, true);
-                    return false;
+                    if(wander > 0) return false;
+                }
+                if(wander <= 0)
+                {
+                    b.acttype = AI_A_IDLE;
+                    return true;
                 }
             }
             if(!b.override && dist > guard*guard) b.acttype = AI_A_HASTE;
@@ -407,7 +412,7 @@ namespace ai
         {
             if(d->feetpos().squaredist(pos) <= guard*guard)
             {
-                b.acttype = enemy(d, b, pos, wander, weaptype[d->weapselect].melee ? 1 : 0, false, true) ? AI_A_PROTECT : AI_A_IDLE;
+                b.acttype = enemy(d, b, pos, d->ai->views[2], weaptype[d->weapselect].melee ? 1 : 0, false, true) ? AI_A_PROTECT : AI_A_IDLE;
                 return true;
             }
             walk++;
@@ -805,7 +810,7 @@ namespace ai
             default:
             {
                 if(check(d, b)) return true;
-                if(iswaypoint(b.target)) return defense(d, b, waypoints[b.target].o);
+                if(iswaypoint(b.target)) return defense(d, b, waypoints[b.target].o, CLOSEDIST, 0, 0);
                 break;
             }
         }
@@ -869,10 +874,10 @@ namespace ai
             }
             default: // this is like a wait state without sitting still..
             {
-                if(check(d, b) || find(d, b)) return true;
-                if(target(d, b, 4, true)) return true;
-                if(iswaypoint(b.target) && vec(waypoints[b.target].o).sub(d->feetpos()).magnitude() >= RETRYDIST)
-                    return makeroute(d, b, waypoints[b.target].o);
+                if(check(d, b) || (b.owner < 0 && find(d, b))) return true;
+                if(target(d, b, b.owner < 0 ? 0 : 4, true)) return true;
+                if(iswaypoint(b.target) && (b.owner >= 0 || d->lastnode != b.target))
+                    return defense(d, b, waypoints[b.target].o, CLOSEDIST, b.owner >= 0 ? 0.f : FARDIST, b.owner >= 0 ? 0 : 2);
                 break;
             }
         }
