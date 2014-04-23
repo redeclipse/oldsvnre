@@ -745,13 +745,12 @@ namespace bomber
         if(d->actortype == A_BOT)
         {
             loopv(st.flags) if(st.flags[i].owner == d) return aihomerun(d, b);
-            if(m_duke(game::gamemode, game::mutators)) return false;
+            if(m_duke(game::gamemode, game::mutators) && b.owner < 0) return false;
         }
         if(st.flags.inrange(b.target))
         {
             bomberstate::flag &f = st.flags[b.target];
-            if(isbomberaffinity(f) && f.owner && ai::owner(d) != ai::owner(f.owner))
-                return ai::violence(d, b, f.owner, 4);
+            if(isbomberaffinity(f) && f.owner && ai::owner(d) != ai::owner(f.owner) && ai::violence(d, b, f.owner, 4)) return true;
             int walk = f.owner && ai::owner(f.owner) != ai::owner(d) ? 1 : 0;
             if(d->actortype == A_BOT)
             {

@@ -1155,7 +1155,7 @@ namespace ai
         d->action[AC_SPECIAL] = d->ai->dontmove = false;
         if(b.acttype == AI_A_IDLE || !actor[d->actortype].canmove)
         {
-            frame *= 2;
+            frame *= 10;
             d->ai->dontmove = true;
             d->ai->spot = fp;
         }

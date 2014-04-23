@@ -721,8 +721,7 @@ namespace capture
         if(st.flags.inrange(b.target))
         {
             capturestate::flag &f = st.flags[b.target];
-            if(f.team == ai::owner(d) && f.owner && ai::owner(f.owner) != ai::owner(d))
-                return ai::violence(d, b, f.owner, 4);
+            if(f.team == ai::owner(d) && f.owner && ai::owner(f.owner) != ai::owner(d) && ai::violence(d, b, f.owner, 4)) return true;
             int walk = f.owner && ai::owner(f.owner) != ai::owner(d) ? 1 : 0;
             if(d->actortype == A_BOT)
             {
