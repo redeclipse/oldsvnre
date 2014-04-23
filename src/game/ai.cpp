@@ -1809,8 +1809,8 @@ namespace ai
     void botsay(gameent *d, int flags, const char *fmt, ...)
     {
         defvformatstring(msg, fmt, fmt);
-        //client::saytext(d, flags, msg);
         client::addmsg(N_TEXT, "ri2s", d->clientnum, flags, msg);
+        //client::saytext(d, flags, msg);
     }
 
     void scanchat(gameent *d, int flags, const char *text)
