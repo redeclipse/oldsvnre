@@ -404,6 +404,7 @@ namespace game
 
     bool allowspec(gameent *d, int level, int cn = -1)
     {
+        if(d->o.magnitude() <= 0 || d->o.z < 0) return false;
         if(cn >= 0)
         {
             if(cn == player1->clientnum && player1->state != CS_ALIVE && d->clientnum == player1->lastattacker) return true;
