@@ -671,7 +671,7 @@ void ircparse(ircnet *n)
             loopi(3) DELETEA(user[i]);
         }
     cleanup:
-        loopi(MAXWORDS) DELETEA(w[i]);
+        loopi(numargs) DELETEA(w[i]);
     }
     int parsed = start - (char *)n->input;
     if(parsed > 0)
