@@ -560,8 +560,8 @@ struct guient
     virtual bool visible() = 0;
     virtual bool shouldtab() { return false; }
     virtual void tab(const char *name = NULL, int color = 0xFFFFFF, bool front = false) = 0;
-    virtual void setstatus(const char *fmt, ...) = 0;
-    virtual void settooltip(const char *fmt, ...) = 0;
+    virtual void setstatus(const char *fmt, int width, ...) = 0;
+    virtual void settooltip(const char *fmt, int width, ...) = 0;
     virtual int title(const char *text, int color = 0xFFFFFF, const char *icon = NULL, int icolor = 0xFFFFFF) = 0;
     virtual int image(Texture *t, float scale, bool overlaid = false, int icolor = 0xFFFFFF) = 0;
     virtual int texture(VSlot &vslot, float scale, bool overlaid = true) = 0;

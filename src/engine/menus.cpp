@@ -334,14 +334,14 @@ void guitab(char *name)
     if(cgui) cgui->tab(name);
 }
 
-void guistatus(char *str)
+void guistatus(char *str, int *width)
 {
-    if(cgui) cgui->setstatus(str);
+    if(cgui) cgui->setstatus("%s", *width, str);
 }
 
-void guitooltip(char *str)
+void guitooltip(char *str, int *width)
 {
-    if(cgui) cgui->settooltip(str);
+    if(cgui) cgui->settooltip("%s", *width, str);
 }
 
 void guibar()
@@ -657,8 +657,8 @@ COMMAND(0, guiradio,"ssfsi");
 COMMAND(0, guibitfield, "ssisi");
 COMMAND(0, guicheckbox, "ssffsi");
 COMMAND(0, guitab, "s");
-COMMAND(0, guistatus, "s");
-COMMAND(0, guitooltip, "s");
+COMMAND(0, guistatus, "si");
+COMMAND(0, guitooltip, "si");
 COMMAND(0, guifield, "sisiisi");
 COMMAND(0, guikeyfield, "sisiis");
 COMMAND(0, guieditor, "siiiiiss");
