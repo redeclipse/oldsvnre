@@ -2007,13 +2007,19 @@ namespace ai
                     default: botsay(e, reply, "%s: name of player?", d->name); break;
                 }
             }
+            else if(!strcasecmp(w[1], "forget"))
+            {
+                loopvrev(e->ai->state) if(e->ai->state[i].owner == d->clientnum) e->ai->state.remove(i);
+                const char *quip[4] = { "back to what i was doing then", "resuming previous operations", "i am no longer your slave", "jolly good show then" };
+                botsay(e, reply, "%s: %s, %s", d->name, affirm[rnd(4)], quip[rnd(4)]);
+            }
             else if(!strcasecmp(w[1], "reset"))
             {
                 e->ai->reset(true, false);
                 const char *quip[4] = { "what was i doing again?", "duh... off i go..", "who were you again?", "ummmm... wtf do i do now?" };
                 botsay(e, reply, "%s: %s, %s", d->name, affirm[rnd(4)], quip[rnd(4)]);
             }
-            else botsay(e, reply, "%s: 'defend', 'attack', or 'reset'", d->name);
+            else botsay(e, reply, "%s: 'defend', 'attack', 'forget', or 'reset'", d->name);
         }
         loopi(numargs) DELETEA(w[i]);
     }
