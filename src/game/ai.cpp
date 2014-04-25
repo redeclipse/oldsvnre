@@ -140,9 +140,9 @@ namespace ai
         return false;
     }
 
-    bool hastarget(gameent *d, aistate &b, gameent *e, bool alt, float yaw, float pitch, float dist)
+    bool hastarget(gameent *d, aistate &b, gameent *e, bool alt, bool insight, float yaw, float pitch, float dist)
     { // add margins of error
-        if(weaprange(d, d->weapselect, alt, dist) || (d->skill <= 100 && !rnd(d->skill)))
+        if((insight && weaprange(d, d->weapselect, alt, dist)) || (d->skill <= 100 && !rnd(d->skill)))
         {
             if(weaptype[d->weapselect].melee) return true;
             float skew = clamp(float(lastmillis-d->ai->enemymillis)/float((d->skill*W(d->weapselect, reloaddelay)/5000.f)+(d->skill*W2(d->weapselect, attackdelay, alt)/500.f)), 0.f, weaptype[d->weapselect].thrown ? 0.25f : 1e16f),
@@ -1144,9 +1144,9 @@ namespace ai
         return false;
     }
 
-    int process(gameent *d, aistate &b)
+    void process(gameent *d, aistate &b, bool &occupied, bool &firing, bool &enemyok)
     {
-        int result = 0, skmod = max(101-d->skill, 1);
+        int skmod = max(101-d->skill, 1);
         float frame = d->skill <= 100 ? ((lastmillis-d->ai->lastrun)*(100.f/gamespeed))/float(skmod*10) : 1;
         if(!actor[d->actortype].canstrafe && d->skill <= 100) frame *= 2;
         if(d->dominating.length()) frame *= 1+d->dominating.length();
@@ -1177,7 +1177,6 @@ namespace ai
             d->ai->targnode = -1;
         }
 
-        bool enemyok = false;
         gameent *e = game::getclient(d->ai->enemy);
         if(!passive())
         {
@@ -1205,7 +1204,7 @@ namespace ai
                 game::getyawpitch(dp, ep, yaw, pitch);
                 game::fixrange(yaw, pitch);
                 bool insight = cansee(d, dp, ep), hasseen = d->ai->enemyseen && lastmillis-d->ai->enemyseen <= (d->skill*10)+3000,
-                    quick = d->ai->enemyseen && lastmillis-d->ai->enemyseen <= (W2(d->weapselect, fullauto, alt) ? W2(d->weapselect, attackdelay, alt)*3 : skmod)+30;
+                    quick = d->ai->enemyseen && lastmillis-d->ai->enemyseen <= (W2(d->weapselect, fullauto, alt) ? W2(d->weapselect, attackdelay, alt)*2 : skmod)+skmod;
                 if(insight) d->ai->enemyseen = lastmillis;
                 if(d->ai->dontmove || insight || hasseen || quick)
                 {
@@ -1220,23 +1219,19 @@ namespace ai
                         d->ai->spot = e->feetpos();
                     }
                     game::scaleyawpitch(d->yaw, d->pitch, yaw, pitch, frame, frame*sskew);
-                    if(insight || quick)
-                    {
-                        bool shoot = canshoot(d, e, alt);
-                        if(d->action[alt ? AC_SECONDARY : AC_PRIMARY] && W2(d->weapselect, power, alt) && W2(d->weapselect, cooked, alt))
-                        { // TODO: make AI more aware of what they're shooting
-                            int cooked = W2(d->weapselect, cooked, alt);
-                            if(cooked&8) shoot = false; // inverted life
-                        }
-                        if(shoot && hastarget(d, b, e, alt, yaw, pitch, dp.squaredist(ep)))
-                        {
-                            d->action[alt ? AC_SECONDARY : AC_PRIMARY] = true;
-                            d->actiontime[alt ? AC_SECONDARY : AC_PRIMARY] = lastmillis;
-                            result = 3;
-                        }
-                        else result = 2;
+                    bool shoot = canshoot(d, e, alt);
+                    if(d->action[alt ? AC_SECONDARY : AC_PRIMARY] && W2(d->weapselect, power, alt) && W2(d->weapselect, cooked, alt))
+                    { // TODO: make AI more aware of what they're shooting
+                        int cooked = W2(d->weapselect, cooked, alt);
+                        if(cooked&8) shoot = false; // inverted life
                     }
-                    else result = 1;
+                    if(shoot && hastarget(d, b, e, alt, insight || quick, yaw, pitch, dp.squaredist(ep)))
+                    {
+                        d->action[alt ? AC_SECONDARY : AC_PRIMARY] = true;
+                        d->actiontime[alt ? AC_SECONDARY : AC_PRIMARY] = lastmillis;
+                        firing = true;
+                    }
+                    occupied = true;
                 }
                 else
                 {
@@ -1246,7 +1241,6 @@ namespace ai
                         d->ai->enemyseen = d->ai->enemymillis = 0;
                     }
                     enemyok = false;
-                    result = 0;
                 }
             }
             else
@@ -1257,16 +1251,14 @@ namespace ai
                     d->ai->enemyseen = d->ai->enemymillis = 0;
                 }
                 enemyok = false;
-                result = 0;
             }
         }
         else
         {
             d->ai->enemy = -1;
             d->ai->enemyseen = d->ai->enemymillis = 0;
-            result = 0;
         }
-        if(result < 3) d->action[AC_PRIMARY] = d->action[AC_SECONDARY] = false;
+        if(!firing) d->action[AC_PRIMARY] = d->action[AC_SECONDARY] = false;
 
         if(!m_insta(game::gamemode, game::mutators))
         {
@@ -1277,7 +1269,7 @@ namespace ai
         else frame *= 2;
 
         game::fixrange(d->ai->targyaw, d->ai->targpitch);
-        if(!result) game::scaleyawpitch(d->yaw, d->pitch, d->ai->targyaw, d->ai->targpitch, frame, frame*0.5f);
+        if(!occupied) game::scaleyawpitch(d->yaw, d->pitch, d->ai->targyaw, d->ai->targpitch, frame, frame*0.5f);
 
         if(actor[d->actortype].canjump && jumpallowed) jumpto(d, b, d->ai->spot);
         if(d->actortype == A_BOT || d->actortype == A_GRUNT)
@@ -1316,7 +1308,6 @@ namespace ai
         }
         if(!actor[d->actortype].canstrafe && d->move && enemyok && lockon(d, e, 8, weaptype[d->weapselect].melee)) d->move = 0;
         findorientation(dp, d->yaw, d->pitch, d->ai->target);
-        return result;
     }
 
     bool hasrange(gameent *d, gameent *e, int weap)
@@ -1333,11 +1324,13 @@ namespace ai
 
     bool request(gameent *d, aistate &b)
     {
-        int busy = process(d, b), sweap = m_weapon(game::gamemode, game::mutators);
-        bool haswaited = d->weapwaited(d->weapselect, lastmillis, (1<<W_S_RELOAD));
+        int sweap = m_weapon(game::gamemode, game::mutators);
+        bool occupied = false, firing = false, enemyok = false,
+             haswaited = d->weapwaited(d->weapselect, lastmillis, (1<<W_S_RELOAD));
+        process(d, b, occupied, firing, enemyok);
         if(d->actortype == A_BOT)
         {
-            if(d->ai->dontmove && busy <= 1 && d->carry(sweap, 1) > 1 && d->weapstate[d->weapselect] != W_S_WAIT)
+            if(d->ai->dontmove && haswaited && !firing && d->carry(sweap, 1) > 1)
             {
                 loopirev(W_ITEM) if(i != d->ai->weappref && d->candrop(i, sweap, lastmillis, G(weaponinterrupts)))
                 {
@@ -1347,7 +1340,7 @@ namespace ai
                     return true;
                 }
             }
-            if(busy <= 2 && !d->action[AC_USE] && haswaited)
+            if(haswaited && !firing && !d->action[AC_USE])
             {
                 static vector<actitem> actitems;
                 actitems.setsize(0);
@@ -1404,13 +1397,17 @@ namespace ai
         }
 
         bool timepassed = d->weapstate[d->weapselect] == W_S_IDLE && (!d->ammo[d->weapselect] || lastmillis-d->weaplast[d->weapselect] >= max(6000-(d->skill*50), weaponswitchdelay));
-        if(busy <= 2 && haswaited && timepassed)
+        if(!firing && timepassed)
         {
             int weap = d->ai->weappref;
             gameent *e = game::getclient(d->ai->enemy);
             if(!isweap(weap) || !d->hasweap(weap, sweap) || !hasrange(d, e, weap))
             {
-                loopirev(W_MAX) if(i >= W_MELEE && d->hasweap(i, sweap) && hasrange(d, e, i)) { weap = i; break; }
+                loopirev(W_MAX) if(i >= W_MELEE && d->hasweap(i, sweap) && hasrange(d, e, i))
+                {
+                    weap = i;
+                    break;
+                }
             }
             if(isweap(weap) && weap != d->weapselect && weapons::weapselect(d, weap, G(weaponinterrupts)))
             {
@@ -1419,16 +1416,13 @@ namespace ai
             }
         }
 
-        if(d->hasweap(d->weapselect, sweap) && busy <= (!d->ammo[d->weapselect] ? 2 : 0) && timepassed)
+        if(!firing && !occupied && timepassed && d->hasweap(d->weapselect, sweap) && weapons::weapreload(d, d->weapselect))
         {
-            if(weapons::weapreload(d, d->weapselect))
-            {
-                d->ai->lastaction = lastmillis;
-                return true;
-            }
+            d->ai->lastaction = lastmillis;
+            return true;
         }
 
-        return busy >= 1;
+        return occupied;
     }
 
     bool transport(gameent *d, int find = 0)
