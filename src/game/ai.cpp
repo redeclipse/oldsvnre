@@ -1401,9 +1401,9 @@ namespace ai
         {
             int weap = d->ai->weappref;
             gameent *e = game::getclient(d->ai->enemy);
-            if(!isweap(weap) || !d->hasweap(weap, sweap) || !hasrange(d, e, weap))
+            if(!isweap(weap) || !d->hasweap(weap, sweap) || (e && !hasrange(d, e, weap)))
             {
-                loopirev(W_MAX) if(i >= W_MELEE && d->hasweap(i, sweap) && hasrange(d, e, i))
+                loopirev(W_MAX) if(i >= W_MELEE && d->hasweap(i, sweap) && (!e || hasrange(d, e, i)))
                 {
                     weap = i;
                     break;
