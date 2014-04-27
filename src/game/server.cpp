@@ -935,35 +935,38 @@ namespace server
         });
     }
 
-    const char *pickmap(const char *suggest, int mode, int muts)
+    const char *pickmap(const char *suggest, int mode, int muts, bool notry)
     {
         const char *map = G(defaultmap);
-        if(!map || !*map) map = choosemap(suggest, mode, muts, G(rotatemaps));
-        else if(strchr(map, ' '))
+        if(!notry)
         {
-            static string defaultmap;
-            defaultmap[0] = 0;
-            vector<char *> maps;
-            explodelist(map, maps);
-            if(*sv_previousmaps)
+            if(!map || !*map) map = choosemap(suggest, mode, muts, G(rotatemaps), true);
+            else if(strchr(map, ' '))
             {
-                vector<char *> prev;
-                explodelist(sv_previousmaps, prev);
-                loopvj(prev) loopvrev(maps) if(strcmp(prev[j], maps[i]))
+                static string defaultmap;
+                defaultmap[0] = 0;
+                vector<char *> maps;
+                explodelist(map, maps);
+                if(*sv_previousmaps)
                 {
-                    delete[] maps[i];
-                    maps.remove(i);
-                    if(maps.length() <= 1) break;
+                    vector<char *> prev;
+                    explodelist(sv_previousmaps, prev);
+                    loopvj(prev) loopvrev(maps) if(strcmp(prev[j], maps[i]))
+                    {
+                        delete[] maps[i];
+                        maps.remove(i);
+                        if(maps.length() <= 1) break;
+                    }
+                    prev.deletearrays();
                 }
-                prev.deletearrays();
+                if(!maps.empty())
+                {
+                    int r = rnd(maps.length());
+                    copystring(defaultmap, maps[r]);
+                }
+                maps.deletearrays();
+                map = *defaultmap ? defaultmap : choosemap(suggest, mode, muts, G(rotatemaps), true);
             }
-            if(!maps.empty())
-            {
-                int r = rnd(maps.length());
-                copystring(defaultmap, maps[r]);
-            }
-            maps.deletearrays();
-            map = *defaultmap ? defaultmap : choosemap(suggest, mode, muts, G(rotatemaps));
         }
         return map && *map ? map : "maps/untitled";
     }
@@ -1352,7 +1355,7 @@ namespace server
         modecheck(mode, muts);
     }
 
-    const char *choosemap(const char *suggest, int mode, int muts, int force)
+    const char *choosemap(const char *suggest, int mode, int muts, int force, bool notry)
     {
         static string chosen;
         if(suggest && *suggest)
@@ -1385,7 +1388,7 @@ namespace server
                 if(found) break;
             }
         }
-        return *chosen ? chosen : pickmap(suggest, mode, muts);
+        return *chosen ? chosen : pickmap(suggest, mode, muts, notry);
     }
 
     bool canload(const char *type)

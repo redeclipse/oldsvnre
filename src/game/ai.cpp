@@ -916,7 +916,7 @@ namespace ai
                         if(!actor[d->actortype].canmove)
                         {
                             vec dp = d->headpos(), ep = getaimpos(d, e, alt);
-                            if(cansee(d, dp, ep, d->actortype >= A_ENEMY) || (e->clientnum == d->ai->enemy && d->ai->enemyseen && lastmillis-d->ai->enemyseen <= (d->skill*10)+1000))
+                            if(cansee(d, dp, ep, d->actortype >= A_ENEMY) || (e->clientnum == d->ai->enemy && d->ai->enemyseen && lastmillis-d->ai->enemyseen <= (d->skill*40)+1000))
                                 return true;
                             return false;
                         }
@@ -1178,9 +1178,10 @@ namespace ai
         }
 
         gameent *e = game::getclient(d->ai->enemy);
-        if(!passive())
+        if(passive()) enemyok = false;
+        else
         {
-            if(!(enemyok = e && targetable(d, e, true)) || d->skill >= 50)
+            if(!(enemyok = (e && targetable(d, e, true))) || d->skill >= 50)
             {
                 gameent *f = game::intersectclosest(dp, d->ai->target, d);
                 if(f)
@@ -1191,69 +1192,52 @@ namespace ai
                         enemyok = true;
                         e = f;
                     }
-                    else enemyok = false;
+                    else enemyok = false; // would hit non-targetable person
                 }
                 else if(!enemyok && target(d, b, weaptype[d->weapselect].melee ? 1 : 0))
                     enemyok = (e = game::getclient(d->ai->enemy)) != NULL;
             }
-            if(enemyok)
-            {
-                bool alt = altfire(d, e);
-                vec ep = getaimpos(d, e, alt);
-                float yaw, pitch;
-                game::getyawpitch(dp, ep, yaw, pitch);
-                game::fixrange(yaw, pitch);
-                bool insight = cansee(d, dp, ep), hasseen = d->ai->enemyseen && lastmillis-d->ai->enemyseen <= (d->skill*10)+3000,
-                    quick = d->ai->enemyseen && lastmillis-d->ai->enemyseen <= (W2(d->weapselect, fullauto, alt) ? W2(d->weapselect, attackdelay, alt)*2 : skmod)+skmod;
-                if(insight) d->ai->enemyseen = lastmillis;
-                if(d->ai->dontmove || insight || hasseen || quick)
-                {
-                    float sskew = insight || d->skill > 100 ? 1.5f : (hasseen ? 1.f : 0.5f);
-                    if(lockon(d, e, actor[d->actortype].canstrafe ? 32 : 16, weaptype[d->weapselect].melee))
-                    {
-                        frame *= 2;
-                        b.acttype = AI_A_LOCKON;
-                        d->ai->dontmove = false;
-                        d->ai->targyaw = yaw;
-                        d->ai->targpitch = pitch;
-                        d->ai->spot = e->feetpos();
-                    }
-                    game::scaleyawpitch(d->yaw, d->pitch, yaw, pitch, frame, frame*sskew);
-                    bool shoot = canshoot(d, e, alt);
-                    if(d->action[alt ? AC_SECONDARY : AC_PRIMARY] && W2(d->weapselect, power, alt) && W2(d->weapselect, cooked, alt))
-                    { // TODO: make AI more aware of what they're shooting
-                        int cooked = W2(d->weapselect, cooked, alt);
-                        if(cooked&8) shoot = false; // inverted life
-                    }
-                    if(shoot && hastarget(d, b, e, alt, insight || quick, yaw, pitch, dp.squaredist(ep)))
-                    {
-                        d->action[alt ? AC_SECONDARY : AC_PRIMARY] = true;
-                        d->actiontime[alt ? AC_SECONDARY : AC_PRIMARY] = lastmillis;
-                        firing = true;
-                    }
-                    occupied = true;
-                }
-                else
-                {
-                    if(!d->ai->enemyseen || lastmillis-d->ai->enemyseen > (d->skill*50)+3000)
-                    {
-                        d->ai->enemy = -1;
-                        d->ai->enemyseen = d->ai->enemymillis = 0;
-                    }
-                    enemyok = false;
-                }
-            }
-            else
-            {
-                if(!enemyok)
-                {
-                    d->ai->enemy = -1;
-                    d->ai->enemyseen = d->ai->enemymillis = 0;
-                }
-                enemyok = false;
-            }
         }
-        else
+        if(enemyok)
+        {
+            bool alt = altfire(d, e);
+            vec ep = getaimpos(d, e, alt);
+            float yaw, pitch;
+            game::getyawpitch(dp, ep, yaw, pitch);
+            game::fixrange(yaw, pitch);
+            bool insight = cansee(d, dp, ep), hasseen = d->ai->enemyseen && lastmillis-d->ai->enemyseen <= (d->skill*40)+1000,
+                 quick = d->ai->enemyseen && lastmillis-d->ai->enemyseen <= (W2(d->weapselect, fullauto, alt) ? W2(d->weapselect, attackdelay, alt)*2 : skmod)+skmod;
+            if(insight) d->ai->enemyseen = lastmillis;
+            if(d->ai->dontmove || insight || hasseen || quick)
+            {
+                float sskew = insight || d->skill > 100 ? 1.5f : (hasseen ? 1.f : 0.5f);
+                if(lockon(d, e, actor[d->actortype].canstrafe ? 32 : 16, weaptype[d->weapselect].melee))
+                {
+                    frame *= 2;
+                    b.acttype = AI_A_LOCKON;
+                    d->ai->dontmove = false;
+                    d->ai->targyaw = yaw;
+                    d->ai->targpitch = pitch;
+                    d->ai->spot = e->feetpos();
+                }
+                game::scaleyawpitch(d->yaw, d->pitch, yaw, pitch, frame, frame*sskew);
+                bool shoot = canshoot(d, e, alt);
+                if(d->action[alt ? AC_SECONDARY : AC_PRIMARY] && W2(d->weapselect, power, alt) && W2(d->weapselect, cooked, alt))
+                { // TODO: make AI more aware of what they're shooting
+                    int cooked = W2(d->weapselect, cooked, alt);
+                    if(cooked&8) shoot = false; // inverted life
+                }
+                if(shoot && hastarget(d, b, e, alt, insight || quick, yaw, pitch, dp.squaredist(ep)))
+                {
+                    d->action[alt ? AC_SECONDARY : AC_PRIMARY] = true;
+                    d->actiontime[alt ? AC_SECONDARY : AC_PRIMARY] = lastmillis;
+                    firing = true;
+                }
+                occupied = true;
+            }
+            else enemyok = false;
+        }
+        if(!enemyok)
         {
             d->ai->enemy = -1;
             d->ai->enemyseen = d->ai->enemymillis = 0;

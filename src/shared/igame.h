@@ -151,8 +151,8 @@ namespace server
     extern void serverupdate();
     extern const char *gameid();
     extern int getver(int n = 0);
-    extern const char *pickmap(const char *suggest = NULL, int mode = -1, int muts = -1);
-    extern const char *choosemap(const char *suggest = NULL, int mode = -1, int muts = -1, int force = 0);
+    extern const char *pickmap(const char *suggest = NULL, int mode = -1, int muts = -1, bool notry = false);
+    extern const char *choosemap(const char *suggest = NULL, int mode = -1, int muts = -1, int force = 0, bool notry = false);
     extern void changemap(const char *name = NULL, int mode = -1, int muts = -1);
     extern bool canload(const char *type);
     extern bool rewritecommand(ident *id, tagval *args, int numargs);
