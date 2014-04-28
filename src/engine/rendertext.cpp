@@ -510,22 +510,22 @@ int draw_key(Texture *&tex, const char *str, float sx, float sy, float sc, cvec 
 
         glColor4ub(uchar((textkeybgcolour>>16)&0xFF), uchar((textkeybgcolour>>8)&0xFF), uchar(textkeybgcolour&0xFF), uchar(textkeybgblend*cl.a));
 
-        float sh = curfont->maxh*sc, sw = (t->w*sh)/float(t->h), w1 = sw*0.3f, w2 = sw*0.4f, amt = swidth/w2;
+        float sh = curfont->maxh*sc, sw = (t->w*sh)/float(t->h), w1 = sw*0.25f, w2 = sw*0.5f, amt = swidth/w2;
         int count = int(floorf(amt));
         varray::attrib<float>(sx + ss,     sy    ); varray::attrib<float>(0, 0);
-        varray::attrib<float>(sx + ss + w1, sy    ); varray::attrib<float>(0.3f, 0);
-        varray::attrib<float>(sx + ss + w1, sy + sh); varray::attrib<float>(0.3f, 1);
+        varray::attrib<float>(sx + ss + w1, sy    ); varray::attrib<float>(0.25f, 0);
+        varray::attrib<float>(sx + ss + w1, sy + sh); varray::attrib<float>(0.25f, 1);
         varray::attrib<float>(sx + ss,     sy + sh); varray::attrib<float>(0, 1);
         sp = (ss += w1);
         loopi(count)
         {
-            varray::attrib<float>(sx + ss,     sy    ); varray::attrib<float>(0.3f, 0);
-            varray::attrib<float>(sx + ss + w2, sy    ); varray::attrib<float>(0.7f, 0);
-            varray::attrib<float>(sx + ss + w2, sy + sh); varray::attrib<float>(0.7f, 1);
-            varray::attrib<float>(sx + ss,     sy + sh); varray::attrib<float>(0.3f, 1);
+            varray::attrib<float>(sx + ss,     sy    ); varray::attrib<float>(0.25f, 0);
+            varray::attrib<float>(sx + ss + w2, sy    ); varray::attrib<float>(0.75f, 0);
+            varray::attrib<float>(sx + ss + w2, sy + sh); varray::attrib<float>(0.75f, 1);
+            varray::attrib<float>(sx + ss,     sy + sh); varray::attrib<float>(0.25f, 1);
             ss += w2;
         }
-        float w3 = amt-float(count), w4 = w1 + w2*w3, w5 = 0.7f - 0.4f*w3;
+        float w3 = amt-float(count), w4 = w1 + w2*w3, w5 = 0.75f - 0.5f*w3;
         varray::attrib<float>(sx + ss,     sy    ); varray::attrib<float>(w5, 0);
         varray::attrib<float>(sx + ss + w4, sy    ); varray::attrib<float>(1, 0);
         varray::attrib<float>(sx + ss + w4, sy + sh); varray::attrib<float>(1, 1);
