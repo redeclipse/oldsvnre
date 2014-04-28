@@ -223,7 +223,7 @@ struct gui : guient
         else
         {
             cury = -ysize;
-            int x1 = curx+tx, x2 = x1+w+guibound[0]*2, y1 = cury-guibound[1]*5/2, y2 = cury-guibound[1], alpha = guitextblend;
+            int x1 = curx+tx, x2 = x1+w+guibound[0]*2, y1 = cury-guibound[1]*2, y2 = cury-guibound[1]/2, alpha = guitextblend;
             if(!visibletab())
             {
                 if(tcurrent && hitx>=x1 && hity>=y1 && hitx<x2 && hity<y2)
@@ -235,9 +235,7 @@ struct gui : guient
                 else tcolor = vec::hexcolor(tcolor).mul(0.25f).tohexcolor();
             }
             skin(x1, y1, x2, y2, guibgcolour, guibgblend, guibordercolour, guiborderblend);
-            x1 += guibound[0];
-            y1 += guibound[1]-FONTH/3*2;
-            text_(name, x1, y1, tcolor, alpha, visible());
+            text_(name, x1+guibound[0], y1+guibound[1]-FONTH/3*2, tcolor, alpha, visible());
         }
         tx += w+guibound[0]*3;
         gui::popfont();
@@ -248,7 +246,7 @@ struct gui : guient
         tx += guibound[1]*2+guibound[0]*2; // acts like a tab
         if(guilayoutpass) return;
         cury = -ysize;
-        int x1 = curx+(xsize-guibound[1]*3/2), x2 = x1+guibound[1]*2, y1 = cury-guibound[1]*5/2, y2 = cury-guibound[1];
+        int x1 = curx+(xsize-guibound[1]*3/2), x2 = x1+guibound[1]*2, y1 = cury-guibound[1]*2, y2 = cury-guibound[1]/2;
         #define uibtn(a,b) \
         { \
             bool hit = false; \
@@ -1145,7 +1143,7 @@ struct gui : guient
                 gui::pushfont("little");
                 int width, height, tw = min(statuswidth ? statuswidth : (guistatuswidth ? guistatuswidth : -1), int(screen->w*(1/uiscale.y)));
                 text_bounds(statusstr, width, height, tw, TEXT_CENTERED|TEXT_NO_INDENT);
-                int w = width+guibound[0]*2, h = guibound[1]/2+height, x1 = -w/2, y1 = guibound[1], x2 = x1+w, y2 = y1+h;
+                int w = width+guibound[0]*2, h = guibound[1]/2+height, x1 = -w/2, y1 = guibound[1]/2, x2 = x1+w, y2 = y1+h;
                 skin(x1, y1, x2, y2, guibgcolour, guibgblend, guibordercolour, guiborderblend);
                 draw_text(statusstr, x1+guibound[0], y1+guibound[1]/4, 255, 255, 255, 255, TEXT_CENTERED|TEXT_NO_INDENT, -1, tw);
                 gui::popfont();
