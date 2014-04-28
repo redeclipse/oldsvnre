@@ -25,7 +25,7 @@ VAR(IDF_PERSIST, guistatuswidth, -1, 2048, VAR_MAX);
 VAR(IDF_PERSIST, guiskinned, 0, 2, 2); // 0 = no backgrounds, 1 = drawn backgrounds, 2 = skinned backgrounds
 
 VAR(IDF_PERSIST|IDF_HEX, guibgcolour, -1, 0x000000, 0xFFFFFF);
-FVAR(IDF_PERSIST, guibgblend, 0, 0.5f, 1);
+FVAR(IDF_PERSIST, guibgblend, 0, 0.7f, 1);
 VAR(IDF_PERSIST|IDF_HEX, guibordercolour, -1, 0x000000, 0xFFFFFF);
 FVAR(IDF_PERSIST, guiborderblend, 0, 1.f, 1);
 
@@ -41,7 +41,7 @@ VAR(IDF_PERSIST|IDF_HEX, guitooltipbordercolour, -1, 0x100000, 0xFFFFFF);
 FVAR(IDF_PERSIST, guitooltipborderblend, 0, 1.f, 1);
 
 VAR(IDF_PERSIST|IDF_HEX, guifieldbgcolour, -1, 0x404040, 0xFFFFFF);
-FVAR(IDF_PERSIST, guifieldbgblend, 0, 0.5f, 1);
+FVAR(IDF_PERSIST, guifieldbgblend, 0, 0.7f, 1);
 VAR(IDF_PERSIST|IDF_HEX, guifieldbordercolour, -1, 0x000000, 0xFFFFFF);
 FVAR(IDF_PERSIST, guifieldborderblend, 0, 1.f, 1);
 
