@@ -549,8 +549,9 @@ struct guient
         defvformatstring(str, faded, fmt);
         return button(str, color, icon, icolor, faded);
     }
-    virtual void background(int color, int parentw = 0, int parenth = 0) = 0;
-    virtual void border(int color, int parentw = 0, int parenth = 0, int offsetx = 0, int offsety = 0) = 0;
+    virtual void fill(int color, int parentw = 0, int parenth = 0) = 0;
+    virtual void outline(int color, int parentw = 0, int parenth = 0, int offsetx = 0, int offsety = 0) = 0;
+    virtual void background(int color = 0, float blend = 0, int parentw = 0, int parenth = 0) = 0;
 
     virtual void pushlist(bool merge = false) {}
     virtual int poplist() { return 0; }

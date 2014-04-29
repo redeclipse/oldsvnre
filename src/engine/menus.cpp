@@ -349,21 +349,27 @@ void guibar()
     if(cgui) cgui->separator();
 }
 
-void guibackground(int *colour, int *levels)
+void guifill(int *colour, int *levels)
 {
-    if(cgui) cgui->background(*colour, *levels);
+    if(cgui) cgui->fill(*colour, *levels);
 }
 
-void guiborder(int *colour, int *levels, int *offsetx, int *offsety)
+void guioutline(int *colour, int *levels, int *offsetx, int *offsety)
 {
-    if(cgui) cgui->border(*colour, *levels, 0, *offsetx, *offsety);
+    if(cgui) cgui->outline(*colour, *levels, 0, *offsetx, *offsety);
+}
+
+void guibackground(int *colour, float *blend, int *levels)
+{
+    if(cgui) cgui->background(*colour, *blend, *levels);
 }
 
 void guistrut(float *strut, int *alt)
 {
     if(cgui)
     {
-        if(*alt) cgui->strut(*strut); else cgui->space(*strut);
+        if(*alt) cgui->strut(*strut);
+        else cgui->space(*strut);
     }
 }
 
@@ -640,8 +646,9 @@ COMMAND(0, guilist, "e");
 COMMAND(0, guibody, "esse");
 COMMAND(0, guititle, "s");
 COMMAND(0, guibar, "");
-COMMAND(0, guibackground, "ii");
-COMMAND(0, guiborder, "iiii");
+COMMAND(0, guifill, "ii");
+COMMAND(0, guioutline, "iiii");
+COMMAND(0, guibackground, "bfi");
 COMMAND(0, guistrut,"fi");
 COMMAND(0, guispring, "i");
 COMMAND(0, guivisible, "e");

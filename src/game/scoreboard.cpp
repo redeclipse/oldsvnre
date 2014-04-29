@@ -490,11 +490,11 @@ namespace hud
                             int bgc2 = vec(c).mul(0.25f).tohexcolor();
                             uicenterlist(g, {
                                 g.pushlist();
-                                if(scorebgrows) loopj(4) g.border(bgcolor, 0, 0, -(j+1), -(j+1));
+                                if(scorebgrows) loopj(4) g.outline(bgcolor, 0, 0, -(j+1), -(j+1));
                                 if(sg.team && m_team(game::gamemode, game::mutators))
                                 {
                                     uilist(g, uifont(g, "default", {
-                                        if(scorebgrows) g.background(bgc2);
+                                        if(scorebgrows) g.fill(bgc2);
                                         g.space(0.15f);
                                         g.textf("team %s", 0xFFFFFF, teamtexname(sg.team), TEAM(sg.team, colour), TEAM(sg.team, name));
                                         g.spring();
@@ -508,34 +508,34 @@ namespace hud
 
                                 uilist(g, {
                                     uilist(g, {
-                                        if(scorebgrows > 1) g.background(bgcolor);
+                                        if(scorebgrows > 1) g.fill(bgcolor);
                                         uicenter(g, uipad(g, 0.25f, g.space(1); g.strut(1)));
                                     });
                                     loopscorelist(uilist(g, {
-                                        if(scorebgrows > 1) g.background(bgcolor);
+                                        if(scorebgrows > 1) g.fill(bgcolor);
                                         uicenter(g, uipad(g, 0.25f, g.space(1); g.strut(1)));
                                     }));
                                 });
 
                                 uilist(g, {
                                     uilist(g, {
-                                        if(scorebgrows > 1) g.background(bgcolor);
+                                        if(scorebgrows > 1) g.fill(bgcolor);
                                         uicenter(g, uipad(g, 0.25f, g.space(1); g.strut(1)));
                                     });
                                     loopscoregroup(uilist(g, {
-                                        if(scorebgrows > 2) g.background(i%2 ? bgc2 : bgc1);
+                                        if(scorebgrows > 2) g.fill(i%2 ? bgc2 : bgc1);
                                         uicenter(g, uipad(g, 0.25f, uicenterlist(g, g.textf("\f($priv%stex)", game::findcolour(o), NULL, 0, hud::privname(o->privilege, o->actortype)))));
                                     }));
                                 });
 
                                 uilist(g, {
                                     uilist(g, {
-                                        if(scorebgrows > 1) g.background(bgcolor);
+                                        if(scorebgrows > 1) g.fill(bgcolor);
                                         uicenter(g, uipad(g, namepad, uicenterlist(g, g.text("name", 0xFFFFFF))));
                                     });
                                     loopscoregroup(uilist(g, {
-                                        if(scorehilight && o == game::player1) loopj(3) g.border(scorehilight, 0, 0, j+1, j+1);
-                                        if(scorebgrows > 2) g.background(i%2 ? bgc2 : bgc1);
+                                        if(scorehilight && o == game::player1) loopj(3) g.outline(scorehilight, 0, 0, j+1, j+1);
+                                        if(scorebgrows > 2) g.fill(i%2 ? bgc2 : bgc1);
                                         uicenter(g, uipad(g, 0.25f, uicenterlist(g, g.textf("%s", 0xFFFFFF, NULL, 0, game::colourname(o, NULL, false, true, scorebgrows > 2 || (scorehilight && o == game::player1) ? 0 : 3)))));
                                     }));
                                 });
@@ -544,11 +544,11 @@ namespace hud
                                 {
                                     uilist(g, {
                                         uilist(g, {
-                                            if(scorebgrows > 1) g.background(bgcolor);
+                                            if(scorebgrows > 1) g.fill(bgcolor);
                                             uicenter(g, uipad(g, 1, g.text("points", 0xFFFFFF)));
                                         });
                                         loopscoregroup(uilist(g, {
-                                                if(scorebgrows > 2) g.background(i%2 ? bgc2 : bgc1);
+                                                if(scorebgrows > 2) g.fill(i%2 ? bgc2 : bgc1);
                                             uicenter(g, uipad(g, 0.5f, g.textf("%d", 0xFFFFFF, NULL, 0, o->points)));
                                         }));
                                     });
@@ -560,11 +560,11 @@ namespace hud
                                     {
                                         uilist(g, {
                                             uilist(g, {
-                                                if(scorebgrows > 1) g.background(bgcolor);
+                                                if(scorebgrows > 1) g.fill(bgcolor);
                                                 uicenter(g, uipad(g, 4, g.text("best", 0xFFFFFF)));
                                             });
                                             loopscoregroup(uilist(g, {
-                                                if(scorebgrows > 2) g.background(i%2 ? bgc2 : bgc1);
+                                                if(scorebgrows > 2) g.fill(i%2 ? bgc2 : bgc1);
                                                 uicenter(g, uipad(g, 0.5f, g.textf("%s", 0xFFFFFF, NULL, 0, o->cptime ? timestr(o->cptime) : "\fadnf")));
                                             }));
                                         });
@@ -573,11 +573,11 @@ namespace hud
                                     {
                                         uilist(g, {
                                             uilist(g, {
-                                                if(scorebgrows > 1) g.background(bgcolor);
+                                                if(scorebgrows > 1) g.fill(bgcolor);
                                                 uicenter(g, uipad(g, 4, g.text("laps", 0xFFFFFF)));
                                             });
                                             loopscoregroup(uilist(g, {
-                                                if(scorebgrows > 2) g.background(i%2 ? bgc2 : bgc1);
+                                                if(scorebgrows > 2) g.fill(i%2 ? bgc2 : bgc1);
                                                 uicenter(g, uipad(g, 0.5f, g.textf("%d", 0xFFFFFF, NULL, 0, o->cplaps)));
                                             }));
                                         });
@@ -588,11 +588,11 @@ namespace hud
                                 {
                                     uilist(g, {
                                         uilist(g, {
-                                            if(scorebgrows > 1) g.background(bgcolor);
+                                            if(scorebgrows > 1) g.fill(bgcolor);
                                             uicenter(g, uipad(g, 1, g.text("frags", 0xFFFFFF)));
                                         });
                                         loopscoregroup(uilist(g, {
-                                            if(scorebgrows > 2) g.background(i%2 ? bgc2 : bgc1);
+                                            if(scorebgrows > 2) g.fill(i%2 ? bgc2 : bgc1);
                                             uicenter(g, uipad(g, 0.5f, g.textf("%d", 0xFFFFFF, NULL, 0, o->frags)));
                                         }));
                                     });
@@ -602,11 +602,11 @@ namespace hud
                                 {
                                     uilist(g, {
                                         uilist(g, {
-                                            if(scorebgrows > 1) g.background(bgcolor);
+                                            if(scorebgrows > 1) g.fill(bgcolor);
                                             uicenter(g, uipad(g, 1, g.text("deaths", 0xFFFFFF)));
                                         });
                                         loopscoregroup(uilist(g, {
-                                            if(scorebgrows > 2) g.background(i%2 ? bgc2 : bgc1);
+                                            if(scorebgrows > 2) g.fill(i%2 ? bgc2 : bgc1);
                                             uicenter(g, uipad(g, 0.5f, g.textf("%d", 0xFFFFFF, NULL, 0, o->deaths)));
                                         }));
                                     });
@@ -616,11 +616,11 @@ namespace hud
                                 {
                                     uilist(g, {
                                         uilist(g, {
-                                            if(scorebgrows > 1) g.background(bgcolor);
+                                            if(scorebgrows > 1) g.fill(bgcolor);
                                             uicenter(g, uipad(g, 1, g.text("ratio", 0xFFFFFF)));
                                         });
                                         loopscoregroup(uilist(g, {
-                                            if(scorebgrows > 2) g.background(i%2 ? bgc2 : bgc1);
+                                            if(scorebgrows > 2) g.fill(i%2 ? bgc2 : bgc1);
                                             float ratio = o->frags >= o->deaths ? (o->frags/float(max(o->deaths, 1))) : -(o->deaths/float(max(o->frags, 1)));
                                             uicenter(g, uipad(g, 0.5f, g.textf("%.1f\fs\fa:\fS%.1f", 0xFFFFFF, NULL, 0, ratio >= 0 ? ratio : 1.f, ratio >= 0 ? 1.f : -ratio)));
                                         }));
@@ -631,11 +631,11 @@ namespace hud
                                 {
                                     uilist(g, {
                                         uilist(g, {
-                                            if(scorebgrows > 1) g.background(bgcolor);
+                                            if(scorebgrows > 1) g.fill(bgcolor);
                                             uicenter(g, uipad(g, 2, g.text("pj", 0xFFFFFF)));
                                         });
                                         loopscoregroup(uilist(g, {
-                                            if(scorebgrows > 2) g.background(i%2 ? bgc2 : bgc1);
+                                            if(scorebgrows > 2) g.fill(i%2 ? bgc2 : bgc1);
                                             uicenter(g, uipad(g, 0.5f, g.textf("%d", 0xFFFFFF, NULL, 0, o->plag)));
                                         }));
                                     });
@@ -645,11 +645,11 @@ namespace hud
                                 {
                                     uilist(g, {
                                         uilist(g, {
-                                            if(scorebgrows > 1) g.background(bgcolor);
+                                            if(scorebgrows > 1) g.fill(bgcolor);
                                             uicenter(g, uipad(g, 2, g.text("ping", 0xFFFFFF)));
                                         });
                                         loopscoregroup(uilist(g, {
-                                            if(scorebgrows > 2) g.background(i%2 ? bgc2 : bgc1);
+                                            if(scorebgrows > 2) g.fill(i%2 ? bgc2 : bgc1);
                                             uicenter(g, uipad(g, 0.5f, g.textf("%d", 0xFFFFFF, NULL, 0, o->ping)));
                                         }));
                                     });
@@ -659,11 +659,11 @@ namespace hud
                                 {
                                     uilist(g, {
                                         uilist(g, {
-                                            if(scorebgrows > 1) g.background(bgcolor);
+                                            if(scorebgrows > 1) g.fill(bgcolor);
                                             uicenter(g, uipad(g, 1, g.text("cn", 0xFFFFFF)));
                                         });
                                         loopscoregroup(uilist(g, {
-                                            if(scorebgrows > 2) g.background(i%2 ? bgc2 : bgc1);
+                                            if(scorebgrows > 2) g.fill(i%2 ? bgc2 : bgc1);
                                             uicenter(g, uipad(g, 0.5f, g.textf("%d", 0xFFFFFF, NULL, 0, o->clientnum)));
                                         }));
                                     });
@@ -673,11 +673,11 @@ namespace hud
                                 {
                                     uilist(g, {
                                         uilist(g, {
-                                            if(scorebgrows > 1) g.background(bgcolor);
+                                            if(scorebgrows > 1) g.fill(bgcolor);
                                             uicenter(g, uipad(g, 1, g.text("sk", 0xFFFFFF)));
                                         });
                                         loopscoregroup(uilist(g, {
-                                            if(scorebgrows > 2) g.background(i%2 ? bgc2 : bgc1);
+                                            if(scorebgrows > 2) g.fill(i%2 ? bgc2 : bgc1);
                                             uicenter(g, uipad(g, 0.5f, {
                                                 if(o->actortype > A_PLAYER) g.textf("%d", 0xFFFFFF, NULL, 0, o->skill);
                                                 else { g.space(1); g.strut(1); }
@@ -689,11 +689,11 @@ namespace hud
                                 {
                                     uilist(g, {
                                         uilist(g, {
-                                            if(scorebgrows > 1) g.background(bgcolor);
+                                            if(scorebgrows > 1) g.fill(bgcolor);
                                             uicenter(g, uipad(g, handlepad, g.space(1); g.strut(1)));
                                         });
                                         loopscoregroup(uilist(g, {
-                                            if(scorebgrows > 2) g.background(i%2 ? bgc2 : bgc1);
+                                            if(scorebgrows > 2) g.fill(i%2 ? bgc2 : bgc1);
                                             uicenter(g, uipad(g, 0.5f, g.textf("%s", 0xFFFFFF, NULL, 0, o->handle[0] ? o->handle : "-")));
                                         }));
                                     });
@@ -702,11 +702,11 @@ namespace hud
                                 {
                                     uilist(g, {
                                         uilist(g, {
-                                           if(scorebgrows > 1) g.background(bgcolor);
+                                           if(scorebgrows > 1) g.fill(bgcolor);
                                            uicenter(g, uipad(g, hostpad, g.space(1); g.strut(1)));
                                         });
                                         loopscoregroup(uilist(g, {
-                                            if(scorebgrows > 2) g.background(i%2 ? bgc2 : bgc1);
+                                            if(scorebgrows > 2) g.fill(i%2 ? bgc2 : bgc1);
                                             uicenter(g, uipad(g, 0.5f, g.textf("%s", 0xFFFFFF, NULL, 0, scorehost(o))));
                                         }));
                                     });
@@ -715,11 +715,11 @@ namespace hud
                                 {
                                     uilist(g, {
                                         uilist(g, {
-                                            if(scorebgrows > 1) g.background(bgcolor);
+                                            if(scorebgrows > 1) g.fill(bgcolor);
                                             uicenter(g, uipad(g, 0.125f, g.space(1); g.strut(1)));
                                         });
                                         loopscoregroup(uilist(g, {
-                                            if(scorebgrows > 2) g.background(i%2 ? bgc2 : bgc1);
+                                            if(scorebgrows > 2) g.fill(i%2 ? bgc2 : bgc1);
                                             const char *status = questiontex;
                                             if(game::player1->dominating.find(o) >= 0) status = dominatedtex;
                                             else if(game::player1->dominated.find(o) >= 0) status = dominatingtex;
@@ -737,11 +737,11 @@ namespace hud
                                 }
                                 uilist(g, {
                                     uilist(g, {
-                                        if(scorebgrows > 1) g.background(bgcolor);
+                                        if(scorebgrows > 1) g.fill(bgcolor);
                                         uicenter(g, uipad(g, 0.25f, g.space(1); g.strut(1)));
                                     });
                                     loopscorelist(uilist(g, {
-                                        if(scorebgrows > 2) g.background(i%2 ? bgc2 : bgc1);
+                                        if(scorebgrows > 2) g.fill(i%2 ? bgc2 : bgc1);
                                         uicenter(g, uipad(g, 0.25f, g.space(1); g.strut(1)));
                                     }));
                                 });
@@ -771,8 +771,8 @@ namespace hud
                                     }
                                     gameent *o = spectators[i];
                                     uilistv(g, 2, uipad(g, 0.25f, uilist(g, {
-                                        loopj(3) g.border(scorehilight && o == game::player1 ? scorehilight : 0x000000, 0, 0, -(j+1), -(j+1));
-                                        if(scorebgrows > 2) g.background(i%2 ? bgc2 : bgc1);
+                                        loopj(3) g.outline(scorehilight && o == game::player1 ? scorehilight : 0x000000, 0, 0, -(j+1), -(j+1));
+                                        if(scorebgrows > 2) g.fill(i%2 ? bgc2 : bgc1);
                                         uipad(g, 0.025f, uilist(g, uipad(g, 0.25f, uicenterlist(g, {
                                             if(scoreclientnum || game::player1->privilege >= PRIV_ELEVATED)
                                                 g.textf("%s [%d]", 0xFFFFFF, NULL, 0, game::colourname(o, NULL, true, false), o->clientnum);

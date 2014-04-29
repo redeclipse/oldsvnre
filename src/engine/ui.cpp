@@ -78,9 +78,11 @@ struct gui : guient
     bool visibletab() { return !tcurrent || tpos == *tcurrent; }
     bool visible() { return !guilayoutpass && visibletab(); }
 
-    void skin(int x1, int y1, int x2, int y2, int c1, float b1, int c2 = 0, float b2 = 1)
+    void skin(int x1, int y1, int x2, int y2, int c1, float b1, int c2 = 0, float b2 = 0)
     {
         if(!hasbgfx) return;
+        int colour1 = c1 >= 0 ? c1 : (guibgcolour >= 0 ? guibgcolour : (c2 >= 0 ? c2 : 0x000000)), colour2 = c2 >= 0 ? c2 : (guibordercolour >= 0 ? guibordercolour : 0x000000);
+        float blend1 = b1 > 0 ? b1 : guibgblend, blend2 = b2 > 0 ? b2 : guiborderblend;
         switch(guiskinned)
         {
             case 2:
@@ -89,10 +91,10 @@ struct gui : guient
                 if(skintex && skintex != notexture)
                 {
                     float pw = skintex->w*0.25f, ph = skintex->h*0.25f, qw = skintex->w*0.5f, qh = skintex->h*0.5f, px = 0, py = 0, tx = 0, ty = 0;
-                    int colour = c1 >= 0 ? c1 : (c2 >= 0 ? c2 : 0x000000), w = x2-x1, h = y2-y1, cw = int(floorf(w/qw))-1, ch = int(floorf(h/qh))+1;
+                    int w = x2-x1, h = y2-y1, cw = int(floorf(w/qw))-1, ch = int(floorf(h/qh))+1;
 
                     glBindTexture(GL_TEXTURE_2D, skintex->id);
-                    glColor4f((colour>>16)/255.f, ((colour>>8)&0xFF)/255.f, (colour&0xFF)/255.f, b1);
+                    glColor4f((colour1>>16)/255.f, ((colour1>>8)&0xFF)/255.f, (colour1&0xFF)/255.f, blend1);
                     glBegin(GL_QUADS);
 
                     loopi(ch)
@@ -159,11 +161,11 @@ struct gui : guient
             }
             case 1:
             {
-                if(guibgcolour >= 0)
+                if(colour1 >= 0)
                 {
                     notextureshader->set();
                     glDisable(GL_TEXTURE_2D);
-                    glColor4f((guibgcolour>>16)/255.f, ((guibgcolour>>8)&0xFF)/255.f, (guibgcolour&0xFF)/255.f, guibgblend);
+                    glColor4f((colour1>>16)/255.f, ((colour1>>8)&0xFF)/255.f, (colour1&0xFF)/255.f, blend1);
                     glBegin(GL_TRIANGLE_STRIP);
                     glVertex2f(x1, y1);
                     glVertex2f(x2, y1);
@@ -174,11 +176,11 @@ struct gui : guient
                     defaultshader->set();
                     glEnable(GL_TEXTURE_2D);
                 }
-                if(guibordercolour >= 0)
+                if(colour2 >= 0)
                 {
                     lineshader->set();
                     glDisable(GL_TEXTURE_2D);
-                    glColor4f((guibordercolour>>16)/255.f, ((guibordercolour>>8)&0xFF)/255.f, (guibordercolour&0xFF)/255.f, guiborderblend);
+                    glColor4f((colour2>>16)/255.f, ((colour2>>8)&0xFF)/255.f, (colour2&0xFF)/255.f, blend2);
                     glBegin(GL_LINE_LOOP);
                     glVertex2f(x1, y1);
                     glVertex2f(x2, y1);
@@ -771,7 +773,7 @@ struct gui : guient
         draw_text(text, x, y, color>>16, (color>>8)&0xFF, color&0xFF, force ? -alpha : alpha);
     }
 
-    void background(int color, int inheritw, int inherith)
+    void fill(int color, int inheritw, int inherith)
     {
         if(!visible()) return;
         glDisable(GL_TEXTURE_2D);
@@ -799,7 +801,7 @@ struct gui : guient
         defaultshader->set();
     }
 
-    void border(int color, int inheritw, int inherith, int offsetx, int offsety)
+    void outline(int color, int inheritw, int inherith, int offsetx, int offsety)
     {
         if(!visible()) return;
         glDisable(GL_TEXTURE_2D);
@@ -825,6 +827,29 @@ struct gui : guient
         rect_(curx+offsetx, cury+offsety, w-offsetx*2, h-offsety*2, true);
         glEnable(GL_TEXTURE_2D);
         defaultshader->set();
+    }
+
+    void background(int color, float blend, int inheritw, int inherith)
+    {
+        if(!visible()) return;
+        int w = xsize, h = ysize;
+        if(inheritw>0)
+        {
+            int parentw = curlist, parentdepth = 0;
+            for(;parentdepth < inheritw && lists[parentw].parent>=0; parentdepth++)
+                parentw = lists[parentw].parent;
+            list &p = lists[parentw];
+            w = p.springs > 0 && (curdepth-parentdepth)&1 ? lists[p.parent].w : p.w;
+        }
+        if(inherith>0)
+        {
+            int parenth = curlist, parentdepth = 0;
+            for(;parentdepth < inherith && lists[parenth].parent>=0; parentdepth++)
+                parenth = lists[parenth].parent;
+            list &p = lists[parenth];
+            h = p.springs > 0 && !((curdepth-parentdepth)&1) ? lists[p.parent].h : p.h;
+        }
+        skin(curx, cury, curx+w, cury+h, color, blend);
     }
 
     void icon_(Texture *t, bool overlaid, int x, int y, int size, bool hit, int icolor)
