@@ -216,7 +216,8 @@ struct gui : guient
         if(color) tcolor = color;
         if(!name) name = intstr(tpos);
         gui::pushfont("super");
-        int w = text_width(name);
+        int width, height;
+        text_bounds(name, width, height);
         if(guilayoutpass)
         {
             ty = max(ty, ysize);
@@ -225,7 +226,7 @@ struct gui : guient
         else
         {
             cury = -ysize;
-            int x1 = curx+tx, x2 = x1+w+guibound[0]*2, y1 = cury-guibound[1]*2, y2 = cury-guibound[1]/2, alpha = guitextblend;
+            int x1 = curx+tx, x2 = x1+width+guibound[0]*2, y1 = cury-guibound[1]*3/4-height, y2 = cury-guibound[1]/2, alpha = guitextblend;
             if(!visibletab())
             {
                 if(tcurrent && hitx>=x1 && hity>=y1 && hitx<x2 && hity<y2)
@@ -237,18 +238,18 @@ struct gui : guient
                 else tcolor = vec::hexcolor(tcolor).mul(0.25f).tohexcolor();
             }
             skin(x1, y1, x2, y2, guibgcolour, guibgblend, guibordercolour, guiborderblend);
-            text_(name, x1+guibound[0], y1+guibound[1]-FONTH/3*2, tcolor, alpha, visible());
+            text_(name, x1+guibound[0], y1+guibound[1]/4, tcolor, alpha, visible());
         }
-        tx += w+guibound[0]*3;
+        tx += width+guibound[0]*3;
         gui::popfont();
     }
 
     void uibuttons()
     {
-        tx += guibound[1]*2+guibound[0]*2; // acts like a tab
+        tx += guibound[1]*3/2+guibound[0]*2; // acts like a tab
         if(guilayoutpass) return;
         cury = -ysize;
-        int x1 = curx+(xsize-guibound[1]*3/2), x2 = x1+guibound[1]*2, y1 = cury-guibound[1]*2, y2 = cury-guibound[1]/2;
+        int x1 = curx+(xsize-guibound[1]), x2 = x1+guibound[1]*3/2, y1 = cury-guibound[1]*2, y2 = cury-guibound[1]/2;
         #define uibtn(a,b) \
         { \
             bool hit = false; \
@@ -258,7 +259,7 @@ struct gui : guient
                 hit = true; \
             } \
             skin(x1, y1, x2, y2, guibgcolour, guibgblend, guibordercolour, guiborderblend); \
-            x1 += guibound[1]/2; \
+            x1 += guibound[1]/4; \
             y1 += guibound[1]/4; \
             icon_(a, false, x1, y1, guibound[1], hit, 0xFFFFFF); \
             y1 += guibound[1]*3/2; \
