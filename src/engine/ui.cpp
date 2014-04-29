@@ -80,7 +80,6 @@ struct gui : guient
 
     void skin(int x1, int y1, int x2, int y2, int c1, float b1, int c2 = 0, float b2 = 0)
     {
-        if(!hasbgfx) return;
         int colour1 = c1 >= 0 ? c1 : (guibgcolour >= 0 ? guibgcolour : (c2 >= 0 ? c2 : 0x000000)), colour2 = c2 >= 0 ? c2 : (guibordercolour >= 0 ? guibordercolour : 0x000000);
         float blend1 = b1 > 0 ? b1 : guibgblend, blend2 = b2 > 0 ? b2 : guiborderblend;
         switch(guiskinned)
@@ -237,7 +236,7 @@ struct gui : guient
                 }
                 else tcolor = vec::hexcolor(tcolor).mul(0.25f).tohexcolor();
             }
-            skin(x1, y1, x2, y2, guibgcolour, guibgblend, guibordercolour, guiborderblend);
+            if(hasbgfx) skin(x1, y1, x2, y2, guibgcolour, guibgblend, guibordercolour, guiborderblend);
             text_(name, x1+guibound[0], y1+guibound[1]/4, tcolor, alpha, visible());
         }
         tx += width+guibound[0]*3;
@@ -258,7 +257,7 @@ struct gui : guient
                 if(mouseaction[0]&GUI_UP) { b; } \
                 hit = true; \
             } \
-            skin(x1, y1, x2, y2, guibgcolour, guibgblend, guibordercolour, guiborderblend); \
+            if(hasbgfx) skin(x1, y1, x2, y2, guibgcolour, guibgblend, guibordercolour, guiborderblend); \
             x1 += guibound[1]/4; \
             y1 += guibound[1]/4; \
             icon_(a, false, x1, y1, guibound[1], hit, 0xFFFFFF); \
@@ -1138,8 +1137,11 @@ struct gui : guient
             glPushMatrix();
             glTranslatef(uiorigin.x, uiorigin.y, uiorigin.z);
             glScalef(uiscale.x, uiscale.y, uiscale.z);
-            int x1 = curx-guibound[0], y1 = cury-guibound[1]/2, x2 = x1+xsize+guibound[0]*2, y2 = y1+ysize+guibound[1];
-            skin(x1, y1, x2, y2, guibgcolour, guibgblend, guibordercolour, guiborderblend);
+            if(hasbgfx)
+            {
+                int x1 = curx-guibound[0], y1 = cury-guibound[1]/2, x2 = x1+xsize+guibound[0]*2, y2 = y1+ysize+guibound[1];
+                skin(x1, y1, x2, y2, guibgcolour, guibgblend, guibordercolour, guiborderblend);
+            }
         }
     }
 
@@ -1170,7 +1172,7 @@ struct gui : guient
                 int width, height, tw = min(statuswidth ? statuswidth : (guistatuswidth ? guistatuswidth : -1), int(screen->w*(1/uiscale.y)));
                 text_bounds(statusstr, width, height, tw, TEXT_CENTERED|TEXT_NO_INDENT);
                 int w = width+guibound[0]*2, h = guibound[1]/2+height, x1 = -w/2, y1 = guibound[1]/2, x2 = x1+w, y2 = y1+h;
-                skin(x1, y1, x2, y2, guibgcolour, guibgblend, guibordercolour, guiborderblend);
+                if(hasbgfx) skin(x1, y1, x2, y2, guibgcolour, guibgblend, guibordercolour, guiborderblend);
                 draw_text(statusstr, x1+guibound[0], y1+guibound[1]/4, 255, 255, 255, 255, TEXT_CENTERED|TEXT_NO_INDENT, -1, tw);
                 gui::popfont();
             }
