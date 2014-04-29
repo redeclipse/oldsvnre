@@ -551,7 +551,7 @@ struct guient
     }
     virtual void fill(int color, int parentw = 0, int parenth = 0) = 0;
     virtual void outline(int color, int parentw = 0, int parenth = 0, int offsetx = 0, int offsety = 0) = 0;
-    virtual void background(int color = -1, float blend = 0, int parentw = 0, int parenth = 0) = 0;
+    virtual void background(int colour1 = -1, float blend1 = 0, int colour2 = -1, float blend2 = 0, bool skinborder = false, int parentw = 0, int parenth = 0) = 0;
 
     virtual void pushlist(bool merge = false) {}
     virtual int poplist() { return 0; }
@@ -589,7 +589,7 @@ struct guicb
     virtual void gui(guient &g, bool firstpass) = 0;
 };
 
-extern char *guiskintex, *guioverlaytex, *guislidertex, *guiexittex, *guihovertex;
+extern char *guiskintex, *guiskinbordertex, *guioverlaytex, *guislidertex, *guiexittex, *guihovertex;
 
 struct editor;
 
