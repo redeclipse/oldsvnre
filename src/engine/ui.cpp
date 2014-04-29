@@ -264,7 +264,7 @@ struct gui : guient
                     if(guitabborder == 2) border = tcolor;
                 }
             }
-            else if(guitabborder) border = guibordercolour;
+            else if(guitabborder == 2) border = guibordercolour;
             if(hasbgfx) skin(x1, y1, x2, y2, guibgcolour, guibgblend, border >= 0 ? border : guibordercolour, guiborderblend, border >= 0);
             text_(name, x1+guibound[0], y1+guibound[1]/4, tcolor, alpha, visible());
         }
