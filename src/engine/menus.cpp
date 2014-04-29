@@ -359,9 +359,9 @@ void guioutline(int *colour, int *levels, int *offsetx, int *offsety)
     if(cgui) cgui->outline(*colour, *levels, 0, *offsetx, *offsety);
 }
 
-void guibackground(int *colour, float *blend, int *levels)
+void guibackground(int *colour1, float *blend1, int *colour2, float *blend2, int *skinborder, int *levels)
 {
-    if(cgui) cgui->background(*colour, *blend, *levels);
+    if(cgui) cgui->background(*colour1, *blend1, *colour2, *blend2, *skinborder!=0, *levels);
 }
 
 void guistrut(float *strut, int *alt)
@@ -648,7 +648,7 @@ COMMAND(0, guititle, "s");
 COMMAND(0, guibar, "");
 COMMAND(0, guifill, "ii");
 COMMAND(0, guioutline, "iiii");
-COMMAND(0, guibackground, "bfi");
+COMMAND(0, guibackground, "bfbfii");
 COMMAND(0, guistrut,"fi");
 COMMAND(0, guispring, "i");
 COMMAND(0, guivisible, "e");
