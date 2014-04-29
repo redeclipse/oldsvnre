@@ -551,7 +551,7 @@ struct guient
     }
     virtual void fill(int color, int parentw = 0, int parenth = 0) = 0;
     virtual void outline(int color, int parentw = 0, int parenth = 0, int offsetx = 0, int offsety = 0) = 0;
-    virtual void background(int color = 0, float blend = 0, int parentw = 0, int parenth = 0) = 0;
+    virtual void background(int color = -1, float blend = 0, int parentw = 0, int parenth = 0) = 0;
 
     virtual void pushlist(bool merge = false) {}
     virtual int poplist() { return 0; }
