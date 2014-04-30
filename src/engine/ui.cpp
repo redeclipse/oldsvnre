@@ -183,6 +183,7 @@ struct gui : guient
             }
             case 1:
             {
+                x1++; y1++; x2--; y2--; // offset these slightly like a skin
                 if(colour1 >= 0)
                 {
                     notextureshader->set();
