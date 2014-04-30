@@ -263,7 +263,7 @@ void guibutton(char *name, char *action, char *altact, char *icon, int *colour)
 SVAR(0, guirolloverimgpath, "");
 SVAR(0, guirolloverimgaction, "");
 
-void guiimage(char *path, char *action, float *scale, int *overlaid, char *altpath, char *altact)
+void guiimage(char *path, char *action, float *scale, int *overlaid, char *altpath, char *altact, int *colour)
 {
     if(!cgui) return;
     Texture *t = path[0] ? textureload(path, 0, true, false) : NULL;
@@ -272,7 +272,7 @@ void guiimage(char *path, char *action, float *scale, int *overlaid, char *altpa
         if(*altpath) t = textureload(altpath, 0, true, false);
         if(t == notexture) return;
     }
-    int ret = cgui->image(t, *scale, *overlaid!=0);
+    int ret = cgui->image(t, *scale, *overlaid!=0, *colour);
     if(ret&GUI_UP)
     {
         char *act = NULL;
@@ -654,7 +654,7 @@ COMMAND(0, guispring, "i");
 COMMAND(0, guivisible, "e");
 COMMAND(0, guivisibletab, "e");
 COMMAND(0, guifont,"se");
-COMMAND(0, guiimage,"ssfiss");
+COMMAND(0, guiimage,"ssfissi");
 COMMAND(0, guislice,"ssfffsss");
 COMMAND(0, guiprogress,"ff");
 COMMAND(0, guislider,"sbbsiii");
