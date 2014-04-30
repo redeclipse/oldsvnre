@@ -494,9 +494,9 @@ namespace hud
                             scoregroup &sg = *groups[k];
                             if(k) g.space(0.5f);
                             vec c = vec::hexcolor(sg.team && m_fight(game::gamemode) && m_team(game::gamemode, game::mutators) ? TEAM(sg.team, colour) : TEAM(T_NEUTRAL, colour));
-                            int bgcolor = vec(c).mul(0.65f).tohexcolor();
-                            int bgc1 = vec(c).mul(0.45f).tohexcolor();
-                            int bgc2 = vec(c).mul(0.25f).tohexcolor();
+                            int bgcolor = vec(c).mul(0.5f).tohexcolor();
+                            int bgc1 = vec(c).mul(0.35f).tohexcolor();
+                            int bgc2 = vec(c).mul(0.15f).tohexcolor();
                             uicenterlist(g, {
                                 if(scorebgrows) g.background(bgcolor);
                                 g.space(0.5f);
@@ -767,12 +767,11 @@ namespace hud
                     if(scorespectators && spectators.length())
                     {
                         vec c = vec::hexcolor(TEAM(T_NEUTRAL, colour));
-                        int bgcolor = vec(c).mul(0.65f).tohexcolor();
-                        int bgc1 = vec(c).mul(0.45f).tohexcolor();
-                        int bgc2 = vec(c).mul(0.25f).tohexcolor();
+                        int bgc1 = vec(c).mul(0.35f).tohexcolor();
+                        int bgc2 = vec(c).mul(0.15f).tohexcolor();
                         g.space(0.5f);
                         g.pushlist();
-                        if(scorebgrows) g.background(bgcolor);
+                        //if(scorebgrows) g.background();
                         g.spring();
                         g.pushlist();
                         g.spring();
@@ -780,7 +779,7 @@ namespace hud
                         uifont(g, "little", uicenterlist(g, {
                             uicenterlist(g, {
                                 uicenterlist(g, g.text("spectators", 0xFFFFFF));
-                                g.space(0.25f);
+                                g.space(0.125f);
                                 bool pushed = false;
                                 loopv(spectators) if(spectators[i])
                                 {
