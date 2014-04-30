@@ -494,9 +494,9 @@ namespace hud
                             scoregroup &sg = *groups[k];
                             if(k) g.space(0.5f);
                             vec c = vec::hexcolor(sg.team && m_fight(game::gamemode) && m_team(game::gamemode, game::mutators) ? TEAM(sg.team, colour) : TEAM(T_NEUTRAL, colour));
-                            int bgcolor = vec(c).mul(0.25f).tohexcolor();
+                            int bgcolor = vec(c).mul(0.65f).tohexcolor();
                             int bgc1 = vec(c).mul(0.45f).tohexcolor();
-                            int bgc2 = vec(c).mul(0.65f).tohexcolor();
+                            int bgc2 = vec(c).mul(0.25f).tohexcolor();
                             uicenterlist(g, {
                                 if(scorebgrows) g.background(bgcolor);
                                 g.space(0.5f);
@@ -767,9 +767,9 @@ namespace hud
                     if(scorespectators && spectators.length())
                     {
                         vec c = vec::hexcolor(TEAM(T_NEUTRAL, colour));
-                        int bgcolor = vec(c).mul(0.25f).tohexcolor();
+                        int bgcolor = vec(c).mul(0.65f).tohexcolor();
                         int bgc1 = vec(c).mul(0.45f).tohexcolor();
-                        int bgc2 = vec(c).mul(0.65f).tohexcolor();
+                        int bgc2 = vec(c).mul(0.25f).tohexcolor();
                         g.space(0.5f);
                         g.pushlist();
                         if(scorebgrows) g.background(bgcolor);
