@@ -198,7 +198,7 @@ struct gui : guient
                     defaultshader->set();
                     glEnable(GL_TEXTURE_2D);
                 }
-                if(colour2 >= 0)
+                if(skinborder && colour2 >= 0)
                 {
                     lineshader->set();
                     glDisable(GL_TEXTURE_2D);
