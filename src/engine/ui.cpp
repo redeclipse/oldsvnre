@@ -17,9 +17,10 @@ VAR(IDF_PERSIST, guiclicktab, 0, 1, 1);
 VAR(IDF_PERSIST, guitabborder, 0, 1, 2);
 VAR(IDF_PERSIST, guitextblend, 1, 255, 255);
 VAR(IDF_PERSIST, guitextfade, 1, 200, 255);
-VAR(IDF_PERSIST, guilinesize, 1, 36, 128);
-VAR(IDF_PERSIST, guisepsize, 1, 10, 128);
+VAR(IDF_PERSIST, guilinesize, 1, 48, 128);
+VAR(IDF_PERSIST, guisepsize, 1, 16, 128);
 VAR(IDF_PERSIST, guiscaletime, 0, 250, VAR_MAX);
+
 VAR(IDF_PERSIST, guitooltipwidth, -1, 512, VAR_MAX);
 VAR(IDF_PERSIST, guistatuswidth, -1, 2048, VAR_MAX);
 
@@ -35,7 +36,8 @@ FVAR(IDF_PERSIST, guihoverscale, 0, 0.3f, 1);
 FVAR(IDF_PERSIST, guihoverblend, 0, 0.9f, 1);
 
 VAR(IDF_PERSIST, guitooltips, 0, 1, 1);
-VAR(IDF_PERSIST, guitooltiptime, 0, 350, VAR_MAX);
+VAR(IDF_PERSIST, guitooltiptime, 0, 500, VAR_MAX);
+VAR(IDF_PERSIST, guitooltipfade, 0, 500, VAR_MAX);
 VAR(IDF_PERSIST|IDF_HEX, guitooltipcolour, -1, 0x000000, 0xFFFFFF);
 FVAR(IDF_PERSIST, guitooltipblend, 0, 0.9f, 1);
 VAR(IDF_PERSIST|IDF_HEX, guitooltipbordercolour, -1, 0x808080, 0xFFFFFF);
@@ -52,7 +54,7 @@ FVAR(IDF_PERSIST, guifieldactiveblend, 0, 1.f, 1);
 VAR(IDF_PERSIST|IDF_HEX, guiactivecolour, -1, 0xF02020, 0xFFFFFF);
 FVAR(IDF_PERSIST, guiactiveblend, 0, 1.f, 1);
 
-static bool needsinput = false, hastitle = true, hasbgfx = true;
+static bool needsinput = false, hastitle = true, hasbgfx = true, tooltipforce = false;
 static char *statusstr = NULL, *tooltipstr = NULL, *tooltip = NULL;
 static int lasttooltip = 0, statuswidth = 0, tooltipwidth = 0;
 
@@ -74,6 +76,7 @@ struct gui : guient
         lists.shrink(0);
         statuswidth = tooltipwidth = 0;
         mergelist = mergedepth = -1;
+        tooltipforce = false;
     }
 
     static int ty, tx, tpos, *tcurrent, tcolor; //tracking tab size and position since uses different layout method...
@@ -82,11 +85,11 @@ struct gui : guient
     bool visibletab() { return !tcurrent || tpos == *tcurrent; }
     bool visible() { return !guilayoutpass && visibletab(); }
 
-    void skin(int x1, int y1, int x2, int y2, int c1, float b1, int c2 = 0, float b2 = 0, bool skinborder = false)
+    void skin(int x1, int y1, int x2, int y2, int c1 = -1, float b1 = -1.f, int c2 = -1, float b2 = -1.f, bool skinborder = false)
     {
         int colour1 = c1 >= 0 ? c1 : (guibgcolour >= 0 ? guibgcolour : (c2 >= 0 ? c2 : 0x000000)),
             colour2 = c2 >= 0 ? c2 : (guibordercolour >= 0 ? guibordercolour : 0x808080);
-        float blend1 = b1 > 0 ? b1 : guibgblend, blend2 = b2 > 0 ? b2 : guiborderblend;
+        float blend1 = b1 >= 0 ? b1 : guibgblend, blend2 = b2 >= 0 ? b2 : guiborderblend;
         switch(guiskinned)
         {
             case 2: case 3:
@@ -110,9 +113,12 @@ struct gui : guient
                             if(skintex && skintex != notexture) t = skintex;
                             break;
                     }
-                    if(!t) continue;
+                    if(!t) break;
+                    int w = x2-x1, h = y2-y1;
+                    if(t->w > w*2 || t->h > h*2) break;
+                    bool fullx = t->w >= w, fully = t->h >= h;
                     float pw = t->w*0.25f, ph = t->h*0.25f, qw = t->w*0.5f, qh = t->h*0.5f, px = 0, py = 0, tx = 0, ty = 0;
-                    int w = x2-x1, h = y2-y1, cw = int(floorf(w/qw))-1, ch = int(floorf(h/qh))+1;
+                    int cw = fullx ? 0 : int(floorf(w/qw))-1, ch = fully ? 1 : int(floorf(h/qh))+1;
 
                     glBindTexture(GL_TEXTURE_2D, t->id);
                     glColor4f((colour>>16)/255.f, ((colour>>8)&0xFF)/255.f, (colour&0xFF)/255.f, blend);
@@ -121,8 +127,9 @@ struct gui : guient
                     loopi(ch)
                     {
                         bool cond = !i || i == ch-1;
-                        float vph = cond ? ph : qh, vth = cond ? 0.25f : 0.5f;
-                        if(i && cond)
+                        float vph = fully ? h : (cond ? ph : qh), vth = fully ? 1.f : (cond ? 0.25f : 0.5f);
+                        if(fully) ty = 0;
+                        else if(i && cond)
                         {
                             float off = h-py;
                             if(off > vph)
@@ -133,7 +140,15 @@ struct gui : guient
                             }
                             ty = 1-vth;
                         }
-                        loopj(3) switch(j)
+                        if(fullx)
+                        {
+                            tx = 0;
+                            glTexCoord2f(tx, ty); glVertex2f(x1+px, y1+py);
+                            glTexCoord2f(tx+1.f, ty); glVertex2f(x1+px+w, y1+py);
+                            glTexCoord2f(tx+1.f, ty+vth); glVertex2f(x1+px+w, y1+py+vph);
+                            glTexCoord2f(tx, ty+vth); glVertex2f(x1+px, y1+py+vph);
+                        }
+                        else loopj(3) switch(j)
                         {
                             case 0: case 2:
                             {
@@ -594,40 +609,40 @@ struct gui : guient
 
     int slider(int &val, int vmin, int vmax, int color, const char *label, bool reverse, bool scroll)
     {
-        int x = curx, y = cury, space = line_(guilinesize, 1.0f, ishorizontal() ? guibound[0]*3 : guibound[1]);
+        float percent = (val-vmin)/float(max(vmax-vmin, 1));
+        int x = curx, y = cury, space = slider_(guilinesize, percent, ishorizontal() ? guibound[0]*3 : guibound[1]);
         if(visible())
         {
-            pushfont("emphasis");
+            pushfont("default");
             if(!label) label = intstr(val);
-            int w = text_width(label);
-
-            bool hit = false, forcecolor = false;
-            int px, py;
+            bool hit = ishorizontal() ? ishit(guilinesize, ysize, x+space/2-guilinesize/2, y) : ishit(xsize, guilinesize, x, y+space/2-guilinesize/2);//, forcecolor = false;
+            /*int px, py;
             if(ishorizontal())
             {
-                hit = ishit(guilinesize, ysize, x + space/2 - guilinesize/2, y);
-                px = x + space/2 - w/2;
-                py = ((ysize-guibound[1])*(val-vmin))/max(vmax-vmin, 1);
+                hit = ishit(guilinesize, ysize, x+space/2-guilinesize/2, y);
+                px = x+space;
+                py = (ysize-guilinesize)*percent;
                 if(reverse) py += y; //vmin at top
-                else py = y + (ysize-guibound[1]) - py; //vmin at bottom
+                else py = y+(ysize-guibound[1])-py; //vmin at bottom
             }
             else
             {
-                hit = ishit(xsize, guilinesize, x, y + space/2 - guilinesize/2);
-                px = ((xsize-w)*(val-vmin))/max(vmax-vmin, 1);
-                if(reverse) px = x + (xsize-guibound[0]/2-w/2) - px; //vmin at right
-                else px += x + guibound[0]/2 - w/2; //vmin at left
-                py = y + space/2 - FONTH/2;
-            }
-            if(hit && hitfx) { forcecolor = true; color = guiactivecolour; }
-            text_(label, px, py, color, hit && hitfx ? guitextblend : guitextfade, hit && mouseaction[0]&GUI_DOWN, forcecolor);
+                hit = ishit(xsize, guilinesize, x, y+space/2-guilinesize/2);
+                px = (xsize-guilinesize)*percent;
+                if(reverse) px = x+(xsize-guibound[0]/2) - px; //vmin at right
+                else px += x+guibound[0]/2; //vmin at left
+                py = y-space;
+            }*/
             if(hit)
             {
+                //text_(label, px, py, color, hit && hitfx ? guitextblend : guitextfade, hit && mouseaction[0]&GUI_DOWN, forcecolor);
+                settooltip("\f[%d]%s", -1, color, label);
+                tooltipforce = true;
                 if(mouseaction[0]&GUI_PRESSED)
                 {
                     int vnew = vmax-vmin+1;
                     if(ishorizontal()) vnew = int((vnew*(reverse ? hity-y-guibound[1]/2 : y+ysize-guibound[1]/2-hity))/(ysize-guibound[1]));
-                    else vnew = int((vnew*(reverse ? x+xsize-guibound[0]/2-hitx : hitx-x-guibound[0]/2))/(xsize-w));
+                    else vnew = int((vnew*(reverse ? x+xsize-guibound[0]/2-hitx : hitx-x-guibound[0]/2))/xsize);
                     vnew += vmin;
                     vnew = clamp(vnew, vmin, vmax);
                     if(vnew != val) val = vnew;
@@ -679,10 +694,10 @@ struct gui : guient
             }
             else e->pixelheight = FONTH*max(height, 1);
         }
-        int h = e->pixelheight, hpad = 0, w = e->pixelwidth, wpad = guibound[0];
-        if((h+hpad)%guibound[1]) hpad += guibound[1]-((h+hpad)%guibound[1]);
+        int h = e->pixelheight, hpad = guibound[1]/4, w = e->pixelwidth, wpad = guibound[0];
+        //if((h+hpad)%guibound[1]) hpad += guibound[1]-((h+hpad)%guibound[1]);
         h += hpad;
-        if((w+wpad)%guibound[0]) wpad += guibound[0]-((w+wpad)%guibound[0]);
+        //if((w+wpad)%guibound[0]) wpad += guibound[0]-((w+wpad)%guibound[0]);
         w += wpad;
 
         bool wasvertical = isvertical();
@@ -1043,26 +1058,64 @@ struct gui : guient
         }
     }
 
-    int line_(int size, float percent = 1.0f, int space = 0)
+    int slider_(int size, float percent = -1.0f, int space = 0)
     {
         space = max(max(space, guibound[0]), size);
         if(visible())
         {
-            if(!slidertex) slidertex = textureload(guislidertex, 3, true, false);
-            glBindTexture(GL_TEXTURE_2D, slidertex->id);
-            if(percent < 0.99f)
+            int x = ishorizontal() ? curx+space/2-size/2 : curx, w = ishorizontal() ? size : xsize,
+                y = ishorizontal() ? cury : cury+space/2-size/2, h = ishorizontal() ? ysize : size;
+            skin(x, y, x+w, y+h, guibgcolour, guibgblend, guifieldbordercolour, guifieldborderblend, true);
+            if(percent >= 0 && percent <= 1)
             {
-                glColor4f(0.5f, 0.5f, 0.5f, 0.375f);
-                if(ishorizontal())
-                    rect_(curx + space/2 - size/2, cury, size, ysize, 0);
-                else
-                    rect_(curx, cury + space/2 - size/2, xsize, size, 1);
+                int px = ishorizontal() ? x+size/8 : x+size/8+((w-size)*percent),
+                    py = ishorizontal() ? y+size/8+((h-size)*percent) : y+size/8;
+                skin(px, py, px+size*3/4, py+size*3/4, guifieldbgcolour, guifieldbgblend, guifieldbordercolour, guifieldborderblend, false);
             }
-            glColor3f(0.5f, 0.5f, 0.5f);
-            if(ishorizontal())
-                rect_(curx + space/2 - size/2, cury + ysize*(1-percent), size, ysize*percent, 0);
-            else
-                rect_(curx, cury + space/2 - size/2, xsize*percent, size, 1);
+        }
+        layout(ishorizontal() ? space : 0, ishorizontal() ? 0 : space);
+        return space;
+    }
+
+    int line_(int size, int space = 0)
+    {
+        space = max(max(space, guibound[0]), size);
+        if(visible())
+        {
+            int colour1 = guibgcolour >= 0 ? guibgcolour : (guibordercolour >= 0 ? guibordercolour : 0x000000),
+                colour2 = guibordercolour >= 0 ? guibordercolour : 0x808080,
+                x1 = ishorizontal() ? curx+space/2-size/2 : curx, x2 = x1+(ishorizontal() ? size : xsize),
+                y1 = ishorizontal() ? cury : cury+space/2-size/2, y2 = y1+(ishorizontal() ? ysize : size);
+            if(colour1 >= 0)
+            {
+                notextureshader->set();
+                glDisable(GL_TEXTURE_2D);
+                glColor4f((colour1>>16)/255.f, ((colour1>>8)&0xFF)/255.f, (colour1&0xFF)/255.f, guibgblend);
+                glBegin(GL_TRIANGLE_STRIP);
+                glVertex2f(x1, y1);
+                glVertex2f(x2, y1);
+                glVertex2f(x1, y2);
+                glVertex2f(x2, y2);
+                xtraverts += 4;
+                glEnd();
+                defaultshader->set();
+                glEnable(GL_TEXTURE_2D);
+            }
+            if(colour2 >= 0)
+            {
+                lineshader->set();
+                glDisable(GL_TEXTURE_2D);
+                glColor4f((colour2>>16)/255.f, ((colour2>>8)&0xFF)/255.f, (colour2&0xFF)/255.f, guiborderblend);
+                glBegin(GL_LINE_LOOP);
+                glVertex2f(x1, y1);
+                glVertex2f(x2, y1);
+                glVertex2f(x2, y2);
+                glVertex2f(x1, y2);
+                xtraverts += 4;
+                glEnd();
+                defaultshader->set();
+                glEnable(GL_TEXTURE_2D);
+            }
         }
         layout(ishorizontal() ? space : 0, ishorizontal() ? 0 : space);
         return space;
@@ -1094,7 +1147,7 @@ struct gui : guient
         return layout(w, h);
     }
 
-    static Texture *skintex, *skinbordertex, *overlaytex, *slidertex, *exittex, *hovertex;
+    static Texture *skintex, *skinbordertex, *overlaytex, *exittex, *hovertex;
 
     vec uiorigin, uiscale;
     guicb *cb;
@@ -1181,7 +1234,7 @@ struct gui : guient
                 gui::popfont();
             }
             if(needsinput && hastitle) uibuttons();
-            if(guitooltips && tooltipstr && *tooltipstr)
+            if((guitooltips || tooltipforce) && tooltipstr && *tooltipstr)
             {
                 if(!tooltip || !lasttooltip || strcmp(tooltip, tooltipstr))
                 {
@@ -1189,14 +1242,16 @@ struct gui : guient
                     tooltip = newstring(tooltipstr);
                     lasttooltip = totalmillis;
                 }
-                if(totalmillis-lasttooltip >= guitooltiptime)
+                if(tooltipforce || totalmillis-lasttooltip >= guitooltiptime)
                 {
                     gui::pushfont("little");
                     int width, height, tw = min(tooltipwidth ? tooltipwidth : (guitooltipwidth ? guitooltipwidth : -1), int(screen->w*(1/uiscale.y)));
                     text_bounds(tooltipstr, width, height, tw, TEXT_NO_INDENT);
-                    int w = width+guibound[0]*2, h = guibound[1]/2+height, x1 = hitx, y1 = hity-height-guibound[1]/2, x2 = x1+w, y2 = y1+h;
-                    skin(x1, y1, x2, y2, guitooltipcolour, guitooltipblend, guitooltipbordercolour, guitooltipborderblend, guitooltipborderskin!=0);
-                    draw_text(tooltip, x1+guibound[0], y1+guibound[1]/4, 255, 255, 255, 255, TEXT_NO_INDENT, -1, tw);
+                    int w = width+guibound[0]*2, h = guibound[1]/2+height, x1 = hitx, y1 = hity-height-guibound[1]/2, x2 = x1+w, y2 = y1+h,
+                        offset = totalmillis-lasttooltip-guitooltiptime;
+                    float blend = tooltipforce ? 1.f : (offset > 0 ? (offset < guitooltipfade ? offset/float(guitooltipfade) : 1.f) : 0.f);
+                    skin(x1, y1, x2, y2, guitooltipcolour, guitooltipblend*blend, guitooltipbordercolour, guitooltipborderblend*blend, guitooltipborderskin!=0);
+                    draw_text(tooltip, x1+guibound[0], y1+guibound[1]/4, 255, 255, 255, int(255*blend), TEXT_NO_INDENT, -1, tw);
                     gui::popfont();
                 }
             }
@@ -1212,11 +1267,10 @@ struct gui : guient
     }
 };
 
-Texture *gui::skintex = NULL, *gui::skinbordertex, *gui::overlaytex = NULL, *gui::slidertex = NULL, *gui::exittex = NULL, *gui::hovertex = NULL;
+Texture *gui::skintex = NULL, *gui::skinbordertex, *gui::overlaytex = NULL, *gui::exittex = NULL, *gui::hovertex = NULL;
 TVARN(IDF_PERSIST|IDF_PRELOAD, guiskintex, "textures/guiskin", gui::skintex, 0);
 TVARN(IDF_PERSIST|IDF_PRELOAD, guiskinbordertex, "textures/guiskinborder", gui::skinbordertex, 0);
 TVARN(IDF_PERSIST|IDF_PRELOAD, guioverlaytex, "textures/guioverlay", gui::overlaytex, 0);
-TVARN(IDF_PERSIST|IDF_PRELOAD, guislidertex, "textures/guislider", gui::slidertex, 0);
 TVARN(IDF_PERSIST|IDF_PRELOAD, guiexittex, "textures/guiexit", gui::exittex, 0);
 TVARN(IDF_PERSIST|IDF_PRELOAD, guihovertex, "textures/guihover", gui::hovertex, 0);
 

@@ -648,7 +648,7 @@ COMMAND(0, guititle, "s");
 COMMAND(0, guibar, "");
 COMMAND(0, guifill, "ii");
 COMMAND(0, guioutline, "iiii");
-COMMAND(0, guibackground, "bfbfii");
+COMMAND(0, guibackground, "bgbgii");
 COMMAND(0, guistrut,"fi");
 COMMAND(0, guispring, "i");
 COMMAND(0, guivisible, "e");
@@ -676,7 +676,7 @@ ICOMMAND(0, guitextwidth, "ss", (char *text, char *font), floatret(guitextwidth(
 void guiplayerpreview(int *model, int *color, int *team, int *weap, char *vanity, char *action, float *scale, int *overlaid, float *size, float *blend, char *altact)
 {
     if(!cgui) return;
-    int ret = cgui->playerpreview(*model, *color, *team, *weap, vanity, *scale, *overlaid!=0, *size!=0 ? *size : 1.f, *blend!=0 ? *blend : 1.f);
+    int ret = cgui->playerpreview(*model, *color, *team, *weap, vanity, *scale, *overlaid!=0, *size!=0 ? *size : 1.f, *blend >= 0 ? *blend : 1.f);
     if(ret&GUI_UP)
     {
         char *act = NULL;
@@ -689,7 +689,7 @@ void guiplayerpreview(int *model, int *color, int *team, int *weap, char *vanity
         }
     }
 }
-COMMAND(0, guiplayerpreview, "iiiissfiffs");
+COMMAND(0, guiplayerpreview, "iiiissfifgs");
 
 void guimodelpreview(char *model, char *animspec, char *action, float *scale, int *overlaid, float *size, float *blend, char *altact)
 {

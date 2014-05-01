@@ -828,7 +828,7 @@ bool addcommand(const char *name, identfun fun, const char *args, int flags)
     bool limit = true;
     for(const char *fmt = args; *fmt; fmt++) switch(*fmt)
     {
-        case 'i': case 'b': case 'f': case 't': case 'N': case 'D': if(numargs < MAXARGS) numargs++; break;
+        case 'i': case 'b': case 'f': case 'g': case 't': case 'N': case 'D': if(numargs < MAXARGS) numargs++; break;
         case 's': case 'e': case 'r': case '$': if(numargs < MAXARGS) { argmask |= 1<<numargs; numargs++; } break;
         case '1': case '2': case '3': case '4': if(numargs < MAXARGS) fmt -= *fmt-'0'+1; break;
         case 'C': case 'V': limit = false; break;
@@ -1183,8 +1183,9 @@ static void compilelookup(vector<uint> &code, const char *&p, int ltype)
                     {
                         case 's': compilestr(code, NULL, 0, true); numargs++; break;
                         case 'i': compileint(code); numargs++; break;
-                        case 'b': compileint(code, INT_MIN); numargs++; break;
+                        case 'b': compileint(code, VAR_MIN); numargs++; break;
                         case 'f': compilefloat(code); numargs++; break;
+                        case 'g': compilefloat(code, FVAR_MIN); numargs++; break;
                         case 't': compilenull(code); numargs++; break;
                         case 'e': compileblock(code); numargs++; break;
                         case 'r': compileident(code); numargs++; break;
@@ -1522,8 +1523,9 @@ static void compilestatements(vector<uint> &code, const char *&p, int rettype, i
                         numargs++;
                         break;
                     case 'i': if(more) more = compilearg(code, p, VAL_INT); if(!more) { if(rep) break; compileint(code); fakeargs++; } numargs++; break;
-                    case 'b': if(more) more = compilearg(code, p, VAL_INT); if(!more) { if(rep) break; compileint(code, INT_MIN); fakeargs++; } numargs++; break;
+                    case 'b': if(more) more = compilearg(code, p, VAL_INT); if(!more) { if(rep) break; compileint(code, VAR_MIN); fakeargs++; } numargs++; break;
                     case 'f': if(more) more = compilearg(code, p, VAL_FLOAT); if(!more) { if(rep) break; compilefloat(code); fakeargs++; } numargs++; break;
+                    case 'g': if(more) more = compilearg(code, p, VAL_FLOAT); if(!more) { if(rep) break; compilefloat(code, FVAR_MIN); fakeargs++; } numargs++; break;
                     case 't': if(more) more = compilearg(code, p, VAL_ANY); if(!more) { if(rep) break; compilenull(code); fakeargs++; } numargs++; break;
                     case 'e': if(more) more = compilearg(code, p, VAL_CODE); if(!more) { if(rep) break; compileblock(code); fakeargs++; } numargs++; break;
                     case 'r': if(more) more = compilearg(code, p, VAL_IDENT); if(!more) { if(rep) break; compileident(code); fakeargs++; } numargs++; break;
@@ -1740,8 +1742,9 @@ static inline void callcommand(ident *id, tagval *args, int numargs, bool lookup
     for(const char *fmt = id->args; *fmt; fmt++) switch(*fmt)
     {
         case 'i': if(++i >= numargs) { if(rep) break; args[i].setint(0); fakeargs++; } else forceint(args[i]); break;
-        case 'b': if(++i >= numargs) { if(rep) break; args[i].setint(INT_MIN); fakeargs++; } else forceint(args[i]); break;
+        case 'b': if(++i >= numargs) { if(rep) break; args[i].setint(VAR_MIN); fakeargs++; } else forceint(args[i]); break;
         case 'f': if(++i >= numargs) { if(rep) break; args[i].setfloat(0.0f); fakeargs++; } else forcefloat(args[i]); break;
+        case 'g': if(++i >= numargs) { if(rep) break; args[i].setfloat(FVAR_MIN); fakeargs++; } else forcefloat(args[i]); break;
         case 's': if(++i >= numargs) { if(rep) break; args[i].setstr(newstring("")); fakeargs++; } else forcestr(args[i]); break;
         case 't': if(++i >= numargs) { if(rep) break; args[i].setnull(); fakeargs++; } break;
         case 'e':
