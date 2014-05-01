@@ -403,7 +403,8 @@ struct gui : guient
 
     void settooltip(const char *fmt, int width, ...)
     {
-        if(tooltipstr) DELETEA(statusstr);
+        if(tooltipforce) return; // overridden in code
+        if(tooltipstr) DELETEA(tooltipstr);
         defvformatstring(str, width, fmt);
         tooltipstr = newstring(str);
         if(width) tooltipwidth = width;
@@ -613,29 +614,9 @@ struct gui : guient
         int x = curx, y = cury, space = slider_(guilinesize, percent, ishorizontal() ? guibound[0]*3 : guibound[1]);
         if(visible())
         {
-            pushfont("default");
-            if(!label) label = intstr(val);
-            bool hit = ishorizontal() ? ishit(guilinesize, ysize, x+space/2-guilinesize/2, y) : ishit(xsize, guilinesize, x, y+space/2-guilinesize/2);//, forcecolor = false;
-            /*int px, py;
-            if(ishorizontal())
+            if(ishorizontal() ? ishit(guilinesize, ysize, x+space/2-guilinesize/2, y) : ishit(xsize, guilinesize, x, y+space/2-guilinesize/2))
             {
-                hit = ishit(guilinesize, ysize, x+space/2-guilinesize/2, y);
-                px = x+space;
-                py = (ysize-guilinesize)*percent;
-                if(reverse) py += y; //vmin at top
-                else py = y+(ysize-guibound[1])-py; //vmin at bottom
-            }
-            else
-            {
-                hit = ishit(xsize, guilinesize, x, y+space/2-guilinesize/2);
-                px = (xsize-guilinesize)*percent;
-                if(reverse) px = x+(xsize-guibound[0]/2) - px; //vmin at right
-                else px += x+guibound[0]/2; //vmin at left
-                py = y-space;
-            }*/
-            if(hit)
-            {
-                //text_(label, px, py, color, hit && hitfx ? guitextblend : guitextfade, hit && mouseaction[0]&GUI_DOWN, forcecolor);
+                if(!label) label = intstr(val);
                 settooltip("\f[%d]%s", -1, color, label);
                 tooltipforce = true;
                 if(mouseaction[0]&GUI_PRESSED)
@@ -660,7 +641,6 @@ struct gui : guient
                     vnew = clamp(vval, vmin, vmax);
                 if(vnew != val) val = vnew;
             }
-            popfont();
         }
         return space;
     }
