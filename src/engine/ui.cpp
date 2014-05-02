@@ -128,7 +128,7 @@ struct gui : guient
                     }
                     if(!t) break;
                     int w = x2-x1, h = y2-y1;
-                    if(t->w > w*2 || t->h > h*2) break;
+                    //if(t->w > w*2 || t->h > h*2) break;
                     bool fullx = t->w >= w, fully = t->h >= h;
                     float pw = t->w*0.25f, ph = t->h*0.25f, qw = t->w*0.5f, qh = t->h*0.5f, px = 0, py = 0, tx = 0, ty = 0;
                     int cw = fullx ? 0 : int(floorf(w/qw))-1, ch = fully ? 1 : int(floorf(h/qh))+1;
