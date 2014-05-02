@@ -622,8 +622,8 @@ struct gui : guient
                 if(mouseaction[0]&GUI_PRESSED)
                 {
                     int vnew = vmax-vmin+1;
-                    if(ishorizontal()) vnew = int((vnew*(reverse ? hity-y-guibound[1]/2 : y+ysize-guibound[1]/2-hity))/(ysize-guibound[1]));
-                    else vnew = int((vnew*(reverse ? x+xsize-guibound[0]/2-hitx : hitx-x-guibound[0]/2))/xsize);
+                    if(ishorizontal()) vnew = int((vnew*(reverse ? hity-y-guilinesize/2 : y+ysize-guilinesize/2-hity))/(ysize-guilinesize));
+                    else vnew = int((vnew*(reverse ? x+xsize-guilinesize/2-hitx : hitx-x-guilinesize/2))/(xsize-guilinesize));
                     vnew += vmin;
                     vnew = clamp(vnew, vmin, vmax);
                     if(vnew != val) val = vnew;
