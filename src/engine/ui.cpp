@@ -17,7 +17,7 @@ VAR(IDF_PERSIST, guiclicktab, 0, 1, 1);
 VAR(IDF_PERSIST, guitabborder, 0, 1, 2);
 VAR(IDF_PERSIST, guitextblend, 1, 255, 255);
 VAR(IDF_PERSIST, guitextfade, 1, 200, 255);
-VAR(IDF_PERSIST, guisepsize, 1, 16, 128);
+VAR(IDF_PERSIST, guisepsize, 1, 4, 128);
 VAR(IDF_PERSIST, guiscaletime, 0, 250, VAR_MAX);
 
 VAR(IDF_PERSIST, guitooltipwidth, -1, 512, VAR_MAX);
