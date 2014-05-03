@@ -51,7 +51,7 @@ namespace hud
     VAR(IDF_PERSIST|IDF_HEX, scorehilight, 0, 0xFFFFFF, 0xFFFFFF);
     VAR(IDF_PERSIST, scoreimage, 0, 0, 1);
     FVAR(IDF_PERSIST, scoreimagesize, FVAR_NONZERO, 6, 10);
-    VAR(IDF_PERSIST, scorebgfx, 0, 0, 1);
+    VAR(IDF_PERSIST, scorebgfx, 0, 1, 1);
     VAR(IDF_PERSIST, scorebgrows, 0, 3, 3);
     FVAR(IDF_PERSIST, scorebgblend, 0, 0.5f, 1);
 
@@ -278,7 +278,7 @@ namespace hud
         uilist(g, {
             uicenterlist(g, {
                 g.pushlist();
-                if(scorebgrows) g.background(guibgcolour, scorebgblend);
+                if(scorebgrows || !scorebgfx) g.background(guibgcolour, scorebgblend);
                 g.space(0.5f);
                 g.pushlist();
                 g.space(0.25f);
@@ -772,7 +772,7 @@ namespace hud
                         int bgc2 = vec(c).mul(0.15f).tohexcolor();
                         g.space(0.5f);
                         g.pushlist();
-                        if(scorebgrows) g.background(guibgcolour, scorebgblend);
+                        if(scorebgrows || !scorebgfx) g.background(guibgcolour, scorebgblend);
                         g.spring();
                         g.pushlist();
                         g.spring();
@@ -792,7 +792,7 @@ namespace hud
                                     }
                                     gameent *o = spectators[i];
                                     uilistv(g, 2, uipad(g, 0.25f, uilist(g, {
-                                        if((scorehilight && o == game::player1) || scorebgrows > 2) g.background(i%2 ? bgc2 : bgc1, 0, scorehilight && o == game::player1 ? scorehilight : -1, 0, scorehilight && o == game::player1);
+                                        if((scorehilight && o == game::player1) || scorebgrows > 2) g.background(i%2 ? bgc2 : bgc1, scorebgblend, scorehilight && o == game::player1 ? scorehilight : -1, scorebgblend, scorehilight && o == game::player1);
                                         uipad(g, 0.025f, uilist(g, uipad(g, 0.25f, uicenterlist(g, {
                                             if(scoreclientnum || game::player1->privilege >= PRIV_ELEVATED)
                                                 g.textf("%s [%d]", 0xFFFFFF, NULL, 0, game::colourname(o, NULL, true, false), o->clientnum);
