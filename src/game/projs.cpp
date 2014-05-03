@@ -1171,7 +1171,7 @@ namespace projs
                 }
             }
         }
-        if(attackdelay >= 5)
+        if(attackdelay >= 5 && weap != W_MELEE)
         {
             int colour = WHCOL(d, weap, partcol, WS(flags));
             float muz = muzzleblend*W2(weap, partblend, WS(flags));
@@ -1204,11 +1204,8 @@ namespace projs
                 targ.sub(from).normalize().mul(weapfx[weap].flarelen).add(from);
                 part_flare(from, targ, attackdelay/2, PART_MUZZLE_FLARE, colour, weapfx[weap].flaresize, muz, 0, 0, d);
             }
-            if(weap != W_MELEE)
-            {
-                int peak = attackdelay/4, fade = min(peak/2, 75);
-                adddynlight(from, 32, vec::hexcolor(colour).mul(0.5f), fade, peak - fade, DL_FLASH);
-            }
+            int peak = attackdelay/4, fade = min(peak/2, 75);
+            adddynlight(from, 32, vec::hexcolor(colour).mul(0.5f), fade, peak - fade, DL_FLASH);
         }
 
         loopv(shots)
@@ -1345,7 +1342,7 @@ namespace projs
             {
                 updatetaper(proj, proj.distance);
                 float trans = fadeweap(proj)*WF(WK(proj.flags), proj.weap, partblend, WS(proj.flags));
-                if(!WK(proj.flags) && !proj.limited && proj.weap != W_MELEE)
+                if(!WK(proj.flags) && !proj.limited)// && proj.weap != W_MELEE)
                 {
                     int vol = int(ceilf(255*proj.curscale));
                     if(W2(proj.weap, power, WS(proj.flags))) switch(W2(proj.weap, cooked, WS(proj.flags)))
@@ -1704,7 +1701,7 @@ namespace projs
                     }
                     default: break;
                 }
-                if(!proj.limited && !WK(proj.flags) && vol > 0 && proj.weap != W_MELEE)
+                if(!proj.limited && !WK(proj.flags) && vol > 0 && (proj.weap != W_MELEE || !hits.empty()))
                 {
                     int slot = WX(WK(proj.flags), proj.weap, explode, WS(proj.flags), game::gamemode, game::mutators, proj.curscale*proj.lifesize) > 0 ? S_W_EXPLODE : S_W_DESTROY;
                     if(vol) playsound(WSND2(proj.weap, WS(proj.flags), slot), proj.o, NULL, 0, vol);
@@ -1767,7 +1764,7 @@ namespace projs
         }
         if(chk)
         {
-            if(chk&1 && !proj.limited && !WK(proj.flags) && proj.weap != W_MELEE)
+            if(chk&1 && !proj.limited && !WK(proj.flags))// && proj.weap != W_MELEE)
             {
                 int vol = int(ceilf(48*proj.curscale)), snd = S_EXTINGUISH;
                 float size = max(proj.radius, 1.f);
