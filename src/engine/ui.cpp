@@ -845,7 +845,7 @@ struct gui : guient
 
     void background(int colour1, float blend1, int colour2, float blend2, bool skinborder, int inheritw, int inherith)
     {
-        if(!visible()) return;
+        //if(!visible()) return;
         int w = xsize, h = ysize;
         if(inheritw>0)
         {

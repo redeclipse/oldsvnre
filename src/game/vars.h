@@ -108,7 +108,7 @@ GSVAR(IDF_ADMIN, smallmaps, "untitled");
 GSVAR(IDF_ADMIN, mediummaps, "untitled");
 GSVAR(IDF_ADMIN, largemaps, "untitled");
 
-GVAR(IDF_ADMIN, modelock, 0, PRIV_OPERATOR, PRIV_CREATOR);
+GVAR(IDF_ADMIN, modelock, 0, PRIV_OPERATOR, PRIV_CREATOR); // TODO: add forcemuts var
 GVAR(IDF_ADMIN, modelocktype, 0, 2, 2); // 0 = off, 1 = only lock level can change modes, 2 = lock level can set limited modes
 GVAR(IDF_ADMIN, modelockfilter, 0, G_LIMIT, G_ALL);
 GVAR(IDF_ADMIN, mutslockfilter, 0, G_M_FILTER, G_M_ALL);
