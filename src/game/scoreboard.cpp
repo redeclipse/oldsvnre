@@ -278,7 +278,7 @@ namespace hud
         uilist(g, {
             uicenterlist(g, {
                 g.pushlist();
-                if(scorebgrows || !scorebgfx) g.background(guibgcolour, scorebgblend);
+                if(scorebgrows) g.background(guibgcolour, scorebgblend);
                 g.space(0.5f);
                 g.pushlist();
                 g.space(0.25f);
@@ -772,7 +772,7 @@ namespace hud
                         int bgc2 = vec(c).mul(0.15f).tohexcolor();
                         g.space(0.5f);
                         g.pushlist();
-                        if(scorebgrows || !scorebgfx) g.background(guibgcolour, scorebgblend);
+                        if(scorebgrows) g.background(guibgcolour, scorebgblend);
                         g.spring();
                         g.pushlist();
                         g.spring();
