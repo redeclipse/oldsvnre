@@ -356,8 +356,8 @@ extern char *logtimeformat, *filetimeformat;
 extern const char *gettime(time_t ctime = 0, const char *format = NULL);
 
 // nasty macros for registering script functions, abuses globals to avoid excessive infrastructure
-#define KEYWORD(flags, name, type) static bool __dummy_##name = addkeyword(type, #name, flags)
-#define COMMANDN(flags, name, fun, nargs) static bool __dummy_##fun = addcommand(#name, (identfun)fun, nargs, flags|IDF_COMPLETE)
+#define KEYWORD(flags, name, type) UNUSED static bool __dummy_##name = addkeyword(type, #name, flags)
+#define COMMANDN(flags, name, fun, nargs) UNUSED static bool __dummy_##fun = addcommand(#name, (identfun)fun, nargs, flags|IDF_COMPLETE)
 #define COMMAND(flags, name, nargs) COMMANDN(flags, name, name, nargs)
 
 // anonymous inline commands, uses nasty template trick with line numbers to keep names unique
