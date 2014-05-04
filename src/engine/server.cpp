@@ -268,7 +268,7 @@ ICOMMAND(0, filterword, "ss", (char *s, char *t),
 });
 
 
-bool filtertext(char *dst, const char *src, bool newline, bool colour, bool whitespace, int len)
+bool filtertext(char *dst, const char *src, bool newline, bool colour, bool whitespace, size_t len)
 {
     bool filtered = false;
     for(int c = uchar(*src); c; c = uchar(*++src))

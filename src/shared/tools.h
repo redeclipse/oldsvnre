@@ -1412,8 +1412,8 @@ extern float getfloat(ucharbuf &p);
 extern void sendstring(const char *t, ucharbuf &p);
 extern void sendstring(const char *t, packetbuf &p);
 extern void sendstring(const char *t, vector<uchar> &p);
-extern void getstring(char *t, ucharbuf &p, int len);
-template<size_t N> static inline void getstring(char (&t)[N], ucharbuf &p) { getstring(t, p, int(N)); }
+extern void getstring(char *t, ucharbuf &p, size_t len);
+template<size_t N> static inline void getstring(char (&t)[N], ucharbuf &p) { getstring(t, p, N); }
 
 #endif
 

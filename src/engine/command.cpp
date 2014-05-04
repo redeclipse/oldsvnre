@@ -2746,7 +2746,7 @@ COMMAND(0, sublist, "siiN");
 
 ICOMMAND(0, stripcolors, "s", (char *s),
 {
-    int len = strlen(s);
+    size_t len = strlen(s);
     char *d = newstring(len);
     filtertext(d, s, false, true, true, len);
     stringret(d);
