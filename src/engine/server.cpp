@@ -1488,17 +1488,13 @@ void setlocations(bool wanthome)
 #if defined(__APPLE__)
     extern const char *mac_resourcedir();
     const char *dir = mac_resourcedir(); // ./blah.app/Contents/Resources
-    if(dir && *dir)
-    {
+    if(dir && *dir && !chdir(dir))
         conoutf("attempting to use resources in: %s", dir);
-        (void)chdir(dir);
-    }
 #endif
 #ifndef STANDALONE
-    loopi(3) if(!fileexists(findfile("data/config/keymap.cfg", "r"), "r"))
+    loopirev(3) if(!fileexists(findfile("data/config/keymap.cfg", "r"), "r"))
     { // standalone solution to this is: pebkac
-        if(i != 2) (void)chdir("..");
-        else fatal("could not find data directory");
+        if(!i || chdir("..") < 0) fatal("could not find data directory");
     }
 #endif
     addpackagedir("data");
