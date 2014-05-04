@@ -2206,7 +2206,7 @@ namespace server
             lilswap(&chan, 1);
             lilswap(&len, 1);
             ENetPacket *packet = enet_packet_create(NULL, len, 0);
-            if(!packet || demoplayback->read(packet->data, len)!=len)
+            if(!packet || demoplayback->read(packet->data, len)!=size_t(len))
             {
                 if(packet) enet_packet_destroy(packet);
                 enddemoplayback();
