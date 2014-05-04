@@ -100,10 +100,10 @@ void ircsend(ircnet *n, const char *msg, ...)
     concatstring(str, "\n");
     ENetBuffer buf;
     uchar ubuf[512];
-    int len = strlen(str), carry = 0;
+    size_t len = strlen(str), carry = 0;
     while(carry < len)
     {
-        int numu = encodeutf8(ubuf, sizeof(ubuf)-1, &((uchar *)str)[carry], len - carry, &carry);
+        size_t numu = encodeutf8(ubuf, sizeof(ubuf)-1, &((uchar *)str)[carry], len - carry, &carry);
         if(carry >= len) ubuf[numu++] = '\n';
         loopi(numu) switch(ubuf[i])
         {
@@ -210,7 +210,7 @@ int ircrecv(ircnet *n)
             case '\v': case '\f': n->input[n->inputlen+i] = ' '; break;
         }
         n->inputlen += len;
-        int carry = 0, decoded = decodeutf8(&n->input[n->inputcarry], n->inputlen - n->inputcarry, &n->input[n->inputcarry], n->inputlen - n->inputcarry, &carry);
+        size_t carry = 0, decoded = decodeutf8(&n->input[n->inputcarry], n->inputlen - n->inputcarry, &n->input[n->inputcarry], n->inputlen - n->inputcarry, &carry);
         if(carry > decoded)
         {
             memmove(&n->input[n->inputcarry + decoded], &n->input[n->inputcarry + carry], n->inputlen - (n->inputcarry + carry));

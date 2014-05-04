@@ -1152,11 +1152,11 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
             clearworldvars();
             if(memcmp(newhdr.head, "MAPZ", 4) == 0 || memcmp(newhdr.head, "BFGZ", 4) == 0)
             {
-                // this check removed below due to breakage: (size_t)newhdr.headersize > sizeof(chdr) || f->read(&chdr.worldsize, newhdr.headersize-sizeof(binary))!=newhdr.headersize-(int)sizeof(binary)
+                // this check removed below due to breakage: size_t(newhdr.headersize) > sizeof(chdr) || f->read(&chdr.worldsize, newhdr.headersize-sizeof(binary))!=size_t(newhdr.headersize)-sizeof(binary)
                 #define MAPZCOMPAT(ver) \
                     mapzcompat##ver chdr; \
                     memcpy(&chdr, &newhdr, sizeof(binary)); \
-                    if(f->read(&chdr.worldsize, sizeof(chdr)-sizeof(binary))!=int(sizeof(chdr)-sizeof(binary))) \
+                    if(f->read(&chdr.worldsize, sizeof(chdr)-sizeof(binary))!=sizeof(chdr)-sizeof(binary)) \
                     { \
                         conoutf("\frerror loading %s: malformatted mapz v%d[%d] header", mapname, newhdr.version, ver); \
                         delete f; \
@@ -1209,7 +1209,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                 }
                 else
                 {
-                    if((size_t)newhdr.headersize > sizeof(newhdr) || f->read(&newhdr.worldsize, newhdr.headersize-sizeof(binary))!=newhdr.headersize-(int)sizeof(binary))
+                    if(size_t(newhdr.headersize) > sizeof(newhdr) || f->read(&newhdr.worldsize, newhdr.headersize-sizeof(binary))!=size_t(newhdr.headersize)-sizeof(binary))
                     {
                         conoutf("\frerror loading %s: malformatted mapz v%d header", mapname, newhdr.version);
                         delete f;
@@ -1348,7 +1348,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                 #define OCTACOMPAT(ver) \
                     octacompat##ver chdr; \
                     memcpy(&chdr, &ohdr, sizeof(binary)); \
-                    if(f->read(&chdr.worldsize, sizeof(chdr)-sizeof(binary))!=int(sizeof(chdr)-sizeof(binary))) \
+                    if(f->read(&chdr.worldsize, sizeof(chdr)-sizeof(binary))!=sizeof(chdr)-sizeof(binary)) \
                     { \
                         conoutf("\frerror loading %s: malformatted octa v%d[%d] header", mapname, ver, ohdr.version); \
                         delete f; \
