@@ -162,7 +162,7 @@ void sendstring(const char *t, ucharbuf &p) { sendstring_(t, p); }
 void sendstring(const char *t, packetbuf &p) { sendstring_(t, p); }
 void sendstring(const char *t, vector<uchar> &p) { sendstring_(t, p); }
 
-void getstring(char *text, ucharbuf &p, int len)
+void getstring(char *text, ucharbuf &p, size_t len)
 {
     char *t = text;
     do
