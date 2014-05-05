@@ -2366,7 +2366,7 @@ bool execfile(const char *cfgfile, bool msg, int flags)
     if(verbose >= 2) conoutf("\faloaded script %s", cfgfile);
     return true;
 }
-ICOMMAND(0, exec, "si", (char *file, int *n), execfile(file, true, *n));
+ICOMMAND(0, exec, "sib", (char *file, int *flags, int *msg), intret(execfile(file, *msg != 0, *flags) ? 1 : 0));
 
 const char *escapestring(const char *s)
 {
