@@ -457,9 +457,9 @@ int playsound(int n, const vec &pos, physent *d, int flags, int vol, int maxrad,
                             lowest = i;
                     if(sounds.inrange(lowest))
                     {
+                        if(verbose >= 4) conoutf("culled channel %d (%d)", lowest, sounds[lowest].curvol);
                         removesound(lowest);
                         chan = Mix_PlayChannel(-1, sample->sound, flags&SND_LOOP ? -1 : 0);
-                        if(verbose >= 4) conoutf("culled channel %d (%d)", lowest, sounds[lowest].curvol);
                     }
                 }
             }
