@@ -960,9 +960,9 @@ namespace client
 
     void saytext(gameent *d, int flags, char *text)
     {
-        ai::scanchat(d, flags, text);
-        filtertext(text, text, true, colourchat ? false : true);
-        if(*filterwords) filterword(text, filterwords);
+        string msg;
+        filtertext(msg, text, true, colourchat ? false : true);
+        if(*filterwords) filterword(msg, filterwords);
         defformatstring(m)("%s", game::colourname(d));
         if(flags&SAY_TEAM)
         {
@@ -970,8 +970,8 @@ namespace client
             concatstring(m, t);
         }
         string s;
-        if(flags&SAY_ACTION) formatstring(s)("\fv* %s %s", m, text);
-        else formatstring(s)("\fw<%s> %s", m, text);
+        if(flags&SAY_ACTION) formatstring(s)("\fv* %s %s", m, msg);
+        else formatstring(s)("\fw<%s> %s", m, msg);
 
         int snd = S_CHAT;
         ident *wid = idents.access(flags&SAY_ACTION ? "on_action" : "on_text");
@@ -985,6 +985,7 @@ namespace client
         }
         conoutft(CON_CHAT, "%s", s);
         if(snd >= 0 && !issound(d->cschan)) playsound(snd, d->o, d, snd != S_CHAT ? 0 : SND_DIRECT, -1, -1, -1, &d->cschan);
+        ai::scanchat(d, flags, text);
     }
 
     void toserver(int flags, char *text)
