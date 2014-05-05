@@ -22,7 +22,7 @@ emblem.png, logo.png
 	Creative Commons Attribution ShareAlike 3.0 License (CC-BY-SA)
 	In addition covered by "THE RED ECLIPSE MARK POLICY" (see trademark.txt included with this distribution)
 
-radiobox.png, radioboxon.png, radiodisable.png, guislider.png, guioverlay.png, guiexit.png, checkdisable.png, checkboxtwo.png, checkboxon.png, checkbox.png
+check*.png, radio*.png, guioverlay.png, guiexit.png
     Created by Maxim "acerspyro" Therrien
     Copyright (C) 2014 Red Eclipse Team
     Creative Commons Attribution ShareAlike 3.0 License (CC-BY-SA)
