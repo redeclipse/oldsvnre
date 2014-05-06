@@ -52,13 +52,13 @@ FVAR(IDF_PERSIST, guifieldactiveblend, 0, 1.f, 1);
 
 VAR(IDF_PERSIST, guislidersize, 1, 48, 128);
 VAR(IDF_PERSIST|IDF_HEX, guislidercolour, -1, 0x000000, 0xFFFFFF);
-FVAR(IDF_PERSIST, guisliderblend, 0, 0.9f, 1);
+FVAR(IDF_PERSIST, guisliderblend, 0, 0.3f, 1);
 VAR(IDF_PERSIST|IDF_HEX, guisliderbordercolour, -1, 0xC0C0C0, 0xFFFFFF);
 FVAR(IDF_PERSIST, guisliderborderblend, 0, 1.f, 1);
 VAR(IDF_PERSIST, guisliderborderskin, 0, 2, 2);
-VAR(IDF_PERSIST|IDF_HEX, guislidermarkcolour, -1, 0x404040, 0xFFFFFF);
+VAR(IDF_PERSIST|IDF_HEX, guislidermarkcolour, -1, 0x808080, 0xFFFFFF);
 FVAR(IDF_PERSIST, guislidermarkblend, 0, 1.f, 1);
-VAR(IDF_PERSIST|IDF_HEX, guislidermarkbordercolour, -1, 0x808080, 0xFFFFFF);
+VAR(IDF_PERSIST|IDF_HEX, guislidermarkbordercolour, -1, 0xC0C0C0, 0xFFFFFF);
 FVAR(IDF_PERSIST, guislidermarkborderblend, 0, 1.f, 1);
 VAR(IDF_PERSIST, guislidermarkborderskin, 0, 0, 2);
 VAR(IDF_PERSIST|IDF_HEX, guislideractivecolour, -1, 0xF04040, 0xFFFFFF);
@@ -621,18 +621,18 @@ struct gui : guient
         layout(size, size);
     }
 
-    int slider(int &val, int vmin, int vmax, int color, const char *label, bool reverse, bool scroll)
+    int slider(int &val, int vmin, int vmax, int colour, const char *label, bool reverse, bool scroll, int style, int scolour)
     {
         int x = curx, y = cury;
         float percent = (val-vmin)/float(max(vmax-vmin, 1));
         bool hit = false;
-        int space = slider_(guislidersize, percent, ishorizontal() ? guibound[0]*3 : guibound[1], hit);
+        int space = slider_(guislidersize, percent, ishorizontal() ? guibound[0]*3 : guibound[1], hit, style, scolour);
         if(visible())
         {
             if(hit)
             {
                 if(!label) label = intstr(val);
-                settooltip("\f[%d]%s", -1, color, label);
+                settooltip("\f[%d]%s", -1, colour, label);
                 tooltipforce = true;
                 if(mouseaction[0]&GUI_PRESSED)
                 {
@@ -743,7 +743,7 @@ struct gui : guient
             if(slines > 0)
             {
                 int oldpos = e->scrolly == editor::SCROLLEND ? slines : e->scrolly, newpos = oldpos;
-                slider(newpos, 0, slines, color, NULL, true, true);
+                slider(newpos, 0, slines, color, NULL, true, true, 0, -1);
                 if(oldpos != newpos)
                 {
                     e->cy = newpos;
@@ -1053,7 +1053,7 @@ struct gui : guient
         }
     }
 
-    int slider_(int size, float percent, int space, bool &hit)
+    int slider_(int size, float percent, int space, bool &hit, int style, int colour)
     {
         space = max(max(space, guibound[0]), size);
         if(visible())
@@ -1064,9 +1064,19 @@ struct gui : guient
             skin(x, y, x+w, y+h, guislidercolour, guisliderblend, hit ? guislideractivecolour : guisliderbordercolour, hit ? guislideractiveblend : guisliderborderblend, guisliderborderskin >= (hit ? 1 : 2));
             if(percent >= 0 && percent <= 1)
             {
-                int px = ishorizontal() ? x+size/8 : x+size/8+((w-size)*percent),
-                    py = ishorizontal() ? y+size/8+((h-size)*percent) : y+size/8;
-                skin(px, py, px+size*3/4, py+size*3/4, guislidermarkcolour, guislidermarkblend, hit ? guislideractivecolour : guislidermarkbordercolour, hit ? guislideractiveblend : guislidermarkborderblend, guislidermarkborderskin >= (hit ? 1 : 2));
+                int px = x+size/8, py = y+size/8, pw = size*3/4, ph = size*3/4;
+                switch(style)
+                {
+                    case 1:
+                        if(ishorizontal()) ph = py+((h-size)*percent);
+                        else pw = px+((w-size)*percent);
+                        break;
+                    case 0: default:
+                        if(ishorizontal()) py += (h-size)*percent;
+                        else px += (w-size)*percent;
+                        break;
+                }
+                skin(px, py, px+pw, py+ph, colour >= 0 ? colour : guislidermarkcolour, guislidermarkblend, hit ? guislideractivecolour : guislidermarkbordercolour, hit ? guislideractiveblend : guislidermarkborderblend, guislidermarkborderskin >= (hit ? 1 : 2));
             }
         }
         layout(ishorizontal() ? space : 0, ishorizontal() ? 0 : space);
