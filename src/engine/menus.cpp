@@ -461,7 +461,7 @@ void guiprogress(float *percent, float *scale)
     cgui->progress(*percent, *scale);
 }
 
-void guislider(char *var, int *min, int *max, char *onchange, int *reverse, int *scroll, int *colour)
+void guislider(char *var, int *min, int *max, char *onchange, int *reverse, int *scroll, int *colour, int *style, int *scolour)
 {
     if(!cgui || !var || !*var) return;
     int oldval = getval(var), val = oldval, vmin = *max > INT_MIN ? *min : getvarmin(var), vmax = *max > INT_MIN ? *max : getvarmax(var);
@@ -470,11 +470,11 @@ void guislider(char *var, int *min, int *max, char *onchange, int *reverse, int 
         int vdef = getvardef(var);
         vmax = vdef > vmin ? vdef*3 : vmin*4;
     }
-    cgui->slider(val, vmin, vmax, *colour >= 0 ? *colour : 0xFFFFFF, NULL, *reverse ? true : false, *scroll ? true : false);
+    cgui->slider(val, vmin, vmax, *colour >= 0 ? *colour : 0xFFFFFF, NULL, *reverse ? true : false, *scroll ? true : false, *style, *scolour);
     if(val != oldval) updateval(var, val, onchange);
 }
 
-void guilistslider(char *var, char *list, char *onchange, int *reverse, int *scroll, int *colour)
+void guilistslider(char *var, char *list, char *onchange, int *reverse, int *scroll, int *colour, int *style, int *scolour)
 {
     if(!cgui) return;
     vector<int> vals;
@@ -488,11 +488,11 @@ void guilistslider(char *var, char *list, char *onchange, int *reverse, int *scr
     if(vals.empty()) return;
     int val = getval(var), oldoffset = vals.length()-1, offset = oldoffset;
     loopv(vals) if(val <= vals[i]) { oldoffset = offset = i; break; }
-    cgui->slider(offset, 0, vals.length()-1, *colour >= 0 ? *colour : 0xFFFFFF, intstr(val), *reverse ? true : false, *scroll ? true : false);
+    cgui->slider(offset, 0, vals.length()-1, *colour >= 0 ? *colour : 0xFFFFFF, intstr(val), *reverse ? true : false, *scroll ? true : false, *style, *scolour);
     if(offset != oldoffset) updateval(var, vals[offset], onchange);
 }
 
-void guinameslider(char *var, char *names, char *list, char *onchange, int *reverse, int *scroll, int *colour)
+void guinameslider(char *var, char *names, char *list, char *onchange, int *reverse, int *scroll, int *colour, int *style, int *scolour)
 {
     if(!cgui) return;
     vector<int> vals;
@@ -507,7 +507,7 @@ void guinameslider(char *var, char *names, char *list, char *onchange, int *reve
     int val = getval(var), oldoffset = vals.length()-1, offset = oldoffset;
     loopv(vals) if(val <= vals[i]) { oldoffset = offset = i; break; }
     char *label = indexlist(names, offset);
-    cgui->slider(offset, 0, vals.length()-1, *colour >= 0 ? *colour : 0xFFFFFF, label, *reverse ? true : false, *scroll ? true : false);
+    cgui->slider(offset, 0, vals.length()-1, *colour >= 0 ? *colour : 0xFFFFFF, label, *reverse ? true : false, *scroll ? true : false, *style, *scolour);
     if(offset != oldoffset) updateval(var, vals[offset], onchange);
     delete[] label;
 }
@@ -657,9 +657,9 @@ COMMAND(0, guifont,"se");
 COMMAND(0, guiimage,"ssfissb");
 COMMAND(0, guislice,"ssfffsss");
 COMMAND(0, guiprogress,"ff");
-COMMAND(0, guislider,"sbbsiib");
-COMMAND(0, guilistslider, "sssiib");
-COMMAND(0, guinameslider, "ssssiib");
+COMMAND(0, guislider,"sbbsiibib");
+COMMAND(0, guilistslider, "sssiibib");
+COMMAND(0, guinameslider, "ssssiibib");
 COMMAND(0, guiradio,"ssfsb");
 COMMAND(0, guibitfield, "ssisb");
 COMMAND(0, guicheckbox, "ssffsb");
