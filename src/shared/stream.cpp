@@ -622,7 +622,7 @@ size_t stream::printf(const char *fmt, ...)
     {
         str = new char[len+1];
         va_start(args, fmt);
-        snprintf(str, len+1, fmt, args);
+        vsnprintf(str, len+1, fmt, args);
         va_end(args);
     }
 #endif
