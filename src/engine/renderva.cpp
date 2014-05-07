@@ -232,7 +232,7 @@ struct queryframe
 {
     int cur, max;
     occludequery queries[MAXQUERY];
-    
+
     queryframe() : cur(0), max(0) {}
 
     void flip() { loopi(cur) queries[i].owner = NULL; cur = 0; }
@@ -538,7 +538,7 @@ void rendermapmodels()
 static inline bool bbinsideva(const ivec &bo, const ivec &br, vtxarray *va)
 {
     return bo.x >= va->bbmin.x && bo.y >= va->bbmin.y && va->o.z >= va->bbmin.z &&
-        br.x <= va->bbmax.x && br.y <= va->bbmax.y && br.z <= va->bbmax.z; 
+        br.x <= va->bbmax.x && br.y <= va->bbmax.y && br.z <= va->bbmax.z;
 }
 
 static inline bool bboccluded(const ivec &bo, const ivec &br, cube *c, const ivec &o, int size)
@@ -2019,8 +2019,8 @@ void cleanupva()
     loopi(NUMCAUSTICS) caustictex[i] = NULL;
 }
 
-VAR(IDF_WORLD, causticscale, 0, 50, 10000);
-VAR(IDF_WORLD, causticmillis, 0, 75, 1000);
+VAR(IDF_WORLD, causticscale, 1, 50, 10000);
+VAR(IDF_WORLD, causticmillis, 1, 75, 1000);
 VARF(IDF_PERSIST, caustics, 0, 1, 1, loadcaustics());
 
 void setupcaustics(int tmu, float blend, GLfloat *color = NULL)
