@@ -1917,6 +1917,7 @@ namespace ai
             {
                 int pos = 2;
                 if(!strcasecmp(w[pos], "the")) pos++;
+#if 0
                 bool attack = false;
                 gameent *f = NULL;
                 int numdyns = game::numdynents();
@@ -1928,7 +1929,9 @@ namespace ai
                     attack = true;
                     break;
                 }
-                if(!attack) switch(game::gamemode)
+                if(!attack)
+#endif
+                switch(game::gamemode)
                 {
                     case G_CAPTURE:
                     {
