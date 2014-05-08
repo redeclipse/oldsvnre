@@ -142,6 +142,7 @@ namespace hud
     VAR(IDF_PERSIST|IDF_HEX, clipstone, -CTONE_MAX, -CTONE_TEAM-1, 0xFFFFFF);
     VAR(IDF_PERSIST|IDF_HEX, radartone, -CTONE_MAX, -CTONE_TEAM-1, 0xFFFFFF);
 
+    VAR(IDF_PERSIST, teamhurthud, 0, 0, 1);
     VAR(IDF_PERSIST, teamhurttime, 0, 2500, VAR_MAX);
     VAR(IDF_PERSIST, teamhurtdist, 0, 0, VAR_MAX);
     FVAR(IDF_PERSIST, teamhurtsize, 0, 0.0175f, 1000);
@@ -3139,7 +3140,7 @@ namespace hud
                 if(burntime && game::focus->state == CS_ALIVE) drawfire(w, h, top, bottom, fade);
                 drawdamage(w, h, top, bottom, fade);
             }
-            if(teamhurttime && m_team(game::gamemode, game::mutators) && game::focus == game::player1 && game::player1->lastteamhit >= 0 && lastmillis-game::player1->lastteamhit <= teamhurttime)
+            if(teamhurthud && teamhurttime && m_team(game::gamemode, game::mutators) && game::focus == game::player1 && game::player1->lastteamhit >= 0 && lastmillis-game::player1->lastteamhit <= teamhurttime)
             {
                 vec targ;
                 bool hasbound = false;
