@@ -633,13 +633,13 @@ namespace server
                     loopv(playing) if(playing[i] && ci->team == playing[i]->team) slots--;
                     if(!slots)
                     {
-                        int wait = 0;
+                        int qn = 0;
                         loopv(spawnq) if(spawnq[i] && spawnq[i]->team == ci->team && spawnq[i]->state.actortype == A_PLAYER)
                         {
-                            wait++;
+                            qn++;
                             if(spawnq[i] == ci)
                             {
-                                if(wait > 1) srvmsgft(spawnq[i]->clientnum, CON_EVENT, "\fyyou are \fs\fzcg#%d\fS in the \fs\fgrespawn queue\fS", wait);
+                                if(qn > 1) srvmsgft(spawnq[i]->clientnum, CON_EVENT, "\fyyou are \fs\fzcg#%d\fS in the \fs\fgrespawn queue\fS", qn);
                                 else srvmsgft(spawnq[i]->clientnum, CON_EVENT, "\fyyou are \fs\fzcrNEXT\fS in the \fs\fgrespawn queue\fS");
                                 break;
                             }
@@ -725,13 +725,13 @@ namespace server
                         // at this point is where it decides this player is spawning, so tell everyone else their position
                         if(x-alive == 1)
                         {
-                            int wait = 0;
+                            int qn = 0;
                             loopv(spawnq) if(spawnq[i] != ci && spawnq[i]->team == ci->team && spawnq[i]->state.actortype == A_PLAYER)
                             {
-                                wait++;
+                                qn++;
                                 if(allowbroadcast(spawnq[i]->clientnum))
                                 {
-                                    if(wait > 1) srvmsgft(spawnq[i]->clientnum, CON_EVENT, "\fyyou are \fs\fzcg#%d\fS in the \fs\fgrespawn queue\fS", wait);
+                                    if(qn > 1) srvmsgft(spawnq[i]->clientnum, CON_EVENT, "\fyyou are \fs\fzcg#%d\fS in the \fs\fgrespawn queue\fS", qn);
                                     else srvmsgft(spawnq[i]->clientnum, CON_EVENT, "\fyyou are \fs\fzcrNEXT\fS in the \fs\fgrespawn queue\fS");
                                 }
                             }
