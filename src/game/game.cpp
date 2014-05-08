@@ -193,13 +193,13 @@ namespace game
     FVAR(IDF_PERSIST, aboveheadinventoryfade, 0.f, 0.5f, 1.f);
     FVAR(IDF_PERSIST, aboveheadstatusblend, 0.f, 1, 1.f);
     FVAR(IDF_PERSIST, aboveheadiconsblend, 0.f, 1, 1.f);
-    FVAR(IDF_PERSIST, aboveheadnamessize, 0, 3, 1000);
-    FVAR(IDF_PERSIST, aboveheadinventorysize, 0, 4, 1000);
-    FVAR(IDF_PERSIST, aboveheadstatussize, 0, 2.5f, 1000);
-    FVAR(IDF_PERSIST, aboveheadiconssize, 0, 2.5f, 1000);
-    FVAR(IDF_PERSIST, aboveheadeventsize, 0, 3, 1000);
+    FVAR(IDF_PERSIST, aboveheadnamessize, 0, 3, 10);
+    FVAR(IDF_PERSIST, aboveheadinventorysize, 0, 4, 10);
+    FVAR(IDF_PERSIST, aboveheadstatussize, 0, 2.5f, 10);
+    FVAR(IDF_PERSIST, aboveheadiconssize, 0, 2.5f, 10);
+    FVAR(IDF_PERSIST, aboveheadeventsize, 0, 3, 10);
 
-    FVAR(IDF_PERSIST, aboveitemiconsize, 0, 2.5f, 1000);
+    FVAR(IDF_PERSIST, aboveitemiconsize, 0, 2.5f, 10);
 
     FVAR(IDF_PERSIST, aboveheadsmooth, 0, 0.25f, 1);
     VAR(IDF_PERSIST, aboveheadsmoothmillis, 1, 100, 10000);
@@ -251,12 +251,16 @@ namespace game
     FVAR(IDF_PERSIST, playerghost, 0, 0.5f, 1);
 
     VAR(IDF_PERSIST, playerhint, 0, 3, 3);
+    VAR(IDF_PERSIST, playerhinthurt, 0, 1, 1);
+    VAR(IDF_PERSIST, playerhinthurtthrob, 0, 1, 1);
     VAR(IDF_PERSIST, playerhinttone, -1, CTONE_TEAMED, CTONE_MAX-1);
     FVAR(IDF_PERSIST, playerhintblend, 0, 0.1f, 1);
     FVAR(IDF_PERSIST, playerhintscale, 0, 0.7f, 1); // scale blend depending on health
     FVAR(IDF_PERSIST, playerhintsize, 0, 1.2f, 2);
     FVAR(IDF_PERSIST, playerhintfadeat, 0, 64, FVAR_MAX);
     FVAR(IDF_PERSIST, playerhintfadecut, 0, 8, FVAR_MAX);
+    FVAR(IDF_PERSIST, playerhinthurtblend, 0, 0.9f, 1);
+    FVAR(IDF_PERSIST, playerhinthurtsize, 0, 1.2f, 2);
 
     VAR(IDF_PERSIST, footstepsounds, 0, 3, 3); // 0 = off, &1 = focus, &2 = everyone else
     FVAR(IDF_PERSIST, footstepsoundmin, 0, 0, FVAR_MAX); // minimum velocity magnitude
@@ -264,7 +268,7 @@ namespace game
     FVAR(IDF_PERSIST, footstepsoundlevel, 0, 1, 10); // a way to scale the volume
     FVAR(IDF_PERSIST, footstepsoundfocus, 0, 0.85f, 10); // focused player version of above
     FVAR(IDF_PERSIST, footstepsounddim, 0, 0.5f, 10); // crouch/lighter player version of above
-    VAR(IDF_PERSIST, footstepsoundminvol, 0, 32, 255);
+    VAR(IDF_PERSIST, footstepsoundminvol, 0, 64, 255);
     VAR(IDF_PERSIST, footstepsoundmaxvol, 0, 255, 255);
     VAR(IDF_PERSIST, footstepsoundminrad, -1, -1, 255);
     VAR(IDF_PERSIST, footstepsoundmaxrad, -1, -1, 255);
@@ -3461,30 +3465,49 @@ namespace game
         float blend = opacity(d, third);
         if(d->state == CS_ALIVE)
         {
-            if(d != focus && playerhint&(d->team != focus->team ? 2 : 1))
+            bool useth = hud::teamhurttime && m_team(game::gamemode, game::mutators) && game::focus == game::player1 &&
+                 d->team == game::player1->team && d->lastteamhit >= 0 && lastmillis-d->lastteamhit <= hud::teamhurttime,
+                 hashint = playerhint&(d->team != focus->team ? 2 : 1);
+            if(d != focus && (useth || hashint))
             {
-                vec c = vec::hexcolor(getcolour(d, playerhinttone));
-                float height = d->height*playerhintsize, fade = blend*playerhintblend;
-                if(playerhintscale > 0)
+                if(hashint)
                 {
-                    float per = d->health/float(m_health(gamemode, mutators, d->model));
-                    fade = (fade*(1.f-playerhintscale))+(fade*per*playerhintscale);
-                    if(fade > 1)
+                    vec c = vec::hexcolor(getcolour(d, playerhinttone));
+                    float height = d->height, fade = blend;
+                    if(playerhintscale > 0)
                     {
-                        height *= 1.f+(fade-1.f);
-                        fade = 1;
+                        float per = d->health/float(m_health(gamemode, mutators, d->model));
+                        fade = (fade*(1.f-playerhintscale))+(fade*per*playerhintscale);
+                        if(fade > 1)
+                        {
+                            height *= 1.f+(fade-1.f);
+                            fade = 1;
+                        }
                     }
+                    if(d->state == CS_ALIVE && d->lastbuff)
+                    {
+                        int millis = lastmillis%1000;
+                        float amt = millis <= 500 ? 1.f-(millis/500.f) : (millis-500)/500.f;
+                        flashcolour(c.r, c.g, c.b, 1.f, 1.f, 1.f, amt);
+                        height += height*amt*0.1f;
+                    }
+                    vec o = d->center(), offset = vec(o).sub(camera1->o).rescale(d->radius/2);
+                    offset.z = max(offset.z, -1.0f);
+                    offset.add(o);
+                    part_create(PART_HINT_BOLD_SOFT, 1, offset, c.tohexcolor(), height*playerhintsize, fade*playerhintblend*camera1->o.distrange(o, playerhintfadeat, playerhintfadecut));
                 }
-                if(d->state == CS_ALIVE && d->lastbuff)
+                if(useth)
                 {
-                    int millis = lastmillis%1000;
-                    float amt = millis <= 500 ? 1.f-(millis/500.f) : (millis-500)/500.f;
-                    flashcolour(c.r, c.g, c.b, 1.f, 1.f, 1.f, amt);
-                    height += height*amt*0.1f;
+                    vec c(0.25f, 0.25f, 0.25f);
+                    int millis = lastmillis%500;
+                    float amt = millis <= 250 ? 1.f-(millis/250.f) : (millis-250)/250.f, height = d->height*0.5f;
+                    flashcolour(c.r, c.g, c.b, 1.f, 0.f, 0.f, amt);
+                    if(playerhinthurtthrob) height += height*amt*0.1f;
+                    vec o = d->center(), offset = vec(o).sub(camera1->o).rescale(-d->radius);
+                    offset.z = max(offset.z, -1.0f);
+                    offset.add(o);
+                    part_icon(offset, textureload(hud::warningtex, 3, true, false), height*playerhinthurtsize, amt*blend*playerhinthurtblend, 0, 0, 1, c.tohexcolor());
                 }
-                vec o = d->center(), offset = vec(o).sub(camera1->o).rescale(d->radius/2);
-                offset.z = max(offset.z, -1.0f);
-                part_create(PART_HINT_BOLD_SOFT, 1, offset.add(o), c.tohexcolor(), height, fade*camera1->o.distrange(o, playerhintfadeat, playerhintfadecut));
             }
             float minz = d == focus && !third && firstpersonbodyfeet >= 0 && d->wantshitbox() ? camera1->o.z-firstpersonbodyfeet : 0.f;
             if(d->hasmelee(lastmillis, true, physics::sliding(d, true), d->physstate >= PHYS_SLOPE || d->onladder || physics::liquidcheck(d))) loopi(2)
