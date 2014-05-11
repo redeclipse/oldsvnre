@@ -62,6 +62,11 @@ ICOMMAND(0, resetlocalop, "", (), localopreset());
 void localopadd(const char *name, const char *flags)
 {
     if(!name || !flags) return;
+    loopv(localops) if(!strcmp(name, localops[i].name))
+    {
+        conoutf("local operator %s already exists with flags %s", localops[i].name, localops[i].flags);
+        return;
+    }
     localop &o = localops.add();
     o.name = newstring(name);
     o.flags = newstring(flags);
