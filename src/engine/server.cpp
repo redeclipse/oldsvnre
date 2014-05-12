@@ -861,8 +861,9 @@ void serverslice(uint timeout)  // main server update, called from main loop in 
                 clientdata &c = *clients[cn];
                 c.peer = event.peer;
                 c.peer->data = &c;
-                static string hostn = "";
-                copystring(c.hostname, (enet_address_get_host_ip(&c.peer->address, hostn, sizeof(hostn))==0) ? hostn : "unknown");
+                if(enet_address_get_host(&c.peer->address, c.hostname, sizeof(c.hostname)) < 0)
+                    if(enet_address_get_host_ip(&c.peer->address, c.hostname, sizeof(c.hostname)) < 0)
+                        copystring(c.hostname, "unknown");
                 int reason = server::clientconnect(c.num, c.peer->address.host);
                 if(reason) disconnect_client(c.num, reason);
                 break;
