@@ -653,14 +653,12 @@ namespace physics
             d->physstate = PHYS_SLIDE;
             d->floor = floor;
         }
-        #if 0
         else if(sticktospecial(d))
         {
             d->airmillis = 0;
             d->physstate = PHYS_FLOOR;
             d->floor = vec(0, 0, 1);
         }
-        #endif
         else d->physstate = PHYS_FALL;
     }
 
@@ -925,7 +923,11 @@ namespace physics
         }
 
         if(d->turnside && (!allowimpulse(d, IM_A_PARKOUR) || d->impulse[IM_TYPE] != IM_T_SKATE || (impulseskate && lastmillis-d->impulse[IM_TIME] > impulseskate) || d->vel.magnitude() <= 1))
+        {
             d->turnside = 0;
+            d->resetphys(true);
+            onfloor = false;
+        }
 
         if(d->turnside)
         {
