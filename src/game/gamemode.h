@@ -296,7 +296,7 @@ extern mutstypes mutstype[];
 #define m_delay(a,b)        (m_duke(a,b) ? 0 : m_xdelay(a, b))
 #define m_protect(a,b)      (m_duke(a,b) ? G(duelprotect) : (m_insta(a, b) ? G(instaprotect) : G(spawnprotect)))
 #define m_noitems(a,b)      (m_trial(a) || G(itemsallowed) < (m_sweaps(a, b) ? 2 : 1))
-#ifdef MEK // TODO: merge corectly with RE after 1.4
+#if 0 // TODO: merge corectly with RE after 1.4
 #define m_health(a,b,c)     (m_insta(a,b) ? 1 : PLAYER(c, health))
 #define m_armour(a,b,c)     (m_insta(a,b) ? 0 : PLAYER(c, armour))
 #else

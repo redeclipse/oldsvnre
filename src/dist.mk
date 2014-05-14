@@ -1,6 +1,6 @@
 appname=$(APPNAME)
-appnamefull=$(shell sed -n 's/versionname *"\([^"]*\)"/\1/p' ../game/$(APPSHORTNAME)/version.cfg)
-appversion=$(shell sed -n 's/versionstring *"\([^"]*\)"/\1/p' ../game/$(APPSHORTNAME)/version.cfg)
+appnamefull=$(shell sed -n 's/versionname *"\([^"]*\)"/\1/p' ../data/version.cfg)
+appversion=$(shell sed -n 's/versionstring *"\([^"]*\)"/\1/p' ../data/version.cfg)
 
 dirname=$(appname)-$(appversion)
 dirname-osx=$(appname).app
@@ -81,7 +81,7 @@ DISTFILES= \
 	$(FILES) \
 	$(BIN_FILES) \
 	data \
-	game/$(APPSHORTNAME) \
+	data \
 	$(DOC_FILES) \
 	$(SRC_FILES) \
 	$(SRC_XCODE)
@@ -221,13 +221,7 @@ dist-xz-osx: ../$(tarname-osx).xz
 
 dist-win: ../$(exename)
 
-ifeq ($(APPNAME),redeclipse)
 dist: dist-bz2 dist-bz2-all dist-bz2-osx dist-win
-else
-ifeq ($(APPNAME),mekarcade)
-dist: dist-bz2 dist-bz2-all
-endif
-endif
 
 ../$(tarname).bz2.torrent: ../$(tarname).bz2
 	rm -f $@
@@ -277,13 +271,7 @@ dist-torrent-osx: ../$(tarname-osx).bz2.torrent
 
 dist-torrent-win: ../$(exename).torrent
 
-ifeq ($(APPNAME),redeclipse)
 dist-torrents: dist-torrent dist-torrent-all dist-torrent-osx dist-torrent-win
-else
-ifeq ($(APPNAME),mekarcade)
-dist-torrents: dist-torrent dist-torrent-all
-endif
-endif
 
 dist-mostlyclean:
 	rm -rf ../$(dirname)

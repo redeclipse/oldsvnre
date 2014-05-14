@@ -29,7 +29,6 @@
 					<Add option="-fsigned-char" />
 					<Add option="-fno-exceptions" />
 					<Add option="-fno-rtti" />
-					<Add option="-DFPS=1" />
 					<Add directory="shared" />
 					<Add directory="engine" />
 					<Add directory="game" />
@@ -74,7 +73,6 @@
 					<Add option="-m32" />
 					<Add option="-mwindows" />
 					<Add option="-fsigned-char" />
-					<Add option="-DFPS=1" />
 					<Add directory="shared" />
 					<Add directory="engine" />
 					<Add directory="game" />
@@ -119,7 +117,6 @@
 					<Add option="-mwindows" />
 					<Add option="-fsigned-char" />
 					<Add option="-finline-functions" />
-					<Add option="-DFPS=1" />
 					<Add directory="shared" />
 					<Add directory="engine" />
 					<Add directory="game" />
@@ -168,7 +165,6 @@
 					<Add option="-fno-exceptions" />
 					<Add option="-fno-rtti" />
 					<Add option="-DSTANDALONE" />
-					<Add option="-DFPS=1" />
 					<Add directory="shared" />
 					<Add directory="engine" />
 					<Add directory="game" />
@@ -209,7 +205,6 @@
 					<Add option="-mwindows" />
 					<Add option="-fsigned-char" />
 					<Add option="-DSTANDALONE" />
-					<Add option="-DFPS=1" />
 					<Add directory="shared" />
 					<Add directory="engine" />
 					<Add directory="game" />
@@ -253,7 +248,6 @@
 					<Add option="-fsigned-char" />
 					<Add option="-fno-exceptions" />
 					<Add option="-fno-rtti" />
-					<Add option="-DFPS=1" />
 					<Add directory="shared" />
 					<Add directory="engine" />
 					<Add directory="game" />
@@ -298,7 +292,6 @@
 					<Add option="-m64" />
 					<Add option="-mwindows" />
 					<Add option="-fsigned-char" />
-					<Add option="-DFPS=1" />
 					<Add directory="shared" />
 					<Add directory="engine" />
 					<Add directory="game" />
@@ -343,7 +336,6 @@
 					<Add option="-mwindows" />
 					<Add option="-fsigned-char" />
 					<Add option="-finline-functions" />
-					<Add option="-DFPS=1" />
 					<Add directory="shared" />
 					<Add directory="engine" />
 					<Add directory="game" />
@@ -392,7 +384,6 @@
 					<Add option="-fno-exceptions" />
 					<Add option="-fno-rtti" />
 					<Add option="-DSTANDALONE" />
-					<Add option="-DFPS=1" />
 					<Add directory="shared" />
 					<Add directory="engine" />
 					<Add directory="game" />
@@ -433,7 +424,6 @@
 					<Add option="-mwindows" />
 					<Add option="-fsigned-char" />
 					<Add option="-DSTANDALONE" />
-					<Add option="-DFPS=1" />
 					<Add directory="shared" />
 					<Add directory="engine" />
 					<Add directory="game" />
@@ -543,9 +533,6 @@
 			<Add alias="ALL" targets="redeclipse-x86;redeclipse_server-x86;redeclipse-amd64;redeclipse_server-amd64;" />
 			<Add alias="ALL-amd64" targets="redeclipse-amd64;redeclipse_server-amd64;" />
 			<Add alias="ALL-x86" targets="redeclipse-x86;redeclipse_server-x86;" />
-			<Add alias="REDECLIPSE" targets="redeclipse-x86;redeclipse_server-x86;redeclipse-amd64;redeclipse_server-amd64;" />
-			<Add alias="REDECLIPSE-amd64" targets="redeclipse-amd64;redeclipse_server-amd64;" />
-			<Add alias="REDECLIPSE-x86" targets="redeclipse-x86;redeclipse_server-x86;" />
 			<Add alias="TOOLS" targets="cube2font;genkey;" />
 		</VirtualTargets>
 		<Unit filename="dpiaware.manifest">

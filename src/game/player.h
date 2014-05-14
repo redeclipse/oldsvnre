@@ -92,41 +92,6 @@ struct score
 #define isteam(a,b,c,d) (m_fight(a) && m_team(a,b) ? (c >= d && c <= numteams(a,b)) : c == T_NEUTRAL)
 #define valteam(a,b)    (a >= b && a <= T_TOTAL)
 
-#ifdef MEK
-#define PLAYERTYPES 4
-#ifdef GAMESERVER
-const char *playertypes[PLAYERTYPES][6] = {
-    { "actors/mek1/hwep",    "actors/mek1",    "actors/mek1",   "actors/mek1",      "mek1",     "light" },
-    { "actors/mek2/hwep",    "actors/mek2",    "actors/mek2",   "actors/mek2",      "mek2",     "medium" },
-    { "actors/mek3/hwep",    "actors/mek3",    "actors/mek3",   "actors/mek3",      "mek3",     "flyer" },
-    { "actors/mek4/hwep",    "actors/mek4",    "actors/mek4",   "actors/mek4",      "mek4",     "heavy" },
-};
-float playerdims[PLAYERTYPES][3] = {
-    { 6,      6,      16 },
-    { 6,      6,      16 },
-    { 6,      6,      16 },
-    { 6,      6,      16 },
-};
-#else
-extern const char *playertypes[PLAYERTYPES][6];
-extern float playerdims[PLAYERTYPES][3];
-#endif
-
-#include "playerdef.h"
-
-PPVAR(0, health, 1, VAR_MAX,
-    300,        400,        330,        500
-);
-PPVAR(0, armour, 0, VAR_MAX,
-    80,         100,        90,         200
-);
-PPFVAR(0, weight, 0, FVAR_MAX,
-    200,        300,        250,        350
-);
-PPFVAR(0, speed, FVAR_NONZERO, FVAR_MAX,
-    80,         60,         70,         40
-);
-#else // FPS
 #define PLAYERTYPES 2
 #ifdef GAMESERVER
 const char *playertypes[PLAYERTYPES][6] = {
@@ -156,7 +121,6 @@ PPFVAR(0, weight, 0, FVAR_MAX,
 PPFVAR(0, speed, FVAR_NONZERO, FVAR_MAX,
     50
 );
-#endif
 
 #define VANITYMAX 16
 struct vanityfile

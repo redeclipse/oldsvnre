@@ -3,18 +3,10 @@
 
 #include "engine.h"
 
-#if defined(FPS)
 #define GAMEID              "fps"
 #define GAMEVERSION         220
+
 #define DEMO_MAGIC          "RED_ECLIPSE_DEMO"
-#elif defined(MEK)
-#define GAMEID              "mek"
-#define GAMEVERSION         220
-#define DEMO_MAGIC          "MEK_ARCADE_DEMO"
-#define CAMPAIGN            1
-#else
-#error "You must add either -DFPS or -DMEK"
-#endif
 #define DEMO_VERSION        GAMEVERSION
 
 #define MAXAI       256

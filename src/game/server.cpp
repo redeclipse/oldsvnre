@@ -1394,10 +1394,8 @@ namespace server
     bool canload(const char *type)
     {
         if(!strcmp(type, gameid())) return true;
-#ifdef MEK
-        if(!strcmp(type, "fps")) return true;
-#endif
-        if(!strcmp(type, "bfa") || !strcmp(type, "bfg")) return true;
+        if(!strcmp(type, "bfa")) return true;
+        if(!strcmp(type, "bfg")) return true;
         return false;
     }
 
