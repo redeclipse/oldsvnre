@@ -1,10 +1,10 @@
 appname=$(APPNAME)
-appnamefull=$(shell sed -n 's/versionname *"\([^"]*\)"/\1/p' ../game/$(APPSHORTNAME)/version.cfg)
+appnamefull=$(shell sed -n 's/versionname *"\([^"]*\)"/\1/p' ../data/version.cfg)
 appsrcname=$(APPNAME)
 cappname=$(shell echo $(appname) | tr '[:lower:]' '[:upper:]')# Captial appname
 appclient=$(APPCLIENT)
 appserver=$(APPSERVER)
-appgamedir=game/$(APPSHORTNAME)
+appgamedir=data
 
 prefix=/usr/local
 games=

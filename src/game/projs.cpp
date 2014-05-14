@@ -2283,13 +2283,10 @@ namespace projs
                             dynent *f = game::iterdynents(j);
                             if(!f || f->state != CS_ALIVE || !physics::issolid(f, &proj, true, false)) continue;
                             if(radial && radialeffect(f, proj, HIT_BURN, expl)) proj.lastradial = lastmillis;
-                            if(proxim == 1 && !proj.beenused && f != oldstick)
+                            if(proxim == 1 && !proj.beenused && f != oldstick && f->center().dist(proj.o) <= dist)
                             {
-                                if(f->center().dist(proj.o) <= dist)
-                                {
-                                    proj.beenused = 1;
-                                    proj.lifetime = min(proj.lifetime, WF(WK(proj.flags), proj.weap, proxtime, WS(proj.flags)));
-                                }
+                                proj.beenused = 1;
+                                proj.lifetime = min(proj.lifetime, WF(WK(proj.flags), proj.weap, proxtime, WS(proj.flags)));
                             }
                         }
                         if(proxim == 2 && !proj.beenused)
@@ -2300,7 +2297,7 @@ namespace projs
                             {
                                 dir.div(mag);
                                 float blocked = tracecollide(&proj, from, dir, mag, RAY_CLIPMAT|RAY_ALPHAPOLY, true);
-                                if(blocked >= 0 && hitplayer)
+                                if(blocked >= 0 && hitplayer)// TODO: add this: && hitplayer->state == CS_ALIVE && physics::issolid(hitplayer, &proj, true, false))
                                 {
                                     proj.beenused = 1;
                                     proj.lifetime = min(proj.lifetime, WF(WK(proj.flags), proj.weap, proxtime, WS(proj.flags)));

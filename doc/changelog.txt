@@ -363,7 +363,6 @@ Core & Install:
  * Added IRC guidelines
  * Client now uses log.txt in the homedir by default
  * Moved binary files to bin/{amd64,x86}/ subdirectories
- * MekArcade source & data tree merged in
  * Enet 1.3.7
  * Workaround for Intel/Apple occlusion bug
  * Network encoding functions moved into tools
