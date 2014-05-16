@@ -2998,7 +2998,12 @@ ICOMMAND(0, findfile, "s", (char *name),
     string fname;
     copystring(fname, name);
     path(fname);
-    intret(fileexists(fname, "e") || findfile(fname, "e") ? 1 : 0);
+    intret(
+#ifndef STANDALONE
+        findzipfile(fname) ||
+#endif
+        fileexists(fname, "e") || findfile(fname, "e") ? 1 : 0
+    );
 });
 
 struct sortitem

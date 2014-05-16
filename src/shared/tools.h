@@ -1381,6 +1381,7 @@ extern void appendhomedir(const char *dir);
 extern void addpackagedir(const char *dir, int flags = 0);
 extern int maskpackagedirs(int flags);
 extern const char *findfile(const char *filename, const char *mode);
+extern bool findzipfile(const char *filename);
 extern stream *openrawfile(const char *filename, const char *mode);
 extern stream *openzipfile(const char *filename, const char *mode);
 extern stream *openfile(const char *filename, const char *mode);
