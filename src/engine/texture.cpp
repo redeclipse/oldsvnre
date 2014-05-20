@@ -3230,7 +3230,9 @@ SDL_Surface *loadsurface(const char *name, bool noload)
             SDL_RWops *rw = z->rwops();
             if(rw)
             {
-                s = IMG_Load_RW(rw, 0);
+                const char *ext = strrchr(name, '.');
+                if(ext) ++ext;
+                s = IMG_LoadTyped_RW(rw, 0, ext);
                 SDL_FreeRW(rw);
             }
             delete z;
