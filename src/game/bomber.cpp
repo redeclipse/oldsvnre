@@ -179,10 +179,11 @@ namespace bomber
 
     int drawinventory(int x, int y, int s, int m, float blend)
     {
-        int sy = 0;
+        int sy = 0, numflags = st.flags.length(), estsize = numflags*s, fitsize = y-m, size = s;
+        if(estsize > fitsize) size = int((fitsize/float(estsize))*s);
         loopv(st.flags) if(isbomberaffinity(st.flags[i]))
         {
-            if(y-sy-s < m) break;
+            if(y-sy-size < m) break;
             bomberstate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent) || !f.enabled) continue;
             int millis = lastmillis-f.displaytime;
@@ -207,17 +208,17 @@ namespace bomber
             else if(millis <= 1000) skew += ((1.f-skew)-(clamp(float(millis)/1000.f, 0.f, 1.f)*(1.f-skew)));
             int oldy = y-sy;
             if(!game::intermission && (f.owner || f.droptime))
-                sy += hud::drawitem(hud::bombtex, x, oldy, s, 0, true, false, colour.x, colour.y, colour.z, blend, skew, "super", "%d%%", int(wait*100.f));
-            else sy += hud::drawitem(hud::bombtex, x, oldy, s, 0, true, false, colour.x, colour.y, colour.z, blend, skew);
+                sy += hud::drawitem(hud::bombtex, x, oldy, size, 0, true, false, colour.x, colour.y, colour.z, blend, skew, "super", "%d%%", int(wait*100.f));
+            else sy += hud::drawitem(hud::bombtex, x, oldy, size, 0, true, false, colour.x, colour.y, colour.z, blend, skew);
             if(f.owner)
             {
                 vec c2 = vec::hexcolor(TEAM(f.owner->team, colour));
-                hud::drawitem(hud::bombtakentex, x, oldy, s, 0.5f, true, false, c2.r, c2.g, c2.b, blend, skew);
+                hud::drawitem(hud::bombtakentex, x, oldy, size, 0.5f, true, false, c2.r, c2.g, c2.b, blend, skew);
             }
-            else if(f.droptime) hud::drawitem(hud::bombdroptex, x, oldy, s, 0.5f, true, false, 0.25f, 1.f, 1.f, blend, skew);
+            else if(f.droptime) hud::drawitem(hud::bombdroptex, x, oldy, size, 0.5f, true, false, 0.25f, 1.f, 1.f, blend, skew);
             if(!game::intermission)
             {
-                if(f.droptime || (f.owner && carrytime)) hud::drawitembar(x, oldy, s, false, colour.r, colour.g, colour.b, blend, skew, wait);
+                if(f.droptime || (f.owner && carrytime)) hud::drawitembar(x, oldy, size, false, colour.r, colour.g, colour.b, blend, skew, wait);
                 if(f.owner == game::focus && m_team(game::gamemode, game::mutators) && bomberlockondelay && f.owner->action[AC_AFFINITY] && lastmillis-f.owner->actiontime[AC_AFFINITY] >= bomberlockondelay)
                 {
                     gameent *e = game::getclient(findtarget(f.owner));
@@ -229,7 +230,7 @@ namespace bomber
                               sp = interval >= 250 ? (500-interval)/250.f : interval/250.f,
                               sq = max(sp, 0.5f);
                         hud::colourskew(rp, gp, bp, sp);
-                        int sx = int(cx*hud::hudwidth-s*sq), sy = int(cy*hud::hudsize-s*sq), ss = int(s*2*sq);
+                        int sx = int(cx*hud::hudwidth-size*sq), sy = int(cy*hud::hudsize-size*sq), ss = int(size*2*sq);
                         Texture *t = textureload(hud::indicatortex, 3);
                         if(t && t != notexture)
                         {

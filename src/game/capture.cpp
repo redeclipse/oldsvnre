@@ -183,10 +183,11 @@ namespace capture
 
     int drawinventory(int x, int y, int s, int m, float blend)
     {
-        int sy = 0;
+        int sy = 0, numflags = st.flags.length(), estsize = numflags*s, fitsize = y-m, size = s;
+        if(estsize > fitsize) size = int((fitsize/float(estsize))*s);
         loopv(st.flags)
         {
-            if(y-sy-s < m) break;
+            if(y-sy-size < m) break;
             capturestate::flag &f = st.flags[i];
             bool headsup = hud::chkcond(hud::inventorygame, game::player1->state == CS_SPECTATOR || f.team == T_NEUTRAL || f.team == game::focus->team);
             if(headsup || f.lastowner == game::focus)
@@ -206,14 +207,14 @@ namespace capture
                 }
                 else if(millis <= 1000) skew += (1.f-skew)-(clamp(float(millis)/1000.f, 0.f, 1.f)*(1.f-skew));
                 int oldy = y-sy;
-                sy += hud::drawitem(hud::flagtex, x, oldy, s, 0, true, false, c.r, c.g, c.b, blend, skew);
+                sy += hud::drawitem(hud::flagtex, x, oldy, size, 0, true, false, c.r, c.g, c.b, blend, skew);
                 if(f.owner)
                 {
                     vec c2 = vec::hexcolor(TEAM(f.owner->team, colour));
-                    hud::drawitem(hud::flagtakentex, x, oldy, s, 0.5f, true, false, c2.r, c2.g, c2.b, blend, skew);
+                    hud::drawitem(hud::flagtakentex, x, oldy, size, 0.5f, true, false, c2.r, c2.g, c2.b, blend, skew);
                 }
-                else if(f.droptime) hud::drawitem(hud::flagdroptex, x, oldy, s, 0.5f, true, false, 0.25f, 1.f, 1.f, blend, skew);
-                else hud::drawitem(hud::teamtexname(f.team), x, oldy, s, 0.5f, true, false, c.r, c.g, c.b, blend, skew);
+                else if(f.droptime) hud::drawitem(hud::flagdroptex, x, oldy, size, 0.5f, true, false, 0.25f, 1.f, 1.f, blend, skew);
+                else hud::drawitem(hud::teamtexname(f.team), x, oldy, size, 0.5f, true, false, c.r, c.g, c.b, blend, skew);
                 if(!game::intermission && (f.droptime || (m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team)))
                 {
                     float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(capturedelay), 0.f, 1.f) : clamp((lastmillis-f.taketime)/float(captureprotectdelay), 0.f, 1.f);
@@ -223,7 +224,7 @@ namespace capture
                         float amt = (millis <= delay ? millis/float(delay) : 1.f-((millis-delay)/float(delay)));
                         flashcolour(c.r, c.g, c.b, 0.65f, 0.65f, 0.65f, amt);
                     }
-                    hud::drawitembar(x, oldy, s, false, c.r, c.g, c.b, blend, skew, wait);
+                    hud::drawitembar(x, oldy, size, false, c.r, c.g, c.b, blend, skew, wait);
                 }
             }
         }
