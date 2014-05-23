@@ -154,13 +154,11 @@ namespace defend
 
     int drawinventory(int x, int y, int s, int m, float blend)
     {
-        int sy = 0, numflags = st.flags.length();
-        float rescale = 1;
-        for(int iters = numflags; iters > 0 && y-int((numflags-1)*s*hud::inventoryskew)-s < m; iters--) rescale *= 0.9f;
-        int size = int(s*rescale);
+        int sy = 0, numflags = st.flags.length(), estsize = ((numflags-1)*s*hud::inventoryskew)+s, fitsize = y-m, size = s;
+        if(estsize > fitsize) size = int((fitsize/float(estsize))*s);
         loopv(st.flags)
         {
-            if(y-sy-s < m) break;
+            if(y-sy-size < m) break;
             defendstate::flag &f = st.flags[i];
             bool hasflag = game::focus->state == CS_ALIVE && insideaffinity(f, game::focus);
             if(f.hasflag != hasflag) { f.hasflag = hasflag; f.lasthad = lastmillis-max(1000-(lastmillis-f.lasthad), 0); }

@@ -24,6 +24,7 @@ VAR(IDF_PERSIST, guitooltipwidth, -1, 512, VAR_MAX);
 VAR(IDF_PERSIST, guistatuswidth, -1, 2048, VAR_MAX);
 
 VAR(IDF_PERSIST, guiskinned, 0, 2, 3); // 0 = no backgrounds, 1 = drawn backgrounds, 2 = skinned backgrounds, 3 = skinned with overlay border
+VARF(IDF_PERSIST, guiskinsize, 0, 0, VAR_MAX, if(guiskinsize) { int off = guiskinsize%4; if(off) guiskinsize += guiskinsize-off; }); // 0 = texture size, otherwise = size in pixels for skin scaling
 
 VAR(IDF_PERSIST|IDF_HEX, guibgcolour, -1, 0x000000, 0xFFFFFF);
 FVAR(IDF_PERSIST, guibgblend, 0, 0.7f, 1);
@@ -127,10 +128,9 @@ struct gui : guient
                             break;
                     }
                     if(!t) break;
-                    int w = x2-x1, h = y2-y1;
-                    //if(t->w > w*2 || t->h > h*2) break;
-                    bool fullx = t->w >= w, fully = t->h >= h;
-                    float pw = t->w*0.25f, ph = t->h*0.25f, qw = t->w*0.5f, qh = t->h*0.5f, px = 0, py = 0, tx = 0, ty = 0;
+                    int w = x2-x1, h = y2-y1, tw = guiskinsize ? guiskinsize : t->w, th = guiskinsize ? guiskinsize : t->h;
+                    bool fullx = tw >= w, fully = th >= h;
+                    float pw = tw*0.25f, ph = th*0.25f, qw = tw*0.5f, qh = th*0.5f, px = 0, py = 0, tx = 0, ty = 0;
                     int cw = fullx ? 0 : int(floorf(w/qw))-1, ch = fully ? 1 : int(floorf(h/qh))+1;
 
                     glBindTexture(GL_TEXTURE_2D, t->id);
@@ -160,6 +160,7 @@ struct gui : guient
                             glTexCoord2f(tx+1.f, ty); glVertex2f(x1+px+w, y1+py);
                             glTexCoord2f(tx+1.f, ty+vth); glVertex2f(x1+px+w, y1+py+vph);
                             glTexCoord2f(tx, ty+vth); glVertex2f(x1+px, y1+py+vph);
+                            xtraverts += 4;
                         }
                         else loopj(3) switch(j)
                         {
