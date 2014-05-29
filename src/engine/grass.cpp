@@ -36,7 +36,7 @@ VARFN(IDF_PERSIST, grasswedges, numgrasswedges, 8, 8, 1024, resetgrasswedges(num
 struct grassvert
 {
     vec pos;
-    uchar color[4];
+    bvec4 color;
     float u, v, lmu, lmv;
 };
 
@@ -203,12 +203,12 @@ static void gengrassquads(grassgroup *&group, const grasswedge &w, const grasstr
               lm2u = g.tcu.dot(p2), lm2v = g.tcv.dot(p2),
               fade = dist - t > taperdist ? (grassdist - (dist - t))*taperscale : 1,
               height = gh * fade;
-        uchar color[4] = { gcol.x, gcol.y, gcol.z, uchar(fade*blend*255) };
+        bvec4 color(gcol, uchar(fade*blend*255));
 
         #define GRASSVERT(n, tcv, modify) { \
             grassvert &gv = grassverts.add(); \
             gv.pos = p##n; \
-            memcpy(gv.color, color, sizeof(color)); \
+            gv.color = color; \
             gv.u = tc##n; gv.v = tcv; \
             gv.lmu = lm##n##u; gv.lmv = lm##n##v; \
             modify; \
@@ -296,7 +296,7 @@ void rendergrass()
     glVertexPointer(3, GL_FLOAT, sizeof(grassvert), grassverts[0].pos.v);
 
     glEnableClientState(GL_COLOR_ARRAY);
-    glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(grassvert), grassverts[0].color);
+    glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(grassvert), grassverts[0].color.v);
 
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     glTexCoordPointer(2, GL_FLOAT, sizeof(grassvert), &grassverts[0].u);

@@ -24,7 +24,7 @@ struct flare
 {
     vec o, center;
     float size;
-    uchar color[3];
+    bvec color;
     int sparkle; // 0 = off, 1 = sparkles and flares, 2 = only sparkles
 };
 
@@ -170,13 +170,13 @@ struct flarerenderer : partrenderer
         glBegin(GL_QUADS);
         loopi(numflares)
         {
-            flare *f = flares+i;
+            const flare &f = flares[i];
             float blend = flareblend;
-            vec center = f->center, axis = vec(f->o).sub(center);
+            vec center = f.center, axis = vec(f.o).sub(center);
             if(flareadjust > 0)
             {
                 float yaw, pitch;
-                vec dir = vec(f->o).sub(camera1->o).normalize();
+                vec dir = vec(f.o).sub(camera1->o).normalize();
                 vectoyawpitch(dir, yaw, pitch);
                 yaw -= camera1->yaw;
                 while(yaw < -180.0f) yaw += 360.0f;
@@ -189,24 +189,24 @@ struct flarerenderer : partrenderer
                 if(pitch < 0) pitch = -pitch;
                 blend *= 1-min(pitch/(fovy*0.5f)*flareadjust, 1.f);
             }
-            uchar color[4] = {f->color[0], f->color[1], f->color[2], 255};
-            loopj(f->sparkle ? (f->sparkle != 2 ? 12 : 3) : 9)
+            bvec4 color(f.color, 255);
+            loopj(f.sparkle ? (f.sparkle != 2 ? 12 : 3) : 9)
             {
-                int q = f->sparkle != 2 ? j : j+9;
+                int q = f.sparkle != 2 ? j : j+9;
                 const flaretype &ft = flaretypes[q];
                 vec o = vec(axis).mul(ft.loc).add(center);
-                float sz = ft.scale*f->size;
+                float sz = ft.scale*f.size;
                 int tex = ft.type;
                 if(ft.type < 0) //sparkles - always done last
                 {
                     tex = 6+((shinetime+1)%10);
-                    color[0] = 0;
-                    color[1] = 0;
-                    color[2] = 0;
-                    color[-ft.type-1] = f->color[-ft.type-1]; //only want a single channel
+                    color.r = 0;
+                    color.g = 0;
+                    color.b = 0;
+                    color[-ft.type-1] = f.color[-ft.type-1]; //only want a single channel
                 }
-                color[3] = uchar(ceilf(ft.alpha*blend));
-                glColor4ubv(color);
+                color.a = uchar(ceilf(ft.alpha*blend));
+                glColor4ubv(color.v);
                 const float tsz = 0.25f; //flares are aranged in 4x4 grid
                 float tx = tsz*(tex&0x03);
                 float ty = tsz*((tex>>2)&0x03);

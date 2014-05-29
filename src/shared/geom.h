@@ -1101,6 +1101,8 @@ static inline uint hthash(const ivec &k)
     return k.x^k.y^k.z;
 }
 
+struct bvec4;
+
 struct bvec
 {
     union
@@ -1114,6 +1116,7 @@ struct bvec
     bvec(uchar x, uchar y, uchar z) : x(x), y(y), z(z) {}
     bvec(const vec &v) : x((uchar)((v.x+1)*255/2)), y((uchar)((v.y+1)*255/2)), z((uchar)((v.z+1)*255/2)) {}
     explicit bvec(int color) : x((color>>16)&0xFF), y((color>>8)&0xFF), z(color&0xFF) {}
+    explicit bvec(const bvec4 &v);
 
     uchar &operator[](int i)       { return v[i]; }
     uchar  operator[](int i) const { return v[i]; }
@@ -1152,12 +1155,51 @@ struct bvec
 
     void lerp(const bvec &a, const bvec &b, float t) { x = uchar(a.x + (b.x-a.x)*t); y = uchar(a.y + (b.y-a.y)*t); z = uchar(a.z + (b.z-a.z)*t); }
 
-    void flip() { x -= 128; y -= 128; z -= 128; }
+    void flip() { x ^= 0x80; y ^= 0x80; z ^= 0x80; }
+
+    void scale(int k, int d) { x = uchar((x*k)/d); y = uchar((y*k)/d); z = uchar((z*k)/d); }
 
     static bvec fromcolor(const vec &v) { return bvec(uchar(v.r*255.0f), uchar(v.g*255.0f), uchar(v.b*255.0f)); }
     vec tocolor() const { return vec(r*(1.0f/255.0f), g*(1.0f/255.0f), b*(1.0f/255.0f)); }
     int tohexcolor() { return ((::clamp(int(r), 0, 255))<<16)|((::clamp(int(g), 0, 255))<<8)|(::clamp(int(b), 0, 255)); }
 };
+
+struct bvec4
+{
+    union
+    {
+        struct { uchar x, y, z, w; };
+        struct { uchar r, g, b, a; };
+        uchar v[4];
+        uint mask;
+    };
+
+    bvec4() {}
+    bvec4(uchar x, uchar y, uchar z, uchar w = 0) : x(x), y(y), z(z), w(w) {}
+    bvec4(const bvec &v, uchar w = 0) : x(v.x), y(v.y), z(v.z), w(w) {}
+
+    uchar &operator[](int i)       { return v[i]; }
+    uchar  operator[](int i) const { return v[i]; }
+
+    bool operator==(const bvec4 &v) const { return mask==v.mask; }
+    bool operator!=(const bvec4 &v) const { return mask!=v.mask; }
+
+    bool iszero() const { return mask==0; }
+
+    vec tovec() const { return vec(x*(2.0f/255.0f)-1.0f, y*(2.0f/255.0f)-1.0f, z*(2.0f/255.0f)-1.0f); }
+
+    void lerp(const bvec4 &a, const bvec4 &b, float t)
+    {
+        x = uchar(a.x + (b.x-a.x)*t);
+        y = uchar(a.y + (b.y-a.y)*t);
+        z = uchar(a.z + (b.z-a.z)*t);
+        w = a.w;
+    }
+
+    void flip() { mask ^= 0x80808080; }
+};
+
+inline bvec::bvec(const bvec4 &v) : x(v.x), y(v.y), z(v.z) {}
 
 struct glmatrixf
 {

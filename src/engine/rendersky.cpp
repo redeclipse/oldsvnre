@@ -203,18 +203,15 @@ void draw_env_overlay(int w, float height, int subdiv, float fade, float scale, 
 static struct domevert
 {
     vec pos;
-    uchar color[4];
+    bvec4 color;
 
     domevert() {}
-    domevert(const vec &pos, const bvec &fcolor, float alpha) : pos(pos)
+    domevert(const vec &pos, const bvec &fcolor, float alpha) : pos(pos), color(fcolor, uchar(alpha*255))
     {
-        memcpy(color, fcolor.v, 3);
-        color[3] = uchar(alpha*255);
     }
-    domevert(const domevert &v0, const domevert &v1) : pos(vec(v0.pos).add(v1.pos).normalize())
+    domevert(const domevert &v0, const domevert &v1) : pos(vec(v0.pos).add(v1.pos).normalize()), color(v0.color)
     {
-        memcpy(color, v0.color, 4);
-        if(v0.pos.z != v1.pos.z) color[3] += uchar((v1.color[3] - v0.color[3]) * (pos.z - v0.pos.z) / (v1.pos.z - v0.pos.z));
+        if(v0.pos.z != v1.pos.z) color.a += uchar((v1.color.a - v0.color.a) * (pos.z - v0.pos.z) / (v1.pos.z - v0.pos.z));
     }
 } *domeverts = NULL;
 static GLushort *domeindices = NULL;
