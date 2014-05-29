@@ -72,7 +72,6 @@ namespace projs
         {
             if(v == target && !selfdamage) nodamage++;
             else if(physics::isghost(target, v)) nodamage++;
-            if(m_expert(game::gamemode, game::mutators) && !hithead(flags)) nodamage++;
         }
 
         if(nodamage || !hithurts(flags))
@@ -240,12 +239,12 @@ namespace projs
                 {
                     if(dist <= radius)
                     {
-                        hitpush(e, proj, (m_expert(game::gamemode, game::mutators) ? HIT_WHIPLASH : HIT_TORSO)|flags, radius, dist, proj.curscale);
+                        hitpush(e, proj, HIT_TORSO|flags, radius, dist, proj.curscale);
                         radiated = true;
                     }
                     else if(push && dist <= maxdist)
                     {
-                        hitpush(e, proj, (m_expert(game::gamemode, game::mutators) ? HIT_WHIPLASH : HIT_TORSO)|HIT_WAVE, maxdist, dist, proj.curscale);
+                        hitpush(e, proj, HIT_TORSO|HIT_WAVE, maxdist, dist, proj.curscale);
                         radiated = true;
                     }
                 }
@@ -2297,7 +2296,7 @@ namespace projs
                             {
                                 dir.div(mag);
                                 float blocked = tracecollide(&proj, from, dir, mag, RAY_CLIPMAT|RAY_ALPHAPOLY, true);
-                                if(blocked >= 0 && hitplayer)// TODO: add this: && hitplayer->state == CS_ALIVE && physics::issolid(hitplayer, &proj, true, false))
+                                if(blocked >= 0 && hitplayer && hitplayer->state == CS_ALIVE && physics::issolid(hitplayer, &proj, true, false))
                                 {
                                     proj.beenused = 1;
                                     proj.lifetime = min(proj.lifetime, WF(WK(proj.flags), proj.weap, proxtime, WS(proj.flags)));

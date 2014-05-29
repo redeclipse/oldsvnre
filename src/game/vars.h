@@ -84,11 +84,6 @@ GSVAR(IDF_ADMIN, defaultmap, "");
 GVAR(IDF_ADMIN, defaultmode, G_START, G_DEATHMATCH, G_MAX-1);
 GVAR(IDF_ADMIN, defaultmuts, 0, 0, G_M_ALL);
 
-#ifdef CAMPAIGN
-GVAR(IDF_ADMIN, campaignplayers, 1, 4, MAXPLAYERS);
-GSVAR(IDF_ADMIN, campaignmaps, "");
-#endif
-
 GSVAR(IDF_ADMIN, allowmaps, "untitled");
 
 GSVAR(IDF_ADMIN, mainmaps, "untitled");
@@ -102,16 +97,16 @@ GSVAR(IDF_ADMIN, gauntletmaps, "untitled");
 
 GSVAR(IDF_ADMIN, multimaps, "untitled"); // applies to modes which *require* multi spawns (ctf/bb)
 GSVAR(IDF_ADMIN, duelmaps, "untitled");
-GSVAR(IDF_ADMIN, jetpackmaps, "untitled");
 
 GSVAR(IDF_ADMIN, smallmaps, "untitled");
 GSVAR(IDF_ADMIN, mediummaps, "untitled");
 GSVAR(IDF_ADMIN, largemaps, "untitled");
 
-GVAR(IDF_ADMIN, modelock, 0, PRIV_OPERATOR, PRIV_CREATOR); // TODO: add forcemuts var
+GVAR(IDF_ADMIN, modelock, 0, PRIV_OPERATOR, PRIV_CREATOR);
 GVAR(IDF_ADMIN, modelocktype, 0, 2, 2); // 0 = off, 1 = only lock level can change modes, 2 = lock level can set limited modes
 GVAR(IDF_ADMIN, modelockfilter, 0, G_LIMIT, G_ALL);
 GVAR(IDF_ADMIN, mutslockfilter, 0, G_M_FILTER, G_M_ALL);
+GVAR(IDF_ADMIN, mutslockforce, 0, 0, G_M_ALL);
 
 GVAR(IDF_ADMIN, mapsfilter, 0, 1, 2); // 0 = off, 1 = filter based on mutators, 2 = also filter based on players
 GVAR(IDF_ADMIN, mapslock, 0, PRIV_OPERATOR, PRIV_CREATOR);
@@ -180,16 +175,11 @@ GVAR(0, balancedelay, 0, 10000, 30000); // before mapbalance forces
 GVAR(0, balancenospawn, 0, 1, 1); // prevent respawning when waiting to balance
 GVAR(0, balanceduke, 0, 0, 1); // enable in duel/survivor
 
-#ifdef CAMPAIGN
-GVAR(0, campaignghost, 0, 0, 1); // 0 = all players are solid, 1 = all players are ghosts
-#endif
 GVAR(0, trialghost, 0, 1, 1); // 0 = all players are solid, 1 = all players are ghosts
 GVAR(0, gauntletghost, 0, 2, 2); // 0 = all players are solid, 1 = all players are ghosts, 2 = team-mates are ghosts
 
 GFVAR(0, maxhealth, 0, 1.5f, FVAR_MAX);
 GFVAR(0, maxhealthvampire, 0, 3.0f, FVAR_MAX);
-GVAR(0, spawnhealth, 1, 100, VAR_MAX);
-GVAR(0, spawnarmour, 0, 0, VAR_MAX);
 
 GFVAR(0, actorscale, FVAR_NONZERO, 1, FVAR_MAX);
 GFVAR(0, maxresizescale, 1, 2, FVAR_MAX);
@@ -214,7 +204,7 @@ GVAR(0, regentime, 0, 1000, VAR_MAX); // regen this often when regenerating norm
 GVAR(0, regenhealth, 0, 5, VAR_MAX); // regen this amount each regen
 GVAR(0, regendecay, 0, 3, VAR_MAX); // if over maxhealth, decay this amount each regen
 
-GVAR(0, kamikaze, 0, 1, 3); // 0 = never, 1 = holding grenade, 2 = have grenade, 3 = always (TODO: move to weapons)
+GVAR(0, kamikaze, 0, 1, 3); // 0 = never, 1 = holding grenade, 2 = have grenade, 3 = always
 GVAR(0, itemsallowed, 0, 2, 2); // 0 = never, 1 = all but limited, 2 = always
 GVAR(0, itemspawntime, 1, 15000, VAR_MAX); // when items respawn
 GVAR(0, itemspawndelay, 0, 1000, VAR_MAX); // after map start items first spawn
@@ -381,16 +371,11 @@ GFVAR(0, enemystrength, FVAR_NONZERO, 1, FVAR_MAX); // scale enemy health values
 GFVAR(0, movespeed, FVAR_NONZERO, 100, FVAR_MAX); // speed
 GFVAR(0, movecrawl, 0, 0.6f, FVAR_MAX); // crawl modifier
 GFVAR(0, movepacing, FVAR_NONZERO, 1.6f, FVAR_MAX); // pacing modifier
-GFVAR(0, movejet, FVAR_NONZERO, 1.6f, FVAR_MAX); // jetpack modifier
 GFVAR(0, movestraight, FVAR_NONZERO, 1.2f, FVAR_MAX); // non-strafe modifier
 GFVAR(0, movestrafe, FVAR_NONZERO, 1, FVAR_MAX); // strafe modifier
 GFVAR(0, moveinair, FVAR_NONZERO, 0.9f, FVAR_MAX); // in-air modifier
 GFVAR(0, movestepup, FVAR_NONZERO, 0.95f, FVAR_MAX); // step-up modifier
 GFVAR(0, movestepdown, FVAR_NONZERO, 1.15f, FVAR_MAX); // step-down modifier
-
-GVAR(0, jetdelay, 0, 250, VAR_MAX); // minimum time between jetpack
-GFVAR(0, jetheight, 0, 0, FVAR_MAX); // jetpack maximum height off ground
-GFVAR(0, jetdecay, 1, 15, FVAR_MAX); // decay rate of one unit per this many ms
 
 GVAR(0, jumpallowed, 0, 1, 1); // if jumping is allowed
 GFVAR(0, jumpspeed, FVAR_NONZERO, 110, FVAR_MAX); // extra velocity to add when jumping
@@ -424,22 +409,19 @@ GVAR(0, impulsekickdelay, 0, 350, VAR_MAX); // minimum time between wall kicks/c
 GFVAR(0, impulsevaultmin, FVAR_NONZERO, 0.25f, FVAR_MAX); // minimum percentage of height for vault
 GFVAR(0, impulsevaultmax, FVAR_NONZERO, 1.f, FVAR_MAX); // maximum percentage of height for vault
 
-GVAR(0, impulsemeter, 0, 30000, VAR_MAX); // impulse dash length; 0 = unlimited, anything else = timer
-GVAR(0, impulsecost, 0, 5000, VAR_MAX); // cost of impulse move
+GVAR(0, impulsemeter, 1, 30000, VAR_MAX); // impulse dash length; timer
+GVAR(0, impulsecost, 1, 5000, VAR_MAX); // cost of impulse move
 GVAR(0, impulsecostrelax, 0, IM_A_RELAX, IM_A_ALL); // whether the cost of an impulse move is unimportant; bit: 0 = off, 1 = dash, 2 = boost, 4 = pacing, 8 = parkour
 GVAR(0, impulsecostscale, 0, 0, 1); // whether the cost scales depend on the amount the impulse scales
 GVAR(0, impulseskate, 0, 1000, VAR_MAX); // length of time a run along a wall can last
 GFVAR(0, impulsepacing, 0, 0, FVAR_MAX); // pacing impulse meter depletion
-GFVAR(0, impulsejet, 0, 0.5f, FVAR_MAX); // jetpack impulse meter depletion
 GFVAR(0, impulseregen, 0, 5, FVAR_MAX); // impulse regen multiplier
 GFVAR(0, impulseregencrouch, 0, 2.5f, FVAR_MAX); // impulse regen crouch modifier
 GFVAR(0, impulseregenpacing, 0, 0.75f, FVAR_MAX); // impulse regen pacing modifier
-GFVAR(0, impulseregenjet, 0, 2, FVAR_MAX); // impulse regen jetpack modifier
 GFVAR(0, impulseregenmove, 0, 1, FVAR_MAX); // impulse regen moving modifier
 GFVAR(0, impulseregeninair, 0, 0.75f, FVAR_MAX); // impulse regen in-air modifier
 GFVAR(0, impulseregenslide, 0, 0, FVAR_MAX); // impulse regen sliding modifier
 GVAR(0, impulseregendelay, 0, 350, VAR_MAX); // delay before impulse regens
-GVAR(0, impulseregenjetdelay, -1, -1, VAR_MAX); // delay before impulse regens after jetting, -1 = must touch ground
 
 GFVAR(0, stillspread, 0, 0, FVAR_MAX);
 GFVAR(0, movespread, 0, 1.f, FVAR_MAX);

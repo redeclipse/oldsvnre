@@ -1717,7 +1717,7 @@ namespace server
             }
             case HEALTH: case ARMOUR:
             {
-                if(m_insta(gamemode, mutators) || (sents[i].attrs[3] && sents[i].attrs[3] != triggerid) || !m_check(sents[i].attrs[1], sents[i].attrs[2], gamemode, mutators)) return false;
+                if(!m_tourney(gamemode, mutators) || (sents[i].attrs[3] && sents[i].attrs[3] != triggerid) || !m_check(sents[i].attrs[1], sents[i].attrs[2], gamemode, mutators)) return false;
                 break;
             }
             default: break;
@@ -1758,11 +1758,7 @@ namespace server
         {
             if(sents[i].type == ACTOR && sents[i].attrs[0] >= 0 && sents[i].attrs[0] < A_TOTAL && (sents[i].attrs[5] == triggerid || !sents[i].attrs[5]) && m_check(sents[i].attrs[3], sents[i].attrs[4], gamemode, mutators))
             {
-#ifdef CAMPAIGN
-                sents[i].millis += m_campaign(gamemode) ? 50 : G(enemyspawndelay);
-#else
                 sents[i].millis += G(enemyspawndelay);
-#endif
                 switch(G(enemyspawnstyle) == 3 ? rnd(2)+1 : G(enemyspawnstyle))
                 {
                     case 1: enemies.add(i); break;
@@ -1795,11 +1791,7 @@ namespace server
         {
             sortrandomly(enemies);
             loopv(enemies)
-#ifdef CAMPAIGN
-                sents[enemies[i]].millis += (m_campaign(gamemode) ? 50 : G(enemyspawndelay))*i;
-#else
                 sents[enemies[i]].millis += G(enemyspawndelay)*i;
-#endif
         }
     }
 
@@ -2403,6 +2395,7 @@ namespace server
     void vote(const char *reqmap, int &reqmode, int &reqmuts, int sender)
     {
         clientinfo *ci = (clientinfo *)getinfo(sender);
+        reqmuts |= G(mutslockforce);
         modecheck(reqmode, reqmuts);
         if(!ci || !m_game(reqmode) || !reqmap || !*reqmap) return;
         if(m_local(reqmode) && !ci->local)
@@ -3576,7 +3569,6 @@ namespace server
         {
             if(v == m && !G(selfdamage)) nodamage++;
             else if(isghost(m, v)) nodamage++;
-            if(m_expert(gamemode, mutators) && !hithead(flags)) nodamage++;
         }
 
         if(isweap(weap) && (WF(WK(flags), weap, residualundo, WS(flags))&WR(BURN)) && m->state.burning(gamemillis, G(burntime)))
@@ -3631,12 +3623,7 @@ namespace server
             int fragvalue = 1;
             if(m != v && (!m_team(gamemode, mutators) || m->team != v->team)) v->state.frags++;
             else fragvalue = -fragvalue;
-#ifdef CAMPAIGN
-            bool isai = m->state.actortype >= A_ENEMY && !m_campaign(gamemode),
-#else
-            bool isai = m->state.actortype >= A_ENEMY,
-#endif
-                 isteamkill = false;
+            bool isai = m->state.actortype >= A_ENEMY, isteamkill = false;
             int pointvalue = (smode && !isai ? smode->points(m, v) : fragvalue), style = FRAG_NONE;
             pointvalue *= isai ? G(enemybonus) : G(fragbonus);
             if(realdamage >= (realflags&HIT_EXPLODE ? m_health(gamemode, mutators, m->state.model)/2 : m_health(gamemode, mutators, m->state.model)))
@@ -3654,16 +3641,11 @@ namespace server
             }
             else if(v != m && v->state.actortype < A_ENEMY)
             {
-#ifdef CAMPAIGN
-                if(!m_campaign(gamemode))
-#endif
+                if(!firstblood && !m_duel(gamemode, mutators) && ((v->state.actortype == A_PLAYER && m->state.actortype < A_ENEMY) || (v->state.actortype < A_ENEMY && m->state.actortype == A_PLAYER)))
                 {
-                    if(!firstblood && !m_duel(gamemode, mutators) && ((v->state.actortype == A_PLAYER && m->state.actortype < A_ENEMY) || (v->state.actortype < A_ENEMY && m->state.actortype == A_PLAYER)))
-                    {
-                        firstblood = true;
-                        style |= FRAG_FIRSTBLOOD;
-                        pointvalue += G(firstbloodpoints);
-                    }
+                    firstblood = true;
+                    style |= FRAG_FIRSTBLOOD;
+                    pointvalue += G(firstbloodpoints);
                 }
                 if(flags&HIT_HEAD) // NOT HZONE
                 {
@@ -4263,19 +4245,6 @@ namespace server
 
     void waiting(clientinfo *ci, int drop, bool doteam, bool exclude)
     {
-#ifdef CAMPAIGN
-        if(m_campaign(gamemode) && ci->state.cpnodes.empty())
-        {
-            int maxnodes = -1;
-            loopv(clients)
-            {
-                clientinfo *oi = clients[i];
-                if(oi->clientnum >= 0 && oi->name[0] && oi->state.actortype < A_ENEMY && (!clients.inrange(maxnodes) || oi->state.cpnodes.length() > clients[maxnodes]->state.cpnodes.length()))
-                    maxnodes = i;
-            }
-            if(clients.inrange(maxnodes)) loopv(clients[maxnodes]->state.cpnodes) ci->state.cpnodes.add(clients[maxnodes]->state.cpnodes[i]);
-        }
-#endif
         if(ci->state.state == CS_ALIVE)
         {
             if(drop) dropitems(ci, drop);
@@ -4304,24 +4273,19 @@ namespace server
 
     void checkents()
     {
-        bool thresh = m_fight(gamemode) && !m_noitems(gamemode, mutators) && !m_special(gamemode, mutators) && G(itemthreshold) > 0;
-        int items[MAXENTTYPES], lowest[MAXENTTYPES], sweap = m_weapon(gamemode, mutators), plr = 0;
-        memset(items, 0, sizeof(items));
-        memset(lowest, -1, sizeof(lowest));
+        bool thresh = m_fight(gamemode) && !m_noitems(gamemode, mutators) && m_classic(gamemode, mutators) && !m_tourney(gamemode, mutators) && G(itemthreshold) > 0;
+        int weapons = 0, lowest = -1, sweap = m_weapon(gamemode, mutators), plr = 0;
         if(thresh)
         {
             loopv(clients) if(clients[i]->clientnum >= 0 && clients[i]->online && clients[i]->state.state == CS_ALIVE && clients[i]->state.actortype < A_ENEMY)
                 plr++;
-            loopv(sents) if(enttype[sents[i].type].usetype == EU_ITEM && hasitem(i))
+            loopv(sents) if(enttype[sents[i].type].usetype == EU_ITEM && sents[i].type == WEAPON && hasitem(i))
             {
-                if(sents[i].type == WEAPON)
-                {
-                    int attr = w_attr(gamemode, mutators, sents[i].attrs[0], sweap);
-                    if(attr < W_OFFSET || attr >= W_ITEM) continue;
-                }
-                if(finditem(i, true, true)) items[sents[i].type]++;
-                else if(!sents.inrange(lowest[sents[i].type]) || sents[i].millis < sents[lowest[sents[i].type]].millis)
-                    lowest[sents[i].type] = i;
+                int attr = w_attr(gamemode, mutators, sents[i].attrs[0], sweap);
+                if(attr < W_OFFSET || attr >= W_ITEM) continue;
+                if(finditem(i, true, true)) weapons++;
+                else if(!sents.inrange(lowest) || sents[i].millis < sents[lowest].millis)
+                    lowest = i;
             }
         }
         loopv(sents) switch(sents[i].type)
@@ -4349,15 +4313,15 @@ namespace server
                 if(enttype[sents[i].type].usetype == EU_ITEM && (allowed || sents[i].spawned))
                 {
                     bool found = finditem(i, true, true);
-                    if(allowed && thresh && i == lowest[sents[i].type] && (gamemillis-sents[lowest[sents[i].type]].last > G(itemspawndelay)))
+                    if(sents[i].type == WEAPON && allowed && thresh && i == lowest && (gamemillis-sents[lowest].last > G(itemspawndelay)))
                     {
-                        float dist = items[sents[i].type]/float(plr*G(maxcarry));
+                        float dist = weapons/float(plr*G(maxcarry));
                         if(dist < G(itemthreshold)) found = false;
                     }
                     if((!found && !sents[i].spawned) || (!allowed && sents[i].spawned))
                     {
                         setspawn(i, allowed, true, true);
-                        items[sents[i].type]++;
+                        if(sents[i].type == WEAPON) weapons++;
                     }
                 }
                 break;
@@ -5516,9 +5480,6 @@ namespace server
                                 {
                                     if(sents[ent].spawned) break;
                                     sents[ent].spawned = true;
-#ifdef CAMPAIGN
-                                    if(m_campaign(gamemode)) startintermission();
-#endif
                                 }
                             }
                             if(commit) sendf(-1, 1, "ri3x", N_TRIGGER, ent, sents[ent].spawned ? 1 : 0, cp->clientnum);
@@ -5584,7 +5545,7 @@ namespace server
                     loopv(clients)
                     {
                         clientinfo *t = clients[i];
-                        if(t == cp || !allowbroadcast(t->clientnum) || (flags&SAY_TEAM && cp->team != t->team)) continue;
+                        if(t != cp && (!allowbroadcast(t->clientnum) || (flags&SAY_TEAM && cp->team != t->team))) continue;
                         sendf(t->clientnum, 1, "ri3s", N_TEXT, cp->clientnum, flags, output);
                     }
                     defformatstring(m)("%s", colourname(cp));

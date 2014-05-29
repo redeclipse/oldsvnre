@@ -4,7 +4,7 @@
 #include "engine.h"
 
 #define GAMEID              "fps"
-#define GAMEVERSION         220
+#define GAMEVERSION         221
 
 #define DEMO_MAGIC          "RED_ECLIPSE_DEMO"
 #define DEMO_VERSION        GAMEVERSION
@@ -20,7 +20,7 @@
 
 enum
 {
-    S_JUMP = S_GAMESPECIFIC, S_IMPULSE, S_JET, S_LAND, S_PAIN, S_DEATH,
+    S_JUMP = S_GAMESPECIFIC, S_IMPULSE, S_LAND, S_PAIN, S_DEATH,
     S_SPLASH1, S_SPLASH2, S_UNDERWATER, S_SPLOSH, S_DEBRIS, S_BURNLAVA, S_BURNING,
     S_EXTINGUISH, S_SHELL, S_ITEMUSE, S_ITEMSPAWN,
     S_REGEN, S_DAMAGE, S_DAMAGE2, S_DAMAGE3, S_DAMAGE4, S_DAMAGE5, S_DAMAGE6, S_DAMAGE7, S_DAMAGE8,
@@ -208,7 +208,6 @@ enum
     ANIM_JUMP_FORWARD, ANIM_JUMP_BACKWARD, ANIM_JUMP_LEFT, ANIM_JUMP_RIGHT, ANIM_JUMP,
     ANIM_IMPULSE_FORWARD, ANIM_IMPULSE_BACKWARD, ANIM_IMPULSE_LEFT, ANIM_IMPULSE_RIGHT,
     ANIM_DASH_FORWARD, ANIM_DASH_BACKWARD, ANIM_DASH_LEFT, ANIM_DASH_RIGHT, ANIM_DASH_UP,
-    ANIM_JET_FORWARD, ANIM_JET_BACKWARD, ANIM_JET_LEFT, ANIM_JET_RIGHT, ANIM_JET_UP,
     ANIM_WALL_RUN_LEFT, ANIM_WALL_RUN_RIGHT, ANIM_WALL_JUMP, ANIM_POWERSLIDE, ANIM_FLYKICK,
     ANIM_SINK, ANIM_EDIT, ANIM_WIN, ANIM_LOSE,
     ANIM_CROUCH, ANIM_CRAWL_FORWARD, ANIM_CRAWL_BACKWARD, ANIM_CRAWL_LEFT, ANIM_CRAWL_RIGHT,
@@ -368,7 +367,7 @@ enum { SINFO_NONE = 0, SINFO_STATUS, SINFO_NAME, SINFO_PORT, SINFO_QPORT, SINFO_
 enum { SSTAT_OPEN = 0, SSTAT_LOCKED, SSTAT_PRIVATE, SSTAT_FULL, SSTAT_UNKNOWN, SSTAT_MAX };
 
 enum { AC_PRIMARY = 0, AC_SECONDARY, AC_RELOAD, AC_USE, AC_JUMP, AC_PACING, AC_CROUCH, AC_SPECIAL, AC_DROP, AC_AFFINITY, AC_TOTAL, AC_DASH = AC_TOTAL, AC_MAX };
-enum { IM_METER = 0, IM_TYPE, IM_TIME, IM_REGEN, IM_COUNT, IM_COLLECT, IM_COLPACE, IM_COLJET, IM_SLIP, IM_SLIDE, IM_JUMP, IM_JET, IM_MAX };
+enum { IM_METER = 0, IM_TYPE, IM_TIME, IM_REGEN, IM_COUNT, IM_COLLECT, IM_COLPACE, IM_SLIP, IM_SLIDE, IM_JUMP, IM_MAX };
 enum { IM_A_NONE = 0, IM_A_DASH = 1<<0, IM_A_BOOST = 1<<1, IM_A_SPRINT = 1<<2, IM_A_PARKOUR = 1<<3, IM_A_ALL = IM_A_DASH|IM_A_BOOST|IM_A_SPRINT|IM_A_PARKOUR, IM_A_RELAX = IM_A_PARKOUR };
 enum { IM_T_NONE = 0, IM_T_BOOST, IM_T_DASH, IM_T_MELEE, IM_T_KICK, IM_T_VAULT, IM_T_SKATE, IM_T_MAX, IM_T_WALL = IM_T_MELEE };
 enum { SPHY_NONE = 0, SPHY_JUMP, SPHY_BOOST, SPHY_DASH, SPHY_MELEE, SPHY_KICK, SPHY_VAULT, SPHY_SKATE, SPHY_POWER, SPHY_EXTINGUISH, SPHY_BUFF, SPHY_MAX, SPHY_SERVER = SPHY_BUFF };
@@ -643,6 +642,8 @@ struct gamestate
                             return true;
                         break;
                     }
+                    case HEALTH: return health < PLAYER(model, health);
+                    case ARMOUR: return armour < PLAYER(model, armour);
                     default: return true;
                 }
                 break;
@@ -705,7 +706,7 @@ struct gamestate
     void respawn(int millis, int heal = 0, int armr = -1)
     {
         health = heal ? heal : 100;
-        armour = armr >= 0 ? armr : 100;
+        armour = armr >= 0 ? armr : 0;
         lastspawn = millis;
         clearstate();
         weapreset(true);
@@ -872,7 +873,6 @@ const char * const animnames[] =
     "jump forward", "jump backward", "jump left", "jump right", "jump",
     "impulse forward", "impulse backward", "impulse left", "impulse right",
     "dash forward", "dash backward", "dash left", "dash right", "dash up",
-    "jet forward", "jet backward", "jet left", "jet right", "jet up",
     "wall run left", "wall run right", "wall jump", "power slide", "fly kick",
     "sink", "edit", "win", "lose",
     "crouch", "crawl forward", "crawl backward", "crawl left", "crawl right",
@@ -911,7 +911,7 @@ struct gameent : dynent, gamestate
 {
     editinfo *edit; ai::aiinfo *ai;
     int team, clientnum, privilege, projid, lastnode, checkpoint, cplast, respawned, suicided, lastupdate, lastpredict, plag, ping, lastflag, totaldamage,
-        actiontime[AC_MAX], impulse[IM_MAX], smoothmillis, turnmillis, turnside, aschan, cschan, vschan, wschan, pschan, fschan, jschan, sschan[2],
+        actiontime[AC_MAX], impulse[IM_MAX], smoothmillis, turnmillis, turnside, aschan, cschan, vschan, wschan, pschan, fschan, sschan[2],
         lasthit, lastteamhit, lastkill, lastattacker, lastpoints, quake, spree, lastfoot;
     float deltayaw, deltapitch, newyaw, newpitch, turnyaw, turnroll;
     vec head, torso, muzzle, origin, eject, waist, jet[3], legs, hrad, trad, lrad, toe[2];
@@ -996,9 +996,12 @@ struct gameent : dynent, gamestate
         if(issound(wschan)) removesound(wschan);
         if(issound(pschan)) removesound(pschan);
         if(issound(fschan)) removesound(fschan);
-        if(issound(jschan)) removesound(jschan);
-        loopi(2) if(issound(sschan[i])) removesound(sschan[i]);
-        aschan = cschan = vschan = wschan = pschan = fschan = jschan = sschan[0] = sschan[1] = -1;
+        aschan = cschan = vschan = wschan = pschan = fschan = -1;
+        loopi(2) if(issound(sschan[i]))
+        {
+            removesound(sschan[i]);
+            sschan[i] = -1;
+        }
     }
 
     void stopmoving(bool full)
@@ -1246,7 +1249,7 @@ struct gameent : dynent, gamestate
 
     void resetjump()
     {
-        airmillis = turnside = impulse[IM_COUNT] = impulse[IM_TYPE] = impulse[IM_JUMP] = impulse[IM_JET] = 0;
+        airmillis = turnside = impulse[IM_COUNT] = impulse[IM_TYPE] = impulse[IM_JUMP] = 0;
     }
 
     void resetair()
@@ -1503,11 +1506,9 @@ namespace physics
     extern bool dropaffinity(gameent *d);
     extern bool secondaryweap(gameent *d, bool zoom = false);
     extern bool allowimpulse(physent *d, int level = 0);
-    extern bool jetpack(physent *d);
     extern bool sliding(physent *d, bool power = false);
     extern bool pacing(physent *d, bool turn = true);
     extern bool canimpulse(physent *d, int level = 0, bool kick = false);
-    extern bool canjet(physent *d);
     extern bool movecamera(physent *pl, const vec &dir, float dist, float stepdist);
     extern void smoothplayer(gameent *d, int res, bool local);
     extern void update();

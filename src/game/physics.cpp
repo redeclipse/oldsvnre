@@ -27,7 +27,7 @@ namespace physics
     bool allowimpulse(physent *d, int type)
     {
         if(d && gameent::is(d))
-            return jumpallowed && (type ? impulseallowed&type : impulseallowed != 0) && (impulsestyle || m_jet(game::gamemode, game::mutators));
+            return jumpallowed && (type ? impulseallowed&type : impulseallowed != 0) && (impulsestyle || PHYS(gravity) == 0);
         return false;
     }
 
@@ -40,17 +40,6 @@ namespace physics
             if(e->impulse[IM_TIME] && lastmillis-e->impulse[IM_TIME] <= impulsedelay) return false;
             if(impulsestyle <= 2 && e->impulse[IM_COUNT] >= impulsecount) return false;
             return true;
-        }
-        return false;
-    }
-
-    bool canjet(physent *d)
-    {
-        if((gameent::is(d)) && d->state == CS_ALIVE && m_jet(game::gamemode, game::mutators))
-        {
-            gameent *e = (gameent *)d;
-            if((!jumpallowed || e->physstate == PHYS_FALL) && !e->onladder && (!e->impulse[IM_TIME] || lastmillis-e->impulse[IM_TIME] > jetdelay))
-                return true;
         }
         return false;
     }
@@ -243,20 +232,6 @@ namespace physics
         return false;
     }
 
-    bool jetpack(physent *d)
-    {
-        if(canjet(d))
-        {
-            gameent *e = (gameent *)d;
-            if(e->action[AC_JUMP])
-            {
-                e->impulse[IM_JET] = lastmillis;
-                return true;
-            }
-        }
-        return false;
-    }
-
     bool pacing(physent *d, bool turn)
     {
         if(allowimpulse(d, IM_A_SPRINT) && (gameent::is(d)) && d->state == CS_ALIVE && movepacing > 0)
@@ -265,7 +240,7 @@ namespace physics
             if(!iscrouching(e) && (e != game::player1 || !W(e->weapselect, zooms) || !game::inzoom()))
             {
                 if(turn && e->turnside) return true;
-                if((e != game::player1 && !e->ai) || !impulsemeter || e->impulse[IM_METER] < impulsemeter)
+                if((e != game::player1 && !e->ai) || m_freestyle(game::gamemode, game::mutators) || e->impulse[IM_METER] < impulsemeter)
                 {
                     bool value = e->action[AC_PACING];
                     if(d == game::player1 && pacingstyle >= 3 && impulsepacing == 0) value = !value;
@@ -380,7 +355,6 @@ namespace physics
                     default: break;
                 }
                 if(pacing(e, false)) vel *= movepacing;
-                if(jetpack(e)) vel *= movejet;
                 if(carryaffinity(e))
                 {
                     if(m_capture(game::gamemode)) vel *= capturecarryspeed;
@@ -403,7 +377,7 @@ namespace physics
                 if(m_capture(game::gamemode)) scale *= capturecarryspeed;
                 else if(m_bomber(game::gamemode)) scale *= bombercarryspeed;
             }
-            if(impulsemeter)
+            if(!m_freestyle(game::gamemode, game::mutators))
             {
                 if(impulsecostscale) cost = int(cost*scale);
                 int diff = impulsemeter-e->impulse[IM_METER];
@@ -428,7 +402,7 @@ namespace physics
     bool movepitch(physent *d)
     {
         if(d->type == ENT_CAMERA || d->state == CS_EDITING || d->state == CS_SPECTATOR) return true;
-        if(d->onladder || (d->inliquid && jumpallowed && (liquidcheck(d) || d->pitch < 0.f)) || jetpack(d) || PHYS(gravity) == 0) return true;
+        if(d->onladder || (d->inliquid && jumpallowed && (liquidcheck(d) || d->pitch < 0.f)) || PHYS(gravity) == 0) return true;
         return false;
     }
 
@@ -779,17 +753,13 @@ namespace physics
     bool canregenimpulse(gameent *d)
     {
         if(impulseregen > 0 && (!impulseregendelay || lastmillis-d->impulse[IM_REGEN] >= impulseregendelay))
-        {
-            if(impulseregenjetdelay && d->impulse[IM_JET] && (impulseregenjetdelay < 0 || lastmillis-d->impulse[IM_JET] < impulseregenjetdelay))
-                return false;
             return true;
-        }
         return false;
     }
 
-    bool impulseplayer(gameent *d, bool &onfloor, bool &jetting, bool melee = false)
+    bool impulseplayer(gameent *d, bool &onfloor, bool melee = false)
     {
-        bool power = !melee && onfloor && !jetting && impulsemethod&1 && sliding(d, true) && d->action[AC_JUMP];
+        bool power = !melee && onfloor && impulsemethod&1 && sliding(d, true) && d->action[AC_JUMP];
         if(power || d->ai || impulseaction || melee)
         {
             bool dash = false, pulse = false;
@@ -830,7 +800,7 @@ namespace physics
                     d->vel = vec(dir).mul(force).add(keepvel);
                     if(power) d->vel.z += jumpvel(d, true);
                     d->doimpulse(cost, melee ? IM_T_MELEE : (dash ? IM_T_DASH : IM_T_BOOST), lastmillis);
-                    if(!m_jet(game::gamemode, game::mutators)) d->action[AC_JUMP] = false;
+                    d->action[AC_JUMP] = false;
                     if(power || pulse) onfloor = false;
                     client::addmsg(N_SPHY, "ri2", d->clientnum, melee ? SPHY_MELEE : (dash ? SPHY_DASH : SPHY_BOOST));
                     game::impulseeffect(d);
@@ -843,8 +813,8 @@ namespace physics
 
     void modifyinput(gameent *d, vec &m, bool wantsmove, int millis)
     {
-        bool onfloor = d->physstate >= PHYS_SLOPE || d->onladder || liquidcheck(d), jetting = jetpack(d);
-        if(impulsemeter)
+        bool onfloor = d->physstate >= PHYS_SLOPE || d->onladder || liquidcheck(d);
+        if(!m_freestyle(game::gamemode, game::mutators))
         {
             bool quickpace = pacing(d, false);
             if(quickpace && impulsepacing > 0)
@@ -862,28 +832,6 @@ namespace physics
                 }
                 else d->impulse[IM_COLPACE] += millis;
             }
-            if(jetting)
-            {
-                if(m_jet(game::gamemode, game::mutators))
-                {
-                    if(impulsejet > 0)
-                    {
-                        int timeslice = millis+d->impulse[IM_COLJET], len = int(timeslice*impulsejet);
-                        if(len > 0)
-                        {
-                            if(d->impulse[IM_METER]+len <= impulsemeter)
-                            {
-                                d->impulse[IM_METER] += len;
-                                d->impulse[IM_REGEN] = lastmillis;
-                                d->impulse[IM_COLJET] = 0;
-                            }
-                            else jetting = d->action[AC_JUMP] = false;
-                        }
-                        else d->impulse[IM_COLJET] += millis;
-                    }
-                }
-                else jetting = d->action[AC_JUMP] = false;
-            }
             if(d->impulse[IM_METER] > 0 && canregenimpulse(d))
             {
                 bool collect = true; // collect time until it is able to act upon it
@@ -894,7 +842,6 @@ namespace physics
                         if(y > 0) { if(timeslice > 0) timeslice = int(timeslice*y); } \
                         else collect = false; \
                     }
-                impulsemod(m_jet(game::gamemode, game::mutators), impulseregenjet);
                 impulsemod(quickpace, impulseregenpacing);
                 impulsemod(d->move || d->strafe, impulseregenmove);
                 impulsemod((!onfloor && PHYS(gravity) > 0) || sliding(d), impulseregeninair);
@@ -909,16 +856,6 @@ namespace physics
                     }
                     else d->impulse[IM_COLLECT] += millis;
                 }
-            }
-        }
-        if(m_jet(game::gamemode, game::mutators) && jetting)
-        {
-            if(d->o.z >= hdr.worldsize) m.z = min(m.z, 0-(millis/jetdecay));
-            else if(jetheight > 0)
-            {
-                vec v(0, 0, -1);
-                float ray = raycube(d->o, v, hdr.worldsize), floor = ray < hdr.worldsize ? d->o.z-ray : 0.f-jetheight;
-                if(d->o.z-floor >= jetheight) m.z = min(m.z, 0-(millis/jetdecay));
             }
         }
 
@@ -954,8 +891,8 @@ namespace physics
         }
         else
         {
-            impulseplayer(d, onfloor, jetting);
-            if(onfloor && d->action[AC_JUMP] && (jetting || jumpallowed))// && (d->ai || !(impulsemethod&1) || !d->action[AC_CROUCH]))
+            impulseplayer(d, onfloor);
+            if(onfloor && d->action[AC_JUMP] && jumpallowed)
             {
                 float force = jumpvel(d, true);
                 if(force > 0)
@@ -969,7 +906,6 @@ namespace physics
                     }
                     d->resetphys();
                     d->impulse[IM_JUMP] = lastmillis;
-                    if(m_jet(game::gamemode, game::mutators) && !allowimpulse(d, IM_A_BOOST)) d->doimpulse(0, IM_T_BOOST, lastmillis);
                     onfloor = false;
                     if(jumpallowed) d->action[AC_JUMP] = false;
                     client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_JUMP);
@@ -987,7 +923,7 @@ namespace physics
                 {
                     //d->action[AC_SPECIAL] = false;
                     d->resetjump();
-                    impulseplayer(d, onfloor, jetting, true);
+                    impulseplayer(d, onfloor, true);
                     if(d->turnside)
                     {
                         d->turnmillis = PHYSMILLIS;
@@ -1147,7 +1083,7 @@ namespace physics
         if(!d->turnside)
         {
             if(d->onladder && !m.iszero()) m.add(vec(0, 0, m.z >= 0 ? 1 : -1)).normalize();
-            else if(jetpack(d) && m.iszero()) m = vec(0, 0, 1);
+            else if(PHYS(gravity) == 0 && m.iszero()) m = vec(0, 0, 1);
         }
     }
 
@@ -1279,7 +1215,7 @@ namespace physics
 
     bool moveplayer(physent *pl, int moveres, bool local, int millis)
     {
-        bool floating = isfloating(pl), player = !floating && gameent::is(pl), jetting = false;
+        bool floating = isfloating(pl), player = !floating && gameent::is(pl);
         float secs = millis/1000.f;
 
         pl->blocked = false;
@@ -1287,8 +1223,7 @@ namespace physics
         {
             updatematerial(pl, pl->center(), pl->feetpos(), local);
             modifyvelocity(pl, local, false, millis);
-            jetting = jetpack(pl);
-            if(!sticktospecial(pl) && !pl->onladder && !jetting) modifygravity(pl, millis); // apply gravity
+            if(!sticktospecial(pl) && !pl->onladder) modifygravity(pl, millis); // apply gravity
             else pl->resetphys(false);
         }
         else
@@ -1323,7 +1258,6 @@ namespace physics
             if(player)
             {
                 gameent *d = (gameent *)pl;
-                if(local && jetting && !jetpack(d)) d->action[AC_JUMP] = false;
                 if(!d->airmillis)
                 {
                     if(local && impulsemethod&2 && timeinair >= impulsedelay && d->move == 1 && allowimpulse(d, IM_A_DASH) && d->action[AC_CROUCH])

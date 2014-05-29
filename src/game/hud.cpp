@@ -516,9 +516,6 @@ namespace hud
     VAR(IDF_PERSIST|IDF_HEX, privcreatorcolour, 0, 0x8844FF, 0xFFFFFF);
 
     TVAR(IDF_PERSIST, modeeditingtex, "<grey>textures/modes/editing", 3);
-#ifdef CAMPAIGN
-    TVAR(IDF_PERSIST, modecampaigntex, "<grey>textures/modes/campaign", 3);
-#endif
     TVAR(IDF_PERSIST, modedeathmatchtex, "<grey>textures/modes/deathmatch", 3);
     TVAR(IDF_PERSIST, modetimetrialtex, "<grey>textures/modes/timetrial", 3);
     TVAR(IDF_PERSIST, modegauntlettex, "<grey>textures/modes/gauntlet", 3);
@@ -546,40 +543,11 @@ namespace hud
     TVAR(IDF_PERSIST, modesurvivortex, "<grey>textures/modes/survivor", 3);
     TVAR(IDF_PERSIST, modeclassictex, "<grey>textures/modes/classic", 3);
     TVAR(IDF_PERSIST, modeonslaughttex, "<grey>textures/modes/onslaught", 3);
-    TVAR(IDF_PERSIST, modejetpacktex, "<grey>textures/modes/jetpack", 3);
+    TVAR(IDF_PERSIST, modefreestyletex, "<grey>textures/modes/freestyle", 3);
     TVAR(IDF_PERSIST, modevampiretex, "<grey>textures/modes/vampire", 3);
-    TVAR(IDF_PERSIST, modeexperttex, "<grey>textures/modes/expert", 3);
+    TVAR(IDF_PERSIST, modetourneytex, "<grey>textures/modes/tourney", 3);
     TVAR(IDF_PERSIST, moderesizetex, "<grey>textures/modes/resize", 3);
 
-#ifdef CAMPAIGN
-    #define ADDMODEICON(g,m) \
-    { \
-        if(m_edit(g)) ADDMODE(modeeditingtex) \
-        else if(m_trial(g)) ADDMODE(modetimetrialtex) \
-        else if(m_gauntlet(g)) ADDMODE(modegauntlettex) \
-        else if(m_campaign(g)) ADDMODE(modecampaigntex) \
-        else if(m_capture(g)) \
-        { \
-            if(m_gsp1(g, m)) ADDMODE(modecapturequicktex) \
-            else if(m_gsp2(g, m)) ADDMODE(modecapturedefendtex) \
-            else if(m_gsp3(g, m)) ADDMODE(modecaptureprotecttex) \
-            else ADDMODE(modecapturetex) \
-        } \
-        else if(m_defend(g)) \
-        { \
-            if(m_gsp1(g, m)) ADDMODE(modedefendquicktex) \
-            else if(m_gsp2(g, m)) ADDMODE(modedefendkingtex) \
-            else ADDMODE(modedefendtex) \
-        } \
-        else if(m_bomber(g)) \
-        { \
-            if(m_gsp1(g, m)) ADDMODE(modebomberholdtex) \
-            else if(m_gsp2(g, m)) ADDMODE(modebombertouchtex) \
-            else ADDMODE(modebombertex) \
-        } \
-        else ADDMODE(modedeathmatchtex) \
-    }
-#else
     #define ADDMODEICON(g,m) \
     { \
         if(m_edit(g)) ADDMODE(modeeditingtex) \
@@ -606,7 +574,6 @@ namespace hud
         } \
         else ADDMODE(modedeathmatchtex) \
     }
-#endif
 
     void modetexs(int g, int m, bool before, bool implied, vector<char> &list)
     {
@@ -623,9 +590,9 @@ namespace hud
         if(m_survivor(g, m) && (implied || !(gametype[g].implied&(1<<G_M_SURVIVOR)))) ADDMODE(modesurvivortex)
         if(m_classic(g, m) && (implied || !(gametype[g].implied&(1<<G_M_CLASSIC)))) ADDMODE(modeclassictex)
         if(m_onslaught(g, m) && (implied || !(gametype[g].implied&(1<<G_M_ONSLAUGHT)))) ADDMODE(modeonslaughttex)
-        if(m_jetpack(g, m) && (implied || !(gametype[g].implied&(1<<G_M_JETPACK)))) ADDMODE(modejetpacktex)
+        if(m_freestyle(g, m) && (implied || !(gametype[g].implied&(1<<G_M_FREESTYLE)))) ADDMODE(modefreestyletex)
         if(m_vampire(g, m) && (implied || !(gametype[g].implied&(1<<G_M_VAMPIRE)))) ADDMODE(modevampiretex)
-        if(m_expert(g, m) && (implied || !(gametype[g].implied&(1<<G_M_EXPERT)))) ADDMODE(modeexperttex)
+        if(m_tourney(g, m) && (implied || !(gametype[g].implied&(1<<G_M_TOURNEY)))) ADDMODE(modetourneytex)
         if(m_resize(g, m) && (implied || !(gametype[g].implied&(1<<G_M_RESIZE)))) ADDMODE(moderesizetex)
         if(!before) ADDMODEICON(g, m)
         #undef ADDMODE
@@ -699,7 +666,6 @@ namespace hud
                     amt += 0.25f+(float((lastmillis-game::focus->lastres[WR_SHOCK])%shockdelay)/float(shockdelay))*0.35f;
                 if(game::focus->turnside || game::focus->impulse[IM_JUMP])
                     amt += game::focus->turnside ? 0.125f : 0.25f;
-                if(physics::jetpack(game::focus)) amt += 0.125f;
                 break;
             }
             case 2: amt += motionbluramt; break;
@@ -1051,6 +1017,7 @@ namespace hud
                     if(circlebarhealthtone) skewcolour(c.r, c.g, c.b, circlebarhealthtone);
                     break;
                 case 1:
+                    if(m_freestyle(game::gamemode, game::mutators)) continue;
                     val = 1-clamp(float(game::focus->impulse[IM_METER])/float(impulsemeter), 0.f, 1.f);
                     if(circlebarimpulsetone) skewcolour(c.r, c.g, c.b, circlebarimpulsetone);
                     break;
@@ -1446,26 +1413,22 @@ namespace hud
                             if(entities::ents.inrange(ent))
                             {
                                 extentity &e = *entities::ents[ent];
-                                if(enttype[e.type].usetype == EU_ITEM)
+                                if(enttype[e.type].usetype == EU_ITEM && e.type == WEAPON)
                                 {
                                     int sweap = m_weapon(game::gamemode, game::mutators), attr = e.type == WEAPON ? w_attr(game::gamemode, game::mutators, e.attrs[0], sweap) : e.attrs[0];
                                     if(target->canuse(e.type, attr, e.attrs, sweap, lastmillis, W_S_ALL))
                                     {
-                                        if(e.type == WEAPON)
+                                        int drop = -1;
+                                        if(w_carry(target->weapselect, sweap) && target->ammo[attr] < 0 && w_carry(attr, sweap) && target->carry(sweap) >= maxcarry)
+                                            drop = target->drop(sweap);
+                                        if(isweap(drop))
                                         {
-                                            int drop = -1;
-                                            if(w_carry(target->weapselect, sweap) && target->ammo[attr] < 0 && w_carry(attr, sweap) && target->carry(sweap) >= maxcarry)
-                                                drop = target->drop(sweap);
-                                            if(isweap(drop))
-                                            {
-                                                static struct dropattrs : attrvector { dropattrs() { add(0, 5); } } attrs;
-                                                attrs[0] = drop;
-                                                defformatstring(dropweap)("%s", entities::entinfo(WEAPON, attrs, false, true));
-                                                ty += draw_textx("Press %s to swap \fs%s\fS for \fs%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey, dropweap, entities::entinfo(e.type, e.attrs, false, true));
-                                            }
-                                            else ty += draw_textx("Press %s to pickup \fs%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey, entities::entinfo(e.type, e.attrs, false, true));
+                                            static struct dropattrs : attrvector { dropattrs() { add(0, 5); } } attrs;
+                                            attrs[0] = drop;
+                                            defformatstring(dropweap)("%s", entities::entinfo(WEAPON, attrs, false, true));
+                                            ty += draw_textx("Press %s to swap \fs%s\fS for \fs%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey, dropweap, entities::entinfo(e.type, e.attrs, false, true));
                                         }
-                                        else ty += draw_textx("Press %s to use \fs%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey, entities::entinfo(e.type, e.attrs, false, true));
+                                        else ty += draw_textx("Press %s to pickup \fs%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey, entities::entinfo(e.type, e.attrs, false, true));
                                         break;
                                     }
                                 }
@@ -2634,7 +2597,7 @@ namespace hud
                     if(!(inventoryhealth)&2) sy += ty;
                 }
             }
-            if(game::focus->actortype < A_ENEMY && physics::allowimpulse(game::focus) && impulsemeter && impulsecost && inventoryimpulse)
+            if(game::focus->actortype < A_ENEMY && physics::allowimpulse(game::focus) && !m_freestyle(game::gamemode, game::mutators) && inventoryimpulse)
             {
                 float fade = blend*inventoryimpulseblend, span = 1-clamp(float(game::focus->impulse[IM_METER])/float(impulsemeter), 0.f, 1.f),
                       pulse = inventoryimpulseflash && game::focus->impulse[IM_METER] ? 1-span : 0.f, throb = 0, gr = 1, gg = 1, gb = 1;
@@ -2794,9 +2757,9 @@ namespace hud
             if(((alive && inventorygameinfo&4) || over) && m_survivor(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_SURVIVOR))) ADDMODE(modesurvivortex)
             if(over && m_classic(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_CLASSIC))) ADDMODE(modeclassictex)
             if(over && m_onslaught(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_ONSLAUGHT))) ADDMODE(modeonslaughttex)
-            if(((alive && inventorygameinfo&2) || over) && m_jet(game::gamemode, game::mutators)) ADDMODE(modejetpacktex)
+            if(((alive && inventorygameinfo&2) || over) && m_freestyle(game::gamemode, game::mutators)) ADDMODE(modefreestyletex)
             if(((alive && inventorygameinfo&2) || over) && m_vampire(game::gamemode, game::mutators)) ADDMODE(modevampiretex)
-            if(((alive && inventorygameinfo&2) || over) && m_expert(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_EXPERT))) ADDMODE(modeexperttex)
+            if(((alive && inventorygameinfo&2) || over) && m_tourney(game::gamemode, game::mutators)) ADDMODE(modetourneytex)
             if((alive && inventorygameinfo&4) && m_resize(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_RESIZE))) ADDMODE(moderesizetex)
             #undef ADDMODE
         }

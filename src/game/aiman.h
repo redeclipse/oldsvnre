@@ -225,10 +225,6 @@ namespace aiman
         }
 
         int balance = 0, people = numclients(-1, true, -1), numt = numteams(gamemode, mutators);
-#ifdef CAMPAIGN
-        if(m_campaign(gamemode)) balance = G(campaignplayers); // campaigns strictly obeys player setting
-        else
-#endif
         if(m_coop(gamemode, mutators))
         {
             numt--; // filter out the human team
