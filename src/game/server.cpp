@@ -5989,6 +5989,7 @@ namespace server
                                     if(text[0]) srvoutf(-3, "\fP%s added \fs\fc" #y "\fS on %s (%s): %s", name, colourname(cp), gethostname(cp->clientnum), text); \
                                     else srvoutf(-3, "\fP%s added \fs\fc" #y "\fS on %s", name, colourname(cp)); \
                                     if(value == ipinfo::BAN) updatecontrols = true; \
+                                    else if(value == ipinfo::LIMIT) cp->swapteam = 0; \
                                 } \
                                 else \
                                 { \
