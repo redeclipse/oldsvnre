@@ -370,7 +370,7 @@ namespace entities
     {
         gameentity &e = *(gameentity *)ents[ent];
         int sweap = m_weapon(game::gamemode, game::mutators), attr = e.type == WEAPON ? w_attr(game::gamemode, game::mutators, e.attrs[0], sweap) : e.attrs[0],
-            colour = e.type == WEAPON ? W(attr, colour) : 0xFFFFFF;
+            colour = e.type == WEAPON ? W(attr, colour) : 0x888888;
         if(e.type == WEAPON) d->addicon(eventicon::WEAPON, lastmillis, game::eventiconshort, attr);
         if(isweap(weap))
         {
@@ -595,7 +595,8 @@ namespace entities
                         interrupts &= ~(1<<W_S_RELOAD);
                         if(!f->canuse(e.type, attr, e.attrs, sweap, lastmillis, interrupts))
                         {
-                            if(!f->canuse(e.type, attr, e.attrs, sweap, lastmillis, (1<<W_S_RELOAD))) return true;
+                            if(e.type != WEAPON) return false;
+                            else if(!f->canuse(e.type, attr, e.attrs, sweap, lastmillis, (1<<W_S_RELOAD))) return true;
                             else if(!isweap(f->weapselect) || f->weapload[f->weapselect] <= 0) return true;
                             else
                             {
@@ -606,8 +607,11 @@ namespace entities
                             }
                         }
                         client::addmsg(N_ITEMUSE, "ri3", f->clientnum, lastmillis-game::maptime, n);
-                        f->setweapstate(f->weapselect, W_S_WAIT, weaponswitchdelay, lastmillis);
-                        f->action[AC_USE] = false;
+                        if(e.type == WEAPON)
+                        {
+                            f->setweapstate(f->weapselect, W_S_WAIT, weaponswitchdelay, lastmillis);
+                            f->action[AC_USE] = false;
+                        }
                         return false;
                     }
                     return true;
@@ -1853,9 +1857,6 @@ namespace entities
             }
             if(gver <= 216 && enttype[e.type].modesattr > 0) // mode/mutator array updates
             {
-#ifdef CAMPAIGN
-                int attr = enttype[e.type].modesattr+1;
-#else
                 int attr = enttype[e.type].modesattr;
                 if(e.attrs[attr])
                 {
@@ -1870,7 +1871,6 @@ namespace entities
                     e.attrs[attr] = neg ? 0-value : value;
                 }
                 attr++; // mutators
-#endif
                 if(e.attrs[attr])
                 {
                     bool neg = e.attrs[attr] < 0;
@@ -1882,6 +1882,12 @@ namespace entities
                     }
                     e.attrs[attr] = neg ? 0-value : value;
                 }
+            }
+            if(gver <= 220 && enttype[e.type].modesattr > 0)
+            {
+                int attr = enttype[e.type].modesattr+1;
+                if(e.attrs[attr]&(1<<10)) e.attrs[attr] &= ~(1<<10); // jetpack -> freestyle
+                if(e.attrs[attr]&(1<<12)) e.attrs[attr] &= ~(1<<12); // expert -> tourney
             }
         }
     }
@@ -2302,7 +2308,7 @@ namespace entities
              hastop = hasent && e.o.squaredist(camera1->o) <= showentdist*showentdist;
         int sweap = m_weapon(game::gamemode, game::mutators),
             attr = e.type == WEAPON ? w_attr(game::gamemode, game::mutators, e.attrs[0], sweap) : e.attrs[0],
-            colour = e.type == WEAPON ? W(attr, colour) : 0xFFFFFF, interval = lastmillis%1000;
+            colour = e.type == WEAPON ? W(attr, colour) : 0x888888, interval = lastmillis%1000;
         float fluc = interval >= 500 ? (1500-interval)/1000.f : (500+interval)/1000.f;
         if(enttype[e.type].usetype == EU_ITEM && (active || isedit))
         {

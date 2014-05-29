@@ -8,9 +8,6 @@ namespace ai
     VAR(0, aidebug, 0, 0, 7);
     VAR(0, aidebugfocus, 0, 1, 2);
     VAR(0, aiforcegun, -1, -1, W_MAX-1);
-#ifdef CAMPAIGN
-    VAR(0, aicampaign, 0, 0, 1);
-#endif
     VAR(0, aipassive, 0, 0, 2); // 0 = off, 1 = passive to humans, 2 = completely passive
 
     VARF(0, showwaypoints, 0, 0, 1, if(showwaypoints) getwaypoints());
@@ -569,11 +566,7 @@ namespace ai
                 int sweap = m_weapon(game::gamemode, game::mutators);
                 if(!hasweap(d, d->ai->weappref) || d->carry(sweap) == 0) items(d, b, interests, d->carry(sweap) == 0);
                 if(m_team(game::gamemode, game::mutators) && !m_duke(game::gamemode, game::mutators))
-#ifdef CAMPAIGN
-                    assist(d, b, interests, false, m_campaign(game::gamemode) || m_gauntlet(game::gamemode));
-#else
                     assist(d, b, interests, false, m_gauntlet(game::gamemode));
-#endif
             }
             if(m_fight(game::gamemode))
             {
@@ -606,21 +599,6 @@ namespace ai
                     }
                 }
             }
-#ifdef CAMPAIGN
-            if(m_campaign(game::gamemode) && aicampaign)
-            {
-                loopi(entities::lastent(TRIGGER)) if(entities::ents[i]->type == TRIGGER && entities::ents[i]->attrs[1] == TR_EXIT)
-                {
-                    interest &n = interests.add();
-                    n.state = AI_S_PURSUE;
-                    n.target = i;
-                    n.node = closestwaypoint(entities::ents[i]->o, CLOSEDIST, true);
-                    n.targtype = AI_T_AFFINITY;
-                    n.score = -1;
-                    n.tolerance = 1;
-                }
-            }
-#endif
         }
         else if(entities::ents.inrange(d->spawnpoint)) loopv(entities::ents[d->spawnpoint]->links)
         {
@@ -783,13 +761,6 @@ namespace ai
             }
             case AI_T_AFFINITY:
             {
-#ifdef CAMPAIGN
-                if(m_campaign(game::gamemode))
-                {
-                    if(aicampaign && entities::ents.inrange(b.target)) return defense(d, b, entities::ents[b.target]->o);
-                }
-                else
-#endif
                 if(m_capture(game::gamemode)) return capture::aidefense(d, b);
                 else if(m_defend(game::gamemode)) return defend::aidefense(d, b);
                 else if(m_bomber(game::gamemode)) return bomber::aidefense(d, b);
@@ -890,13 +861,6 @@ namespace ai
         {
             case AI_T_AFFINITY:
             {
-#ifdef CAMPAIGN
-                if(m_campaign(game::gamemode))
-                {
-                    if(aicampaign && entities::ents.inrange(b.target)) return defense(d, b, entities::ents[b.target]->o);
-                }
-                else
-#endif
                 if(m_capture(game::gamemode)) return capture::aipursue(d, b);
                 else if(m_defend(game::gamemode)) return defend::aipursue(d, b);
                 else if(m_bomber(game::gamemode)) return bomber::aipursue(d, b);
@@ -938,7 +902,7 @@ namespace ai
     {
         vec pos = d->feetpos();
         int node1 = -1, node2 = -1, node3 = -1;
-        float mindist1 = CLOSEDIST*CLOSEDIST, mindist2 = physics::jetpack(d) ? JETDIST*JETDIST : RETRYDIST*RETRYDIST, mindist3 = mindist2;
+        float mindist1 = CLOSEDIST*CLOSEDIST, mindist2 = RETRYDIST*RETRYDIST, mindist3 = mindist2;
         loopv(d->ai->route) if(iswaypoint(d->ai->route[i]))
         {
             vec epos = waypoints[d->ai->route[i]].o;
@@ -1087,10 +1051,9 @@ namespace ai
         vec off = vec(pos).sub(d->feetpos());
         int airtime = d->airtime(lastmillis);
         bool sequenced = d->ai->blockseq || d->ai->targseq, offground = airtime && !physics::liquidcheck(d) && !d->onladder,
-             jet = airtime > 100 && !d->turnside && off.z >= JUMPMIN && physics::canjet(d),
-             impulse = airtime > (b.acttype >= AI_A_LOCKON ? 100 : 250) && !d->turnside && (b.acttype >= AI_A_LOCKON || off.z >= JUMPMIN) && physics::canimpulse(d, IM_A_BOOST, false) && !physics::jetpack(d) && impulsemeter-d->impulse[IM_METER] >= impulsecost,
+             impulse = airtime > (b.acttype >= AI_A_LOCKON ? 100 : 250) && !d->turnside && (b.acttype >= AI_A_LOCKON || off.z >= JUMPMIN) && physics::canimpulse(d, IM_A_BOOST, false) && (m_freestyle(game::gamemode, game::mutators) || impulsemeter-d->impulse[IM_METER] >= impulsecost),
              jumper = !offground && (b.acttype == AI_A_LOCKON || sequenced || off.z >= JUMPMIN || (d->actortype == A_BOT && lastmillis >= d->ai->jumprand)),
-             jump = (impulse || jet || jumper) && (jet || lastmillis >= d->ai->jumpseed);
+             jump = (impulse || jumper) && lastmillis >= d->ai->jumpseed;
         if(jump)
         {
             vec old = d->o;
@@ -1255,7 +1218,7 @@ namespace ai
         if(actor[d->actortype].canjump && jumpallowed) jumpto(d, b, d->ai->spot);
         if(d->actortype == A_BOT || d->actortype == A_GRUNT)
         {
-            if(d->action[AC_PACING] != (physics::allowimpulse(d, IM_A_SPRINT) && (!impulsemeter || impulsepacing == 0 || impulseregenpacing > 0)))
+            if(d->action[AC_PACING] != (physics::allowimpulse(d, IM_A_SPRINT) && (m_freestyle(game::gamemode, game::mutators) || impulsepacing == 0 || impulseregenpacing > 0)))
                 if((d->action[AC_PACING] = !d->action[AC_PACING]) == true) d->actiontime[AC_PACING] = lastmillis;
             if(d->action[AC_CROUCH] != d->ai->dontmove)
                 if((d->action[AC_CROUCH] = !d->action[AC_CROUCH]) == true) d->actiontime[AC_CROUCH] = lastmillis;
@@ -1409,7 +1372,7 @@ namespace ai
     {
         vec pos = d->feetpos();
         static vector<int> candidates; candidates.setsize(0);
-        if(find) findwaypointswithin(pos, WAYPOINTRADIUS, (physics::jetpack(d) ? JETDIST : RETRYDIST)*find, candidates);
+        if(find) findwaypointswithin(pos, WAYPOINTRADIUS, RETRYDIST*find, candidates);
         if(find ? !candidates.empty() : !d->ai->route.empty()) loopk(2)
         {
             int best = -1;
@@ -1804,7 +1767,6 @@ namespace ai
     {
         defvformatstring(msg, fmt, fmt);
         client::addmsg(N_TEXT, "ri2s", d->clientnum, flags, msg);
-        //client::saytext(d, flags, msg);
     }
 
     void scanchat(gameent *d, int flags, const char *text)

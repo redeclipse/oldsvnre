@@ -10,7 +10,6 @@ namespace ai
     const float MINWPDIST       = 4.f;     // is on top of
     const float CLOSEDIST       = 32.f;    // is close
     const float RETRYDIST       = 64.f;    // is close when retrying
-    const float JETDIST         = 128.f;   // close when jetting
     const float FARDIST         = 256.f;   // too far to remap close
     const float JUMPMIN         = 2.f;     // decides to jump
     const float JUMPMAX         = 32.f;    // max jump
