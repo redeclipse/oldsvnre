@@ -1,7 +1,7 @@
 The development version changelog is an ongoing work and should be reasonably
 complete covering changes made up to revision:
 
-6225 (11/20/13)
+6554 (05/30/2014)
 
 If you update the changelog with changes made beyond this point, and consider
 it to resonably cover all previous changes, please update the above revision
@@ -34,14 +34,17 @@ number.
 Gameplay:
  * Ragdolls now twitch when they're under the influence of shock residual
  * Show player distance when fragged
+ * Show throwing distance in Bomber-Ball when scored
+ * Bomber-Ball throwing originates from head for more consistent throwing
  * Added /playerhint variable to make players have a team colored glow
    over them to make it more clear to which team they belong
  * Improved AI for CTF and DAC games, making bots more evasive when endangered
+ * Support for giving AI orders ("defend", "attack", "base", "goal", "ball", "forget")
  * Better physics and bounce sounds for affinities
+ * Enable interactions with affinities
  * Footstep sounds
  * Fixed spawn queue in Time-Trial
  * Auto team balancing
- * Bomber-Ball throwing originates from head for more consistent throwing
 
 Weapons:
  * Sword damage and secondary attack speed increased,
@@ -53,6 +56,8 @@ Weapons:
    used to damage enemies and put out teammates that are on fire
  * Grenades have smaller explode radius, back to v1.3 behaviour
  * Ability to cancel a cook event (e.g. grenades) by pressing reload
+ * Set all weapon selfdamage to 100%
+ * Increased weapon spread when in air / impulsing
 
 Modes & Mutators:
  * Rebranded Defend-The-Flag to Defend-And-Control
@@ -61,7 +66,8 @@ Modes & Mutators:
  * Resize more in Resize
  * Steal more life in Vampire
  * Increased buffing timeout tolerances when defending affinities
- * Enable interactions with affinities
+ * Changed jetpack mutator into freestyle mutator
+ * Changed expert mutator into tourney mutator
 
 Maps:
  * Time-trial
@@ -76,22 +82,23 @@ Maps:
    - Campgrounds - new map by ballist1c and Greaserpirate
    - Canyon - new map by restcoser
    - Condensation - new map by Unnamed
+   - Decay by Ricky Thomson
    - Echo2k - remix of Echo by Ulukai
    - Enyo - new map by Ulukai
-   - Insidious - new map by ballist1c
-   - LongestYard2k - remix of LongestYard by John_III and ballist1c
    - Octavus - new map by Ricky Thomson
  * Out of rotation
    - Pumpstation
    - Star Libido
    - Echo
+ * Maps for review (WIP): 
+   - Affluence by Greaserpirate
 
 Interface & Menus:
  * Added /spectvfollow for aiming camera to certain player whilst
    maintaining normal spectv camera selections
  * Added variables for showing distance and health left when killed
    (/showobitdists /showobithpleft)
- * Added /nogore variable for disabling gore effects
+ * Added /nogore variable to disable gore effects
  * Added third person key to controls menu
  * Added higher resolutions to display menu
  * Better inventory score
@@ -104,6 +111,8 @@ Interface & Menus:
  * New loading screen
  * Map preview size bumped to 512x512
  * Bomber-Ball in inventory and its itembar flash red
+ * Added "Sharpen" shader to postfx menu
+ * New variable menu with search capabilities
 
 Modding & Mapmaking:
  * Updated edit menu
@@ -117,13 +126,21 @@ Modding & Mapmaking:
 
 Data Assets:
  * New vanity items
-   - Stratocaster
-   - Fox Ears
+   - Blade
+   - Boots
+   - Chestplate
    - Crown
-   - Shoulder armor
+   - Disc
+   - Fox Ears
+   - Guitar
+   - Mask
+   - Microeye
    - Panda
+   - Prongs
+   - Shoulder armor
  * New wakawaka sound
  * New model for control points used in defend-and-control and Bomber-Ball
+ * New Rocket projectile by Unnamed
  * Added texture set by Unnamed
  * Added lava texture by Nobiax, applied in maps Hinder, Nova, Tower
  * New mapmodels by Nobiax
@@ -147,7 +164,8 @@ Multiplayer & Servers:
 Core & Install:
  * Fixed desktop entry icon field
  * Improve IRC connection stability
- * ENet updated to v1.3.10
+ * ENet updated to v1.3.12
+ * Removed Mekarcade from the project
 
 Additional noteworthy fixed bugs:
  * #449 - Ability to make current settings default (/savevars)
