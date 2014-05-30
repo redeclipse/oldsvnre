@@ -53,6 +53,7 @@ namespace hud
     FVAR(IDF_PERSIST, scoreimagesize, FVAR_NONZERO, 6, 10);
     VAR(IDF_PERSIST, scorebgfx, 0, 1, 1);
     VAR(IDF_PERSIST, scorebgrows, 0, 3, 3);
+    VAR(IDF_PERSIST, scorebgborder, 0, 1, 1);
     FVAR(IDF_PERSIST, scorebgblend, 0, 0.5f, 1);
 
     static bool scoreson = false, scoresoff = false, shownscores = false;
@@ -495,9 +496,9 @@ namespace hud
                             scoregroup &sg = *groups[k];
                             if(k) g.space(0.5f);
                             vec c = vec::hexcolor(sg.team && m_fight(game::gamemode) && m_team(game::gamemode, game::mutators) ? TEAM(sg.team, colour) : TEAM(T_NEUTRAL, colour));
-                            int bgcolor = vec(c).mul(0.5f).tohexcolor();
-                            int bgc1 = vec(c).mul(0.35f).tohexcolor();
-                            int bgc2 = vec(c).mul(0.15f).tohexcolor();
+                            int bgcolor = vec(c).mul(0.55f).tohexcolor();
+                            int bgc1 = vec(c).mul(0.15f).tohexcolor();
+                            int bgc2 = vec(c).mul(0.35f).tohexcolor();
                             uicenterlist(g, {
                                 if(scorebgrows) g.background(bgcolor, scorebgblend);
                                 g.space(0.5f);
@@ -768,8 +769,8 @@ namespace hud
                     if(scorespectators && spectators.length())
                     {
                         vec c = vec::hexcolor(TEAM(T_NEUTRAL, colour));
-                        int bgc1 = vec(c).mul(0.35f).tohexcolor();
-                        int bgc2 = vec(c).mul(0.15f).tohexcolor();
+                        int bgc1 = vec(c).mul(0.15f).tohexcolor();
+                        int bgc2 = vec(c).mul(0.35f).tohexcolor();
                         g.space(0.5f);
                         g.pushlist();
                         if(scorebgrows) g.background(guibgcolour, scorebgblend);
