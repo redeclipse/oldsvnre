@@ -218,15 +218,26 @@ namespace weapons
             else offset = d->weapload[weap];
         }
         float scale = 1;
+        bool zooming = (pressed && secondary && W(weap, zooms)) || d->weapstate[weap] == W_S_ZOOM, wassecond = secondary;
+        if(zooming)
+        {
+            if(!pressed)
+            {
+                client::addmsg(N_SPHY, "ri4", d->clientnum, SPHY_COOK, W_S_IDLE, 0);
+                d->setweapstate(weap, W_S_IDLE, 0, lastmillis);
+                return false;
+            }
+            else secondary = zooming;
+        }
         int sub = W2(weap, sub, secondary), cooked = force;
-        if(W2(weap, power, secondary) && !W(weap, zooms))
+        if(W2(weap, power, secondary) || zooming)
         {
             float maxscale = 1;
             if(sub > 1 && d->ammo[weap] < sub) maxscale = d->ammo[weap]/float(sub);
-            int len = int(W2(weap, power, secondary)*maxscale);
+            int len = int(W2(weap, power, secondary)*maxscale), type = zooming ? W_S_ZOOM : W_S_POWER;
             if(!cooked)
             {
-                if(d->weapstate[weap] != W_S_POWER)
+                if(d->weapstate[weap] != type)
                 {
                     if(pressed)
                     {
@@ -236,13 +247,17 @@ namespace weapons
                             d->reloads[weap] = max(d->reloads[weap]-1, 0);
                             d->weapload[weap] = -offset;
                         }
-                        client::addmsg(N_SPHY, "ri3", d->clientnum, SPHY_POWER, len);
-                        d->setweapstate(weap, W_S_POWER, len, lastmillis);
+                        client::addmsg(N_SPHY, "ri4", d->clientnum, SPHY_COOK, type, len);
+                        d->setweapstate(weap, type, len, lastmillis);
                     }
                     else return false;
                 }
                 cooked = clamp(lastmillis-d->weaplast[weap], 1, len);
-                if(pressed && cooked < len) return false;
+                if(zooming)
+                {
+                    if(pressed && wassecond) return false;
+                }
+                else if(pressed && cooked < len) return false;
             }
             scale = cooked/float(W2(weap, power, secondary));
             if(sub > 1 && scale < 1) sub = int(ceilf(sub*scale));
@@ -270,36 +285,6 @@ namespace weapons
         {
             from = d->muzzlepos(weap, secondary);
             to = targ;
-#if 0
-            vec unitv;
-            float dist = to.dist(from, unitv);
-            if(dist > 0) unitv.div(dist);
-            else unitv = vec(d->yaw*RAD, d->pitch*RAD);
-
-            // move along the eye ray towards the weap origin, stopping when something is hit
-            // nudge the target a tiny bit forward in the direction of the target for stability
-
-            vec eyedir(from);
-            eyedir.sub(d->o);
-            float eyedist = eyedir.magnitude();
-            if(eyedist > 0) eyedir.div(eyedist);
-            float barrier = eyedist > 0 ? raycube(d->o, eyedir, eyedist, RAY_CLIPMAT) : eyedist;
-            if(barrier < eyedist)
-            {
-                (from = eyedir).mul(barrier).add(d->o);
-                (to = targ).sub(from).rescale(1e-3f).add(from);
-            }
-            else
-            {
-                barrier = raycube(from, unitv, dist, RAY_CLIPMAT|RAY_ALPHAPOLY);
-                if(barrier < dist)
-                {
-                    to = unitv;
-                    to.mul(barrier);
-                    to.add(from);
-                }
-            }
-#endif
             int rays = W2(weap, rays, secondary), x = 0;
             if(rays > 1 && W2(weap, power, secondary) && scale < 1) rays = int(ceilf(rays*scale));
             float m = accmod(d, W(d->weapselect, zooms) && secondary, &x);
@@ -323,9 +308,9 @@ namespace weapons
     void shoot(gameent *d, vec &targ, int force)
     {
         if(!game::allowmove(d)) return;
-        bool secondary = physics::secondaryweap(d), alt = secondary && !W(d->weapselect, zooms);
-        if(doshot(d, targ, d->weapselect, d->action[alt ? AC_SECONDARY : AC_PRIMARY], secondary, force))
-            if(!W2(d->weapselect, fullauto, secondary)) d->action[alt ? AC_SECONDARY : AC_PRIMARY] = false;
+        bool secondary = physics::secondaryweap(d);
+        if(doshot(d, targ, d->weapselect, d->action[secondary ? AC_SECONDARY : AC_PRIMARY], secondary, force))
+            if(!W2(d->weapselect, fullauto, secondary)) d->action[secondary ? AC_SECONDARY : AC_PRIMARY] = false;
     }
 
     void preload()

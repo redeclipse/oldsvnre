@@ -1138,7 +1138,7 @@ namespace projs
             life = W2(weap, time, WS(flags)), speed = W2(weap, speed, WS(flags)),
             limspeed = W2(weap, limspeed, WS(flags));
         float skew = 1;
-        if((!W(weap, zooms) || !WS(flags)) && power && cooked)
+        if(power && cooked)
         {
             if(cooked&1)  skew = scale; // scaled
             if(cooked&2)  skew = 1-scale; // inverted scale

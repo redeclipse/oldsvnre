@@ -155,14 +155,10 @@ namespace physics
     bool secondaryweap(gameent *d, bool zoom)
     {
         if(!isweap(d->weapselect)) return false;
-        if(W(d->weapselect, zooms)) { if(d == game::player1 && game::zooming && game::inzoomswitch()) return true; }
-        else if(!zoom)
+        if(d->weapselect != W_MELEE || (d->physstate == PHYS_FALL && !d->onladder))
         {
-            if(d->weapselect != W_MELEE || (d->physstate == PHYS_FALL && !d->onladder))
-            {
-                if(d->action[AC_SECONDARY] && (!d->action[AC_PRIMARY] || d->actiontime[AC_SECONDARY] > d->actiontime[AC_PRIMARY])) return true;
-                else if(d->actiontime[AC_SECONDARY] > d->actiontime[AC_PRIMARY] && W2(d->weapselect, power, true) && d->weapstate[d->weapselect] == W_S_POWER) return true;
-            }
+            if(d->action[AC_SECONDARY] && (!d->action[AC_PRIMARY] || d->actiontime[AC_SECONDARY] > d->actiontime[AC_PRIMARY])) return true;
+            else if(d->actiontime[AC_SECONDARY] > d->actiontime[AC_PRIMARY] && W2(d->weapselect, power, true) && d->weapstate[d->weapselect] == W_S_POWER) return true;
         }
         return false;
     }
@@ -237,7 +233,7 @@ namespace physics
         if(allowimpulse(d, IM_A_SPRINT) && (gameent::is(d)) && d->state == CS_ALIVE && movepacing > 0)
         {
             gameent *e = (gameent *)d;
-            if(!iscrouching(e) && (e != game::player1 || !W(e->weapselect, zooms) || !game::inzoom()))
+            if(!iscrouching(e) && (!isweap(e->weapselect) || e->weapstate[e->weapselect] != W_S_ZOOM))
             {
                 if(turn && e->turnside) return true;
                 if((e != game::player1 && !e->ai) || m_freestyle(game::gamemode, game::mutators) || e->impulse[IM_METER] < impulsemeter)

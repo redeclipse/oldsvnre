@@ -477,29 +477,6 @@ namespace game
         zooming = on;
     }
 
-    bool zoomvalid()
-    {
-        if(W(player1->weapselect, zooms))
-        {
-            int state = player1->weapstate[player1->weapselect];
-            return state == W_S_IDLE || state == W_S_PRIMARY || state == W_S_SECONDARY || state == W_S_POWER;
-        }
-        return false;
-    }
-
-    bool zoomallow()
-    {
-        if(zoomvalid()) switch(zoomlock)
-        {
-            case 4: if(!physics::iscrouching(player1)) break;
-            case 3: if(player1->physstate != PHYS_FLOOR) break;
-            case 2: if(player1->move || player1->strafe) break;
-            case 1: if(physics::sliding(player1, true) || (player1->airmillis && (!zooming || !lastzoom || player1->airtime(lastmillis) >= zoomlocktime || player1->impulse[IM_JUMP]))) break;
-            case 0: default: return true; break;
-        }
-        return false;
-    }
-
     bool inzoom()
     {
         if(lastzoom && (zooming || lastmillis-lastzoom <= zoomtime))
@@ -1033,7 +1010,7 @@ namespace game
             if(d == focus && third) total *= camera1->o.dist(d->o)/(d != player1 ? followdist : thirdpersondist);
             int prot = m_protect(gamemode, mutators), millis = d->protect(lastmillis, prot); // protect returns time left
             if(millis > 0) total *= 1.f-(float(millis)/float(prot));
-            if(d == player1 && inzoom())
+            if(d == focus && inzoom())
             {
                 int frame = lastmillis-lastzoom;
                 float pc = frame <= zoomtime ? (frame)/float(zoomtime) : 1.f;
@@ -1126,7 +1103,7 @@ namespace game
 
         d->checktags();
 
-        loopi(W_MAX) if(d->weapstate[i] != W_S_IDLE)
+        loopi(W_MAX) if(d->weapstate[i] != W_S_IDLE && d->weapstate[i] != W_S_ZOOM)
         {
             bool timeexpired = lastmillis-d->weaplast[i] >= d->weapwait[i]+(d->weapselect != i || d->weapstate[i] != W_S_POWER ? 0 : PHYSMILLIS);
             if(d->state == CS_ALIVE && i == d->weapselect && d->weapstate[i] == W_S_RELOAD && timeexpired)
@@ -2211,7 +2188,7 @@ namespace game
             physent *d = (intermission || player1->state >= CS_SPECTATOR) && (focus == player1 || followaim()) ? camera1 : (allowmove(player1) ? player1 : NULL);
             if(d)
             {
-                float scale = (inzoom() && zoomsensitivity > 0 ? (1.f-((zoomlevel+1)/float(zoomlevels+2)))*zoomsensitivity : 1.f)*sensitivity;
+                float scale = (focus == player1 && inzoom() && zoomsensitivity > 0 ? (1.f-((zoomlevel+1)/float(zoomlevels+2)))*zoomsensitivity : 1.f)*sensitivity;
                 d->yaw += mousesens(dx, sensitivityscale, yawsensitivity*scale);
                 d->pitch -= mousesens(dy, sensitivityscale, pitchsensitivity*scale*(mouseinvert ? -1.f : 1.f));
                 fixrange(d->yaw, d->pitch);
@@ -2347,7 +2324,7 @@ namespace game
         if(firstpersonbob && !intermission && d->state == CS_ALIVE)
         {
             float scale = 1;
-            if(d == player1 && inzoom())
+            if(d == focus && inzoom())
             {
                 int frame = lastmillis-lastzoom;
                 float pc = frame <= zoomtime ? (frame)/float(zoomtime) : 1.f;
@@ -2732,7 +2709,7 @@ namespace game
         if(firstpersonbob && !intermission && d->state == CS_ALIVE && !thirdpersonview(true))
         {
             float scale = 1;
-            if(d == player1 && inzoom())
+            if(d == focus && inzoom())
             {
                 int frame = lastmillis-lastzoom;
                 float pc = frame <= zoomtime ? (frame)/float(zoomtime) : 1.f;
@@ -2830,13 +2807,7 @@ namespace game
             checkoften(player1, true);
             loopv(players) if(players[i]) checkoften(players[i], players[i]->ai != NULL);
             if(!allowmove(player1)) player1->stopmoving(player1->state < CS_SPECTATOR);
-            if(player1->state == CS_ALIVE)
-            {
-                bool allow = zoomallow();
-                if(zooming && !allow) zoomset(false, lastmillis);
-                else if(allow && zooming != player1->action[AC_SECONDARY])
-                    zoomset(player1->action[AC_SECONDARY], lastmillis);
-            }
+            if(focus->state == CS_ALIVE) zoomset(focus->weapstate[focus->weapselect] == W_S_ZOOM, lastmillis);
             else if(zooming) zoomset(false, 0);
 
             physics::update();
@@ -3339,7 +3310,7 @@ namespace game
                         weapflags = animflags = ANIM_SWITCH+(d->weapstate[weap]-W_S_SWITCH);
                         break;
                     }
-                    case W_S_POWER:
+                    case W_S_POWER: case W_S_ZOOM:
                     {
                         switch(weaptype[weap].anim)
                         {

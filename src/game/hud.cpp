@@ -814,8 +814,9 @@ namespace hud
         float r = 1, g = 1, b = 1, amt = 0;
         switch(game::focus->weapstate[weap])
         {
-            case W_S_POWER: if(game::focus->weapwait[weap])
+            case W_S_POWER: case W_S_ZOOM: if(game::focus->weapwait[weap])
             {
+                if(millis >= game::focus->weapwait[weap]) return;
                 amt = clamp(float(millis)/float(game::focus->weapwait[weap]), 0.f, 1.f);
                 colourskew(r, g, b, 1.f-amt);
                 break;
@@ -1143,7 +1144,7 @@ namespace hud
         if(game::focus->state == CS_ALIVE && index >= POINTER_HAIR)
         {
             if(crosshairweapons&2) c = vec::hexcolor(W(game::focus->weapselect, colour));
-            if(index == POINTER_ZOOM && game::inzoom() && W(game::focus->weapselect, zooms))
+            if(index == POINTER_ZOOM && game::inzoom())
             {
                 int frame = lastmillis-game::lastzoom, off = int(zoomcrosshairsize*hudsize)-cs;
                 float amt = frame <= zoomtime ? clamp(float(frame)/float(zoomtime), 0.f, 1.f) : 1.f;
@@ -1194,7 +1195,7 @@ namespace hud
             index = POINTER_NONE;
         else if(game::focus->state == CS_EDITING) index = POINTER_EDIT;
         else if(game::focus->state >= CS_SPECTATOR) index = POINTER_SPEC;
-        else if(game::inzoom() && W(game::focus->weapselect, zooms)) index = POINTER_ZOOM;
+        else if(game::inzoom()) index = POINTER_ZOOM;
         else if(m_team(game::gamemode, game::mutators))
         {
             vec pos = game::focus->headpos();
@@ -3097,7 +3098,7 @@ namespace hud
         if(!game::intermission && !client::waitplayers)
         {
             bool third = game::thirdpersonview(true) && game::focus != game::player1;
-            if(game::focus->state == CS_ALIVE && game::inzoom() && W(game::focus->weapselect, zooms)) drawzoom(w, h);
+            if(game::focus->state == CS_ALIVE && game::inzoom()) drawzoom(w, h);
             if(showdamage && !third)
             {
                 if(burntime && game::focus->state == CS_ALIVE) drawfire(w, h, top, bottom, fade);

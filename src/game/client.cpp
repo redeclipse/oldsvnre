@@ -1764,7 +1764,7 @@ namespace client
 
                 case N_SPHY: // simple phys events
                 {
-                    int lcn = getint(p), st = getint(p), param = st == SPHY_POWER || st == SPHY_BUFF ? getint(p) : 0;
+                    int lcn = getint(p), st = getint(p), param = st == SPHY_COOK || st == SPHY_BUFF ? getint(p) : 0;
                     gameent *t = game::getclient(lcn);
                     if(t && (st == SPHY_EXTINGUISH || st == SPHY_BUFF || (t != game::player1 && !t->ai))) switch(st)
                     {
@@ -1784,7 +1784,12 @@ namespace client
                                 game::footstep(d);
                             break;
                         }
-                        case SPHY_POWER: t->setweapstate(t->weapselect, W_S_POWER, param, lastmillis); break;
+                        case SPHY_COOK:
+                        {
+                            int value = getint(p);
+                            t->setweapstate(t->weapselect, param, value, lastmillis);
+                            break;
+                        }
                         case SPHY_EXTINGUISH:
                         {
                             t->resetburning();
