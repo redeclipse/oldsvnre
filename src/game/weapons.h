@@ -9,10 +9,10 @@ enum
 
 enum { W_F_NONE = 0, W_F_FORCED = 1<<0 };
 enum {
-    W_S_IDLE = 0, W_S_PRIMARY, W_S_SECONDARY, W_S_RELOAD, W_S_POWER,
+    W_S_IDLE = 0, W_S_PRIMARY, W_S_SECONDARY, W_S_RELOAD, W_S_POWER, W_S_ZOOM,
     W_S_SWITCH, W_S_USE, W_S_WAIT, W_S_MAX,
-    W_S_INTERRUPT = (1<<W_S_RELOAD)|(1<<W_S_SWITCH)|(1<<W_S_POWER),
-    W_S_ALL = (1<<W_S_PRIMARY)|(1<<W_S_SECONDARY)|(1<<W_S_RELOAD)|(1<<W_S_POWER)|(1<<W_S_SWITCH)|(1<<W_S_USE)|(1<<W_S_WAIT)
+    W_S_INTERRUPT = (1<<W_S_RELOAD)|(1<<W_S_SWITCH)|(1<<W_S_POWER)|(1<<W_S_ZOOM),
+    W_S_ALL = (1<<W_S_PRIMARY)|(1<<W_S_SECONDARY)|(1<<W_S_RELOAD)|(1<<W_S_POWER)|(1<<W_S_ZOOM)|(1<<W_S_SWITCH)|(1<<W_S_USE)|(1<<W_S_WAIT)
 };
 
 enum
@@ -170,7 +170,7 @@ WPVAR(IDF_HEX, colour, 0, 0xFFFFFF,
 );
 WPVARM(0, cooked, 0, VAR_MAX,
     0,          0,          0,          0,          0,          0,          0,          0,          8,          0,          0,
-    0,          0,          0,          0,          0,          0,          33,         0,          8,          0,          0
+    0,          0,          0,          0,          0,          0,          33,         17,         8,          0,          0
 );
 WPVARK(0, damage, VAR_MIN, VAR_MAX,
     30,         25,         32,         8,          18,         7,          15,         45,         100,        150,        200,
@@ -397,7 +397,7 @@ WPVARM(0, projdelay, 0, VAR_MAX,
 );
 WPVARM(0, power, 0, VAR_MAX,
     0,          0,          0,          0,          0,          0,          0,          0,          3000,       0,          0,
-    0,          0,          0,          0,          0,          0,          2000,       0,          3000,       0,          0
+    0,          0,          0,          0,          0,          0,          2000,       750,        3000,       0,          0
 );
 WPVARK(0, proxdelay, 0, VAR_MAX,
     0,          0,          0,          0,          0,          0,          0,          0,          0,          3000,       0,

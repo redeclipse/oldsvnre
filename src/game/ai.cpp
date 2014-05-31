@@ -118,7 +118,7 @@ namespace ai
     {
         if(e && !W(d->weapselect, zooms) && canshoot(d, e, true))
         {
-            if(d->weapstate[d->weapselect] == W_S_POWER)
+            if(d->weapstate[d->weapselect] == W_S_POWER || d->weapstate[d->weapselect] == W_S_ZOOM)
             {
                 if(d->action[AC_SECONDARY] && (!d->action[AC_PRIMARY] || d->actiontime[AC_SECONDARY] > d->actiontime[AC_PRIMARY]))
                     return true;
