@@ -2034,9 +2034,9 @@ namespace client
                     if(weap != t->weapselect && weap != W_MELEE) t->weapswitch(weap, lastmillis);
                     float scale = 1;
                     int sub = W2(weap, sub, WS(flags));
-                    if(W2(weap, power, WS(flags)))
+                    if(W2(weap, cooktime, WS(flags)))
                     {
-                        scale = len/float(W2(weap, power, WS(flags)));
+                        scale = len/float(W2(weap, cooktime, WS(flags)));
                         if(sub > 1) sub = int(ceilf(sub*scale));
                     }
                     projs::shootv(weap, flags, sub, 0, scale, from, shots, t, false);

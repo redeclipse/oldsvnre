@@ -607,7 +607,7 @@ struct gamestate
     bool canshoot(int weap, int flags, int sweap, int millis, int skip = 0)
     {
         if(weap == weapselect || weap == W_MELEE)
-            if(hasweap(weap, sweap) && getammo(weap, millis) >= (W2(weap, power, WS(flags)) ? 1 : W2(weap, sub, WS(flags))) && weapwaited(weap, millis, skip))
+            if(hasweap(weap, sweap) && getammo(weap, millis) >= (W2(weap, cooktime, WS(flags)) ? 1 : W2(weap, sub, WS(flags))) && weapwaited(weap, millis, skip))
                 return true;
         return false;
     }
@@ -682,6 +682,11 @@ struct gamestate
             }
             default: break;
         }
+    }
+
+    bool zooming()
+    {
+        return isweap(weapselect) && weapstate[weapselect] == W_S_ZOOM;
     }
 
     void resetresidual(int n = -1)

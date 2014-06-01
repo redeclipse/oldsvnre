@@ -431,7 +431,7 @@ namespace game
         if(!viewonly && (d->state == CS_DEAD || d->state == CS_WAITING)) return true;
         if(player1->state == CS_EDITING) return false;
         if(player1->state >= CS_SPECTATOR && d == player1) return false;
-        if(d == player1 && inzoom()) return false;
+        if(d == focus && inzoom()) return false;
         if(!(d != player1 ? followthirdperson : thirdperson)) return false;
         return true;
     }
@@ -896,7 +896,7 @@ namespace game
                         if(powerdl[d->weapselect] > 0)
                         {
                             float thresh = max(amt, 0.25f), size = 4+powerdl[d->weapselect]*thresh;
-                            int span = max(W2(d->weapselect, power, physics::secondaryweap(d))/4, 500), interval = lastmillis%span, part = span/2;
+                            int span = max(W2(d->weapselect, cooktime, physics::secondaryweap(d))/4, 500), interval = lastmillis%span, part = span/2;
                             if(interval) size += size*0.5f*(interval <= part ? interval/float(part) : (span-interval)/float(part));
                             adddynlight(d->muzzlepos(d->weapselect), size, vec(col).mul(thresh), 0, 0, DL_KEEP);
                         }
@@ -1103,7 +1103,7 @@ namespace game
 
         d->checktags();
 
-        loopi(W_MAX) if(d->weapstate[i] != W_S_IDLE && d->weapstate[i] != W_S_ZOOM)
+        loopi(W_MAX) if(d->weapstate[i] != W_S_IDLE && (d->weapselect != i || d->weapstate[i] != W_S_ZOOM))
         {
             bool timeexpired = lastmillis-d->weaplast[i] >= d->weapwait[i]+(d->weapselect != i || d->weapstate[i] != W_S_POWER ? 0 : PHYSMILLIS);
             if(d->state == CS_ALIVE && i == d->weapselect && d->weapstate[i] == W_S_RELOAD && timeexpired)
@@ -1122,7 +1122,7 @@ namespace game
                 bool secondary = physics::secondaryweap(d);
                 float amt = millis/float(d->weapwait[d->weapselect]);
                 int vol = 255;
-                if(W2(d->weapselect, power, secondary)) switch(W2(d->weapselect, cooked, secondary))
+                if(W2(d->weapselect, cooktime, secondary)) switch(W2(d->weapselect, cooked, secondary))
                 {
                     case 4: case 5: vol = 10+int(245*(1.f-amt)); break; // longer
                     case 1: case 2: case 3: default: vol = 10+int(245*amt); break; // shorter
@@ -2807,7 +2807,7 @@ namespace game
             checkoften(player1, true);
             loopv(players) if(players[i]) checkoften(players[i], players[i]->ai != NULL);
             if(!allowmove(player1)) player1->stopmoving(player1->state < CS_SPECTATOR);
-            if(focus->state == CS_ALIVE) zoomset(focus->weapstate[focus->weapselect] == W_S_ZOOM, lastmillis);
+            if(focus->state == CS_ALIVE) zoomset(focus->zooming(), lastmillis);
             else if(zooming) zoomset(false, 0);
 
             physics::update();

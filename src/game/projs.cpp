@@ -1134,11 +1134,11 @@ namespace projs
     void shootv(int weap, int flags, int sub, int offset, float scale, vec &from, vector<shotmsg> &shots, gameent *d, bool local)
     {
         int delay = W2(weap, projdelay, WS(flags)), attackdelay = W2(weap, attackdelay, WS(flags)),
-            power = W2(weap, power, WS(flags)), cooked = W2(weap, cooked, WS(flags)),
+            cook = W2(weap, cooktime, WS(flags)), cooked = W2(weap, cooked, WS(flags)),
             life = W2(weap, time, WS(flags)), speed = W2(weap, speed, WS(flags)),
             limspeed = W2(weap, limspeed, WS(flags));
         float skew = 1;
-        if(power && cooked)
+        if(cook && cooked)
         {
             if(cooked&1)  skew = scale; // scaled
             if(cooked&2)  skew = 1-scale; // inverted scale
@@ -1344,7 +1344,7 @@ namespace projs
                 if(!WK(proj.flags) && !proj.limited)// && proj.weap != W_MELEE)
                 {
                     int vol = int(ceilf(255*proj.curscale));
-                    if(W2(proj.weap, power, WS(proj.flags))) switch(W2(proj.weap, cooked, WS(proj.flags)))
+                    if(W2(proj.weap, cooktime, WS(proj.flags))) switch(W2(proj.weap, cooked, WS(proj.flags)))
                     {
                         case 4: case 5: vol = 10+int(245*(1.f-proj.lifespan)*proj.lifesize*proj.curscale); break; // longer
                         case 1: case 2: case 3: default: vol = 10+int(245*proj.lifespan*proj.lifesize*proj.curscale); break; // shorter

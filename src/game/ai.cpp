@@ -1180,7 +1180,7 @@ namespace ai
                 }
                 game::scaleyawpitch(d->yaw, d->pitch, yaw, pitch, frame, frame*0.75f);
                 bool shoot = canshoot(d, e, alt);
-                if(d->action[alt ? AC_SECONDARY : AC_PRIMARY] && W2(d->weapselect, power, alt) && W2(d->weapselect, cooked, alt))
+                if(d->action[alt ? AC_SECONDARY : AC_PRIMARY] && W2(d->weapselect, cooktime, alt) && W2(d->weapselect, cooked, alt))
                 { // TODO: make AI more aware of what they're shooting
                     int cooked = W2(d->weapselect, cooked, alt);
                     if(cooked&8) shoot = false; // inverted life
