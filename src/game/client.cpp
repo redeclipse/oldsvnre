@@ -160,6 +160,7 @@ namespace client
         int gamemode, mutators;
     };
     vector<demoinfo> demoinfos;
+    vector<char *> faildemos;
 
     int demoint(stream *f)
     {
@@ -173,8 +174,13 @@ namespace client
     {
         if(!name || !*name) return -1;
         loopv(demoinfos) if(!strcmp(demoinfos[i].file, name)) return i;
+        loopv(faildemos) if(!strcmp(faildemos[i], name)) return -1;
         stream *f = opengzfile(name, "rb");
-        if(!f) return -1;
+        if(!f)
+        {
+            faildemos.add(newstring(name));
+            return -1;
+        }
         int num = demoinfos.length();
         demoinfo &d = demoinfos.add();
         copystring(d.file, name);
@@ -191,6 +197,7 @@ namespace client
         {
             conoutft(CON_INFO, "%s", msg);
             demoinfos.pop();
+            faildemos.add(newstring(name));
             delete f;
             return -1;
         }
@@ -205,6 +212,7 @@ namespace client
                 {
                     conoutft(CON_INFO, "\frunable to parse map name from: \fc%s", name);
                     demoinfos.pop();
+                    faildemos.add(newstring(name));
                     delete f;
                     return -1;
                 }
@@ -219,10 +227,22 @@ namespace client
         }
         conoutft(CON_INFO, "\frunexpected message while reading: \fc%s", name);
         demoinfos.pop();
+        faildemos.add(newstring(name));
         delete f;
         return -1;
     }
     ICOMMAND(0, demoscan, "s", (char *name), intret(scandemo(name)));
+
+    void resetdemos(bool all)
+    {
+        if(all) loopvrev(demoinfos) demoinfos.remove(i);
+        loopvrev(faildemos)
+        {
+            DELETEA(faildemos[i]);
+            faildemos.remove(i);
+        }
+    }
+    ICOMMAND(0, demoreset, "i", (int *all), resetdemos(*all!=0));
 
     void infodemo(int idx, int prop)
     {
