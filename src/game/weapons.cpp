@@ -230,11 +230,11 @@ namespace weapons
             else secondary = zooming;
         }
         int sub = W2(weap, sub, secondary), cooked = force;
-        if(W2(weap, power, secondary) || zooming)
+        if(W2(weap, cooktime, secondary) || zooming)
         {
             float maxscale = 1;
             if(sub > 1 && d->ammo[weap] < sub) maxscale = d->ammo[weap]/float(sub);
-            int len = int(W2(weap, power, secondary)*maxscale), type = zooming ? W_S_ZOOM : W_S_POWER;
+            int len = int(W2(weap, cooktime, secondary)*maxscale), type = zooming ? W_S_ZOOM : W_S_POWER;
             if(!cooked)
             {
                 if(d->weapstate[weap] != type)
@@ -259,7 +259,7 @@ namespace weapons
                 }
                 else if(pressed && cooked < len) return false;
             }
-            scale = cooked/float(W2(weap, power, secondary));
+            scale = cooked/float(W2(weap, cooktime, secondary));
             if(sub > 1 && scale < 1) sub = int(ceilf(sub*scale));
         }
         else if(!pressed) return false;
@@ -278,7 +278,7 @@ namespace weapons
             if(weap == W_MELEE) to = vec(targ).sub(from).normalize().mul(d->radius).add(from);
             else to = d->muzzlepos(weap, secondary);
             int rays = W2(weap, rays, secondary);
-            if(rays > 1 && W2(weap, power, secondary) && scale < 1) rays = int(ceilf(rays*scale));
+            if(rays > 1 && W2(weap, cooktime, secondary) && scale < 1) rays = int(ceilf(rays*scale));
             loopi(rays) addshot(to);
         }
         else
@@ -286,7 +286,7 @@ namespace weapons
             from = d->muzzlepos(weap, secondary);
             to = targ;
             int rays = W2(weap, rays, secondary), x = 0;
-            if(rays > 1 && W2(weap, power, secondary) && scale < 1) rays = int(ceilf(rays*scale));
+            if(rays > 1 && W2(weap, cooktime, secondary) && scale < 1) rays = int(ceilf(rays*scale));
             float m = accmod(d, W(d->weapselect, zooms) && secondary, &x);
             float spread = WSP(weap, secondary, game::gamemode, game::mutators, m, x);
             loopi(rays)

@@ -3973,14 +3973,14 @@ namespace server
             return;
         }
         int sub = W2(weap, sub, WS(flags));
-        if(sub > 1 && W2(weap, power, WS(flags)))
+        if(sub > 1 && W2(weap, cooktime, WS(flags)))
         {
             if(ci->state.ammo[weap] < sub)
             {
-                int maxscale = int(ci->state.ammo[weap]/float(sub)*W2(weap, power, WS(flags)));
+                int maxscale = int(ci->state.ammo[weap]/float(sub)*W2(weap, cooktime, WS(flags)));
                 if(scale > maxscale) scale = maxscale;
             }
-            sub = int(ceilf(sub*scale/float(W2(weap, power, WS(flags)))));
+            sub = int(ceilf(sub*scale/float(W2(weap, cooktime, WS(flags)))));
         }
         if(!gs.canshoot(weap, flags, m_weapon(gamemode, mutators), millis))
         {
@@ -5270,7 +5270,7 @@ namespace server
                     if(!isweap(ev->weap)) havecn = false;
                     else
                     {
-                        ev->scale = clamp(ev->scale, 0, W2(ev->weap, power, WS(ev->flags)));
+                        ev->scale = clamp(ev->scale, 0, W2(ev->weap, cooktime, WS(ev->flags)));
                         if(havecn) ev->millis = cp->getmillis(gamemillis, ev->id);
                     }
                     loopk(3) ev->from[k] = getint(p);
@@ -5290,7 +5290,7 @@ namespace server
                     if(havecn)
                     {
                         int rays = min(W2(ev->weap, rays, WS(ev->flags)), MAXPARAMS);
-                        if(rays > 1 && W2(ev->weap, power, WS(ev->flags))) rays = int(ceilf(rays*ev->scale/float(W2(ev->weap, power, WS(ev->flags)))));
+                        if(rays > 1 && W2(ev->weap, cooktime, WS(ev->flags))) rays = int(ceilf(rays*ev->scale/float(W2(ev->weap, cooktime, WS(ev->flags)))));
                         while(ev->shots.length() > rays) ev->shots.remove(rnd(ev->shots.length()));
                         cp->addevent(ev);
                     }

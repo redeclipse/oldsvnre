@@ -158,7 +158,7 @@ namespace physics
         if(d->weapselect != W_MELEE || (d->physstate == PHYS_FALL && !d->onladder))
         {
             if(d->action[AC_SECONDARY] && (!d->action[AC_PRIMARY] || d->actiontime[AC_SECONDARY] > d->actiontime[AC_PRIMARY])) return true;
-            else if(d->actiontime[AC_SECONDARY] > d->actiontime[AC_PRIMARY] && W2(d->weapselect, power, true) && d->weapstate[d->weapselect] == W_S_POWER) return true;
+            else if(d->actiontime[AC_SECONDARY] > d->actiontime[AC_PRIMARY] && d->weapstate[d->weapselect] == W_S_POWER) return true;
         }
         return false;
     }
@@ -233,7 +233,7 @@ namespace physics
         if(allowimpulse(d, IM_A_SPRINT) && (gameent::is(d)) && d->state == CS_ALIVE && movepacing > 0)
         {
             gameent *e = (gameent *)d;
-            if(!iscrouching(e) && (!isweap(e->weapselect) || e->weapstate[e->weapselect] != W_S_ZOOM))
+            if(!iscrouching(e) && !e->zooming())
             {
                 if(turn && e->turnside) return true;
                 if((e != game::player1 && !e->ai) || m_freestyle(game::gamemode, game::mutators) || e->impulse[IM_METER] < impulsemeter)
@@ -340,8 +340,7 @@ namespace physics
             {
                 gameent *e = (gameent *)pl;
                 vel *= movespeed/100.f*(1.f-clamp(e->stunned(lastmillis), 0.f, 1.f));
-                if((!e->airmillis && !sliding(e) && iscrouching(e)) || (e == game::player1 && game::inzoom()))
-                    vel *= movecrawl;
+                if((!e->airmillis && !sliding(e) && iscrouching(e)) || e->zooming()) vel *= movecrawl;
                 if(e->move >= 0) vel *= e->strafe ? movestrafe : movestraight;
                 switch(e->physstate)
                 {
