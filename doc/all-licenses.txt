@@ -58,11 +58,6 @@ Files: game/fps/maps/keystone2k* game/fps/maps/livefire*
 Copyright: 2012-2013, John_III <snaginneb@yahoo.com>
 License: CC-BY-SA-3.0
 
-Files: game/fps/maps/fourplex* game/fps/maps/pumpstation*
-       game/fps/maps/starlibido*
-Copyright: 2012-2013 D.a.M.i.E.n. <daymeenn@gmail.com>
-License: CC-BY-SA-3.0
-
 Files: game/fps/maps/neodrive* game/fps/maps/hawk*
 Copyright: 2012-2013, Kirill "TristamK" Kolesnikov <tristamk@bk.ru>
 License: CC-BY-SA-3.0
@@ -97,17 +92,6 @@ Files: game/fps/maps/bloodlust*
 Copyright: 2013 Joseph "ballist1c" Calabria
            2013 Matt "greaserpirate" Kalt
 License: CC-BY-SA-3.0
-
-Files: data/misc/light2*
-Copyright: 2009 Georges "TRaK" Grondin <drognin@gmail.com>
-           2013 D.a.M.i.E.n. <daymeenn@gmail.com>
-License: Expat
-
-Files: data/misc/starllogo*
-Copyright: 2009 Georges "TRaK" Grondin <drognin@gmail.com>
-           2012 Julia Petretta <julia.petretta@googlemail.com>
-           2013 D.a.M.i.E.n. <daymeenn@gmail.com>
-License: Expat
 
 Files: data/jwin/*
 Copyright: JWindecker <jacobwindecker@hotmail.com>
