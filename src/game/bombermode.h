@@ -105,7 +105,7 @@ struct bomberservmode : bomberstate, servmode
 
     void scoreaffinity(clientinfo *ci, int relay, int goal)
     {
-        if(!canplay(hasflaginfo) || !m_team(gamemode, mutators) || m_gsp2(gamemode, mutators) || !flags.inrange(relay) || !flags.inrange(goal) || flags[relay].lastowner != ci->clientnum || !flags[relay].droptime) return;
+        if(!canplay(hasflaginfo) || m_gsp1(gamemode, mutators) || m_gsp2(gamemode, mutators) || !flags.inrange(relay) || !flags.inrange(goal) || flags[relay].lastowner != ci->clientnum || !flags[relay].droptime) return;
         scorebomb(ci, relay, goal);
     }
 
@@ -114,14 +114,11 @@ struct bomberservmode : bomberstate, servmode
         if(!canplay(hasflaginfo) || ci->state.actortype >= A_ENEMY) return;
         if(G(bomberthreshold) > 0 && oldpos.dist(newpos) >= G(bomberthreshold))
             dropaffinity(ci, oldpos, vec(ci->state.vel).add(ci->state.falling));
-        if(!m_team(gamemode, mutators) || m_gsp1(gamemode, mutators)) return;
-        loopv(flags) if(isbomberaffinity(flags[i]) && flags[i].owner == ci->clientnum)
+        if(m_gsp1(gamemode, mutators) || (G(bomberbasketonly) && !m_gsp2(gamemode, mutators))) return;
+        loopv(flags) if(isbomberaffinity(flags[i]) && flags[i].owner == ci->clientnum) loopvk(flags)
         {
-            loopvk(flags)
-            {
-                flag &f = flags[k];
-                if(isbombertarg(f, ci->team) && newpos.dist(f.spawnloc) <= enttype[AFFINITY].radius/2) scorebomb(ci, i, k);
-            }
+            flag &f = flags[k];
+            if(isbombertarg(f, ci->team) && newpos.dist(f.spawnloc) <= enttype[AFFINITY].radius/2) scorebomb(ci, i, k);
         }
     }
 
