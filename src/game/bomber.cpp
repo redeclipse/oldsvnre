@@ -574,7 +574,9 @@ namespace bomber
             }
             else if(f.droptime)
             {
-                f.droploc = f.pos();
+                vec pos = f.pos();
+                f.distance += f.droploc.dist(pos);
+                f.droploc = pos;
                 if(f.lastowner && (f.lastowner == game::player1 || f.lastowner->ai) && f.proj && (!f.movetime || totalmillis-f.movetime >= 40))
                 {
                     f.inertia = f.proj->vel;
@@ -787,17 +789,6 @@ namespace bomber
                         b.millis = lastmillis;
                     }
                 }
-                vec pos = d->feetpos();
-                float mindist = enttype[AFFINITY].radius*8; mindist *= mindist;
-                loopv(st.flags)
-                { // get out of the way of the returnee!
-                    bomberstate::flag &g = st.flags[i];
-                    if(pos.squaredist(g.pos()) <= mindist)
-                    {
-                        if(g.owner && ai::owner(g.owner) == ai::owner(d) && !walk) walk = 1;
-                        if(g.droptime && ai::makeroute(d, b, g.pos())) return true;
-                    }
-                }
             }
             return ai::defense(d, b, f.pos(), enttype[AFFINITY].radius, enttype[AFFINITY].radius*walk*8, walk);
         }
@@ -820,12 +811,15 @@ namespace bomber
                 }
                 return ai::makeroute(d, b, f.pos());
             }
-            else if(isbombertarg(f, ai::owner(d))) loopv(st.flags) if(st.flags[i].owner == d && ai::makeroute(d, b, f.pos()))
+            if(isbombertarg(f, ai::owner(d)))
             {
-                b.acttype = ai::AI_A_HASTE;
-                return true;
+                loopv(st.flags) if(st.flags[i].owner == d && ai::makeroute(d, b, f.pos()))
+                {
+                    b.acttype = ai::AI_A_HASTE;
+                    return true;
+                }
             }
-            else if(b.owner >= 0) return ai::makeroute(d, b, f.pos());
+            if(b.owner >= 0) return ai::makeroute(d, b, f.pos());
         }
         return false;
     }

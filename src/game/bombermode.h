@@ -105,7 +105,9 @@ struct bomberservmode : bomberstate, servmode
 
     void scoreaffinity(clientinfo *ci, int relay, int goal)
     {
-        if(!canplay(hasflaginfo) || m_gsp1(gamemode, mutators) || m_gsp2(gamemode, mutators) || !flags.inrange(relay) || !flags.inrange(goal) || flags[relay].lastowner != ci->clientnum || !flags[relay].droptime) return;
+        if(!canplay(hasflaginfo) || m_gsp1(gamemode, mutators) || m_gsp2(gamemode, mutators) || !flags.inrange(relay) || !flags.inrange(goal)) return;
+        if(flags[relay].lastowner != ci->clientnum || !flags[relay].droptime) return;
+        if(G(bomberbasketmindist) > 0 && !flags[relay].travel(flags[goal].spawnloc, G(bomberbasketmindist))) return;
         scorebomb(ci, relay, goal);
     }
 
@@ -209,7 +211,7 @@ struct bomberservmode : bomberstate, servmode
             if(f.owner >= 0)
             {
                 clientinfo *ci = (clientinfo *)getinfo(f.owner);
-                if((!m_team(gamemode, mutators) || m_gsp1(gamemode, mutators)) && t > 0)
+                if(m_gsp1(gamemode, mutators) && t > 0)
                 {
                     int score = G(bomberholdpoints)*t;
                     if(score)
@@ -233,10 +235,10 @@ struct bomberservmode : bomberstate, servmode
                     ci->state.weapshots[W_GRENADE][0].add(1);
                     sendf(-1, 1, "ri8", N_DROP, ci->clientnum, -1, 1, W_GRENADE, -1, -1, -1);
                     dropaffinity(ci, ci->state.feetpos(G(bomberdropheight)), vec(ci->state.vel).add(ci->state.falling));
-                    if((!m_team(gamemode, mutators) || m_gsp1(gamemode, mutators)) && G(bomberholdpenalty))
+                    if(m_gsp1(gamemode, mutators) && G(bomberholdpenalty))
                     {
                         givepoints(ci, -G(bomberholdpenalty));
-                        if(m_team(gamemode, mutators) && m_gsp1(gamemode, mutators))
+                        if(m_team(gamemode, mutators))
                         {
                             int total = addscore(ci->team, -G(bomberholdpenalty));
                             sendf(-1, 1, "ri3", N_SCORE, ci->team, total);
@@ -327,6 +329,7 @@ struct bomberservmode : bomberstate, servmode
         if(!f.droptime || f.owner >= 0 || !isbomberaffinity(f)) return;
         clientinfo *co = f.lastowner >= 0 ? (clientinfo *)getinfo(f.lastowner) : NULL;
         if(!co || co->clientnum != ci->clientnum) return;
+        f.distance += f.droploc.dist(o);
         f.droploc = o;
         f.inertia = inertia;
         //sendf(-1, 1, "ri9", N_MOVEAFFIN, ci->clientnum, id, int(f.droploc.x*DMF), int(f.droploc.y*DMF), int(f.droploc.z*DMF), int(f.inertia.x*DMF), int(f.inertia.y*DMF), int(f.inertia.z*DMF));
