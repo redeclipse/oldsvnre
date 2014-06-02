@@ -12,9 +12,10 @@ struct bomberstate
 {
     struct flag
     {
-        vec droploc, inertia, spawnloc;
+        vec droploc, droppos, inertia, spawnloc;
         int team, ent, droptime, taketime;
         bool enabled;
+        float distance;
 #ifdef GAMESERVER
         int owner, lastowner;
         vector<int> votes;
@@ -22,7 +23,7 @@ struct bomberstate
         gameent *owner, *lastowner;
         projent *proj;
         int displaytime, pickuptime, movetime, inittime, viewtime, rendertime, interptime;
-        vec droppos, viewpos, renderpos, interppos, render, above;
+        vec viewpos, renderpos, interppos, render, above;
         entitylight light;
 #endif
 
@@ -35,7 +36,7 @@ struct bomberstate
         void reset()
         {
             inertia = vec(0, 0, 0);
-            droploc = spawnloc = vec(-1, -1, -1);
+            droploc = droppos = spawnloc = vec(-1, -1, -1);
 #ifdef GAMESERVER
             owner = lastowner = -1;
             votes.shrink(0);
@@ -43,11 +44,12 @@ struct bomberstate
             owner = lastowner = NULL;
             proj = NULL;
             displaytime = pickuptime = movetime = inittime = viewtime = rendertime = interptime = 0;
-            viewpos = renderpos = droppos = vec(-1, -1, -1);
+            viewpos = renderpos = vec(-1, -1, -1);
 #endif
             team = T_NEUTRAL;
             taketime = droptime = 0;
             enabled = false;
+            distance = 0;
         }
 
 #ifndef GAMESERVER
@@ -93,6 +95,12 @@ struct bomberstate
             return position(render);
         }
 #endif
+        bool travel(const vec &o, float dist)
+        {
+            if(!droptime) return false;
+            if(distance > 0 && distance >= dist) return true;
+            return droppos.dist(o) >= dist;
+        }
     };
     vector<flag> flags;
 
@@ -172,15 +180,15 @@ struct bomberstate
 #ifndef GAMESERVER
         interp(i, t);
 #endif
-        f.droploc = o;
+        f.droploc = f.droppos = o;
         f.inertia = p;
         f.droptime = t;
         f.taketime = 0;
+        f.distance = 0;
 #ifdef GAMESERVER
         f.owner = -1;
         f.votes.shrink(0);
 #else
-        f.droppos = o;
         f.pickuptime = 0;
         f.movetime = t;
         if(!f.inittime) f.inittime = t;
