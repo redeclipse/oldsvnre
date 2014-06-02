@@ -563,6 +563,8 @@ namespace game
     };
     vector<ancbuf> anclist;
 
+    VAR(IDF_PERSIST, announcecollect, 1, 1, 3);
+    VAR(IDF_PERSIST, announcededupe, 0, 2, 3);
     VAR(IDF_PERSIST, announcebuffer, 1, 64, VAR_MAX);
 
     void removeannounceall()
@@ -586,26 +588,30 @@ namespace game
     {
         if(idx < 0) return;
         physent *t = !d || d == game::player1 || forced ? camera1 : d;
-        int *chan = d && !forced ? &d->aschan : &announcerchan;
-        bool inuse = false;
+        bool ispl = d && !forced, inuse = false;
+        int *chan = ispl ? &d->aschan : &announcerchan;
         if(issound(*chan))
         {
-            if(sounds[*chan].slotnum == idx) return; // duplicate is currently playing
+            if(announcededupe&(ispl ? 2 : 1) && sounds[*chan].slotnum == idx) return; // de-dupe
             inuse = true;
         }
-        loopv(anclist) if(anclist[i].chan == chan)
+        if(announcecollect&(ispl ? 2 : 1))
         {
-            if(anclist[i].idx == idx) return; // skip duplicates
-            inuse = true;
+            loopv(anclist) if(anclist[i].chan == chan)
+            {
+                if(announcededupe&(ispl ? 2 : 1) && anclist[i].idx == idx) return; // de-dupe
+                inuse = true;
+            }
+            if(inuse)
+            {
+                ancbuf &a = anclist.add();
+                a.idx = idx;
+                a.t = t;
+                a.chan = chan;
+                return;
+            }
         }
-        if(inuse)
-        {
-            ancbuf &a = anclist.add();
-            a.idx = idx;
-            a.t = t;
-            a.chan = chan;
-        }
-        else playsound(idx, t->o, t, t != camera1 ? SND_IMPORT : SND_FORCED, -1, -1, -1, chan);
+        playsound(idx, t->o, t, t != camera1 ? SND_IMPORT : SND_FORCED, -1, -1, -1, chan);
     }
 
     void announcef(int idx, int targ, gameent *d, bool forced, const char *msg, ...)
