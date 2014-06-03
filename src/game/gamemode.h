@@ -90,7 +90,7 @@ gametypes gametype[] = {
             0
         },
         "bomber-ball", "bomber", { "hold", "touchdown", "" },
-        "carry or throw the bomb into the enemy goal to score", { "hold the bomb as long as possible to score", "carry the bomb into the enemy goal to score", "" },
+        "throw the bomb into the enemy goal to score", { "hold the bomb as long as possible to score", "carry the bomb into the enemy goal to score", "" },
     },
     {
         G_TRIAL, 0, 0,
@@ -261,9 +261,9 @@ extern mutstypes mutstype[];
 #define m_xdelay(a,b)       (m_play(a) ? (m_trial(a) ? G(trialdelay) : (m_bomber(a) ? G(bomberdelay) : (m_insta(a, b) ? G(instadelay) : G(spawndelay)))) : 0)
 #define m_delay(a,b)        (m_duke(a,b) ? 0 : m_xdelay(a, b))
 #define m_protect(a,b)      (m_duke(a,b) ? G(duelprotect) : (m_insta(a, b) ? G(instaprotect) : G(spawnprotect)))
-#define m_noitems(a,b)      (m_trial(a) || (!m_tourney(a, b) && G(itemsallowed) < (m_sweaps(a, b) ? 2 : 1)))
+#define m_noitems(a,b)      (m_trial(a) || G(itemsallowed) < (m_sweaps(a, b) ? 2 : 1))
 #define m_health(a,b,c)     (m_insta(a,b) ? 1 : PLAYER(c, health))
-#define m_armour(a,b,c)     (!m_tourney(a,b) ? 0 : PLAYER(c, armour))
+#define m_armour(a,b,c)     (m_insta(a,b) || !m_tourney(a,b) ? 0 : PLAYER(c, armour))
 #define m_maxhealth(a,b,c)  (int(m_health(a, b, c)*(m_vampire(a,b) ? G(maxhealthvampire) : G(maxhealth))))
 #define m_swapteam(a,b)     (m_team(a, b) && !m_trial(a) && m_fight(a) && (G(teambalanceduel) || !m_duel(a, b)) && !m_coop(gamemode, mutators) && G(teambalance) >= 3 && G(teambalanceswap))
 #define m_balteam(a,b,c)    (m_team(a, b) && !m_trial(a) && m_fight(a) && (G(teambalanceduel) || !m_duel(a, b)) && !m_coop(gamemode, mutators) && G(teambalance) >= c)

@@ -1430,9 +1430,8 @@ namespace client
         }
         if(d->conopen) flags |= 1<<8;
         if(d->action[AC_JUMP]) flags |= 1<<9;
-        if(d->action[AC_PACING] == (d!=game::player1 || physics::pacingstyle < 3)) flags |= 1<<10;
-        if(d->action[AC_CROUCH]) flags |= 1<<11;
-        if(d->action[AC_SPECIAL]) flags |= 1<<12;
+        if(d->action[AC_CROUCH]) flags |= 1<<10;
+        if(d->action[AC_SPECIAL]) flags |= 1<<11;
         putuint(q, flags);
         loopk(3)
         {
@@ -1687,9 +1686,8 @@ namespace client
                     if(val != d->action[x]) d->actiontime[x] = lastmillis; \
                 }
                 actmod(AC_JUMP, 9);
-                actmod(AC_PACING, 10);
-                actmod(AC_CROUCH, 11);
-                actmod(AC_SPECIAL, 12);
+                actmod(AC_CROUCH, 10);
+                actmod(AC_SPECIAL, 11);
                 vec oldpos(d->o);
                 d->o = o;
                 d->o.z += d->height;

@@ -1216,13 +1216,8 @@ namespace ai
         }
 
         if(actor[d->actortype].canjump && jumpallowed) jumpto(d, b, d->ai->spot);
-        if(d->actortype == A_BOT || d->actortype == A_GRUNT)
-        {
-            if(d->action[AC_PACING] != (physics::allowimpulse(d, IM_A_SPRINT) && (m_freestyle(game::gamemode, game::mutators) || impulsepacing == 0 || impulseregenpacing > 0)))
-                if((d->action[AC_PACING] = !d->action[AC_PACING]) == true) d->actiontime[AC_PACING] = lastmillis;
-            if(d->action[AC_CROUCH] != d->ai->dontmove)
-                if((d->action[AC_CROUCH] = !d->action[AC_CROUCH]) == true) d->actiontime[AC_CROUCH] = lastmillis;
-        }
+        if((d->actortype == A_BOT || d->actortype == A_GRUNT) && d->action[AC_CROUCH] != d->ai->dontmove)
+            if((d->action[AC_CROUCH] = !d->action[AC_CROUCH]) == true) d->actiontime[AC_CROUCH] = lastmillis;
 
         if(d->ai->dontmove || (d->actortype >= A_ENEMY && lastmillis-d->lastpain <= PHYSMILLIS/3)) d->move = d->strafe = 0;
         else if(!actor[d->actortype].canmove || !actor[d->actortype].canstrafe)

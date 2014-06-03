@@ -20,9 +20,8 @@ namespace physics
 
     VAR(IDF_PERSIST, dashstyle, 0, 1, 1); // 0 = only with impulse, 1 = double tap
     VAR(IDF_PERSIST, crouchstyle, 0, 0, 2); // 0 = press and hold, 1 = double-tap toggle, 2 = toggle
-    VAR(IDF_PERSIST, pacingstyle, 0, 3, 5); // 0 = press and hold, 1 = double-tap toggle, 2 = toggle, 3-5 = same, but auto engage if impulsepacing == 0
 
-    int physsteps = 0, lastphysframe = 0, lastmove = 0, lastdirmove = 0, laststrafe = 0, lastdirstrafe = 0, lastcrouch = 0, lastpacing = 0;
+    int physsteps = 0, lastphysframe = 0, lastmove = 0, lastdirmove = 0, laststrafe = 0, lastdirstrafe = 0, lastcrouch = 0;
 
     bool allowimpulse(physent *d, int type)
     {
@@ -79,7 +78,6 @@ namespace physics
                 switch(type)
                 {
                     case AC_CROUCH: style = crouchstyle; last = &lastcrouch; break;
-                    case AC_PACING: style = pacingstyle%3; last = &lastpacing; break;
                     default: break;
                 }
                 switch(style)
@@ -132,7 +130,6 @@ namespace physics
     ICOMMAND(0, reload, "D", (int *n), doaction(AC_RELOAD, *n!=0));
     ICOMMAND(0, use, "D", (int *n), doaction(AC_USE, *n!=0));
     ICOMMAND(0, jump, "D", (int *n), doaction(AC_JUMP, *n!=0));
-    ICOMMAND(0, pacing, "D", (int *n), doaction(AC_PACING, *n!=0));
     ICOMMAND(0, crouch, "D", (int *n), doaction(AC_CROUCH, *n!=0));
     ICOMMAND(0, special, "D", (int *n), doaction(AC_SPECIAL, *n!=0));
     ICOMMAND(0, drop, "D", (int *n), doaction(AC_DROP, *n!=0));
@@ -224,25 +221,6 @@ namespace physics
         {
             gameent *e = (gameent *)d;
             return e->action[AC_CROUCH] || e->actiontime[AC_CROUCH] < 0 || lastmillis-e->actiontime[AC_CROUCH] <= PHYSMILLIS;
-        }
-        return false;
-    }
-
-    bool pacing(physent *d, bool turn)
-    {
-        if(allowimpulse(d, IM_A_SPRINT) && (gameent::is(d)) && d->state == CS_ALIVE && movepacing > 0)
-        {
-            gameent *e = (gameent *)d;
-            if(!iscrouching(e) && !e->zooming())
-            {
-                if(turn && e->turnside) return true;
-                if((e != game::player1 && !e->ai) || m_freestyle(game::gamemode, game::mutators) || e->impulse[IM_METER] < impulsemeter)
-                {
-                    bool value = e->action[AC_PACING];
-                    if(d == game::player1 && pacingstyle >= 3 && impulsepacing == 0) value = !value;
-                    if(value && (e->move || e->strafe)) return true;
-                }
-            }
         }
         return false;
     }
@@ -349,7 +327,7 @@ namespace physics
                     case PHYS_STEP_UP: vel *= movestepup; break;
                     default: break;
                 }
-                if(pacing(e, false)) vel *= movepacing;
+                if(e->running()) vel *= moverun;
                 if(carryaffinity(e))
                 {
                     if(m_capture(game::gamemode)) vel *= capturecarryspeed;
@@ -809,48 +787,29 @@ namespace physics
     void modifyinput(gameent *d, vec &m, bool wantsmove, int millis)
     {
         bool onfloor = d->physstate >= PHYS_SLOPE || d->onladder || liquidcheck(d);
-        if(!m_freestyle(game::gamemode, game::mutators))
+        if(!m_freestyle(game::gamemode, game::mutators) && d->impulse[IM_METER] > 0 && canregenimpulse(d))
         {
-            bool quickpace = pacing(d, false);
-            if(quickpace && impulsepacing > 0)
-            {
-                int timeslice = millis+d->impulse[IM_COLPACE], len = int(timeslice*impulsepacing);
-                if(len > 0)
-                {
-                    if(d->impulse[IM_METER]+len <= impulsemeter)
-                    {
-                        d->impulse[IM_METER] += len;
-                        d->impulse[IM_REGEN] = lastmillis;
-                        d->impulse[IM_COLPACE] = 0;
-                    }
-                    else quickpace = d->action[AC_PACING] = false;
+            bool collect = true; // collect time until it is able to act upon it
+            int timeslice = int((millis+d->impulse[IM_COLLECT])*impulseregen);
+            #define impulsemod(x,y) \
+                if(collect && (x)) \
+                { \
+                    if(y > 0) { if(timeslice > 0) timeslice = int(timeslice*y); } \
+                    else collect = false; \
                 }
-                else d->impulse[IM_COLPACE] += millis;
-            }
-            if(d->impulse[IM_METER] > 0 && canregenimpulse(d))
+            impulsemod(d->running(), impulseregenrun);
+            impulsemod(d->move || d->strafe, impulseregenmove);
+            impulsemod((!onfloor && PHYS(gravity) > 0) || sliding(d), impulseregeninair);
+            impulsemod(onfloor && iscrouching(d) && !sliding(d), impulseregencrouch);
+            impulsemod(sliding(d), impulseregenslide);
+            if(collect)
             {
-                bool collect = true; // collect time until it is able to act upon it
-                int timeslice = int((millis+d->impulse[IM_COLLECT])*impulseregen);
-                #define impulsemod(x,y) \
-                    if(collect && (x)) \
-                    { \
-                        if(y > 0) { if(timeslice > 0) timeslice = int(timeslice*y); } \
-                        else collect = false; \
-                    }
-                impulsemod(quickpace, impulseregenpacing);
-                impulsemod(d->move || d->strafe, impulseregenmove);
-                impulsemod((!onfloor && PHYS(gravity) > 0) || sliding(d), impulseregeninair);
-                impulsemod(onfloor && iscrouching(d) && !sliding(d), impulseregencrouch);
-                impulsemod(sliding(d), impulseregenslide);
-                if(collect)
+                if(timeslice > 0)
                 {
-                    if(timeslice > 0)
-                    {
-                        if((d->impulse[IM_METER] -= timeslice) < 0) d->impulse[IM_METER] = 0;
-                        d->impulse[IM_COLLECT] = 0;
-                    }
-                    else d->impulse[IM_COLLECT] += millis;
+                    if((d->impulse[IM_METER] -= timeslice) < 0) d->impulse[IM_METER] = 0;
+                    d->impulse[IM_COLLECT] = 0;
                 }
+                else d->impulse[IM_COLLECT] += millis;
             }
         }
 

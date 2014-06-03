@@ -113,7 +113,7 @@ PPVAR(0, health, 1, VAR_MAX,
     100
 );
 PPVAR(0, armour, 0, VAR_MAX,
-    0
+    100
 );
 PPFVAR(0, weight, 0, FVAR_MAX,
     200
