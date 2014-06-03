@@ -234,10 +234,6 @@ void ircnewnet(int type, const char *name, const char *serv, int port, const cha
     ircnet &n = *ircnets.add(new ircnet);
     n.type = type;
     n.port = port;
-    n.lastattempt = n.lastactivity = n.lastping = 0;
-    #ifndef STANDALONE
-    n.updated = IRCUP_NEW;
-    #endif
     copystring(n.name, name);
     copystring(n.serv, serv);
     copystring(n.nick, nick);

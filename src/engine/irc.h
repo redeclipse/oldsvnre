@@ -78,6 +78,8 @@ struct ircnet
             type = IRCT_NONE;
             state = IRC_NEW;
             sock = ENET_SOCKET_NULL;
+            address.host = ENET_HOST_ANY;
+            address.port = 6667;
         }
         else state = IRC_DISC;
         inputcarry = inputlen = 0;
@@ -85,7 +87,7 @@ struct ircnet
         name[0] = serv[0] = nick[0] = ip[0] = passkey[0] = authname[0] = authpass[0] = 0;
         channels.shrink(0);
 #ifndef STANDALONE
-        updated = 0;
+        updated = IRCUP_NEW;
         buffer.reset();
 #endif
     }
