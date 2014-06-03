@@ -1,5 +1,5 @@
 appname=$(APPNAME)
-appnamefull=$(shell sed -n 's/versionname *"\([^"]*\)"/\1/p' ../data/version.cfg)
+appnamefull=$(shell sed -n 's/versionname *"\([^"]*\)"/\1/p' ../data/config/version.cfg)
 appsrcname=$(APPNAME)
 cappname=$(shell echo $(appname) | tr '[:lower:]' '[:upper:]')# Captial appname
 appclient=$(APPCLIENT)
@@ -92,10 +92,10 @@ system-install-server: server
 	g,@APPNAME@,\
 	s,@APPNAME@,$(appname),g\n\
 	w\n" | ed -s $(gamesbindir)/$(appname)-server
-	install -m644 ../$(appgamedir)/version.cfg \
-		$(datadir)/$(appname)/version.cfg
-	ln -s $(patsubst $(DESTDIR)%,%,$(datadir))/$(appname)/version.cfg \
-		$(libexecdir)/$(appname)/version.cfg
+	install -m644 ../$(appgamedir)/config/version.cfg \
+		$(datadir)/$(appname)/config/version.cfg
+	ln -s $(patsubst $(DESTDIR)%,%,$(datadir))/$(appname)/config/version.cfg \
+		$(libexecdir)/$(appname)/config/version.cfg
 
 system-install-data:
 	$(MKDIR) $(datadir)/$(appname)/game
@@ -165,7 +165,7 @@ system-uninstall-client:
 	@rm -fv $(libexecdir)/$(appname)/$(appname)
 	@rm -fv $(libexecdir)/$(appname)/data
 	@rm -fv $(libexecdir)/$(appname)/game
-	@rm -fv	$(libexecdir)/$(appname)/version.cfg
+	@rm -fv	$(libexecdir)/$(appname)/config/version.cfg
 	@rm -fv $(gamesbindir)/$(appname)
 
 system-uninstall-server:
@@ -175,7 +175,7 @@ system-uninstall-server:
 system-uninstall-data:
 	rm -rf $(datadir)/$(appname)/data
 	rm -rf $(datadir)/$(appname)/game
-	rm -fv $(datadir)/$(appname)/version.cfg
+	rm -fv $(datadir)/$(appname)/config/version.cfg
 
 system-uninstall-docs:
 	@rm -rfv $(docdir)/$(appname)/examples
