@@ -300,7 +300,7 @@ GVAR(0, defendregenextra, 0, 2, VAR_MAX); // add this to regen when buffed
 GVAR(0, bomberlimit, 0, 0, VAR_MAX); // finish when score is this or more (non-hold)
 GVAR(0, bomberholdlimit, 0, 0, VAR_MAX); // finish when score is this or more (hold)
 GVAR(0, bomberbasketonly, 0, 1, 1); // prohibit touchdowns in normal game
-GFVAR(0, bomberbasketmindist, 0, 16, FVAR_MAX); // prohibit baskets less than this far away
+GFVAR(0, bomberbasketmindist, 0, 48, FVAR_MAX); // prohibit baskets less than this far away
 GVAR(0, bomberresetdelay, 0, 15000, VAR_MAX);
 GVAR(0, bomberpickupdelay, -1, 5000, VAR_MAX);
 GVAR(0, bombercarrytime, 0, 15000, VAR_MAX);
@@ -370,9 +370,10 @@ GFVAR(0, enemyspeed, 0, 1, FVAR_MAX);
 GFVAR(0, enemyscale, FVAR_NONZERO, 1, FVAR_MAX);
 GFVAR(0, enemystrength, FVAR_NONZERO, 1, FVAR_MAX); // scale enemy health values by this much
 
-GFVAR(0, movespeed, FVAR_NONZERO, 100, FVAR_MAX); // speed
+GFVAR(0, movespeed, FVAR_NONZERO, 125, FVAR_MAX); // speed
+GFVAR(0, runspeed, 0, 50, FVAR_MAX); // speed running starts
 GFVAR(0, movecrawl, 0, 0.6f, FVAR_MAX); // crawl modifier
-GFVAR(0, movepacing, FVAR_NONZERO, 1.6f, FVAR_MAX); // pacing modifier
+GFVAR(0, moverun, FVAR_NONZERO, 1.3f, FVAR_MAX); // running modifier
 GFVAR(0, movestraight, FVAR_NONZERO, 1.2f, FVAR_MAX); // non-strafe modifier
 GFVAR(0, movestrafe, FVAR_NONZERO, 1, FVAR_MAX); // strafe modifier
 GFVAR(0, moveinair, FVAR_NONZERO, 0.9f, FVAR_MAX); // in-air modifier
@@ -400,7 +401,7 @@ GFVAR(0, impulseparkourkickredir, 0, 1, FVAR_MAX); // how much of the old veloci
 GFVAR(0, impulseparkourvault, 0, 1.3f, FVAR_MAX); // parkour vault modifier
 GFVAR(0, impulseparkourvaultredir, 0, 1, FVAR_MAX); // how much of the old velocity is redirected into the new one
 GFVAR(0, impulseparkournorm, 0, 0.5f, FVAR_MAX); // minimum parkour surface z normal
-GVAR(0, impulseallowed, 0, IM_A_ALL, IM_A_ALL); // impulse actions allowed; bit: 0 = off, 1 = dash, 2 = boost, 4 = pacing, 8 = parkour
+GVAR(0, impulseallowed, 0, IM_A_ALL, IM_A_ALL); // impulse actions allowed; bit: 0 = off, 1 = dash, 2 = boost, 4 = parkour
 GVAR(0, impulsestyle, 0, 1, 3); // impulse style; 0 = off, 1 = touch and count, 2 = count only, 3 = freestyle
 GVAR(0, impulsecount, 0, 6, VAR_MAX); // number of impulse actions per air transit
 GVAR(0, impulseslip, 0, 250, VAR_MAX); // time before floor friction kicks back in
@@ -413,13 +414,12 @@ GFVAR(0, impulsevaultmax, FVAR_NONZERO, 1.f, FVAR_MAX); // maximum percentage of
 
 GVAR(0, impulsemeter, 1, 30000, VAR_MAX); // impulse dash length; timer
 GVAR(0, impulsecost, 1, 5000, VAR_MAX); // cost of impulse move
-GVAR(0, impulsecostrelax, 0, IM_A_RELAX, IM_A_ALL); // whether the cost of an impulse move is unimportant; bit: 0 = off, 1 = dash, 2 = boost, 4 = pacing, 8 = parkour
+GVAR(0, impulsecostrelax, 0, IM_A_RELAX, IM_A_ALL); // whether the cost of an impulse move is unimportant; bit: 0 = off, 1 = dash, 2 = boost, 4 = parkour
 GVAR(0, impulsecostscale, 0, 0, 1); // whether the cost scales depend on the amount the impulse scales
 GVAR(0, impulseskate, 0, 1000, VAR_MAX); // length of time a run along a wall can last
-GFVAR(0, impulsepacing, 0, 0, FVAR_MAX); // pacing impulse meter depletion
 GFVAR(0, impulseregen, 0, 5, FVAR_MAX); // impulse regen multiplier
 GFVAR(0, impulseregencrouch, 0, 2.5f, FVAR_MAX); // impulse regen crouch modifier
-GFVAR(0, impulseregenpacing, 0, 0.75f, FVAR_MAX); // impulse regen pacing modifier
+GFVAR(0, impulseregenrun, 0, 0.75f, FVAR_MAX); // impulse regen running modifier
 GFVAR(0, impulseregenmove, 0, 1, FVAR_MAX); // impulse regen moving modifier
 GFVAR(0, impulseregeninair, 0, 0.75f, FVAR_MAX); // impulse regen in-air modifier
 GFVAR(0, impulseregenslide, 0, 0, FVAR_MAX); // impulse regen sliding modifier
@@ -436,7 +436,7 @@ GVAR(0, quakelimit, 0, 200, VAR_MAX);
 
 GVAR(0, zoomlimitmin, 1, 10, 150);
 GVAR(0, zoomlimitmax, 1, 65, 150);
-GVAR(0, zoomtime, 1, 350, VAR_MAX);
+GVAR(0, zoomtime, 1, 250, VAR_MAX);
 
 GFVAR(0, radialscale, 0, 1, FVAR_MAX);
 GFVAR(0, radiallimited, 0, 0.75f, FVAR_MAX);
