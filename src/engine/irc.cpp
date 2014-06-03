@@ -228,14 +228,11 @@ void ircnewnet(int type, const char *name, const char *serv, int port, const cha
     ircnet *m = ircfind(name);
     if(m)
     {
-        if(m->state != IRC_DISC) conoutf("ircnet %s already exists", m->name);
-        else ircestablish(m);
+        conoutf("ircnet %s already exists", m->name);
         return;
     }
     ircnet &n = *ircnets.add(new ircnet);
     n.type = type;
-    n.state = IRC_NEW;
-    n.sock = ENET_SOCKET_NULL;
     n.port = port;
     n.lastattempt = n.lastactivity = n.lastping = 0;
     #ifndef STANDALONE
@@ -298,7 +295,7 @@ ICOMMAND(0, ircauth, "sss", (const char *name, const char *s, const char *t), {
 ICOMMAND(0, ircconnect, "s", (const char *name), {
     ircnet *n = ircfind(name);
     if(!n) { conoutf("no such ircnet: %s", name); return; }
-    if(n->state != IRC_DISC) { ircprintf(n, 4, NULL, "network already already active"); return; }
+    if(n->state > IRC_DISC) { ircprintf(n, 4, NULL, "network already already active"); return; }
     ircestablish(n);
 });
 
@@ -767,7 +764,7 @@ void ircslice()
     loopvrev(ircnets)
     {
         ircnet *n = ircnets[i];
-        if((n->sock == ENET_SOCKET_NULL || n->state == IRC_DISC) && n->updated&IRCUP_LEAVE)
+        if((n->sock == ENET_SOCKET_NULL || n->state <= IRC_DISC) && n->updated&IRCUP_LEAVE)
         {
             delete n;
             ircnets.remove(i);

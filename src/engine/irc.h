@@ -68,13 +68,18 @@ struct ircnet
     ircbuf buffer;
 #endif
 
-    ircnet() { reset(); }
-    ~ircnet() { reset(); }
+    ircnet() { reset(true); }
+    ~ircnet() { reset(true); }
 
-    void reset()
+    void reset(bool start = false)
     {
-        type = IRCT_NONE;
-        state = IRC_DISC;
+        if(start)
+        {
+            type = IRCT_NONE;
+            state = IRC_NEW;
+            sock = ENET_SOCKET_NULL;
+        }
+        else state = IRC_DISC;
         inputcarry = inputlen = 0;
         port = lastattempt = lastactivity = lastping = 0;
         name[0] = serv[0] = nick[0] = ip[0] = passkey[0] = authname[0] = authpass[0] = 0;
