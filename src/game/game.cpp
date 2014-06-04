@@ -236,7 +236,7 @@ namespace game
     FVAR(IDF_PERSIST, gibscale, 0, 1, 1000);
     VAR(IDF_PERSIST, gibfade, 1, 5000, VAR_MAX);
     FVAR(IDF_PERSIST, impulsescale, 0, 1, 1000);
-    VAR(IDF_PERSIST, impulsefade, 0, 400, VAR_MAX);
+    VAR(IDF_PERSIST, impulsefade, 0, 200, VAR_MAX);
     VAR(IDF_PERSIST, ragdolleffect, 2, 500, VAR_MAX);
 
     VAR(IDF_PERSIST, playerovertone, -1, CTONE_TEAM, CTONE_MAX-1);
@@ -947,15 +947,14 @@ namespace game
 
     void boosteffect(gameent *d, const vec &pos, int num, int len, bool shape = false)
     {
-        float scale = 0.6f+(rnd(40)/100.f);
-        part_create(PART_HINT, shape ? len/2 : 1, pos, 0x1818A8, scale*1.5f, min(0.75f*scale, 0.95f), 0, 0);
-        part_create(PART_FIREBALL, shape ? len/2 : 1, pos, pulsecols[PULSE_FIRE][rnd(PULSECOLOURS)], scale*1.25f, min(0.75f*scale, 0.95f), 0, 0);
+        float scale = 0.4f+(rnd(40)/100.f);
+        part_create(PART_HINT, shape ? len/2 : len/10, pos, getcolour(d, playereffecttone), scale*1.5f, scale*0.75f, 0, 0);
+        part_create(PART_FIREBALL, shape ? len/2 : len/10, pos, pulsecols[PULSE_FIRE][rnd(PULSECOLOURS)], scale*1.25f, scale*0.75f, 0, 0);
         if(shape) loopi(num) regularshape(PART_FIREBALL, int(d->radius)*2, pulsecols[PULSE_FIRE][rnd(PULSECOLOURS)], 21, 1, len, pos, scale*1.25f, 0.75f, -5, 0, 10);
     }
 
     void impulseeffect(gameent *d, int effect)
     {
-        if(!gameent::is(d)) return;
         int num = int((effect ? 5 : 20)*impulsescale);
         switch(effect)
         {
@@ -1117,25 +1116,25 @@ namespace game
                 if(timeexpired && playreloadnotify&(d == focus ? 1 : 2) && (d->ammo[i] >= W(i, max) || playreloadnotify&(d == focus ? 4 : 8)))
                     playsound(WSND(i, S_W_NOTIFY), d->o, d, 0, reloadnotifyvol, -1, -1, &d->wschan);
             }
-            if(d->state != CS_ALIVE || timeexpired)
-                d->setweapstate(i, W_S_IDLE, 0, lastmillis);
+            if(d->state != CS_ALIVE || timeexpired) d->setweapstate(i, W_S_IDLE, 0, lastmillis);
         }
-        if(d->state == CS_ALIVE && isweap(d->weapselect) && d->weapstate[d->weapselect] == W_S_POWER)
+        if(d->state == CS_ALIVE && isweap(d->weapselect) && (d->weapstate[d->weapselect] == W_S_POWER || d->weapstate[d->weapselect] == W_S_ZOOM))
         {
             int millis = lastmillis-d->weaplast[d->weapselect];
-            if(millis > 0)
+            if(millis >= 0 && millis <= d->weapwait[d->weapselect])
             {
                 bool secondary = physics::secondaryweap(d);
                 float amt = millis/float(d->weapwait[d->weapselect]);
-                int vol = 255;
+                int vol = 255, snd = d->weapstate[d->weapselect] == W_S_POWER ? WSND2(d->weapselect, secondary, S_W_POWER) : WSND(d->weapselect, S_W_ZOOM);
                 if(W2(d->weapselect, cooktime, secondary)) switch(W2(d->weapselect, cooked, secondary))
                 {
                     case 4: case 5: vol = 10+int(245*(1.f-amt)); break; // longer
                     case 1: case 2: case 3: default: vol = 10+int(245*amt); break; // shorter
                 }
                 if(issound(d->pschan)) sounds[d->pschan].vol = vol;
-                else playsound(WSND2(d->weapselect, secondary, S_W_POWER), d->o, d, SND_LOOP, vol, -1, -1, &d->pschan);
+                else playsound(snd, d->o, d, SND_LOOP, vol, -1, -1, &d->pschan);
             }
+            else if(issound(d->pschan)) removesound(d->pschan);
         }
         else if(issound(d->pschan)) removesound(d->pschan);
         if(local)
@@ -3328,7 +3327,7 @@ namespace game
                     case W_S_PRIMARY:
                     case W_S_SECONDARY:
                     {
-                        if(weaptype[weap].thrown[d->weapstate[weap] != W_S_SECONDARY ? 0 : 1] > 0 && (lastmillis-d->weaplast[weap] <= d->weapwait[weap]/2 || !d->hasweap(weap, m_weapon(gamemode, mutators))))
+                        if(weaptype[weap].thrown[d->weapstate[weap]-W_S_PRIMARY] > 0 && (lastmillis-d->weaplast[weap] <= d->weapwait[weap]/2 || !d->hasweap(weap, m_weapon(gamemode, mutators))))
                             showweap = false;
                         weapflags = animflags = (weaptype[weap].anim+d->weapstate[weap])|ANIM_CLAMP;
                         break;
@@ -3535,7 +3534,7 @@ namespace game
                     case 0: default: break;
                 }
             }
-            if(d->turnside || d->impulse[IM_JUMP] || physics::sliding(d)) impulseeffect(d, 1);
+            if(d->turnside || d->running() || d->impulse[IM_JUMP] || physics::sliding(d)) impulseeffect(d, 1);
         }
         if(burntime && d->burning(lastmillis, burntime))
         {
