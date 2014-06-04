@@ -614,7 +614,7 @@ struct gamestate
 
     bool canreload(int weap, int sweap, bool check = true, int millis = 0, int skip = 0)
     {
-        if(check || (weap == weapselect && hasweap(weap, sweap) && ammo[weap] < W(weap, max) && weapwaited(weap, millis, skip)))
+        if(weapstate[weap] != W_S_ZOOM && (check || (weap == weapselect && hasweap(weap, sweap) && ammo[weap] < W(weap, max) && weapwaited(weap, millis, skip))))
         {
             int n = w_reload(weap, sweap);
             switch(n)
@@ -1389,7 +1389,7 @@ struct gameent : dynent, gamestate
 
     bool running()
     {
-        return G(runspeed) == 0 || vel.magnitude() >= runspeed;
+        return (move || strafe) && (G(runspeed) == 0 || vel.magnitude() >= runspeed);
     }
 };
 
