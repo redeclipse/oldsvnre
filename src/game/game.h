@@ -1602,7 +1602,7 @@ namespace hud
 enum { CTONE_TEAM = 0, CTONE_TONE, CTONE_TEAMED, CTONE_ALONE, CTONE_MIXED, CTONE_TMIX, CTONE_AMIX, CTONE_MAX };
 namespace game
 {
-    extern int gamemode, mutators, nextmode, nextmuts, timeremaining, maptime, lastzoom, lasttvcam, lasttvchg, spectvtime, waittvtime,
+    extern int gamemode, mutators, nextmode, nextmuts, timeremaining, lasttimeremain, maptime, lastzoom, lasttvcam, lasttvchg, spectvtime, waittvtime,
             bloodfade, bloodsize, bloodsparks, debrisfade, eventiconfade, eventiconshort,
             announcefilter, dynlighteffects, aboveheadnames, followthirdperson, nogore, forceplayermodel,
             playerovertone, playerundertone, playerdisplaytone, playereffecttone, playerteamtone, follow, specmode, spectvfollow, spectvfollowing;
