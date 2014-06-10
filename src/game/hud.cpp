@@ -2884,7 +2884,7 @@ namespace hud
                         }
                         else if(client::waitplayers) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fywaiting\fS");
                         else if(paused) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fopaused\fS", 0xFFFFFF);
-                        else if(game::timeremaining && timelimit) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fg%s\fS", timestr(game::timeremaining*1000+(lastmillis-game::lasttimeremain), inventorytimestyle));
+                        else if(game::timeremaining && timelimit) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fg%s\fS", timestr(game::timeremaining*1000-(lastmillis-game::lasttimeremain), inventorytimestyle));
                     }
                 }
                 if(texpaneltimer) break;
