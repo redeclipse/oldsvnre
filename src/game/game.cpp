@@ -2,7 +2,7 @@
 #include "game.h"
 namespace game
 {
-    int nextmode = G_EDITMODE, nextmuts = 0, gamemode = G_EDITMODE, mutators = 0, maptime = 0, timeremaining = 0,
+    int nextmode = G_EDITMODE, nextmuts = 0, gamemode = G_EDITMODE, mutators = 0, maptime = 0, timeremaining = 0, lasttimeremain = 0,
         lastcamera = 0, lasttvcam = 0, lasttvchg = 0, lastzoom = 0, liquidchan = -1, spectvfollowing = -1;
     bool intermission = false, prevzoom = false, zooming = false, inputmouse = false, inputview = false, inputmode = false;
     float swayfade = 0, swayspeed = 0, swaydist = 0, bobfade = 0, bobdist = 0;
@@ -1743,6 +1743,7 @@ namespace game
         if(timeremaining & timeremain && timeremaining > timeremain && maptime > 0 && client::waitplayers)
             client::waitplayers = false;
         timeremaining = timeremain;
+        lasttimeremain = lastmillis;
         if(!timeremain && !intermission)
         {
             player1->stopmoving(true);
