@@ -479,9 +479,9 @@ bool listdir(const char *dirname, bool rel, const char *ext, vector<char *> &fil
             if(!ext) files.add(newstring(FindFileData.cFileName));
             else
             {
-                size_t namelen = strlen(FindFileData.cFileName); 
-                if(namelen > extsize) 
-                { 
+                size_t namelen = strlen(FindFileData.cFileName);
+                if(namelen > extsize)
+                {
                     namelen -= extsize;
                     if(FindFileData.cFileName[namelen] == '.' && strncmp(FindFileData.cFileName+namelen+1, ext, extsize-1)==0)
                         files.add(newstring(FindFileData.cFileName, namelen));
@@ -538,9 +538,7 @@ int listfiles(const char *dir, const char *ext, vector<char *> &files)
         formatstring(s)("%s%s", packagedirs[i].name, dirname);
         if(listdir(s, false, ext, files)) dirs++;
     }
-#ifndef STANDALONE
     dirs += listzipfiles(dirname, ext, files);
-#endif
     return dirs;
 }
 
@@ -1184,10 +1182,8 @@ stream *openrawfile(const char *filename, const char *mode)
 
 stream *openfile(const char *filename, const char *mode)
 {
-#ifndef STANDALONE
     stream *s = openzipfile(filename, mode);
     if(s) return s;
-#endif
     return openrawfile(filename, mode);
 }
 

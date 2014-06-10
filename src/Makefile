@@ -154,6 +154,7 @@ SERVER_OBJS= \
 	shared/geom-standalone.o \
 	shared/stream-standalone.o \
 	shared/tools-standalone.o \
+	shared/zip-standalone.o \
 	engine/command-standalone.o \
 	engine/irc-standalone.o \
 	engine/master-standalone.o \
@@ -583,6 +584,9 @@ shared/stream-standalone.o: shared/igame.h
 shared/tools-standalone.o: shared/cube.h shared/tools.h shared/command.h
 shared/tools-standalone.o: shared/geom.h shared/ents.h shared/iengine.h
 shared/tools-standalone.o: shared/igame.h
+shared/zip-standalone.o: shared/cube.h shared/tools.h shared/command.h
+shared/zip-standalone.o: shared/geom.h shared/ents.h shared/iengine.h
+shared/zip-standalone.o: shared/igame.h
 engine/command-standalone.o: engine/engine.h shared/cube.h shared/tools.h
 engine/command-standalone.o: shared/command.h shared/geom.h shared/ents.h
 engine/command-standalone.o: shared/iengine.h shared/igame.h engine/irc.h

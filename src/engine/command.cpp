@@ -2998,12 +2998,7 @@ void findfile_(char *name)
     string fname;
     copystring(fname, name);
     path(fname);
-    intret(
-#ifndef STANDALONE
-        findzipfile(fname) ||
-#endif
-        fileexists(fname, "e") || findfile(fname, "e") ? 1 : 0
-    );
+    intret(findzipfile(fname) || fileexists(fname, "e") || findfile(fname, "e") ? 1 : 0);
 }
 COMMANDN(0, findfile, findfile_, "s");
 

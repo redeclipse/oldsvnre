@@ -1601,7 +1601,7 @@ void rehash(bool reload)
     interactive = false;
     initing = NOT_INITING;
 #endif
-    conoutf("\fwconfiguration reloaded");
+    conoutf("\fwconfiguration %s", reload ? "reloaded" : "loaded");
     rehashing = 0;
 }
 ICOMMAND(0, rehash, "i", (int *nosave), if(!(identflags&IDF_WORLD)) rehash(*nosave ? false : true));
