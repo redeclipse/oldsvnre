@@ -915,7 +915,7 @@ namespace hud
                         pushfont("little");
                         sy += draw_textx("by %s", x+FONTW*2, y, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, game::colourteam(sg.team));
                         popfont();
-                        sy += draw_textx("\fg%s", x, y-sy, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, timestr(sg.total));
+                        sy += draw_textx("\fg%s", x, y-sy, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, timestr(sg.total, hud::inventorycheckpointstyle));
                     }
                 }
                 else if(!sg.players.empty())
@@ -925,7 +925,7 @@ namespace hud
                         pushfont("little");
                         sy += draw_textx("by %s", x+FONTW*2, y, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, game::colourname(sg.players[0]));
                         popfont();
-                        sy += draw_textx("\fg%s", x, y-sy, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, timestr(sg.players[0]->cptime));
+                        sy += draw_textx("\fg%s", x, y-sy, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, timestr(sg.players[0]->cptime, hud::inventorycheckpointstyle));
                     }
                 }
             }

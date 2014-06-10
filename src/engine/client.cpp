@@ -56,7 +56,7 @@ ICOMMAND(0, connectedhost, "", (),
 {
     const ENetAddress *address = connectedpeer();
     string hostname;
-    result(address && enet_address_get_host(address, hostname, sizeof(hostname)) >= 0 ? hostname : "");
+    result(address && enet_address_get_host(address, hostname, sizeof(hostname)) >= 0 ? hostname : (address && enet_address_get_host_ip(address, hostname, sizeof(hostname)) >= 0 ? hostname : ""));
 });
 
 ICOMMAND(0, connectedport, "", (),
