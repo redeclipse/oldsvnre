@@ -5924,7 +5924,7 @@ namespace server
                     #define CONTROLSWITCH(x,y) \
                         case x: \
                         { \
-                            if(haspriv(ci, G(y##lock), #y " people") && m >= 0) \
+                            if(haspriv(ci, G(y##lock), #y " players") && m >= 0) \
                             { \
                                 clientinfo *cp = (clientinfo *)getinfo(m); \
                                 if(!cp || cp->state.ownernum >= 0 || (value != ipinfo::ALLOW && !cmppriv(ci, cp, #y))) break; \
@@ -5932,7 +5932,7 @@ namespace server
                                 if(!ip) break; \
                                 if(checkipinfo(control, ipinfo::ALLOW, ip)) \
                                 { \
-                                    if(!haspriv(ci, PRIV_ADMINISTRATOR, #y " protected people")) break; \
+                                    if(!haspriv(ci, PRIV_ADMINISTRATOR, #y " protected players")) break; \
                                     else if(value >= ipinfo::BAN) loopvrev(control) \
                                         if(control[i].type == ipinfo::ALLOW && (ip & control[i].mask) == control[i].ip) \
                                             control.remove(i); \

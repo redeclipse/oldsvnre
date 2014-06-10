@@ -267,6 +267,7 @@ namespace hud
     VAR(IDF_PERSIST, inventorydate, 0, 0, 1);
     SVAR(IDF_PERSIST, inventorydateformat, "%H:%M:%S");
     VAR(IDF_PERSIST, inventorytime, 0, 1, 1);
+    VAR(IDF_PERSIST, inventorytimestyle, -1, 0, 3);
     VAR(IDF_PERSIST, inventoryscore, 0, 1, VAR_MAX);
     VAR(IDF_PERSIST, inventoryscorespec, 0, 2, VAR_MAX);
     VAR(IDF_PERSIST, inventoryscorebg, 0, 0, 1);
@@ -331,6 +332,7 @@ namespace hud
     VAR(IDF_PERSIST, inventoryvelocity, 0, 0, 2);
     FVAR(IDF_PERSIST, inventoryvelocityblend, 0, 1, 1);
     VAR(IDF_PERSIST, inventorycheckpoint, 0, 2, 2);
+    VAR(IDF_PERSIST, inventorycheckpointstyle, -1, 0, 3);
     FVAR(IDF_PERSIST, inventorycheckpointblend, 0, 1, 1);
     VAR(IDF_PERSIST, inventorystatus, 0, 2, 3); // 0 = off, 1 = text, 2 = icon, 3 = icon + tex
     FVAR(IDF_PERSIST, inventorystatusblend, 0, 1, 1);
@@ -2780,11 +2782,11 @@ namespace hud
             {
                 sy += draw_textx("\falap: \fw%d", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, game::focus->cplaps+1);
                 if(game::focus->cptime)
-                    sy += draw_textx("\fy%s", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, timestr(game::focus->cptime));
+                    sy += draw_textx("\fy%s", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, timestr(game::focus->cptime, inventorycheckpointstyle));
                 if(game::focus->cpmillis)
-                    sy += draw_textx("%s", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, timestr(lastmillis-game::focus->cpmillis, 1));
+                    sy += draw_textx("%s", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, timestr(lastmillis-game::focus->cpmillis, inventorycheckpointstyle));
                 else if(game::focus->cplast)
-                    sy += draw_textx("\fzwe%s", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, timestr(game::focus->cplast));
+                    sy += draw_textx("\fzwe%s", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, timestr(game::focus->cplast, inventorycheckpointstyle));
             }
             sy += trialinventory(x, y-sy, s, fade);
             popfont();
@@ -2856,47 +2858,41 @@ namespace hud
             case 1:
             {
                 int cm = cr+top;
-                if(lastnewgame)
+                if(!radardisabled && radarstyle == 3 && !hasinput(true) && (game::focus->state == CS_EDITING ? showeditradar >= 1 : chkcond(showradar, !game::tvmode() || (game::focus != game::player1 && radarstyle==3))))
+                    cm += int(max(w, h)/2*radarcorner*2);
+                if(inventorydate)
+                    cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorydateskew, "super", fade*inventorydateblend, "%s", gettime(clocktime, inventorydateformat));
+                if(inventorytime)
                 {
-                    if(!game::intermission) lastnewgame = 0;
-                    else
+                    if(m_edit(game::gamemode)) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fgediting\fS");
+                    else if(m_play(game::gamemode) || client::demoplayback)
                     {
-                        int millis = votelimit-(totalmillis-lastnewgame);
-                        float amt = float(millis)/float(votelimit);
-                        const char *col = "\fw";
-                        if(amt > 0.75f) col = "\fg";
-                        else if(amt > 0.5f) col = "\fc";
-                        else if(amt > 0.25f) col = "\fy";
-                        else col = "\fo";
-                        drawprogress(cx[i], cm+csr, 0, 1, csr, false, 1, 1, 1, fade*0.25f, 1);
-                        cm += drawprogress(cx[i], cm+csr, 1-amt, amt, csr, false, 1, 1, 1, fade, 1, "super", "%s%d", col, int(millis/1000.f));
-                    }
-                }
-                else
-                {
-                    if(!radardisabled && radarstyle == 3 && !hasinput(true) && (game::focus->state == CS_EDITING ? showeditradar >= 1 : chkcond(showradar, !game::tvmode() || (game::focus != game::player1 && radarstyle==3))))
-                        cm += int(max(w, h)/2*radarcorner*2);
-                    if(inventorydate)
-                        cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorydateskew, "super", fade*inventorydateblend, "%s", gettime(clocktime, inventorydateformat));
-                    if(inventorytime)
-                    {
-                        if(m_edit(game::gamemode)) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fgediting\fS");
-                        else if(m_play(game::gamemode) || client::demoplayback)
+                        if(game::intermission)
                         {
-                            if(game::intermission) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fointermission\fS");
-                            else if(client::waitplayers) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fowaiting\fS");
-                            else if(paused) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fopaused\fS", 0xFFFFFF);
-                            else if(game::timeremaining && timelimit) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fg%s\fS", timestr(game::timeremaining, 2));
+                            if(lastnewgame)
+                            {
+                                int millis = votelimit-(totalmillis-lastnewgame);
+                                float amt = float(millis)/float(votelimit);
+                                const char *col = "\fw";
+                                if(amt > 0.75f) col = "\fg";
+                                else if(amt > 0.5f) col = "\fc";
+                                else if(amt > 0.25f) col = "\fy";
+                                else col = "\fo";
+                                cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fcvoting:\fS \fs%s%s\fS", col, timestr(millis, inventorytimestyle));
+                            }
+                            else cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fyintermission\fS");
                         }
-                    }
-                    if(texpaneltimer) break;
-                    if(m_fight(game::gamemode))
-                    {
-                        int count = game::player1->state == CS_SPECTATOR ? inventoryscorespec : inventoryscore;
-                        if(count && ((cc = drawscore(cx[i], cm, csr, (h-edge*2)/2, fade, count)) > 0)) cm += cc+cr;
+                        else if(client::waitplayers) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fywaiting\fS");
+                        else if(paused) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fopaused\fS", 0xFFFFFF);
+                        else if(game::timeremaining && timelimit) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fg%s\fS", timestr(game::timeremaining, inventorytimestyle));
                     }
                 }
                 if(texpaneltimer) break;
+                if(m_fight(game::gamemode))
+                {
+                    int count = game::player1->state == CS_SPECTATOR ? inventoryscorespec : inventoryscore;
+                    if(count && ((cc = drawscore(cx[i], cm, csr, (h-edge*2)/2, fade, count)) > 0)) cm += cc+cr;
+                }
                 if((cc = drawselection(cx[i], cy[i], csr, cm, fade)) > 0) cy[i] -= cc+cr;
                 if(inventorygame)
                 {
