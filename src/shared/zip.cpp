@@ -213,7 +213,7 @@ static bool checkprefix(vector<zipfile> &files, const char *prefix, int prefixle
 
 static void mountzip(ziparchive &arch, vector<zipfile> &files, const char *mountdir, const char *stripdir)
 {
-    string packagesdir = "packages/";
+    string packagesdir = "data/";
     path(packagesdir);
     size_t striplen = stripdir ? strlen(stripdir) : 0;
     if(!mountdir && !stripdir) loopv(files)
@@ -229,19 +229,19 @@ static void mountzip(ziparchive &arch, vector<zipfile> &files, const char *mount
             }
             break;
         }
-        const char *foundogz = strstr(f.name, ".ogz");
-        if(foundogz)
+        const char *foundmpz = strstr(f.name, ".mpz");
+        if(foundmpz)
         {
-            const char *ogzdir = foundogz;
-            while(--ogzdir >= f.name && *ogzdir != PATHDIV);
-            if(ogzdir < f.name || checkprefix(files, f.name, ogzdir + 1 - f.name))
+            const char *mpzdir = foundmpz;
+            while(--mpzdir >= f.name && *mpzdir != PATHDIV);
+            if(mpzdir < f.name || checkprefix(files, f.name, mpzdir + 1 - f.name))
             {
-                if(ogzdir >= f.name)
+                if(mpzdir >= f.name)
                 {
                     stripdir = f.name;
-                    striplen = ogzdir + 1 - f.name;
+                    striplen = mpzdir + 1 - f.name;
                 }
-                if(!mountdir) mountdir = "packages/base/";
+                if(!mountdir) mountdir = "maps/";
                 break;
             }
         }
