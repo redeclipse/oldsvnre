@@ -1134,6 +1134,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
             stream *f = opengzfile(mapfile, "rb");
             if(!f)
             {
+                conoutf("\frnot found: %s", mapfile);
                 maskpackagedirs(mask);
                 continue;
             }

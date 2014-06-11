@@ -1681,7 +1681,7 @@ namespace hud
                             ident *id = idents.access(idname);
                             if(id)
                             {
-                                mkstring(idtype);
+                                string idtype = "";
                                 if(id->flags&IDF_CLIENT || id->flags&IDF_SERVER)
                                 {
                                     if(id->flags&IDF_ADMIN) concatstring(idtype, "admin-only ");

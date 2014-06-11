@@ -3423,7 +3423,7 @@ ICOMMAND(0, getmillis, "i", (int *total), intret(*total ? totalmillis : lastmill
 
 void getvariable(int num)
 {
-    mkstring(text);
+    string text = "";
     num--;
     static vector<ident *> ids;
     static int lastupdate = 0;

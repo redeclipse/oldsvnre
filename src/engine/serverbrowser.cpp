@@ -498,6 +498,7 @@ COMMAND(0, updateservers, "");
 
 void writeservercfg()
 {
+    if(servers.empty()) return;
     stream *f = openutf8file("servers.cfg", "w");
     if(!f) return;
     f->printf("// servers which are connected to or queried get added here automatically\n\n");

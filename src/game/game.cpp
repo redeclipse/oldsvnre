@@ -3166,7 +3166,7 @@ namespace game
         }
         if(aboveheadinventory && d != player1)
         {
-            mkstring(weapons);
+            string weapons = "";
             #define printweapon(q) \
                 if((q != W_MELEE || q == d->weapselect) && d->hasweap(q, m_weapon(gamemode, mutators))) \
                 { \

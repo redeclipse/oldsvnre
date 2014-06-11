@@ -132,7 +132,6 @@ static inline T clamp(T a, T b, T c)
 
 #define MAXSTRLEN 512 // must be at least 512 bytes to comply with rfc1459
 typedef char string[MAXSTRLEN];
-#define mkstring(d) string d; d[0] = 0;
 
 inline void vformatstring(char *d, const char *fmt, va_list v, int len = MAXSTRLEN) { _vsnprintf(d, len, fmt, v); d[len-1] = 0; }
 inline char *copystring(char *d, const char *s, size_t len = MAXSTRLEN)
@@ -1193,7 +1192,7 @@ template <class T, int SIZE> struct queue
         T &t = data[head];
         head++;
         if(head >= SIZE) head -= SIZE;
-        len--; 
+        len--;
         return t;
     }
 

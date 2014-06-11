@@ -376,6 +376,7 @@ bool fileexists(const char *path, const char *mode)
 {
     bool exists = true;
     if(mode[0]=='w' || mode[0]=='a') path = parentdir(path);
+    else if(findzipfile(path)) return true;
 #ifdef WIN32
     if(GetFileAttributes(path[0] ? path : ".\\") == INVALID_FILE_ATTRIBUTES) exists = false;
 #else

@@ -184,7 +184,7 @@ namespace client
         int num = demoinfos.length();
         demoinfo &d = demoinfos.add();
         copystring(d.file, name);
-        mkstring(msg);
+        string msg = "";
         if(f->read(&d.hdr, sizeof(demoheader))!=sizeof(demoheader) || memcmp(d.hdr.magic, DEMO_MAGIC, sizeof(d.hdr.magic)))
             formatstring(msg)("\frsorry, \fs\fc%s\fS is not a demo file", name);
         else
@@ -859,7 +859,7 @@ namespace client
     {
         if(!arg[0]) return;
         int val = 1;
-        mkstring(hash);
+        string hash = "";
         if(!arg[1] && isdigit(arg[0])) val = parseint(arg);
         else server::hashpassword(game::player1->clientnum, sessionid, arg, hash);
         addmsg(N_SETPRIV, "ris", val, hash);
@@ -1395,7 +1395,7 @@ namespace client
         putint(p, game::player1->colour);
         putint(p, game::player1->model);
         sendstring(game::player1->vanity, p);
-        mkstring(hash);
+        string hash = "";
         if(connectpass[0])
         {
             server::hashpassword(game::player1->clientnum, sessionid, connectpass, hash);

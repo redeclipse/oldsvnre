@@ -1199,7 +1199,7 @@ namespace server
 
     bool cmppriv(clientinfo *ci, clientinfo *cp, const char *msg = NULL)
     {
-        mkstring(str);
+        string str = "";
         if(msg && *msg) formatstring(str)("%s %s", msg, colourname(cp));
         if(haspriv(ci, cp->local ? PRIV_MAX : cp->privilege, str)) return true;
         return false;
@@ -2150,7 +2150,7 @@ namespace server
     void setupdemoplayback()
     {
         demoheader hdr;
-        mkstring(msg);
+        string msg = "";
         defformatstring(file)(strstr(smapname, "maps/")==smapname || strstr(smapname, "maps\\")==smapname ? "%s.dmo" : "demos/%s.dmo", smapname);
         demoplayback = opengzfile(file, "rb");
         if(!demoplayback) formatstring(msg)("\frcould not read demo \fs\fc%s\fS", file);

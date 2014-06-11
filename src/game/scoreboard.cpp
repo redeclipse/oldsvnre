@@ -193,7 +193,7 @@ namespace hud
                     {
                         if(numgroups > 1 && sg.total == groups[1]->total)
                         {
-                            mkstring(winner);
+                            string winner = "";
                             loopi(numgroups) if(i)
                             {
                                 if(sg.total == groups[i]->total)
@@ -215,7 +215,7 @@ namespace hud
                     {
                         if(sg.players.length() > 1 && sg.players[0]->cptime == sg.players[1]->cptime)
                         {
-                            mkstring(winner);
+                            string winner = "";
                             loopv(sg.players) if(i)
                             {
                                 if(sg.players[0]->cptime == sg.players[i]->cptime)
@@ -233,7 +233,7 @@ namespace hud
                     {
                         if(sg.players.length() > 1 && sg.players[0]->points == sg.players[1]->points)
                         {
-                            mkstring(winner);
+                            string winner = "";
                             loopv(sg.players) if(i)
                             {
                                 if(sg.players[0]->points == sg.players[i]->points)

@@ -122,7 +122,7 @@ namespace auth
     void setprivilege(clientinfo *ci, int val, int flags = 0, bool authed = false, bool local = true)
     {
         int privilege = ci->privilege;
-        mkstring(msg);
+        string msg = "";
         if(val > 0)
         {
             if(ci->privilege >= flags) return;
