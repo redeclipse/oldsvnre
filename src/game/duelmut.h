@@ -231,10 +231,10 @@ struct duelservmode : servmode
                     if(smode) smode->layout();
                     mutate(smuts, mut->layout());
                     duelround++;
-                    mkstring(fight);
+                    string fight = "";
                     if(m_duel(gamemode, mutators))
                     {
-                        mkstring(names);
+                        string names = "";
                         loopv(playing)
                         {
                             concatstring(names, colourname(playing[i]));

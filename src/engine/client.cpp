@@ -194,7 +194,7 @@ ICOMMAND(0, isconnected, "ii", (int *a, int *b), intret(connected(*a==0, *b==0) 
 void reconnect(const char *pass)
 {
     int port = 0;
-    mkstring(addr);
+    string addr = "";
     if(*connectname) copystring(addr, connectname);
     if(connectport) port = connectport;
     disconnect(1);

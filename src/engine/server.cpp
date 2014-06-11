@@ -1422,7 +1422,7 @@ bool serveroption(char *opt)
 
 bool findoctadir(const char *name, bool fallback)
 {
-    mkstring(s);
+    string s = "";
     copystring(s, name);
     path(s);
     defformatstring(octadefs)("%s/data/default_map_settings.cfg", s);
@@ -1459,7 +1459,7 @@ void trytofindocta(bool fallback)
     if((!octadir || !*octadir || !findoctadir(octadir, false)) && fallback)
     { // user hasn't specifically set it, try some common locations alongside our folder
 #if defined(WIN32)
-        mkstring(dir);
+        string dir = "";
         if(SHGetFolderPath(NULL, CSIDL_PROGRAM_FILESX86, NULL, 0, dir) == S_OK)
         {
             defformatstring(s)("%s\\Sauerbraten", dir);
@@ -1508,7 +1508,7 @@ void setlocations(bool wanthome)
     if(wanthome)
     {
 #if defined(WIN32)
-        mkstring(dir);
+        string dir = "";
         if(SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, 0, dir) == S_OK)
         {
             defformatstring(s)("%s\\My Games\\%s", dir, versionname);
