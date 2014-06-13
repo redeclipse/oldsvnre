@@ -1,7 +1,4 @@
 APPNAME=redeclipse
-ICON=../data/textures/icon.png
-FILES=readme.txt
-APPFLAGS= 
 APPCLIENT=$(APPNAME)
 APPSERVER=$(APPNAME)_server
 
@@ -32,7 +29,7 @@ endif
 CXX_TEMP:=$(CXX)
 override CXX=$(TOOLSET_PREFIX)$(CXX_TEMP)
 
-INCLUDES= -Ishared -Iengine -Igame -Ienet/include $(APPFLAGS)
+INCLUDES= -Ishared -Iengine -Igame -Ienet/include
 
 
 STRIP=
