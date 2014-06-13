@@ -15,7 +15,8 @@ tarname-osx=$(appname)_$(appversion)_osx.tar
 torrent-trackers-url="udp://tracker.openbittorrent.com:80,udp://tracker.publicbt.com:80,udp://tracker.ccc.de:80,udp://tracker.istole.it:80"
 torrent-webseed-baseurl="http://downloads.sourceforge.net/redeclipse"
 
-FILES+= \
+FILES= \
+	readme.txt \
 	$(APPCLIENT).bat \
 	$(APPCLIENT).sh \
 	$(APPSERVER).bat \
@@ -32,7 +33,7 @@ SRC_DIRS= \
 
 SRC_FILES= \
 	$(shell cd ../ && find $(SRC_DIRS) -not -iname *.lo -not -iname *.gch -not -iname *.o || echo "") \
-	src/core.mk \
+	src/Makefile \
 	src/dist.mk \
 	src/dpiaware.manifest \
 	src/system-install.mk \
@@ -81,30 +82,9 @@ DISTFILES= \
 	$(FILES) \
 	$(BIN_FILES) \
 	data \
-	data \
 	$(DOC_FILES) \
 	$(SRC_FILES) \
 	$(SRC_XCODE)
-
-# appname can be used for e.g. an *-svn package
-ifneq ($(APPNAME),$(appname))
-define distappnamedef
-appname=$(appname)
-
-endef
-endif
-
-# generated game-specific dist Makefile
-define DIST_MAKEFILE
-APPNAME=$(APPNAME)
-$(distappnamedef)
-all:
-
-include $(APPNAME).mk
-
-include core.mk
-endef
-export DIST_MAKEFILE
 
 ../$(dirname):
 	rm -rf $@
@@ -112,7 +92,6 @@ export DIST_MAKEFILE
 	tar --exclude='.svn' --exclude='*.git' --exclude='*.hg' \
 		--exclude='*.bzr' \
 		-cf - $(DISTFILES:%=../%) | (mkdir $@/; cd $@/ ; tar -xpf -)
-	printf '%s\n' "$$DIST_MAKEFILE" >$@/src/Makefile
 	$(MAKE) -C $@/src clean
 	$(MAKE) -C $@/src/enet clean
 	rm -f $@/data/misc/largeandincharge.png
@@ -142,13 +121,10 @@ dist-tar-all: ../$(tarname-all)
 	mkdir tmpdir-osx/$(dirname-osx)/Contents
 	mkdir tmpdir-osx/$(dirname-osx)/Contents/Resources
 	# Use links with tar dereference to change directory paths
-	ln -s ../$</data/ tmpdir-osx/$(dirname-osx)/data
-	ln -s ../$</doc/ tmpdir-osx/$(dirname-osx)/doc
-	ln -s ../$</game/ tmpdir-osx/$(dirname-osx)/game
-	ln -s ../$</src/ tmpdir-osx/$(dirname-osx)/src
-ifeq ($(APPNAME),redeclipse)
-	ln -s ../$</readme.txt tmpdir-osx/$(dirname-osx)/readme.txt
-endif
+	ln -s ../../$</data/ tmpdir-osx/$(dirname-osx)/data
+	ln -s ../../$</doc/ tmpdir-osx/$(dirname-osx)/doc
+	ln -s ../../$</src/ tmpdir-osx/$(dirname-osx)/src
+	ln -s ../../$</readme.txt tmpdir-osx/$(dirname-osx)/readme.txt
 	tar \
 		-hrf $@ -C tmpdir-osx $(dirname-osx)
 	rm -rf tmpdir-osx/

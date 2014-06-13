@@ -4,7 +4,6 @@ appsrcname=$(APPNAME)
 cappname=$(shell echo $(appname) | tr '[:lower:]' '[:upper:]')# Captial appname
 appclient=$(APPCLIENT)
 appserver=$(APPSERVER)
-appgamedir=data
 
 prefix=/usr/local
 games=
@@ -71,8 +70,6 @@ system-install-client: client
 	w\n" | ed -s $(gamesbindir)/$(appname)
 	ln -s $(patsubst $(DESTDIR)%,%,$(datadir))/$(appname)/data \
 		$(libexecdir)/$(appname)/data
-	ln -s $(patsubst $(DESTDIR)%,%,$(datadir))/$(appname)/game \
-		$(libexecdir)/$(appname)/game
 
 system-install-server: server
 	$(MKDIR) $(libexecdir)/$(appname)
@@ -92,16 +89,14 @@ system-install-server: server
 	g,@APPNAME@,\
 	s,@APPNAME@,$(appname),g\n\
 	w\n" | ed -s $(gamesbindir)/$(appname)-server
-	install -m644 ../$(appgamedir)/config/version.cfg \
-		$(datadir)/$(appname)/config/version.cfg
-	ln -s $(patsubst $(DESTDIR)%,%,$(datadir))/$(appname)/config/version.cfg \
-		$(libexecdir)/$(appname)/config/version.cfg
+	install -m644 ../data/config/version.cfg \
+		$(datadir)/$(appname)/version.cfg
+	ln -s $(patsubst $(DESTDIR)%,%,$(datadir))/$(appname)/version.cfg \
+		$(libexecdir)/$(appname)/version.cfg
 
 system-install-data:
-	$(MKDIR) $(datadir)/$(appname)/game
 	cp -r ../data $(datadir)/$(appname)/data
 	rm -f $(datadir)/$(appname)/data/misc/largeandincharge.png
-	cp -r ../$(appgamedir) $(datadir)/$(appname)/game
 
 system-install-docs: $(MANPAGES)
 	$(MKDIR) $(mandir)/man6
@@ -164,8 +159,7 @@ system-install: system-install-client system-install-server system-install-data 
 system-uninstall-client:
 	@rm -fv $(libexecdir)/$(appname)/$(appname)
 	@rm -fv $(libexecdir)/$(appname)/data
-	@rm -fv $(libexecdir)/$(appname)/game
-	@rm -fv	$(libexecdir)/$(appname)/config/version.cfg
+	@rm -fv	$(libexecdir)/$(appname)/version.cfg
 	@rm -fv $(gamesbindir)/$(appname)
 
 system-uninstall-server:
@@ -174,8 +168,7 @@ system-uninstall-server:
 
 system-uninstall-data:
 	rm -rf $(datadir)/$(appname)/data
-	rm -rf $(datadir)/$(appname)/game
-	rm -fv $(datadir)/$(appname)/config/version.cfg
+	rm -fv $(datadir)/$(appname)/version.cfg
 
 system-uninstall-docs:
 	@rm -rfv $(docdir)/$(appname)/examples
