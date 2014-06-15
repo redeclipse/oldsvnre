@@ -181,7 +181,7 @@ struct editor
         mark(false);
         loopv(lines) lines[i].clear();
         lines.shrink(0);
-        if(init && *init) lines.add().set(init);
+        if(init) lines.add().set(init);
     }
 
     void setfile(const char *fname)
