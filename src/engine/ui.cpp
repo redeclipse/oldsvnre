@@ -677,7 +677,7 @@ struct gui : guient
         editor *e = useeditor(name, initmode, false, initval, parent); // generate a new editor if necessary
         if(guilayoutpass)
         {
-            if(initval && e->mode == EDITORFOCUSED && (e != currentfocus() || fieldmode == FIELDSHOW) && strcmp(e->lines[0].text, initval))
+            if(initval && (e->lines.empty() || (e->mode == EDITORFOCUSED && (e != currentfocus() || fieldmode == FIELDSHOW) && strcmp(e->lines[0].text, initval))))
                 e->clear(initval);
             e->linewrap = (length < 0);
             e->maxx = e->linewrap ? -1 : length;
