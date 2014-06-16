@@ -73,7 +73,7 @@ namespace aiman
                 n = min(G(enemyskillmin), m);
                 break;
         }
-        m = min(m, 100);
+        m = min(m, 101);
         n = min(n, m);
     }
 
