@@ -28,7 +28,7 @@ namespace aiman
         return G(botlimit);
     }
 
-    void getskillrange(int type, int &m, int &n)
+    void getskillrange(int type, int &n, int &m, int frags = -1, int deaths = -1)
     {
         switch(type)
         {
@@ -37,17 +37,54 @@ namespace aiman
                 {
                     m = max(G(coopskillmax), G(coopskillmin));
                     n = min(G(coopskillmin), m);
+                    if(deaths > 0 && G(coopskilldeaths) > 0)
+                    {
+                        int amt = G(coopskilldeaths)*deaths;
+                        m += amt;
+                        n += amt;
+                    }
+                    if(frags > 0 && G(coopskillfrags) > 0)
+                    {
+                        int amt = G(coopskillfrags)*frags;
+                        m -= amt;
+                        n -= amt;
+                    }
                 }
                 else
                 {
                     m = max(G(botskillmax), G(botskillmin));
                     n = min(G(botskillmin), m);
+                    if(deaths > 0 && G(botskilldeaths) > 0)
+                    {
+                        int amt = G(botskilldeaths)*deaths;
+                        m += amt;
+                        n += amt;
+                    }
+                    if(frags > 0 && G(botskillfrags) > 0)
+                    {
+                        int amt = G(botskillfrags)*frags;
+                        m -= amt;
+                        n -= amt;
+                    }
                 }
                 break;
             default:
                 m = max(G(enemyskillmax), G(enemyskillmin));
                 n = min(G(enemyskillmin), m);
                 break;
+        }
+        m = min(m, 100);
+        n = min(n, m);
+    }
+
+    void setskill(clientinfo *ci)
+    {
+        int n = 1, m = 100;
+        getskillrange(ci->state.actortype, n, m, ci->state.frags, ci->state.deaths);
+        if(ci->state.skill > m || ci->state.skill < n)
+        { // needs re-skilling
+            ci->state.skill = (m != n ? rnd(m-n) + n + 1 : m);
+            if(!ci->state.aireinit) ci->state.aireinit = 1;
         }
     }
 
@@ -77,8 +114,8 @@ namespace aiman
             clientinfo *ci = (clientinfo *)getinfo(cn);
             if(ci)
             {
-                int s = skill, m = 100, n = 1;
-                getskillrange(type, m, n);
+                int s = skill, n = 1, m = 100;
+                getskillrange(type, n, m);
                 if(skill > m || skill < n) s = (m != n ? rnd(m-n) + n + 1 : m);
                 ci->clientnum = cn;
                 clientinfo *owner = findaiclient();
@@ -210,18 +247,13 @@ namespace aiman
 
     void checksetup()
     {
-        int m = 100, n = 1, numbots = 0, numenemies = 0, blimit = getlimit(A_BOT), elimit = getlimit(A_ENEMY);
+        int numbots = 0, numenemies = 0, blimit = getlimit(A_BOT), elimit = getlimit(A_ENEMY);
         loopv(clients) if(clients[i]->state.actortype > A_PLAYER && clients[i]->state.ownernum >= 0)
         {
             clientinfo *ci = clients[i];
-            getskillrange(clients[i]->state.actortype, m, n);
-            if(ci->state.skill > m || ci->state.skill < n)
-            { // needs re-skilling
-                ci->state.skill = (m != n ? rnd(m-n) + n + 1 : m);
-                if(!ci->state.aireinit) ci->state.aireinit = 1;
-            }
-            if(ci->state.actortype == A_BOT && ++numbots >= blimit) shiftai(ci, NULL);
-            if(ci->state.actortype >= A_ENEMY && ++numenemies >= elimit) shiftai(ci, NULL);
+            if(ci->state.actortype == A_BOT && ++numbots >= blimit) { shiftai(ci, NULL); continue; }
+            if(ci->state.actortype >= A_ENEMY && ++numenemies >= elimit) { shiftai(ci, NULL); continue; }
+            setskill(ci);
         }
 
         int balance = 0, people = numclients(-1, true, -1), numt = numteams(gamemode, mutators);
