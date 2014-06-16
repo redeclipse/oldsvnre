@@ -389,6 +389,7 @@ namespace server
     };
 
     namespace aiman {
+        extern void setskill(clientinfo *ci);
         extern bool addai(int type, int ent = -1, int skill = -1);
         extern void deleteai(clientinfo *ci);
         extern bool delai(int type, bool skip = true);
@@ -3738,6 +3739,8 @@ namespace server
             mutate(smuts, mut->died(m, v));
             m->state.state = CS_DEAD; // don't issue respawn yet until DEATHMILLIS has elapsed
             m->state.lastdeath = gamemillis;
+            if(m->state.actortype == A_BOT) aiman::setskill(m);
+            if(m != v && v->state.actortype == A_BOT) aiman::setskill(v);
             if(isteamkill && v->state.actortype == A_PLAYER) // don't punish the idiot bots
             {
                 v->state.teamkills.add(teamkill(totalmillis, v->team, 0-pointvalue));
@@ -3813,6 +3816,7 @@ namespace server
         mutate(smuts, mut->died(ci, NULL));
         gs.state = CS_DEAD;
         gs.lastdeath = gamemillis;
+        if(ci->state.actortype == A_BOT) aiman::setskill(ci);
     }
 
     int calcdamage(clientinfo *v, clientinfo *m, int weap, int &flags, float radial, float size, float dist, float scale, bool self)
