@@ -439,6 +439,7 @@ GVAR(0, weaponinterrupts, 0, W_S_INTERRUPT, W_S_ALL); // what weapon states can 
 GFVAR(0, pushscale, 0, 1, FVAR_MAX);
 GFVAR(0, pushlimited, 0, 0.75f, FVAR_MAX);
 GFVAR(0, hitpushscale, 0, 1, FVAR_MAX);
+GFVAR(0, hitvelscale, 0, 1, FVAR_MAX);
 GFVAR(0, deadpushscale, 0, 2, FVAR_MAX);
 GFVAR(0, wavepushscale, 0, 1, FVAR_MAX);
 

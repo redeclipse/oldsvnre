@@ -1278,11 +1278,12 @@ namespace game
     }
 
     static int alarmchan = -1;
-    void hiteffect(int weap, int flags, int damage, gameent *d, gameent *v, vec &dir, bool local)
+    void hiteffect(int weap, int flags, int damage, gameent *d, gameent *v, vec &dir, vec &vel, float dist, bool local)
     {
         bool burning = burn(d, weap, flags), bleeding = bleed(d, weap, flags), shocking = shock(d, weap, flags);
         if(!local || burning || bleeding || shocking)
         {
+            float scale = damage/float(WF(WK(flags), weap, damage, WS(flags)));
             if(hithurts(flags))
             {
                 if(d == focus) hud::damage(damage, v->o, v, weap, flags);
@@ -1307,6 +1308,7 @@ namespace game
                 }
                 if(d->actortype < A_ENEMY && !issound(d->vschan)) playsound(S_PAIN, d->o, d, 0, -1, -1, -1, &d->vschan);
                 d->lastpain = lastmillis;
+                playsound(WSND2(weap, WS(flags), S_W_IMPACT), vec(d->center()).add(vec(dir).mul(dist)), NULL, 0, clamp(int(255*scale), 25, 255));
             }
             if(d->actortype < A_ENEMY || actor[d->actortype].canmove)
             {
@@ -1320,7 +1322,6 @@ namespace game
                 }
                 else if(isweap(weap) && !burning && !bleeding && !shocking && WF(WK(flags), weap, damage, WS(flags)) != 0)
                 {
-                    float scale = damage/float(WF(WK(flags), weap, damage, WS(flags)));
                     if(WF(WK(flags), weap, stuntime, WS(flags)))
                     {
                         float amt = scale*WRS(flags&HIT_WAVE || !hithurts(flags) ? wavestunscale : (d->health <= 0 ? deadstunscale : hitstunscale), stun, gamemode, mutators),
@@ -1329,7 +1330,7 @@ namespace game
                         if(s > 0) d->vel.mul(1.f-clamp(s, 0.f, 1.f));
                         if(g > 0) d->falling.mul(1.f-clamp(g, 0.f, 1.f));
                     }
-                    if(WF(WK(flags), weap, hitpush, WS(flags)) != 0)
+                    if(WF(WK(flags), weap, hitpush, WS(flags)) != 0 || WF(WK(flags), weap, hitvel, WS(flags)) != 0)
                     {
                         float amt = scale*WRS(flags&HIT_WAVE || !hithurts(flags) ? wavepushscale : (d->health <= 0 ? deadpushscale : hitpushscale), push, gamemode, mutators);
                         bool doquake = hithurts(flags);
@@ -1351,6 +1352,8 @@ namespace game
                             d->vel.add(vec(dir).mul(hit));
                             if(doquake) d->quake = min(d->quake+max(int(hit), 1), quakelimit);
                         }
+                        hit = WF(WK(flags), weap, hitvel, WS(flags))*amt;
+                        if(hit != 0) d->vel.add(vec(vel).mul(hit));
                     }
                 }
             }
@@ -1358,7 +1361,7 @@ namespace game
         }
     }
 
-    void damaged(int weap, int flags, int damage, int health, int armour, gameent *d, gameent *v, int millis, vec &dir)
+    void damaged(int weap, int flags, int damage, int health, int armour, gameent *d, gameent *v, int millis, vec &dir, vec &vel, float dist)
     {
         if(d->state != CS_ALIVE || intermission) return;
         if(hithurts(flags))
@@ -1369,7 +1372,7 @@ namespace game
             d->lastpain = lastmillis;
             v->totaldamage += damage;
         }
-        hiteffect(weap, flags, damage, d, v, dir, v == player1 || v->ai);
+        hiteffect(weap, flags, damage, d, v, dir, vel, dist, v == player1 || v->ai);
     }
 
     void killed(int weap, int flags, int damage, gameent *d, gameent *v, vector<gameent *> &log, int style, int material)
