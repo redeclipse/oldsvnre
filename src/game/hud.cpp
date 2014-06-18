@@ -2758,7 +2758,7 @@ namespace hud
             pushfont("default");
             if((game::focus->cpmillis || game::focus->cptime) && (game::focus->state == CS_ALIVE || game::focus->state == CS_DEAD || game::focus->state == CS_WAITING))
             {
-                sy += draw_textx("\falap: \fw%d", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, game::focus->cplaps+1);
+                sy += draw_textx("\falap: \fw%d", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, game::focus->points+1);
                 if(game::focus->cptime)
                     sy += draw_textx("\fy%s", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, timestr(game::focus->cptime, inventorycheckpointstyle));
                 if(game::focus->cpmillis)

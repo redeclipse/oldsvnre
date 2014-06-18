@@ -261,7 +261,7 @@ namespace server
     {
         uint ip;
         string name, handle;
-        int points, score, frags, spree, rewards, timeplayed, deaths, shotdamage, damage, cptime, cplaps;
+        int points, score, frags, spree, rewards, timeplayed, deaths, shotdamage, damage, cptime;
         int warnings[WARN_MAX][2];
         vector<teamkill> teamkills;
         bool quarantine;
@@ -279,7 +279,6 @@ namespace server
             shotdamage = gs.shotdamage;
             damage = gs.damage;
             cptime = gs.cptime;
-            cplaps = gs.cplaps;
             loopi(WARN_MAX) loopj(2) warnings[i][j] = gs.warnings[i][j];
             quarantine = gs.quarantine;
         }
@@ -297,14 +296,13 @@ namespace server
             gs.shotdamage = shotdamage;
             gs.damage = damage;
             gs.cptime = cptime;
-            gs.cplaps = cplaps;
             loopi(WARN_MAX) loopj(2) gs.warnings[i][j] = warnings[i][j];
             gs.quarantine = quarantine;
         }
 
         void mapchange()
         {
-            points = frags = spree = rewards = deaths = shotdamage = damage = cptime = cplaps = 0;
+            points = frags = spree = rewards = deaths = shotdamage = damage = cptime = 0;
             teamkills.shrink(0);
         }
     };
@@ -1403,12 +1401,12 @@ namespace server
             int best = -1;
             loopv(clients) if(clients[i]->state.actortype < A_ENEMY && clients[i]->state.state != CS_SPECTATOR)
             {
-                if(best < 0 || (m_laptime(gamemode, mutators) ? (clients[best]->state.cptime <= 0 || (clients[i]->state.cptime > 0 && clients[i]->state.cptime < clients[best]->state.cptime)) : (m_lapcount(gamemode, mutators) ? clients[i]->state.cplaps > clients[best]->state.cplaps : clients[i]->state.points > clients[best]->state.points)))
+                if(best < 0 || (m_laptime(gamemode, mutators) ? (clients[best]->state.cptime <= 0 || (clients[i]->state.cptime > 0 && clients[i]->state.cptime < clients[best]->state.cptime)) : clients[i]->state.points > clients[best]->state.points))
                 {
                     best = i;
                     result = false;
                 }
-                else if(m_laptime(gamemode, mutators) ? clients[i]->state.cptime == clients[best]->state.cptime : (m_lapcount(gamemode, mutators) ? clients[i]->state.cplaps == clients[best]->state.cplaps : clients[i]->state.points == clients[best]->state.points)) result = true;
+                else if(m_laptime(gamemode, mutators) ? clients[i]->state.cptime == clients[best]->state.cptime : clients[i]->state.points == clients[best]->state.points) result = true;
             }
         }
         return result;
@@ -1963,7 +1961,7 @@ namespace server
         }
         int spawn = pickspawn(ci);
         gs.spawnstate(gamemode, mutators, weap, health, armour);
-        sendf(ci->clientnum, 1, "ri9i3vv", N_SPAWNSTATE, ci->clientnum, spawn, gs.state, gs.points, gs.frags, gs.deaths, gs.health, gs.armour, gs.cptime, gs.cplaps, gs.weapselect, W_MAX, &gs.ammo[0], W_MAX, &gs.reloads[0]);
+        sendf(ci->clientnum, 1, "ri9i2vv", N_SPAWNSTATE, ci->clientnum, spawn, gs.state, gs.points, gs.frags, gs.deaths, gs.health, gs.armour, gs.cptime, gs.weapselect, W_MAX, &gs.ammo[0], W_MAX, &gs.reloads[0]);
         gs.lastrespawn = gs.lastspawn = gamemillis;
     }
 
@@ -1977,7 +1975,6 @@ namespace server
         putint(p, gs.health);
         putint(p, gs.armour);
         putint(p, gs.cptime);
-        putint(p, gs.cplaps);
         putint(p, gs.weapselect);
         loopi(W_MAX) putint(p, gs.ammo[i]);
         loopi(W_MAX) putint(p, gs.reloads[i]);
@@ -3231,7 +3228,7 @@ namespace server
     void sendresume(clientinfo *ci)
     {
         servstate &gs = ci->state;
-        sendf(-1, 1, "ri9i2vvi", N_RESUME, ci->clientnum, gs.state, gs.points, gs.frags, gs.deaths, gs.health, gs.armour, gs.cptime, gs.cplaps, gs.weapselect, W_MAX, &gs.ammo[0], W_MAX, &gs.reloads[0], -1);
+        sendf(-1, 1, "ri9ivvi", N_RESUME, ci->clientnum, gs.state, gs.points, gs.frags, gs.deaths, gs.health, gs.armour, gs.cptime, gs.weapselect, W_MAX, &gs.ammo[0], W_MAX, &gs.reloads[0], -1);
     }
 
     void putinitclient(clientinfo *ci, packetbuf &p)
@@ -5347,8 +5344,8 @@ namespace server
                                     {
                                         int laptime = gamemillis-cp->state.cpmillis;
                                         if(cp->state.cptime <= 0 || laptime < cp->state.cptime) cp->state.cptime = laptime;
-                                        cp->state.cplaps++;
-                                        sendf(-1, 1, "ri6", N_CHECKPOINT, cp->clientnum, ent, laptime, cp->state.cptime, cp->state.cplaps);
+                                        cp->state.points++;
+                                        sendf(-1, 1, "ri6", N_CHECKPOINT, cp->clientnum, ent, laptime, cp->state.cptime, cp->state.points);
                                         if(m_team(gamemode, mutators))
                                         {
                                             if(m_laptime(gamemode, mutators))

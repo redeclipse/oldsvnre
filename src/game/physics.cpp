@@ -37,7 +37,7 @@ namespace physics
             gameent *e = (gameent *)d;
             if(!kick && impulsestyle == 1 && e->impulse[IM_TYPE] > IM_T_NONE && e->impulse[IM_TYPE] < IM_T_WALL) return false;
             if(e->impulse[IM_TIME] && lastmillis-e->impulse[IM_TIME] <= impulsedelay) return false;
-            if(impulsestyle <= 2 && e->impulse[IM_COUNT] >= impulsecount) return false;
+            if(!m_freestyle(game::gamemode, game::mutators) && impulsestyle <= 2 && e->impulse[IM_COUNT] >= impulsecount) return false;
             return true;
         }
         return false;

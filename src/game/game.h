@@ -457,12 +457,12 @@ struct gamestate
     int health, armour, ammo[W_MAX], entid[W_MAX], reloads[W_MAX], colour, model;
     int weapselect, weapload[W_MAX], weapshot[W_MAX], weapstate[W_MAX], weapwait[W_MAX], weaplast[W_MAX];
     int lastdeath, lastspawn, lastrespawn, lastpain, lastregen, lastbuff, lastres[WR_MAX], lastrestime[WR_MAX];
-    int actortype, spawnpoint, ownernum, skill, points, frags, deaths, cpmillis, cptime, cplaps;
+    int actortype, spawnpoint, ownernum, skill, points, frags, deaths, cpmillis, cptime;
     bool quarantine;
     string vanity;
     vector<int> loadweap, lastweap;
     gamestate() : colour(0), model(0), weapselect(W_MELEE), lastdeath(0), lastspawn(0), lastrespawn(0), lastpain(0), lastregen(0), lastbuff(0),
-        actortype(A_PLAYER), spawnpoint(-1), ownernum(-1), skill(0), points(0), frags(0), deaths(0), cpmillis(0), cptime(0), cplaps(0), quarantine(false)
+        actortype(A_PLAYER), spawnpoint(-1), ownernum(-1), skill(0), points(0), frags(0), deaths(0), cpmillis(0), cptime(0), quarantine(false)
     {
         setvanity();
         loadweap.shrink(0);
@@ -704,7 +704,7 @@ struct gamestate
 
     void mapchange()
     {
-        points = cpmillis = cptime = cplaps = 0;
+        points = cpmillis = cptime = 0;
         loadweap.shrink(0);
     }
 
