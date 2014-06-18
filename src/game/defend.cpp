@@ -189,6 +189,7 @@ namespace defend
                 }
                 else if(f.owner)
                     hud::drawitem(hud::teamtexname(f.owner), x, oldy, size, 0.5f, true, false, c1.r, c1.g, c1.b, blend, skew);
+                hud::drawitemtext(x, oldy, size, false, skew, "default", blend, "%s", f.name);
             }
         }
         return sy;
