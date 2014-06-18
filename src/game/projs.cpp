@@ -1710,7 +1710,7 @@ namespace projs
                             if(W2(proj.weap, fragspeed, WS(proj.flags)) > 0)
                                 mag = rnd(W2(proj.weap, fragspeed, WS(proj.flags)))*0.5f+W2(proj.weap, fragspeed, WS(proj.flags))*0.5f;
                             if(skew > 0) to.add(vec(rnd(2001)-1000, rnd(2001)-1000, rnd(2001)-1000).normalize().mul(skew*mag));
-                            if(W2(proj.weap, fragrel, WS(proj.flags)) > 0) to.add(vec(dir).mul(W2(proj.weap, fragrel, WS(proj.flags))*mag));
+                            if(W2(proj.weap, fragrel, WS(proj.flags)) != 0) to.add(vec(dir).mul(W2(proj.weap, fragrel, WS(proj.flags))*mag));
                             create(pos, to, proj.local, proj.owner, PRJ_SHOT, max(life, 1), W2(proj.weap, fragtime, WS(proj.flags)), delay, W2(proj.weap, fragspeed, WS(proj.flags)), proj.id, w, -1, (f >= W_MAX ? HIT_ALT : 0)|HIT_FLAK, scale, true, &proj);
                             delay += W2(proj.weap, fragdelay, WS(proj.flags));
                         }
