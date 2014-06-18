@@ -1590,7 +1590,6 @@ namespace client
         d->health = getint(p);
         d->armour = getint(p);
         d->cptime = getint(p);
-        d->cplaps = getint(p);
         if(resume && (d == game::player1 || d->ai))
         {
             d->weapreset(false);
@@ -2605,12 +2604,12 @@ namespace client
                         {
                             t->cplast = laptime;
                             t->cptime = getint(p);
-                            t->cplaps = getint(p);
+                            t->points = getint(p);
                             t->cpmillis = t->impulse[IM_METER] = 0;
                             if(showlaptimes > (t != game::focus ? (t->actortype > A_PLAYER ? 2 : 1) : 0))
                             {
                                 defformatstring(best)("%s", timestr(t->cptime));
-                                conoutft(t != game::player1 ? CON_INFO : CON_SELF, "%s completed in \fs\fg%s\fS (best: \fs\fy%s\fS, laps: \fs\fc%d\fS)", game::colourname(t), timestr(t->cplast), best, t->cplaps);
+                                conoutft(t != game::player1 ? CON_INFO : CON_SELF, "%s completed in \fs\fg%s\fS (best: \fs\fy%s\fS, laps: \fs\fc%d\fS)", game::colourname(t), timestr(t->cplast), best, t->points);
                             }
                         }
                     }
