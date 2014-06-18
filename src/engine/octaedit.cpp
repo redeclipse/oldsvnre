@@ -1844,7 +1844,7 @@ void valpha(float *front, float *back)
 }
 COMMAND(0, valpha, "ff");
 
-void vcolor(float *r, float *g, float *b)
+void vcolour(float *r, float *g, float *b)
 {
     if(noedit() || multiplayer()) return;
     VSlot ds;
@@ -1852,7 +1852,7 @@ void vcolor(float *r, float *g, float *b)
     ds.colorscale = vec(max(*r, 0.0f), max(*g, 0.0f), max(*b, 0.0f));
     mpeditvslot(ds, allfaces, sel, true);
 }
-COMMAND(0, vcolor, "fff");
+COMMAND(0, vcolour, "fff");
 
 void vpalette(int *p, int *x)
 {
