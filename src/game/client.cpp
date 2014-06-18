@@ -2067,12 +2067,14 @@ namespace client
                 {
                     int tcn = getint(p), acn = getint(p), weap = getint(p), flags = getint(p), damage = getint(p),
                         health = getint(p), armour = getint(p);
-                    vec dir;
+                    vec dir, vel;
                     loopk(3) dir[k] = getint(p)/DNF;
+                    loopk(3) vel[k] = getint(p)/DNF;
                     dir.normalize();
+                    float dist = getint(p)/DNF;
                     gameent *m = game::getclient(tcn), *v = game::getclient(acn);
                     if(!m || !v) break;
-                    game::damaged(weap, flags, damage, health, armour, m, v, lastmillis, dir);
+                    game::damaged(weap, flags, damage, health, armour, m, v, lastmillis, dir, vel, dist);
                     break;
                 }
 

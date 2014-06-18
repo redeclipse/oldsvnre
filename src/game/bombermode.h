@@ -30,7 +30,7 @@ struct bomberservmode : bomberstate, servmode
         dropaffinity(ci, ci->state.feetpos(G(bomberdropheight)), vec(ci->state.vel).add(ci->state.falling));
     }
 
-    void dodamage(clientinfo *m, clientinfo *v, int &damage, int &hurt, int &weap, int &flags, int &material, const ivec &hitpush)
+    void dodamage(clientinfo *m, clientinfo *v, int &damage, int &hurt, int &weap, int &flags, int &material, const ivec &hitpush, const ivec &hitvel, float dist)
     {
         //if(weaptype[weap].melee) dropaffinity(m, m->state.o);
     }

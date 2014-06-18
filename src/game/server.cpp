@@ -99,7 +99,7 @@ namespace server
             int rays;
             int dist;
         };
-        ivec dir;
+        ivec dir, vel;
     };
 
     struct destroyevent : timedevent
@@ -461,7 +461,7 @@ namespace server
         virtual void intermission() {}
         virtual bool wantsovertime() { return false; }
         virtual bool damage(clientinfo *m, clientinfo *v, int damage, int weap, int flags, int material, const ivec &hitpush = ivec(0, 0, 0)) { return true; }
-        virtual void dodamage(clientinfo *m, clientinfo *v, int &damage, int &hurt, int &weap, int &flags, int &material, const ivec &hitpush = ivec(0, 0, 0)) { }
+        virtual void dodamage(clientinfo *m, clientinfo *v, int &damage, int &hurt, int &weap, int &flags, int &material, const ivec &hitpush = ivec(0, 0, 0), const ivec &hitvel = ivec(0, 0, 0), float dist = 0) { }
         virtual void regen(clientinfo *ci, int &total, int &amt, int &delay) {}
         virtual void checkclient(clientinfo *ci) {}
         virtual void scoreaffinity(clientinfo *ci, bool win = true) {}
@@ -579,7 +579,7 @@ namespace server
     struct vampireservmode : servmode
     {
         vampireservmode() {}
-        void dodamage(clientinfo *m, clientinfo *v, int &damage, int &hurt, int &weap, int &flags, int &material, const ivec &hitpush = ivec(0, 0, 0))
+        void dodamage(clientinfo *m, clientinfo *v, int &damage, int &hurt, int &weap, int &flags, int &material, const ivec &hitpush, const ivec &hitvel, float dist)
         {
             if(v != m && (!m_team(gamemode, mutators) || v->team != m->team) && v->state.state == CS_ALIVE && hurt > 0)
             {
@@ -3499,7 +3499,7 @@ namespace server
         return false;
     }
 
-    void dodamage(clientinfo *m, clientinfo *v, int damage, int weap, int flags, int material, const ivec &hitpush = ivec(0, 0, 0))
+    void dodamage(clientinfo *m, clientinfo *v, int damage, int weap, int flags, int material, const ivec &hitpush = ivec(0, 0, 0), const ivec &hitvel = ivec(0, 0, 0), float dist = 0)
     {
         int realdamage = damage, realflags = flags, nodamage = 0, hurt = 0;
         realflags &= ~HIT_SFLAGS;
@@ -3555,11 +3555,11 @@ namespace server
                 m->state.lastresowner[WR_SHOCK] = v->clientnum;
             }
         }
-        if(smode) smode->dodamage(m, v, realdamage, hurt, weap, realflags, material, hitpush);
-        mutate(smuts, mut->dodamage(m, v, realdamage, hurt, weap, realflags, material, hitpush));
+        if(smode) smode->dodamage(m, v, realdamage, hurt, weap, realflags, material, hitpush, hitvel, dist);
+        mutate(smuts, mut->dodamage(m, v, realdamage, hurt, weap, realflags, material, hitpush, hitvel, dist));
         if(m != v && (!m_team(gamemode, mutators) || m->team != v->team))
             addhistory(m, v, gamemillis);
-        sendf(-1, 1, "ri8i3", N_DAMAGE, m->clientnum, v->clientnum, weap, realflags, realdamage, m->state.health, m->state.armour, hitpush.x, hitpush.y, hitpush.z);
+        sendf(-1, 1, "ri8i7", N_DAMAGE, m->clientnum, v->clientnum, weap, realflags, realdamage, m->state.health, m->state.armour, hitpush.x, hitpush.y, hitpush.z, hitvel.x, hitvel.y, hitvel.z, int(dist*DNF));
         if(realflags&HIT_KILL)
         {
             int fragvalue = 1;
@@ -3893,7 +3893,7 @@ namespace server
                     if(m->state.state == CS_ALIVE && !m->state.protect(gamemillis, m_protect(gamemode, mutators)))
                     {
                         int damage = calcdamage(ci, m, weap, hflags, rad, size, dist, skew, ci == m);
-                        if(damage) dodamage(m, ci, damage, weap, hflags, 0, h.dir);
+                        if(damage) dodamage(m, ci, damage, weap, hflags, 0, h.dir, h.vel, dist);
                         else if(G(serverdebug) >= 2)
                             srvmsgf(ci->clientnum, "sync error: destroy [%d (%d)] failed - hit %d [%d] determined zero damage", weap, id, i, h.target);
                     }
@@ -5287,6 +5287,7 @@ namespace server
                         hit.target = getint(p);
                         hit.dist = max(getint(p), 0);
                         loopk(3) hit.dir[k] = getint(p);
+                        loopk(3) hit.vel[k] = getint(p);
                     }
                     if(havecn) cp->events.add(ev);
                     else delete ev;

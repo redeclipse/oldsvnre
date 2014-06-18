@@ -255,6 +255,8 @@ static Mix_Chunk *loadwav(const char *name)
 
 int addsound(const char *name, int vol, int maxrad, int minrad, int value, vector<soundslot> &sounds)
 {
+    bool emptyslot = !strcmp(name, "<none>");
+
     if(vol <= 0 || vol >= 255) vol = 255;
     if(maxrad <= 0) maxrad = -1;
     if(minrad < 0) minrad = -1;
@@ -263,9 +265,17 @@ int addsound(const char *name, int vol, int maxrad, int minrad, int value, vecto
         loopv(sounds)
         {
             soundslot &slot = sounds[i];
-            if(slot.vol == vol && slot.maxrad == maxrad && slot.minrad == minrad && !strcmp(slot.name, name))
+            if((emptyslot || (slot.vol == vol && slot.maxrad == maxrad && slot.minrad == minrad)) && !strcmp(slot.name, name))
                 return i;
         }
+    }
+    if(emptyslot)
+    {
+        soundslot &slot = sounds.add();
+        slot.name = newstring(name);
+        slot.vol = 0;
+        slot.maxrad = slot.minrad = -1;
+        return sounds.length()-1;
     }
     soundsample *sample = NULL;
     #define loadsound(req) \
@@ -425,8 +435,13 @@ int playsound(int n, const vec &pos, physent *d, int flags, int vol, int maxrad,
 
     vector<soundslot> &soundset = flags&SND_MAP ? mapsounds : gamesounds;
 
-    if(soundset.inrange(n) && !soundset[n].samples.empty())
+    if(soundset.inrange(n))
     {
+        if(soundset[n].samples.empty() || !soundset[n].vol)
+        {
+            if(oldhook && issound(*oldhook)) removesound(*oldhook);
+            return -1;
+        }
         soundslot *slot = &soundset[n];
         if(!oldhook || !issound(*oldhook) || (n != sounds[*oldhook].slotnum && strcmp(slot->name, gamesounds[sounds[*oldhook].slotnum].name)))
             oldhook = NULL;

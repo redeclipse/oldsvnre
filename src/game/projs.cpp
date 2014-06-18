@@ -134,28 +134,18 @@ namespace projs
     void hitpush(gameent *d, projent &proj, int flags = 0, float radial = 0, float dist = 0, float scale = 1)
     {
         if(dist < 0) dist = 0.f;
-        vec dir, middle = d->center();
+        vec dir, vel(0, 0, 0), middle = d->center();
         dir = vec(middle).sub(proj.o);
         float dmag = dir.magnitude();
         if(dmag > 1e-3f) dir.div(dmag);
         else dir = vec(0, 0, 1);
-        if(isweap(proj.weap) && !weaptype[proj.weap].traced && flags&HIT_PROJ)
-        { // transfer the momentum
-            float speed = proj.vel.magnitude();
-            if(speed > 1e-6f)
-            {
-                dir.add(vec(proj.vel).div(speed));
-                dmag = dir.magnitude();
-                if(dmag > 1e-3f) dir.div(dmag);
-                else dir = vec(0, 0, 1);
-            }
-        }
+        if(isweap(proj.weap) && !weaptype[proj.weap].traced && flags&HIT_PROJ) vel = proj.vel;
         if(proj.owner && proj.local)
         {
             int hflags = proj.flags|flags;
             float size = hflags&HIT_WAVE ? radial*WF(WK(proj.flags), proj.weap, wavepush, WS(proj.flags)) : radial;
             int damage = calcdamage(proj.owner, d, proj.weap, hflags, radial, size, dist, scale);
-            if(damage) game::hiteffect(proj.weap, hflags, damage, d, proj.owner, dir, false);
+            if(damage) game::hiteffect(proj.weap, hflags, damage, d, proj.owner, dir, vel, dist, false);
             else return;
         }
         hitmsg &h = hits.add();
@@ -164,6 +154,7 @@ namespace projs
         h.target = d->clientnum;
         h.dist = int(dist*DNF);
         h.dir = ivec(int(dir.x*DNF), int(dir.y*DNF), int(dir.z*DNF));
+        h.vel = ivec(int(vel.x*DNF), int(vel.y*DNF), int(vel.z*DNF));
     }
 
     void projpush(projent *p)
@@ -178,7 +169,7 @@ namespace projs
                 h.proj = p->id;
                 h.target = p->owner->clientnum;
                 h.dist = 0;
-                h.dir = ivec(0, 0, 0);
+                h.dir = h.vel = ivec(0, 0, 0);
             }
         }
     }
@@ -1695,7 +1686,7 @@ namespace projs
                     }
                     default: break;
                 }
-                if(!proj.limited && !WK(proj.flags) && vol > 0 && (proj.weap != W_MELEE || !hits.empty()))
+                if(!proj.limited && vol > 0)
                 {
                     int slot = WX(WK(proj.flags), proj.weap, explode, WS(proj.flags), game::gamemode, game::mutators, proj.curscale*proj.lifesize) > 0 ? S_W_EXPLODE : S_W_DESTROY;
                     if(vol) playsound(WSND2(proj.weap, WS(proj.flags), slot), proj.o, NULL, 0, vol);

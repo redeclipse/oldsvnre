@@ -22,6 +22,7 @@ enum
     S_W_SWITCH, S_W_RELOAD, S_W_NOTIFY,
     S_W_EXPLODE, S_W_EXPLODE2,
     S_W_DESTROY, S_W_DESTROY2,
+    S_W_IMPACT, S_W_IMPACT2,
     S_W_EXTINGUISH, S_W_EXTINGUISH2,
     S_W_TRANSIT, S_W_TRANSIT2,
     S_W_BOUNCE, S_W_BOUNCE2,
@@ -71,7 +72,7 @@ enum
 enum { WR_BURN = 0, WR_BLEED, WR_SHOCK, WR_MAX, WR_ALL = (1<<WR_BURN)|(1<<WR_BLEED)|(1<<WR_SHOCK) };
 
 struct shotmsg { int id; ivec pos; };
-struct hitmsg { int flags, proj, target, dist; ivec dir; };
+struct hitmsg { int flags, proj, target, dist; ivec dir, vel; };
 
 #define hithead(x)       (x&HIT_WHIPLASH || x&HIT_HEAD)
 #define hithurts(x)      (x&HIT_BURN || x&HIT_BLEED || x&HIT_SHOCK || x&HIT_EXPLODE || x&HIT_PROJ || x&HIT_MATERIAL)
@@ -320,6 +321,12 @@ WPFVARK(0, hitpush, FVAR_MIN, FVAR_MAX,
     200.0f,     35.0f,      100.0f,     25.0f,      50.0f,      75.0f,      -50.0f,     150.0f,     250.0f,     0.0f,       500.0f,
     100.0f,     35.0f,      50.0f,      20.0f,      50.0f,      5.0f,       20.0f,      0.0f,       250.0f,     0.0f,       500.0f,
     200.0f,     35.0f,      100.0f,     25.0f,      50.0f,      75.0f,      -50.0f,     0.0f,       250.0f,     0.0f,       500.0f
+);
+WPFVARK(0, hitvel, 0, FVAR_MAX,
+    1,          1,          1,          1,          1,          1,          1,          1,          1,          1,          1,
+    1,          1,          1,          1,          1,          1,          1,          1,          1,          1,          1,
+    1,          1,          1,          1,          1,          1,          1,          1,          1,          1,          1,
+    1,          1,          1,          1,          1,          1,          1,          1,          1,          1,          1
 );
 WPVARK(0, interacts, 0, 3,
     0,          1,          0,          1,          1,          1,          1,          1,          3,          3,          1,

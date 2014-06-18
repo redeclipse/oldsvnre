@@ -1658,8 +1658,8 @@ namespace game
     extern void resetcamera(bool cam = true, bool input = true);
     extern void resetworld();
     extern void resetstate();
-    extern void hiteffect(int weap, int flags, int damage, gameent *d, gameent *v, vec &dir, bool local = false);
-    extern void damaged(int weap, int flags, int damage, int health, int armour, gameent *d, gameent *v, int millis, vec &dir);
+    extern void hiteffect(int weap, int flags, int damage, gameent *d, gameent *v, vec &dir, vec &vel, float dist, bool local = false);
+    extern void damaged(int weap, int flags, int damage, int health, int armour, gameent *d, gameent *v, int millis, vec &dir, vec &vel, float dist);
     extern void killed(int weap, int flags, int damage, gameent *d, gameent *v, vector<gameent*> &log, int style, int material);
     extern void timeupdate(int timeremain);
     extern vec rescolour(dynent *d, int c = PULSE_BURN);
