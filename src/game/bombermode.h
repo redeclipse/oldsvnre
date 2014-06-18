@@ -103,14 +103,6 @@ struct bomberservmode : bomberstate, servmode
         }
     }
 
-    void scoreaffinity(clientinfo *ci, int relay, int goal)
-    {
-        if(!canplay(hasflaginfo) || m_gsp1(gamemode, mutators) || m_gsp2(gamemode, mutators) || !flags.inrange(relay) || !flags.inrange(goal)) return;
-        if(flags[relay].lastowner != ci->clientnum || !flags[relay].droptime) return;
-        if(G(bomberbasketmindist) > 0 && !flags[relay].travel(flags[goal].spawnloc, G(bomberbasketmindist))) return;
-        scorebomb(ci, relay, goal);
-    }
-
     void moved(clientinfo *ci, const vec &oldpos, const vec &newpos)
     {
         if(!canplay(hasflaginfo) || ci->state.actortype >= A_ENEMY) return;
@@ -118,10 +110,7 @@ struct bomberservmode : bomberstate, servmode
             dropaffinity(ci, oldpos, vec(ci->state.vel).add(ci->state.falling));
         if(m_gsp1(gamemode, mutators) || (G(bomberbasketonly) && !m_gsp2(gamemode, mutators))) return;
         loopv(flags) if(isbomberaffinity(flags[i]) && flags[i].owner == ci->clientnum) loopvk(flags)
-        {
-            flag &f = flags[k];
-            if(isbombertarg(f, ci->team) && newpos.dist(f.spawnloc) <= enttype[AFFINITY].radius/2) scorebomb(ci, i, k);
-        }
+            if(isbombertarg(flags[k], ci->team) && newpos.dist(flags[k].spawnloc) <= enttype[AFFINITY].radius/2) scorebomb(ci, i, k);
     }
 
     void takeaffinity(clientinfo *ci, int i)
@@ -172,7 +161,7 @@ struct bomberservmode : bomberstate, servmode
             int hasaffinity = 0;
             vector<int> candidates[T_MAX];
             loopv(flags) candidates[flags[i].team].add(i);
-            int wants = m_gsp1(gamemode, mutators) ? 1 : teamcount(gamemode, mutators);
+            int wants = m_gsp1(gamemode, mutators) ? 1 : (m_gsp3(gamemode, mutators) ? 2 : teamcount(gamemode, mutators));
             loopi(wants)
             {
                 int c = candidates[i].length(), r = c > 1 ? rnd(c) : 0;
@@ -304,7 +293,7 @@ struct bomberservmode : bomberstate, servmode
     {
         if(!canplay(hasflaginfo) || ci->state.state != CS_ALIVE || m_insta(gamemode, mutators)) return;
         #define bomberbuff1 (G(bomberbuffing)&1 && isbomberhome(f, ci->team) && (G(bomberbuffarea) > 0 ? ci->state.o.dist(f.spawnloc) <= G(bomberbuffarea) : true))
-        #define bomberbuff2 (G(bomberbuffing)&2 && isbomberaffinity(f) && f.owner == ci->clientnum)
+        #define bomberbuff2 ((G(bomberbuffing)&2 || (G(bomberbuffing)&4 && m_gsp3(gamemode, mutators) && ci->team == T_ALPHA)) && isbomberaffinity(f) && f.owner == ci->clientnum)
         if(G(bomberbuffing)) loopv(flags)
         {
             flag &f = flags[i];
@@ -324,7 +313,7 @@ struct bomberservmode : bomberstate, servmode
 
     void moveaffinity(clientinfo *ci, int cn, int id, const vec &o, const vec &inertia = vec(0, 0, 0))
     {
-        if(!flags.inrange(id)) return;
+        if(!canplay(hasflaginfo) || flags.inrange(id)) return;
         flag &f = flags[id];
         if(!f.droptime || f.owner >= 0 || !isbomberaffinity(f)) return;
         clientinfo *co = f.lastowner >= 0 ? (clientinfo *)getinfo(f.lastowner) : NULL;
@@ -332,6 +321,13 @@ struct bomberservmode : bomberstate, servmode
         f.distance += f.droploc.dist(o);
         f.droploc = o;
         f.inertia = inertia;
+        if(!m_gsp1(gamemode, mutators) && !m_gsp2(gamemode, mutators)) loopv(flags)
+        {
+            if(isbomberaffinity(flags[i]) || f.droploc.dist(flags[i].spawnloc) > enttype[AFFINITY].radius/2) continue;
+            if(G(bomberbasketmindist) > 0 && !flags[id].travel(flags[i].spawnloc, G(bomberbasketmindist))) continue;
+            scorebomb(ci, id, i);
+            break;
+        }
         //sendf(-1, 1, "ri9", N_MOVEAFFIN, ci->clientnum, id, int(f.droploc.x*DMF), int(f.droploc.y*DMF), int(f.droploc.z*DMF), int(f.inertia.x*DMF), int(f.inertia.y*DMF), int(f.inertia.z*DMF));
     }
 

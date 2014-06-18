@@ -86,7 +86,7 @@ namespace hud
             if((a->cptime && !b->cptime) || (a->cptime && b->cptime && a->cptime < b->cptime)) return true;
             if((b->cptime && !a->cptime) || (a->cptime && b->cptime && b->cptime < a->cptime)) return false;
         }
-        else if(m_gauntlet(game::gamemode))
+        else if(m_lapcount(game::gamemode, game::mutators))
         {
             if(a->cplaps > b->cplaps) return true;
             if(b->cplaps > a->cplaps) return false;
@@ -203,9 +203,9 @@ namespace hud
                                 }
                                 else break;
                             }
-                            game::announcef(S_V_DRAW, CON_MESG, NULL, true, "\fw%s tied %swith a total score of: \fs\fc%s\fS", game::colourteam(sg.team), winner, m_laptime(game::gamemode, game::mutators) ? timestr(sg.total) : intstr(sg.total));
+                            game::announcef(S_V_DRAW, CON_MESG, NULL, true, "\fw%s tied %swith a total score of \fs\fc%s\fS", game::colourteam(sg.team), winner, m_laptime(game::gamemode, game::mutators) ? timestr(sg.total) : intstr(sg.total));
                         }
-                        else game::announcef(anc, CON_MESG, NULL, true, "\fwteam %s won the match with a total score of: \fs\fc%s\fS", game::colourteam(sg.team), m_laptime(game::gamemode, game::mutators) ? timestr(sg.total) : intstr(sg.total));
+                        else game::announcef(anc, CON_MESG, NULL, true, "\fwteam %s won the match with a total score of \fs\fc%s\fS", game::colourteam(sg.team), m_laptime(game::gamemode, game::mutators) ? timestr(sg.total) : intstr(sg.total));
                     }
                 }
                 else
@@ -225,9 +225,27 @@ namespace hud
                                 }
                                 else break;
                             }
-                            game::announcef(S_V_DRAW, CON_MESG, NULL, true, "\fw%s tied %swith the fastest lap: \fs\fc%s\fS", game::colourname(sg.players[0]), winner, sg.players[0]->cptime ? timestr(sg.players[0]->cptime) : "dnf");
+                            game::announcef(S_V_DRAW, CON_MESG, NULL, true, "\fw%s tied %swith the fastest lap \fs\fc%s\fS", game::colourname(sg.players[0]), winner, sg.players[0]->cptime ? timestr(sg.players[0]->cptime) : "dnf");
                         }
-                        else game::announcef(anc, CON_MESG, NULL, true, "\fw%s won the match with the fastest lap: \fs\fc%s\fS", game::colourname(sg.players[0]), sg.players[0]->cptime ? timestr(sg.players[0]->cptime) : "dnf");
+                        else game::announcef(anc, CON_MESG, NULL, true, "\fw%s won the match with the fastest lap \fs\fc%s\fS", game::colourname(sg.players[0]), sg.players[0]->cptime ? timestr(sg.players[0]->cptime) : "dnf");
+                    }
+                    else if(m_lapcount(game::gamemode, game::mutators))
+                    {
+                        if(sg.players.length() > 1 && sg.players[0]->cplaps == sg.players[1]->cplaps)
+                        {
+                            string winner = "";
+                            loopv(sg.players) if(i)
+                            {
+                                if(sg.players[0]->cplaps == sg.players[i]->cplaps)
+                                {
+                                    concatstring(winner, game::colourname(sg.players[i]));
+                                    concatstring(winner, ", ");
+                                }
+                                else break;
+                            }
+                            game::announcef(S_V_DRAW, CON_MESG, NULL, true, "\fw%s tied %swith a lap count of \fs\fc%d\fS", game::colourname(sg.players[0]), winner, sg.players[0]->cplaps);
+                        }
+                        else game::announcef(anc, CON_MESG, NULL, true, "\fw%s won the match with a lap count of \fs\fc%d\fS", game::colourname(sg.players[0]), sg.players[0]->cplaps);
                     }
                     else
                     {
@@ -243,9 +261,9 @@ namespace hud
                                 }
                                 else break;
                             }
-                            game::announcef(S_V_DRAW, CON_MESG, NULL, true, "\fw%s tied %swith a total score of: \fs\fc%d\fS", game::colourname(sg.players[0]), winner, sg.players[0]->points);
+                            game::announcef(S_V_DRAW, CON_MESG, NULL, true, "\fw%s tied %swith a total score of \fs\fc%d\fS", game::colourname(sg.players[0]), winner, sg.players[0]->points);
                         }
-                        else game::announcef(anc, CON_MESG, NULL, true, "\fw%s won the match with a total score of: \fs\fc%d\fS", game::colourname(sg.players[0]), sg.players[0]->points);
+                        else game::announcef(anc, CON_MESG, NULL, true, "\fw%s won the match with a total score of \fs\fc%d\fS", game::colourname(sg.players[0]), sg.players[0]->points);
                     }
                 }
             }
@@ -512,7 +530,8 @@ namespace hud
                                         g.textf("team %s", 0xFFFFFF, teamtexname(sg.team), TEAM(sg.team, colour), TEAM(sg.team, name));
                                         g.spring();
                                         if(m_defend(game::gamemode) && ((defendlimit && sg.total >= defendlimit) || sg.total == INT_MAX)) g.text("WINNER", 0xFFFFFF);
-                                        else if(m_laptime(game::gamemode, game::mutators)) g.textf("best: %s", 0xFFFFFF, NULL, 0, sg.total ? timestr(sg.total) : "\fadnf");
+                                        else if(m_laptime(game::gamemode, game::mutators)) g.textf("%s", 0xFFFFFF, NULL, 0, sg.total ? timestr(sg.total) : "\fadnf");
+                                        else if(m_lapcount(game::gamemode, game::mutators)) g.textf("%d laps", 0xFFFFFF, NULL, 0, sg.total);
                                         else g.textf("%d points", 0xFFFFFF, NULL, 0, sg.total);
                                         g.space(0.25f);
                                     }));
@@ -552,7 +571,7 @@ namespace hud
                                     }));
                                 });
 
-                                if(scorepoints >= (m_trial(game::gamemode) || m_gauntlet(game::gamemode) ? 2 : 1))
+                                if(scorepoints >= (m_checkpoint(game::gamemode) ? 2 : 1))
                                 {
                                     uilist(g, {
                                         uilist(g, {
@@ -566,7 +585,7 @@ namespace hud
                                     });
                                 }
 
-                                if(m_trial(game::gamemode) || m_gauntlet(game::gamemode))
+                                if(m_checkpoint(game::gamemode))
                                 {
                                     if(scoretimer && (scoretimer >= 2 || m_laptime(game::gamemode, game::mutators)))
                                     {
@@ -581,7 +600,7 @@ namespace hud
                                             }));
                                         });
                                     }
-                                    if(scorelaps && (scorelaps >= 2 || !m_laptime(game::gamemode, game::mutators)))
+                                    if(scorelaps && (scorelaps >= 2 || m_lapcount(game::gamemode, game::mutators)))
                                     {
                                         uilist(g, {
                                             uilist(g, {
@@ -882,15 +901,15 @@ namespace hud
                     {
                         gameent *d = sg.players[j];
                         realpos++;
-                        if(!pos || (m_laptime(game::gamemode, game::mutators) ? d->cptime > sg.players[lastpos]->cptime : d->points < sg.players[lastpos]->points))
+                        if(!pos || (m_laptime(game::gamemode, game::mutators) ? d->cptime > sg.players[lastpos]->cptime : (m_lapcount(game::gamemode, game::mutators) ? d->cplaps < sg.players[lastpos]->cplaps : d->points < sg.players[lastpos]->points)))
                         {
                             pos = realpos;
                             lastpos = j;
                         }
                         if((d != game::focus) == !i) continue;
                         float sk = numout && inventoryscoreshrink > 0 ? 1.f-min(numout*inventoryscoreshrink, inventoryscoreshrinkmax) : 1;
-                        int score = m_laptime(game::gamemode, game::mutators) ? d->cptime : d->points,
-                            offset = sg.players.length() > 1 ? score-(m_laptime(game::gamemode, game::mutators) ? sg.players[j ? 0 : 1]->cptime : sg.players[j ? 0 : 1]->points) : 0;
+                        int score = m_laptime(game::gamemode, game::mutators) ? d->cptime : (m_lapcount(game::gamemode, game::mutators) ? d->cplaps : d->points),
+                            offset = sg.players.length() > 1 ? score-(m_laptime(game::gamemode, game::mutators) ? sg.players[j ? 0 : 1]->cptime : (m_lapcount(game::gamemode, game::mutators) ? sg.players[j ? 0 : 1]->cplaps : sg.players[j ? 0 : 1]->points)) : 0;
                         sy += drawscoreitem(playertex, game::getcolour(d, game::playerteamtone), x, y+sy, s, sk*inventoryscoresize, blend*inventoryblend, pos, score, offset, game::colourname(d));
                         if(++numout >= count) return sy;
                     }
@@ -936,7 +955,17 @@ namespace hud
                     pushfont("little");
                     sy += draw_textx("by %s", x+FONTW*2, y, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, game::colourteam(sg.team));
                     popfont();
-                    sy += draw_textx("\fg%d", x, y-sy, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, sg.total);
+                    sy += draw_textx("laps: \fg%d", x, y-sy, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, sg.total);
+                }
+            }
+            else if(!sg.players.empty())
+            {
+                if(sg.players[0]->cplaps)
+                {
+                    pushfont("little");
+                    sy += draw_textx("by %s", x+FONTW*2, y, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, game::colourname(sg.players[0]));
+                    popfont();
+                    sy += draw_textx("laps: \fg%d", x, y-sy, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, sg.players[0]->cplaps);
                 }
             }
         }

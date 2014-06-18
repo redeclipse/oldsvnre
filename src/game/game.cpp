@@ -870,12 +870,6 @@ namespace game
                 if(m_capture(gamemode)) capture::adddynlights();
                 else if(m_defend(gamemode)) defend::adddynlights();
                 else if(m_bomber(gamemode)) bomber::adddynlights();
-                else if(m_gauntlet(gamemode))
-                {
-                    int numents = entities::lastenttype[CHECKPOINT];
-                    loopi(numents) if(entities::ents[i]->type == CHECKPOINT && (entities::ents[i]->attrs[6] == CP_LAST || entities::ents[i]->attrs[6] == CP_FINISH))
-                        adddynlight(entities::ents[i]->o, float(max(entities::ents[i]->attrs[0], enttype[entities::ents[i]->type].radius)), vec::hexcolor(TEAM(T_ALPHA, colour)), 0, 0, DL_KEEP);
-                }
             }
             gameent *d = NULL;
             int numdyns = numdynents();
@@ -3590,7 +3584,7 @@ namespace game
         if(rendernormally && early) focus->cleartags();
         if(project && !third) viewproject(firstpersondepth);
         if(third || !rendernormally) renderplayer(focus, 1, opacity(focus, thirdpersonview(true)), focus->curscale, early);
-        else if(!third && focus->state == CS_ALIVE && focus->weapselect != W_MELEE) renderplayer(focus, 0, opacity(focus, false), focus->curscale, early);
+        else if(!third && focus->state == CS_ALIVE) renderplayer(focus, 0, opacity(focus, false), focus->curscale, early);
         if(project && !third) viewproject();
         if(!third && focus->state == CS_ALIVE && firstpersonmodel == 2)
         {

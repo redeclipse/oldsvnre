@@ -598,7 +598,7 @@ namespace bomber
     bool aihomerun(gameent *d, ai::aistate &b)
     {
         vec pos = d->feetpos();
-        if(m_team(game::gamemode, game::mutators) && !m_gsp1(game::gamemode, game::mutators))
+        if(m_team(game::gamemode, game::mutators) && !m_gsp1(game::gamemode, game::mutators) && (!m_gsp3(game::gamemode, game::mutators) || d->team != T_ALPHA))
         {
             int goal = -1;
             loopv(st.flags)

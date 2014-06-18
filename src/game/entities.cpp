@@ -2,7 +2,7 @@
 namespace entities
 {
     vector<extentity *> ents;
-    int lastenttype[MAXENTTYPES], lastusetype[EU_MAX], numactors = 0, numcheckpoints = 0;
+    int lastenttype[MAXENTTYPES], lastusetype[EU_MAX], numactors = 0;
 
     VAR(IDF_PERSIST, showlighting, 0, 0, 1);
     VAR(IDF_PERSIST, showentmodels, 0, 1, 2);
@@ -780,8 +780,7 @@ namespace entities
                 {
                     if(d->state != CS_ALIVE || !gameent::is(d)) break;
                     gameent *g = (gameent *)d;
-                    if(!m_check(e.attrs[3], e.attrs[4], game::gamemode, game::mutators) || !m_checkpoint(game::gamemode)) break;
-                    if((m_gauntlet(game::gamemode) && g->team != T_ALPHA) || g->checkpoint == n) break;
+                    if(!m_check(e.attrs[3], e.attrs[4], game::gamemode, game::mutators) || !m_checkpoint(game::gamemode) || g->checkpoint == n) break;
                     if(e.attrs[6] == CP_START)
                     {
                         if(g->cpmillis) break;
@@ -1060,7 +1059,6 @@ namespace entities
                     while(e.attrs[6] < 0) e.attrs[6] += CP_MAX;
                     while(e.attrs[6] >= CP_MAX) e.attrs[6] -= CP_MAX;
                 }
-                if(create && (e.attrs[6] == CP_LAST || e.attrs[6] == CP_FINISH)) numcheckpoints++;
                 break;
             case ACTOR:
                 while(e.attrs[0] < 0) e.attrs[0] += A_TOTAL;
@@ -1894,7 +1892,7 @@ namespace entities
 
     void initents(stream *g, int mtype, int mver, char *gid, int gver)
     {
-        numactors = numcheckpoints = 0;
+        numactors = 0;
         ai::oldwaypoints.setsize(0);
         loopv(ents)
         {
@@ -1913,7 +1911,6 @@ namespace entities
             switch(ents[i]->type)
             {
                 case ACTOR: numactors++; break;
-                case CHECKPOINT: if(ents[i]->attrs[6] == CP_LAST || ents[i]->attrs[6] == CP_FINISH) numcheckpoints++; break;
                 default: break;
             }
         }
@@ -1944,23 +1941,6 @@ namespace entities
                 }
                 numactors++;
             }
-        }
-        if(m_gauntlet(game::gamemode) && !numcheckpoints) loopj(3)
-        {
-            loopv(ents) if(j == 2 || (ents[i]->type == (!j ? AFFINITY : PLAYERSTART) && ents[i]->attrs[0] == T_OMEGA))
-            {
-                extentity &e = *newent();
-                ents.add(&e);
-                e.type = CHECKPOINT;
-                e.o = ents[i]->o;
-                e.attrs.add(0, max(5, enttype[CHECKPOINT].numattrs));
-                e.attrs[0] = enttype[AFFINITY].radius;
-                if(j != 2) e.attrs[1] = ents[i]->attrs[1];
-                e.attrs[6] = CP_FINISH;
-                numcheckpoints++;
-                break;
-            }
-            if(numcheckpoints) break;
         }
         loopv(ents)
         {
@@ -2387,17 +2367,10 @@ namespace entities
     {
         float maxdist = float(maxparticledistance)*float(maxparticledistance);
         int numents = m_edit(game::gamemode) ? ents.length() : max(lastusetype[EU_ITEM], max(lastenttype[PARTICLES], lastenttype[TELEPORT]));
-        if(m_gauntlet(game::gamemode)) numents = max(numents, lastenttype[CHECKPOINT]);
         loopi(numents)
         {
             gameentity &e = *(gameentity *)ents[i];
-            if(m_gauntlet(game::gamemode) && e.type == CHECKPOINT && (e.attrs[6] == CP_FINISH || e.attrs[6] == CP_LAST))
-            {
-                float radius = float(max(e.attrs[0], enttype[e.type].radius));
-                part_explosion(e.o, radius, PART_SHOCKWAVE, 1, TEAM(T_ALPHA, colour), 1, 0.125f);
-                part_explosion(e.o, min(radius*0.35f, enttype[e.type].radius*0.35f), PART_SHOCKBALL, 1, TEAM(T_ALPHA, colour), 1, 0.25f);
-            }
-            else if(e.type != PARTICLES && e.type != TELEPORT && !m_edit(game::gamemode) && enttype[e.type].usetype != EU_ITEM) continue;
+            if(e.type != PARTICLES && e.type != TELEPORT && !m_edit(game::gamemode) && enttype[e.type].usetype != EU_ITEM) continue;
             else if(e.o.squaredist(camera1->o) > maxdist) continue;
             float skew = 1;
             bool active = false;

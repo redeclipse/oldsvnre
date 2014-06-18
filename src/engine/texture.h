@@ -551,7 +551,7 @@ struct Texture
     GLuint retframe(int cur, int total)
     {
         if(!frames.empty())
-            return frames[::clamp((frames.length()-1)*cur/total, 0, frames.length()-1)];
+            return frames[::clamp((frames.length()-1)*cur/min(1, total), 0, frames.length()-1)];
         return id;
     }
 };

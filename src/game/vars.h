@@ -93,7 +93,6 @@ GSVAR(IDF_ADMIN, kingmaps, "untitled");
 GSVAR(IDF_ADMIN, bombermaps, "untitled");
 GSVAR(IDF_ADMIN, holdmaps, "untitled");
 GSVAR(IDF_ADMIN, trialmaps, "untitled");
-GSVAR(IDF_ADMIN, gauntletmaps, "untitled");
 
 GSVAR(IDF_ADMIN, multimaps, "untitled"); // applies to modes which *require* multi spawns (ctf/bb)
 GSVAR(IDF_ADMIN, duelmaps, "untitled");
@@ -156,7 +155,6 @@ GVAR(0, spawnrotate, 0, 2, 2); // 0 = let client decide, 1 = sequence, 2 = rando
 GVAR(0, spawnweapon, 0, W_PISTOL, W_MAX-1);
 GVAR(0, instaweapon, 0, W_RIFLE, W_MAX-1);
 GVAR(0, trialweapon, 0, W_MELEE, W_MAX-1);
-GVAR(0, gauntletweapon, 0, W_RIFLE, W_MAX-1);
 GVAR(0, spawngrenades, 0, 0, 2); // 0 = never, 1 = all but insta/trial, 2 = always
 GVAR(0, spawnmines, 0, 0, 2); // 0 = never, 1 = all but insta/trial, 2 = always
 GVAR(0, spawndelay, 0, 5000, VAR_MAX); // delay before spawning in most modes
@@ -176,7 +174,6 @@ GVAR(0, balancenospawn, 0, 1, 1); // prevent respawning when waiting to balance
 GVAR(0, balanceduke, 0, 0, 1); // enable in duel/survivor
 
 GVAR(0, trialghost, 0, 1, 1); // 0 = all players are solid, 1 = all players are ghosts
-GVAR(0, gauntletghost, 0, 2, 2); // 0 = all players are solid, 1 = all players are ghosts, 2 = team-mates are ghosts
 
 GFVAR(0, maxhealth, 0, 1.5f, FVAR_MAX);
 GFVAR(0, maxhealthvampire, 0, 3.0f, FVAR_MAX);
@@ -325,7 +322,7 @@ GFVAR(0, bomberliquidcoast, FVAR_MIN, 1.75f, FVAR_MAX);
 GFVAR(0, bomberweight, FVAR_MIN, 350, FVAR_MAX);
 GFVAR(0, bomberminspeed, 0, 65, FVAR_MAX);
 GFVAR(0, bomberthreshold, 0, 0, FVAR_MAX); // if someone 'warps' more than this distance, auto-drop
-GVAR(0, bomberbuffing, 0, 1, 3); // buffed; 0 = off, &1 = when guarding, &2 = when securing
+GVAR(0, bomberbuffing, 0, 5, 7); // buffed; 0 = off, &1 = when guarding, &2 = when securing, &4 = when secured as defender in attack
 GVAR(0, bomberbuffdelay, 0, 3000, VAR_MAX); // buffed for this long after leaving
 GFVAR(0, bomberbuffarea, FVAR_NONZERO, 128, FVAR_MAX); // radius in which buffing occurs
 GFVAR(0, bomberbuffdamage, 1, 1.25f, FVAR_MAX); // multiply outgoing damage by this much when buffed
@@ -333,15 +330,6 @@ GFVAR(0, bomberbuffshield, 1, 1.25f, FVAR_MAX); // divide incoming damage by thi
 GVAR(0, bomberregenbuff, 0, 1, 1); // 0 = off, 1 = modify regeneration when buffed
 GVAR(0, bomberregendelay, 0, 1000, VAR_MAX); // regen this often when buffed
 GVAR(0, bomberregenextra, 0, 2, VAR_MAX); // add this to regen when buffed
-
-GVAR(0, gauntletbuffing, 0, 1, 2); // buffed; 0 = off, 1 = when guarding, 2 = always (always on if gsp2)
-GVAR(0, gauntletbuffdelay, 0, 1000, VAR_MAX); // buffed for this long after leaving
-GFVAR(0, gauntletbuffarea, 0, 256, FVAR_MAX); // radius in which buffing occurs
-GFVAR(0, gauntletbuffdamage, 1, 1.5f, FVAR_MAX); // multiply outgoing damage by this much when buffed
-GFVAR(0, gauntletbuffshield, 1, 1.5f, FVAR_MAX); // divide incoming damage by this much when buffed
-GVAR(0, gauntletregenbuff, 0, 1, 1); // 0 = off, 1 = modify regeneration when buffed
-GVAR(0, gauntletregendelay, 0, 1000, VAR_MAX); // regen this often when buffed
-GVAR(0, gauntletregenextra, 0, 2, VAR_MAX); // add this to regen when buffed
 
 GVAR(IDF_ADMIN, airefreshdelay, 0, 1500, VAR_MAX);
 GVAR(0, botbalance, -1, -1, VAR_MAX); // -1 = always use numplayers, 0 = don't balance, 1 or more = fill only with this*numteams

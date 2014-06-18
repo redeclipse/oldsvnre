@@ -100,11 +100,6 @@ namespace projs
                 if(v->lastbuff) skew *= bomberbuffdamage;
                 if(target->lastbuff) skew /= bomberbuffshield;
             }
-            else if(m_gauntlet(game::gamemode) && gauntletbuffdelay)
-            {
-                if(v->lastbuff) skew *= gauntletbuffdamage;
-                if(target->lastbuff) skew /= gauntletbuffshield;
-            }
         }
         if(!(flags&HIT_HEAD))
         {
@@ -2244,20 +2239,6 @@ namespace projs
             {
                 proj.state = CS_DEAD;
                 proj.escaped = true;
-            }
-            if(m_bomber(game::gamemode) && !m_gsp2(game::gamemode, game::mutators) && proj.projtype == PRJ_AFFINITY && !proj.beenused && bomber::st.flags.inrange(proj.id))
-            {
-                gameent *d = bomber::st.flags[proj.id].lastowner;
-                if(d && (d == game::player1 || d->ai))
-                {
-                    loopv(bomber::st.flags) if(!isbomberaffinity(bomber::st.flags[i]) && proj.o.dist(bomber::st.flags[i].spawnloc) <= enttype[AFFINITY].radius/2)
-                    {
-                        proj.beenused = 1;
-                        proj.lifetime = min(proj.lifetime, proj.fadetime);
-                        client::addmsg(N_SCOREAFFIN, "ri3", d->clientnum, proj.id, i);
-                        break;
-                    }
-                }
             }
             if(proj.local && proj.owner && proj.projtype == PRJ_SHOT)
             {

@@ -1,11 +1,11 @@
 enum
 {
-    G_DEMO = 0, G_EDITMODE, G_DEATHMATCH, G_CAPTURE, G_DEFEND, G_BOMBER, G_TRIAL, G_GAUNTLET, G_MAX,
+    G_DEMO = 0, G_EDITMODE, G_DEATHMATCH, G_CAPTURE, G_DEFEND, G_BOMBER, G_TRIAL, G_MAX,
     G_START = G_EDITMODE, G_PLAY = G_DEATHMATCH, G_FIGHT = G_DEATHMATCH,
     G_RAND = G_BOMBER-G_DEATHMATCH+1, G_COUNT = G_MAX-G_PLAY,
-    G_NEVER = (1<<G_DEMO)|(1<<G_EDITMODE)|(1<<G_GAUNTLET),
+    G_NEVER = (1<<G_DEMO)|(1<<G_EDITMODE),
     G_LIMIT = (1<<G_DEATHMATCH)|(1<<G_CAPTURE)|(1<<G_DEFEND)|(1<<G_BOMBER),
-    G_ALL = (1<<G_DEMO)|(1<<G_EDITMODE)|(1<<G_DEATHMATCH)|(1<<G_CAPTURE)|(1<<G_DEFEND)|(1<<G_BOMBER)|(1<<G_TRIAL)|(1<<G_GAUNTLET),
+    G_ALL = (1<<G_DEMO)|(1<<G_EDITMODE)|(1<<G_DEATHMATCH)|(1<<G_CAPTURE)|(1<<G_DEFEND)|(1<<G_BOMBER)|(1<<G_TRIAL),
     G_SW = (1<<G_TRIAL),
 };
 enum
@@ -84,34 +84,24 @@ gametypes gametype[] = {
     {
         G_BOMBER, (1<<G_F_GSP), 0,
         {
-            (1<<G_M_MULTI)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_DUEL)|(1<<G_M_SURVIVOR)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_FREESTYLE)|(1<<G_M_VAMPIRE)|(1<<G_M_TOURNEY)|(1<<G_M_RESIZE)|(1<<G_M_GSP1)|(1<<G_M_GSP2),
+            (1<<G_M_MULTI)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_DUEL)|(1<<G_M_SURVIVOR)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_FREESTYLE)|(1<<G_M_VAMPIRE)|(1<<G_M_TOURNEY)|(1<<G_M_RESIZE)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3),
             (1<<G_M_MULTI)|(1<<G_M_FFA)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_FREESTYLE)|(1<<G_M_VAMPIRE)|(1<<G_M_TOURNEY)|(1<<G_M_RESIZE)|(1<<G_M_GSP1),
             (1<<G_M_MULTI)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_DUEL)|(1<<G_M_SURVIVOR)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_FREESTYLE)|(1<<G_M_VAMPIRE)|(1<<G_M_TOURNEY)|(1<<G_M_RESIZE)|(1<<G_M_GSP2),
-            0
+            (1<<G_M_MULTI)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_FREESTYLE)|(1<<G_M_VAMPIRE)|(1<<G_M_TOURNEY)|(1<<G_M_RESIZE)|(1<<G_M_GSP2)|(1<<G_M_GSP3)
         },
-        "bomber-ball", "bomber", { "hold", "touchdown", "" },
-        "throw the bomb into the enemy goal to score", { "hold the bomb as long as possible to score", "carry the bomb into the enemy goal to score", "" },
+        "bomber-ball", "bomber", { "hold", "touchdown", "attack" },
+        "throw the bomb into the enemy goal to score", { "hold the bomb as long as possible to score", "carry the bomb into the enemy goal to score", "teams take turns attacking and defending" },
     },
     {
         G_TRIAL, 0, 0,
         {
-            (1<<G_M_FFA)|(1<<G_M_INSTA)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_FREESTYLE)|(1<<G_M_VAMPIRE)|(1<<G_M_RESIZE),
-            0, 0, 0
+            (1<<G_M_FFA)|(1<<G_M_FREESTYLE)|(1<<G_M_GSP1),
+            (1<<G_M_FFA)|(1<<G_M_FREESTYLE)|(1<<G_M_GSP1),
+            0, 0
         },
-        "time-trial", "trial", { "", "", "" },
-        "compete for the fastest time completing a lap", { "", "", "" },
-    },
-    {
-        G_GAUNTLET, 0, 0,
-        {
-            (1<<G_M_INSTA)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_FREESTYLE)|(1<<G_M_VAMPIRE)|(1<<G_M_TOURNEY)|(1<<G_M_RESIZE)|(1<<G_M_GSP1)|(1<<G_M_GSP2),
-            (1<<G_M_INSTA)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_FREESTYLE)|(1<<G_M_VAMPIRE)|(1<<G_M_TOURNEY)|(1<<G_M_RESIZE)|(1<<G_M_GSP1)|(1<<G_M_GSP2),
-            (1<<G_M_INSTA)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_FREESTYLE)|(1<<G_M_VAMPIRE)|(1<<G_M_TOURNEY)|(1<<G_M_RESIZE)|(1<<G_M_GSP1)|(1<<G_M_GSP2),
-            0
-        },
-        "gauntlet", "gauntlet", { "timed", "hard", "" },
-        "attack and defend for the most number laps completed", { "attack and defend for the fastest time completing a lap", "the defending team is permanently buffed", "" },
-    },
+        "time-trial", "trial", { "marathon", "", "" },
+        "compete for the fastest time completing a lap", { "compete for the most number of laps", "", "" },
+    }
 };
 mutstypes mutstype[] = {
     {
@@ -169,7 +159,7 @@ mutstypes mutstype[] = {
     {
         G_M_FREESTYLE, (1<<G_M_FREESTYLE),
         (1<<G_M_MULTI)|(1<<G_M_FFA)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_DUEL)|(1<<G_M_SURVIVOR)|(1<<G_M_CLASSIC)|(1<<G_M_ONSLAUGHT)|(1<<G_M_FREESTYLE)|(1<<G_M_VAMPIRE)|(1<<G_M_TOURNEY)|(1<<G_M_RESIZE)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3),
-        "freestyle", "players can impulse without bounds"
+        "freestyle", "players can parkour without limits"
     },
     {
         G_M_VAMPIRE, (1<<G_M_VAMPIRE),
@@ -218,7 +208,6 @@ extern mutstypes mutstype[];
 #define m_defend(a)         (a == G_DEFEND)
 #define m_bomber(a)         (a == G_BOMBER)
 #define m_trial(a)          (a == G_TRIAL)
-#define m_gauntlet(a)       (a == G_GAUNTLET)
 
 #define m_play(a)           (a >= G_PLAY)
 #define m_affinity(a)       (m_capture(a) || m_defend(a) || m_bomber(a))
@@ -245,19 +234,20 @@ extern mutstypes mutstype[];
 #define m_gsp(a,b)          (m_gsp1(a,b) || m_gsp2(a,b) || m_gsp3(a,b))
 
 #define m_team(a,b)         (m_multi(a, b) || !m_ffa(a, b))
-#define m_sweaps(a,b)       (m_insta(a, b) || m_medieval(a, b) || m_kaboom(a, b))
+#define m_sweaps(a,b)       (m_trial(a) || m_insta(a, b) || m_medieval(a, b) || m_kaboom(a, b))
 #define m_loadout(a,b)      (!m_classic(a, b) && !m_sweaps(a, b))
 #define m_duke(a,b)         (m_duel(a, b) || m_survivor(a, b))
 #define m_regen(a,b)        (!m_tourney(a,b) && !m_duke(a, b) && !m_insta(a, b))
 #define m_enemies(a,b)      (m_onslaught(a, b))
-#define m_checkpoint(a)     (m_trial(a) || m_gauntlet(a))
-#define m_ghost(a)          (m_trial(a) ? G(trialghost) : (m_gauntlet(a) ? G(gauntletghost) : 0))
+#define m_checkpoint(a)     (m_trial(a))
+#define m_ghost(a)          (m_trial(a) ? G(trialghost) : 0)
 #define m_bots(a)           (m_fight(a) && !m_trial(a))
 #define m_nopoints(a,b)     (m_duke(a, b) || (m_bomber(a) && m_gsp1(a, b)) || m_trial(a))
 #define m_teamscore(a)      (m_dm(a))
-#define m_laptime(a,b)      (m_trial(a) || (m_gauntlet(a) && m_gsp1(a, b)))
+#define m_laptime(a,b)      (m_trial(a) && !m_gsp1(a, b))
+#define m_lapcount(a,b)     (m_trial(a) && m_gsp1(a, b))
 
-#define m_weapon(a,b)       (m_loadout(a, b) ? 0-W_ITEM : (m_medieval(a, b) ? W_SWORD : (m_kaboom(a, b) ? 0-W_BOOM : (m_insta(a, b) ? G(instaweapon) : (m_gauntlet(a) ? G(gauntletweapon) : (m_trial(a) ? G(trialweapon) : G(spawnweapon)))))))
+#define m_weapon(a,b)       (m_loadout(a, b) ? 0-W_ITEM : (m_medieval(a, b) ? W_SWORD : (m_kaboom(a, b) ? 0-W_BOOM : (m_insta(a, b) ? G(instaweapon) : (m_trial(a) ? G(trialweapon) : G(spawnweapon))))))
 #define m_xdelay(a,b)       (m_play(a) ? (m_trial(a) ? G(trialdelay) : (m_bomber(a) ? G(bomberdelay) : (m_insta(a, b) ? G(instadelay) : G(spawndelay)))) : 0)
 #define m_delay(a,b)        (m_duke(a,b) ? 0 : m_xdelay(a, b))
 #define m_protect(a,b)      (m_duke(a,b) ? G(duelprotect) : (m_insta(a, b) ? G(instaprotect) : G(spawnprotect)))
@@ -267,8 +257,9 @@ extern mutstypes mutstype[];
 #define m_maxhealth(a,b,c)  (int(m_health(a, b, c)*(m_vampire(a,b) ? G(maxhealthvampire) : G(maxhealth))))
 #define m_swapteam(a,b)     (m_team(a, b) && !m_trial(a) && m_fight(a) && (G(teambalanceduel) || !m_duel(a, b)) && !m_coop(gamemode, mutators) && G(teambalance) >= 3 && G(teambalanceswap))
 #define m_balteam(a,b,c)    (m_team(a, b) && !m_trial(a) && m_fight(a) && (G(teambalanceduel) || !m_duel(a, b)) && !m_coop(gamemode, mutators) && G(teambalance) >= c)
-#define m_balance(a,b)      (m_team(a, b) && !m_trial(a) && m_fight(a) && (G(balanceduke) || !m_duke(a, b)) && (m_gauntlet(a) || ((G(balancemaps) >= 0 ? G(balancemaps) : G(mapbalance)) >= (m_affinity(a) ? 1 : 2))))
-#define m_balreset(a)       (m_capture(a) || m_bomber(a) || m_gauntlet(a))
+#define m_forcebal(a,b)     (m_bomber(a) && m_gsp3(a, b))
+#define m_balance(a,b)      (m_team(a, b) && !m_trial(a) && m_fight(a) && (m_forcebal(a, b) || ((G(balanceduke) || !m_duke(a, b)) && ((G(balancemaps) >= 0 ? G(balancemaps) : G(mapbalance)) >= (m_affinity(a) ? 1 : 2)))))
+#define m_balreset(a,b)     (m_capture(a) || m_bomber(a))
 
 #define w_reload(w1,w2)     (w1 != W_MELEE ? (isweap(w2) ? (w1 == w2 ? -1 : W(w1, reloads)) : (w1 < 0-w2 ? -1 : W(w1, reloads))) : 0)
 #define w_carry(w1,w2)      (w1 > W_MELEE && (isweap(w2) ? w1 != w2 : w1 >= 0-w2) && (isweap(w1) && W(w1, carried)))
@@ -302,15 +293,14 @@ extern mutstypes mutstype[];
     else if(m_defend(b)) a = newstring(m_gsp2(b, c) ? G(kingmaps) : G(defendmaps)); \
     else if(m_bomber(b)) a = newstring(m_gsp1(b, c) ? G(holdmaps) : G(bombermaps)); \
     else if(m_trial(b)) a = newstring(G(trialmaps)); \
-    else if(m_gauntlet(b)) a = newstring(G(gauntletmaps)); \
     else if(m_fight(b)) a = newstring(G(mainmaps)); \
     else a = newstring(G(allowmaps)); \
     if(e) mapcull(a, b, c, d, e, f) \
     else mapshrink(!f, a, G(previousmaps), true) \
 }
 #ifdef GAMESERVER
-SVAR(0, modename, "demo editing deathmatch capture-the-flag defend-and-control bomber-ball time-trial gauntlet");
-SVAR(0, modeidxname, "demo editing deathmatch capture defend bomber trial gauntlet");
+SVAR(0, modename, "demo editing deathmatch capture-the-flag defend-and-control bomber-ball time-trial");
+SVAR(0, modeidxname, "demo editing deathmatch capture defend bomber trial");
 VAR(0, modeidxdemo, 1, G_DEMO, -1);
 VAR(0, modeidxediting, 1, G_EDITMODE, -1);
 VAR(0, modeidxdeathmatch, 1, G_DEATHMATCH, -1);
@@ -318,7 +308,6 @@ VAR(0, modeidxcapture, 1, G_CAPTURE, -1);
 VAR(0, modeidxdefend, 1, G_DEFEND, -1);
 VAR(0, modeidxbomber, 1, G_BOMBER, -1);
 VAR(0, modeidxtrial, 1, G_TRIAL, -1);
-VAR(0, modeidxgauntlet, 1, G_GAUNTLET, -1);
 VAR(0, modeidxstart, 1, G_START, -1);
 VAR(0, modeidxplay, 1, G_PLAY, -1);
 VAR(0, modeidxfight, 1, G_FIGHT, -1);
@@ -333,7 +322,6 @@ VAR(0, modebitcapture, 1, (1<<G_CAPTURE), -1);
 VAR(0, modebitdefend, 1, (1<<G_DEFEND), -1);
 VAR(0, modebitbomber, 1, (1<<G_BOMBER), -1);
 VAR(0, modebittrial, 1, (1<<G_TRIAL), -1);
-VAR(0, modebitgauntlet, 1, (1<<G_GAUNTLET), -1);
 VAR(0, modebitall, 1, G_ALL, -1);
 SVAR(0, mutsname, "multi ffa coop instagib medieval kaboom duel survivor classic onslaught freestyle vampire tourney resize");
 SVAR(0, mutsidxname, "multi ffa coop instagib medieval kaboom duel survivor classic onslaught freestyle vampire tourney resize");
