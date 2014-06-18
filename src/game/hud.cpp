@@ -520,7 +520,6 @@ namespace hud
     TVAR(IDF_PERSIST, modeeditingtex, "<grey>textures/modes/editing", 3);
     TVAR(IDF_PERSIST, modedeathmatchtex, "<grey>textures/modes/deathmatch", 3);
     TVAR(IDF_PERSIST, modetimetrialtex, "<grey>textures/modes/timetrial", 3);
-    TVAR(IDF_PERSIST, modegauntlettex, "<grey>textures/modes/gauntlet", 3);
 
     TVAR(IDF_PERSIST, modecapturetex, "<grey>textures/modes/capture", 3);
     TVAR(IDF_PERSIST, modecapturequicktex, "<grey>textures/modes/capturequick", 3);
@@ -554,7 +553,6 @@ namespace hud
     { \
         if(m_edit(g)) ADDMODE(modeeditingtex) \
         else if(m_trial(g)) ADDMODE(modetimetrialtex) \
-        else if(m_gauntlet(g)) ADDMODE(modegauntlettex) \
         else if(m_capture(g)) \
         { \
             if(m_gsp1(g, m)) ADDMODE(modecapturequicktex) \
@@ -1497,14 +1495,6 @@ namespace hud
             if(m_capture(game::gamemode)) capture::drawnotices(hudwidth, hudheight, tx, ty, tf/255.f);
             else if(m_defend(game::gamemode)) defend::drawnotices(hudwidth, hudheight, tx, ty, tf/255.f);
             else if(m_bomber(game::gamemode)) bomber::drawnotices(hudwidth, hudheight, tx, ty, tf/255.f);
-            else if(m_gauntlet(game::gamemode) && game::focus->state == CS_ALIVE && game::focus->lastbuff && shownotices >= 3)
-            {
-                pushfont("reduced");
-                if(m_regen(game::gamemode, game::mutators) && gauntletregenbuff && gauntletregenextra)
-                    ty += draw_textx("Buffing: \fs\fo%d%%\fS damage, \fs\fg%d%%\fS shield, +\fs\fy%d\fS regen", tx, ty, 255, 255, 255, tf, TEXT_CENTERED, -1, -1, int(gauntletbuffdamage*100), int(gauntletbuffshield*100), gauntletregenextra)*noticescale;
-                else ty += draw_textx("Buffing: \fs\fo%d%%\fS damage, \fs\fg%d%%\fS shield", tx, ty, 255, 255, 255, tf, TEXT_CENTERED, -1, -1, int(gauntletbuffdamage*100), int(gauntletbuffshield*100))*noticescale;
-                popfont();
-            }
         }
         popfont();
         glPopMatrix();
@@ -2105,17 +2095,6 @@ namespace hud
             if(m_capture(game::gamemode)) capture::drawblips(w, h, blend*radarblend);
             else if(m_defend(game::gamemode)) defend::drawblips(w, h, blend*radarblend);
             else if(m_bomber(game::gamemode)) bomber::drawblips(w, h, blend*radarblend);
-            else if(m_gauntlet(game::gamemode))
-            {
-                int numents = entities::lastenttype[CHECKPOINT];
-                loopi(numents) if(entities::ents[i]->type == CHECKPOINT && (entities::ents[i]->attrs[6] == CP_LAST || entities::ents[i]->attrs[6] == CP_FINISH))
-                {
-                    vec dir = vec(entities::ents[i]->o).sub(camera1->o), colour = vec::hexcolor(TEAM(T_ALPHA, colour));
-                    if(radaraffinitynames > 0) drawblip(arrowtex, 3, w, h, radaraffinitysize*1.25f, blend*radaraffinityblend, -1-radarstyle, dir, colour, "little", "goal");
-                    else drawblip(arrowtex, 3, w, h, radaraffinitysize*1.25f, blend*radaraffinityblend, -1-radarstyle, dir, colour);
-                }
-            }
-
         }
         if(chkcond(radarplayers, radarplayerfilter != 3 || m_duke(game::gamemode, game::mutators) || m_edit(game::gamemode))) // 4
         {
@@ -2772,7 +2751,6 @@ namespace hud
     int drawtimer(int x, int y, int s, float blend)
     {
         if(game::focus->state == CS_EDITING || game::focus->state == CS_SPECTATOR) return 0;
-        if(m_gauntlet(game::gamemode) && game::focus->team != T_ALPHA) return 0;
         int sy = 0;
         if(inventorycheckpoint && m_checkpoint(game::gamemode))
         {

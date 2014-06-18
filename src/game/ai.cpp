@@ -46,15 +46,11 @@ namespace ai
     int owner(gameent *d)
     {
         if(!d) return -1;
-        if(d->actortype >= A_ENEMY)
+        if(d->actortype >= A_ENEMY && entities::ents.inrange(d->spawnpoint))
         {
-            if(m_gauntlet(game::gamemode)) return T_OMEGA;
-            else if(entities::ents.inrange(d->spawnpoint))
-            {
-                if(m_capture(game::gamemode)) return capture::aiowner(d);
-                else if(m_defend(game::gamemode)) return defend::aiowner(d);
-                else if(m_bomber(game::gamemode)) return bomber::aiowner(d);
-            }
+            if(m_capture(game::gamemode)) return capture::aiowner(d);
+            else if(m_defend(game::gamemode)) return defend::aiowner(d);
+            else if(m_bomber(game::gamemode)) return bomber::aiowner(d);
         }
         return d->team;
     }
@@ -566,38 +562,13 @@ namespace ai
                 int sweap = m_weapon(game::gamemode, game::mutators);
                 if(!hasweap(d, d->ai->weappref) || d->carry(sweap) == 0) items(d, b, interests, d->carry(sweap) == 0);
                 if(m_team(game::gamemode, game::mutators) && !m_duke(game::gamemode, game::mutators))
-                    assist(d, b, interests, false, m_gauntlet(game::gamemode));
+                    assist(d, b, interests, false, false);
             }
             if(m_fight(game::gamemode))
             {
                 if(m_capture(game::gamemode)) capture::aifind(d, b, interests);
                 else if(m_defend(game::gamemode)) defend::aifind(d, b, interests);
                 else if(m_bomber(game::gamemode)) bomber::aifind(d, b, interests);
-                else if(m_gauntlet(game::gamemode))
-                {
-                    int numents = entities::lastenttype[CHECKPOINT];
-                    loopi(numents) if(entities::ents[i]->type == CHECKPOINT && (entities::ents[i]->attrs[6] == CP_LAST || entities::ents[i]->attrs[6] == CP_FINISH))
-                    { // defend the flag
-                        interest &n = interests.add();
-                        if(d->team != T_ALPHA)
-                        {
-                            n.state = AI_S_DEFEND;
-                            n.target = n.node = randomnode(d, b, entities::ents[i]->o, CLOSEDIST, FARDIST);
-                            n.score = entities::ents[i]->o.squaredist(d->feetpos())/100.f;
-                            n.acttype = AI_A_PROTECT;
-                        }
-                        else
-                        {
-                            n.state = AI_S_PURSUE;
-                            n.target = n.node = closestwaypoint(entities::ents[i]->o, CLOSEDIST, true);
-                            n.score = entities::ents[i]->o.squaredist(d->feetpos())/100.f;
-                            n.acttype = AI_A_HASTE;
-                        }
-                        n.targtype = AI_T_NODE;
-                        n.tolerance = 0.5f;
-                        n.team = true;
-                    }
-                }
             }
         }
         else if(entities::ents.inrange(d->spawnpoint)) loopv(entities::ents[d->spawnpoint]->links)

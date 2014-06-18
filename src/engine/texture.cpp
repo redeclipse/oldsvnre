@@ -794,15 +794,14 @@ Texture *notexture = NULL, *blanktexture = NULL; // used as default, ensured to 
 static void updatetexture(Texture *t)
 {
     if(t->frames.length() <= 1 || t->delay <= 0) return;
-    int elapsed = lastmillis - t->last;
+    int elapsed = lastmillis-t->last;
     if(elapsed < t->delay) return;
     int animlen = t->throb ? (t->frames.length()-1)*2 : t->frames.length();
     t->frame += elapsed/t->delay;
     t->frame %= animlen;
-    t->last = lastmillis - lastmillis%t->delay;
-    t->id = t->frames[t->throb && t->frame >= t->frames.length() ? animlen - t->frame : t->frame];
-    if(t->id <= 0)
-         t->id = t != notexture ? notexture->id : 0;
+    t->last = lastmillis-(lastmillis%t->delay);
+    int frame = t->throb && t->frame >= t->frames.length() ? animlen-t->frame : t->frame;
+    t->id = t->frames.inrange(frame) ? t->frames[frame] : 0;
 }
 
 void updatetextures()
@@ -1303,8 +1302,8 @@ static bool texturedata(ImageData &d, const char *tname, Slot::Tex *tex = NULL, 
             if(anim)
             {
                 anim->delay = arg[0] ? atoi(arg[0]) : 50;
-                anim->x = arg[1] ? atoi(arg[1]) : 1;
-                anim->y = arg[2] ? atoi(arg[2]) : 2;
+                anim->x = min(1, arg[1] ? atoi(arg[1]) : 1);
+                anim->y = min(1, arg[2] ? atoi(arg[2]) : 2);
                 anim->throb = arg[3] && atoi(arg[3]);
                 anim->w = d.w/anim->x;
                 anim->h = d.h/anim->y;

@@ -765,62 +765,6 @@ namespace server
         }
     } spawnmutator;
 
-    struct gauntletservmode : servmode
-    {
-        void spawned(clientinfo *ci)
-        {
-            ci->state.cpmillis = gamemillis;
-            ci->state.cpnodes.shrink(0);
-            sendf(-1, 1, "ri3", N_CHECKPOINT, ci->clientnum, -2);
-        }
-
-        void initclient(clientinfo *ci, packetbuf &p, bool connecting)
-        {
-            loopv(clients)
-            {
-                clientinfo *oi = clients[i];
-                if(!oi || !oi->connected || (ci && oi->clientnum == ci->clientnum) || oi->team != T_OMEGA || !oi->state.lastbuff) continue;
-                putint(p, N_SPHY);
-                putint(p, oi->clientnum);
-                putint(p, SPHY_BUFF);
-                putint(p, 1);
-            }
-        }
-
-        void regen(clientinfo *ci, int &total, int &amt, int &delay)
-        {
-            if(!G(gauntletregenbuff) || ci->team != T_OMEGA || !ci->state.lastbuff) return;
-            if(G(maxhealth)) total = max(m_maxhealth(gamemode, mutators, ci->state.model), total);
-            if(ci->state.lastregen && G(gauntletregendelay)) delay = G(gauntletregendelay);
-            if(G(gauntletregenextra)) amt += G(gauntletregenextra);
-        }
-
-        void checkclient(clientinfo *ci)
-        {
-            if(ci->state.state != CS_ALIVE || m_insta(gamemode, mutators) || ci->team != T_OMEGA) return;
-            if(G(gauntletbuffing))
-            {
-                if(m_gsp2(gamemode, mutators))
-                {
-                    if(!ci->state.lastbuff) sendf(-1, 1, "ri4", N_SPHY, ci->clientnum, SPHY_BUFF, 1);
-                    ci->state.lastbuff = gamemillis;
-                    return;
-                }
-                else loopv(sents) if(sents[i].type == CHECKPOINT && (sents[i].attrs[6] == CP_LAST || sents[i].attrs[6] == CP_FINISH))
-                {
-                    if(ci->state.o.dist(sents[i].o) > G(gauntletbuffarea)) continue;
-                    if(!ci->state.lastbuff) sendf(-1, 1, "ri4", N_SPHY, ci->clientnum, SPHY_BUFF, 1);
-                    ci->state.lastbuff = gamemillis;
-                    return;
-                }
-            }
-            if(ci->state.lastbuff && (!G(gauntletbuffing) || gamemillis-ci->state.lastbuff > G(gauntletbuffdelay)))
-            {
-                ci->state.lastbuff = 0;
-                sendf(-1, 1, "ri4", N_SPHY, ci->clientnum, SPHY_BUFF, 0);
-            }
-        }
-    } gauntletmode;
 
     SVAR(0, serverpass, "");
     SVAR(0, adminpass, "");
@@ -1278,7 +1222,7 @@ namespace server
             else if((type == 4 || type == 5) && m_defend(mode) && m_gsp2(mode, muts)) concatstring(mdname, gametype[mode].gsd[1]);
             else if((type == 4 || type == 5) && m_bomber(mode) && m_gsp1(mode, muts)) concatstring(mdname, gametype[mode].gsd[0]);
             else if((type == 4 || type == 5) && m_bomber(mode) && m_gsp2(mode, muts)) concatstring(mdname, gametype[mode].gsd[1]);
-            else if((type == 4 || type == 5) && m_gauntlet(mode) && m_gsp1(mode, muts)) concatstring(mdname, gametype[mode].gsd[0]);
+            else if((type == 4 || type == 5) && m_trial(mode) && m_gsp1(mode, muts)) concatstring(mdname, gametype[mode].gsd[0]);
             else concatstring(mdname, gametype[mode].desc);
         }
         return mdname;
@@ -1297,7 +1241,7 @@ namespace server
             if(m_capture(mode) && m_gsp3(mode, muts)) return "";
             else if(m_defend(mode) && m_gsp2(mode, muts)) return "";
             else if(m_bomber(mode) && (m_gsp1(mode, muts) || m_gsp2(mode, muts))) return "";
-            else if(m_gauntlet(mode) && m_gsp1(mode, muts)) return "";
+            else if(m_trial(mode) && m_gsp1(mode, muts)) return "";
         }
         if(type == 1 || type == 3 || type == 4)
         {
@@ -1459,12 +1403,12 @@ namespace server
             int best = -1;
             loopv(clients) if(clients[i]->state.actortype < A_ENEMY && clients[i]->state.state != CS_SPECTATOR)
             {
-                if(best < 0 || (m_laptime(gamemode, mutators) ? (clients[best]->state.cptime <= 0 || (clients[i]->state.cptime > 0 && clients[i]->state.cptime < clients[best]->state.cptime)) : clients[i]->state.points > clients[best]->state.points))
+                if(best < 0 || (m_laptime(gamemode, mutators) ? (clients[best]->state.cptime <= 0 || (clients[i]->state.cptime > 0 && clients[i]->state.cptime < clients[best]->state.cptime)) : (m_lapcount(gamemode, mutators) ? clients[i]->state.cplaps > clients[best]->state.cplaps : clients[i]->state.points > clients[best]->state.points)))
                 {
                     best = i;
                     result = false;
                 }
-                else if(m_laptime(gamemode, mutators) ? clients[i]->state.cptime == clients[best]->state.cptime : clients[i]->state.points == clients[best]->state.points) result = true;
+                else if(m_laptime(gamemode, mutators) ? clients[i]->state.cptime == clients[best]->state.cptime : (m_lapcount(gamemode, mutators) ? clients[i]->state.cplaps == clients[best]->state.cplaps : clients[i]->state.points == clients[best]->state.points)) result = true;
             }
         }
         return result;
@@ -1571,7 +1515,7 @@ namespace server
                     if(delpart >= 1000)
                     {
                         int secs = delpart/1000;
-                        ancmsgft(-1, S_V_BALWARN, CON_EVENT, "\fy\fs\fzoyWARNING:\fS \fs\fcteams\fS will be \fs\fcreassigned\fS in \fs\fc%d\fS %s%s", secs, secs != 1 ? "seconds" : "second", !m_gauntlet(gamemode) ? " for map symmetry" : "");
+                        ancmsgft(-1, S_V_BALWARN, CON_EVENT, "\fy\fs\fzoyWARNING:\fS \fs\fcteams\fS will be \fs\fcreassigned\fS in \fs\fc%d\fS %s%s", secs, secs != 1 ? "seconds" : "second", !m_forcebal(gamemode, mutators) ? " for map symmetry" : "");
                     }
                 }
                 if(gamemillis >= nextbalance)
@@ -1602,13 +1546,14 @@ namespace server
                                     break;
                                 }
                             }
-                            setteam(cp, to, (m_balreset(gamemode) ? TT_RESET : 0)|TT_INFO, false);
+                            setteam(cp, to, (m_balreset(gamemode, mutators) ? TT_RESET : 0)|TT_INFO, false);
+                            cp->state.lastdeath = 0;
                         }
                         score &cs = teamscore(from);
                         cs.total = scores[tot];
                         sendf(-1, 1, "ri3", N_SCORE, cs.team, cs.total);
                     }
-                    ancmsgft(-1, S_V_BALALERT, CON_EVENT, "\fy\fs\fzoyALERT:\fS \fs\fcteams\fS have %sbeen \fs\fcreassigned\fS%s", delpart > 0 ? "now " : "", !m_gauntlet(gamemode) ? " for map symmetry" : "");
+                    ancmsgft(-1, S_V_BALALERT, CON_EVENT, "\fy\fs\fzoyALERT:\fS \fs\fcteams\fS have %sbeen \fs\fcreassigned\fS%s", delpart > 0 ? "now " : "", !m_forcebal(gamemode, mutators) ? " for map symmetry" : "");
                     if(smode) smode->layout();
                     mutate(smuts, mut->layout());
                 }
@@ -1672,7 +1617,8 @@ namespace server
                                 int team = chooseteam(cp);
                                 if(team != cp->team)
                                 {
-                                    setteam(cp, team, (m_balreset(gamemode) ? TT_RESET : 0)|TT_INFOSM, false);
+                                    setteam(cp, team, (m_balreset(gamemode, mutators) ? TT_RESET : 0)|TT_INFOSM, false);
+                                    cp->state.lastdeath = 0;
                                     tc[i].removeobj(cp);
                                     tc[team-T_FIRST].add(cp);
                                     moved++;
@@ -1941,7 +1887,7 @@ namespace server
         if(ci->state.actortype >= A_ENEMY) return ci->state.spawnpoint;
         else
         {
-            if(m_checkpoint(gamemode) && !m_gauntlet(gamemode) && !ci->state.cpnodes.empty())
+            if(m_checkpoint(gamemode) && !ci->state.cpnodes.empty())
             {
                 int checkpoint = ci->state.cpnodes.last();
                 if(sents.inrange(checkpoint)) return checkpoint;
@@ -1955,9 +1901,7 @@ namespace server
                         team = spawns[T_ALPHA].iteration <= spawns[T_OMEGA].iteration ? T_ALPHA : T_OMEGA;
                     if(!rotate) rotate = 2;
                 }
-                else if(m_fight(gamemode) && m_team(gamemode, mutators) && !m_trial(gamemode) && !spawns[ci->team].ents.empty())
-                    team = ci->team;
-                if(m_gauntlet(gamemode) && team == T_ALPHA) spawns[team].current = 0;
+                else if(m_fight(gamemode) && m_team(gamemode, mutators) && !m_trial(gamemode) && !spawns[ci->team].ents.empty()) team = ci->team;
                 else switch(rotate)
                 {
                     case 2:
@@ -2564,7 +2508,8 @@ namespace server
         {
             clientinfo *cp = clients[i];
             if(cp->state.actortype != A_PLAYER || (newteam && cp->team != newteam) || !cp->swapteam || cp->swapteam != oldteam) continue;
-            setteam(cp, oldteam, (m_balreset(gamemode) ? TT_RESET : 0)|TT_INFOSM, false);
+            setteam(cp, oldteam, TT_RESET|TT_INFOSM, false);
+            cp->state.lastdeath = 0;
             ancmsgft(cp->clientnum, S_V_BALALERT, CON_EVENT, "\fyyou have been moved to %s as previously requested", colourteam(oldteam));
             return;
         }
@@ -2818,7 +2763,6 @@ namespace server
         if(m_capture(gamemode)) smode = &capturemode;
         else if(m_defend(gamemode)) smode = &defendmode;
         else if(m_bomber(gamemode)) smode = &bombermode;
-        else if(m_gauntlet(gamemode)) smode = &gauntletmode;
         else smode = NULL;
         smuts.shrink(0);
         smuts.add(&spawnmutator);
@@ -3712,7 +3656,7 @@ namespace server
                     }
                 }
             }
-            if(m_checkpoint(gamemode) && (m_gauntlet(gamemode) || m->state.cpnodes.length() == 1))
+            if(m_checkpoint(gamemode) && m->state.cpnodes.length() == 1)
             {  // reset if hasn't reached another checkpoint yet
                 m->state.cpmillis = 0;
                 m->state.cpnodes.shrink(0);
@@ -3791,7 +3735,7 @@ namespace server
         ci->state.spree = 0;
         ci->state.deaths++;
         bool kamikaze = dropitems(ci, actor[ci->state.actortype].living ? DROP_DEATH : DROP_EXPIRE);
-        if(m_checkpoint(gamemode) && !(flags&HIT_SPEC) && (!flags || m_gauntlet(gamemode) || ci->state.cpnodes.length() == 1))
+        if(m_checkpoint(gamemode) && !(flags&HIT_SPEC) && (!flags || ci->state.cpnodes.length() == 1))
         { // reset if suicided, hasn't reached another checkpoint yet
             ci->state.cpmillis = 0;
             ci->state.cpnodes.shrink(0);
@@ -3847,11 +3791,6 @@ namespace server
             {
                 if(v->state.lastbuff) skew *= G(bomberbuffdamage);
                 if(m->state.lastbuff) skew /= G(bomberbuffshield);
-            }
-            else if(m_gauntlet(gamemode) && G(gauntletbuffdelay))
-            {
-                if(v->state.lastbuff) skew *= G(gauntletbuffdamage);
-                if(m->state.lastbuff) skew /= G(gauntletbuffshield);
             }
         }
         if(!(flags&HIT_HEAD))
@@ -5397,7 +5336,7 @@ namespace server
                     {
                         if(sents[ent].type == CHECKPOINT)
                         {
-                            if((m_gauntlet(gamemode) && cp->team != T_ALPHA) || cp->state.cpnodes.find(ent) >= 0) break;
+                            if(cp->state.cpnodes.find(ent) >= 0) break;
                             if(sents[ent].attrs[5] && sents[ent].attrs[5] != triggerid) break;
                             if(!m_check(sents[ent].attrs[3], sents[ent].attrs[4], gamemode, mutators)) break;
                             if(m_checkpoint(gamemode)) switch(sents[ent].attrs[6])
@@ -5437,7 +5376,7 @@ namespace server
                                 }
                                 case CP_START: case CP_RESPAWN:
                                 {
-                                    if(m_gauntlet(gamemode) || cp->state.cpnodes.find(ent) >= 0) break;
+                                    if(cp->state.cpnodes.find(ent) >= 0) break;
                                     if(sents[ent].attrs[6] == CP_START)
                                     {
                                         if(cp->state.cpmillis) break;
@@ -5819,15 +5758,6 @@ namespace server
                     if(!ci) break;
                     if(smode==&capturemode) capturemode.resetaffinity(ci, flag);
                     else if(smode==&bombermode) bombermode.resetaffinity(ci, flag);
-                    break;
-                }
-
-                case N_SCOREAFFIN:
-                {
-                    int lcn = getint(p), relay = getint(p), goal = getint(p);
-                    clientinfo *cp = (clientinfo *)getinfo(lcn);
-                    if(!hasclient(cp, ci) || cp->state.state == CS_SPECTATOR) break;
-                    if(smode==&bombermode) bombermode.scoreaffinity(cp, relay, goal);
                     break;
                 }
 
