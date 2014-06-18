@@ -556,12 +556,14 @@ namespace bomber
             if(!entities::ents.inrange(f.ent) || !f.enabled || !isbomberaffinity(f)) continue;
             if(f.owner)
             {
-                int takemillis = lastmillis-f.taketime;
-                if(carrytime && d->ai && f.owner == d && takemillis >= carrytime-550-bomberlockondelay)
+                bool forever = m_gsp1(game::gamemode, game::mutators) || m_gsp2(game::gamemode, game::mutators) || (m_gsp3(game::gamemode, game::mutators) && d->team == T_ALPHA);
+                if(!carrytime && forever) continue;
+                int takemillis = lastmillis-f.taketime, length = forever ? carrytime-550-bomberlockondelay : min(carrytime, 1000);
+                if(d->ai && f.owner == d && takemillis >= length)
                 {
                     if(d->action[AC_AFFINITY])
                     {
-                        if(takemillis >= carrytime-500 || lastmillis-d->actiontime[AC_AFFINITY] >= bomberlockondelay)
+                        if((carrytime && takemillis >= carrytime-500) || lastmillis-d->actiontime[AC_AFFINITY] >= bomberlockondelay)
                             d->action[AC_AFFINITY] = false;
                     }
                     else
