@@ -63,7 +63,7 @@ struct duelservmode : servmode
         respawns.removeobj(ci);
     }
 
-    bool damage(clientinfo *m, clientinfo *v, int damage, int weap, int flags, int material, const ivec &hitpush)
+    bool damage(clientinfo *m, clientinfo *v, int damage, int weap, int flags, int material, const ivec &hitpush, const ivec &hitvel, float dist)
     {
         if(dueltime >= 0 && m->state.actortype < A_ENEMY) return false;
         return true;

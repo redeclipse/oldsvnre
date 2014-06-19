@@ -113,17 +113,6 @@ struct bomberservmode : bomberstate, servmode
             if(isbombertarg(flags[k], ci->team) && newpos.dist(flags[k].spawnloc) <= enttype[AFFINITY].radius/2) scorebomb(ci, i, k);
     }
 
-    void takeaffinity(clientinfo *ci, int i)
-    {
-        if(!canplay(hasflaginfo) || !flags.inrange(i) || ci->state.state!=CS_ALIVE || ci->state.actortype >= A_ENEMY) return;
-        flag &f = flags[i];
-        if(!isbomberaffinity(f) || f.owner >= 0 || !f.enabled) return;
-        if(f.lastowner == ci->clientnum && f.droptime && (G(bomberpickupdelay) < 0 || gamemillis-f.droptime <= max(G(bomberpickupdelay), 500))) return;
-        bomberstate::takeaffinity(i, ci->clientnum, gamemillis);
-        if(!m_nopoints(gamemode, mutators) && (!f.droptime || f.lastowner != ci->clientnum)) givepoints(ci, G(bomberpickuppoints));
-        sendf(-1, 1, "ri3", N_TAKEAFFIN, ci->clientnum, i);
-    }
-
     void returnaffinity(int i, int v) // 0 = disable, 1 = return and wait, 2 = return instantly
     {
         bomberstate::returnaffinity(i, gamemillis, v == 2);
@@ -132,6 +121,21 @@ struct bomberservmode : bomberstate, servmode
         {
             loopvj(flags) if(flags[j].enabled) returnaffinity(j, 0);
             if(bombertime >= 0) bombertime = gamemillis+G(bomberdelay);
+        }
+    }
+
+    void takeaffinity(clientinfo *ci, int i)
+    {
+        if(!canplay(hasflaginfo) || !flags.inrange(i) || ci->state.state!=CS_ALIVE || ci->state.actortype >= A_ENEMY) return;
+        flag &f = flags[i];
+        if(!isbomberaffinity(f) || f.owner >= 0 || !f.enabled) return;
+        if(f.lastowner == ci->clientnum && f.droptime && (G(bomberpickupdelay) < 0 || gamemillis-f.droptime <= max(G(bomberpickupdelay), 500))) return;
+        if(!m_nopoints(gamemode, mutators) && (!f.droptime || f.lastowner != ci->clientnum)) givepoints(ci, G(bomberpickuppoints));
+        if(m_gsp3(gamemode, mutators) && ci->team == T_ALPHA && G(bomberattackreset)) returnaffinity(i, 2);
+        else
+        {
+            bomberstate::takeaffinity(i, ci->clientnum, gamemillis);
+            sendf(-1, 1, "ri3", N_TAKEAFFIN, ci->clientnum, i);
         }
     }
 

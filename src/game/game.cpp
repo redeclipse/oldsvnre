@@ -1283,7 +1283,7 @@ namespace game
         bool burning = burn(d, weap, flags), bleeding = bleed(d, weap, flags), shocking = shock(d, weap, flags);
         if(!local || burning || bleeding || shocking)
         {
-            float scale = damage/float(WF(WK(flags), weap, damage, WS(flags)));
+            float scale = isweap(weap) ? damage/float(WF(WK(flags), weap, damage, WS(flags))) : 1.f;
             if(hithurts(flags))
             {
                 if(d == focus) hud::damage(damage, v->o, v, weap, flags);

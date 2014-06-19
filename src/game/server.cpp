@@ -460,7 +460,7 @@ namespace server
         virtual void balance(int oldbalance) {}
         virtual void intermission() {}
         virtual bool wantsovertime() { return false; }
-        virtual bool damage(clientinfo *m, clientinfo *v, int damage, int weap, int flags, int material, const ivec &hitpush = ivec(0, 0, 0)) { return true; }
+        virtual bool damage(clientinfo *m, clientinfo *v, int damage, int weap, int flags, int material, const ivec &hitpush = ivec(0, 0, 0), const ivec &hitvel = ivec(0, 0, 0), float dist = 0) { return true; }
         virtual void dodamage(clientinfo *m, clientinfo *v, int &damage, int &hurt, int &weap, int &flags, int &material, const ivec &hitpush = ivec(0, 0, 0), const ivec &hitvel = ivec(0, 0, 0), float dist = 0) { }
         virtual void regen(clientinfo *ci, int &total, int &amt, int &delay) {}
         virtual void checkclient(clientinfo *ci) {}
@@ -3505,8 +3505,8 @@ namespace server
         realflags &= ~HIT_SFLAGS;
         if(realflags&HIT_MATERIAL && (material&MATF_VOLUME) == MAT_LAVA) realflags |= HIT_BURN;
 
-        if(smode && !smode->damage(m, v, realdamage, weap, realflags, material, hitpush)) { nodamage++; }
-        mutate(smuts, if(!mut->damage(m, v, realdamage, weap, realflags, material, hitpush)) { nodamage++; });
+        if(smode && !smode->damage(m, v, realdamage, weap, realflags, material, hitpush, hitvel, dist)) { nodamage++; }
+        mutate(smuts, if(!mut->damage(m, v, realdamage, weap, realflags, material, hitpush, hitvel, dist)) { nodamage++; });
         if(v->state.actortype < A_ENEMY)
         {
             if(v == m && !G(selfdamage)) nodamage++;
