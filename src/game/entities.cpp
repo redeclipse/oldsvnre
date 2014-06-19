@@ -1770,6 +1770,10 @@ namespace entities
                     { // insert mine before rockets (9 -> 10) after grenades (8)
                         if(e.attrs[0] >= 9) e.attrs[0]++;
                     }
+                    if(mtype == MAP_MAPZ && gver <= 221)
+                    { // insert taser before rifle (7 -> 8) after plasma (6)
+                        if(e.attrs[0] >= 7) e.attrs[0]++;
+                    }
                     break;
                 }
                 case TRIGGER:
@@ -1884,8 +1888,11 @@ namespace entities
             if(gver <= 220 && enttype[e.type].modesattr > 0)
             {
                 int attr = enttype[e.type].modesattr+1;
-                if(e.attrs[attr]&(1<<10)) e.attrs[attr] &= ~(1<<10); // jetpack -> freestyle
-                if(e.attrs[attr]&(1<<12)) e.attrs[attr] &= ~(1<<12); // expert -> tourney
+                bool neg = e.attrs[attr] < 0;
+                int value = neg ? 0-e.attrs[attr] : e.attrs[attr];
+                //if(value&(1<<10)) value &= ~(1<<10); // jetpack -> freestyle
+                if(value&(1<<12)) value &= ~(1<<12); // expert -> tourney
+                e.attrs[attr] = neg ? 0-value : value;
             }
         }
     }
