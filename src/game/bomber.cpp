@@ -593,6 +593,7 @@ namespace bomber
                     client::addmsg(N_MOVEAFFIN, "ri8", f.lastowner->clientnum, i, int(f.droploc.x*DMF), int(f.droploc.y*DMF), int(f.droploc.z*DMF), int(f.inertia.x*DMF), int(f.inertia.y*DMF), int(f.inertia.z*DMF));
                 }
             }
+            if(!f.droptime && m_gsp3(game::gamemode, game::mutators) && d->team == T_ALPHA && bomberattackreset) continue;
             if(f.pickuptime && lastmillis-f.pickuptime <= 1000) continue;
             if(f.lastowner == d && f.droptime && (bomberpickupdelay < 0 || lastmillis-f.droptime <= max(bomberpickupdelay, 500))) continue;
             if(o.dist(f.pos()) <= enttype[AFFINITY].radius/2)
