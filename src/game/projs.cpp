@@ -1483,12 +1483,13 @@ namespace projs
                     }
                     case W_RIFLE:
                     {
-                        float size = clamp(WF(WK(proj.flags), proj.weap, partlen, WS(proj.flags))*(1.f-proj.lifespan)*proj.curscale, proj.curscale, min(min(WF(WK(proj.flags), proj.weap, partlen, WS(proj.flags)), proj.movement), proj.o.dist(proj.from)));
-                        if(type == W_TASER || size > 0)
+                        vec from = type != W_TASER || !proj.owner || proj.owner->weapselect != proj.weap ? proj.from : proj.owner->muzzlepos(proj.weap);
+                        float size = clamp(WF(WK(proj.flags), proj.weap, partlen, WS(proj.flags))*(1.f-proj.lifespan)*proj.curscale, proj.curscale, min(min(WF(WK(proj.flags), proj.weap, partlen, WS(proj.flags)), proj.movement), proj.o.dist(from)));
+                        if(size > 0)
                         {
                             if(type != W_TASER || !proj.owner || proj.owner->weapselect != proj.weap)
                                 proj.to = vec(proj.o).sub(vec(proj.vel).normalize().mul(size));
-                            else proj.to = proj.owner->muzzlepos(proj.weap);
+                            else proj.to = vec(proj.o).sub(vec(proj.o).sub(from).normalize().mul(size));
                             part_flare(proj.to, proj.o, 1, type != W_TASER ? PART_FLARE : PART_LIGHTNING_FLARE, FWCOL(H, partcol, proj), WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags))*proj.curscale, 0.85f*trans);
                             if(projhints) part_flare(proj.to, proj.o, 1, type != W_TASER ? PART_FLARE : PART_LIGHTNING_FLARE, projhint(proj.owner, FWCOL(H, partcol, proj)), WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags))*projhintsize*proj.curscale, projhintblend*trans);
                             if(type != W_TASER && !WK(proj.flags) && W2(proj.weap, fragweap, WS(proj.flags)) >= 0)
@@ -1674,10 +1675,13 @@ namespace projs
                     }
                     case W_RIFLE:
                     {
-                        float dist = proj.o.dist(proj.from), size = clamp(WF(WK(proj.flags), proj.weap, partlen, WS(proj.flags))*proj.curscale, proj.curscale, min(WF(WK(proj.flags), proj.weap, partlen, WS(proj.flags)), proj.movement)),
+                        vec from = type != W_TASER || !proj.owner || proj.owner->weapselect != proj.weap ? proj.from : proj.owner->muzzlepos(proj.weap);
+                        float dist = proj.o.dist(from), size = clamp(WF(WK(proj.flags), proj.weap, partlen, WS(proj.flags))*proj.curscale, proj.curscale, min(WF(WK(proj.flags), proj.weap, partlen, WS(proj.flags)), proj.movement)),
                             expl = WX(WK(proj.flags), proj.weap, explode, WS(proj.flags), game::gamemode, game::mutators, proj.curscale*proj.lifesize);
-                        vec dir = dist >= size ? vec(proj.vel).normalize() : vec(proj.o).sub(proj.from).normalize();
-                        proj.to = vec(proj.o).sub(vec(dir).mul(size));
+                        vec dir = dist >= size ? vec(proj.vel).normalize() : vec(proj.o).sub(from).normalize();
+                        if(type != W_TASER || !proj.owner || proj.owner->weapselect != proj.weap)
+                            proj.to = vec(proj.o).sub(vec(dir).mul(size));
+                        else proj.to = vec(proj.o).sub(vec(proj.o).sub(from).normalize().mul(size));
                         int len = WS(proj.flags) ? 750 : 500;
                         if(expl > 0)
                         {

@@ -397,7 +397,7 @@ namespace hud
     FVAR(IDF_PERSIST, smgclipoffset, 0, 0.35f, 0.5f);
     FVAR(IDF_PERSIST, flamerclipoffset, 0, 0.5f, 0.5f);
     FVAR(IDF_PERSIST, plasmaclipoffset, 0, 0.1f, 0.5f);
-    FVAR(IDF_PERSIST, taserclipoffset, 0, 0.1f, 0.5f);
+    FVAR(IDF_PERSIST, taserclipoffset, 0, 0.3f, 0.5f);
     FVAR(IDF_PERSIST, rifleclipoffset, 0, 0.25f, 0.5f);
     FVAR(IDF_PERSIST, grenadeclipoffset, 0, 0, 0.5f);
     FVAR(IDF_PERSIST, mineclipoffset, 0, 0, 0.5f);
