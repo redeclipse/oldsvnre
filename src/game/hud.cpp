@@ -269,7 +269,7 @@ namespace hud
     VAR(IDF_PERSIST, inventorydate, 0, 0, 1);
     SVAR(IDF_PERSIST, inventorydateformat, "%H:%M:%S");
     VAR(IDF_PERSIST, inventorytime, 0, 1, 1);
-    VAR(IDF_PERSIST, inventorytimestyle, -1, 0, 3);
+    VAR(IDF_PERSIST, inventorytimestyle, -1, 1, 3);
     VAR(IDF_PERSIST, inventoryscore, 0, 1, VAR_MAX);
     VAR(IDF_PERSIST, inventoryscorespec, 0, 2, VAR_MAX);
     VAR(IDF_PERSIST, inventoryscorebg, 0, 0, 1);
