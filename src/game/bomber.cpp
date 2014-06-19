@@ -375,7 +375,14 @@ namespace bomber
             gameentity &e = *(gameentity *)entities::ents[i];
             if(!m_check(e.attrs[3], e.attrs[4], game::gamemode, game::mutators) || !isteam(game::gamemode, game::mutators, e.attrs[0], T_NEUTRAL))
                 continue;
-            st.addaffinity(e.o, e.attrs[0], i);
+            int team = e.attrs[0];
+            if(m_gsp3(game::gamemode, game::mutators)) switch(team)
+            { // attack
+                case T_ALPHA: break; // goal
+                case T_OMEGA: team = T_NEUTRAL; break; // ball
+                default: continue; // remove
+            }
+            st.addaffinity(e.o, team, i);
             if(st.flags.length() >= MAXPARAMS) break;
         }
     }

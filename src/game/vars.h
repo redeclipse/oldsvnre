@@ -297,6 +297,7 @@ GVAR(0, defendregenextra, 0, 2, VAR_MAX); // add this to regen when buffed
 GVAR(0, bomberlimit, 0, 0, VAR_MAX); // finish when score is this or more (non-hold)
 GVAR(0, bomberholdlimit, 0, 0, VAR_MAX); // finish when score is this or more (hold)
 GVAR(0, bomberbasketonly, 0, 1, 1); // prohibit touchdowns in normal game
+GVAR(0, bomberattackreset, 0, 1, 1); // defenders reset rather than carry the ball
 GFVAR(0, bomberbasketmindist, 0, 48, FVAR_MAX); // prohibit baskets less than this far away
 GVAR(0, bomberresetdelay, 0, 15000, VAR_MAX);
 GVAR(0, bomberpickupdelay, -1, 5000, VAR_MAX);
@@ -322,7 +323,7 @@ GFVAR(0, bomberliquidcoast, FVAR_MIN, 1.75f, FVAR_MAX);
 GFVAR(0, bomberweight, FVAR_MIN, 350, FVAR_MAX);
 GFVAR(0, bomberminspeed, 0, 65, FVAR_MAX);
 GFVAR(0, bomberthreshold, 0, 0, FVAR_MAX); // if someone 'warps' more than this distance, auto-drop
-GVAR(0, bomberbuffing, 0, 5, 7); // buffed; 0 = off, &1 = when guarding, &2 = when securing, &4 = when secured as defender in attack
+GVAR(0, bomberbuffing, 0, 1, 7); // buffed; 0 = off, &1 = when guarding, &2 = when securing, &4 = when secured as defender in attack
 GVAR(0, bomberbuffdelay, 0, 3000, VAR_MAX); // buffed for this long after leaving
 GFVAR(0, bomberbuffarea, FVAR_NONZERO, 128, FVAR_MAX); // radius in which buffing occurs
 GFVAR(0, bomberbuffdamage, 1, 1.25f, FVAR_MAX); // multiply outgoing damage by this much when buffed
