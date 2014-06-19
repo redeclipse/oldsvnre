@@ -891,7 +891,7 @@ namespace game
                     if(d->weapselect == W_SWORD || powering)
                     {
                         static float powerdl[W_MAX] = {
-                            0, 16, 18, 20, 18, 20, 24, 18, 18, 18, 18
+                            0, 16, 18, 20, 18, 20, 24, 24, 18, 18, 18, 18
                         };
                         if(powerdl[d->weapselect] > 0)
                         {
@@ -1416,6 +1416,7 @@ namespace game
                     { "fell victim to their own crossfire", "shot themself" },
                     { "spontaneously combusted", "burned themself" },
                     { "was caught up in their own plasma-filled mayhem", "plasmified themself" },
+                    { "put their finger in the taser socket", "electrocuted themself" },
                     { "got a good shock", "shocked themself" },
                     { "kicked it, kamikaze style", "blew themself up" },
                     { "kicked it, kamikaze style", "blew themself up" },
@@ -1449,6 +1450,7 @@ namespace game
                         { "riddled with holes by", "shot by" },
                         { "char-grilled by", "burned by" },
                         { "plasmified by", "plasmified by" },
+                        { "electrocuted by", "electrocuted by" },
                         { "laser shocked by", "shocked by" },
                         { "blown to pieces by", "blown up by" },
                         { "blown to pieces by", "blown up by" },
@@ -1462,6 +1464,7 @@ namespace game
                         { "spliced apart by", "shot by" },
                         { "snuffed out by", "burned by" },
                         { "shown the light by", "melted by" },
+                        { "tasered into submission by", "electrocuted by" },
                         { "given laser burn by", "lasered by" },
                         { "blown to pieces by", "blown up by" },
                         { "blown to pieces by", "blown up by" },
@@ -1475,6 +1478,7 @@ namespace game
                         { "air conditioned courtesy of", "aerated by" },
                         { "char-grilled by", "grilled by" },
                         { "plasmafied by", "plasmified by" },
+                        { "electrocuted by", "electrocuted by" },
                         { "expertly sniped by", "sniped by" },
                         { "blown to pieces by", "blown up by" },
                         { "blown to pieces by", "blown up by" },
@@ -3065,7 +3069,7 @@ namespace game
             if((anim>>ANIM_SECONDARY)&ANIM_INDEX) switch(anim&ANIM_INDEX)
             {
                 case ANIM_IDLE: case ANIM_MELEE: case ANIM_PISTOL: case ANIM_SWORD:
-                case ANIM_SHOTGUN: case ANIM_SMG: case ANIM_FLAMER: case ANIM_PLASMA:
+                case ANIM_SHOTGUN: case ANIM_SMG: case ANIM_FLAMER: case ANIM_PLASMA: case ANIM_TASER:
                 case ANIM_RIFLE: case ANIM_GRENADE: case ANIM_MINE: case ANIM_ROCKET:
                 {
                     anim = (anim>>ANIM_SECONDARY) | ((anim&((1<<ANIM_SECONDARY)-1))<<ANIM_SECONDARY);
@@ -3505,6 +3509,7 @@ namespace game
                     { 2, PART_SPARK, 0.1f, 2 },
                     { 2, PART_FIREBALL, 0.1f, 6 },
                     { 1, PART_PLASMA, 0.05f, 2 },
+                    { 2, PART_ELECTRIC, 0.05f, 2.5f },
                     { 2, PART_PLASMA, 0.05f, 2.5f },
                     { 3, PART_PLASMA, 0.1f, 0.125f },
                     { 0, 0, 0, 0 },

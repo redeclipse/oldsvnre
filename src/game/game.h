@@ -4,7 +4,7 @@
 #include "engine.h"
 
 #define GAMEID              "fps"
-#define GAMEVERSION         221
+#define GAMEVERSION         222
 
 #define DEMO_MAGIC          "RED_ECLIPSE_DEMO"
 #define DEMO_VERSION        GAMEVERSION
@@ -219,6 +219,7 @@ enum
     ANIM_SMG, ANIM_SMG_PRIMARY, ANIM_SMG_SECONDARY, ANIM_SMG_RELOAD,
     ANIM_FLAMER, ANIM_FLAMER_PRIMARY, ANIM_FLAMER_SECONDARY, ANIM_FLAMER_RELOAD,
     ANIM_PLASMA, ANIM_PLASMA_PRIMARY, ANIM_PLASMA_SECONDARY, ANIM_PLASMA_RELOAD,
+    ANIM_TASER, ANIM_TASER_PRIMARY, ANIM_TASER_SECONDARY, ANIM_TASER_RELOAD,
     ANIM_RIFLE, ANIM_RIFLE_PRIMARY, ANIM_RIFLE_SECONDARY, ANIM_RIFLE_RELOAD,
     ANIM_GRENADE, ANIM_GRENADE_PRIMARY, ANIM_GRENADE_SECONDARY, ANIM_GRENADE_RELOAD, ANIM_GRENADE_POWER,
     ANIM_MINE, ANIM_MINE_PRIMARY, ANIM_MINE_SECONDARY, ANIM_MINE_RELOAD,
@@ -889,6 +890,7 @@ const char * const animnames[] =
     "smg", "smg primary", "smg secondary", "smg reload",
     "flamer", "flamer primary", "flamer secondary", "flamer reload",
     "plasma", "plasma primary", "plasma secondary", "plasma reload",
+    "taser", "taser primary", "taser secondary", "taser reload",
     "rifle", "rifle primary", "rifle secondary", "rifle reload",
     "grenade", "grenade primary", "grenade secondary", "grenade reload", "grenade power",
     "mine", "mine primary", "mine secondary", "mine reload",
