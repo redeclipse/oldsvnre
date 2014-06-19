@@ -119,11 +119,11 @@
         GSVAR(flags, smg##name, w04); \
         GSVAR(flags, flamer##name, w05); \
         GSVAR(flags, plasma##name, w06); \
-        GSVAR(flags, taser##name, w06); \
-        GSVAR(flags, rifle##name, w07); \
-        GSVAR(flags, grenade##name, w08); \
-        GSVAR(flags, mine##name, w09); \
-        GSVAR(flags, rocket##name, w10); \
+        GSVAR(flags, taser##name, w07); \
+        GSVAR(flags, rifle##name, w08); \
+        GSVAR(flags, grenade##name, w09); \
+        GSVAR(flags, mine##name, w10); \
+        GSVAR(flags, rocket##name, w11); \
         char **sv_weap_stat_##name[] = { \
             &sv_melee##name, \
             &sv_pistol##name, \
@@ -292,11 +292,11 @@
         GSVAR(flags, smg##name, w04); \
         GSVAR(flags, flamer##name, w05); \
         GSVAR(flags, plasma##name, w06); \
-        GSVAR(flags, taser##name, w06); \
-        GSVAR(flags, rifle##name, w07); \
-        GSVAR(flags, grenade##name, w08); \
-        GSVAR(flags, mine##name, w09); \
-        GSVAR(flags, rocket##name, w10); \
+        GSVAR(flags, taser##name, w07); \
+        GSVAR(flags, rifle##name, w08); \
+        GSVAR(flags, grenade##name, w09); \
+        GSVAR(flags, mine##name, w10); \
+        GSVAR(flags, rocket##name, w11); \
         char **weap_stat_##name[] = { \
             &melee##name, \
             &pistol##name, \
@@ -404,11 +404,11 @@
         GSVAR(flags, smg##name, w04); \
         GSVAR(flags, flamer##name, w05); \
         GSVAR(flags, plasma##name, w06); \
-        GSVAR(flags, taser##name, w06); \
-        GSVAR(flags, rifle##name, w07); \
-        GSVAR(flags, grenade##name, w08); \
-        GSVAR(flags, mine##name, w09); \
-        GSVAR(flags, rocket##name, w10); \
+        GSVAR(flags, taser##name, w07); \
+        GSVAR(flags, rifle##name, w08); \
+        GSVAR(flags, grenade##name, w09); \
+        GSVAR(flags, mine##name, w10); \
+        GSVAR(flags, rocket##name, w11); \
         extern char **weap_stat_##name[];
     #define WPSVARM(flags, name, w100, w101, w102, w103, w104, w105, w106, w107, w108, w109, w110, w111, w200, w201, w202, w203, w204, w205, w206, w207, w208, w209, w210, w211) \
         GSVAR(flags, melee##name##1, w100);   GSVAR(flags, melee##name##2, w200); \
