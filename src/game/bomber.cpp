@@ -563,7 +563,7 @@ namespace bomber
             if(!entities::ents.inrange(f.ent) || !f.enabled || !isbomberaffinity(f)) continue;
             if(f.owner)
             {
-                bool forever = m_gsp1(game::gamemode, game::mutators) || m_gsp2(game::gamemode, game::mutators) || (m_gsp3(game::gamemode, game::mutators) && d->team == T_ALPHA);
+                bool forever = m_gsp1(game::gamemode, game::mutators) || m_gsp2(game::gamemode, game::mutators) || (m_gsp3(game::gamemode, game::mutators) && d->team != T_OMEGA);
                 if(!carrytime && forever) continue;
                 int takemillis = lastmillis-f.taketime, length = forever ? carrytime-550-bomberlockondelay : min(carrytime, 1000);
                 if(d->ai && f.owner == d && takemillis >= length)
@@ -593,7 +593,7 @@ namespace bomber
                     client::addmsg(N_MOVEAFFIN, "ri8", f.lastowner->clientnum, i, int(f.droploc.x*DMF), int(f.droploc.y*DMF), int(f.droploc.z*DMF), int(f.inertia.x*DMF), int(f.inertia.y*DMF), int(f.inertia.z*DMF));
                 }
             }
-            if(!f.droptime && m_gsp3(game::gamemode, game::mutators) && d->team == T_ALPHA && bomberattackreset) continue;
+            if(!f.droptime && m_gsp3(game::gamemode, game::mutators) && d->team != T_OMEGA && bomberattackreset) continue;
             if(f.pickuptime && lastmillis-f.pickuptime <= 1000) continue;
             if(f.lastowner == d && f.droptime && (bomberpickupdelay < 0 || lastmillis-f.droptime <= max(bomberpickupdelay, 500))) continue;
             if(o.dist(f.pos()) <= enttype[AFFINITY].radius/2)
@@ -608,7 +608,7 @@ namespace bomber
     bool aihomerun(gameent *d, ai::aistate &b)
     {
         vec pos = d->feetpos();
-        if(m_team(game::gamemode, game::mutators) && !m_gsp1(game::gamemode, game::mutators) && (!m_gsp3(game::gamemode, game::mutators) || d->team != T_ALPHA))
+        if(m_team(game::gamemode, game::mutators) && !m_gsp1(game::gamemode, game::mutators) && (!m_gsp3(game::gamemode, game::mutators) || d->team == T_OMEGA))
         {
             int goal = -1;
             loopv(st.flags)

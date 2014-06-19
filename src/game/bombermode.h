@@ -101,6 +101,28 @@ struct bomberservmode : bomberstate, servmode
             ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fyscore limit has been reached");
             startintermission();
         }
+        if(m_gsp3(gamemode, mutators) && G(bomberattackwinner))
+        {
+            int numt = numteams(gamemode, mutators);
+            if(curbalance == numt-1)
+            {
+                bool found = false;
+                loopi(numt)
+                {
+                    int t = i+T_FIRST;
+                    if(t != T_OMEGA && teamscore(t).total >= score)
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+                if(!found)
+                {
+                    ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fybest score has been reached");
+                    startintermission();
+                }
+            }
+        }
     }
 
     void moved(clientinfo *ci, const vec &oldpos, const vec &newpos)
@@ -130,7 +152,7 @@ struct bomberservmode : bomberstate, servmode
         flag &f = flags[i];
         if(!isbomberaffinity(f) || f.owner >= 0 || !f.enabled) return;
         if(f.lastowner == ci->clientnum && f.droptime && (G(bomberpickupdelay) < 0 || gamemillis-f.droptime <= max(G(bomberpickupdelay), 500))) return;
-        if(m_gsp3(gamemode, mutators) && ci->team == T_ALPHA && G(bomberattackreset))
+        if(m_gsp3(gamemode, mutators) && ci->team != T_OMEGA && G(bomberattackreset))
         {
             if(!f.droptime) return;
             if(!m_nopoints(gamemode, mutators) && (!f.droptime || f.lastowner != ci->clientnum)) givepoints(ci, G(bomberpickuppoints));
@@ -302,7 +324,7 @@ struct bomberservmode : bomberstate, servmode
     {
         if(!canplay(hasflaginfo) || ci->state.state != CS_ALIVE || m_insta(gamemode, mutators)) return;
         #define bomberbuff1 (G(bomberbuffing)&1 && isbomberhome(f, ci->team) && (G(bomberbuffarea) > 0 ? ci->state.o.dist(f.spawnloc) <= G(bomberbuffarea) : true))
-        #define bomberbuff2 ((G(bomberbuffing)&2 || (G(bomberbuffing)&4 && m_gsp3(gamemode, mutators) && ci->team == T_ALPHA)) && isbomberaffinity(f) && f.owner == ci->clientnum)
+        #define bomberbuff2 ((G(bomberbuffing)&2 || (G(bomberbuffing)&4 && m_gsp3(gamemode, mutators) && ci->team != T_OMEGA)) && isbomberaffinity(f) && f.owner == ci->clientnum)
         if(G(bomberbuffing)) loopv(flags)
         {
             flag &f = flags[i];
