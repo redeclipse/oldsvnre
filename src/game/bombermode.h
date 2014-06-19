@@ -130,11 +130,16 @@ struct bomberservmode : bomberstate, servmode
         flag &f = flags[i];
         if(!isbomberaffinity(f) || f.owner >= 0 || !f.enabled) return;
         if(f.lastowner == ci->clientnum && f.droptime && (G(bomberpickupdelay) < 0 || gamemillis-f.droptime <= max(G(bomberpickupdelay), 500))) return;
-        if(!m_nopoints(gamemode, mutators) && (!f.droptime || f.lastowner != ci->clientnum)) givepoints(ci, G(bomberpickuppoints));
-        if(m_gsp3(gamemode, mutators) && ci->team == T_ALPHA && G(bomberattackreset)) returnaffinity(i, 2);
+        if(m_gsp3(gamemode, mutators) && ci->team == T_ALPHA && G(bomberattackreset))
+        {
+            if(!f.droptime) return;
+            if(!m_nopoints(gamemode, mutators) && (!f.droptime || f.lastowner != ci->clientnum)) givepoints(ci, G(bomberpickuppoints));
+            returnaffinity(i, 2);
+        }
         else
         {
             bomberstate::takeaffinity(i, ci->clientnum, gamemillis);
+            if(!m_nopoints(gamemode, mutators) && (!f.droptime || f.lastowner != ci->clientnum)) givepoints(ci, G(bomberpickuppoints));
             sendf(-1, 1, "ri3", N_TAKEAFFIN, ci->clientnum, i);
         }
     }
