@@ -207,7 +207,6 @@ GVAR(0, itemsallowed, 0, 2, 2); // 0 = never, 1 = all but limited, 2 = always
 GVAR(0, itemspawntime, 1, 15000, VAR_MAX); // when items respawn
 GVAR(0, itemspawndelay, 0, 1000, VAR_MAX); // after map start items first spawn
 GVAR(0, itemspawnstyle, 0, 1, 3); // 0 = all at once, 1 = staggered, 2 = random, 3 = randomise between both
-GFVAR(0, itemthreshold, 0, 2, FVAR_MAX); // if numitems/(players*maxcarry) is less than this, spawn one of this type
 GVAR(0, itemcollide, 0, BOUNCE_GEOM, VAR_MAX);
 GVAR(0, itemextinguish, 0, 6, 7);
 GVAR(0, iteminteracts, 0, 3, 3);

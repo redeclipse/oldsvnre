@@ -4213,21 +4213,6 @@ namespace server
 
     void checkents()
     {
-        bool thresh = m_fight(gamemode) && !m_noitems(gamemode, mutators) && m_classic(gamemode, mutators) && !m_tourney(gamemode, mutators) && G(itemthreshold) > 0;
-        int weapons = 0, lowest = -1, sweap = m_weapon(gamemode, mutators), plr = 0;
-        if(thresh)
-        {
-            loopv(clients) if(clients[i]->clientnum >= 0 && clients[i]->online && clients[i]->state.state == CS_ALIVE && clients[i]->state.actortype < A_ENEMY)
-                plr++;
-            loopv(sents) if(enttype[sents[i].type].usetype == EU_ITEM && sents[i].type == WEAPON && hasitem(i))
-            {
-                int attr = w_attr(gamemode, mutators, sents[i].attrs[0], sweap);
-                if(attr < W_OFFSET || attr >= W_ITEM) continue;
-                if(finditem(i, true, true)) weapons++;
-                else if(!sents.inrange(lowest) || sents[i].millis < sents[lowest].millis)
-                    lowest = i;
-            }
-        }
         loopv(sents) switch(sents[i].type)
         {
             case TRIGGER:
@@ -4253,16 +4238,8 @@ namespace server
                 if(enttype[sents[i].type].usetype == EU_ITEM && (allowed || sents[i].spawned))
                 {
                     bool found = finditem(i, true, true);
-                    if(sents[i].type == WEAPON && allowed && thresh && i == lowest && (gamemillis-sents[lowest].last > G(itemspawndelay)))
-                    {
-                        float dist = weapons/float(plr*G(maxcarry));
-                        if(dist < G(itemthreshold)) found = false;
-                    }
                     if((!found && !sents[i].spawned) || (!allowed && sents[i].spawned))
-                    {
                         setspawn(i, allowed, true, true);
-                        if(sents[i].type == WEAPON) weapons++;
-                    }
                 }
                 break;
             }
