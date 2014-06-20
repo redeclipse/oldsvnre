@@ -1458,30 +1458,26 @@ namespace projs
                         }
                         break;
                     }
-                    case W_PLASMA: case W_TASER:
+                    case W_PLASMA:
                     {
                         float expl = WX(WK(proj.flags), proj.weap, explode, WS(proj.flags), game::gamemode, game::mutators, proj.curscale*proj.lifesize);
-                        if(type != W_TASER || expl > 0)
+                        if(expl > 0)
                         {
-                            if(expl > 0)
-                            {
-                                part_explosion(proj.o, expl, PART_SHOCKBALL, 1, FWCOL(H, partcol, proj), 1.f, trans);
-                                if(WF(WK(proj.flags), proj.weap, wavepush, WS(proj.flags)) >= 1)
-                                    part_explosion(proj.o, expl*WF(WK(proj.flags), proj.weap, wavepush, WS(proj.flags)), PART_SHOCKWAVE, 1, projhint(proj.owner, FWCOL(H, partcol, proj)), 1.f, 0.125f*projhintblend*trans);
-                            }
-                            if(projtrails && lastmillis-proj.lasteffect >= projtraildelay)
-                            {
-                                part_create(PART_PLASMA_SOFT, projtraillength, proj.o, FWCOL(H, partcol, proj), WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags))*proj.lifesize*proj.curscale, 0.125f*trans, 20);
-                                proj.lasteffect = lastmillis - (lastmillis%projtraildelay);
-                            }
-                            part_create(PART_PLASMA_SOFT, 1, proj.o, FWCOL(H, partcol, proj), WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags))*proj.lifesize*proj.curscale, 0.5f*trans);
-                            part_create(PART_ELECTRIC_SOFT, 1, proj.o, FWCOL(H, partcol, proj), WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags))*0.45f*proj.lifesize*proj.curscale, 0.5f*trans);
-                            if(projhints) part_create(PART_HINT_SOFT, 1, proj.o, projhint(proj.owner, FWCOL(H, partcol, proj)), WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags))*projhintsize*proj.lifesize*proj.curscale, 0.5f*projhintblend*trans);
-                            break;
+                            part_explosion(proj.o, expl, PART_SHOCKBALL, 1, FWCOL(H, partcol, proj), 1.f, trans);
+                            if(WF(WK(proj.flags), proj.weap, wavepush, WS(proj.flags)) >= 1)
+                                part_explosion(proj.o, expl*WF(WK(proj.flags), proj.weap, wavepush, WS(proj.flags)), PART_SHOCKWAVE, 1, projhint(proj.owner, FWCOL(H, partcol, proj)), 1.f, 0.125f*projhintblend*trans);
                         }
-                        // taser uses this if not explosive
+                        if(projtrails && lastmillis-proj.lasteffect >= projtraildelay)
+                        {
+                            part_create(PART_PLASMA_SOFT, projtraillength, proj.o, FWCOL(H, partcol, proj), WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags))*proj.lifesize*proj.curscale, 0.125f*trans, 20);
+                            proj.lasteffect = lastmillis - (lastmillis%projtraildelay);
+                        }
+                        part_create(PART_PLASMA_SOFT, 1, proj.o, FWCOL(H, partcol, proj), WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags))*proj.lifesize*proj.curscale, 0.5f*trans);
+                        part_create(PART_ELECTRIC_SOFT, 1, proj.o, FWCOL(H, partcol, proj), WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags))*0.45f*proj.lifesize*proj.curscale, 0.5f*trans);
+                        if(projhints) part_create(PART_HINT_SOFT, 1, proj.o, projhint(proj.owner, FWCOL(H, partcol, proj)), WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags))*projhintsize*proj.lifesize*proj.curscale, 0.5f*projhintblend*trans);
+                        break;
                     }
-                    case W_RIFLE:
+                    case W_RIFLE: case W_TASER:
                     {
                         vec from = type != W_TASER || !proj.owner || proj.owner->weapselect != proj.weap || WK(proj.flags) ? proj.from : proj.owner->muzzlepos(proj.weap);
                         float size = clamp(WF(WK(proj.flags), proj.weap, partlen, WS(proj.flags))*(1.f-proj.lifespan)*proj.curscale, proj.curscale, min(min(WF(WK(proj.flags), proj.weap, partlen, WS(proj.flags)), proj.movement), proj.o.dist(from)));
@@ -1650,30 +1646,26 @@ namespace projs
                         else adddecal(DECAL_BULLET, proj.o, proj.norm, max(WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags)), 0.25f)*4);
                         break;
                     }
-                    case W_PLASMA: case W_TASER:
+                    case W_PLASMA:
                     {
                         int len = WS(proj.flags) ? 750 : 500;
                         float expl = WX(WK(proj.flags), proj.weap, explode, WS(proj.flags), game::gamemode, game::mutators, proj.curscale*proj.lifesize);
-                        if(type != W_TASER || expl > 0)
+                        if(expl > 0)
                         {
-                            if(expl > 0)
-                            {
-                                part_explosion(proj.o, expl, PART_SHOCKBALL, len, FWCOL(H, explcol, proj), 1.f, WF(WK(proj.flags), proj.weap, partblend, WS(proj.flags)));
-                                if(WF(WK(proj.flags), proj.weap, wavepush, WS(proj.flags)) >= 1)
-                                    part_explosion(proj.o, expl*WF(WK(proj.flags), proj.weap, wavepush, WS(proj.flags)), PART_SHOCKWAVE, len/2, projhint(proj.owner, FWCOL(H, explcol, proj)), 1.f, 0.25f*WF(WK(proj.flags), proj.weap, partblend, WS(proj.flags))*projhintblend);
-                            }
-                            else expl = max(WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags)), 0.25f)*4;
-                            part_splash(PART_SPARK, 20, len*2, proj.o, FWCOL(H, partcol, proj), 0.25f, WF(WK(proj.flags), proj.weap, partblend, WS(proj.flags)), 1, 0, expl, 20);
-                            part_create(PART_PLASMA_SOFT, len, proj.o, FWCOL(H, partcol, proj), expl*0.75f, 0.5f*WF(WK(proj.flags), proj.weap, partblend, WS(proj.flags)));
-                            part_create(PART_ELECTRIC_SOFT, len/2, proj.o, FWCOL(H, partcol, proj), expl*0.375f, WF(WK(proj.flags), proj.weap, partblend, WS(proj.flags)));
-                            part_create(PART_SMOKE, len, proj.o, FWCOL(H, partcol, proj), expl*0.35f, 0.35f*WF(WK(proj.flags), proj.weap, partblend, WS(proj.flags)), -30);
-                            adddecal(DECAL_ENERGY, proj.o, proj.norm, expl*0.75f, bvec::fromcolor(FWCOL(P, explcol, proj)));
-                            adddynlight(proj.o, 1.1f*expl, FWCOL(P, explcol, proj), len, 10);
-                            break;
+                            part_explosion(proj.o, expl, PART_SHOCKBALL, len, FWCOL(H, explcol, proj), 1.f, WF(WK(proj.flags), proj.weap, partblend, WS(proj.flags)));
+                            if(WF(WK(proj.flags), proj.weap, wavepush, WS(proj.flags)) >= 1)
+                                part_explosion(proj.o, expl*WF(WK(proj.flags), proj.weap, wavepush, WS(proj.flags)), PART_SHOCKWAVE, len/2, projhint(proj.owner, FWCOL(H, explcol, proj)), 1.f, 0.25f*WF(WK(proj.flags), proj.weap, partblend, WS(proj.flags))*projhintblend);
                         }
-                        // taser
+                        else expl = max(WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags)), 0.25f)*4;
+                        part_splash(PART_SPARK, 20, len*2, proj.o, FWCOL(H, partcol, proj), 0.25f, WF(WK(proj.flags), proj.weap, partblend, WS(proj.flags)), 1, 0, expl, 20);
+                        part_create(PART_PLASMA_SOFT, len, proj.o, FWCOL(H, partcol, proj), expl*0.75f, 0.5f*WF(WK(proj.flags), proj.weap, partblend, WS(proj.flags)));
+                        part_create(PART_ELECTRIC_SOFT, len/2, proj.o, FWCOL(H, partcol, proj), expl*0.375f, WF(WK(proj.flags), proj.weap, partblend, WS(proj.flags)));
+                        part_create(PART_SMOKE, len, proj.o, FWCOL(H, partcol, proj), expl*0.35f, 0.35f*WF(WK(proj.flags), proj.weap, partblend, WS(proj.flags)), -30);
+                        adddecal(DECAL_ENERGY, proj.o, proj.norm, expl*0.75f, bvec::fromcolor(FWCOL(P, explcol, proj)));
+                        adddynlight(proj.o, 1.1f*expl, FWCOL(P, explcol, proj), len, 10);
+                        break;
                     }
-                    case W_RIFLE:
+                    case W_RIFLE: case W_TASER:
                     {
                         vec from = type != W_TASER || !proj.owner || proj.owner->weapselect != proj.weap || WK(proj.flags) ? proj.from : proj.owner->muzzlepos(proj.weap);
                         float expl = WX(WK(proj.flags), proj.weap, explode, WS(proj.flags), game::gamemode, game::mutators, proj.curscale*proj.lifesize),
