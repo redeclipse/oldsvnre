@@ -1312,23 +1312,24 @@ namespace game
             }
             if(d->actortype < A_ENEMY || actor[d->actortype].canmove)
             {
-                if(weap == -1 && shocking)
+                if(weap == -1 && shocking && shockstun)
                 {
                     float amt = WRS(d->health <= 0 ? deadstunscale : hitstunscale, stun, gamemode, mutators),
                           s = G(shockstunscale)*amt, g = G(shockstunfall)*amt;
-                    if(s > 0 || g > 0) d->addstun(weap, lastmillis, G(shockstuntime), s, g);
-                    if(s > 0) d->vel.mul(1.f-clamp(s, 0.f, 1.f));
-                    if(g > 0) d->falling.mul(1.f-clamp(g, 0.f, 1.f));
+                    d->addstun(weap, lastmillis, G(shockstuntime), shockstun&1 ? s : 0.f, shockstun&2 ? g : 0.f);
+                    if(shockstun&4 && s > 0) d->vel.mul(1.f-clamp(s, 0.f, 1.f));
+                    if(shockstun&8 && g > 0) d->falling.mul(1.f-clamp(g, 0.f, 1.f));
                 }
                 else if(isweap(weap) && !burning && !bleeding && !shocking && WF(WK(flags), weap, damage, WS(flags)) != 0)
                 {
-                    if(WF(WK(flags), weap, stuntime, WS(flags)))
+                    if(WF(WK(flags), weap, stun, WS(flags)))
                     {
+                        int stun = WF(WK(flags), weap, stun, WS(flags));
                         float amt = scale*WRS(flags&HIT_WAVE || !hithurts(flags) ? wavestunscale : (d->health <= 0 ? deadstunscale : hitstunscale), stun, gamemode, mutators),
                               s = WF(WK(flags), weap, stunscale, WS(flags))*amt, g = WF(WK(flags), weap, stunfall, WS(flags))*amt;
-                        if(s > 0 || g > 0) d->addstun(weap, lastmillis, int(scale*WF(WK(flags), weap, stuntime, WS(flags))), s, g);
-                        if(s > 0) d->vel.mul(1.f-clamp(s, 0.f, 1.f));
-                        if(g > 0) d->falling.mul(1.f-clamp(g, 0.f, 1.f));
+                        d->addstun(weap, lastmillis, int(scale*WF(WK(flags), weap, stuntime, WS(flags))), stun&1 ? s : 0.f, stun&2 ? g : 0.f);
+                        if(stun&4 && s > 0) d->vel.mul(1.f-clamp(s, 0.f, 1.f));
+                        if(stun&8 && g > 0) d->falling.mul(1.f-clamp(g, 0.f, 1.f));
                     }
                     if(WF(WK(flags), weap, hitpush, WS(flags)) != 0 || WF(WK(flags), weap, hitvel, WS(flags)) != 0)
                     {

@@ -1347,6 +1347,7 @@ struct gameent : dynent, gamestate
 
     void addstun(int weap, int millis, int delay, float scale, float gravity)
     {
+        if(delay <= 0 || (scale == 0 && gravity == 0)) return;
         stunevent &s = stuns.add();
         s.weap = weap;
         s.millis = millis;
