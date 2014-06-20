@@ -296,8 +296,8 @@ namespace hud
                             if(game::intermission) g.text(", \fs\fointermission\fS", 0xFFFFFF);
                             else if(client::waitplayers) g.text(", \fs\fowaiting\fS", 0xFFFFFF);
                             else if(paused) g.text(", \fs\fopaused\fS", 0xFFFFFF);
-                            if((m_play(game::gamemode) || client::demoplayback) && game::timeremaining >= 0)
-                                g.textf(", \fs\fg%s\fS remain", 0xFFFFFF, NULL, 0, timestr(game::timeremaining, scoretimestyle));
+                            if((m_play(game::gamemode) || client::demoplayback) && game::timeremaining >= 0 && timelimit)
+                                g.textf(", \fs\fg%s\fS remain", 0xFFFFFF, NULL, 0, timestr(game::timeremaining*1000-(lastmillis-game::lasttimeremain), scoretimestyle));
                         }));
                         if(*connectname)
                         {
