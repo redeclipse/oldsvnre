@@ -1483,11 +1483,11 @@ namespace projs
                     }
                     case W_RIFLE:
                     {
-                        vec from = type != W_TASER || !proj.owner || proj.owner->weapselect != proj.weap ? proj.from : proj.owner->muzzlepos(proj.weap);
+                        vec from = type != W_TASER || !proj.owner || proj.owner->weapselect != proj.weap || WK(proj.flags) ? proj.from : proj.owner->muzzlepos(proj.weap);
                         float size = clamp(WF(WK(proj.flags), proj.weap, partlen, WS(proj.flags))*(1.f-proj.lifespan)*proj.curscale, proj.curscale, min(min(WF(WK(proj.flags), proj.weap, partlen, WS(proj.flags)), proj.movement), proj.o.dist(from)));
                         if(size > 0)
                         {
-                            if(type != W_TASER || !proj.owner || proj.owner->weapselect != proj.weap)
+                            if(type != W_TASER || !proj.owner || proj.owner->weapselect != proj.weap || WK(proj.flags))
                                 proj.to = vec(proj.o).sub(vec(proj.vel).normalize().mul(size));
                             else proj.to = vec(proj.o).sub(vec(proj.o).sub(from).normalize().mul(size));
                             part_flare(proj.to, proj.o, 1, type != W_TASER ? PART_FLARE : PART_LIGHTNING_FLARE, FWCOL(H, partcol, proj), WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags))*proj.curscale, 0.85f*trans);
@@ -1675,23 +1675,24 @@ namespace projs
                     }
                     case W_RIFLE:
                     {
-                        vec from = type != W_TASER || !proj.owner || proj.owner->weapselect != proj.weap ? proj.from : proj.owner->muzzlepos(proj.weap);
-                        float dist = proj.o.dist(from), size = clamp(WF(WK(proj.flags), proj.weap, partlen, WS(proj.flags))*proj.curscale, proj.curscale, min(WF(WK(proj.flags), proj.weap, partlen, WS(proj.flags)), proj.movement)),
-                            expl = WX(WK(proj.flags), proj.weap, explode, WS(proj.flags), game::gamemode, game::mutators, proj.curscale*proj.lifesize);
-                        vec dir = dist >= size ? vec(proj.vel).normalize() : vec(proj.o).sub(from).normalize();
-                        if(type != W_TASER || !proj.owner || proj.owner->weapselect != proj.weap)
-                            proj.to = vec(proj.o).sub(vec(dir).mul(size));
-                        else proj.to = vec(proj.o).sub(vec(proj.o).sub(from).normalize().mul(size));
-                        int len = WS(proj.flags) ? 750 : 500;
+                        vec from = type != W_TASER || !proj.owner || proj.owner->weapselect != proj.weap || WK(proj.flags) ? proj.from : proj.owner->muzzlepos(proj.weap);
+                        float expl = WX(WK(proj.flags), proj.weap, explode, WS(proj.flags), game::gamemode, game::mutators, proj.curscale*proj.lifesize),
+                              size = clamp(WF(WK(proj.flags), proj.weap, partlen, WS(proj.flags))*(1.f-proj.lifespan)*proj.curscale, proj.curscale, min(min(WF(WK(proj.flags), proj.weap, partlen, WS(proj.flags)), proj.movement), proj.o.dist(from)));
+                        if(size > 0)
+                        {
+                            if(type != W_TASER || !proj.owner || proj.owner->weapselect != proj.weap || WK(proj.flags))
+                                proj.to = vec(proj.o).sub(vec(proj.vel).normalize().mul(size));
+                            else proj.to = vec(proj.o).sub(vec(proj.o).sub(from).normalize().mul(size));
+                        }
+                        int len = type != W_TASER ? (WS(proj.flags) ? 750 : 500) : 350;
                         if(expl > 0)
                         {
-                            part_create(PART_PLASMA_SOFT, len, proj.o, FWCOL(H, partcol, proj), expl*0.5f, 0.5f*WF(WK(proj.flags), proj.weap, partblend, WS(proj.flags))); // corona
+                            part_create(type != W_TASER ? PART_PLASMA_SOFT : PART_ELECTRIC_SOFT, len, proj.o, FWCOL(H, partcol, proj), expl*0.5f, 0.5f*WF(WK(proj.flags), proj.weap, partblend, WS(proj.flags))); // corona
                             part_splash(PART_SPARK, 10, len*2, proj.o, FWCOL(H, partcol, proj), 0.25f, WF(WK(proj.flags), proj.weap, partblend, WS(proj.flags)), 1, 0, expl, 15);
                             part_explosion(proj.o, expl, PART_SHOCKBALL, len, FWCOL(H, explcol, proj), 1.f, WF(WK(proj.flags), proj.weap, partblend, WS(proj.flags)));
                             if(WF(WK(proj.flags), proj.weap, wavepush, WS(proj.flags)) >= 1)
                                 part_explosion(proj.o, expl*WF(WK(proj.flags), proj.weap, wavepush, WS(proj.flags)), PART_SHOCKWAVE, len/2, projhint(proj.owner, FWCOL(H, explcol, proj)), 1.f, 0.5f*WF(WK(proj.flags), proj.weap, partblend, WS(proj.flags))*projhintblend);
                         }
-                        else expl = max(WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags)), 0.25f)*4;
                         part_flare(proj.to, proj.o, len, type != W_TASER ? PART_FLARE : PART_LIGHTNING_FLARE, FWCOL(H, partcol, proj), WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags))*proj.curscale, 0.85f*WF(WK(proj.flags), proj.weap, partblend, WS(proj.flags)));
                         if(projhints) part_flare(proj.to, proj.o, len, type != W_TASER ? PART_FLARE : PART_LIGHTNING_FLARE, projhint(proj.owner, FWCOL(H, partcol, proj)), WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags))*projhintsize*proj.curscale, projhintblend*WF(WK(proj.flags), proj.weap, partblend, WS(proj.flags)));
                         adddecal(DECAL_SCORCH, proj.o, proj.norm, max(expl, 2.f));
@@ -1710,6 +1711,7 @@ namespace projs
                 {
                     if(!WK(proj.flags) && !m_insta(game::gamemode, game::mutators) && W2(proj.weap, fragweap, WS(proj.flags)) >= 0)
                     {
+                        int rays = max(1, int(ceilf(W2(proj.weap, fragrays, WS(proj.flags))*proj.curscale)));
                         int f = W2(proj.weap, fragweap, WS(proj.flags)), w = f%W_MAX,
                             life = W2(proj.weap, fragtime, WS(proj.flags)), delay = 0;
                         float mag = max(proj.vel.magnitude(), W2(proj.weap, flakminspeed, WS(proj.flags))),
@@ -1719,7 +1721,7 @@ namespace projs
                         vec dir = vec(proj.stuck ? proj.norm : proj.vel).normalize(),
                             pos = vec(proj.o).sub(vec(dir).mul(offset));
                         if(W2(proj.weap, fragjump, WS(proj.flags)) > 0) life -= int(ceilf(life*W2(proj.weap, fragjump, WS(proj.flags))));
-                        loopi(W2(proj.weap, fragrays, WS(proj.flags)))
+                        loopi(rays)
                         {
                             vec to = vec(pos).add(dir);
                             if(W2(proj.weap, fragspeed, WS(proj.flags)) > 0)
