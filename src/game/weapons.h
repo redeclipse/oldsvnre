@@ -9,12 +9,12 @@ enum
 
 enum { W_F_NONE = 0, W_F_FORCED = 1<<0 };
 enum {
-    W_C_SCALE = 1<<0, W_C_INVSCALE = 1<<1,
-    W_C_LIFE = 1<<2, W_C_INVLIFE = 1<<3,
-    W_C_SPEED = 1<<4, W_C_INVSPEED = 1<<5,
+    W_C_SCALE = 1<<0, W_C_SCALEN = 1<<1,
+    W_C_LIFE = 1<<2, W_C_LIFEN = 1<<3,
+    W_C_SPEED = 1<<4, W_C_SPEEDN = 1<<5,
     W_C_RAYS = 1<<6, W_C_ZOOM = 1<<7,
-    W_C_ALL = W_C_SCALE|W_C_INVSCALE|W_C_LIFE|W_C_INVLIFE|W_C_RAYS|W_C_ZOOM,
-    W_C_SF = W_C_SCALE|W_C_LIFE,
+    W_C_ALL = W_C_SCALE|W_C_SCALEN|W_C_LIFE|W_C_LIFEN|W_C_RAYS|W_C_ZOOM,
+    W_C_SS = W_C_SCALE|W_C_SPEED,
     W_C_SZ = W_C_SCALE|W_C_ZOOM
 };
 enum {
@@ -184,8 +184,8 @@ WPVAR(IDF_HEX, colour, 0, 0xFFFFFF,
     0x606060,   0xC0C0C0,   0x4040F0,   0xF0F020,   0xF05820,   0xF02020,   0x40F0C8,   0xC090F0,   0xA020F0,   0x40F000,   0x00F068,   0x803000
 );
 WPVARM(0, cooked, 0, VAR_MAX,
-    0,          0,          0,          0,          0,          0,          0,          0,          0,          W_C_LIFE,   0,          0,
-    0,          0,          0,          0,          0,          0,          W_C_SF,     W_C_RAYS,   W_C_SZ,     W_C_LIFE,   0,          0
+    0,          0,          0,          0,          0,          0,          0,          0,          0,          W_C_LIFEN,  0,          0,
+    0,          0,          0,          0,          0,          0,          W_C_SS,     W_C_RAYS,   W_C_SZ,     W_C_LIFEN,  0,          0
 );
 WPVARM(0, cooktime, 0, VAR_MAX,
     0,          0,          0,          0,          0,          0,          0,          0,          0,          3000,       0,          0,
