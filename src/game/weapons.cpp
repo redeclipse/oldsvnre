@@ -161,7 +161,7 @@ namespace weapons
             bool noammo = d->ammo[d->weapselect] < W2(d->weapselect, sub, WS(flags)),
                  noattack = !d->action[AC_PRIMARY] && !d->action[AC_SECONDARY];
             if((noammo || noattack) && !d->action[AC_USE] && d->weapstate[d->weapselect] == W_S_IDLE && (noammo || lastmillis-d->weaplast[d->weapselect] >= autoreloaddelay))
-                return autoreloading >= (noammo ? 1 : (W(d->weapselect, add) < W(d->weapselect, max) ? 2 : (W(d->weapselect, zooms) ? 4 : 3)));
+                return autoreloading >= (noammo ? 1 : (W(d->weapselect, add) < W(d->weapselect, max) ? 2 : (W2(d->weapselect, cooked, true)&W_C_ZOOM ? 4 : 3)));
         }
         return false;
     }
@@ -218,7 +218,7 @@ namespace weapons
             else offset = d->weapload[weap];
         }
         float scale = 1;
-        bool zooming = (pressed && secondary && W(weap, zooms)) || d->weapstate[weap] == W_S_ZOOM, wassecond = secondary;
+        bool zooming = (pressed && secondary && W2(weap, cooked, true)&W_C_ZOOM) || d->weapstate[weap] == W_S_ZOOM, wassecond = secondary;
         if(zooming)
         {
             if(!pressed)
@@ -278,7 +278,8 @@ namespace weapons
             if(weap == W_MELEE) to = vec(targ).sub(from).normalize().mul(d->radius).add(from);
             else to = d->muzzlepos(weap, secondary);
             int rays = W2(weap, rays, secondary);
-            if(rays > 1 && W2(weap, cooktime, secondary) && scale < 1) rays = int(ceilf(rays*scale));
+            if(rays > 1 && W2(weap, cooked, secondary)&W_C_RAYS && W2(weap, cooktime, secondary) && scale < 1)
+                rays = max(1, int(ceilf(rays*scale)));
             loopi(rays) addshot(to);
         }
         else
@@ -286,8 +287,9 @@ namespace weapons
             from = d->muzzlepos(weap, secondary);
             to = targ;
             int rays = W2(weap, rays, secondary), x = 0;
-            if(rays > 1 && W2(weap, cooktime, secondary) && scale < 1) rays = int(ceilf(rays*scale));
-            float m = accmod(d, W(d->weapselect, zooms) && secondary, &x);
+            if(rays > 1 && W2(weap, cooked, secondary)&W_C_RAYS && W2(weap, cooktime, secondary) && scale < 1)
+                rays = max(1, int(ceilf(rays*scale)));
+            float m = accmod(d, W2(d->weapselect, cooked, true)&W_C_ZOOM && secondary, &x);
             float spread = WSP(weap, secondary, game::gamemode, game::mutators, m, x);
             loopi(rays)
             {

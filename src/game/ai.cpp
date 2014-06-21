@@ -112,7 +112,7 @@ namespace ai
 
     bool altfire(gameent *d, gameent *e)
     {
-        if(e && !W(d->weapselect, zooms) && canshoot(d, e, true))
+        if(e && !(W2(d->weapselect, cooked, true)&W_C_ZOOM) && canshoot(d, e, true))
         {
             if(d->weapstate[d->weapselect] == W_S_POWER || d->weapstate[d->weapselect] == W_S_ZOOM)
             {
