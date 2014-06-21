@@ -1126,12 +1126,12 @@ namespace projs
         float skew = 1;
         if(cook && cooked)
         {
-            if(cooked&W_C_SCALE)  skew = scale; // scaled
-            if(cooked&W_C_INVSCALE)  skew = 1-scale; // inverted scale
-            if(cooked&W_C_LIFE)  life = int(ceilf(life*scale)); // life scale
-            if(cooked&W_C_INVLIFE)  life = int(ceilf(life*(1-scale))); // inverted life
-            if(cooked&W_C_SPEED) speed = limspeed+int(ceilf(max(speed-limspeed, 0)*scale)); // speed scale
-            if(cooked&W_C_INVSPEED) speed = limspeed+int(ceilf(max(speed-limspeed, 0)*(1-scale))); // inverted speed
+            if(cooked&W_C_SCALE)   skew = scale; // scaled
+            if(cooked&W_C_SCALEN)  skew = 1-scale; // inverted scale
+            if(cooked&W_C_LIFE)    life = int(ceilf(life*scale)); // life scale
+            if(cooked&W_C_LIFEN)   life = int(ceilf(life*(1-scale))); // inverted life
+            if(cooked&W_C_SPEED)   speed = limspeed+int(ceilf(max(speed-limspeed, 0)*scale)); // speed scale
+            if(cooked&W_C_SPEEDN)  speed = limspeed+int(ceilf(max(speed-limspeed, 0)*(1-scale))); // inverted speed
         }
 
         if(weaptype[weap].sound >= 0 && (weap != W_MELEE || !(WS(flags))))
