@@ -312,7 +312,7 @@ namespace aiman
 
     void checkenemies()
     {
-        if(m_enemies(gamemode, mutators))
+        if(m_onslaught(gamemode, mutators))
         {
             loopvj(sents) if(sents[j].type == ACTOR && sents[j].attrs[0] >= 0 && sents[j].attrs[0] < A_TOTAL && gamemillis >= sents[j].millis && (sents[j].attrs[5] == triggerid || !sents[j].attrs[5]) && m_check(sents[j].attrs[3], sents[j].attrs[4], gamemode, mutators))
             {
@@ -361,7 +361,7 @@ namespace aiman
                 if(!dorefresh)
                 {
                     #define checkold(n) if(old##n != G(n)) { dorefresh = 1; old##n = G(n); }
-                    if(m_enemies(gamemode, mutators))
+                    if(m_onslaught(gamemode, mutators))
                     {
                         checkold(enemyskillmin);
                         checkold(enemyskillmax);

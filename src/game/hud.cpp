@@ -333,9 +333,9 @@ namespace hud
 
     VAR(IDF_PERSIST, inventoryvelocity, 0, 0, 2);
     FVAR(IDF_PERSIST, inventoryvelocityblend, 0, 1, 1);
-    VAR(IDF_PERSIST, inventorycheckpoint, 0, 2, 2);
-    VAR(IDF_PERSIST, inventorycheckpointstyle, -1, 0, 3);
-    FVAR(IDF_PERSIST, inventorycheckpointblend, 0, 1, 1);
+    VAR(IDF_PERSIST, inventorytrial, 0, 2, 2);
+    VAR(IDF_PERSIST, inventorytrialstyle, -1, 0, 3);
+    FVAR(IDF_PERSIST, inventorytrialblend, 0, 1, 1);
     VAR(IDF_PERSIST, inventorystatus, 0, 2, 3); // 0 = off, 1 = text, 2 = icon, 3 = icon + tex
     FVAR(IDF_PERSIST, inventorystatusblend, 0, 1, 1);
     FVAR(IDF_PERSIST, inventorystatusiconblend, 0, 0.65f, 1);
@@ -2619,7 +2619,7 @@ namespace hud
                     }
                 }
             }
-            if(inventoryvelocity >= (m_checkpoint(game::gamemode) ? 1 : 2))
+            if(inventoryvelocity >= (m_trial(game::gamemode) ? 1 : 2))
             {
                 float fade = blend*inventoryvelocityblend;
                 pushfont("emphasis");
@@ -2759,19 +2759,19 @@ namespace hud
     {
         if(game::focus->state == CS_EDITING || game::focus->state == CS_SPECTATOR) return 0;
         int sy = 0;
-        if(inventorycheckpoint && m_checkpoint(game::gamemode))
+        if(inventorytrial && m_trial(game::gamemode))
         {
-            float fade = blend*inventorycheckpointblend;
+            float fade = blend*inventorytrialblend;
             pushfont("default");
             if((game::focus->cpmillis || game::focus->cptime) && (game::focus->state == CS_ALIVE || game::focus->state == CS_DEAD || game::focus->state == CS_WAITING))
             {
                 sy += draw_textx("\falap: \fw%d", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, game::focus->points+1);
                 if(game::focus->cptime)
-                    sy += draw_textx("\fy%s", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, timestr(game::focus->cptime, inventorycheckpointstyle));
+                    sy += draw_textx("\fy%s", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, timestr(game::focus->cptime, inventorytrialstyle));
                 if(game::focus->cpmillis)
-                    sy += draw_textx("%s", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, timestr(lastmillis-game::focus->cpmillis, inventorycheckpointstyle));
+                    sy += draw_textx("%s", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, timestr(lastmillis-game::focus->cpmillis, inventorytrialstyle));
                 else if(game::focus->cplast)
-                    sy += draw_textx("\fzwe%s", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, timestr(game::focus->cplast, inventorycheckpointstyle));
+                    sy += draw_textx("\fzwe%s", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, timestr(game::focus->cplast, inventorytrialstyle));
             }
             sy += trialinventory(x, y-sy, s, fade);
             popfont();

@@ -2480,7 +2480,7 @@ namespace client
                     if(s == game::player1)
                     {
                         game::specreset();
-                        if(m_checkpoint(game::gamemode)) game::specmode = 0;
+                        if(m_trial(game::gamemode)) game::specmode = 0;
                     }
                     if(val != 0)
                     {

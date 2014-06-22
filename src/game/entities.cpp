@@ -779,7 +779,7 @@ namespace entities
                 {
                     if(d->state != CS_ALIVE || !gameent::is(d)) break;
                     gameent *g = (gameent *)d;
-                    if(!m_check(e.attrs[3], e.attrs[4], game::gamemode, game::mutators) || !m_checkpoint(game::gamemode) || g->checkpoint == n) break;
+                    if(!m_check(e.attrs[3], e.attrs[4], game::gamemode, game::mutators) || !m_trial(game::gamemode) || g->checkpoint == n) break;
                     if(e.attrs[6] == CP_START)
                     {
                         if(g->cpmillis) break;
@@ -1922,7 +1922,7 @@ namespace entities
         }
         memset(lastenttype, 0, sizeof(lastenttype));
         memset(lastusetype, 0, sizeof(lastusetype));
-        if(m_enemies(game::gamemode, game::mutators) && !numactors)
+        if(m_onslaught(game::gamemode, game::mutators) && !numactors)
         {
             loopv(ents) if(ents[i]->type == PLAYERSTART || ents[i]->type == WEAPON)
             {
