@@ -132,8 +132,8 @@ namespace server
 
     struct projectile
     {
-        int id, ammo, reloads;
-        projectile(int n, int a, int r) : id(n), ammo(a), reloads(r) {}
+        int id, ammo;
+        projectile(int n, int a) : id(n), ammo(a) {}
         ~projectile() {}
     };
     struct projectilestate
@@ -141,9 +141,9 @@ namespace server
         vector<projectile> projs;
         projectilestate() { reset(); }
         void reset() { projs.shrink(0); }
-        void add(int id, int ammo = -1, int reloads = -1)
+        void add(int id, int ammo = -1)
         {
-            projs.add(projectile(id, ammo, reloads));
+            projs.add(projectile(id, ammo));
         }
         bool remove(int id)
         {
@@ -169,10 +169,10 @@ namespace server
             loopv(projs) if(projs[i].id==id) return true;
             return false;
         }
-        void values(int id, int &a, int &v)
+        void values(int id, int &a)
         {
-            loopv(projs) if(projs[i].id==id) { a = projs[i].ammo; v = projs[i].reloads; return; }
-            a = v = -1;
+            loopv(projs) if(projs[i].id==id) { a = projs[i].ammo; return; }
+            a = -1;
         }
     };
 
@@ -534,7 +534,7 @@ namespace server
 
     void takeammo(clientinfo *ci, int weap, int amt = 1) { ci->state.ammo[weap] = max(ci->state.ammo[weap]-amt, 0); }
 
-    struct droplist { int weap, ent, ammo, reloads; };
+    struct droplist { int weap, ent, ammo; };
     enum
     {
         DROP_NONE = 0, DROP_WEAPONS = 1<<0, DROP_WCLR = 1<<1, DROP_KAMIKAZE = 1<<2, DROP_EXPLODE = 1<<3,
@@ -550,10 +550,9 @@ namespace server
             d.weap = weap;
             d.ent = ci->state.entid[weap];
             d.ammo = ci->state.ammo[weap];
-            d.reloads = ci->state.reloads[weap];
-            ci->state.dropped.add(d.ent, d.ammo, d.reloads);
+            ci->state.dropped.add(d.ent, d.ammo);
             ci->state.entid[weap] = -1;
-            if(flags&DROP_WCLR) ci->state.ammo[weap] = ci->state.reloads[weap] = -1;
+            if(flags&DROP_WCLR) ci->state.ammo[weap] = -1;
         }
     }
 
@@ -566,8 +565,8 @@ namespace server
             ci->state.weapshots[W_GRENADE][0].add(1);
             droplist &d = drop.add();
             d.weap = W_GRENADE;
-            d.ent = d.ammo = d.reloads = -1;
-            if(!(flags&DROP_EXPLODE)) takeammo(ci, W_GRENADE, W2(W_GRENADE, sub, false));
+            d.ent = d.ammo = -1;
+            if(!(flags&DROP_EXPLODE)) takeammo(ci, W_GRENADE, W2(W_GRENADE, ammosub, false));
             kamikaze = true;
         }
         if(flags&DROP_WEAPONS) loopi(W_MAX) dropweapon(ci, flags, i, drop);
@@ -1648,13 +1647,13 @@ namespace server
 
     bool hasitem(int i)
     {
-        if(!sents.inrange(i) || m_noitems(gamemode, mutators)) return false;
+        if(m_trial(gamemode) || !sents.inrange(i)) return false;
         switch(sents[i].type)
         {
             case WEAPON:
             {
                 int sweap = m_weapon(gamemode, mutators), attr = w_attr(gamemode, mutators, sents[i].attrs[0], sweap);
-                if(!isweap(attr) || (sweap < 0 && attr < 0-sweap) || !m_check(W(attr, modes), W(attr, muts), gamemode, mutators))
+                if(!isweap(attr) || !w_item(attr, sweap) || !m_check(W(attr, modes), W(attr, muts), gamemode, mutators))
                     return false;
                 if((sents[i].attrs[4] && sents[i].attrs[4] != triggerid) || !m_check(sents[i].attrs[2], sents[i].attrs[3], gamemode, mutators))
                     return false;
@@ -1961,7 +1960,7 @@ namespace server
         }
         int spawn = pickspawn(ci);
         gs.spawnstate(gamemode, mutators, weap, health, armour);
-        sendf(ci->clientnum, 1, "ri9i2vv", N_SPAWNSTATE, ci->clientnum, spawn, gs.state, gs.points, gs.frags, gs.deaths, gs.health, gs.armour, gs.cptime, gs.weapselect, W_MAX, &gs.ammo[0], W_MAX, &gs.reloads[0]);
+        sendf(ci->clientnum, 1, "ri9i2v", N_SPAWNSTATE, ci->clientnum, spawn, gs.state, gs.points, gs.frags, gs.deaths, gs.health, gs.armour, gs.cptime, gs.weapselect, W_MAX, &gs.ammo[0]);
         gs.lastrespawn = gs.lastspawn = gamemillis;
     }
 
@@ -1977,7 +1976,6 @@ namespace server
         putint(p, gs.cptime);
         putint(p, gs.weapselect);
         loopi(W_MAX) putint(p, gs.ammo[i]);
-        loopi(W_MAX) putint(p, gs.reloads[i]);
     }
 
     void relayf(int r, const char *s, ...)
@@ -3228,7 +3226,7 @@ namespace server
     void sendresume(clientinfo *ci)
     {
         servstate &gs = ci->state;
-        sendf(-1, 1, "ri9ivvi", N_RESUME, ci->clientnum, gs.state, gs.points, gs.frags, gs.deaths, gs.health, gs.armour, gs.cptime, gs.weapselect, W_MAX, &gs.ammo[0], W_MAX, &gs.reloads[0], -1);
+        sendf(-1, 1, "ri9ivi", N_RESUME, ci->clientnum, gs.state, gs.points, gs.frags, gs.deaths, gs.health, gs.armour, gs.cptime, gs.weapselect, W_MAX, &gs.ammo[0], -1);
     }
 
     void putinitclient(clientinfo *ci, packetbuf &p)
@@ -3489,7 +3487,7 @@ namespace server
                 case 1: return true; break;
                 case 0: default: break;
             }
-            if(m_team(gamemode, mutators)) switch(G(teamdamage))
+            if(m_team(gamemode, mutators)) switch(G(damageteam))
             {
                 case 1: if(d->state.actortype > A_PLAYER || (e && e->state.actortype == A_PLAYER)) break;
                 case 0: if(e && d->team == e->team) return true; break;
@@ -3509,7 +3507,7 @@ namespace server
         mutate(smuts, if(!mut->damage(m, v, realdamage, weap, realflags, material, hitpush, hitvel, dist)) { nodamage++; });
         if(v->state.actortype < A_ENEMY)
         {
-            if(v == m && !G(selfdamage)) nodamage++;
+            if(v == m && !G(damageself)) nodamage++;
             else if(isghost(m, v)) nodamage++;
         }
 
@@ -3574,7 +3572,7 @@ namespace server
             if(m_team(gamemode, mutators) && v->team == m->team)
             {
                 v->state.spree = 0;
-                if(isweap(weap) && (v == m || WF(WK(flags), weap, teampenalty, WS(flags))))
+                if(isweap(weap) && (v == m || WF(WK(flags), weap, damagepenalty, WS(flags))))
                 {
                     pointvalue *= G(teamkillpenalty);
                     if(v != m) isteamkill = true;
@@ -3799,7 +3797,7 @@ namespace server
         }
         if(self)
         {
-            float modify = WF(WK(flags), weap, selfdamage, WS(flags))*G(selfdamagescale);
+            float modify = WF(WK(flags), weap, damageself, WS(flags))*G(damageselfscale);
             if(modify != 0) skew *= modify;
             else
             {
@@ -3809,7 +3807,7 @@ namespace server
         }
         else if(m_team(gamemode, mutators) && v->team == m->team)
         {
-            float modify = WF(WK(flags), weap, teamdamage, WS(flags))*G(teamdamagescale);
+            float modify = WF(WK(flags), weap, damageteam, WS(flags))*G(damageteamscale);
             if(modify != 0) skew *= modify;
             else
             {
@@ -3912,7 +3910,7 @@ namespace server
             if(G(serverdebug) >= 3) srvmsgf(ci->clientnum, "sync error: shoot [%d] failed - unexpected message", weap);
             return;
         }
-        int sub = W2(weap, sub, WS(flags));
+        int sub = W2(weap, ammosub, WS(flags));
         if(sub > 1 && W2(weap, cooktime, WS(flags)))
         {
             if(ci->state.ammo[weap] < sub)
@@ -3926,7 +3924,7 @@ namespace server
         {
             if(!gs.canshoot(weap, flags, m_weapon(gamemode, mutators), millis, (1<<W_S_RELOAD)))
             {
-                if(sub && W(weap, max)) ci->state.ammo[weap] = max(ci->state.ammo[weap]-sub, 0);
+                if(sub && W(weap, ammomax)) ci->state.ammo[weap] = max(ci->state.ammo[weap]-sub, 0);
                 if(!gs.hasweap(weap, m_weapon(gamemode, mutators))) gs.entid[weap] = -1; // its gone..
                 if(G(serverdebug)) srvmsgf(ci->clientnum, "sync error: shoot [%d] failed - current state disallows it", weap);
                 return;
@@ -3934,9 +3932,8 @@ namespace server
             else if(gs.weapload[gs.weapselect] > 0)
             {
                 takeammo(ci, gs.weapselect, gs.weapload[gs.weapselect]);
-                gs.reloads[gs.weapselect] = max(gs.reloads[gs.weapselect]-1, 0);
                 gs.weapload[gs.weapselect] = -gs.weapload[gs.weapselect]; // the client should already do this for themself
-                sendf(-1, 1, "ri6x", N_RELOAD, ci->clientnum, gs.weapselect, gs.weapload[gs.weapselect], gs.ammo[gs.weapselect], gs.reloads[gs.weapselect], ci->clientnum);
+                sendf(-1, 1, "ri5x", N_RELOAD, ci->clientnum, gs.weapselect, gs.weapload[gs.weapselect], gs.ammo[gs.weapselect], ci->clientnum);
             }
             else return;
         }
@@ -3949,8 +3946,8 @@ namespace server
         if(!gs.hasweap(weap, m_weapon(gamemode, mutators)))
         {
             //if(sents.inrange(gs.entid[weap])) setspawn(gs.entid[weap], false);
-            sendf(-1, 1, "ri8", N_DROP, ci->clientnum, -1, 1, weap, -1, 0, 0);
-            gs.ammo[weap] = gs.entid[weap] = gs.reloads[weap] = -1; // its gone..
+            sendf(-1, 1, "ri7", N_DROP, ci->clientnum, -1, 1, weap, -1, 0);
+            gs.ammo[weap] = gs.entid[weap] = -1; // its gone..
         }
     }
 
@@ -3974,9 +3971,8 @@ namespace server
             else if(gs.weapload[gs.weapselect] > 0)
             {
                 takeammo(ci, gs.weapselect, gs.weapload[gs.weapselect]);
-                gs.reloads[gs.weapselect] = max(gs.reloads[gs.weapselect]-1, 0);
                 gs.weapload[gs.weapselect] = -gs.weapload[gs.weapselect]; // the client should already do this for themself
-                sendf(-1, 1, "ri6x", N_RELOAD, ci->clientnum, gs.weapselect, gs.weapload[gs.weapselect], gs.ammo[gs.weapselect], gs.reloads[gs.weapselect], ci->clientnum);
+                sendf(-1, 1, "ri5x", N_RELOAD, ci->clientnum, gs.weapselect, gs.weapload[gs.weapselect], gs.ammo[gs.weapselect], ci->clientnum);
             }
             else return;
         }
@@ -4007,18 +4003,17 @@ namespace server
             }
             else return;
         }
-        int dropped = -1, ammo = -1, reloads = -1, nweap = gs.bestweap(sweap, true); // switch to best weapon
+        int dropped = -1, ammo = -1, nweap = gs.bestweap(sweap, true); // switch to best weapon
         if(sents.inrange(gs.entid[weap]))
         {
             dropped = gs.entid[weap];
-            ammo = gs.ammo[weap] ? gs.ammo[weap] : W(weap, max);
-            reloads = gs.reloads[weap];
+            ammo = gs.ammo[weap] ? gs.ammo[weap] : W(weap, ammomax);
             setspawn(dropped, false);
-            gs.dropped.add(dropped, ammo, reloads);
+            gs.dropped.add(dropped, ammo);
         }
-        gs.ammo[weap] = gs.entid[weap] = gs.reloads[weap] = -1;
+        gs.ammo[weap] = gs.entid[weap] = -1;
         gs.weapswitch(nweap, millis, G(weaponswitchdelay));
-        sendf(-1, 1, "ri8", N_DROP, ci->clientnum, nweap, 1, weap, dropped, ammo, reloads);
+        sendf(-1, 1, "ri7", N_DROP, ci->clientnum, nweap, 1, weap, dropped, ammo);
     }
 
     void reloadevent::process(clientinfo *ci)
@@ -4027,21 +4022,18 @@ namespace server
         if(!gs.isalive(gamemillis) || !isweap(weap))
         {
             if(G(serverdebug) >= 3) srvmsgf(ci->clientnum, "sync error: reload [%d] failed - unexpected message", weap);
-            //sendf(ci->clientnum, 1, "ri6", N_RELOAD, ci->clientnum, weap, gs.weapload[weap], gs.ammo[weap], gs.reloads[weap]);
             return;
         }
         if(!gs.canreload(weap, m_weapon(gamemode, mutators), false, millis))
         {
             if(G(serverdebug)) srvmsgf(ci->clientnum, "sync error: reload [%d] failed - current state disallows it", weap);
-            //sendf(ci->clientnum, 1, "ri6", N_RELOAD, ci->clientnum, weap, gs.weapload[weap], gs.ammo[weap], gs.reloads[weap]);
             return;
         }
         gs.setweapstate(weap, W_S_RELOAD, W(weap, reloaddelay), millis);
         int oldammo = gs.ammo[weap];
-        gs.ammo[weap] = min(max(gs.ammo[weap], 0) + W(weap, add), W(weap, max));
-        gs.reloads[weap]++;
+        gs.ammo[weap] = min(max(gs.ammo[weap], 0) + W(weap, ammoadd), W(weap, ammomax));
         gs.weapload[weap] = gs.ammo[weap]-oldammo;
-        sendf(-1, 1, "ri6x", N_RELOAD, ci->clientnum, weap, gs.weapload[weap], gs.ammo[weap], gs.reloads[weap], ci->clientnum);
+        sendf(-1, 1, "ri5x", N_RELOAD, ci->clientnum, weap, gs.weapload[weap], gs.ammo[weap], ci->clientnum);
     }
 
     void useevent::process(clientinfo *ci)
@@ -4068,13 +4060,12 @@ namespace server
             else if(gs.weapload[gs.weapselect] > 0)
             {
                 takeammo(ci, gs.weapselect, gs.weapload[gs.weapselect]);
-                gs.reloads[gs.weapselect] = max(gs.reloads[gs.weapselect]-1, 0);
                 gs.weapload[gs.weapselect] = -gs.weapload[gs.weapselect]; // the client should already do this for themself
-                sendf(-1, 1, "ri6x", N_RELOAD, ci->clientnum, gs.weapselect, gs.weapload[gs.weapselect], gs.ammo[gs.weapselect], gs.reloads[gs.weapselect], ci->clientnum);
+                sendf(-1, 1, "ri5x", N_RELOAD, ci->clientnum, gs.weapselect, gs.weapload[gs.weapselect], gs.ammo[gs.weapselect], ci->clientnum);
             }
             else return;
         }
-        int weap = -1, ammoamt = -1, reloadamt = -1, dropped = -1, ammo = -1, reloads = -1;
+        int weap = -1, ammoamt = -1, dropped = -1, ammo = -1;
         switch(sents[ent].type)
         {
             case WEAPON:
@@ -4083,7 +4074,7 @@ namespace server
                     weap = gs.drop(sweap);
                 loopvk(clients) if(clients[k]->state.dropped.find(ent))
                 {
-                    clients[k]->state.dropped.values(ent, ammoamt, reloadamt);
+                    clients[k]->state.dropped.values(ent, ammoamt);
                     break;
                 }
                 if(isweap(weap))
@@ -4092,12 +4083,11 @@ namespace server
                     {
                         dropped = gs.entid[weap];
                         ammo = gs.ammo[weap];
-                        reloads = gs.reloads[weap];
                         setspawn(dropped, false);
                         gs.setweapstate(weap, W_S_SWITCH, G(weaponswitchdelay), millis);
-                        gs.dropped.add(dropped, ammo, reloads);
+                        gs.dropped.add(dropped, ammo);
                     }
-                    gs.ammo[weap] = gs.entid[weap] = gs.reloads[weap] = -1;
+                    gs.ammo[weap] = gs.entid[weap] = -1;
                 }
                 break;
             }
@@ -4109,8 +4099,8 @@ namespace server
             default: break;
         }
         setspawn(ent, false, true);
-        gs.useitem(ent, sents[ent].type, attr, ammoamt, reloadamt, sweap, millis, G(weaponswitchdelay));
-        sendf(-1, 1, "ri9i", N_ITEMACC, ci->clientnum, ent, ammoamt, reloadamt, sents[ent].spawned ? 1 : 0, weap, dropped, ammo, reloads);
+        gs.useitem(ent, sents[ent].type, attr, ammoamt, sweap, millis, G(weaponswitchdelay));
+        sendf(-1, 1, "ri8", N_ITEMACC, ci->clientnum, ent, ammoamt, sents[ent].spawned ? 1 : 0, weap, dropped, ammo);
     }
 
     bool gameevent::flush(clientinfo *ci, int fmillis)
@@ -4234,13 +4224,10 @@ namespace server
             }
             default:
             {
+                if(enttype[sents[i].type].usetype != EU_ITEM) break;
                 bool allowed = hasitem(i);
-                if(enttype[sents[i].type].usetype == EU_ITEM && (allowed || sents[i].spawned))
-                {
-                    bool found = finditem(i, true, true);
-                    if((!found && !sents[i].spawned) || (!allowed && sents[i].spawned))
-                        setspawn(i, allowed, true, true);
-                }
+                if((allowed && !sents[i].spawned && !finditem(i, true, true)) || (!allowed && sents[i].spawned))
+                    setspawn(i, allowed, true, true);
                 break;
             }
         }
@@ -5005,9 +4992,8 @@ namespace server
                             else if(cp->state.weapload[cp->state.weapselect] > 0)
                             {
                                 takeammo(cp, cp->state.weapselect, cp->state.weapload[cp->state.weapselect]);
-                                cp->state.reloads[cp->state.weapselect] = max(cp->state.reloads[cp->state.weapselect]-1, 0);
                                 cp->state.weapload[cp->state.weapselect] = -cp->state.weapload[cp->state.weapselect];
-                                sendf(-1, 1, "ri6x", N_RELOAD, cp->clientnum, cp->state.weapselect, cp->state.weapload[cp->state.weapselect], cp->state.ammo[cp->state.weapselect], cp->state.reloads[cp->state.weapselect], cp->clientnum);
+                                sendf(-1, 1, "ri5x", N_RELOAD, cp->clientnum, cp->state.weapselect, cp->state.weapload[cp->state.weapselect], cp->state.ammo[cp->state.weapselect], cp->clientnum);
                             }
                             else break;
                         }

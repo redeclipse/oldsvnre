@@ -32,7 +32,7 @@ namespace weapons
     ICOMMAND(0, weapslot, "i", (int *o), intret(slot(game::player1, *o >= 0 ? *o : game::player1->weapselect))); // -1 = weapselect slot
     ICOMMAND(0, weapselect, "", (), intret(game::player1->weapselect));
     ICOMMAND(0, ammo, "i", (int *n), intret(isweap(*n) ? game::player1->ammo[*n] : -1));
-    ICOMMAND(0, reloads, "i", (int *n), intret(isweap(*n) ? game::player1->reloads[*n] : -1));
+    ICOMMAND(0, reloadweap, "i", (int *n), intret(isweap(*n) && w_reload(*n, m_weapon(game::gamemode, game::mutators)) ? 1 : 0));
     ICOMMAND(0, hasweap, "ii", (int *n, int *o), intret(isweap(*n) && game::player1->hasweap(*n, *o) ? 1 : 0));
     ICOMMAND(0, getweap, "ii", (int *n, int *o), {
         if(isweap(*n)) switch(*o)
@@ -59,7 +59,6 @@ namespace weapons
                 {
                     int offset = d->weapload[d->weapselect];
                     d->ammo[d->weapselect] = max(d->ammo[d->weapselect]-offset, 0);
-                    d->reloads[d->weapselect] = max(d->reloads[d->weapselect]-1, 0);
                     d->weapload[d->weapselect] = -d->weapload[d->weapselect];
                 }
             }
@@ -70,7 +69,7 @@ namespace weapons
         return true;
     }
 
-    bool weapreload(gameent *d, int weap, int load, int ammo, int reloads, bool local)
+    bool weapreload(gameent *d, int weap, int load, int ammo, bool local)
     {
         if(game::intermission || (!local && (d == game::player1 || d->ai))) return false; // this can't be fixed until 1.5
         if(local)
@@ -82,13 +81,11 @@ namespace weapons
             }
             client::addmsg(N_RELOAD, "ri3", d->clientnum, lastmillis-game::maptime, weap);
             int oldammo = d->ammo[weap];
-            ammo = min(max(d->ammo[weap], 0) + W(weap, add), W(weap, max));
-            reloads = max(d->reloads[weap], 0) + 1;
+            ammo = min(max(d->ammo[weap], 0) + W(weap, ammoadd), W(weap, ammomax));
             load = ammo-oldammo;
         }
         d->weapload[weap] = load;
-        d->ammo[weap] = min(ammo, W(weap, max));
-        d->reloads[weap] = max(reloads, 0);
+        d->ammo[weap] = min(ammo, W(weap, ammomax));
         playsound(WSND(weap, S_W_RELOAD), d->o, d, 0, -1, -1, -1, &d->wschan);
         d->setweapstate(weap, W_S_RELOAD, W(weap, reloaddelay), lastmillis);
         return true;
@@ -156,12 +153,12 @@ namespace weapons
 
     bool autoreload(gameent *d, int flags = 0)
     {
-        if(!game::intermission && d == game::player1 && W2(d->weapselect, sub, WS(flags)) && d->canreload(d->weapselect, m_weapon(game::gamemode, game::mutators), false, lastmillis))
+        if(!game::intermission && d == game::player1 && W2(d->weapselect, ammosub, WS(flags)) && d->canreload(d->weapselect, m_weapon(game::gamemode, game::mutators), false, lastmillis))
         {
-            bool noammo = d->ammo[d->weapselect] < W2(d->weapselect, sub, WS(flags)),
+            bool noammo = d->ammo[d->weapselect] < W2(d->weapselect, ammosub, WS(flags)),
                  noattack = !d->action[AC_PRIMARY] && !d->action[AC_SECONDARY];
             if((noammo || noattack) && !d->action[AC_USE] && d->weapstate[d->weapselect] == W_S_IDLE && (noammo || lastmillis-d->weaplast[d->weapselect] >= autoreloaddelay))
-                return autoreloading >= (noammo ? 1 : (W(d->weapselect, add) < W(d->weapselect, max) ? 2 : (W2(d->weapselect, cooked, true)&W_C_ZOOM ? 4 : 3)));
+                return autoreloading >= (noammo ? 1 : (W(d->weapselect, ammoadd) < W(d->weapselect, ammomax) ? 2 : (W2(d->weapselect, cooked, true)&W_C_ZOOM ? 4 : 3)));
         }
         return false;
     }
@@ -229,7 +226,7 @@ namespace weapons
             }
             else secondary = zooming;
         }
-        int sub = W2(weap, sub, secondary), cooked = force;
+        int sub = W2(weap, ammosub, secondary), cooked = force;
         if(W2(weap, cooktime, secondary) || zooming)
         {
             float maxscale = 1;
@@ -244,7 +241,6 @@ namespace weapons
                         if(offset > 0)
                         {
                             d->ammo[weap] = max(d->ammo[weap]-offset, 0);
-                            d->reloads[weap] = max(d->reloads[weap]-1, 0);
                             d->weapload[weap] = -offset;
                         }
                         client::addmsg(N_SPHY, "ri4", d->clientnum, SPHY_COOK, type, len);

@@ -828,7 +828,7 @@ namespace hud
                 colourskew(r, g, b, 1.f-amt);
                 break;
             }
-            case W_S_RELOAD: if(showindicator >= (W(weap, add) < W(weap, max) ? 3 : 2) && millis <= game::focus->weapwait[weap])
+            case W_S_RELOAD: if(showindicator >= (W(weap, ammoadd) < W(weap, ammomax) ? 3 : 2) && millis <= game::focus->weapwait[weap])
             {
                 amt = 1.f-clamp(float(millis)/float(game::focus->weapwait[weap]), 0.f, 1.f);
                 colourskew(r, g, b, 1.f-amt);
@@ -900,7 +900,7 @@ namespace hud
 
     void drawclip(int weap, int x, int y, float s)
     {
-        if(!isweap(weap) || (!W2(weap, sub, false) && !W2(weap, sub, true)) || W(weap, max) < cliplength) return;
+        if(!isweap(weap) || (!W2(weap, ammosub, false) && !W2(weap, ammosub, true)) || W(weap, ammomax) < cliplength) return;
         const char *cliptexs[W_MAX] = {
             meleecliptex, pistolcliptex, swordcliptex, shotguncliptex, smgcliptex,
             flamercliptex, plasmacliptex, tasercliptex, riflecliptex, grenadecliptex, minecliptex, rocketcliptex
@@ -917,7 +917,7 @@ namespace hud
             meleecliprotate, pistolcliprotate, swordcliprotate, shotguncliprotate, smgcliprotate,
             flamercliprotate, plasmacliprotate, tasercliprotate, riflecliprotate, grenadecliprotate, minecliprotate, rocketcliprotate
         };
-        int ammo = game::focus->ammo[weap], maxammo = W(weap, max), interval = lastmillis-game::focus->weaplast[weap];
+        int ammo = game::focus->ammo[weap], maxammo = W(weap, ammomax), interval = lastmillis-game::focus->weaplast[weap];
         float fade = clipblend*hudblend, size = s*clipsize*clipskew[weap], offset = s*clipoffset, amt = 0, spin = 0,
               slice = 360/float(maxammo), angle = (maxammo > (cliprots[weap]&4 ? 4 : 3) || maxammo%2 ? 360.f : 360.f-slice*0.5f)-((maxammo-ammo)*slice),
               area = 1-clamp(clipoffs[weap]*2, 1e-3f, 1.f), need = s*clipsize*clipskew[weap]*area*maxammo, have = 2*M_PI*s*clipoffset,
@@ -1033,14 +1033,14 @@ namespace hud
                 {
                     if(!isweap(game::focus->weapselect)) continue;
                     int weap = game::focus->weapselect, interval = lastmillis-game::focus->weaplast[weap];
-                    val = game::focus->ammo[weap]/float(W(weap, max));
+                    val = game::focus->ammo[weap]/float(W(weap, ammomax));
                     if(circlebarammotone || circlebarammocolour) skewcolour(c.r, c.g, c.b, circlebarammocolour ? W(weap, colour) : circlebarammotone);
                     if(interval <= game::focus->weapwait[weap]) switch(game::focus->weapstate[weap])
                     {
                         case W_S_RELOAD: case W_S_USE:
                             if(game::focus->weapload[weap] > 0)
                             {
-                                val -= game::focus->weapload[weap]/float(W(weap, max));
+                                val -= game::focus->weapload[weap]/float(W(weap, ammomax));
                                 break;
                             }
                             else if(game::focus->weapstate[weap] == W_S_RELOAD) break;
@@ -1077,7 +1077,7 @@ namespace hud
                         {
                             float amt = 1.f-clamp(float(interval)/float(game::focus->weapwait[weap]), 0.f, 1.f);
                             fade *= amt;
-                            val = (game::focus->weapshot[weap] ? game::focus->weapshot[weap] : 1)/float(W(weap, max))*amt;
+                            val = (game::focus->weapshot[weap] ? game::focus->weapshot[weap] : 1)/float(W(weap, ammomax))*amt;
                             break;
                         }
                         case W_S_RELOAD: case W_S_USE:
@@ -1089,7 +1089,7 @@ namespace hud
                                 {
                                     float amt = clamp(float(interval-check)/float(check), 0.f, 1.f);
                                     fade *= amt;
-                                    val = game::focus->weapload[weap]/float(W(weap, max))*amt;
+                                    val = game::focus->weapload[weap]/float(W(weap, ammomax))*amt;
                                 }
                             }
                             break;
@@ -2428,11 +2428,11 @@ namespace hud
                     if(reloaded > curammo) curammo = reloaded;
                 }
 
-                if(inventoryammo >= 2 && (i == game::focus->weapselect || inventoryammo >= 3) && W(i, max) > 1 && game::focus->hasweap(i, sweap))
+                if(inventoryammo >= 2 && (i == game::focus->weapselect || inventoryammo >= 3) && W(i, ammomax) > 1 && game::focus->hasweap(i, sweap))
                     sy += drawitem(hudtexs[i], x, y-sy, size, 0, true, false, c.r, c.g, c.b, blend, skew, "super", "%d", curammo);
                 else sy += drawitem(hudtexs[i], x, y-sy, size, 0, true, false, c.r, c.g, c.b, blend, skew);
-                if(inventoryammobar && (i == game::focus->weapselect || inventoryammobar >= 2) && W(i, max) > 1 && game::focus->hasweap(i, sweap))
-                    drawitembar(x, oldy, size, false, c.r, c.g, c.b, blend, skew, curammo/float(W(i, max)));
+                if(inventoryammobar && (i == game::focus->weapselect || inventoryammobar >= 2) && W(i, ammomax) > 1 && game::focus->hasweap(i, sweap))
+                    drawitembar(x, oldy, size, false, c.r, c.g, c.b, blend, skew, curammo/float(W(i, ammomax)));
                 if(inventoryweapids && (i == game::focus->weapselect || inventoryweapids >= 2))
                 {
                     static string weapids[W_MAX];

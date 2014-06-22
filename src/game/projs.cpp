@@ -70,7 +70,7 @@ namespace projs
         flags &= ~HIT_SFLAGS;
         if(v->actortype < A_ENEMY)
         {
-            if(v == target && !selfdamage) nodamage++;
+            if(v == target && !damageself) nodamage++;
             else if(physics::isghost(target, v)) nodamage++;
         }
 
@@ -110,7 +110,7 @@ namespace projs
         }
         if(v == target)
         {
-            float modify = WF(WK(flags), weap, selfdamage, WS(flags))*G(selfdamagescale);
+            float modify = WF(WK(flags), weap, damageself, WS(flags))*G(damageselfscale);
             if(modify != 0) skew *= modify;
             else
             {
@@ -120,7 +120,7 @@ namespace projs
         }
         else if(m_team(game::gamemode, game::mutators) && v->team == target->team)
         {
-            float modify = WF(WK(flags), weap, teamdamage, WS(flags))*G(teamdamagescale);
+            float modify = WF(WK(flags), weap, damageteam, WS(flags))*G(damageteamscale);
             if(modify != 0) skew *= modify;
             else
             {
@@ -535,14 +535,14 @@ namespace projs
                 }
                 vecfromyawpitch(aim[0][1], aim[1][1], 1, 0, dir[1]);
             }
-            float minspeed = proj.minspeed;
+            float speedmin = proj.speedmin;
             #define repel(x,r,z) \
             { \
                 if(overlapsbox(proj.o, r, r, x, r, r)) \
                 { \
                     vec nrm = vec(proj.o).sub(x).normalize(); \
                     dir[1].add(nrm).normalize(); \
-                    minspeed = max(minspeed, z); \
+                    speedmin = max(speedmin, z); \
                     break; \
                 } \
             }
@@ -554,7 +554,7 @@ namespace projs
                     {
                         loopv(projs) if(projs[i]->projtype == PRJ_ENT && projs[i] != &proj && entities::ents.inrange(projs[i]->id) && enttype[entities::ents[projs[i]->id]->type].usetype == EU_ITEM)
                             repel(projs[i]->o, itemrepulsion, itemrepelspeed);
-                        if(!minspeed) loopi(entities::lastusetype[EU_ITEM]) if(enttype[entities::ents[i]->type].usetype == EU_ITEM && entities::ents[i]->spawned)
+                        if(!speedmin) loopi(entities::lastusetype[EU_ITEM]) if(enttype[entities::ents[i]->type].usetype == EU_ITEM && entities::ents[i]->spawned)
                             repel(entities::ents[i]->o, itemrepulsion, itemrepelspeed);
                     }
                     break;
@@ -569,7 +569,7 @@ namespace projs
                     break;
                 }
             }
-            if(!dir[1].iszero()) proj.vel = vec(dir[1]).mul(max(mag, minspeed));
+            if(!dir[1].iszero()) proj.vel = vec(dir[1]).mul(max(mag, speedmin));
         }
         else proj.vel = vec(0, 0, 0);
     }
@@ -672,7 +672,7 @@ namespace projs
                 proj.o = proj.lastgood;
                 if(insideworld(proj.o) && !collide(&proj, dir, 0, false))
                 {
-                    if(rev) proj.vel = vec(proj.o).sub(orig).normalize().mul(max(max(proj.vel.magnitude()*proj.elasticity, 1.f), proj.minspeed));
+                    if(rev) proj.vel = vec(proj.o).sub(orig).normalize().mul(max(max(proj.vel.magnitude()*proj.elasticity, 1.f), proj.speedmin));
                     return true;
                 }
                 else proj.o = orig;
@@ -685,7 +685,7 @@ namespace projs
                 proj.o.add(vec((int(yaw+k*45)%360)*RAD, j*45*RAD).mul(proj.radius*i));
                 if(insideworld(proj.o) && !collide(&proj, dir, 0, false))
                 {
-                    if(rev) proj.vel = vec(proj.o).sub(orig).normalize().mul(max(max(proj.vel.magnitude()*proj.elasticity, 1.f), proj.minspeed));
+                    if(rev) proj.vel = vec(proj.o).sub(orig).normalize().mul(max(max(proj.vel.magnitude()*proj.elasticity, 1.f), proj.speedmin));
                     return true;
                 }
                 else proj.o = orig;
@@ -790,7 +790,7 @@ namespace projs
                 proj.liquidcoast = WF(WK(proj.flags), proj.weap, liquidcoast, WS(proj.flags));
                 proj.weight = WF(WK(proj.flags), proj.weap, weight, WS(proj.flags));
                 proj.projcollide = WF(WK(proj.flags), proj.weap, collide, WS(proj.flags));
-                proj.minspeed = WF(WK(proj.flags), proj.weap, minspeed, WS(proj.flags));
+                proj.speedmin = WF(WK(proj.flags), proj.weap, speedmin, WS(proj.flags));
                 proj.extinguish = WF(WK(proj.flags), proj.weap, extinguish, WS(proj.flags))|4;
                 proj.interacts = WF(WK(proj.flags), proj.weap, interacts, WS(proj.flags));
                 proj.mdl = weaptype[proj.weap].proj;
@@ -916,7 +916,7 @@ namespace projs
                 proj.liquidcoast = itemliquidcoast;
                 proj.weight = itemweight;
                 proj.projcollide = itemcollide;
-                proj.minspeed = itemminspeed;
+                proj.speedmin = itemspeedmin;
                 proj.escaped = true;
                 float mag = proj.inertia.magnitude();
                 if(mag <= 50)
@@ -951,7 +951,7 @@ namespace projs
                         proj.weight = bomberweight;
                         proj.relativity = bomberrelativity;
                         proj.liquidcoast = bomberliquidcoast;
-                        proj.minspeed = bomberminspeed;
+                        proj.speedmin = bomberspeedmin;
                         break;
                     case G_CAPTURE: default:
                         proj.mdl = "props/flag";
@@ -962,7 +962,7 @@ namespace projs
                         proj.weight = captureweight;
                         proj.relativity = capturerelativity;
                         proj.liquidcoast = captureliquidcoast;
-                        proj.minspeed = captureminspeed;
+                        proj.speedmin = capturespeedmin;
                         break;
                 }
                 break;
@@ -1100,15 +1100,15 @@ namespace projs
         return &proj;
     }
 
-    void drop(gameent *d, int weap, int ent, int ammo, int reloads, bool local, int index, int targ)
+    void drop(gameent *d, int weap, int ent, int ammo, bool local, int index, int targ)
     {
         if(weap >= W_OFFSET && isweap(weap))
         {
             if(ammo >= 0)
             {
                 if(entities::ents.inrange(ent))
-                    create(d->muzzlepos(), d->muzzlepos(), local, d, PRJ_ENT, w_spawn(weap), w_spawn(weap), 1, 1, ent, ammo, reloads, index);
-                d->ammo[weap] = d->reloads[weap] = -1;
+                    create(d->muzzlepos(), d->muzzlepos(), local, d, PRJ_ENT, w_spawn(weap), w_spawn(weap), 1, 1, ent, ammo, index);
+                d->ammo[weap] = -1;
                 if(targ >= 0) d->setweapstate(weap, W_S_SWITCH, weaponswitchdelay, lastmillis);
             }
             else if(weap == W_GRENADE || weap == W_MINE)
@@ -1119,10 +1119,11 @@ namespace projs
 
     void shootv(int weap, int flags, int sub, int offset, float scale, vec &from, vector<shotmsg> &shots, gameent *d, bool local)
     {
-        int delay = W2(weap, projdelay, WS(flags)), attackdelay = W2(weap, attackdelay, WS(flags)),
+        int delay = W2(weap, timedelay, WS(flags)), iter = W2(weap, timeiter, WS(flags)),
+            attackdelay = W2(weap, attackdelay, WS(flags)),
             cook = W2(weap, cooktime, WS(flags)), cooked = W2(weap, cooked, WS(flags)),
             life = W2(weap, time, WS(flags)), speed = W2(weap, speed, WS(flags)),
-            limspeed = W2(weap, limspeed, WS(flags));
+            speedlimit = W2(weap, speedlimit, WS(flags));
         float skew = 1;
         if(cook && cooked)
         {
@@ -1130,8 +1131,8 @@ namespace projs
             if(cooked&W_C_SCALEN)  skew = 1-scale; // inverted scale
             if(cooked&W_C_LIFE)    life = int(ceilf(life*scale)); // life scale
             if(cooked&W_C_LIFEN)   life = int(ceilf(life*(1-scale))); // inverted life
-            if(cooked&W_C_SPEED)   speed = limspeed+int(ceilf(max(speed-limspeed, 0)*scale)); // speed scale
-            if(cooked&W_C_SPEEDN)  speed = limspeed+int(ceilf(max(speed-limspeed, 0)*(1-scale))); // inverted speed
+            if(cooked&W_C_SPEED)   speed = speedlimit+int(ceilf(max(speed-speedlimit, 0)*scale)); // speed scale
+            if(cooked&W_C_SPEEDN)  speed = speedlimit+int(ceilf(max(speed-speedlimit, 0)*(1-scale))); // inverted speed
         }
 
         if(weaptype[weap].sound >= 0 && (weap != W_MELEE || !(WS(flags))))
@@ -1193,20 +1194,19 @@ namespace projs
             int peak = attackdelay/4, fade = min(peak/2, 75);
             adddynlight(from, 32, vec::hexcolor(colour).mul(0.5f), fade, peak - fade, DL_FLASH);
         }
-
+        int wait = delay;
         loopv(shots)
-            create(from, shots[i].pos.tovec().div(DMF), local, d, PRJ_SHOT, max(life, 1), W2(weap, time, WS(flags)), delay, speed, shots[i].id, weap, -1, flags, skew);
-        if(ejectfade && weaptype[weap].eject && *weaptype[weap].eprj) loopi(clamp(sub, 1, W2(weap, sub, WS(flags))))
+        {
+            create(from, shots[i].pos.tovec().div(DMF), local, d, PRJ_SHOT, max(life, 1), W2(weap, time, WS(flags)), wait, speed, shots[i].id, weap, -1, flags, skew);
+            wait += iter;
+        }
+        if(ejectfade && weaptype[weap].eject && *weaptype[weap].eprj) loopi(clamp(sub, 1, W2(weap, ammosub, WS(flags))))
             create(from, from, local, d, PRJ_EJECT, rnd(ejectfade)+ejectfade, 0, delay, rnd(weaptype[weap].espeed)+weaptype[weap].espeed, 0, weap, -1, flags);
 
         d->setweapstate(weap, WS(flags) ? W_S_SECONDARY : W_S_PRIMARY, attackdelay, lastmillis);
         d->ammo[weap] = max(d->ammo[weap]-sub-offset, 0);
         d->weapshot[weap] = sub;
-        if(offset > 0)
-        {
-            d->reloads[weap] = max(d->reloads[weap]-1, 0);
-            d->weapload[weap] = -offset;
-        }
+        if(offset > 0) d->weapload[weap] = -offset;
         if(d->actortype < A_ENEMY || actor[d->actortype].canmove)
         {
             vec kick = vec(d->yaw*RAD, d->pitch*RAD).mul(-W2(weap, kickpush, WS(flags))*skew);
@@ -1705,7 +1705,7 @@ namespace projs
                     {
                         int f = W2(proj.weap, fragweap, WS(proj.flags)), w = f%W_MAX,
                             life = W2(proj.weap, fragtime, WS(proj.flags)), delay = 0;
-                        float mag = max(proj.vel.magnitude(), W2(proj.weap, flakminspeed, WS(proj.flags))),
+                        float mag = max(proj.vel.magnitude(), W2(proj.weap, flakspeedmin, WS(proj.flags))),
                               scale = W2(proj.weap, fragscale, WS(proj.flags))*proj.curscale,
                               offset = proj.hit || proj.stick ? W2(proj.weap, fragoffset, WS(proj.flags)) : 1e-6f,
                               skew = proj.hit || proj.stuck ? W2(proj.weap, fragskew, WS(proj.flags)) : W2(proj.weap, fragspread, WS(proj.flags));
@@ -2021,7 +2021,7 @@ namespace projs
             if(!targ.iszero())
             {
                 vec dir = vec(proj.vel).normalize();
-                float amt = clamp(bomberdelta*secs, 1e-8f, 1.f), mag = max(proj.vel.magnitude(), bomberminspeed);
+                float amt = clamp(bomberspeeddelta*secs, 1e-8f, 1.f), mag = max(proj.vel.magnitude(), bomberspeedmin);
                 dir.mul(1.f-amt).add(targ.mul(amt)).normalize();
                 if(!dir.iszero()) (proj.vel = dir).mul(mag);
             }
@@ -2075,7 +2075,7 @@ namespace projs
             }
             if(!proj.dest.iszero())
             {
-                float amt = clamp(WF(WK(proj.flags), proj.weap, delta, WS(proj.flags))*secs, 1e-8f, 1.f),
+                float amt = clamp(WF(WK(proj.flags), proj.weap, speeddelta, WS(proj.flags))*secs, 1e-8f, 1.f),
                       mag = max(proj.vel.magnitude(), physics::movevelocity(&proj));
                 dir.mul(1.f-amt).add(vec(proj.dest).sub(proj.o).normalize().mul(amt)).normalize();
                 if(!dir.iszero()) (proj.vel = dir).mul(mag);

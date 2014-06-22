@@ -366,7 +366,7 @@ namespace entities
         }
     }
 
-    void useeffects(gameent *d, int ent, int ammoamt, int reloadamt, bool spawn, int weap, int drop, int ammo, int reloads)
+    void useeffects(gameent *d, int ent, int ammoamt, bool spawn, int weap, int drop, int ammo)
     {
         gameentity &e = *(gameentity *)ents[ent];
         int sweap = m_weapon(game::gamemode, game::mutators), attr = e.type == WEAPON ? w_attr(game::gamemode, game::mutators, e.attrs[0], sweap) : e.attrs[0],
@@ -375,21 +375,21 @@ namespace entities
         if(isweap(weap))
         {
             d->setweapstate(weap, W_S_SWITCH, weaponswitchdelay, lastmillis);
-            d->ammo[weap] = d->reloads[weap] = -1;
+            d->ammo[weap] = -1;
             if(d->weapselect != weap)
             {
                 d->addlastweap(d->weapselect);
                 d->weapselect = weap;
             }
         }
-        d->useitem(ent, e.type, attr, ammoamt, reloadamt, sweap, lastmillis, weaponswitchdelay);
+        d->useitem(ent, e.type, attr, ammoamt, sweap, lastmillis, weaponswitchdelay);
         playsound(e.type == WEAPON && attr >= W_OFFSET ? WSND(attr, S_W_USE) : S_ITEMUSE, d->o, d, 0, -1, -1, -1, &d->wschan);
         if(game::dynlighteffects) adddynlight(d->center(), enttype[e.type].radius*2, vec::hexcolor(colour).mul(2.f), 250, 250);
         if(ents.inrange(drop) && ents[drop]->type == WEAPON)
         {
             gameentity &f = *(gameentity *)ents[drop];
             attr = w_attr(game::gamemode, game::mutators, f.attrs[0], sweap);
-            if(isweap(attr)) projs::drop(d, attr, drop, ammo, reloads, d == game::player1 || d->ai, 0, weap);
+            if(isweap(attr)) projs::drop(d, attr, drop, ammo, d == game::player1 || d->ai, 0, weap);
         }
         if(e.spawned != spawn)
         {
@@ -602,7 +602,6 @@ namespace entities
                             {
                                 int offset = f->weapload[f->weapselect];
                                 f->ammo[f->weapselect] = max(f->ammo[f->weapselect]-offset, 0);
-                                f->reloads[f->weapselect] = max(f->reloads[f->weapselect]-1, 0);
                                 f->weapload[f->weapselect] = -f->weapload[f->weapselect];
                             }
                         }
