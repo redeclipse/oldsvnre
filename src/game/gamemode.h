@@ -107,7 +107,7 @@ mutstypes mutstype[] = {
     {
         G_M_MULTI, (1<<G_M_MULTI),
         (1<<G_M_MULTI)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_DUEL)|(1<<G_M_SURVIVOR)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_FREESTYLE)|(1<<G_M_VAMPIRE)|(1<<G_M_TOURNEY)|(1<<G_M_RESIZE)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3),
-        "multi", "four teams fight to determine the winning side"
+        "multi", "four teams battle to determine the winning side"
     },
     {
         G_M_FFA, (1<<G_M_FFA),
@@ -127,13 +127,12 @@ mutstypes mutstype[] = {
     {
         G_M_MEDIEVAL, (1<<G_M_MEDIEVAL),
         (1<<G_M_MULTI)|(1<<G_M_FFA)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_DUEL)|(1<<G_M_SURVIVOR)|(1<<G_M_MEDIEVAL)|(1<<G_M_ONSLAUGHT)|(1<<G_M_FREESTYLE)|(1<<G_M_VAMPIRE)|(1<<G_M_TOURNEY)|(1<<G_M_RESIZE)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3),
-        "medieval", "everyone spawns only with swords"
+        "medieval", "players spawn only with swords"
     },
     {
         G_M_KABOOM,  (1<<G_M_KABOOM),
         (1<<G_M_MULTI)|(1<<G_M_FFA)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_DUEL)|(1<<G_M_SURVIVOR)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_FREESTYLE)|(1<<G_M_VAMPIRE)|(1<<G_M_TOURNEY)|(1<<G_M_RESIZE)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3),
-        "kaboom",
-        "everyone spawns with explosives only"
+        "kaboom", "players spawn with explosives only"
     },
     {
         G_M_DUEL, (1<<G_M_DUEL),
@@ -143,7 +142,7 @@ mutstypes mutstype[] = {
     {
         G_M_SURVIVOR, (1<<G_M_SURVIVOR),
         (1<<G_M_MULTI)|(1<<G_M_FFA)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_SURVIVOR)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_FREESTYLE)|(1<<G_M_VAMPIRE)|(1<<G_M_TOURNEY)|(1<<G_M_RESIZE)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3),
-        "survivor", "everyone battles to determine the winner"
+        "survivor", "players battle to determine the winner"
     },
     {
         G_M_CLASSIC,    (1<<G_M_CLASSIC),
@@ -174,7 +173,7 @@ mutstypes mutstype[] = {
     {
         G_M_RESIZE, (1<<G_M_RESIZE),
         (1<<G_M_MULTI)|(1<<G_M_FFA)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_DUEL)|(1<<G_M_SURVIVOR)|(1<<G_M_CLASSIC)|(1<<G_M_ONSLAUGHT)|(1<<G_M_FREESTYLE)|(1<<G_M_VAMPIRE)|(1<<G_M_TOURNEY)|(1<<G_M_RESIZE)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3),
-        "resize", "everyone changes size depending on their health"
+        "resize", "players change size depending on their health"
     },
     {
         G_M_GSP1, (1<<G_M_GSP1),
@@ -238,12 +237,9 @@ extern mutstypes mutstype[];
 #define m_loadout(a,b)      (!m_classic(a, b) && !m_sweaps(a, b))
 #define m_duke(a,b)         (m_duel(a, b) || m_survivor(a, b))
 #define m_regen(a,b)        (!m_tourney(a,b) && !m_duke(a, b) && !m_insta(a, b))
-#define m_enemies(a,b)      (m_onslaught(a, b))
-#define m_checkpoint(a)     (m_trial(a))
 #define m_ghost(a)          (m_trial(a) ? G(trialghost) : 0)
 #define m_bots(a)           (m_fight(a) && !m_trial(a))
 #define m_nopoints(a,b)     (m_duke(a, b) || (m_bomber(a) && m_gsp1(a, b)) || m_trial(a))
-#define m_teamscore(a)      (m_dm(a))
 #define m_laptime(a,b)      (m_trial(a) && !m_gsp1(a, b))
 
 #define m_weapon(a,b)       (m_medieval(a, b) ? W_SWORD : (m_kaboom(a, b) ? W_GRENADE : (m_insta(a, b) ? G(instaweapon) : (m_trial(a) ? G(trialweapon) : G(spawnweapon)))))

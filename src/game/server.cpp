@@ -1474,7 +1474,7 @@ namespace server
             startintermission();
             return; // bail
         }
-        if(!m_balance(gamemode, mutators) && G(pointlimit) && m_teamscore(gamemode))
+        if(!m_balance(gamemode, mutators) && G(pointlimit) && m_dm(gamemode))
         {
             if(m_team(gamemode, mutators))
             {
@@ -1884,7 +1884,7 @@ namespace server
         if(ci->state.actortype >= A_ENEMY) return ci->state.spawnpoint;
         else
         {
-            if(m_checkpoint(gamemode) && !ci->state.cpnodes.empty())
+            if(m_trial(gamemode) && !ci->state.cpnodes.empty())
             {
                 int checkpoint = ci->state.cpnodes.last();
                 if(sents.inrange(checkpoint)) return checkpoint;
@@ -2466,7 +2466,7 @@ namespace server
         ci->state.score += points;
         ci->state.points += points;
         sendf(-1, 1, "ri4", N_POINTS, ci->clientnum, points, ci->state.points);
-        if(team && m_team(gamemode, mutators) && m_teamscore(gamemode))
+        if(team && m_team(gamemode, mutators) && m_dm(gamemode))
         {
             score &ts = teamscore(ci->team);
             ts.total += points;
@@ -2480,7 +2480,7 @@ namespace server
         savedscore *sc = findscore(ci, true);
         if(sc)
         {
-            if(ci->state.actortype == A_PLAYER && m_teamscore(gamemode) && m_team(gamemode, mutators) && !m_nopoints(gamemode, mutators) && G(teamkillrestore) && canplay())
+            if(ci->state.actortype == A_PLAYER && m_dm(gamemode) && m_team(gamemode, mutators) && !m_nopoints(gamemode, mutators) && G(teamkillrestore) && canplay())
             {
                 int restorepoints[T_MAX] = {0};
                 loopv(ci->state.teamkills) restorepoints[ci->state.teamkills[i].team] += ci->state.teamkills[i].points;
@@ -3207,7 +3207,7 @@ namespace server
         if(sc)
         {
             sc->restore(ci->state);
-            if(ci->state.actortype == A_PLAYER && m_teamscore(gamemode) && m_team(gamemode, mutators) && !m_nopoints(gamemode, mutators) && G(teamkillrestore) && canplay())
+            if(ci->state.actortype == A_PLAYER && m_dm(gamemode) && m_team(gamemode, mutators) && !m_nopoints(gamemode, mutators) && G(teamkillrestore) && canplay())
             {
                 int restorepoints[T_MAX] = {0};
                 loopv(ci->state.teamkills) restorepoints[ci->state.teamkills[i].team] += ci->state.teamkills[i].points;
@@ -3651,7 +3651,7 @@ namespace server
                     }
                 }
             }
-            if(m_checkpoint(gamemode) && m->state.cpnodes.length() == 1)
+            if(m_trial(gamemode) && m->state.cpnodes.length() == 1)
             {  // reset if hasn't reached another checkpoint yet
                 m->state.cpmillis = 0;
                 m->state.cpnodes.shrink(0);
@@ -3730,7 +3730,7 @@ namespace server
         ci->state.spree = 0;
         ci->state.deaths++;
         bool kamikaze = dropitems(ci, actor[ci->state.actortype].living ? DROP_DEATH : DROP_EXPIRE);
-        if(m_checkpoint(gamemode) && !(flags&HIT_SPEC) && (!flags || ci->state.cpnodes.length() == 1))
+        if(m_trial(gamemode) && !(flags&HIT_SPEC) && (!flags || ci->state.cpnodes.length() == 1))
         { // reset if suicided, hasn't reached another checkpoint yet
             ci->state.cpmillis = 0;
             ci->state.cpnodes.shrink(0);
@@ -5300,7 +5300,7 @@ namespace server
                             if(cp->state.cpnodes.find(ent) >= 0) break;
                             if(sents[ent].attrs[5] && sents[ent].attrs[5] != triggerid) break;
                             if(!m_check(sents[ent].attrs[3], sents[ent].attrs[4], gamemode, mutators)) break;
-                            if(m_checkpoint(gamemode)) switch(sents[ent].attrs[6])
+                            if(m_trial(gamemode)) switch(sents[ent].attrs[6])
                             {
                                 case CP_LAST: case CP_FINISH:
                                 {

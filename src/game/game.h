@@ -1542,7 +1542,7 @@ namespace hud
         *spree1tex, *spree2tex, *spree3tex, *spree4tex, *multi1tex, *multi2tex, *multi3tex, *headshottex, *dominatetex, *revengetex,
         *firstbloodtex, *breakertex;
     extern int hudwidth, hudheight, hudsize, lastteam, lastnewgame, damageresidue, damageresiduefade, shownotices, radarstyle, radaraffinitynames,
-        inventorygame, inventoryscore, inventoryscorespec, inventoryscorebg, inventoryscoreinfo, inventoryscorebreak, inventoryscorepos, inventorycheckpointstyle,
+        inventorygame, inventoryscore, inventoryscorespec, inventoryscorebg, inventoryscoreinfo, inventoryscorebreak, inventoryscorepos, inventorytrialstyle,
         teamhurttime, teamhurtdist;
     extern float noticescale, inventoryblend, inventoryskew, radaraffinityblend, radarblipblend, radaraffinitysize,
         inventoryglow, inventoryscoresize, inventoryscoreshrink, inventoryscoreshrinkmax;
