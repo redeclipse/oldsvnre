@@ -246,11 +246,10 @@ extern mutstypes mutstype[];
 #define m_teamscore(a)      (m_dm(a))
 #define m_laptime(a,b)      (m_trial(a) && !m_gsp1(a, b))
 
-#define m_weapon(a,b)       (m_loadout(a, b) ? 0-W_ITEM : (m_medieval(a, b) ? W_SWORD : (m_kaboom(a, b) ? 0-W_BOOM : (m_insta(a, b) ? G(instaweapon) : (m_trial(a) ? G(trialweapon) : G(spawnweapon))))))
+#define m_weapon(a,b)       (m_medieval(a, b) ? W_SWORD : (m_kaboom(a, b) ? W_GRENADE : (m_insta(a, b) ? G(instaweapon) : (m_trial(a) ? G(trialweapon) : G(spawnweapon)))))
 #define m_xdelay(a,b)       (m_play(a) ? (m_trial(a) ? G(trialdelay) : (m_bomber(a) ? G(bomberdelay) : (m_insta(a, b) ? G(instadelay) : G(spawndelay)))) : 0)
 #define m_delay(a,b)        (m_duke(a,b) ? 0 : m_xdelay(a, b))
 #define m_protect(a,b)      (m_duke(a,b) ? G(duelprotect) : (m_insta(a, b) ? G(instaprotect) : G(spawnprotect)))
-#define m_noitems(a,b)      (m_trial(a) || G(itemsallowed) < (m_sweaps(a, b) ? 2 : 1))
 #define m_health(a,b,c)     (m_insta(a,b) ? 1 : PLAYER(c, health))
 #define m_armour(a,b,c)     (m_insta(a,b) || !m_tourney(a,b) ? 0 : PLAYER(c, armour))
 #define m_maxhealth(a,b,c)  (int(m_health(a, b, c)*(m_vampire(a,b) ? G(maxhealthvampire) : G(maxhealth))))
@@ -260,9 +259,10 @@ extern mutstypes mutstype[];
 #define m_balance(a,b)      (m_team(a, b) && !m_trial(a) && m_fight(a) && (m_forcebal(a, b) || ((G(balanceduke) || !m_duke(a, b)) && ((G(balancemaps) >= 0 ? G(balancemaps) : G(mapbalance)) >= (m_affinity(a) ? 1 : 2)))))
 #define m_balreset(a,b)     (m_capture(a) || m_bomber(a))
 
-#define w_reload(w1,w2)     (w1 != W_MELEE ? (isweap(w2) ? (w1 == w2 ? -1 : W(w1, reloads)) : (w1 < 0-w2 ? -1 : W(w1, reloads))) : 0)
-#define w_carry(w1,w2)      (w1 > W_MELEE && (isweap(w2) ? w1 != w2 : w1 >= 0-w2) && (isweap(w1) && W(w1, carried)))
-#define w_attr(a,b,w1,w2)   (m_edit(a) ? w1 : ((w1 >= W_OFFSET && w1 != w2) ? w1 : (w2 == W_GRENADE ? W_MINE : W_GRENADE)))
+#define w_carry(w1,w2)      (isweap(w1) && w1 != W_MELEE && (!isweap(w2) || (w1 != w2 && (w2 != W_GRENADE || w1 != W_MINE))) && (w1 == W_ROCKET || (w1 >= W_OFFSET && w1 < W_ITEM)))
+#define w_reload(w1,w2)     (isweap(w1) && (w1 == W_MELEE || (w1 >= W_OFFSET && w1 < W_ITEM) || (isweap(w2) && (w1 == w2 || (w2 == W_GRENADE && w1 == W_MINE)))))
+#define w_item(w1,w2)       (isweap(w1) && (w1 >= W_OFFSET && w1 < W_MAX && (!isweap(w2) || (w1 != w2 && (w2 != W_GRENADE || w1 != W_MINE)))))
+#define w_attr(a,b,w1,w2)   (m_edit(a) ? w1 : (w1 != w2 ? (!m_classic(a, b) ? (w1 >= W_ITEM ? w1 : -1) : (w1 >= W_OFFSET && w1 < W_MAX ? w1 : -1)) : (w1 != W_GRENADE ? W_GRENADE : W_MINE)))
 #define w_spawn(weap)       int(ceilf(G(itemspawntime)*W(weap, frequency)))
 
 #define mapshrink(a,b,c,d) if((a) && (b) && (c) && *(c)) \

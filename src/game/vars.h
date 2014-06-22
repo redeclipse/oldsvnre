@@ -203,7 +203,6 @@ GVAR(0, regenhealth, 0, 5, VAR_MAX); // regen this amount each regen
 GVAR(0, regendecay, 0, 3, VAR_MAX); // if over maxhealth, decay this amount each regen
 
 GVAR(0, kamikaze, 0, 1, 3); // 0 = never, 1 = holding grenade, 2 = have grenade, 3 = always
-GVAR(0, itemsallowed, 0, 2, 2); // 0 = never, 1 = all but limited, 2 = always
 GVAR(0, itemspawntime, 1, 15000, VAR_MAX); // when items respawn
 GVAR(0, itemspawndelay, 0, 1000, VAR_MAX); // after map start items first spawn
 GVAR(0, itemspawnstyle, 0, 1, 3); // 0 = all at once, 1 = staggered, 2 = random, 3 = randomise between both
@@ -214,7 +213,7 @@ GFVAR(0, itemelasticity, FVAR_MIN, 0.4f, FVAR_MAX);
 GFVAR(0, itemrelativity, FVAR_MIN, 1, FVAR_MAX);
 GFVAR(0, itemliquidcoast, 0, 1.75f, FVAR_MAX);
 GFVAR(0, itemweight, FVAR_MIN, 150, FVAR_MAX);
-GFVAR(0, itemminspeed, 0, 0, FVAR_MAX);
+GFVAR(0, itemspeedmin, 0, 0, FVAR_MAX);
 GFVAR(0, itemrepulsion, 0, 8, FVAR_MAX);
 GFVAR(0, itemrepelspeed, 0, 25, FVAR_MAX);
 
@@ -232,10 +231,10 @@ GVAR(0, duelcycles, 0, 2, VAR_MAX); // maximum wins in a row before force-cyclin
 
 GVAR(0, pointlimit, 0, 0, VAR_MAX); // finish when score is this or more
 GVAR(0, teampersist, 0, 1, 2); // 0 = off, 1 = only attempt, 2 = forced
-GVAR(0, selfdamage, 0, 1, 1); // 0 = off, 1 = either hurt self or use teamdamage rules
-GFVAR(0, selfdamagescale, FVAR_MIN, 1, FVAR_MAX); // 0 = off, anything else = scale for damage
-GVAR(0, teamdamage, 0, 1, 2); // 0 = off, 1 = non-bots damage team, 2 = all players damage team
-GFVAR(0, teamdamagescale, FVAR_MIN, 1, FVAR_MAX); // 0 = off, anything else = scale for damage
+GVAR(0, damageself, 0, 1, 1); // 0 = off, 1 = either hurt self or use damageteam rules
+GFVAR(0, damageselfscale, FVAR_MIN, 1, FVAR_MAX); // 0 = off, anything else = scale for damage
+GVAR(0, damageteam, 0, 1, 2); // 0 = off, 1 = non-bots damage team, 2 = all players damage team
+GFVAR(0, damageteamscale, FVAR_MIN, 1, FVAR_MAX); // 0 = off, anything else = scale for damage
 
 GVAR(0, teambalance, 0, 4, 4); // 0 = off, 1 = by number then rank, 2 = by rank then number, 3 = by number and enforce, 4 = number, enforce, and reassign
 GVAR(0, teambalanceduel, 0, 0, 1); // allow teambalance in duel
@@ -264,7 +263,7 @@ GFVAR(0, capturerelativity, 0, 0.25f, FVAR_MAX);
 GFVAR(0, captureelasticity, FVAR_MIN, 0.65f, FVAR_MAX);
 GFVAR(0, captureliquidcoast, FVAR_MIN, 1.75f, FVAR_MAX);
 GFVAR(0, captureweight, FVAR_MIN, 250, FVAR_MAX);
-GFVAR(0, captureminspeed, 0, 0, FVAR_MAX);
+GFVAR(0, capturespeedmin, 0, 0, FVAR_MAX);
 GFVAR(0, capturerepulsion, 0, 16, FVAR_MAX);
 GFVAR(0, capturerepelspeed, 0, 25, FVAR_MAX);
 GFVAR(0, capturethreshold, 0, 0, FVAR_MAX); // if someone 'warps' more than this distance, auto-drop
@@ -314,7 +313,8 @@ GVAR(0, bomberholdpenalty, 0, 10, VAR_MAX); // penalty for holding too long
 GVAR(0, bomberholdinterval, 0, 3000, VAR_MAX);
 GVAR(0, bomberlockondelay, 0, 250, VAR_MAX);
 GFVAR(0, bomberspeed, 0, 250, FVAR_MAX);
-GFVAR(0, bomberdelta, 0, 1000, FVAR_MAX);
+GFVAR(0, bomberspeeddelta, 0, 1000, FVAR_MAX);
+GFVAR(0, bomberspeedmin, 0, 65, FVAR_MAX);
 GVAR(0, bombercollide, 0, BOUNCE_GEOM, VAR_MAX);
 GVAR(0, bomberextinguish, 0, 6, 7);
 GVAR(0, bomberinteracts, 0, 3, 3);
@@ -322,7 +322,6 @@ GFVAR(0, bomberrelativity, 0, 0.25f, FVAR_MAX);
 GFVAR(0, bomberelasticity, FVAR_MIN, 0.75f, FVAR_MAX);
 GFVAR(0, bomberliquidcoast, FVAR_MIN, 1.75f, FVAR_MAX);
 GFVAR(0, bomberweight, FVAR_MIN, 350, FVAR_MAX);
-GFVAR(0, bomberminspeed, 0, 65, FVAR_MAX);
 GFVAR(0, bomberthreshold, 0, 0, FVAR_MAX); // if someone 'warps' more than this distance, auto-drop
 GVAR(0, bomberbuffing, 0, 1, 7); // buffed; 0 = off, &1 = when guarding, &2 = when securing, &4 = when secured as defender in attack
 GVAR(0, bomberbuffdelay, 0, 3000, VAR_MAX); // buffed for this long after leaving

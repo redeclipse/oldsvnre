@@ -1102,17 +1102,14 @@ namespace game
 
         d->checktags();
 
-        loopi(W_MAX) if(d->weapstate[i] != W_S_IDLE && (d->weapselect != i || d->weapstate[i] != W_S_ZOOM))
+        loopi(W_MAX) if(d->weapstate[i] != W_S_IDLE && (intermission || d->weapselect != i || d->weapstate[i] != W_S_ZOOM))
         {
             bool timeexpired = lastmillis-d->weaplast[i] >= d->weapwait[i]+(d->weapselect != i || d->weapstate[i] != W_S_POWER ? 0 : PHYSMILLIS);
-            if(d->state == CS_ALIVE && i == d->weapselect && d->weapstate[i] == W_S_RELOAD && timeexpired)
-            {
-                if(timeexpired && playreloadnotify&(d == focus ? 1 : 2) && (d->ammo[i] >= W(i, max) || playreloadnotify&(d == focus ? 4 : 8)))
-                    playsound(WSND(i, S_W_NOTIFY), d->o, d, 0, reloadnotifyvol, -1, -1, &d->wschan);
-            }
-            if(d->state != CS_ALIVE || timeexpired) d->setweapstate(i, W_S_IDLE, 0, lastmillis);
+            if(!intermission && d->state == CS_ALIVE && i == d->weapselect && d->weapstate[i] == W_S_RELOAD && timeexpired && playreloadnotify&(d == focus ? 1 : 2) && (d->ammo[i] >= W(i, ammomax) || playreloadnotify&(d == focus ? 4 : 8)))
+                playsound(WSND(i, S_W_NOTIFY), d->o, d, 0, reloadnotifyvol, -1, -1, &d->wschan);
+            if(intermission || d->state != CS_ALIVE || timeexpired) d->setweapstate(i, W_S_IDLE, 0, lastmillis);
         }
-        if(d->state == CS_ALIVE && isweap(d->weapselect) && (d->weapstate[d->weapselect] == W_S_POWER || d->weapstate[d->weapselect] == W_S_ZOOM))
+        if(!intermission && d->state == CS_ALIVE && isweap(d->weapselect) && (d->weapstate[d->weapselect] == W_S_POWER || d->weapstate[d->weapselect] == W_S_ZOOM))
         {
             int millis = lastmillis-d->weaplast[d->weapselect];
             if(millis >= 0 && millis <= d->weapwait[d->weapselect])
@@ -1144,7 +1141,7 @@ namespace game
         else if(issound(d->fschan)) removesound(d->fschan);
         if(d->lastres[WR_BLEED] > 0 && lastmillis-d->lastres[WR_BLEED] >= bleedtime) d->resetbleeding();
         if(d->lastres[WR_SHOCK] > 0 && lastmillis-d->lastres[WR_SHOCK] >= shocktime) d->resetshocking();
-        if(d->state == CS_ALIVE)
+        if(!intermission && d->state == CS_ALIVE)
         {
             int curfoot = d->curfoot();
             if(curfoot != d->lastfoot)
@@ -1337,13 +1334,13 @@ namespace game
                         bool doquake = hithurts(flags);
                         if(d == v)
                         {
-                            float modify = WF(WK(flags), weap, selfdamage, WS(flags))*G(selfdamagescale);
+                            float modify = WF(WK(flags), weap, damageself, WS(flags))*G(damageselfscale);
                             if(modify != 0) amt *= 1/modify;
                             else doquake = false;
                         }
                         else if(m_team(gamemode, mutators) && d->team == v->team)
                         {
-                            float modify = WF(WK(flags), weap, teamdamage, WS(flags))*G(teamdamagescale);
+                            float modify = WF(WK(flags), weap, damageteam, WS(flags))*G(damageteamscale);
                             if(modify != 0) amt *= 1/modify;
                             else doquake = false;
                         }
@@ -1733,7 +1730,7 @@ namespace game
             if(d->obliterated) amt *= 2;
             loopi(amt) projs::create(pos, pos, true, d, nogore ? PRJ_DEBRIS : PRJ_GIBS, rnd(gibfade)+gibfade, 0, rnd(500)+1, rnd(50)+10);
         }
-        if(m_team(gamemode, mutators) && d->team == v->team && d != v && v == player1 && isweap(weap) && WF(WK(flags), weap, teampenalty, WS(flags)))
+        if(m_team(gamemode, mutators) && d->team == v->team && d != v && v == player1 && isweap(weap) && WF(WK(flags), weap, damagepenalty, WS(flags)))
         {
             hud::teamkills.add(totalmillis);
             if(hud::numteamkills() >= teamkillwarn) hud::lastteam = totalmillis;
@@ -2817,7 +2814,7 @@ namespace game
             checkoften(player1, true);
             loopv(players) if(players[i]) checkoften(players[i], players[i]->ai != NULL);
             if(!allowmove(player1)) player1->stopmoving(player1->state < CS_SPECTATOR);
-            if(focus->state == CS_ALIVE) zoomset(focus->zooming(), lastmillis);
+            if(focus->state == CS_ALIVE && !intermission) zoomset(focus->zooming(), lastmillis);
             else if(zooming) zoomset(false, 0);
 
             physics::update();
@@ -3103,9 +3100,9 @@ namespace game
             e->light.effect = vec::hexcolor(getcolour(d, playerlighttone)).mul(playerlightmix);
             e->light.material[0] = bvec(getcolour(d, playerovertone));
             e->light.material[1] = bvec(getcolour(d, playerundertone));
-            if(renderpath != R_FIXEDFUNCTION && isweap(d->weapselect) && (W2(d->weapselect, sub, false) || W2(d->weapselect, sub, true)) && W(d->weapselect, max) > 1)
+            if(renderpath != R_FIXEDFUNCTION && isweap(d->weapselect) && (W2(d->weapselect, ammosub, false) || W2(d->weapselect, ammosub, true)) && W(d->weapselect, ammomax) > 1)
             {
-                int ammo = d->ammo[d->weapselect], maxammo = W(d->weapselect, max);
+                int ammo = d->ammo[d->weapselect], maxammo = W(d->weapselect, ammomax);
                 float scale = 1;
                 switch(d->weapstate[d->weapselect])
                 {
@@ -3339,7 +3336,7 @@ namespace game
                     }
                     case W_S_RELOAD:
                     {
-                        if(!d->hasweap(weap, m_weapon(gamemode, mutators))) showweap = false;// || (!d->canreload(weap, m_weapon(gamemode, mutators), false, lastmillis) && lastmillis-d->weaplast[weap] <= d->weapwait[weap]/3))
+                        if(!d->hasweap(weap, m_weapon(gamemode, mutators))) showweap = false;
                         weapflags = animflags = weaptype[weap].anim+d->weapstate[weap];
                         break;
                     }
@@ -3618,7 +3615,7 @@ namespace game
             previewent->spawnstate(G_DEATHMATCH, 0);
             previewent->light.color = vec(1, 1, 1);
             previewent->light.dir = vec(0, -1, 2).normalize();
-            loopi(W_MAX) previewent->ammo[i] = W(i, max);
+            loopi(W_MAX) previewent->ammo[i] = W(i, ammomax);
         }
         previewent->setinfo(NULL, color, model, vanity);
         previewent->team = clamp(team, 0, int(T_MULTI));
