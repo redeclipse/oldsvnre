@@ -847,7 +847,7 @@ namespace game
                 int weap = index%W_MAX;
                 if(!m_edit(gamemode) && index < W_MAX)
                 {
-                    weap = w_attr(gamemode, mutators, weap, m_weapon(gamemode, mutators));
+                    weap = w_attr(gamemode, mutators, WEAPON, weap, m_weapon(gamemode, mutators));
                     if(!isweap(weap) || (m_loadout(gamemode, mutators) && weap < W_ITEM) || !m_check(W(weap, modes), W(weap, muts), gamemode, mutators))
                         weap = -1;
                 }
@@ -1359,13 +1359,12 @@ namespace game
         }
     }
 
-    void damaged(int weap, int flags, int damage, int health, int armour, gameent *d, gameent *v, int millis, vec &dir, vec &vel, float dist)
+    void damaged(int weap, int flags, int damage, int health, gameent *d, gameent *v, int millis, vec &dir, vec &vel, float dist)
     {
         if(d->state != CS_ALIVE || intermission) return;
         if(hithurts(flags))
         {
             d->health = health;
-            d->armour = armour;
             if(d->health <= m_health(gamemode, mutators, d->model)) d->lastregen = 0;
             d->lastpain = lastmillis;
             v->totaldamage += damage;
@@ -1924,7 +1923,7 @@ namespace game
         gameent *d;
         int numdyns = numdynents();
         loopi(numdyns) if((d = (gameent *)iterdynents(i)) && (gameent::is(d)))
-            d->mapchange(lastmillis, m_health(gamemode, mutators, d->model), m_armour(gamemode, mutators, d->model));
+            d->mapchange(lastmillis, m_health(gamemode, mutators, d->model));
         if(!client::demoplayback && m_loadout(gamemode, mutators) && autoloadweap && *favloadweaps)
             chooseloadweap(player1, favloadweaps);
         entities::spawnplayer(player1); // prevent the player from being in the middle of nowhere

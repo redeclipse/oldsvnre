@@ -117,7 +117,6 @@ namespace hud
 
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, healthtex, "<grey>textures/hud/health", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, healthbgtex, "<grey>textures/hud/healthbg", 3);
-    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, armourtex, "<grey>textures/hud/armour", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, impulsetex, "<grey>textures/hud/impulse", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, impulsebgtex, "<grey>textures/hud/impulsebg", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, inventorytex, "<grey>textures/hud/inventory", 3);
@@ -315,12 +314,6 @@ namespace hud
     FVAR(IDF_PERSIST, inventoryhealthbarbottom, 0, 0.0859375f, 1); // ends at this offset
     FVAR(IDF_PERSIST, inventoryhealthbgglow, 0, 0.05f, 1);
     FVAR(IDF_PERSIST, inventoryhealthbgblend, 0, 0.5f, 1);
-    VAR(IDF_PERSIST, inventoryarmour, 0, 3, 3); // relies on inventory health!
-    VAR(IDF_PERSIST, inventoryarmourflash, 0, 1, 1);
-    FVAR(IDF_PERSIST, inventoryarmourblend, 0, 1, 1);
-    FVAR(IDF_PERSIST, inventoryarmourthrob, 0, 0.035f, 1);
-    FVAR(IDF_PERSIST, inventoryarmourbartop, 0, 0.09375f, 1); // starts from this offset
-    FVAR(IDF_PERSIST, inventoryarmourbarbottom, 0, 0.0859375f, 1); // ends at this offset
 
     VAR(IDF_PERSIST, inventoryimpulse, 0, 2, 3); // 0 = off, 1 = text, 2 = bar, 3 = both
     VAR(IDF_PERSIST, inventoryimpulseflash, 0, 1, 1);
@@ -553,7 +546,7 @@ namespace hud
     TVAR(IDF_PERSIST, modeonslaughttex, "<grey>textures/modes/onslaught", 3);
     TVAR(IDF_PERSIST, modefreestyletex, "<grey>textures/modes/freestyle", 3);
     TVAR(IDF_PERSIST, modevampiretex, "<grey>textures/modes/vampire", 3);
-    TVAR(IDF_PERSIST, modetourneytex, "<grey>textures/modes/tourney", 3);
+    TVAR(IDF_PERSIST, modehardtex, "<grey>textures/modes/hard", 3);
     TVAR(IDF_PERSIST, moderesizetex, "<grey>textures/modes/resize", 3);
 
     #define ADDMODEICON(g,m) \
@@ -599,7 +592,7 @@ namespace hud
         if(m_onslaught(g, m) && (implied || !(gametype[g].implied&(1<<G_M_ONSLAUGHT)))) ADDMODE(modeonslaughttex)
         if(m_freestyle(g, m) && (implied || !(gametype[g].implied&(1<<G_M_FREESTYLE)))) ADDMODE(modefreestyletex)
         if(m_vampire(g, m) && (implied || !(gametype[g].implied&(1<<G_M_VAMPIRE)))) ADDMODE(modevampiretex)
-        if(m_tourney(g, m) && (implied || !(gametype[g].implied&(1<<G_M_TOURNEY)))) ADDMODE(modetourneytex)
+        if(m_hard(g, m) && (implied || !(gametype[g].implied&(1<<G_M_HARD)))) ADDMODE(modehardtex)
         if(m_resize(g, m) && (implied || !(gametype[g].implied&(1<<G_M_RESIZE)))) ADDMODE(moderesizetex)
         if(!before) ADDMODEICON(g, m)
         #undef ADDMODE
@@ -1423,7 +1416,7 @@ namespace hud
                                 extentity &e = *entities::ents[ent];
                                 if(enttype[e.type].usetype == EU_ITEM && e.type == WEAPON)
                                 {
-                                    int sweap = m_weapon(game::gamemode, game::mutators), attr = e.type == WEAPON ? w_attr(game::gamemode, game::mutators, e.attrs[0], sweap) : e.attrs[0];
+                                    int sweap = m_weapon(game::gamemode, game::mutators), attr = w_attr(game::gamemode, game::mutators, e.type, e.attrs[0], sweap);
                                     if(target->canuse(e.type, attr, e.attrs, sweap, lastmillis, W_S_ALL))
                                     {
                                         int drop = -1;
@@ -1767,7 +1760,6 @@ namespace hud
             case 3: dist = radarcornerdist ? radarcornerdist : getworldsize(); break;
             case 2: case 1: case 0: case -1: default: dist = radardist ? radardist : getworldsize(); break;
         }
-        if(radardistlimit) dist = min(radardistlimit, dist);
         return dist;
     }
 
@@ -1992,7 +1984,7 @@ namespace hud
             float fade = insel ? 1.f : clamp(1.f-(dist/float(radarrange())), 0.1f, 1.f), size = radarblipsize;
             if(type == WEAPON)
             {
-                int attr1 = w_attr(game::gamemode, game::mutators, attr[0], m_weapon(game::gamemode, game::mutators));
+                int attr1 = w_attr(game::gamemode, game::mutators, type, attr[0], m_weapon(game::gamemode, game::mutators));
                 tex = itemtex(WEAPON, attr1);
                 colour = vec::hexcolor(W(attr1, colour));
                 fade *= radaritemblend;
@@ -2320,14 +2312,12 @@ namespace hud
         {
             case PLAYERSTART: return playertex; break;
             case AFFINITY: return flagtex; break;
-            case HEALTH: return healthtex; break;
-            case ARMOUR: return armourtex; break;
             case WEAPON:
             {
                 const char *weaptexs[W_MAX] = {
                     meleetex, pistoltex, swordtex, shotguntex, smgtex, flamertex, plasmatex, tasertex, rifletex, grenadetex, minetex, rockettex
                 };
-                if(isweap(stype)) return weaptexs[stype];
+                return isweap(stype) ? weaptexs[stype] : questiontex;
                 break;
             }
             default: break;
@@ -2535,16 +2525,11 @@ namespace hud
             if(inventoryhealth)
             {
                 float fade = blend*inventoryhealthblend;
-                int heal = m_health(game::gamemode, game::mutators, game::focus->model), arm = m_armour(game::gamemode, game::mutators, game::focus->model);
+                int heal = m_health(game::gamemode, game::mutators, game::focus->model);
                 float hpulse = inventoryhealthflash ? clamp((heal-game::focus->health)/float(heal), 0.f, 1.f) : 0.f,
-                      hthrob = inventoryhealththrob > 0 && regentime && game::focus->lastregen && lastmillis-game::focus->lastregen <= regentime ? clamp((lastmillis-game::focus->lastregen)/float(regentime/2), 0.f, 2.f) : 0.f,
-                      apulse = inventoryarmourflash ? clamp((arm-game::focus->armour)/float(arm), 0.f, 1.f) : 0.f;
+                      hthrob = inventoryhealththrob > 0 && regentime && game::focus->lastregen && lastmillis-game::focus->lastregen <= regentime ? clamp((lastmillis-game::focus->lastregen)/float(regentime/2), 0.f, 2.f) : 0.f;
                 if(inventoryhealth&2)
-                {
                     sy += drawbar(x, y, s, size, 1, inventoryhealthbartop, inventoryhealthbarbottom, fade, clamp(game::focus->health/float(heal), 0.f, 1.f), healthtex, healthbgtex, inventorytone, inventoryhealthbgglow, inventoryhealthbgblend, hpulse, (hthrob > 1.f ? 1.f-hthrob : hthrob)*inventoryhealththrob);
-                    if(inventoryarmour&2 && arm)
-                        drawbar(x, y, s, size, 3, inventoryarmourbartop, inventoryarmourbarbottom, fade, clamp(game::focus->armour/float(arm), 0.f, 1.f), armourtex, NULL, inventorytone, inventoryhealthbgglow, inventoryhealthbgblend, apulse, 0);
-                }
                 if(inventoryhealth&1)
                 {
                     float gr = 1, gg = 1, gb = 1;
@@ -2555,7 +2540,7 @@ namespace hud
                         flashcolour(gr, gg, gb, 1.f, 0.f, 0.f, amt);
                     }
                     pushfont("super");
-                    int ty = inventoryhealth&2 ? 0-size/2-(inventoryarmour&1 && arm ? FONTH/4 : 0) : 0;
+                    int ty = inventoryhealth&2 ? 0-size/2 : 0;
                     ty += draw_textx("%d", x+s/2, y-sy-ty, int(gr*255), int(gg*255), int(gb*255), int(fade*255), TEXT_CENTER_UP, -1, -1, max(game::focus->health, 0));
                     popfont();
                     if(!(inventoryhealth&2))
@@ -2563,27 +2548,8 @@ namespace hud
                         pushfont("reduced");
                         ty += draw_textx("health", x+s/2, y-sy-ty, 255, 255, 255, int(fade*255), TEXT_CENTER_UP, -1, -1);
                         popfont();
+                        sy += ty;
                     }
-                    if(inventoryarmour&1 && arm)
-                    {
-                        gr = gg = gb = 1;
-                        if(apulse > 0)
-                        {
-                            int millis = lastmillis%1000;
-                            float amt = (millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f))*apulse;
-                            flashcolour(gr, gg, gb, 1.f, 0.f, 0.f, amt);
-                        }
-                        pushfont(inventoryhealth&1 ? "default" : "emphasis");
-                        ty += draw_textx("%d", x+s/2, y-sy-ty, int(gr*255), int(gg*255), int(gb*255), int(fade*255), TEXT_CENTER_UP, -1, -1, max(game::focus->armour, 0));
-                        popfont();
-                        if(!(inventoryhealth&2))
-                        {
-                            pushfont("reduced");
-                            ty += draw_textx("armour", x+s/2, y-sy-ty, 255, 255, 255, int(fade*255), TEXT_CENTER_UP, -1, -1);
-                            popfont();
-                        }
-                    }
-                    if(!(inventoryhealth)&2) sy += ty;
                 }
             }
             if(game::focus->actortype < A_ENEMY && physics::allowimpulse(game::focus) && !m_freestyle(game::gamemode, game::mutators) && inventoryimpulse)
@@ -2748,7 +2714,7 @@ namespace hud
             if(over && m_onslaught(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_ONSLAUGHT))) ADDMODE(modeonslaughttex)
             if(((alive && inventorygameinfo&2) || over) && m_freestyle(game::gamemode, game::mutators)) ADDMODE(modefreestyletex)
             if(((alive && inventorygameinfo&2) || over) && m_vampire(game::gamemode, game::mutators)) ADDMODE(modevampiretex)
-            if(((alive && inventorygameinfo&2) || over) && m_tourney(game::gamemode, game::mutators)) ADDMODE(modetourneytex)
+            if(((alive && inventorygameinfo&2) || over) && m_hard(game::gamemode, game::mutators)) ADDMODE(modehardtex)
             if((alive && inventorygameinfo&4) && m_resize(game::gamemode, game::mutators) && !(gametype[game::gamemode].implied&(1<<G_M_RESIZE))) ADDMODE(moderesizetex)
             #undef ADDMODE
         }
@@ -2843,7 +2809,7 @@ namespace hud
             case 1:
             {
                 int cm = cr+top;
-                if(!radardisabled && radarstyle == 3 && !hasinput(true) && (game::focus->state == CS_EDITING ? showeditradar >= 1 : chkcond(showradar, !game::tvmode() || (game::focus != game::player1 && radarstyle==3))))
+                if(!m_hard(game::gamemode, game::mutators) && radarstyle == 3 && !hasinput(true) && (game::focus->state == CS_EDITING ? showeditradar >= 1 : chkcond(showradar, !game::tvmode() || (game::focus != game::player1 && radarstyle==3))))
                     cm += int(max(w, h)/2*radarcorner*2);
                 if(inventorydate)
                     cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorydateskew, "super", fade*inventorydateblend, "%s", gettime(clocktime, inventorydateformat));
@@ -3110,7 +3076,7 @@ namespace hud
                     }
                 }
             }
-            if(!radardisabled && !hasinput(true) && (game::focus->state == CS_EDITING ? showeditradar >= 1 : chkcond(showradar, !game::tvmode() || (game::focus != game::player1 && radarstyle==3))))
+            if(!m_hard(game::gamemode, game::mutators) && !hasinput(true) && (game::focus->state == CS_EDITING ? showeditradar >= 1 : chkcond(showradar, !game::tvmode() || (game::focus != game::player1 && radarstyle==3))))
                 drawradar(w, h, fade);
         }
         drawspecborder(w, h, game::intermission || client::waitplayers || game::player1->state == CS_SPECTATOR ? BORDER_SPEC : (game::player1->state == CS_WAITING ? BORDER_WAIT : (game::player1->state == CS_WAITING ? BORDER_EDIT : BORDER_PLAY)), top, bottom);

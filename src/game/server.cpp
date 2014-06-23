@@ -242,11 +242,11 @@ namespace server
             else loopi(WR_MAX) lastresowner[i] = -1;
         }
 
-        void respawn(int millis = 0, int heal = 0, int armr = -1)
+        void respawn(int millis = 0, int heal = 0)
         {
             lastboost = rewards[1] = 0;
             resetresidualowner();
-            gamestate::respawn(millis, heal, armr);
+            gamestate::respawn(millis, heal);
             o = vec(-1e10f, -1e10f, -1e10f);
             vel = falling = vec(0, 0, 0);
             yaw = pitch = roll = 0;
@@ -526,7 +526,7 @@ namespace server
             sents[ent].spawned = spawned;
             sents[ent].millis = sents[ent].last = gamemillis;
             if(sents[ent].type == WEAPON && !(sents[ent].attrs[1]&W_F_FORCED))
-                sents[ent].millis += w_spawn(w_attr(gamemode, mutators, sents[ent].attrs[0], m_weapon(gamemode, mutators)));
+                sents[ent].millis += w_spawn(w_attr(gamemode, mutators, sents[ent].type, sents[ent].attrs[0], m_weapon(gamemode, mutators)));
             else sents[ent].millis += G(itemspawntime);
             if(msg) sendf(-1, 1, "ri3", N_ITEMSPAWN, ent, sents[ent].spawned ? 1 : 0);
         }
@@ -587,7 +587,7 @@ namespace server
                 {
                     v->state.health = heal;
                     v->state.lastregen = gamemillis;
-                    sendf(-1, 1, "ri5", N_REGEN, v->clientnum, v->state.health, eff, v->state.armour);
+                    sendf(-1, 1, "ri4", N_REGEN, v->clientnum, v->state.health, eff);
                 }
             }
         }
@@ -1647,25 +1647,10 @@ namespace server
 
     bool hasitem(int i)
     {
-        if(m_trial(gamemode) || !sents.inrange(i)) return false;
-        switch(sents[i].type)
-        {
-            case WEAPON:
-            {
-                int sweap = m_weapon(gamemode, mutators), attr = w_attr(gamemode, mutators, sents[i].attrs[0], sweap);
-                if(!isweap(attr) || !w_item(attr, sweap) || !m_check(W(attr, modes), W(attr, muts), gamemode, mutators))
-                    return false;
-                if((sents[i].attrs[4] && sents[i].attrs[4] != triggerid) || !m_check(sents[i].attrs[2], sents[i].attrs[3], gamemode, mutators))
-                    return false;
-                break;
-            }
-            case HEALTH: case ARMOUR:
-            {
-                if(!m_tourney(gamemode, mutators) || (sents[i].attrs[3] && sents[i].attrs[3] != triggerid) || !m_check(sents[i].attrs[1], sents[i].attrs[2], gamemode, mutators)) return false;
-                break;
-            }
-            default: break;
-        }
+        if(m_trial(gamemode) || !sents.inrange(i) || sents[i].type != WEAPON) return false;
+        int sweap = m_weapon(gamemode, mutators), attr = w_attr(gamemode, mutators, sents[i].type, sents[i].attrs[0], sweap);
+        if(!isweap(attr) || !w_item(attr, sweap) || !m_check(W(attr, modes), W(attr, muts), gamemode, mutators)) return false;
+        if((sents[i].attrs[4] && sents[i].attrs[4] != triggerid) || !m_check(sents[i].attrs[2], sents[i].attrs[3], gamemode, mutators)) return false;
         return true;
     }
 
@@ -1718,7 +1703,7 @@ namespace server
                     case 1: items.add(i); break;
                     case 2:
                     {
-                        int delay = sents[i].type == WEAPON ? w_spawn(w_attr(gamemode, mutators, sents[i].attrs[0], sweap)) : G(itemspawntime);
+                        int delay = sents[i].type == WEAPON ? w_spawn(w_attr(gamemode, mutators, sents[i].type, sents[i].attrs[0], sweap)) : G(itemspawntime);
                         if(delay > 1) sents[i].millis += (delay+rnd(delay))/2;
                         break;
                     }
@@ -1948,7 +1933,7 @@ namespace server
     void sendspawn(clientinfo *ci)
     {
         servstate &gs = ci->state;
-        int weap = -1, health = 0, armour = -1;
+        int weap = -1, health = 0;
         if(ci->state.actortype >= A_ENEMY)
         {
             bool hasent = sents.inrange(ci->state.spawnpoint) && sents[ci->state.spawnpoint].type == ACTOR;
@@ -1956,11 +1941,10 @@ namespace server
             else weap = hasent && sents[ci->state.spawnpoint].attrs[6] > 0 ? sents[ci->state.spawnpoint].attrs[6]-1 : actor[ci->state.actortype].weap;
             if(!m_insta(gamemode, mutators)) health = max(int((hasent && sents[ci->state.spawnpoint].attrs[7] > 0 ? sents[ci->state.spawnpoint].attrs[7] : actor[ci->state.actortype].health)*G(enemystrength)), 1);
             if(!isweap(weap)) weap = -1; // let spawnstate figure it out
-            armour = actor[ci->state.actortype].armour;
         }
         int spawn = pickspawn(ci);
-        gs.spawnstate(gamemode, mutators, weap, health, armour);
-        sendf(ci->clientnum, 1, "ri9i2v", N_SPAWNSTATE, ci->clientnum, spawn, gs.state, gs.points, gs.frags, gs.deaths, gs.health, gs.armour, gs.cptime, gs.weapselect, W_MAX, &gs.ammo[0]);
+        gs.spawnstate(gamemode, mutators, weap, health);
+        sendf(ci->clientnum, 1, "ri9iv", N_SPAWNSTATE, ci->clientnum, spawn, gs.state, gs.points, gs.frags, gs.deaths, gs.health, gs.cptime, gs.weapselect, W_MAX, &gs.ammo[0]);
         gs.lastrespawn = gs.lastspawn = gamemillis;
     }
 
@@ -1972,7 +1956,6 @@ namespace server
         putint(p, gs.frags);
         putint(p, gs.deaths);
         putint(p, gs.health);
-        putint(p, gs.armour);
         putint(p, gs.cptime);
         putint(p, gs.weapselect);
         loopi(W_MAX) putint(p, gs.ammo[i]);
@@ -3226,7 +3209,7 @@ namespace server
     void sendresume(clientinfo *ci)
     {
         servstate &gs = ci->state;
-        sendf(-1, 1, "ri9ivi", N_RESUME, ci->clientnum, gs.state, gs.points, gs.frags, gs.deaths, gs.health, gs.armour, gs.cptime, gs.weapselect, W_MAX, &gs.ammo[0], -1);
+        sendf(-1, 1, "ri9vi", N_RESUME, ci->clientnum, gs.state, gs.points, gs.frags, gs.deaths, gs.health, gs.cptime, gs.weapselect, W_MAX, &gs.ammo[0], -1);
     }
 
     void putinitclient(clientinfo *ci, packetbuf &p)
@@ -3524,13 +3507,6 @@ namespace server
         }
         else
         {
-            if(realdamage >= 0 && m->state.armour > 0)
-            {
-                int absorb = realdamage/2; // armour absorbs half until depleted
-                if(m->state.armour < absorb) absorb = m->state.armour;
-                m->state.armour -= absorb;
-                realdamage -= absorb;
-            }
             hurt = min(m->state.health, realdamage);
             m->state.health = min(m->state.health-realdamage, m_maxhealth(gamemode, mutators, m->state.model));
             /*if(m->state.health <= m_health(gamemode, mutators, m->state.model))*/ m->state.lastregen = 0;
@@ -3557,7 +3533,7 @@ namespace server
         mutate(smuts, mut->dodamage(m, v, realdamage, hurt, weap, realflags, material, hitpush, hitvel, dist));
         if(m != v && (!m_team(gamemode, mutators) || m->team != v->team))
             addhistory(m, v, gamemillis);
-        sendf(-1, 1, "ri8i7", N_DAMAGE, m->clientnum, v->clientnum, weap, realflags, realdamage, m->state.health, m->state.armour, hitpush.x, hitpush.y, hitpush.z, hitvel.x, hitvel.y, hitvel.z, int(dist*DNF));
+        sendf(-1, 1, "ri9i5", N_DAMAGE, m->clientnum, v->clientnum, weap, realflags, realdamage, m->state.health, hitpush.x, hitpush.y, hitpush.z, hitvel.x, hitvel.y, hitvel.z, int(dist*DNF));
         if(realflags&HIT_KILL)
         {
             int fragvalue = 1;
@@ -4039,17 +4015,17 @@ namespace server
     void useevent::process(clientinfo *ci)
     {
         servstate &gs = ci->state;
-        if(gs.state != CS_ALIVE || !sents.inrange(ent) || enttype[sents[ent].type].usetype != EU_ITEM)
+        if(gs.state != CS_ALIVE || !sents.inrange(ent) || sents[ent].type != WEAPON)
         {
             if(G(serverdebug) >= 3) srvmsgf(ci->clientnum, "sync error: use [%d] failed - unexpected message", ent);
             return;
         }
-        int sweap = m_weapon(gamemode, mutators), attr = sents[ent].type == WEAPON ? w_attr(gamemode, mutators, sents[ent].attrs[0], sweap) : sents[ent].attrs[0];
         if(!finditem(ent))
         {
             if(G(serverdebug)) srvmsgf(ci->clientnum, "sync error: use [%d] failed - doesn't seem to be spawned anywhere", ent);
             return;
         }
+        int sweap = m_weapon(gamemode, mutators), attr = w_attr(gamemode, mutators, sents[ent].type, sents[ent].attrs[0], sweap);
         if(!gs.canuse(sents[ent].type, attr, sents[ent].attrs, sweap, millis, (1<<W_S_SWITCH)))
         {
             if(!gs.canuse(sents[ent].type, attr, sents[ent].attrs, sweap, millis, (1<<W_S_SWITCH)|(1<<W_S_RELOAD)))
@@ -4066,37 +4042,23 @@ namespace server
             else return;
         }
         int weap = -1, ammoamt = -1, dropped = -1, ammo = -1;
-        switch(sents[ent].type)
+        if(!gs.hasweap(attr, sweap) && w_carry(attr, sweap) && gs.carry(sweap) >= G(maxcarry)) weap = gs.drop(sweap);
+        loopvk(clients) if(clients[k]->state.dropped.find(ent))
         {
-            case WEAPON:
+            clients[k]->state.dropped.values(ent, ammoamt);
+            break;
+        }
+        if(isweap(weap))
+        {
+            if(sents.inrange(gs.entid[weap]))
             {
-                if(!gs.hasweap(attr, sweap) && w_carry(attr, sweap) && gs.carry(sweap) >= G(maxcarry))
-                    weap = gs.drop(sweap);
-                loopvk(clients) if(clients[k]->state.dropped.find(ent))
-                {
-                    clients[k]->state.dropped.values(ent, ammoamt);
-                    break;
-                }
-                if(isweap(weap))
-                {
-                    if(sents.inrange(gs.entid[weap]))
-                    {
-                        dropped = gs.entid[weap];
-                        ammo = gs.ammo[weap];
-                        setspawn(dropped, false);
-                        gs.setweapstate(weap, W_S_SWITCH, G(weaponswitchdelay), millis);
-                        gs.dropped.add(dropped, ammo);
-                    }
-                    gs.ammo[weap] = gs.entid[weap] = -1;
-                }
-                break;
+                dropped = gs.entid[weap];
+                ammo = gs.ammo[weap];
+                setspawn(dropped, false);
+                gs.setweapstate(weap, W_S_SWITCH, G(weaponswitchdelay), millis);
+                gs.dropped.add(dropped, ammo);
             }
-            case HEALTH:
-            {
-                ammoamt = healthamt[attr];
-                break;
-            }
-            default: break;
+            gs.ammo[weap] = gs.entid[weap] = -1;
         }
         setspawn(ent, false, true);
         gs.useitem(ent, sents[ent].type, attr, ammoamt, sweap, millis, G(weaponswitchdelay));
@@ -4331,7 +4293,7 @@ namespace server
                             {
                                 ci->state.health = heal;
                                 ci->state.lastregen = gamemillis;
-                                sendf(-1, 1, "ri5", N_REGEN, ci->clientnum, ci->state.health, eff, ci->state.armour);
+                                sendf(-1, 1, "ri4", N_REGEN, ci->clientnum, ci->state.health, eff);
                             }
                         }
                     }
@@ -4347,7 +4309,7 @@ namespace server
                     if(ci->state.lastdeath) flushevents(ci, ci->state.lastdeath + DEATHMILLIS);
                     cleartimedevents(ci);
                     ci->state.state = CS_DEAD; // safety
-                    ci->state.respawn(gamemillis, m_health(gamemode, mutators, ci->state.model), m_armour(gamemode, mutators, ci->state.model));
+                    ci->state.respawn(gamemillis, m_health(gamemode, mutators, ci->state.model));
                     sendspawn(ci);
                 }
             }

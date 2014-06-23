@@ -252,8 +252,7 @@ struct duelservmode : servmode
                             playing[i]->state.lastregen = gamemillis;
                             playing[i]->state.resetresidual();
                             playing[i]->state.health = m_health(gamemode, mutators, playing[i]->state.model);
-                            playing[i]->state.armour = m_armour(gamemode, mutators, playing[i]->state.model);
-                            sendf(-1, 1, "ri5", N_REGEN, playing[i]->clientnum, playing[i]->state.health, playing[i]->state.armour, 0); // amt = 0 regens impulse
+                            sendf(-1, 1, "ri4", N_REGEN, playing[i]->clientnum, playing[i]->state.health, 0); // amt = 0 regens impulse
                         }
                         else if(allowed.find(playing[i]) < 0) allowed.add(playing[i]);
                         duelqueue.removeobj(playing[i]);

@@ -165,9 +165,6 @@ GVAR(0, spawnprotect, 0, 3000, VAR_MAX); // delay before damage can be dealt to 
 GVAR(0, duelprotect, 0, 5000, VAR_MAX); // .. in duel/survivor matches
 GVAR(0, instaprotect, 0, 3000, VAR_MAX); // .. in instagib matches
 
-GVAR(0, radardisabled, 0, 0, 1); // forces the radar to be off
-GVAR(0, radardistlimit, 0, 0, VAR_MAX); // forces the radar to this distance max, 0 = off
-
 GVAR(0, balancemaps, -1, -1, 1); // determined if map team balancing is used: -1 = map default, 0 = off, 1 = on
 GVAR(0, balancedelay, 0, 10000, 30000); // before mapbalance forces
 GVAR(0, balancenospawn, 0, 1, 1); // prevent respawning when waiting to balance
@@ -224,6 +221,7 @@ GVAR(0, intermlimit, 0, 15000, VAR_MAX); // .. before vote menu comes up
 GVAR(0, votelimit, 0, 45000, VAR_MAX); // .. before vote passes by default
 GVAR(0, duelreset, 0, 1, 1); // reset winner in duel
 GVAR(0, duelclear, 0, 1, 1); // clear items in duel
+GVAR(0, duelregen, 0, 0, 1); // allow regen in duel
 GVAR(0, dueldelay, 500, 1000, VAR_MAX); // round continues for this length after winning
 GVAR(0, duelcooloff, 0, 5000, VAR_MAX); // cool off period before duel goes to next round
 GVAR(0, duelcycle, 0, 2, 3); // determines if players are force-cycled after a certain number of wins (bit: 0 = off, 1 = non-team games, 2 = team games)

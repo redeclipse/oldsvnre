@@ -40,7 +40,7 @@ enum                                // entity types
     NOTUSED = ET_EMPTY, LIGHT = ET_LIGHT, MAPMODEL = ET_MAPMODEL, PLAYERSTART = ET_PLAYERSTART, ENVMAP = ET_ENVMAP, PARTICLES = ET_PARTICLES,
     MAPSOUND = ET_SOUND, LIGHTFX = ET_LIGHTFX, SUNLIGHT = ET_SUNLIGHT, WEAPON = ET_GAMESPECIFIC,
     TELEPORT, ACTOR, TRIGGER, PUSHER, AFFINITY, CHECKPOINT,
-    HEALTH, ARMOUR,
+    UNUSED1, UNUSED2,
     MAXENTTYPES
 };
 
@@ -52,8 +52,6 @@ enum { TA_MANUAL = 0, TA_AUTO, TA_ACTION, TA_MAX };
 #define TRIGSTATE(a,b)  (b%2 ? !a : a)
 
 enum { CP_RESPAWN = 0, CP_START, CP_FINISH, CP_LAST, CP_MAX };
-enum { HEALTH_SHARD = 0, HEALTH_SMALL, HEALTH_REGULAR, HEALTH_LARGE, HEALTH_MAX };
-enum { ARMOUR_SHARD = 0, ARMOUR_SMALL, ARMOUR_REGULAR, ARMOUR_LARGE, ARMOUR_MAX };
 
 enum { TELE_NOAFFIN = 0, TELE_MAX };
 
@@ -182,24 +180,20 @@ enttypes enttype[] = {
                 "checkpoint",   { "radius", "yaw",      "pitch",    "modes",    "muts",     "id",       "type",     "sound" }
     },
     {
-        HEALTH,         2,          59,     24,     EU_ITEM,    4,          1,          3,
-            0, 0,
-            (1<<ENT_PLAYER)|(1<<ENT_AI),
-            false,  true,   true,      false,      false,
-                "health",       { "type",   "modes",    "muts",     "id" }
+        UNUSED1,        -1,         0,      0,      EU_NONE,    0,          -1,         -1,
+            0, 0, 0,
+            true,   false,  false,      false,      false,
+                "none",         { "" }
     },
     {
-        ARMOUR,         2,          59,     24,     EU_ITEM,    4,          1,          3,
-            0, 0,
-            (1<<ENT_PLAYER)|(1<<ENT_AI),
-            false,  true,   true,      false,      false,
-                "armour",       { "type",   "modes",    "muts",     "id" }
+        UNUSED2,        -1,         0,      0,      EU_NONE,    0,          -1,         -1,
+            0, 0, 0,
+            true,   false,  false,      false,      false,
+                "none",         { "" }
     }
 };
-int healthamt[HEALTH_MAX] = { 10, 25, 50, 100 }, armouramt[ARMOUR_MAX] = { 10, 25, 50, 100 };
 #else
 extern enttypes enttype[];
-extern int healthamt[HEALTH_MAX], armouramt[ARMOUR_MAX];
 #endif
 
 enum
@@ -455,7 +449,7 @@ static inline void modecheck(int &mode, int &muts, int trying = 0)
 // inherited by gameent and server clients
 struct gamestate
 {
-    int health, armour, ammo[W_MAX], entid[W_MAX], colour, model;
+    int health, ammo[W_MAX], entid[W_MAX], colour, model;
     int weapselect, weapload[W_MAX], weapshot[W_MAX], weapstate[W_MAX], weapwait[W_MAX], weaplast[W_MAX];
     int lastdeath, lastspawn, lastrespawn, lastpain, lastregen, lastbuff, lastres[WR_MAX], lastrestime[WR_MAX];
     int actortype, spawnpoint, ownernum, skill, points, frags, deaths, cpmillis, cptime;
@@ -627,18 +621,9 @@ struct gamestate
             case EU_AUTO: case EU_ACT: return true; break;
             case EU_ITEM:
             { // can't use when reloading or firing
-                switch(type)
-                {
-                    case WEAPON:
-                    {
-                        if(isweap(attr) && !hasweap(attr, sweap, 4) && weapwaited(weapselect, millis, skip))
-                            return true;
-                        break;
-                    }
-                    case HEALTH: return health < PLAYER(model, health);
-                    case ARMOUR: return armour < PLAYER(model, armour);
-                    default: return true;
-                }
+                if(type != WEAPON || !isweap(attr)) return false;
+                if(!hasweap(attr, sweap, 4) && weapwaited(weapselect, millis, skip))
+                    return true;
                 break;
             }
             default: break;
@@ -648,32 +633,12 @@ struct gamestate
 
     void useitem(int id, int type, int attr, int ammoamt, int sweap, int millis, int delay)
     {
-        switch(type)
-        {
-            case TRIGGER: break;
-            case WEAPON:
-            {
-                int prev = max(ammo[attr], 0), ammoval = ammoamt >= 0 ? ammoamt : WUSE(attr);
-                weapswitch(attr, millis, delay, W_S_USE);
-                ammo[attr] = clamp(prev+ammoval, 0, W(attr, ammomax));
-                weapload[attr] = ammo[attr]-prev;
-                entid[attr] = id;
-                break;
-            }
-            case HEALTH:
-            {
-                int value = ammoamt >= 0 ? ammoamt : healthamt[attr];
-                health = max(health + value, PLAYER(model, health));
-                break;
-            }
-            case ARMOUR:
-            {
-                int value = ammoamt >= 0 ? ammoamt : armouramt[attr];
-                armour = max(armour + value, PLAYER(model, armour));
-                break;
-            }
-            default: break;
-        }
+        if(type != WEAPON || !isweap(attr)) return;
+        int prev = max(ammo[attr], 0), ammoval = ammoamt >= 0 ? ammoamt : WUSE(attr);
+        weapswitch(attr, millis, delay, W_S_USE);
+        ammo[attr] = clamp(prev+ammoval, 0, W(attr, ammomax));
+        weapload[attr] = ammo[attr]-prev;
+        entid[attr] = id;
     }
 
     bool zooming()
@@ -700,16 +665,15 @@ struct gamestate
         loadweap.shrink(0);
     }
 
-    void respawn(int millis, int heal = 0, int armr = -1)
+    void respawn(int millis, int heal = 0)
     {
         health = heal ? heal : 100;
-        armour = armr >= 0 ? armr : 0;
         lastspawn = millis;
         clearstate();
         weapreset(true);
     }
 
-    void spawnstate(int gamemode, int mutators, int sweap = -1, int heal = 0, int armr = -1)
+    void spawnstate(int gamemode, int mutators, int sweap = -1, int heal = 0)
     {
         weapreset(true);
         if(!isweap(sweap))
@@ -756,13 +720,12 @@ struct gamestate
             weapselect = sweap;
         }
         health = heal ? heal : m_health(gamemode, mutators, model);
-        armour = armr >= 0 ? armr : m_armour(gamemode, mutators, model);
     }
 
-    void editspawn(int gamemode, int mutators, int sweap = -1, int heal = 0, int armr = -1)
+    void editspawn(int gamemode, int mutators, int sweap = -1, int heal = 0)
     {
         clearstate();
-        spawnstate(gamemode, mutators, sweap, heal, armr);
+        spawnstate(gamemode, mutators, sweap, heal);
     }
 
     int respawnwait(int millis, int delay)
@@ -1011,16 +974,16 @@ struct gameent : dynent, gamestate
         used.shrink(0);
     }
 
-    void respawn(int millis = 0, int heal = 0, int armr = -1, int gamemode = 0, int mutators = 0)
+    void respawn(int millis = 0, int heal = 0, int gamemode = 0, int mutators = 0)
     {
         stopmoving(true);
         removesounds();
         clearstate(gamemode, mutators);
         physent::reset();
-        gamestate::respawn(millis, heal, armr);
+        gamestate::respawn(millis, heal);
     }
 
-    void editspawn(int gamemode, int mutators, int sweap = -1, int heal = 0, int armr = -1)
+    void editspawn(int gamemode, int mutators, int sweap = -1, int heal = 0)
     {
         stopmoving(true);
         clearstate();
@@ -1031,22 +994,22 @@ struct gameent : dynent, gamestate
         vel = falling = vec(0, 0, 0);
         floor = vec(0, 0, 1);
         resetinterp();
-        gamestate::editspawn(gamemode, mutators, sweap, heal, armr);
+        gamestate::editspawn(gamemode, mutators, sweap, heal);
     }
 
-    void resetstate(int millis, int heal, int armr)
+    void resetstate(int millis, int heal)
     {
-        respawn(millis, heal, armr);
+        respawn(millis, heal);
         frags = deaths = totaldamage = 0;
     }
 
-    void mapchange(int millis, int heal, int armr)
+    void mapchange(int millis, int heal)
     {
         checkpoint = -1;
         dominating.shrink(0);
         dominated.shrink(0);
         icons.shrink(0);
-        resetstate(millis, heal, armr);
+        resetstate(millis, heal);
         gamestate::mapchange();
     }
 
@@ -1638,7 +1601,7 @@ namespace game
     extern void resetworld();
     extern void resetstate();
     extern void hiteffect(int weap, int flags, int damage, gameent *d, gameent *v, vec &dir, vec &vel, float dist, bool local = false);
-    extern void damaged(int weap, int flags, int damage, int health, int armour, gameent *d, gameent *v, int millis, vec &dir, vec &vel, float dist);
+    extern void damaged(int weap, int flags, int damage, int health, gameent *d, gameent *v, int millis, vec &dir, vec &vel, float dist);
     extern void killed(int weap, int flags, int damage, gameent *d, gameent *v, vector<gameent*> &log, int style, int material);
     extern void timeupdate(int timeremain);
     extern vec rescolour(dynent *d, int c = PULSE_BURN);
