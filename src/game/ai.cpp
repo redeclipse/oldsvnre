@@ -503,51 +503,36 @@ namespace ai
         loopj(entities::lastusetype[EU_ITEM])
         {
             gameentity &e = *(gameentity *)entities::ents[j];
-            if(enttype[e.type].usetype != EU_ITEM) continue;
-            switch(e.type)
-            {
-                case WEAPON:
-                {
-                    int attr = w_attr(game::gamemode, game::mutators, e.attrs[0], sweap);
-                    if(e.spawned && isweap(attr) && wantsweap(d, attr))
-                    { // go get a weapon upgrade
-                        interest &n = interests.add();
-                        n.state = AI_S_INTEREST;
-                        n.node = closestwaypoint(e.o, CLOSEDIST, true);
-                        n.target = j;
-                        n.targtype = AI_T_ENTITY;
-                        n.score =  pos.squaredist(e.o)/(attr == d->ai->weappref ? 1e8f : (force ? 1e4f : 1.f));
-                        n.tolerance = 0;
-                    }
-                    break;
-                }
-                default: break;
+            if(enttype[e.type].usetype != EU_ITEM || e.type != WEAPON) continue;
+            int attr = w_attr(game::gamemode, game::mutators, e.type, e.attrs[0], sweap);
+            if(e.spawned && isweap(attr) && wantsweap(d, attr))
+            { // go get a weapon upgrade
+                interest &n = interests.add();
+                n.state = AI_S_INTEREST;
+                n.node = closestwaypoint(e.o, CLOSEDIST, true);
+                n.target = j;
+                n.targtype = AI_T_ENTITY;
+                n.score =  pos.squaredist(e.o)/(attr == d->ai->weappref ? 1e8f : (force ? 1e4f : 1.f));
+                n.tolerance = 0;
             }
         }
 
         loopvj(projs::projs) if(projs::projs[j]->projtype == PRJ_ENT && projs::projs[j]->ready())
         {
             projent &proj = *projs::projs[j];
-            if(!entities::ents.inrange(proj.id) || enttype[entities::ents[proj.id]->type].usetype != EU_ITEM) continue;
+            if(!entities::ents.inrange(proj.id)) continue;
             gameentity &e = *(gameentity *)entities::ents[proj.id];
-            switch(e.type)
-            {
-                case WEAPON:
-                {
-                    int attr = w_attr(game::gamemode, game::mutators, e.attrs[0], sweap);
-                    if(isweap(attr) && wantsweap(d, attr) && proj.owner != d)
-                    { // go get a weapon upgrade
-                        interest &n = interests.add();
-                        n.state = AI_S_INTEREST;
-                        n.node = closestwaypoint(proj.o, CLOSEDIST, true);
-                        n.target = proj.id;
-                        n.targtype = AI_T_DROP;
-                        n.score = pos.squaredist(proj.o)/(attr == d->ai->weappref ? 1e8f : (force ? 1e4f : 1.f));
-                        n.tolerance = 0;
-                    }
-                    break;
-                }
-                default: break;
+            if(enttype[e.type].usetype != EU_ITEM || e.type != WEAPON) continue;
+            int attr = w_attr(game::gamemode, game::mutators, e.type, e.attrs[0], sweap);
+            if(isweap(attr) && wantsweap(d, attr) && proj.owner != d)
+            { // go get a weapon upgrade
+                interest &n = interests.add();
+                n.state = AI_S_INTEREST;
+                n.node = closestwaypoint(proj.o, CLOSEDIST, true);
+                n.target = proj.id;
+                n.targtype = AI_T_DROP;
+                n.score = pos.squaredist(proj.o)/(attr == d->ai->weappref ? 1e8f : (force ? 1e4f : 1.f));
+                n.tolerance = 0;
             }
         }
     }
@@ -667,7 +652,7 @@ namespace ai
     {
         if(!passive() && m_fight(game::gamemode) && entities::ents.inrange(ent) && entities::ents[ent]->type == WEAPON && spawned > 0)
         {
-            int sweap = m_weapon(game::gamemode, game::mutators), attr = w_attr(game::gamemode, game::mutators, entities::ents[ent]->attrs[0], sweap);
+            int sweap = m_weapon(game::gamemode, game::mutators), attr = w_attr(game::gamemode, game::mutators, entities::ents[ent]->type, entities::ents[ent]->attrs[0], sweap);
             loopv(game::players) if(game::players[i] && game::players[i]->ai && game::players[i]->actortype == A_BOT && game::players[i]->state == CS_ALIVE && iswaypoint(game::players[i]->lastnode))
             {
                 gameent *d = game::players[i];
@@ -679,7 +664,7 @@ namespace ai
                     {
                         if(entities::ents.inrange(b.target))
                         {
-                            int weap = w_attr(game::gamemode, game::mutators, entities::ents[b.target]->attrs[0], sweap);
+                            int weap = w_attr(game::gamemode, game::mutators, entities::ents[ent]->type, entities::ents[b.target]->attrs[0], sweap);
                             if((attr == d->ai->weappref && weap != d->ai->weappref) || d->o.squaredist(entities::ents[ent]->o) < d->o.squaredist(entities::ents[b.target]->o))
                                 d->ai->switchstate(b, AI_S_INTEREST, AI_T_ENTITY, ent);
                         }
@@ -768,21 +753,12 @@ namespace ai
                 if(entities::ents.inrange(b.target))
                 {
                     gameentity &e = *(gameentity *)entities::ents[b.target];
-                    if(enttype[e.type].usetype != EU_ITEM) return false;
-                    int sweap = m_weapon(game::gamemode, game::mutators),
-                        attr = w_attr(game::gamemode, game::mutators, e.attrs[0], sweap);
-                    switch(e.type)
-                    {
-                        case WEAPON:
-                        {
-                            if(!e.spawned || !wantsweap(d, attr)) return false;
-                            //float guard = enttype[e.type].radius;
-                            //if(d->feetpos().squaredist(e.o) <= guard*guard)
-                            //    b.acttype = enemy(d, b, e.o, guard*4, weaptype[d->weapselect].melee ? 1 : 0, false) ? AI_A_PROTECT : AI_A_IDLE;
-                            break;
-                        }
-                        default: break;
-                    }
+                    if(enttype[e.type].usetype != EU_ITEM || e.type != WEAPON) return false;
+                    int sweap = m_weapon(game::gamemode, game::mutators), attr = w_attr(game::gamemode, game::mutators, e.type, e.attrs[0], sweap);
+                    if(!isweap(attr) || !e.spawned || !wantsweap(d, attr)) return false;
+                    //float guard = enttype[e.type].radius;
+                    //if(d->feetpos().squaredist(e.o) <= guard*guard)
+                    //    b.acttype = enemy(d, b, e.o, guard*4, weaptype[d->weapselect].melee ? 1 : 0, false) ? AI_A_PROTECT : AI_A_IDLE;
                     return makeroute(d, b, e.o);
                 }
                 break;
@@ -792,24 +768,15 @@ namespace ai
                 loopvj(projs::projs) if(projs::projs[j]->projtype == PRJ_ENT && projs::projs[j]->ready() && projs::projs[j]->id == b.target)
                 {
                     projent &proj = *projs::projs[j];
-                    if(!entities::ents.inrange(proj.id) || enttype[entities::ents[proj.id]->type].usetype != EU_ITEM) return false;
+                    if(!entities::ents.inrange(proj.id) || proj.owner == d) return false;
                     gameentity &e = *(gameentity *)entities::ents[proj.id];
-                    int sweap = m_weapon(game::gamemode, game::mutators),
-                        attr = w_attr(game::gamemode, game::mutators, e.attrs[0], sweap);
-                    switch(e.type)
-                    {
-                        case WEAPON:
-                        {
-                            if(!wantsweap(d, attr) || proj.owner == d) return false;
-                            //float guard = enttype[e.type].radius;
-                            //if(d->feetpos().squaredist(e.o) <= guard*guard)
-                            //    b.acttype = enemy(d, b, e.o, guard*4, weaptype[d->weapselect].melee ? 1 : 0, false) ? AI_A_PROTECT : AI_A_IDLE;
-                            break;
-                        }
-                        default: break;
-                    }
+                    if(enttype[entities::ents[proj.id]->type].usetype != EU_ITEM || e.type != WEAPON) return false;
+                    int sweap = m_weapon(game::gamemode, game::mutators), attr = w_attr(game::gamemode, game::mutators, e.type, e.attrs[0], sweap);
+                    if(!isweap(attr) || !wantsweap(d, attr)) return false;
+                    //float guard = enttype[e.type].radius;
+                    //if(d->feetpos().squaredist(e.o) <= guard*guard)
+                    //    b.acttype = enemy(d, b, e.o, guard*4, weaptype[d->weapselect].melee ? 1 : 0, false) ? AI_A_PROTECT : AI_A_IDLE;
                     return makeroute(d, b, proj.o);
-                    break;
                 }
                 break;
             }
@@ -1267,7 +1234,7 @@ namespace ai
                             {
                                 if(!entities::ents.inrange(t.target)) break;
                                 extentity &e = *entities::ents[t.target];
-                                if(enttype[e.type].usetype != EU_ITEM) break;
+                                if(enttype[e.type].usetype != EU_ITEM || e.type != WEAPON) break;
                                 ent = t.target;
                                 break;
                             }
@@ -1277,7 +1244,7 @@ namespace ai
                                 projent &proj = *projs::projs[t.target];
                                 if(!entities::ents.inrange(proj.id)) break;
                                 extentity &e = *entities::ents[proj.id];
-                                if(enttype[e.type].usetype != EU_ITEM || proj.owner == d) break;
+                                if(enttype[e.type].usetype != EU_ITEM || e.type != WEAPON || proj.owner == d) break;
                                 ent = proj.id;
                                 break;
                             }
@@ -1286,17 +1253,13 @@ namespace ai
                         if(entities::ents.inrange(ent))
                         {
                             extentity &e = *entities::ents[ent];
-                            int attr = e.type == WEAPON ? w_attr(game::gamemode, game::mutators, e.attrs[0], sweap) : e.attrs[0];
-                            if(d->canuse(e.type, attr, e.attrs, sweap, lastmillis, G(weaponinterrupts))) switch(e.type)
+                            int attr = w_attr(game::gamemode, game::mutators, e.type, e.attrs[0], sweap);
+                            if(d->canuse(e.type, attr, e.attrs, sweap, lastmillis, G(weaponinterrupts)))
                             {
-                                case WEAPON:
-                                {
-                                    if(!wantsweap(d, attr)) break;
-                                    d->action[AC_USE] = true;
-                                    d->ai->lastaction = d->actiontime[AC_USE] = lastmillis;
-                                    return true;
-                                }
-                                default: break;
+                                if(!wantsweap(d, attr)) break;
+                                d->action[AC_USE] = true;
+                                d->ai->lastaction = d->actiontime[AC_USE] = lastmillis;
+                                return true;
                             }
                         }
                         actitems.pop();

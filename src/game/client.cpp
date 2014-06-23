@@ -1588,7 +1588,6 @@ namespace client
         d->frags = getint(p);
         d->deaths = getint(p);
         d->health = getint(p);
-        d->armour = getint(p);
         d->cptime = getint(p);
         if(resume && (d == game::player1 || d->ai))
         {
@@ -2064,8 +2063,7 @@ namespace client
 
                 case N_DAMAGE:
                 {
-                    int tcn = getint(p), acn = getint(p), weap = getint(p), flags = getint(p), damage = getint(p),
-                        health = getint(p), armour = getint(p);
+                    int tcn = getint(p), acn = getint(p), weap = getint(p), flags = getint(p), damage = getint(p), health = getint(p);
                     vec dir, vel;
                     loopk(3) dir[k] = getint(p)/DNF;
                     loopk(3) vel[k] = getint(p)/DNF;
@@ -2073,7 +2071,7 @@ namespace client
                     float dist = getint(p)/DNF;
                     gameent *m = game::getclient(tcn), *v = game::getclient(acn);
                     if(!m || !v) break;
-                    game::damaged(weap, flags, damage, health, armour, m, v, lastmillis, dir, vel, dist);
+                    game::damaged(weap, flags, damage, health, m, v, lastmillis, dir, vel, dist);
                     break;
                 }
 
@@ -2088,7 +2086,7 @@ namespace client
 
                 case N_REGEN:
                 {
-                    int trg = getint(p), heal = getint(p), amt = getint(p), armour = getint(p);
+                    int trg = getint(p), heal = getint(p), amt = getint(p);
                     gameent *f = game::getclient(trg);
                     if(!f) break;
                     if(!amt)
@@ -2098,7 +2096,6 @@ namespace client
                     }
                     else if(amt > 0 && (!f->lastregen || lastmillis-f->lastregen >= 500)) playsound(S_REGEN, f->o, f);
                     f->health = heal;
-                    f->armour = armour;
                     f->lastregen = lastmillis;
                     break;
                 }
@@ -2185,7 +2182,7 @@ namespace client
                     ai::itemspawned(ent, value!=0);
                     if(e.spawned)
                     {
-                        int sweap = m_weapon(game::gamemode, game::mutators), attr = e.type == WEAPON ? w_attr(game::gamemode, game::mutators, e.attrs[0], sweap) : e.attrs[0],
+                        int sweap = m_weapon(game::gamemode, game::mutators), attr = w_attr(game::gamemode, game::mutators, e.type, e.attrs[0], sweap),
                             colour = e.type == WEAPON ? W(attr, colour) : 0xFFFFFF;
                         playsound(e.type == WEAPON && attr >= W_OFFSET ? WSND(attr, S_W_SPAWN) : S_ITEMSPAWN, e.o);
                         if(entities::showentdescs)

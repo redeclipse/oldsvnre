@@ -220,7 +220,7 @@ namespace entities
             }
             case WEAPON:
             {
-                int sweap = m_weapon(game::gamemode, game::mutators), attr1 = w_attr(game::gamemode, game::mutators, attr[0], sweap);
+                int sweap = m_weapon(game::gamemode, game::mutators), attr1 = w_attr(game::gamemode, game::mutators, type, attr[0], sweap);
                 if(isweap(attr1))
                 {
                     defformatstring(str)("\fs\f[%d]%s%s%s%s\fS", W(attr1, colour), icon ? "\f(" : "", icon ? hud::itemtex(type, attr1) : W(attr1, name), icon ? ")" : "", icon ? W(attr1, name) : "");
@@ -231,26 +231,6 @@ namespace entities
                         if(attr[1]&W_F_FORCED) addentinfo("forced");
                     }
                 }
-                break;
-            }
-            case HEALTH:
-            {
-                if(attr[0] >= 0 && attr[0] < HEALTH_MAX)
-                {
-                    defformatstring(str)("+%d", healthamt[attr[0]]);
-                    addentinfo(str);
-                }
-                if(full) addmodeinfo(attr[1], attr[2]);
-                break;
-            }
-            case ARMOUR:
-            {
-                if(attr[0] >= 0 && attr[0] < ARMOUR_MAX)
-                {
-                    defformatstring(str)("+%d", armouramt[attr[0]]);
-                    addentinfo(str);
-                }
-                if(full) addmodeinfo(attr[1], attr[2]);
                 break;
             }
             case MAPMODEL:
@@ -341,12 +321,10 @@ namespace entities
         {
             case AFFINITY: return "props/flag";
             case PLAYERSTART: return playertypes[0][1];
-            case HEALTH: return "props/health";
-            case ARMOUR: return "props/armour";
             case WEAPON:
             {
-                int sweap = m_weapon(game::gamemode, game::mutators), attr1 = w_attr(game::gamemode, game::mutators, attr[0], sweap);
-                return weaptype[attr1].item;
+                int weap = w_attr(game::gamemode, game::mutators, type, attr[0], m_weapon(game::gamemode, game::mutators));
+                return isweap(weap) && *weaptype[weap].item ? weaptype[weap].item : "projectiles/cartridge";
             }
             case ACTOR: return actor[clamp(attr[0]+A_ENEMY, int(A_ENEMY), int(A_MAX-1))].playermodel[1];
             default: break;
@@ -369,7 +347,7 @@ namespace entities
     void useeffects(gameent *d, int ent, int ammoamt, bool spawn, int weap, int drop, int ammo)
     {
         gameentity &e = *(gameentity *)ents[ent];
-        int sweap = m_weapon(game::gamemode, game::mutators), attr = e.type == WEAPON ? w_attr(game::gamemode, game::mutators, e.attrs[0], sweap) : e.attrs[0],
+        int sweap = m_weapon(game::gamemode, game::mutators), attr = w_attr(game::gamemode, game::mutators, e.type, e.attrs[0], sweap),
             colour = e.type == WEAPON ? W(attr, colour) : 0x888888;
         if(e.type == WEAPON) d->addicon(eventicon::WEAPON, lastmillis, game::eventiconshort, attr);
         if(isweap(weap))
@@ -388,7 +366,7 @@ namespace entities
         if(ents.inrange(drop) && ents[drop]->type == WEAPON)
         {
             gameentity &f = *(gameentity *)ents[drop];
-            attr = w_attr(game::gamemode, game::mutators, f.attrs[0], sweap);
+            attr = w_attr(game::gamemode, game::mutators, f.type, f.attrs[0], sweap);
             if(isweap(attr)) projs::drop(d, attr, drop, ammo, d == game::player1 || d->ai, 0, weap);
         }
         if(e.spawned != spawn)
@@ -591,7 +569,7 @@ namespace entities
                     gameent *f = (gameent *)d;
                     if(game::allowmove(f))
                     {
-                        int interrupts = G(weaponinterrupts), sweap = m_weapon(game::gamemode, game::mutators), attr = e.type == WEAPON ? w_attr(game::gamemode, game::mutators, e.attrs[0], sweap) : e.attrs[0];
+                        int interrupts = G(weaponinterrupts), sweap = m_weapon(game::gamemode, game::mutators), attr = w_attr(game::gamemode, game::mutators, e.type, e.attrs[0], sweap);
                         interrupts &= ~(1<<W_S_RELOAD);
                         if(!f->canuse(e.type, attr, e.attrs, sweap, lastmillis, interrupts))
                         {
@@ -1036,14 +1014,6 @@ namespace entities
                 if(create && (e.attrs[0] < W_OFFSET || e.attrs[0] >= W_MAX)) e.attrs[0] = W_OFFSET; // don't be stupid when creating the entity
                 while(e.attrs[0] < W_OFFSET) e.attrs[0] += W_MAX-W_OFFSET; // don't allow superimposed weaps
                 while(e.attrs[0] >= W_MAX) e.attrs[0] -= W_MAX-W_OFFSET;
-                break;
-            case HEALTH:
-                while(e.attrs[0] < 0) e.attrs[0] += HEALTH_MAX;
-                while(e.attrs[0] >= HEALTH_MAX) e.attrs[0] -= HEALTH_MAX;
-                break;
-            case ARMOUR:
-                while(e.attrs[0] < 0) e.attrs[0] += ARMOUR_MAX;
-                while(e.attrs[0] >= ARMOUR_MAX) e.attrs[0] -= ARMOUR_MAX;
                 break;
             case PLAYERSTART:
                 while(e.attrs[0] < 0) e.attrs[0] += T_ALL;
@@ -1884,15 +1854,6 @@ namespace entities
                     e.attrs[attr] = neg ? 0-value : value;
                 }
             }
-            if(gver <= 220 && enttype[e.type].modesattr > 0)
-            {
-                int attr = enttype[e.type].modesattr+1;
-                bool neg = e.attrs[attr] < 0;
-                int value = neg ? 0-e.attrs[attr] : e.attrs[attr];
-                //if(value&(1<<10)) value &= ~(1<<10); // jetpack -> freestyle
-                if(value&(1<<12)) value &= ~(1<<12); // expert -> tourney
-                e.attrs[attr] = neg ? 0-value : value;
-            }
         }
     }
 
@@ -1954,8 +1915,8 @@ namespace entities
             progress(i/float(ents.length()), "updating entities...");
             if(mtype == MAP_MAPZ && gver <= 212)
             {
-                if(e.type == HEALTH) e.type = NOTUSED;
-                else if(e.type == ARMOUR)
+                if(e.type == UNUSED1) e.type = NOTUSED;
+                else if(e.type == UNUSED2)
                 {
                     ai::oldwaypoint &o = ai::oldwaypoints.add();
                     o.o = e.o;
@@ -1964,6 +1925,7 @@ namespace entities
                     e.type = NOTUSED;
                 }
             }
+            if(mtype == MAP_MAPZ && gver <= 221 && (e.type == UNUSED1 || e.type == UNUSED2)) e.type = NOTUSED;
             if(e.type < MAXENTTYPES)
             {
                 lastenttype[e.type] = max(lastenttype[e.type], i+1);
@@ -2244,7 +2206,7 @@ namespace entities
                         if(e.type == WEAPON)
                         {
                             flags |= MDL_LIGHTFX;
-                            int col = W(w_attr(game::gamemode, game::mutators, e.attrs[0], m_weapon(game::gamemode, game::mutators)), colour), interval = lastmillis%1000;
+                            int col = W(w_attr(game::gamemode, game::mutators, e.type, e.attrs[0], m_weapon(game::gamemode, game::mutators)), colour), interval = lastmillis%1000;
                             e.light.effect = vec::hexcolor(col).mul(interval >= 500 ? (1000-interval)/500.f : interval/500.f);
                         }
                         else e.light.effect = vec(0, 0, 0);
@@ -2293,7 +2255,7 @@ namespace entities
              hasent = isedit && idx >= 0 && (enthover == idx || entgroup.find(idx) >= 0),
              hastop = hasent && e.o.squaredist(camera1->o) <= showentdist*showentdist;
         int sweap = m_weapon(game::gamemode, game::mutators),
-            attr = e.type == WEAPON ? w_attr(game::gamemode, game::mutators, e.attrs[0], sweap) : e.attrs[0],
+            attr = w_attr(game::gamemode, game::mutators, e.type, e.attrs[0], sweap),
             colour = e.type == WEAPON ? W(attr, colour) : 0x888888, interval = lastmillis%1000;
         float fluc = interval >= 500 ? (1500-interval)/1000.f : (500+interval)/1000.f;
         if(enttype[e.type].usetype == EU_ITEM && (active || isedit))
