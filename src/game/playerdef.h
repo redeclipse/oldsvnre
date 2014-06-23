@@ -20,8 +20,8 @@
             &sv_actor##name \
         };
 
-    #define PLAYER(actor,name)         (*sv_actor_stat_##name[actor])
-    #define PLAYERSTR(a,actor,attr)    defformatstring(a)("sv_%s%s", playertypes[actor][4], #attr)
+    #define PLAYER(t,name)         (*sv_actor_stat_##name[t])
+    #define PLAYERSTR(a,t,attr)    defformatstring(a)("sv_%s%s", playertypes[t][4], #attr)
 #else
 #ifdef GAMEWORLD
     #define PPVAR(flags, name, mn, mx, w00) \
@@ -55,6 +55,6 @@
         GSVAR(flags, actor##name, w00); \
         extern char **actor_stat_##name[];
 #endif
-    #define PLAYER(actor,name)         (*actor_stat_##name[actor])
-    #define PLAYERSTR(a,actor,attr)    defformatstring(a)("%s%s", playertypes[actor][4], #attr)
+    #define PLAYER(t,name)         (*actor_stat_##name[t])
+    #define PLAYERSTR(a,t,attr)    defformatstring(a)("%s%s", playertypes[t][4], #attr)
 #endif
