@@ -278,14 +278,14 @@ GVAR(0, captureregenextra, 0, 2, VAR_MAX); // add this to regen when buffed
 
 GVAR(0, defendlimit, 0, 0, VAR_MAX); // finish when score is this or more
 GVAR(0, defendpoints, 0, 1, VAR_MAX); // points added to score
-GVAR(0, defendinterval, 0, 25, VAR_MAX);
-GVAR(0, defendhold, 1, 200, VAR_MAX); // points needed to gain a score point
-GVAR(0, defendoccupy, 1, 200, VAR_MAX); // points needed to occupy in regular games
+GVAR(0, defendinterval, 0, 10, VAR_MAX);
+GVAR(0, defendhold, 1, 100, VAR_MAX); // points needed to gain a score point
+GVAR(0, defendoccupy, 1, 100, VAR_MAX); // points needed to occupy in regular games
 GVAR(0, defendking, 1, 100, VAR_MAX); // points needed to occupy in king of the hill
 GVAR(0, defendflags, 0, 3, 3); // 0 = init all (neutral), 1 = init neutral and team only, 2 = init team only, 3 = init all (team + neutral + converted)
 GVAR(0, defendbuffing, 0, 1, 7); // buffed; 0 = off, &1 = when guarding, &2 = when securing, &4 = even when enemies are present
 GFVAR(0, defendbuffoccupy, 0, 0.5f, 1); // for defendbuffing&4, must be occupied this much before passing
-GVAR(0, defendbuffdelay, 0, 1500, VAR_MAX); // buffed for this long after leaving
+GVAR(0, defendbuffdelay, 0, 1000, VAR_MAX); // buffed for this long after leaving
 GFVAR(0, defendbuffarea, 0, 64, FVAR_MAX); // radius in which buffing occurs
 GFVAR(0, defendbuffdamage, 1, 1.25f, FVAR_MAX); // multiply outgoing damage by this much when buffed
 GFVAR(0, defendbuffshield, 1, 1.25f, FVAR_MAX); // divide incoming damage by this much when buffed
@@ -310,7 +310,7 @@ GVAR(0, bomberpickuppoints, 0, 3, VAR_MAX); // points added to score
 GVAR(0, bomberholdtime, 0, 15000, VAR_MAX);
 GVAR(0, bomberholdpoints, 0, 1, VAR_MAX); // points added to score
 GVAR(0, bomberholdpenalty, 0, 10, VAR_MAX); // penalty for holding too long
-GVAR(0, bomberholdinterval, 0, 3000, VAR_MAX);
+GVAR(0, bomberholdinterval, 0, 1000, VAR_MAX);
 GVAR(0, bomberlockondelay, 0, 250, VAR_MAX);
 GFVAR(0, bomberspeed, 0, 250, FVAR_MAX);
 GFVAR(0, bomberspeeddelta, 0, 1000, FVAR_MAX);
