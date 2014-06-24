@@ -1413,7 +1413,7 @@ namespace game
                     { "fell victim to their own crossfire", "shot themself" },
                     { "spontaneously combusted", "burned themself" },
                     { "was caught up in their own plasma-filled mayhem", "plasmified themself" },
-                    { "put their finger in the taser socket", "electrocuted themself" },
+                    { "tried to use themself as a circuit breaker", "electrocuted themself" },
                     { "got a good shock", "shocked themself" },
                     { "kicked it, kamikaze style", "blew themself up" },
                     { "kicked it, kamikaze style", "blew themself up" },
@@ -1448,7 +1448,7 @@ namespace game
                         { "char-grilled by", "burned by" },
                         { "plasmified by", "plasmified by" },
                         { "electrocuted by", "electrocuted by" },
-                        { "laser shocked by", "shocked by" },
+                        { "laser shocked by", "lasered by" },
                         { "blown to pieces by", "blown up by" },
                         { "blown to pieces by", "blown up by" },
                         { "exploded by", "exploded by" },
@@ -1461,7 +1461,7 @@ namespace game
                         { "spliced apart by", "shot by" },
                         { "snuffed out by", "burned by" },
                         { "shown the light by", "melted by" },
-                        { "tasered into submission by", "tasered by" },
+                        { "shocked into submission by", "shocked by" },
                         { "given laser burn by", "lasered by" },
                         { "blown to pieces by", "blown up by" },
                         { "blown to pieces by", "blown up by" },
@@ -1489,8 +1489,8 @@ namespace game
                         { "swiss-cheesed by", "aerated by" },
                         { "barbequed by", "grilled by" },
                         { "reduced to ooze by", "plasmified by" },
-                        { "tasered relentlessly by", "tasered by" },
-                        { "given laser shock treatment by", "shocked by" },
+                        { "shocked relentlessly by", "shocked by" },
+                        { "given laser shock treatment by", "lasered by" },
                         { "turned into shrapnel by", "gibbed by" },
                         { "turned into shrapnel by", "gibbed by" },
                         { "obliterated by", "obliterated by" },
@@ -3068,7 +3068,7 @@ namespace game
             if((anim>>ANIM_SECONDARY)&ANIM_INDEX) switch(anim&ANIM_INDEX)
             {
                 case ANIM_IDLE: case ANIM_MELEE: case ANIM_PISTOL: case ANIM_SWORD:
-                case ANIM_SHOTGUN: case ANIM_SMG: case ANIM_FLAMER: case ANIM_PLASMA: case ANIM_TASER:
+                case ANIM_SHOTGUN: case ANIM_SMG: case ANIM_FLAMER: case ANIM_PLASMA: case ANIM_CONVULSER:
                 case ANIM_RIFLE: case ANIM_GRENADE: case ANIM_MINE: case ANIM_ROCKET:
                 {
                     anim = (anim>>ANIM_SECONDARY) | ((anim&((1<<ANIM_SECONDARY)-1))<<ANIM_SECONDARY);

@@ -123,7 +123,7 @@ namespace ai
             {
                 case W_PISTOL: return true; break;
                 case W_MELEE: case W_ROCKET: default: return false; break;
-                case W_SWORD: case W_SHOTGUN: case W_SMG: case W_FLAMER: case W_PLASMA: case W_TASER: case W_GRENADE: case W_MINE:
+                case W_SWORD: case W_SHOTGUN: case W_SMG: case W_FLAMER: case W_PLASMA: case W_CONVULSER: case W_GRENADE: case W_MINE:
                     if(rnd(d->skill*3) <= d->skill) return false;
                     break;
                 case W_RIFLE: if(weaprange(d, d->weapselect, false, e->o.squaredist(d->o))) return false; break;
