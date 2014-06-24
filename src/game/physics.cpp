@@ -20,8 +20,9 @@ namespace physics
 
     VAR(IDF_PERSIST, dashstyle, 0, 1, 1); // 0 = only with impulse, 1 = double tap
     VAR(IDF_PERSIST, crouchstyle, 0, 0, 2); // 0 = press and hold, 1 = double-tap toggle, 2 = toggle
+    VAR(IDF_PERSIST, walkstyle, 0, 0, 2); // 0 = press and hold, 1 = double-tap toggle, 2 = toggle
 
-    int physsteps = 0, lastphysframe = 0, lastmove = 0, lastdirmove = 0, laststrafe = 0, lastdirstrafe = 0, lastcrouch = 0;
+    int physsteps = 0, lastphysframe = 0, lastmove = 0, lastdirmove = 0, laststrafe = 0, lastdirstrafe = 0, lastcrouch = 0, lastwalk = 0;
 
     bool allowimpulse(physent *d, int type)
     {
@@ -78,6 +79,7 @@ namespace physics
                 switch(type)
                 {
                     case AC_CROUCH: style = crouchstyle; last = &lastcrouch; break;
+                    case AC_WALK: style = walkstyle; last = &lastwalk; break;
                     default: break;
                 }
                 switch(style)
@@ -130,6 +132,7 @@ namespace physics
     ICOMMAND(0, reload, "D", (int *n), doaction(AC_RELOAD, *n!=0));
     ICOMMAND(0, use, "D", (int *n), doaction(AC_USE, *n!=0));
     ICOMMAND(0, jump, "D", (int *n), doaction(AC_JUMP, *n!=0));
+    ICOMMAND(0, walk, "D", (int *n), doaction(AC_WALK, *n!=0));
     ICOMMAND(0, crouch, "D", (int *n), doaction(AC_CROUCH, *n!=0));
     ICOMMAND(0, special, "D", (int *n), doaction(AC_SPECIAL, *n!=0));
     ICOMMAND(0, drop, "D", (int *n), doaction(AC_DROP, *n!=0));
@@ -215,16 +218,6 @@ namespace physics
         return false;
     }
 
-    bool iscrouching(physent *d)
-    {
-        if(d->state == CS_ALIVE && (gameent::is(d)))
-        {
-            gameent *e = (gameent *)d;
-            return e->action[AC_CROUCH] || e->actiontime[AC_CROUCH] < 0 || lastmillis-e->actiontime[AC_CROUCH] <= PHYSMILLIS;
-        }
-        return false;
-    }
-
     bool liquidcheck(physent *d) { return d->inliquid && !d->onladder && d->submerged >= PHYS(liquidsubmerge); }
 
     float liquidmerge(physent *d, float from, float to)
@@ -266,33 +259,18 @@ namespace physics
         return 1.f;
     }
 
-    bool sliding(physent *d, bool power)
-    {
-        if(gameent::is(d))
-        {
-            gameent *e = (gameent *)d;
-            if((!power && e->turnside) || (impulseslip && e->impulse[IM_SLIP] && lastmillis-e->impulse[IM_SLIP] <= impulseslip) || (impulseslide && e->impulse[IM_SLIDE] && lastmillis-e->impulse[IM_SLIDE] <= impulseslide))
-            {
-                if(!power || e->action[AC_CROUCH])
-                {
-                    if(power && impulseslide && impulseslip && e->move == 1 && e->impulse[IM_SLIP] > e->impulse[IM_SLIDE])
-                        e->impulse[IM_SLIDE] = e->impulse[IM_SLIP];
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
     bool sticktofloor(physent *d)
     {
-        if(!d->onladder && !liquidcheck(d) && (gameent::is(d)) && PHYS(gravity) > 0)
+        if(!d->onladder)
         {
-            gameent *e = (gameent *)d;
-            if((e->turnside || !e->action[AC_CROUCH]) && sliding(e)) return false;
-            return true;
+            if(liquidcheck(d)) return false;
+            if(gameent::is(d))
+            {
+                gameent *e = (gameent *)d;
+                if(e->sliding()) return false;
+            }
         }
-        return false;
+        return true;
     }
 
     bool sticktospecial(physent *d)
@@ -318,7 +296,7 @@ namespace physics
             {
                 gameent *e = (gameent *)pl;
                 vel *= movespeed/100.f*(1.f-clamp(e->stunned(lastmillis), 0.f, 1.f));
-                if((!e->airmillis && !sliding(e) && iscrouching(e)) || e->zooming()) vel *= movecrawl;
+                if(!e->airmillis && !e->sliding() && e->crouching()) vel *= movecrawl;
                 if(e->move >= 0) vel *= e->strafe ? movestrafe : movestraight;
                 switch(e->physstate)
                 {
@@ -732,7 +710,7 @@ namespace physics
 
     bool impulseplayer(gameent *d, bool &onfloor, bool melee = false)
     {
-        bool power = !melee && onfloor && impulsemethod&1 && sliding(d, true) && d->action[AC_JUMP];
+        bool power = !melee && onfloor && impulsemethod&1 && d->sliding(true) && d->action[AC_JUMP];
         if(power || d->ai || impulseaction || melee)
         {
             bool dash = false, pulse = false;
@@ -799,9 +777,9 @@ namespace physics
                 }
             impulsemod(d->running(), impulseregenrun);
             impulsemod(d->move || d->strafe, impulseregenmove);
-            impulsemod((!onfloor && PHYS(gravity) > 0) || sliding(d), impulseregeninair);
-            impulsemod(onfloor && iscrouching(d) && !sliding(d), impulseregencrouch);
-            impulsemod(sliding(d), impulseregenslide);
+            impulsemod((!onfloor && PHYS(gravity) > 0) || d->sliding(), impulseregeninair);
+            impulsemod(onfloor && d->crouching() && !d->sliding(), impulseregencrouch);
+            impulsemod(d->sliding(), impulseregenslide);
             if(collect)
             {
                 if(timeslice > 0)
@@ -867,7 +845,7 @@ namespace physics
                     regularshape(PART_SMOKE, int(d->radius), 0x222222, 21, 20, 250, d->feetpos(), 1, 1, -10, 0, 10.f);
                 }
             }
-            if(d->hasmelee(lastmillis, true, sliding(d, true), onfloor))
+            if(d->hasmelee(lastmillis, true, d->sliding(true), onfloor))
             {
                 vec oldpos = d->o, dir(d->yaw*RAD, 0.f);
                 d->o.add(dir);
@@ -1004,7 +982,7 @@ namespace physics
                 }
             }
         }
-        if(d->canmelee(m_weapon(game::gamemode, game::mutators), lastmillis, true, sliding(d, true), onfloor))
+        if(d->canmelee(m_weapon(game::gamemode, game::mutators), lastmillis, true, d->sliding(true), onfloor))
             weapons::doshot(d, d->o, W_MELEE, true, true);
         if(!found && d->turnside) d->turnside = 0;
         d->action[AC_DASH] = false;
@@ -1068,7 +1046,7 @@ namespace physics
         if(floating || pl->type == ENT_CAMERA) coast = floatcoast;
         else
         {
-            bool slide = gameent::is(pl) && sliding((gameent *)pl);
+            bool slide = gameent::is(pl) && ((gameent *)pl)->sliding();
             float c = pl->physstate >= PHYS_SLOPE || pl->onladder ? (slide ? PHYS(slidecoast) : PHYS(floorcoast))*coastscale(pl->feetpos(-2)) : PHYS(aircoast);
             coast = pl->inliquid ? liquidmerge(pl, c, PHYS(liquidcoast)) : c;
         }

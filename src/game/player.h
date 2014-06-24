@@ -115,6 +115,9 @@ PPVAR(0, health, 1, VAR_MAX,
 PPFVAR(0, weight, 0, FVAR_MAX,
     200
 );
+PPFVAR(0, scale, FVAR_NONZERO, FVAR_MAX,
+    1
+);
 PPFVAR(0, speed, FVAR_NONZERO, FVAR_MAX,
     50
 );

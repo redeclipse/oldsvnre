@@ -267,7 +267,7 @@ namespace game
     FVAR(IDF_PERSIST, footstepsoundmax, 0, 150, FVAR_MAX); // maximum velocity magnitude
     FVAR(IDF_PERSIST, footstepsoundlevel, 0, 1, 10); // a way to scale the volume
     FVAR(IDF_PERSIST, footstepsoundfocus, 0, 0.85f, 10); // focused player version of above
-    FVAR(IDF_PERSIST, footstepsounddim, 0, 0.5f, 10); // crouch/lighter player version of above
+    FVAR(IDF_PERSIST, footstepsoundlight, 0, 0.5f, 10); // crouch/walk player version of above
     VAR(IDF_PERSIST, footstepsoundminvol, 0, 64, 255);
     VAR(IDF_PERSIST, footstepsoundmaxvol, 0, 255, 255);
     VAR(IDF_PERSIST, footstepsoundminrad, -1, -1, 255);
@@ -1030,7 +1030,7 @@ namespace game
                 if(curfoot < 0) curfoot = d->lastfoot;
                 vec pos = d->footpos(curfoot);
                 float amt = clamp(mag/n, 0.f, 1.f)*(d != focus ? footstepsoundlevel : footstepsoundfocus);
-                if(onfloor && physics::iscrouching(d)) amt *= footstepsounddim;
+                if(onfloor && (!d->running() || d->crouching())) amt *= footstepsoundlight;
                 int vol = clamp(int(amt*footstepsoundmaxvol), footstepsoundminvol, footstepsoundmaxvol);
                 playsound(liquid && (!onfloor || rnd(4)) ? S_SWIMSTEP : S_FOOTSTEP, pos, NULL, d != focus ? 0 : SND_NOCULL, vol, footstepsoundmaxrad, footstepsoundminrad, &d->sschan[curfoot]);
             }
@@ -1087,7 +1087,7 @@ namespace game
                     break;
                 }
             }
-            if(physics::iscrouching(d))
+            if(d->crouching())
             {
                 int crouchtime = abs(d->actiontime[AC_CROUCH]);
                 float amt = lastmillis-crouchtime <= PHYSMILLIS ? clamp(float(lastmillis-crouchtime)/PHYSMILLIS, 0.f, 1.f) : 1.f;
@@ -2702,7 +2702,7 @@ namespace game
         switch(d->state)
         {
             case CS_SPECTATOR: case CS_WAITING: r = wobble*0.5f; break;
-            case CS_ALIVE: if(physics::iscrouching(d)) wobble *= 0.5f; r += wobble; break;
+            case CS_ALIVE: if(d->crouching()) wobble *= 0.5f; r += wobble; break;
             case CS_DEAD: r += wobble; break;
             default: break;
         }
@@ -3005,7 +3005,7 @@ namespace game
         }
         else
         {
-            bool melee = d->hasmelee(lastmillis, true, physics::sliding(d, true), onfloor);
+            bool melee = d->hasmelee(lastmillis, true, d->sliding(true), onfloor);
             if(secondary && allowmove(d) && actor[d->actortype].canmove)
             {
                 if(physics::liquidcheck(d) && d->physstate <= PHYS_FALL)
@@ -3046,8 +3046,8 @@ namespace game
                     else anim |= ANIM_JUMP<<ANIM_SECONDARY;
                     if(!basetime2) anim |= ANIM_END<<ANIM_SECONDARY;
                 }
-                else if(physics::sliding(d, true)) anim |= (ANIM_POWERSLIDE|ANIM_LOOP)<<ANIM_SECONDARY;
-                else if(d->action[AC_CROUCH] || d->actiontime[AC_CROUCH]<0)
+                else if(d->sliding(true)) anim |= (ANIM_POWERSLIDE|ANIM_LOOP)<<ANIM_SECONDARY;
+                else if(d->crouching(true))
                 {
                     if(d->move>0) anim |= (ANIM_CRAWL_FORWARD|ANIM_LOOP)<<ANIM_SECONDARY;
                     else if(d->strafe) anim |= ((d->strafe>0 ? ANIM_CRAWL_LEFT : ANIM_CRAWL_RIGHT)|ANIM_LOOP)<<ANIM_SECONDARY;
@@ -3466,7 +3466,7 @@ namespace game
                 }
             }
             float minz = d == focus && !third && firstpersonbodyfeet >= 0 && d->wantshitbox() ? camera1->o.z-firstpersonbodyfeet : 0.f;
-            if(d->hasmelee(lastmillis, true, physics::sliding(d, true), d->physstate >= PHYS_SLOPE || d->onladder || physics::liquidcheck(d))) loopi(2)
+            if(d->hasmelee(lastmillis, true, d->sliding(true), d->physstate >= PHYS_SLOPE || d->onladder || physics::liquidcheck(d))) loopi(2)
             {
                 vec pos = d->footpos(i);
                 if(minz > 0 && pos.z > minz) pos.z -= pos.z-minz;
@@ -3536,7 +3536,7 @@ namespace game
                     case 0: default: break;
                 }
             }
-            if(d->turnside || d->running() || d->impulse[IM_JUMP] || physics::sliding(d)) impulseeffect(d, 1);
+            if(d->turnside || d->impulse[IM_JUMP] || d->sliding()) impulseeffect(d, 1);
         }
         if(burntime && d->burning(lastmillis, burntime))
         {

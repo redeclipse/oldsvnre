@@ -361,7 +361,7 @@ enum { MM_OPEN = 0, MM_VETO, MM_LOCKED, MM_PRIVATE, MM_PASSWORD };
 enum { SINFO_NONE = 0, SINFO_STATUS, SINFO_NAME, SINFO_PORT, SINFO_QPORT, SINFO_DESC, SINFO_MODE, SINFO_MUTS, SINFO_MAP, SINFO_TIME, SINFO_NUMPLRS, SINFO_MAXPLRS, SINFO_PING, SINFO_MAX };
 enum { SSTAT_OPEN = 0, SSTAT_LOCKED, SSTAT_PRIVATE, SSTAT_FULL, SSTAT_UNKNOWN, SSTAT_MAX };
 
-enum { AC_PRIMARY = 0, AC_SECONDARY, AC_RELOAD, AC_USE, AC_JUMP, AC_CROUCH, AC_SPECIAL, AC_DROP, AC_AFFINITY, AC_TOTAL, AC_DASH = AC_TOTAL, AC_MAX };
+enum { AC_PRIMARY = 0, AC_SECONDARY, AC_RELOAD, AC_USE, AC_JUMP, AC_WALK, AC_CROUCH, AC_SPECIAL, AC_DROP, AC_AFFINITY, AC_TOTAL, AC_DASH = AC_TOTAL, AC_MAX };
 enum { IM_METER = 0, IM_TYPE, IM_TIME, IM_REGEN, IM_COUNT, IM_COLLECT, IM_SLIP, IM_SLIDE, IM_JUMP, IM_MAX };
 enum { IM_A_NONE = 0, IM_A_DASH = 1<<0, IM_A_BOOST = 1<<1, IM_A_PARKOUR = 1<<2, IM_A_ALL = IM_A_DASH|IM_A_BOOST|IM_A_PARKOUR, IM_A_RELAX = IM_A_PARKOUR };
 enum { IM_T_NONE = 0, IM_T_BOOST, IM_T_DASH, IM_T_MELEE, IM_T_KICK, IM_T_VAULT, IM_T_SKATE, IM_T_MAX, IM_T_WALL = IM_T_MELEE };
@@ -1329,9 +1329,28 @@ struct gameent : dynent, gamestate
         return footpos(0).squaredist(dir) > footpos(1).squaredist(dir) ? 0 : 1;
     }
 
+    bool crouching(bool limit = false)
+    {
+        return action[AC_CROUCH] || actiontime[AC_CROUCH] < 0 || (!limit && lastmillis-actiontime[AC_CROUCH] <= PHYSMILLIS);
+    }
+
     bool running()
     {
-        return (move || strafe) && (G(runspeed) == 0 || vel.magnitude() >= runspeed);
+        return (move || strafe) && !action[AC_WALK] && (G(runspeed) == 0 || vel.magnitude() >= G(runspeed));
+    }
+
+    bool sliding(bool power = false)
+    {
+        if((!power && turnside) || (G(impulseslip) && impulse[IM_SLIP] && lastmillis-impulse[IM_SLIP] <= G(impulseslip)) || (G(impulseslide) && impulse[IM_SLIDE] && lastmillis-impulse[IM_SLIDE] <= G(impulseslide)))
+        {
+            if(!power || crouching())
+            {
+                if(power && G(impulseslide) && G(impulseslip) && move == 1 && impulse[IM_SLIP] > impulse[IM_SLIDE])
+                    impulse[IM_SLIDE] = impulse[IM_SLIP];
+                return true;
+            }
+        }
+        return false;
     }
 };
 
@@ -1458,7 +1477,6 @@ namespace physics
     extern bool dropaffinity(gameent *d);
     extern bool secondaryweap(gameent *d, bool zoom = false);
     extern bool allowimpulse(physent *d, int level = 0);
-    extern bool sliding(physent *d, bool power = false);
     extern bool canimpulse(physent *d, int level = 0, bool kick = false);
     extern bool movecamera(physent *pl, const vec &dir, float dist, float stepdist);
     extern void smoothplayer(gameent *d, int res, bool local);

@@ -1416,7 +1416,7 @@ namespace client
         putuint(q, d->impulse[IM_METER]);
         ivec o = ivec(vec(d->o.x, d->o.y, d->o.z-d->height).mul(DMF));
         uint vel = min(int(d->vel.magnitude()*DVELF), 0xFFFF), fall = min(int(d->falling.magnitude()*DVELF), 0xFFFF);
-        // 3 bits position, 1 bit velocity, 3 bits falling, 1 bit aim, 1 bit crouching, 1 bit conopen
+        // 3 bits position, 1 bit velocity, 3 bits falling
         uint flags = 0;
         if(o.x < 0 || o.x > 0xFFFF) flags |= 1<<0;
         if(o.y < 0 || o.y > 0xFFFF) flags |= 1<<1;
@@ -1430,8 +1430,9 @@ namespace client
         }
         if(d->conopen) flags |= 1<<8;
         if(d->action[AC_JUMP]) flags |= 1<<9;
-        if(d->action[AC_CROUCH]) flags |= 1<<10;
-        if(d->action[AC_SPECIAL]) flags |= 1<<11;
+        if(d->action[AC_WALK]) flags |= 1<<10;
+        if(d->action[AC_CROUCH]) flags |= 1<<11;
+        if(d->action[AC_SPECIAL]) flags |= 1<<12;
         putuint(q, flags);
         loopk(3)
         {
@@ -1683,8 +1684,9 @@ namespace client
                     if(val != d->action[x]) d->actiontime[x] = lastmillis; \
                 }
                 actmod(AC_JUMP, 9);
-                actmod(AC_CROUCH, 10);
-                actmod(AC_SPECIAL, 11);
+                actmod(AC_WALK, 10);
+                actmod(AC_CROUCH, 11);
+                actmod(AC_SPECIAL, 12);
                 vec oldpos(d->o);
                 d->o = o;
                 d->o.z += d->height;
