@@ -175,7 +175,6 @@ GVAR(0, trialghost, 0, 1, 1); // 0 = all players are solid, 1 = all players are 
 GFVAR(0, maxhealth, 0, 1.5f, FVAR_MAX);
 GFVAR(0, maxhealthvampire, 0, 3.0f, FVAR_MAX);
 
-GFVAR(0, actorscale, FVAR_NONZERO, 1, FVAR_MAX);
 GFVAR(0, maxresizescale, 1, 2, FVAR_MAX);
 GFVAR(0, minresizescale, FVAR_NONZERO, 0.5f, 1);
 GFVAR(0, instaresizeamt, FVAR_NONZERO, 0.1f, 1); // each kill adds this much size in insta-resize
@@ -416,10 +415,10 @@ GFVAR(0, impulseregeninair, 0, 0.75f, FVAR_MAX); // impulse regen in-air modifie
 GFVAR(0, impulseregenslide, 0, 0, FVAR_MAX); // impulse regen sliding modifier
 GVAR(0, impulseregendelay, 0, 350, VAR_MAX); // delay before impulse regens
 
-GFVAR(0, stillspread, 0, 0, FVAR_MAX);
-GFVAR(0, movespread, 0, 1.f, FVAR_MAX);
-GFVAR(0, impulsespread, 0, 1.f, FVAR_MAX);
-GFVAR(0, inairspread, 0, 1.f, FVAR_MAX);
+GFVAR(0, spreadstill, 0, 0, FVAR_MAX);
+GFVAR(0, spreadmoving, 0, 1.f, FVAR_MAX);
+GFVAR(0, spreadrunning, 0, 1.f, FVAR_MAX);
+GFVAR(0, spreadinair, 0, 1.f, FVAR_MAX);
 
 GVAR(0, quakefade, 0, 250, VAR_MAX);
 GVAR(0, quakewobble, 1, 18, VAR_MAX);

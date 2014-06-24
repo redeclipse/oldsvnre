@@ -656,7 +656,7 @@ namespace projs
                 trans *= 1.f-(WF(WK(proj.flags), proj.weap, visfade, WS(proj.flags))*millis/float(WF(WK(proj.flags), proj.weap, vistime, WS(proj.flags))));
             else trans *= 1.f-WF(WK(proj.flags), proj.weap, visfade, WS(proj.flags));
             if(proj.beenused && proj.lifetime < WF(WK(proj.flags), proj.weap, proxtime, WS(proj.flags)))
-                    trans += (1.f-trans)*((WF(WK(proj.flags), proj.weap, proxtime, WS(proj.flags))-proj.lifetime)/float(WF(WK(proj.flags), proj.weap, proxtime, WS(proj.flags))));
+                trans += (1.f-trans)*((WF(WK(proj.flags), proj.weap, proxtime, WS(proj.flags))-proj.lifetime)/float(WF(WK(proj.flags), proj.weap, proxtime, WS(proj.flags))));
         }
         return trans;
     }
@@ -1194,12 +1194,8 @@ namespace projs
             int peak = attackdelay/4, fade = min(peak/2, 75);
             adddynlight(from, 32, vec::hexcolor(colour).mul(0.5f), fade, peak - fade, DL_FLASH);
         }
-        int wait = delay;
         loopv(shots)
-        {
-            create(from, shots[i].pos.tovec().div(DMF), local, d, PRJ_SHOT, max(life, 1), W2(weap, time, WS(flags)), wait, speed, shots[i].id, weap, -1, flags, skew);
-            wait += iter;
-        }
+            create(from, shots[i].pos.tovec().div(DMF), local, d, PRJ_SHOT, max(life, 1), W2(weap, time, WS(flags)), delay+(iter*i), speed, shots[i].id, weap, -1, flags, skew);
         if(ejectfade && weaptype[weap].eject && *weaptype[weap].eprj) loopi(clamp(sub, 1, W2(weap, ammosub, WS(flags))))
             create(from, from, local, d, PRJ_EJECT, rnd(ejectfade)+ejectfade, 0, delay, rnd(weaptype[weap].espeed)+weaptype[weap].espeed, 0, weap, -1, flags);
 
@@ -1215,7 +1211,7 @@ namespace projs
                 if(d == game::focus) game::swaypush.add(vec(kick).mul(kickpushsway));
                 float kickmod = kickpushscale;
                 if(W2(weap, cooked, WS(flags))&W_C_ZOOM && WS(flags)) kickmod *= kickpushzoom;
-                if(physics::iscrouching(d) && !physics::sliding(d)) kickmod *= kickpushcrouch;
+                if(d->crouching() && !d->sliding()) kickmod *= kickpushcrouch;
                 d->vel.add(vec(kick).mul(kickmod));
             }
         }

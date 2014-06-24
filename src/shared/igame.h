@@ -82,7 +82,6 @@ namespace physics
     extern bool entinmap(physent *d, bool avoidplayers);
     extern void updatephysstate(physent *d);
     extern bool droptofloor(vec &o, int type = ENT_CAMERA, float radius = 1, float height = 1);
-    extern bool iscrouching(physent *d);
     extern bool moveplayer(physent *pl, int moveres, bool local, int millis);
     extern void interppos(physent *d);
     extern void updatematerial(physent *pl, const vec &center, const vec &bottom, bool local = false);
