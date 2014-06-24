@@ -1,7 +1,7 @@
 enum
 {
     W_MELEE = 0, W_PISTOL, W_OFFSET, // end of unselectable weapon set
-    W_SWORD = W_OFFSET, W_SHOTGUN, W_SMG, W_FLAMER, W_PLASMA, W_TASER, W_RIFLE, W_ITEM,
+    W_SWORD = W_OFFSET, W_SHOTGUN, W_SMG, W_FLAMER, W_PLASMA, W_CONVULSER, W_RIFLE, W_ITEM,
     W_GRENADE = W_ITEM, W_MINE, W_BOOM, W_ROCKET = W_BOOM, // end of item weapon set
     W_MAX, W_LOADOUT = W_ITEM-W_OFFSET // if you add to this at all, check all arrays with W_MAX
 };
@@ -49,8 +49,8 @@ enum
     S_SMG       = S_SHOTGUN+S_W_MAX,
     S_FLAMER    = S_SMG+S_W_MAX,
     S_PLASMA    = S_FLAMER+S_W_MAX,
-    S_TASER   = S_PLASMA+S_W_MAX,
-    S_RIFLE     = S_TASER+S_W_MAX,
+    S_CONVULSER   = S_PLASMA+S_W_MAX,
+    S_RIFLE     = S_CONVULSER+S_W_MAX,
     S_GRENADE   = S_RIFLE+S_W_MAX,
     S_MINE      = S_GRENADE+S_W_MAX,
     S_ROCKET    = S_MINE+S_W_MAX,
@@ -101,7 +101,7 @@ struct hitmsg { int flags, proj, target, dist; ivec dir, vel; };
 #include "weapdef.h"
 
 WPSVAR(0, name,
-    "melee",    "pistol",   "sword",    "shotgun",  "smg",      "flamer",   "plasma",   "taser",    "rifle",    "grenade",  "mine",     "rocket"
+    "melee",    "pistol",   "sword",    "shotgun",  "smg",      "flamer",   "plasma",   "convulser",    "rifle",    "grenade",  "mine",     "rocket"
 );
 WPFVARM(0, aidist, 0, FVAR_MAX,
     16.0f,      512.0f,     48.0f,      64.0f,      512.0f,     64.0f,      512.0f,     64.f,       768.0f,     384.0f,     128.0f,     1024.0f,
@@ -420,10 +420,10 @@ WPFVARK(0, partsize, 0, FVAR_MAX,
     2.0f,       0.25f,      1.25f,      0.45f,      0.4f,       12.0f,      24.0f,      3.0f,       3.0f,       1.0f,       2.0f,       1.0f
 );
 WPVARK(0, parttype, 0, W_MAX-1,
-    W_MELEE,    W_PISTOL,   W_SWORD,    W_SHOTGUN,  W_SMG,      W_FLAMER,   W_PLASMA,   W_TASER,    W_RIFLE,    W_GRENADE,  W_MINE,     W_ROCKET,
-    W_MELEE,    W_PISTOL,   W_SWORD,    W_SHOTGUN,  W_SMG,      W_FLAMER,   W_PLASMA,   W_TASER,    W_RIFLE,    W_GRENADE,  W_MINE,     W_ROCKET,
-    W_MELEE,    W_PISTOL,   W_SWORD,    W_SHOTGUN,  W_SMG,      W_FLAMER,   W_PLASMA,   W_TASER,    W_RIFLE,    W_GRENADE,  W_MINE,     W_ROCKET,
-    W_MELEE,    W_PISTOL,   W_SWORD,    W_SHOTGUN,  W_SMG,      W_FLAMER,   W_PLASMA,   W_TASER,    W_RIFLE,    W_GRENADE,  W_MINE,     W_ROCKET
+    W_MELEE,    W_PISTOL,   W_SWORD,    W_SHOTGUN,  W_SMG,      W_FLAMER,   W_PLASMA,   W_CONVULSER,    W_RIFLE,    W_GRENADE,  W_MINE,     W_ROCKET,
+    W_MELEE,    W_PISTOL,   W_SWORD,    W_SHOTGUN,  W_SMG,      W_FLAMER,   W_PLASMA,   W_CONVULSER,    W_RIFLE,    W_GRENADE,  W_MINE,     W_ROCKET,
+    W_MELEE,    W_PISTOL,   W_SWORD,    W_SHOTGUN,  W_SMG,      W_FLAMER,   W_PLASMA,   W_CONVULSER,    W_RIFLE,    W_GRENADE,  W_MINE,     W_ROCKET,
+    W_MELEE,    W_PISTOL,   W_SWORD,    W_SHOTGUN,  W_SMG,      W_FLAMER,   W_PLASMA,   W_CONVULSER,    W_RIFLE,    W_GRENADE,  W_MINE,     W_ROCKET
 );
 WPVARK(0, proxdelay, 0, VAR_MAX,
     0,          0,          0,          0,          0,          0,          0,          0,          0,          0,          3000,       0,
@@ -684,10 +684,10 @@ weaptypes weaptype[] =
             "plasma", "weapons/plasma/item", "weapons/plasma/vwep", "weapons/plasma/hwep", "", ""
     },
     {
-            ANIM_TASER,        S_TASER,   1,
+            ANIM_CONVULSER,        S_CONVULSER,   1,
             false,      false,      true,       false,
             { 0, 0 },               12,         0,
-            "taser", "weapons/taser/item", "weapons/taser/vwep", "weapons/taser/hwep", "", ""
+            "convulser", "weapons/convulser/item", "weapons/convulser/vwep", "weapons/convulser/hwep", "", ""
     },
     {
             ANIM_RIFLE,         S_RIFLE,    1,
@@ -714,7 +714,7 @@ weaptypes weaptype[] =
             "rocket", "weapons/rocket/item", "weapons/rocket/vwep", "weapons/rocket/hwep", "weapons/rocket/proj",  ""
     }
 };
-SVAR(0, weapname, "melee pistol sword shotgun smg flamer plasma taser rifle grenade mine rocket");
+SVAR(0, weapname, "melee pistol sword shotgun smg flamer plasma convulser rifle grenade mine rocket");
 VAR(0, weapidxmelee, 1, W_MELEE, -1);
 VAR(0, weapidxpistol, 1, W_PISTOL, -1);
 VAR(0, weapidxsword, 1, W_SWORD, -1);
@@ -722,7 +722,7 @@ VAR(0, weapidxshotgun, 1, W_SHOTGUN, -1);
 VAR(0, weapidxsmg, 1, W_SMG, -1);
 VAR(0, weapidxflamer, 1, W_FLAMER, -1);
 VAR(0, weapidxplasma, 1, W_PLASMA, -1);
-VAR(0, weapidxtaser, 1, W_TASER, -1);
+VAR(0, weapidxconvulser, 1, W_CONVULSER, -1);
 VAR(0, weapidxrifle, 1, W_RIFLE, -1);
 VAR(0, weapidxgrenade, 1, W_GRENADE, -1);
 VAR(0, weapidxmine, 1, W_MINE, -1);
