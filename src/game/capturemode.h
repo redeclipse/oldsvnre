@@ -254,11 +254,9 @@ struct captureservmode : capturestate, servmode
 
     void moveaffinity(clientinfo *ci, int cn, int id, const vec &o, const vec &inertia = vec(0, 0, 0))
     {
-        if(!flags.inrange(id)) return;
+        if(!canplay(hasflaginfo) || !flags.inrange(id)) return;
         flag &f = flags[id];
-        if(!f.droptime || f.owner >= 0) return;
-        clientinfo *co = f.lastowner >= 0 ? (clientinfo *)getinfo(f.lastowner) : NULL;
-        if(!co || co->clientnum != ci->clientnum) return;
+        if(!f.droptime || f.owner >= 0 || f.lastowner != ci->clientnum) return;
         f.droploc = o;
         f.inertia = inertia;
         //sendf(-1, 1, "ri9", N_MOVEAFFIN, ci->clientnum, id, int(f.droploc.x*DMF), int(f.droploc.y*DMF), int(f.droploc.z*DMF), int(f.inertia.x*DMF), int(f.inertia.y*DMF), int(f.inertia.z*DMF));

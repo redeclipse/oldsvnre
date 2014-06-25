@@ -552,36 +552,50 @@ namespace bomber
         if(d->ai) aihomerun(d, d->ai->state.last());
     }
 
-    void checkaffinity(dynent *e)
+    void checkaffinity(gameent *d, int i)
     {
-        if(e->state != CS_ALIVE || !gameent::is(e)) return;
-        gameent *d = (gameent *)e;
         vec o = d->feetpos();
+        bomberstate::flag &f = st.flags[i];
+        if(f.owner)
+        {
+            bool forever = m_gsp1(game::gamemode, game::mutators) || m_gsp2(game::gamemode, game::mutators) || (m_gsp3(game::gamemode, game::mutators) && d->team != T_OMEGA);
+            if(!carrytime && forever) return;
+            int takemillis = lastmillis-f.taketime, length = forever ? carrytime-550-bomberlockondelay : min(carrytime, 1000);
+            if(d->ai && f.owner == d && takemillis >= length)
+            {
+                if(d->action[AC_AFFINITY])
+                {
+                    if((carrytime && takemillis >= carrytime-500) || lastmillis-d->actiontime[AC_AFFINITY] >= bomberlockondelay)
+                        d->action[AC_AFFINITY] = false;
+                }
+                else
+                {
+                    d->action[AC_AFFINITY] = true;
+                    d->actiontime[AC_AFFINITY] = lastmillis;
+                }
+            }
+            return;
+        }
+        if(!f.droptime && m_gsp3(game::gamemode, game::mutators) && d->team != T_OMEGA && bomberattackreset) return;
+        if(f.pickuptime && lastmillis-f.pickuptime <= 1000) return;
+        if(f.lastowner == d && f.droptime && (bomberpickupdelay < 0 || lastmillis-f.droptime <= max(bomberpickupdelay, 500))) return;
+        if(o.dist(f.pos()) <= enttype[AFFINITY].radius/2)
+        {
+            client::addmsg(N_TAKEAFFIN, "ri2", d->clientnum, i);
+            f.pickuptime = lastmillis;
+        }
+    }
+
+    void update()
+    {
+        gameent *d = NULL;
+        int numdyn = game::numdynents();
+        loopj(numdyn) if(((d = (gameent *)game::iterdynents(j))) && d->state == CS_ALIVE && (d == game::player1 || d->ai)) dropaffinity(d);
         loopv(st.flags)
         {
             bomberstate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent) || !f.enabled || !isbomberaffinity(f)) continue;
-            if(f.owner)
-            {
-                bool forever = m_gsp1(game::gamemode, game::mutators) || m_gsp2(game::gamemode, game::mutators) || (m_gsp3(game::gamemode, game::mutators) && d->team != T_OMEGA);
-                if(!carrytime && forever) continue;
-                int takemillis = lastmillis-f.taketime, length = forever ? carrytime-550-bomberlockondelay : min(carrytime, 1000);
-                if(d->ai && f.owner == d && takemillis >= length)
-                {
-                    if(d->action[AC_AFFINITY])
-                    {
-                        if((carrytime && takemillis >= carrytime-500) || lastmillis-d->actiontime[AC_AFFINITY] >= bomberlockondelay)
-                            d->action[AC_AFFINITY] = false;
-                    }
-                    else
-                    {
-                        d->action[AC_AFFINITY] = true;
-                        d->actiontime[AC_AFFINITY] = lastmillis;
-                    }
-                }
-                continue;
-            }
-            else if(f.droptime)
+            if(f.droptime)
             {
                 vec pos = f.pos();
                 f.distance += f.droploc.dist(pos);
@@ -593,16 +607,8 @@ namespace bomber
                     client::addmsg(N_MOVEAFFIN, "ri8", f.lastowner->clientnum, i, int(f.droploc.x*DMF), int(f.droploc.y*DMF), int(f.droploc.z*DMF), int(f.inertia.x*DMF), int(f.inertia.y*DMF), int(f.inertia.z*DMF));
                 }
             }
-            if(!f.droptime && m_gsp3(game::gamemode, game::mutators) && d->team != T_OMEGA && bomberattackreset) continue;
-            if(f.pickuptime && lastmillis-f.pickuptime <= 1000) continue;
-            if(f.lastowner == d && f.droptime && (bomberpickupdelay < 0 || lastmillis-f.droptime <= max(bomberpickupdelay, 500))) continue;
-            if(o.dist(f.pos()) <= enttype[AFFINITY].radius/2)
-            {
-                client::addmsg(N_TAKEAFFIN, "ri2", d->clientnum, i);
-                f.pickuptime = lastmillis;
-            }
+            loopj(numdyn) if(((d = (gameent *)game::iterdynents(j))) && d->state == CS_ALIVE && (d == game::player1 || d->ai)) checkaffinity(d, i);
         }
-        dropaffinity(d);
     }
 
     bool aihomerun(gameent *d, ai::aistate &b)

@@ -820,8 +820,6 @@ namespace entities
                 }
             }
         }
-        if(m_capture(game::gamemode)) capture::checkaffinity(d);
-        else if(m_bomber(game::gamemode)) bomber::checkaffinity(d);
     }
 
     void putitems(packetbuf &p)

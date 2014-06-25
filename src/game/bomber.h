@@ -169,7 +169,8 @@ struct bomberstate
 #else
         f.pickuptime = f.movetime = 0;
         if(!f.inittime) f.inittime = t;
-        (f.lastowner = owner)->addicon(eventicon::AFFINITY, t, game::eventiconfade, f.team);
+        owner->addicon(eventicon::AFFINITY, t, game::eventiconfade, f.team);
+        f.lastowner = owner;
         destroy(i);
 #endif
     }
@@ -189,8 +190,7 @@ struct bomberstate
         f.owner = -1;
         f.votes.shrink(0);
 #else
-        f.pickuptime = 0;
-        f.movetime = t;
+        f.pickuptime = f.movetime = 0;
         if(!f.inittime) f.inittime = t;
         f.owner = NULL;
         destroy(i);
@@ -233,7 +233,7 @@ namespace bomber
     extern void reset();
     extern void setup();
     extern void setscore(int team, int total);
-    extern void checkaffinity(dynent *e);
+    extern void update();
     extern void killed(gameent *d, gameent *v);
     extern void drawnotices(int w, int h, int &tx, int &ty, float blend);
     extern void drawblips(int w, int h, float blend);

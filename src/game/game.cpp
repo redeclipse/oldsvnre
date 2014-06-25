@@ -2823,6 +2823,8 @@ namespace game
             if(!intermission)
             {
                 entities::update();
+                if(m_capture(game::gamemode)) capture::update();
+                else if(m_bomber(game::gamemode)) bomber::update();
                 if(player1->state == CS_ALIVE) weapons::shoot(player1, worldpos);
             }
             otherplayers();

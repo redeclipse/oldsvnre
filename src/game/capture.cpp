@@ -27,16 +27,6 @@ namespace capture
         if(!st.flags.inrange(n)) return false;
         capturestate::flag &f = st.flags[n];
         if(!entities::ents.inrange(f.ent) || f.owner) return false;
-        if(f.droptime)
-        {
-            f.droploc = f.pos();
-            if(f.lastowner && (f.lastowner == game::player1 || f.lastowner->ai) && f.proj && (!f.movetime || totalmillis-f.movetime >= 40))
-            {
-                f.inertia = f.proj->vel;
-                f.movetime = totalmillis-(totalmillis%40);
-                client::addmsg(N_MOVEAFFIN, "ri8", f.lastowner->clientnum, n, int(f.droploc.x*DMF), int(f.droploc.y*DMF), int(f.droploc.z*DMF), int(f.inertia.x*DMF), int(f.inertia.y*DMF), int(f.inertia.z*DMF));
-            }
-        }
         if(f.pickuptime && lastmillis-f.pickuptime <= 1000) return false;
         if(f.team == d->team && (m_gsp2(game::gamemode, game::mutators) || (!f.droptime && (m_gsp1(game::gamemode, game::mutators) || check || !d->action[AC_AFFINITY]))))
             return false;
@@ -532,18 +522,38 @@ namespace capture
         if(d->ai) aihomerun(d, d->ai->state.last());
     }
 
-    void checkaffinity(dynent *e)
+    void checkaffinity(gameent *d, int i)
     {
-        if(e->state != CS_ALIVE || !gameent::is(e)) return;
-        gameent *d = (gameent *)e;
-        loopv(st.flags) if(canpickup(d, i))
+        if(canpickup(d, i))
         {
             client::addmsg(N_TAKEAFFIN, "ri2", d->clientnum, i);
             st.flags[i].pickuptime = lastmillis;
             d->action[AC_AFFINITY] = false;
             d->actiontime[AC_AFFINITY] = 0;
         }
-        dropaffinity(d);
+    }
+
+    void update()
+    {
+        gameent *d = NULL;
+        int numdyn = game::numdynents();
+        loopj(numdyn) if(((d = (gameent *)game::iterdynents(j))) && d->state == CS_ALIVE && (d == game::player1 || d->ai)) dropaffinity(d);
+        loopv(st.flags)
+        {
+            capturestate::flag &f = st.flags[i];
+            if(!entities::ents.inrange(f.ent) || f.owner >= 0) continue;
+            if(f.droptime)
+            {
+                f.droploc = f.pos();
+                if(f.lastowner && (f.lastowner == game::player1 || f.lastowner->ai) && f.proj && (!f.movetime || totalmillis-f.movetime >= 40))
+                {
+                    f.inertia = f.proj->vel;
+                    f.movetime = totalmillis-(totalmillis%40);
+                    client::addmsg(N_MOVEAFFIN, "ri8", f.lastowner->clientnum, i, int(f.droploc.x*DMF), int(f.droploc.y*DMF), int(f.droploc.z*DMF), int(f.inertia.x*DMF), int(f.inertia.y*DMF), int(f.inertia.z*DMF));
+                }
+            }
+            loopj(numdyn) if(((d = (gameent *)game::iterdynents(j))) && d->state == CS_ALIVE && (d == game::player1 || d->ai)) checkaffinity(d, i);
+        }
     }
 
     vec &aiflagpos(gameent *d, capturestate::flag &f)
