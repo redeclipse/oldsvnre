@@ -1047,7 +1047,7 @@ namespace physics
         else
         {
             bool slide = gameent::is(pl) && ((gameent *)pl)->sliding();
-            float c = pl->physstate >= PHYS_SLOPE || pl->onladder ? (slide ? PHYS(slidecoast) : PHYS(floorcoast))*coastscale(pl->feetpos(-2)) : PHYS(aircoast);
+            float c = pl->physstate >= PHYS_SLOPE || pl->onladder ? (slide ? PHYS(slidecoast) : PHYS(floorcoast))*coastscale(pl->feetpos(-1)) : PHYS(aircoast);
             coast = pl->inliquid ? liquidmerge(pl, c, PHYS(liquidcoast)) : c;
         }
         pl->vel.lerp(m, pl->vel, pow(max(1.0f - 1.0f/coast, 0.0f), millis/20.0f));
@@ -1072,7 +1072,7 @@ namespace physics
         else pl->falling = g;
         if(liquidcheck(pl) || pl->physstate >= PHYS_SLOPE)
         {
-            float coast = liquidcheck(pl) ? liquidmerge(pl, PHYS(aircoast), PHYS(liquidcoast)) : PHYS(floorcoast)*coastscale(pl->feetpos(-2)),
+            float coast = liquidcheck(pl) ? liquidmerge(pl, PHYS(aircoast), PHYS(liquidcoast)) : PHYS(floorcoast)*coastscale(pl->feetpos(-1)),
                   c = liquidcheck(pl) ? 1.0f : clamp((pl->floor.z - slopez)/(floorz-slopez), 0.0f, 1.0f);
             pl->falling.mul(pow(max(1.0f - c/coast, 0.0f), curtime/20.0f));
         }

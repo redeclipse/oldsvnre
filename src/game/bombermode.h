@@ -253,7 +253,7 @@ struct bomberservmode : bomberstate, servmode
                 if(ci && carrytime && gamemillis-f.taketime >= carrytime)
                 {
                     ci->state.weapshots[W_GRENADE][0].add(1);
-                    sendf(-1, 1, "ri8", N_DROP, ci->clientnum, -1, 1, W_GRENADE, -1, -1);
+                    sendf(-1, 1, "ri7", N_DROP, ci->clientnum, -1, 1, W_GRENADE, -1, -1);
                     dropaffinity(ci, ci->state.feetpos(G(bomberdropheight)), vec(ci->state.vel).add(ci->state.falling));
                     if(m_gsp1(gamemode, mutators) && G(bomberholdpenalty))
                     {
@@ -344,11 +344,9 @@ struct bomberservmode : bomberstate, servmode
 
     void moveaffinity(clientinfo *ci, int cn, int id, const vec &o, const vec &inertia = vec(0, 0, 0))
     {
-        if(!canplay(hasflaginfo) || flags.inrange(id)) return;
+        if(!canplay(hasflaginfo) || !flags.inrange(id)) return;
         flag &f = flags[id];
-        if(!f.droptime || f.owner >= 0 || !isbomberaffinity(f)) return;
-        clientinfo *co = f.lastowner >= 0 ? (clientinfo *)getinfo(f.lastowner) : NULL;
-        if(!co || co->clientnum != ci->clientnum) return;
+        if(!f.droptime || f.owner >= 0 || !isbomberaffinity(f) || f.lastowner != ci->clientnum) return;
         f.distance += f.droploc.dist(o);
         f.droploc = o;
         f.inertia = inertia;

@@ -161,8 +161,7 @@ struct capturestate
         f.owner = -1;
         f.votes.shrink(0);
 #else
-        f.pickuptime = 0;
-        f.movetime = t;
+        f.pickuptime =  f.movetime = 0;
         f.owner = NULL;
         destroy(i);
         create(i);
@@ -203,7 +202,7 @@ namespace capture
     extern void reset();
     extern void setup();
     extern void setscore(int team, int total);
-    extern void checkaffinity(dynent *e);
+    extern void update();
     extern void drawnotices(int w, int h, int &tx, int &ty, float blend);
     extern void drawblips(int w, int h, float blend);
     extern int drawinventory(int x, int y, int s, int m, float blend);
