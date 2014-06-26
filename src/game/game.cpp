@@ -3294,24 +3294,19 @@ namespace game
         else
         {
             secondary = third;
-            if(showweap)
+            if(showweap && isweap(weap))
             {
                 weapaction = lastaction = d->weaplast[weap];
                 animdelay = d->weapwait[weap];
                 switch(d->weapstate[weap])
                 {
-                    case W_S_SWITCH:
-                    case W_S_USE:
+                    case W_S_SWITCH: case W_S_USE:
                     {
                         int millis = lastmillis-d->weaplast[weap], off = d->weapwait[weap]/3, lastweap = d->getlastweap(m_weapon(gamemode, mutators));
-                        if(millis <= off)
+                        if(isweap(lastweap) && millis <= off)
                         {
-                            if(!d->hasweap(lastweap, m_weapon(gamemode, mutators))) showweap = false;
-                            else
-                            {
-                                weap = lastweap;
-                                weapscale = 1-(millis/float(off));
-                            }
+                            weap = lastweap;
+                            weapscale = 1-(millis/float(off));
                         }
                         else if(!d->hasweap(weap, m_weapon(gamemode, mutators))) showweap = false;
                         else if(millis <= off*2) weapscale = (millis-off)/float(off);
@@ -3327,11 +3322,15 @@ namespace game
                         }
                         break;
                     }
-                    case W_S_PRIMARY:
-                    case W_S_SECONDARY:
+                    case W_S_PRIMARY: case W_S_SECONDARY:
                     {
-                        if(weaptype[weap].thrown[d->weapstate[weap]-W_S_PRIMARY] > 0 && (lastmillis-d->weaplast[weap] <= d->weapwait[weap]/2 || !d->hasweap(weap, m_weapon(gamemode, mutators))))
-                            showweap = false;
+                        if(weaptype[weap].thrown[d->weapstate[weap]-W_S_PRIMARY] > 0)
+                        {
+                            int millis = lastmillis-d->weaplast[weap], off = d->weapwait[weap]/2;
+                            if(millis <= off || !d->hasweap(weap, m_weapon(gamemode, mutators)))
+                                showweap = false;
+                            else weapscale = (millis-off)/float(off);
+                        }
                         weapflags = animflags = (weaptype[weap].anim+d->weapstate[weap])|ANIM_CLAMP;
                         break;
                     }
