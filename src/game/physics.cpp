@@ -13,8 +13,8 @@ namespace physics
     VAR(IDF_PERSIST, physframetime, 5, 5, 20);
     VAR(IDF_PERSIST, physinterp, 0, 1, 1);
 
-    FVAR(IDF_PERSIST, impulsekick, 0, 150, 180); // determines the minimum angle to switch between wall kick and run
-    FVAR(IDF_PERSIST, impulseflip, 0, 45, 89.9f); // determines the minimum angle to switch between climb and flip
+    FVAR(IDF_PERSIST, impulsekick, 0, 150, 180); // determines the minimum yaw angle to switch between wall kick and run
+    FVAR(IDF_PERSIST, impulseflip, 0, 0, 89.9f); // determines the minimum pitch angle to switch between climb and flip
 
     FVAR(IDF_PERSIST, impulsekickup, 0, 89.9f, 89.9f); // reflection pitch angle
     FVAR(IDF_PERSIST, impulsevaultup, 0, 89.9f, 89.9f); // reflection pitch angle
