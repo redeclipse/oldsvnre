@@ -3038,6 +3038,15 @@ namespace server
             }
             #endif
             if(!strcmp(id->name, "sv_gamespeed") && G(gamespeedlock) > locked) locked = G(gamespeedlock);
+            else if(id->type == ID_VAR)
+            {
+                int len = strlen(id->name);
+                if(len > 4 && !strcmp(&id->name[len-4], "lock"))
+                {
+                    if(!haspriv(ci, parseint(arg), "set a lock value that high")) return;
+                    locked = max(*id->storage.i, locked);
+                }
+            }
             switch(id->type)
             {
                 case ID_COMMAND:
@@ -4530,7 +4539,7 @@ namespace server
         }
 
         uchar operator[](int msg) const { return msg >= 0 && msg < NUMMSG ? msgmask[msg] : 0; }
-    } msgfilter(-1, N_CONNECT, N_SERVERINIT, N_CLIENTINIT, N_WELCOME, N_NEWGAME, N_MAPCHANGE, N_SERVMSG, N_DAMAGE, N_SHOTFX, N_DIED, N_POINTS, N_SPAWNSTATE, N_ITEMACC, N_ITEMSPAWN, N_TICK, N_DISCONNECT, N_CURRENTPRIV, N_PONG, N_RESUME, N_SCORE, N_ANNOUNCE, N_SENDDEMOLIST, N_SENDDEMO, N_DEMOPLAYBACK, N_REGEN, N_CLIENT, N_AUTHCHAL, -2, N_REMIP, N_NEWMAP, N_CLIPBOARD, -3, N_EDITENT, N_EDITLINK, N_EDITVAR, N_EDITF, N_EDITT, N_EDITM, N_FLIP, N_COPY, N_PASTE, N_ROTATE, N_REPLACE, N_DELCUBE, -4, N_POS, N_SPAWN, N_DESTROY, NUMMSG),
+    } msgfilter(-1, N_CONNECT, N_SERVERINIT, N_CLIENTINIT, N_WELCOME, N_NEWGAME, N_MAPCHANGE, N_SERVMSG, N_DAMAGE, N_SHOTFX, N_DIED, N_POINTS, N_SPAWNSTATE, N_ITEMACC, N_ITEMSPAWN, N_TICK, N_DISCONNECT, N_CURRENTPRIV, N_PONG, N_RESUME, N_SCOREAFFIN, N_SCORE, N_ANNOUNCE, N_SENDDEMOLIST, N_SENDDEMO, N_DEMOPLAYBACK, N_REGEN, N_CLIENT, N_AUTHCHAL, -2, N_REMIP, N_NEWMAP, N_CLIPBOARD, -3, N_EDITENT, N_EDITLINK, N_EDITVAR, N_EDITF, N_EDITT, N_EDITM, N_FLIP, N_COPY, N_PASTE, N_ROTATE, N_REPLACE, N_DELCUBE, -4, N_POS, N_SPAWN, N_DESTROY, NUMMSG),
       connectfilter(-1, N_CONNECT, -2, N_AUTHANS, -3, N_PING, NUMMSG);
 
     int checktype(int type, clientinfo *ci)
@@ -4561,7 +4570,7 @@ namespace server
             // no overflow check
             case 4: return type;
         }
-        if(ci && ++ci->overflow >= 250) return -2;
+        if(ci && !haspriv(ci, G(overflowlock)) && ++ci->overflow >= G(overflowsize)) return -2;
         return type;
     }
 

@@ -54,6 +54,9 @@ GVAR(IDF_ADMIN, vetolock, 0, PRIV_OPERATOR, PRIV_CREATOR);
 GVAR(IDF_ADMIN, editlock, 0, PRIV_OPERATOR, PRIV_CREATOR);
 GVAR(IDF_ADMIN, masterlock, 0, PRIV_MODERATOR, PRIV_CREATOR);
 
+GVAR(IDF_ADMIN, overflowlock, 0, PRIV_MODERATOR, PRIV_CREATOR); // normal message queue override
+GVAR(IDF_ADMIN, overflowsize, 0, 255, VAR_MAX); // kick if queued messages >= this
+
 GVAR(IDF_ADMIN, floodlock, 0, PRIV_OPERATOR, PRIV_CREATOR);
 GVAR(IDF_ADMIN, floodmute, 0, 3, VAR_MAX); // automatically mute player when warned this many times
 GVAR(IDF_ADMIN, floodtime, 250, 10000, VAR_MAX); // time span to check for floody messages
@@ -370,7 +373,6 @@ GFVAR(0, moveinair, FVAR_NONZERO, 0.9f, FVAR_MAX); // in-air modifier
 GFVAR(0, movestepup, FVAR_NONZERO, 0.95f, FVAR_MAX); // step-up modifier
 GFVAR(0, movestepdown, FVAR_NONZERO, 1.15f, FVAR_MAX); // step-down modifier
 
-GVAR(0, jumpallowed, 0, 1, 1); // if jumping is allowed
 GFVAR(0, jumpspeed, FVAR_NONZERO, 110, FVAR_MAX); // extra velocity to add when jumping
 GFVAR(0, impulsespeed, FVAR_NONZERO, 90, FVAR_MAX); // extra velocity to add when impulsing
 GFVAR(0, impulselimit, 0, 0, FVAR_MAX); // maximum impulse speed
@@ -378,7 +380,7 @@ GFVAR(0, impulseboost, 0, 1, FVAR_MAX); // thrust modifier
 GFVAR(0, impulseboostredir, 0, 1, FVAR_MAX); // how much of the old velocity is redirected into the new one
 GFVAR(0, impulsepower, 0, 1.5f, FVAR_MAX); // power jump modifier
 GFVAR(0, impulsepowerredir, 0, 1, FVAR_MAX); // how much of the old velocity is redirected into the new one
-GFVAR(0, impulsedash, 0, 1.2f, FVAR_MAX); // dashing/powerslide modifier
+GFVAR(0, impulsedash, 0, 1.3f, FVAR_MAX); // dashing/powerslide modifier
 GFVAR(0, impulsedashredir, 0, 1, FVAR_MAX); // how much of the old velocity is redirected into the new one
 GFVAR(0, impulsejump, 0, 1.1f, FVAR_MAX); // jump modifier
 GFVAR(0, impulsejumpredir, 0, 1, FVAR_MAX); // how much of the old velocity is redirected into the new one
@@ -386,9 +388,9 @@ GFVAR(0, impulsemelee, 0, 0.75f, FVAR_MAX); // melee modifier
 GFVAR(0, impulsemeleeredir, 0, 1, FVAR_MAX); // how much of the old velocity is redirected into the new one
 GFVAR(0, impulseparkour, 0, 1, FVAR_MAX); // parkour modifier
 GFVAR(0, impulseparkourredir, 0, 1, FVAR_MAX); // how much of the old velocity is redirected into the new one
-GFVAR(0, impulseparkourkick, 0, 1.3f, FVAR_MAX); // parkour kick modifier
+GFVAR(0, impulseparkourkick, 0, 1.4f, FVAR_MAX); // parkour kick modifier
 GFVAR(0, impulseparkourkickredir, 0, 1, FVAR_MAX); // how much of the old velocity is redirected into the new one
-GFVAR(0, impulseparkourvault, 0, 1.3f, FVAR_MAX); // parkour vault modifier
+GFVAR(0, impulseparkourvault, 0, 1.4f, FVAR_MAX); // parkour vault modifier
 GFVAR(0, impulseparkourvaultredir, 0, 1, FVAR_MAX); // how much of the old velocity is redirected into the new one
 GFVAR(0, impulseparkournorm, 0, 0.5f, FVAR_MAX); // minimum parkour surface z normal
 GVAR(0, impulseallowed, 0, IM_A_ALL, IM_A_ALL); // impulse actions allowed; bit: 0 = off, 1 = dash, 2 = boost, 4 = parkour

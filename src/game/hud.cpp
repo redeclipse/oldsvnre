@@ -2395,12 +2395,12 @@ namespace hud
             const char *hudtexs[W_MAX] = {
                 meleetex, pistoltex, swordtex, shotguntex, smgtex, flamertex, plasmatex, convulsertex, rifletex, grenadetex, minetex, rockettex
             };
-            int sweap = m_weapon(game::gamemode, game::mutators), lastweap = game::focus->getlastweap(sweap);
+            int sweap = m_weapon(game::gamemode, game::mutators);//, lastweap = game::focus->getlastweap(sweap);
             loopi(W_MAX) if((i != W_MELEE || sweap == W_MELEE || game::focus->weapselect == W_MELEE || !inventoryhidemelee) && game::focus->holdweap(i, sweap, lastmillis))
             {
                 if(y-sy-s < m) break;
                 float size = s, skew = 0.f;
-                if((game::focus->weapstate[i] == W_S_SWITCH || game::focus->weapstate[i] == W_S_USE) && (i != game::focus->weapselect || i != lastweap))
+                if(game::focus->weapstate[i] == W_S_SWITCH || game::focus->weapstate[i] == W_S_USE)// && (i != game::focus->weapselect || i != lastweap))
                 {
                     float amt = clamp(float(lastmillis-game::focus->weaplast[i])/float(game::focus->weapwait[i]), 0.f, 1.f);
                     if(i != game::focus->weapselect) skew = game::focus->hasweap(i, sweap) ? 1.f-(amt*(1.f-inventoryskew)) : 1.f-amt;

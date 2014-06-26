@@ -871,8 +871,8 @@ namespace ai
             {
                 vec feet = d->feetpos();
                 float zoff = epos.z-d->feetpos().z;
-                if((!actor[d->actortype].canjump || !jumpallowed) && zoff >= JUMPMIN) epos.z = feet.z;
-                else if(jumpallowed && actor[d->actortype].canjump && d->airtime(lastmillis) >= 25 && zoff <= -JUMPMIN) epos.z = feet.z;
+                if(!actor[d->actortype].canjump && zoff >= JUMPMIN) epos.z = feet.z;
+                else if(actor[d->actortype].canjump && d->airtime(lastmillis) >= 25 && zoff <= -JUMPMIN) epos.z = feet.z;
                 d->ai->spot = epos;
                 d->ai->targnode = entid;
                 return !check || feet.squaredist(epos) > MINWPDIST*MINWPDIST ? 1 : 2;
@@ -1153,7 +1153,7 @@ namespace ai
             game::scaleyawpitch(d->yaw, d->pitch, d->ai->targyaw, d->ai->targpitch, frame, frame*0.5f);
         }
 
-        if(actor[d->actortype].canjump && jumpallowed) jumpto(d, b, d->ai->spot);
+        if(actor[d->actortype].canjump) jumpto(d, b, d->ai->spot);
         if((d->actortype == A_BOT || d->actortype == A_GRUNT) && d->action[AC_CROUCH] != d->ai->dontmove)
             if((d->action[AC_CROUCH] = !d->action[AC_CROUCH]) == true) d->actiontime[AC_CROUCH] = lastmillis;
 

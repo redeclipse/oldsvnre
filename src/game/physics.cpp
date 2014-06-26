@@ -14,6 +14,12 @@ namespace physics
     VAR(IDF_PERSIST, physinterp, 0, 1, 1);
 
     FVAR(IDF_PERSIST, impulsekick, 0, 150, 180); // determines the minimum angle to switch between wall kick and run
+    FVAR(IDF_PERSIST, impulseflip, 0, 45, 89.9f); // determines the minimum angle to switch between climb and flip
+
+    FVAR(IDF_PERSIST, impulsekickup, 0, 89.9f, 89.9f); // reflection pitch angle
+    FVAR(IDF_PERSIST, impulsevaultup, 0, 89.9f, 89.9f); // reflection pitch angle
+    FVAR(IDF_PERSIST, impulseflipup, 0, 67.5f, 89.9f); // reflection pitch angle
+
     VAR(IDF_PERSIST, impulsemethod, 0, 3, 3); // determines which impulse method to use, 0 = none, 1 = power jump, 2 = power slide, 3 = both
     VAR(IDF_PERSIST, impulseaction, 0, 3, 3); // determines how impulse action works, 0 = off, 1 = impulse jump, 2 = impulse dash, 3 = both
     FVAR(IDF_PERSIST, impulseroll, 0, 15, 89);
@@ -27,7 +33,7 @@ namespace physics
     bool allowimpulse(physent *d, int type)
     {
         if(d && gameent::is(d))
-            return jumpallowed && (type ? impulseallowed&type : impulseallowed != 0) && (impulsestyle || PHYS(gravity) == 0);
+            return (type ? impulseallowed&type : impulseallowed != 0) && (impulsestyle || PHYS(gravity) == 0);
         return false;
     }
 
@@ -37,7 +43,7 @@ namespace physics
         {
             gameent *e = (gameent *)d;
             if(!kick && impulsestyle == 1 && e->impulse[IM_TYPE] > IM_T_NONE && e->impulse[IM_TYPE] < IM_T_WALL) return false;
-            if(e->impulse[IM_TIME] && lastmillis-e->impulse[IM_TIME] <= impulsedelay) return false;
+            if(e->impulse[IM_TIME] && lastmillis-e->impulse[IM_TIME] <= (e->impulse[IM_TYPE] == IM_T_KICK || e->impulse[IM_TYPE] == IM_T_VAULT ? impulsekickdelay : impulsedelay)) return false;
             if(!m_freestyle(game::gamemode, game::mutators) && impulsestyle <= 2 && e->impulse[IM_COUNT] >= impulsecount) return false;
             return true;
         }
@@ -353,7 +359,7 @@ namespace physics
     bool movepitch(physent *d)
     {
         if(d->type == ENT_CAMERA || d->state == CS_EDITING || d->state == CS_SPECTATOR) return true;
-        if(d->onladder || (d->inliquid && jumpallowed && (liquidcheck(d) || d->pitch < 0.f)) || PHYS(gravity) == 0) return true;
+        if(d->onladder || (d->inliquid && (liquidcheck(d) || d->pitch < 0.f)) || PHYS(gravity) == 0) return true;
         return false;
     }
 
@@ -824,7 +830,7 @@ namespace physics
         else
         {
             impulseplayer(d, onfloor);
-            if(onfloor && d->action[AC_JUMP] && jumpallowed)
+            if(onfloor && d->action[AC_JUMP])
             {
                 float force = jumpvel(d, true);
                 if(force > 0)
@@ -839,7 +845,7 @@ namespace physics
                     d->resetphys();
                     d->impulse[IM_JUMP] = lastmillis;
                     onfloor = false;
-                    if(jumpallowed) d->action[AC_JUMP] = false;
+                    d->action[AC_JUMP] = false;
                     client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_JUMP);
                     playsound(S_JUMP, d->o, d);
                     regularshape(PART_SMOKE, int(d->radius), 0x222222, 21, 20, 250, d->feetpos(), 1, 1, -10, 0, 10.f);
@@ -919,24 +925,30 @@ namespace physics
                     }
                     if(!d->turnside && (parkour || vault) && iskick)
                     {
-                        if(!d->impulse[IM_TIME] || (d->impulse[IM_TYPE] != IM_T_KICK && d->impulse[IM_TYPE] != IM_T_VAULT) || lastmillis-d->impulse[IM_TIME] > impulsekickdelay)
+                        int cost = impulsecost;
+                        vec keepvel = vec(d->vel).add(d->falling);
+                        float mag = impulsevelocity(d, vault ? impulseparkourvault : impulseparkourkick, cost, IM_A_PARKOUR, vault ? impulseparkourvaultredir : impulseparkourkickredir, keepvel);
+                        if(mag > 0)
                         {
-                            int cost = impulsecost;
-                            vec keepvel = vec(d->vel).add(d->falling);
-                            float mag = impulsevelocity(d, vault ? impulseparkourvault : impulseparkourkick, cost, IM_A_PARKOUR, vault ? impulseparkourvaultredir : impulseparkourkickredir, keepvel);
-                            if(mag > 0)
+                            bool flip = !vault && impulseflip > 0 && fabs(d->pitch) <= impulseflip;
+                            vec rft;
+                            vecfromyawpitch(d->yaw, flip ? impulseflipup : (vault ? impulsevaultup : impulsekickup), 1, 0, rft);
+                            rft.reflect(face);
+                            d->vel = vec(rft).mul(mag).add(keepvel);
+                            d->doimpulse(cost, vault ? IM_T_VAULT : IM_T_KICK, lastmillis);
+                            d->turnmillis = PHYSMILLIS;
+                            d->turnside = 0;
+                            d->turnyaw = d->turnroll = 0;
+                            if(flip)
                             {
-                                vec rft;
-                                vecfromyawpitch(d->yaw, vault ? 90.f : fabs(d->pitch), 1, 0, rft);
-                                d->vel = vec(rft).reflect(face).mul(mag).add(keepvel);
-                                d->doimpulse(cost, vault ? IM_T_VAULT : IM_T_KICK, lastmillis);
-                                d->turnmillis = PHYSMILLIS;
-                                d->turnside = 0;
-                                d->turnyaw = d->turnroll = 0;
-                                client::addmsg(N_SPHY, "ri2", d->clientnum, vault ? SPHY_VAULT : SPHY_KICK);
-                                game::impulseeffect(d);
-                                game::footstep(d);
+                                d->turnyaw = d->yaw;
+                                d->turnyaw -= -atan2(rft.x, rft.y)/RAD;
+                                while(d->turnyaw < -180.0f) d->turnyaw += 360.0f;
+                                while(d->turnyaw >= 180.0f) d->turnyaw -= 360.0f;
                             }
+                            client::addmsg(N_SPHY, "ri2", d->clientnum, vault ? SPHY_VAULT : SPHY_KICK);
+                            game::impulseeffect(d);
+                            game::footstep(d);
                         }
                         break;
                     }
