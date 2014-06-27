@@ -1334,9 +1334,9 @@ struct gameent : dynent, gamestate
         return action[AC_CROUCH] || actiontime[AC_CROUCH] < 0 || (!limit && lastmillis-actiontime[AC_CROUCH] <= PHYSMILLIS);
     }
 
-    bool running()
+    bool running(float minspeed = 0)
     {
-        return (move || strafe) && !action[AC_WALK] && (G(runspeed) == 0 || vel.magnitude() >= G(runspeed));
+        return (move || strafe) && !action[AC_WALK] && (max(G(movethresh), minspeed) == 0 || vel.magnitude() >= max(G(movethresh), minspeed));
     }
 
     bool sliding(bool power = false)

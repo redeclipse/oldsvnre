@@ -622,8 +622,8 @@ WPFVARK(0, whipdamage, FVAR_MIN, FVAR_MAX,
 );
 
 #define WRS(a,b,c,d)         ((a)*(m_sweaps(c, d) ? G(b##limited) : G(b##scale)))
-#define WX(k,a,b,c,d,e,f)    (!m_insta(d, e) || m_loadout(d, e) || (a) != W_RIFLE ? WRS(WF(k, a, b, c)*f, radial, d, e) : 0)
-#define WSP(a,b,c,d,e,f)     (!m_insta(c, d) || m_loadout(c, d) || (a) != W_RIFLE ? clamp(max(W2(a, spread, b), f*0.5f)*(e), W2(a, spreadmin, b), W2(a, spreadmax, b) > 0 ? W2(a, spreadmax, b) : FVAR_MAX) : 0.f)
+#define WX(k,a,b,c,d,e,f)    (!m_insta(d, e) || (a) != W_RIFLE ? WRS(WF(k, a, b, c)*f, radial, d, e) : 0)
+#define WSP(a,b,c,d,e,f)     (!m_insta(c, d) || (a) != W_RIFLE ? clamp(max(W2(a, spread, b), f*0.5f)*(e), W2(a, spreadmin, b), W2(a, spreadmax, b) > 0 ? W2(a, spreadmax, b) : FVAR_MAX) : 0.f)
 #define WSND(a,b)            (weaptype[a].sound+(b))
 #define WSNDF(a,b)           (weaptype[a].sound+((b) ? S_W_SECONDARY : S_W_PRIMARY))
 #define WSND2(a,b,c)         (weaptype[a].sound+((b) ? (c)+1 : (c)))

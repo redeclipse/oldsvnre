@@ -191,12 +191,22 @@ namespace weapons
 
     float accmod(gameent *d, bool zooming, int *x)
     {
-        float r = 1; int y = 0;
-        if(spreadinair > 0 && d->airmillis && !d->onladder) { r += spreadinair; y++; }
-        if(spreadrunning > 0 && d->running()) { r += spreadrunning; y++; }
-        else if(spreadmoving > 0 && (d->move || d->strafe)) { r += spreadmoving; y++; }
-        else if(spreadstill > 0 && !d->sliding() && !d->crouching() && !zooming) { r += spreadstill; y++; }
-        if(x) *x = y;
+        float r = 1;
+        if(spreadinair > 0 && d->airmillis && !d->onladder)
+        {
+            if(x) (*x)++;
+            r += spreadinair;
+        }
+        if((d->running() ? spreadrunning : spreadmoving) > 0 && (d->move || d->strafe || d->vel.magnitude() >= moveslow))
+        {
+            if(x) (*x)++;
+            r += d->running() ? spreadrunning : spreadmoving;
+        }
+        else if(spreadstill > 0 && !d->sliding() && !d->crouching() && !zooming)
+        {
+            if(x) (*x)++;
+            r += spreadstill;
+        }
         return r;
     }
 

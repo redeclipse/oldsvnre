@@ -364,7 +364,8 @@ GFVAR(0, enemyscale, FVAR_NONZERO, 1, FVAR_MAX);
 GFVAR(0, enemystrength, FVAR_NONZERO, 1, FVAR_MAX); // scale enemy health values by this much
 
 GFVAR(0, movespeed, FVAR_NONZERO, 125, FVAR_MAX); // speed
-GFVAR(0, runspeed, 0, 50, FVAR_MAX); // speed running starts
+GFVAR(0, moveslow, 0, 50, FVAR_MAX); // threshold for moving
+GFVAR(0, movethresh, 0, 0, FVAR_MAX); // speed running starts, 0 = always run
 GFVAR(0, movecrawl, 0, 0.6f, FVAR_MAX); // crawl modifier
 GFVAR(0, moverun, FVAR_NONZERO, 1.3f, FVAR_MAX); // running modifier
 GFVAR(0, movestraight, FVAR_NONZERO, 1.2f, FVAR_MAX); // non-strafe modifier
@@ -417,7 +418,7 @@ GFVAR(0, impulseregeninair, 0, 0.75f, FVAR_MAX); // impulse regen in-air modifie
 GFVAR(0, impulseregenslide, 0, 0, FVAR_MAX); // impulse regen sliding modifier
 GVAR(0, impulseregendelay, 0, 350, VAR_MAX); // delay before impulse regens
 
-GFVAR(0, spreadstill, 0, 0, FVAR_MAX);
+GFVAR(0, spreadstill, 0, 0.f, FVAR_MAX);
 GFVAR(0, spreadmoving, 0, 1.f, FVAR_MAX);
 GFVAR(0, spreadrunning, 0, 1.f, FVAR_MAX);
 GFVAR(0, spreadinair, 0, 1.f, FVAR_MAX);
