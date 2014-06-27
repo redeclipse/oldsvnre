@@ -3056,7 +3056,7 @@ namespace game
                     else if(d->move<0) anim |= (ANIM_CRAWL_BACKWARD|ANIM_LOOP)<<ANIM_SECONDARY;
                     else anim |= (ANIM_CROUCH|ANIM_LOOP)<<ANIM_SECONDARY;
                 }
-                else if(d->running())
+                else if(d->running(moveslow))
                 {
                     if(d->move>0) anim |= (ANIM_IMPULSE_FORWARD|ANIM_LOOP)<<ANIM_SECONDARY;
                     else if(d->strafe) anim |= ((d->strafe>0 ? ANIM_IMPULSE_LEFT : ANIM_IMPULSE_RIGHT)|ANIM_LOOP)<<ANIM_SECONDARY;

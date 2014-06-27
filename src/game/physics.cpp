@@ -302,8 +302,9 @@ namespace physics
             {
                 gameent *e = (gameent *)pl;
                 vel *= movespeed/100.f*(1.f-clamp(e->stunned(lastmillis), 0.f, 1.f));
-                if(!e->airmillis && !e->sliding() && e->crouching()) vel *= movecrawl;
+                if((d->physstate >= PHYS_SLOPE || d->onladder) && !e->sliding() && e->crouching()) vel *= movecrawl;
                 if(e->move >= 0) vel *= e->strafe ? movestrafe : movestraight;
+                if(e->running()) vel *= moverun;
                 switch(e->physstate)
                 {
                     case PHYS_FALL: if(PHYS(gravity) > 0) vel *= moveinair; break;
@@ -311,7 +312,6 @@ namespace physics
                     case PHYS_STEP_UP: vel *= movestepup; break;
                     default: break;
                 }
-                if(e->running()) vel *= moverun;
                 if(carryaffinity(e))
                 {
                     if(m_capture(game::gamemode)) vel *= capturecarryspeed;
@@ -1067,10 +1067,10 @@ namespace physics
 
     void modifygravity(physent *pl, int curtime)
     {
-        float secs = curtime/1000.0f;
-        vec g(0, 0, 0);
         if(PHYS(gravity) > 0)
         {
+            vec g(0, 0, 0);
+            float secs = curtime/1000.0f;
             if(pl->physstate == PHYS_FALL) g.z -= gravityvel(pl)*secs;
             else if(pl->floor.z > 0 && pl->floor.z < floorz)
             {
@@ -1079,15 +1079,16 @@ namespace physics
                 g.normalize();
                 g.mul(gravityvel(pl)*secs);
             }
-            if(!liquidcheck(pl) || (!pl->move && !pl->strafe)) pl->falling.add(g);
+            bool liquid = liquidcheck(pl);
+            if((!liquid && (!gameent::is(pl) || !((gameent *)pl)->crouching())) || (!pl->move && !pl->strafe)) pl->falling.add(g);
+            if(liquid || pl->physstate >= PHYS_SLOPE)
+            {
+                float coast = liquid ? liquidmerge(pl, PHYS(aircoast), PHYS(liquidcoast)) : PHYS(floorcoast)*coastscale(pl->feetpos(-1)),
+                      c = liquid ? 1.0f : clamp((pl->floor.z - slopez)/(floorz-slopez), 0.0f, 1.0f);
+                pl->falling.mul(pow(max(1.0f - c/coast, 0.0f), curtime/20.0f));
+            }
         }
-        else pl->falling = g;
-        if(liquidcheck(pl) || pl->physstate >= PHYS_SLOPE)
-        {
-            float coast = liquidcheck(pl) ? liquidmerge(pl, PHYS(aircoast), PHYS(liquidcoast)) : PHYS(floorcoast)*coastscale(pl->feetpos(-1)),
-                  c = liquidcheck(pl) ? 1.0f : clamp((pl->floor.z - slopez)/(floorz-slopez), 0.0f, 1.0f);
-            pl->falling.mul(pow(max(1.0f - c/coast, 0.0f), curtime/20.0f));
-        }
+        else pl->falling = vec(0, 0, 0);
     }
 
     void updatematerial(physent *pl, const vec &center, const vec &bottom, bool local)
