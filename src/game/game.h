@@ -1336,7 +1336,8 @@ struct gameent : dynent, gamestate
 
     bool running(float minspeed = 0)
     {
-        return (move || strafe) && !action[AC_WALK] && (max(G(movethresh), minspeed) == 0 || vel.magnitude() >= max(G(movethresh), minspeed));
+        if(minspeed != 0 && vel.magnitude() >= minspeed) return true;
+        return !action[AC_WALK];
     }
 
     bool sliding(bool power = false)
