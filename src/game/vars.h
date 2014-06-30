@@ -365,7 +365,6 @@ GFVAR(0, enemystrength, FVAR_NONZERO, 1, FVAR_MAX); // scale enemy health values
 
 GFVAR(0, movespeed, FVAR_NONZERO, 125, FVAR_MAX); // speed
 GFVAR(0, moveslow, 0, 50, FVAR_MAX); // threshold for moving
-GFVAR(0, movethresh, 0, 0, FVAR_MAX); // speed running starts, 0 = always run
 GFVAR(0, movecrawl, 0, 0.6f, FVAR_MAX); // crawl modifier
 GFVAR(0, moverun, FVAR_NONZERO, 1.3f, FVAR_MAX); // running modifier
 GFVAR(0, movestraight, FVAR_NONZERO, 1.2f, FVAR_MAX); // non-strafe modifier

@@ -197,10 +197,11 @@ namespace weapons
             if(x) (*x)++;
             r += spreadinair;
         }
-        if((d->running() ? spreadrunning : spreadmoving) > 0 && (d->move || d->strafe || d->vel.magnitude() >= moveslow))
+        bool running = d->running(moveslow);
+        if((running && spreadrunning > 0 ? spreadrunning : spreadmoving) > 0 && (d->move || d->strafe || running))
         {
             if(x) (*x)++;
-            r += d->running() ? spreadrunning : spreadmoving;
+            r += running ? spreadrunning : spreadmoving;
         }
         else if(spreadstill > 0 && !d->sliding() && !d->crouching() && !zooming)
         {
