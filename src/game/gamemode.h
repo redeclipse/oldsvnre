@@ -44,7 +44,7 @@ gametypes gametype[] = {
     {
         G_EDITMODE, 0, (1<<G_M_FFA)|(1<<G_M_CLASSIC),
         {
-            (1<<G_M_FFA)|(1<<G_M_CLASSIC)|(1<<G_M_HARD),
+            (1<<G_M_FFA)|(1<<G_M_CLASSIC)|(1<<G_M_FREESTYLE),
             0, 0, 0
         },
         "editing", "editing", { "", "", "" },
@@ -317,8 +317,8 @@ VAR(0, modebitdefend, 1, (1<<G_DEFEND), -1);
 VAR(0, modebitbomber, 1, (1<<G_BOMBER), -1);
 VAR(0, modebittrial, 1, (1<<G_TRIAL), -1);
 VAR(0, modebitall, 1, G_ALL, -1);
-SVAR(0, mutsname, "multi ffa coop instagib medieval kaboom duel survivor classic onslaught freestyle vampire hard resize");
-SVAR(0, mutsidxname, "multi ffa coop instagib medieval kaboom duel survivor classic onslaught freestyle vampire hard resize");
+SVAR(0, mutsname, "multi ffa coop instagib medieval kaboom duel survivor classic onslaught freestyle vampire resize hard");
+SVAR(0, mutsidxname, "multi ffa coop instagib medieval kaboom duel survivor classic onslaught freestyle vampire resize hard");
 VAR(0, mutsidxmulti, 1, G_M_MULTI, -1);
 VAR(0, mutsidxffa, 1, G_M_FFA, -1);
 VAR(0, mutsidxcoop, 1, G_M_COOP, -1);
@@ -331,8 +331,8 @@ VAR(0, mutsidxclassic, 1, G_M_CLASSIC, -1);
 VAR(0, mutsidxonslaught, 1, G_M_ONSLAUGHT, -1);
 VAR(0, mutsidxfreestyle, 1, G_M_FREESTYLE, -1);
 VAR(0, mutsidxvampire, 1, G_M_VAMPIRE, -1);
-VAR(0, mutsidxhard, 1, G_M_HARD, -1);
 VAR(0, mutsidxresize, 1, G_M_RESIZE, -1);
+VAR(0, mutsidxhard, 1, G_M_HARD, -1);
 VAR(0, mutsidxgsp1, 1, G_M_GSP1, -1);
 VAR(0, mutsidxgsp2, 1, G_M_GSP2, -1);
 VAR(0, mutsidxgsp3, 1, G_M_GSP3, -1);
