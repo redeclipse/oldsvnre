@@ -163,6 +163,7 @@ GVAR(0, spawnmines, 0, 0, 2); // 0 = never, 1 = all but insta/trial, 2 = always
 GVAR(0, spawndelay, 0, 5000, VAR_MAX); // delay before spawning in most modes
 GVAR(0, instadelay, 0, 3000, VAR_MAX); // .. in instagib matches
 GVAR(0, trialdelay, 0, 500, VAR_MAX); // .. in time trial matches
+GVAR(0, trialdelayex, 0, 3000, VAR_MAX); // .. for defenders in gauntlet time trial matches
 GVAR(0, bomberdelay, 0, 3000, VAR_MAX); // delay before spawning in bomber
 GVAR(0, spawnprotect, 0, 3000, VAR_MAX); // delay before damage can be dealt to spawning player
 GVAR(0, duelprotect, 0, 5000, VAR_MAX); // .. in duel/survivor matches
@@ -242,6 +243,8 @@ GVAR(0, teambalancewait, 10000, 60000, VAR_MAX); // how long before teambalance 
 GVAR(0, teambalancedelay, 2000, 15000, VAR_MAX); // how long before teambalance 4 reassignments start
 GVAR(0, teambalanceswap, 0, 1, 1); // allow swap requests if unable to change team
 GVAR(0, teambalancestyle, 0, 2, 3); // when moving players, sort by: 0 = top of list, 1 = lowest time played, 2 = lowest points, 3 = lowest frags
+
+GVAR(0, trialgauntletwinner, 0, 1, 1); // declare the winner when the final team exceeds best score
 
 GVAR(0, capturelimit, 0, 0, VAR_MAX); // finish when score is this or more
 GVAR(0, captureresetdelay, 0, 30000, VAR_MAX);

@@ -96,7 +96,7 @@ struct duelservmode : servmode
                 }
                 return false; // only respawn when all dead
             }
-            int delay = m_xdelay(gamemode, mutators);
+            int delay = m_xdelay(gamemode, mutators, ci->team);
             if(delay && ci->state.respawnwait(gamemillis, delay)) return false;
             if(allowed.find(ci) < 0) allowed.add(ci);
             duelcheck = gamemillis+1000;

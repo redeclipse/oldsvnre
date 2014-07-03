@@ -401,7 +401,7 @@ static inline void modecheck(int &mode, int &muts, int trying = 0)
             if(changed) break;
             if(gametype[mode].flags&(1<<G_F_GSP))
             {
-                trying |= m; // game specific mutator exclusively provides allowed bits
+                //trying |= m; // game specific mutator exclusively provides allowed bits
                 mutsidx = gametype[mode].mutators[j+1];
             }
         }

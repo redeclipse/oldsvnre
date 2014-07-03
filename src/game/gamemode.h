@@ -93,15 +93,15 @@ gametypes gametype[] = {
         "throw the bomb into the enemy goal to score", { "hold the bomb as long as possible to score", "carry the bomb into the enemy goal to score", "teams take turns attacking and defending" },
     },
     {
-        G_TRIAL, 0, 0,
+        G_TRIAL, (1<<G_F_GSP), 0,
         {
-            (1<<G_M_FFA)|(1<<G_M_FREESTYLE)|(1<<G_M_GSP1)|(1<<G_M_GSP2),
-            (1<<G_M_FFA)|(1<<G_M_FREESTYLE)|(1<<G_M_GSP1)|(1<<G_M_GSP2),
-            (1<<G_M_FFA)|(1<<G_M_FREESTYLE)|(1<<G_M_GSP1)|(1<<G_M_GSP2),
-            0
+            (1<<G_M_MULTI)|(1<<G_M_FFA)|(1<<G_M_FREESTYLE)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3),
+            (1<<G_M_MULTI)|(1<<G_M_FFA)|(1<<G_M_FREESTYLE)|(1<<G_M_GSP1)|(1<<G_M_GSP2),
+            (1<<G_M_MULTI)|(1<<G_M_FFA)|(1<<G_M_FREESTYLE)|(1<<G_M_GSP1)|(1<<G_M_GSP2),
+            (1<<G_M_MULTI)|(1<<G_M_FREESTYLE)|(1<<G_M_GSP1)|(1<<G_M_GSP3)
         },
-        "time-trial", "trial", { "marathon", "battle", "" },
-        "compete for the fastest time completing a lap", { "compete for the most number of laps", "players are solid and can attack each other", "" },
+        "time-trial", "trial", { "marathon", "battle", "gauntlet" },
+        "compete for the fastest time completing a lap", { "compete for the most number of laps", "players are solid and can attack each other", "teams take turns running the gauntlet" },
     }
 };
 mutstypes mutstype[] = {
@@ -238,22 +238,22 @@ extern mutstypes mutstype[];
 #define m_loadout(a,b)      (!m_classic(a, b) && !m_sweaps(a, b))
 #define m_duke(a,b)         (m_duel(a, b) || m_survivor(a, b))
 #define m_regen(a,b)        (!m_hard(a,b) && (G(duelregen) || !m_duke(a, b)) && !m_insta(a, b))
-#define m_ghost(a,b)        (m_trial(a) && !m_gsp2(a, b))
+#define m_ghost(a,b)        (m_trial(a) && !m_gsp2(a, b) && !m_gsp3(a, b))
 #define m_bots(a)           (m_fight(a) && !m_trial(a))
 #define m_nopoints(a,b)     (m_duke(a, b) || (m_bomber(a) && m_gsp1(a, b)) || m_trial(a))
 #define m_laptime(a,b)      (m_trial(a) && !m_gsp1(a, b))
 
 #define m_weapon(a,b)       (m_medieval(a, b) ? W_SWORD : (m_kaboom(a, b) ? W_GRENADE : (m_insta(a, b) ? G(instaweapon) : (m_trial(a) ? G(trialweapon) : G(spawnweapon)))))
-#define m_xdelay(a,b)       (m_play(a) ? (m_trial(a) ? G(trialdelay) : (m_bomber(a) ? G(bomberdelay) : (m_insta(a, b) ? G(instadelay) : G(spawndelay)))) : 0)
-#define m_delay(a,b)        (m_duke(a,b) ? 0 : m_xdelay(a, b))
+#define m_xdelay(a,b,c)     (m_play(a) ? (m_trial(a) ? (!m_gsp3(a, b) || c == T_ALPHA ? G(trialdelay) : G(trialdelayex)) : (m_bomber(a) ? G(bomberdelay) : (m_insta(a, b) ? G(instadelay) : G(spawndelay)))) : 0)
+#define m_delay(a,b,c)      (m_duke(a,b) ? 0 : m_xdelay(a, b, c))
 #define m_protect(a,b)      (m_duke(a,b) ? G(duelprotect) : (m_insta(a, b) ? G(instaprotect) : G(spawnprotect)))
 #define m_health(a,b,c)     (m_insta(a,b) ? 1 : PLAYER(c, health))
 #define m_maxhealth(a,b,c)  (int(m_health(a, b, c)*(m_vampire(a,b) ? G(maxhealthvampire) : G(maxhealth))))
-#define m_swapteam(a,b)     (m_team(a, b) && !m_trial(a) && m_fight(a) && (G(teambalanceduel) || !m_duel(a, b)) && !m_coop(gamemode, mutators) && G(teambalance) >= 3 && G(teambalanceswap))
-#define m_balteam(a,b,c)    (m_team(a, b) && !m_trial(a) && m_fight(a) && (G(teambalanceduel) || !m_duel(a, b)) && !m_coop(gamemode, mutators) && G(teambalance) >= c)
-#define m_forcebal(a,b)     (m_bomber(a) && m_gsp3(a, b))
-#define m_balance(a,b)      (m_team(a, b) && !m_trial(a) && m_fight(a) && (m_forcebal(a, b) || ((G(balanceduke) || !m_duke(a, b)) && ((G(balancemaps) >= 0 ? G(balancemaps) : G(mapbalance)) >= (m_affinity(a) ? 1 : 2)))))
-#define m_balreset(a,b)     (m_capture(a) || m_bomber(a))
+#define m_swapteam(a,b)     (m_team(a, b) && (!m_trial(a) || m_gsp3(a, b)) && m_fight(a) && (G(teambalanceduel) || !m_duel(a, b)) && !m_coop(gamemode, mutators) && G(teambalance) >= 3 && G(teambalanceswap))
+#define m_balteam(a,b,c)    (m_team(a, b) && (!m_trial(a) || m_gsp3(a, b)) && m_fight(a) && (G(teambalanceduel) || !m_duel(a, b)) && !m_coop(gamemode, mutators) && G(teambalance) >= c)
+#define m_forcebal(a,b)     ((m_bomber(a) && m_gsp3(a, b)) || (m_trial(a) && m_gsp3(a, b)))
+#define m_balance(a,b)      (m_team(a, b) && (!m_trial(a) || m_gsp3(a, b)) && m_fight(a) && (m_forcebal(a, b) || ((G(balanceduke) || !m_duke(a, b)) && ((G(balancemaps) >= 0 ? G(balancemaps) : G(mapbalance)) >= (m_affinity(a) ? 1 : 2)))))
+#define m_balreset(a,b)     (m_capture(a) || m_bomber(a) || m_trial(a))
 
 #define w_carry(w1,w2)      (isweap(w1) && w1 != W_MELEE && (!isweap(w2) || (w1 != w2 && (w2 != W_GRENADE || w1 != W_MINE))) && (w1 == W_ROCKET || (w1 >= W_OFFSET && w1 < W_ITEM)))
 #define w_reload(w1,w2)     (isweap(w1) && (w1 == W_MELEE || (w1 >= W_OFFSET && w1 < W_ITEM) || (isweap(w2) && (w1 == w2 || (w2 == W_GRENADE && w1 == W_MINE)))))

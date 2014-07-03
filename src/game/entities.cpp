@@ -755,9 +755,10 @@ namespace entities
                 }
                 else if(e.type == CHECKPOINT)
                 {
-                    if(d->state != CS_ALIVE || !gameent::is(d)) break;
+                    if(d->state != CS_ALIVE || !gameent::is(d) || !m_trial(game::gamemode)) break;
+                    if(!m_check(e.attrs[3], e.attrs[4], game::gamemode, game::mutators)) break;
                     gameent *g = (gameent *)d;
-                    if(!m_check(e.attrs[3], e.attrs[4], game::gamemode, game::mutators) || !m_trial(game::gamemode) || g->checkpoint == n) break;
+                    if(g->checkpoint == n || (m_trial(game::gamemode) && m_gsp3(game::gamemode, game::mutators) && g->team != T_ALPHA)) break;
                     if(e.attrs[6] == CP_START)
                     {
                         if(g->cpmillis) break;
@@ -1145,7 +1146,18 @@ namespace entities
             switch(ents[ent]->type)
             {
                 case ACTOR: if(d->type == ENT_PLAYER) break;
-                case CHECKPOINT: physics::droptofloor(pos, ENT_DUMMY);
+                case CHECKPOINT:
+                {
+                    float yaw = ents[ent]->attrs[1], pitch = ents[ent]->attrs[2];
+                    if(m_trial(game::gamemode) && m_gsp3(game::gamemode, game::mutators) && d->team != T_ALPHA)
+                    {
+                        yaw -= 180;
+                        pitch = -pitch;
+                    }
+                    physics::droptofloor(pos, ENT_DUMMY);
+                    if(tryspawn(d, pos, yaw, pitch)) return;
+                    break;
+                }
                 case PLAYERSTART:
                     if(tryspawn(d, pos, ents[ent]->attrs[1], ents[ent]->attrs[2])) return;
                     break;
