@@ -76,19 +76,19 @@ struct bomberservmode : bomberstate, servmode
     {
         flag g = flags[goal];
         if(!g.enabled) return;
-        int score = 0;
+        int total = 0;
         if(g.team != ci->team)
         {
             givepoints(ci, G(bomberpoints));
-            score = addscore(ci->team, 1);
+            total = addscore(ci->team, 1);
         }
         else
         {
             givepoints(ci, -G(bomberpenalty));
-            score = addscore(ci->team, -1);
+            total = addscore(ci->team, -1);
         }
         bomberstate::returnaffinity(relay, gamemillis, false);
-        sendf(-1, 1, "ri5", N_SCOREAFFIN, ci->clientnum, relay, goal, score);
+        sendf(-1, 1, "ri5", N_SCOREAFFIN, ci->clientnum, relay, goal, total);
         mutate(smuts, mut->scoreaffinity(ci, g.team != ci->team));
         bombertime = m_duke(gamemode, mutators) ? -1 : gamemillis+G(bomberdelay);
         loopvj(flags) if(flags[j].enabled)
@@ -96,7 +96,7 @@ struct bomberservmode : bomberstate, servmode
             bomberstate::returnaffinity(j, gamemillis, false);
             sendf(-1, 1, "ri3", N_RESETAFFIN, j, 0);
         }
-        if(!m_balance(gamemode, mutators) && G(bomberlimit) && score >= G(bomberlimit))
+        if(!m_balance(gamemode, mutators) && G(bomberlimit) && total >= G(bomberlimit))
         {
             ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fyscore limit has been reached");
             startintermission();
@@ -109,8 +109,8 @@ struct bomberservmode : bomberstate, servmode
                 bool found = false;
                 loopi(numt)
                 {
-                    int t = i+T_FIRST;
-                    if(t != T_OMEGA && teamscore(t).total >= score)
+                    int t = i+T_FIRST, s = teamscore(t).total;
+                    if(t != T_OMEGA && s >= total)
                     {
                         found = true;
                         break;

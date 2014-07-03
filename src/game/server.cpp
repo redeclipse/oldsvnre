@@ -674,7 +674,7 @@ namespace server
             {
                 if(m_balance(gamemode, mutators) && G(balancenospawn) && nextbalance && nextbalance >= gamemillis) return false;
                 if(m_loadout(gamemode, mutators) && !chkloadweap(ci, false)) return false;
-                int delay = ci->state.actortype >= A_ENEMY && ci->state.lastdeath ? G(enemyspawntime) : m_delay(gamemode, mutators);
+                int delay = ci->state.actortype >= A_ENEMY && ci->state.lastdeath ? G(enemyspawntime) : m_delay(gamemode, mutators, ci->team);
                 if(delay && ci->state.respawnwait(gamemillis, delay)) return false;
                 if(spawnqueue() && playing.find(ci) < 0)
                 {
@@ -1543,6 +1543,12 @@ namespace server
                                     break;
                                 }
                             }
+                            if(m_trial(gamemode))
+                            {
+                                cp->state.cpmillis = 0;
+                                cp->state.cpnodes.shrink(0);
+                                sendf(-1, 1, "ri3", N_CHECKPOINT, cp->clientnum, -1);
+                            }
                             setteam(cp, to, (m_balreset(gamemode, mutators) ? TT_RESET : 0)|TT_INFO, false);
                             cp->state.lastdeath = 0;
                         }
@@ -1788,6 +1794,25 @@ namespace server
         if(update)
         {
             int numt = numteams(gamemode, mutators), cplayers = 0;
+            if(m_trial(gamemode))
+            {
+                loopv(sents) if(sents[i].type == PLAYERSTART && (sents[i].attrs[5] == triggerid || !sents[i].attrs[5]) && m_check(sents[i].attrs[3], sents[i].attrs[4], gamemode, mutators))
+                {
+                    spawns[m_gsp3(gamemode, mutators) ? T_ALPHA : T_NEUTRAL].add(i);
+                    totalspawns++;
+                }
+                if(m_gsp3(gamemode, mutators))
+                {
+                    loopv(sents) if(sents[i].type == CHECKPOINT && sents[i].attrs[6] == CP_RESPAWN && (sents[i].attrs[5] == triggerid || !sents[i].attrs[5]) && m_check(sents[i].attrs[3], sents[i].attrs[4], gamemode, mutators))
+                    {
+                        loopk(numt-1) spawns[T_OMEGA+k].add(i);
+                        totalspawns++;
+                    }
+                }
+                setmod(sv_numplayers, 0);
+                setmod(sv_maxplayers, 0);
+                return;
+            }
             bool teamspawns = m_team(gamemode, mutators) && !m_trial(gamemode);
             if(!teamspawns && m_duel(gamemode, mutators))
             { // iterate through teams so players spawn on opposite sides in duel
@@ -1869,7 +1894,7 @@ namespace server
         if(ci->state.actortype >= A_ENEMY) return ci->state.spawnpoint;
         else
         {
-            if(m_trial(gamemode) && !ci->state.cpnodes.empty())
+            if(m_trial(gamemode) && !ci->state.cpnodes.empty() && (!m_gsp3(gamemode, mutators) || ci->team == T_ALPHA))
             {
                 int checkpoint = ci->state.cpnodes.last();
                 if(sents.inrange(checkpoint)) return checkpoint;
@@ -1883,7 +1908,7 @@ namespace server
                         team = spawns[T_ALPHA].iteration <= spawns[T_OMEGA].iteration ? T_ALPHA : T_OMEGA;
                     if(!rotate) rotate = 2;
                 }
-                else if(m_fight(gamemode) && m_team(gamemode, mutators) && !m_trial(gamemode) && !spawns[ci->team].ents.empty()) team = ci->team;
+                else if(m_fight(gamemode) && m_team(gamemode, mutators) && (!m_trial(gamemode) || m_gsp3(gamemode, mutators)) && !spawns[ci->team].ents.empty()) team = ci->team;
                 else switch(rotate)
                 {
                     case 2:
@@ -3631,7 +3656,7 @@ namespace server
                     }
                 }
             }
-            if(m_trial(gamemode) && m->state.cpnodes.length() == 1)
+            if(m_trial(gamemode) && (!m_gsp3(gamemode, mutators) || m->team == T_ALPHA) && m->state.cpnodes.length() == 1)
             {  // reset if hasn't reached another checkpoint yet
                 m->state.cpmillis = 0;
                 m->state.cpnodes.shrink(0);
@@ -3710,7 +3735,7 @@ namespace server
         ci->state.spree = 0;
         ci->state.deaths++;
         bool kamikaze = dropitems(ci, actor[ci->state.actortype].living ? DROP_DEATH : DROP_EXPIRE);
-        if(m_trial(gamemode) && !(flags&HIT_SPEC) && (!flags || ci->state.cpnodes.length() == 1))
+        if(m_trial(gamemode) && (!m_gsp3(gamemode, mutators) || ci->team == T_ALPHA) && !(flags&HIT_SPEC) && (!flags || ci->state.cpnodes.length() == 1))
         { // reset if suicided, hasn't reached another checkpoint yet
             ci->state.cpmillis = 0;
             ci->state.cpnodes.shrink(0);
@@ -5263,16 +5288,17 @@ namespace server
                     {
                         if(sents[ent].type == CHECKPOINT)
                         {
-                            if(cp->state.cpnodes.find(ent) >= 0) break;
                             if(sents[ent].attrs[5] && sents[ent].attrs[5] != triggerid) break;
                             if(!m_check(sents[ent].attrs[3], sents[ent].attrs[4], gamemode, mutators)) break;
-                            if(m_trial(gamemode)) switch(sents[ent].attrs[6])
+                            if(!m_trial(gamemode) || (m_gsp3(gamemode, mutators) && cp->team != T_ALPHA)) break;
+                            if(cp->state.cpnodes.find(ent) >= 0) break;
+                            switch(sents[ent].attrs[6])
                             {
                                 case CP_LAST: case CP_FINISH:
                                 {
                                     if(cp->state.cpmillis)
                                     {
-                                        int laptime = gamemillis-cp->state.cpmillis;
+                                        int laptime = gamemillis-cp->state.cpmillis, total = 0;
                                         if(cp->state.cptime <= 0 || laptime < cp->state.cptime) cp->state.cptime = laptime;
                                         cp->state.points++;
                                         sendf(-1, 1, "ri6", N_CHECKPOINT, cp->clientnum, ent, laptime, cp->state.cptime, cp->state.points);
@@ -5283,15 +5309,37 @@ namespace server
                                                 score &ts = teamscore(cp->team);
                                                 if(!ts.total || ts.total > cp->state.cptime)
                                                 {
-                                                    ts.total = cp->state.cptime;
+                                                    total = ts.total = cp->state.cptime;
                                                     sendf(-1, 1, "ri3", N_SCORE, ts.team, ts.total);
                                                 }
                                             }
                                             else
                                             {
                                                 score &ts = teamscore(cp->team);
-                                                ts.total++;
+                                                total = ++ts.total;
                                                 sendf(-1, 1, "ri3", N_SCORE, ts.team, ts.total);
+                                            }
+                                            if(total && m_gsp3(gamemode, mutators) && G(trialgauntletwinner))
+                                            {
+                                                int numt = numteams(gamemode, mutators);
+                                                if(curbalance == numt-1)
+                                                {
+                                                    bool found = false;
+                                                    loopi(numt)
+                                                    {
+                                                        int t = i+T_FIRST, s = teamscore(t).total;
+                                                        if(t != T_OMEGA && (m_laptime(gamemode, mutators) ? s <= total : s >= total))
+                                                        {
+                                                            found = true;
+                                                            break;
+                                                        }
+                                                    }
+                                                    if(!found)
+                                                    {
+                                                        ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fybest score has been reached");
+                                                        startintermission();
+                                                    }
+                                                }
                                             }
                                         }
                                     }
