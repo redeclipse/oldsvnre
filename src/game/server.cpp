@@ -3473,12 +3473,7 @@ namespace server
     {
         if(d != e)
         {
-            switch(m_ghost(gamemode))
-            {
-                case 2: if(!e || e->team == d->team) return true; break;
-                case 1: return true; break;
-                case 0: default: break;
-            }
+            if(m_ghost(gamemode, mutators)) return true;
             if(m_team(gamemode, mutators)) switch(G(damageteam))
             {
                 case 1: if(d->state.actortype > A_PLAYER || (e && e->state.actortype == A_PLAYER)) break;

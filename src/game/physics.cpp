@@ -170,13 +170,8 @@ namespace physics
     {
         if(d != e)
         {
+            if(m_ghost(game::gamemode, game::mutators)) return true;
             if(d->actortype >= A_ENEMY && e && e->actortype >= A_ENEMY && ai::owner(d) == ai::owner(e)) return true;
-            switch(m_ghost(game::gamemode))
-            {
-                case 2: if(e && ai::owner(d) == ai::owner(e)) return true; break;
-                case 1: return true; break;
-                case 0: default: break;
-            }
             if(m_team(game::gamemode, game::mutators)) switch(G(damageteam))
             {
                 case 1: if(d->actortype > A_PLAYER || (e && e->actortype == A_PLAYER)) break;
