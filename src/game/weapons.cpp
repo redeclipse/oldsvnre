@@ -197,13 +197,13 @@ namespace weapons
             if(x) (*x)++;
             r += spreadinair;
         }
-        bool running = d->running(moveslow);
+        bool running = d->running(moveslow) || d->sliding();
         if((running && spreadrunning > 0 ? spreadrunning : spreadmoving) > 0 && (d->move || d->strafe || running))
         {
             if(x) (*x)++;
             r += running ? spreadrunning : spreadmoving;
         }
-        else if(spreadstill > 0 && !d->sliding() && !d->crouching() && !zooming)
+        else if(spreadstill > 0 && !d->crouching() && !zooming)
         {
             if(x) (*x)++;
             r += spreadstill;
@@ -259,14 +259,14 @@ namespace weapons
                     }
                     else return false;
                 }
-                cooked = clamp(lastmillis-d->weaplast[weap], 1, len);
+                cooked = len ? clamp(lastmillis-d->weaplast[weap], 1, len) : 1;
                 if(zooming)
                 {
                     if(pressed && wassecond) return false;
                 }
                 else if(pressed && cooked < len) return false;
             }
-            scale = cooked/float(W2(weap, cooktime, secondary));
+            scale = len ? cooked/float(W2(weap, cooktime, secondary)) : 1;
             if(sub > 1 && scale < 1) sub = int(ceilf(sub*scale));
         }
         else if(!pressed) return false;
@@ -279,23 +279,21 @@ namespace weapons
             s.id = d->getprojid(); \
             s.pos = ivec(int(p.x*DMF), int(p.y*DMF), int(p.z*DMF)); \
         }
+        int rays = W2(weap, rays, secondary);
+        if(rays > 1 && W2(weap, cooked, secondary)&W_C_RAYS && W2(weap, cooktime, secondary) && scale < 1)
+            rays = max(1, int(ceilf(rays*scale)));
         if(weaptype[weap].traced)
         {
             from = d->originpos(weap == W_MELEE, secondary);
             if(weap == W_MELEE) to = vec(targ).sub(from).normalize().mul(d->radius).add(from);
             else to = d->muzzlepos(weap, secondary);
-            int rays = W2(weap, rays, secondary);
-            if(rays > 1 && W2(weap, cooked, secondary)&W_C_RAYS && W2(weap, cooktime, secondary) && scale < 1)
-                rays = max(1, int(ceilf(rays*scale)));
             loopi(rays) addshot(to);
         }
         else
         {
             from = d->muzzlepos(weap, secondary);
             to = targ;
-            int rays = W2(weap, rays, secondary), x = 0;
-            if(rays > 1 && W2(weap, cooked, secondary)&W_C_RAYS && W2(weap, cooktime, secondary) && scale < 1)
-                rays = max(1, int(ceilf(rays*scale)));
+            int x = 0;
             float m = accmod(d, W2(d->weapselect, cooked, true)&W_C_ZOOM && secondary, &x);
             float spread = WSP(weap, secondary, game::gamemode, game::mutators, m, x);
             loopi(rays)

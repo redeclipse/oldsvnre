@@ -95,12 +95,13 @@ gametypes gametype[] = {
     {
         G_TRIAL, 0, 0,
         {
-            (1<<G_M_FFA)|(1<<G_M_FREESTYLE)|(1<<G_M_GSP1),
-            (1<<G_M_FFA)|(1<<G_M_FREESTYLE)|(1<<G_M_GSP1),
-            0, 0
+            (1<<G_M_FFA)|(1<<G_M_FREESTYLE)|(1<<G_M_GSP1)|(1<<G_M_GSP2),
+            (1<<G_M_FFA)|(1<<G_M_FREESTYLE)|(1<<G_M_GSP1)|(1<<G_M_GSP2),
+            (1<<G_M_FFA)|(1<<G_M_FREESTYLE)|(1<<G_M_GSP1)|(1<<G_M_GSP2),
+            0
         },
-        "time-trial", "trial", { "marathon", "", "" },
-        "compete for the fastest time completing a lap", { "compete for the most number of laps", "", "" },
+        "time-trial", "trial", { "marathon", "battle", "" },
+        "compete for the fastest time completing a lap", { "compete for the most number of laps", "players are solid and can attack each other", "" },
     }
 };
 mutstypes mutstype[] = {
@@ -237,7 +238,7 @@ extern mutstypes mutstype[];
 #define m_loadout(a,b)      (!m_classic(a, b) && !m_sweaps(a, b))
 #define m_duke(a,b)         (m_duel(a, b) || m_survivor(a, b))
 #define m_regen(a,b)        (!m_hard(a,b) && (G(duelregen) || !m_duke(a, b)) && !m_insta(a, b))
-#define m_ghost(a)          (m_trial(a) ? G(trialghost) : 0)
+#define m_ghost(a,b)        (m_trial(a) && !m_gsp2(a, b))
 #define m_bots(a)           (m_fight(a) && !m_trial(a))
 #define m_nopoints(a,b)     (m_duke(a, b) || (m_bomber(a) && m_gsp1(a, b)) || m_trial(a))
 #define m_laptime(a,b)      (m_trial(a) && !m_gsp1(a, b))
