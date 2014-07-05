@@ -148,8 +148,8 @@ GICOMMAND(0, resetvars, "", (), server::resetgamevars(true, false); result("succ
 GICOMMAND(0, savevars, "", (), server::savegamevars(); result("success"), );
 GICOMMAND(IDF_ADMIN, resetconfig, "", (), rehash(true); result("success"), );
 
-GFVAR(0, maxalive, 0, 1, FVAR_MAX); // only allow this*maxplayers to be alive at once
-GVAR(0, maxalivequeue, 0, 1, 1); // if number of players exceeds this amount, use a queue system
+GFVAR(0, maxalive, 0, 0, FVAR_MAX); // only allow this*maxplayers to be alive at once, 0 = turn off maxalive
+GVAR(0, maxalivequeue, 0, 1, 1); // upon triggering maxalive, use a queue system
 GVAR(0, maxaliveminimum, 2, 4, VAR_MAX); // kicks in if alive >= this
 GFVAR(0, maxalivethreshold, 0, 0, FVAR_MAX); // .. or this percentage of clients
 

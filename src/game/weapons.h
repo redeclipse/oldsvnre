@@ -516,7 +516,7 @@ WPFVARK(0, speedmin, 0, FVAR_MAX,
 );
 WPFVARM(0, spread, 0, FVAR_MAX,
     1.0f,       1.0f,       1.0f,       12.0f,      2.5f,       7.5f,       2.0f,       2.0f,       1.5f,       1.0f,       1.0f,       1.0f,
-    1.0f,       2.0f,       1.0f,       2.0f,       2.0f,       1.0f,       1.0f,       3.5f,       0.25f,      1.0f,       1.0f,       1.0f
+    1.0f,       2.0f,       1.0f,       2.0f,       2.0f,       1.0f,       1.0f,       2.0f,       0.25f,      1.0f,       1.0f,       1.0f
 );
 WPFVARM(0, spreadmax, 0, FVAR_MAX,
     0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,

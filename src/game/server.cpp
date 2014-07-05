@@ -1796,24 +1796,37 @@ namespace server
             int numt = numteams(gamemode, mutators), cplayers = 0;
             if(m_trial(gamemode))
             {
-                loopv(sents) if(sents[i].type == PLAYERSTART && (sents[i].attrs[5] == triggerid || !sents[i].attrs[5]) && m_check(sents[i].attrs[3], sents[i].attrs[4], gamemode, mutators))
+                loopv(sents) if(sents[i].type == PLAYERSTART && sents[i].attrs[0] == T_NEUTRAL && (sents[i].attrs[5] == triggerid || !sents[i].attrs[5]) && m_check(sents[i].attrs[3], sents[i].attrs[4], gamemode, mutators))
+                {
+                    spawns[m_gsp3(gamemode, mutators) ? T_ALPHA : T_NEUTRAL].add(i);
+                    totalspawns++;
+                }
+                if(!totalspawns) loopv(sents) if(sents[i].type == CHECKPOINT && sents[i].attrs[6] == CP_START && (sents[i].attrs[5] == triggerid || !sents[i].attrs[5]) && m_check(sents[i].attrs[3], sents[i].attrs[4], gamemode, mutators))
                 {
                     spawns[m_gsp3(gamemode, mutators) ? T_ALPHA : T_NEUTRAL].add(i);
                     totalspawns++;
                 }
                 if(m_gsp3(gamemode, mutators))
                 {
-                    loopv(sents) if(sents[i].type == CHECKPOINT && sents[i].attrs[6] == CP_RESPAWN && (sents[i].attrs[5] == triggerid || !sents[i].attrs[5]) && m_check(sents[i].attrs[3], sents[i].attrs[4], gamemode, mutators))
+                    int enemyspawns = 0;
+                    loopv(sents) if(sents[i].type == PLAYERSTART && sents[i].attrs[0] >= T_OMEGA && (sents[i].attrs[5] == triggerid || !sents[i].attrs[5]) && m_check(sents[i].attrs[3], sents[i].attrs[4], gamemode, mutators))
                     {
                         loopk(numt-1) spawns[T_OMEGA+k].add(i);
                         totalspawns++;
+                        enemyspawns++;
+                    }
+                    if(!enemyspawns) loopv(sents) if(sents[i].type == CHECKPOINT && sents[i].attrs[6] == CP_RESPAWN && (sents[i].attrs[5] == triggerid || !sents[i].attrs[5]) && m_check(sents[i].attrs[3], sents[i].attrs[4], gamemode, mutators))
+                    {
+                        loopk(numt-1) spawns[T_OMEGA+k].add(i);
+                        totalspawns++;
+                        enemyspawns++;
                     }
                 }
                 setmod(sv_numplayers, 0);
                 setmod(sv_maxplayers, 0);
                 return;
             }
-            bool teamspawns = m_team(gamemode, mutators) && !m_trial(gamemode);
+            bool teamspawns = m_team(gamemode, mutators);
             if(!teamspawns && m_duel(gamemode, mutators))
             { // iterate through teams so players spawn on opposite sides in duel
                 teamspawns = true;
@@ -3067,10 +3080,7 @@ namespace server
             {
                 int len = strlen(id->name);
                 if(len > 4 && !strcmp(&id->name[len-4], "lock"))
-                {
-                    if(!haspriv(ci, parseint(arg), "set a lock value that high")) return;
-                    locked = max(*id->storage.i, locked);
-                }
+                    locked = max(max(*id->storage.i, parseint(arg)), locked);
             }
             switch(id->type)
             {

@@ -59,6 +59,7 @@ FVAR(IDF_PERSIST, soundevtvol, 0, 1, FVAR_MAX);
 FVAR(IDF_PERSIST, soundevtscale, 0, 1, FVAR_MAX);
 FVAR(IDF_PERSIST, soundenvvol, 0, 1, FVAR_MAX);
 FVAR(IDF_PERSIST, soundenvscale, 0, 1, FVAR_MAX);
+VAR(IDF_PERSIST, soundcull, 0, 0, 1);
 
 VARF(IDF_PERSIST, musicvol, 0, 32, 255, changedvol = true);
 VAR(IDF_PERSIST, musicfadein, 0, 1000, VAR_MAX);
@@ -368,7 +369,7 @@ void updatesound(int chan)
 {
     sound &s = sounds[chan];
     bool waiting = (!(s.flags&SND_NODELAY) && Mix_Paused(chan));
-    if((s.flags&SND_NOCULL) || s.curvol > 0 || s.pos.dist(camera1->o) <= s.minrad)
+    if((s.flags&SND_NOCULL) || !soundcull || s.curvol > 0 || s.pos.dist(camera1->o) <= s.minrad)
     {
         if(waiting)
         { // delay the sound based on average physical constants
@@ -456,7 +457,7 @@ int playsound(int n, const vec &pos, physent *d, int flags, int vol, int maxrad,
         calcvol(flags, v, slot->vol, x, y, o, &cvol, &cpan, liquid || isliquid(mat&MATF_VOLUME));
         bool nocull = flags&SND_NOCULL || (d && game::camerapos(d).dist(camera1->o) <= minrad);
 
-        if(nocull || cvol > 0)
+        if(nocull || !soundcull || cvol > 0)
         {
             int chan = -1;
             if(oldhook) chan = *oldhook;
