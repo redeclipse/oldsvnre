@@ -23,7 +23,8 @@ namespace entities
     FVAR(IDF_PERSIST, simpleitemhalo, 0, 0.5f, 1);
 
     vector<extentity *> &getents() { return ents; }
-    int lastent(int type) { return type >= 0 && type < MAXENTTYPES ? lastenttype[type] : 0; }
+    int lastent(int type) { return type >= 0 && type < MAXENTTYPES ? clamp(lastenttype[type], 0, ents.length()) : 0; }
+    int lastuse(int type) { return type >= 0 && type < MAXENTTYPES ? clamp(lastusetype[type], 0, ents.length()) : 0; }
 
     int numattrs(int type) { return type >= 0 && type < MAXENTTYPES ? enttype[type].numattrs : 0; }
     ICOMMAND(0, entityattrs, "b", (int *n), intret(numattrs(*n)));
@@ -553,7 +554,7 @@ namespace entities
 
     void runtriggers(int n, gameent *d)
     {
-        loopi(lastenttype[TRIGGER]) if(ents[i]->type == TRIGGER && ents[i]->attrs[0] == n && ents[i]->attrs[2] == TA_MANUAL) runtrigger(i, d, false);
+        loopi(lastent(TRIGGER)) if(ents[i]->type == TRIGGER && ents[i]->attrs[0] == n && ents[i]->attrs[2] == TA_MANUAL) runtrigger(i, d, false);
     }
     ICOMMAND(0, exectrigger, "i", (int *n), if(identflags&IDF_WORLD) runtriggers(*n, trigger ? trigger : game::player1));
 
@@ -1089,7 +1090,7 @@ namespace entities
             gameentity &e = *(gameentity *)ents[index];
             if(e.type == TRIGGER && !cantrigger(index)) return;
             bool commit = false;
-            int numents = max(lastenttype[MAPMODEL], max(lastenttype[LIGHTFX], max(lastenttype[PARTICLES], lastenttype[MAPSOUND])));
+            int numents = max(lastent(MAPMODEL), max(lastent(LIGHTFX), max(lastent(PARTICLES), lastent(MAPSOUND))));
             loopi(numents) if(ents[i]->links.find(index) >= 0)
             {
                 gameentity &f = *(gameentity *)ents[i];
@@ -1116,11 +1117,11 @@ namespace entities
                         f.lastemit = e.lastemit;
                         if(e.type == TRIGGER) f.spawned = TRIGSTATE(e.spawned, e.attrs[4]);
                         else if(local) commit = true;
-                        if(mapsounds.inrange(f.attrs[0]) && !issound(((gameentity *)ents[i])->schan))
+                        if(mapsounds.inrange(f.attrs[0]) && !issound(f.schan))
                         {
                             int flags = SND_MAP;
                             loopk(SND_LAST)  if(f.attrs[4]&(1<<k)) flags |= 1<<k;
-                            playsound(f.attrs[0], both ? f.o : e.o, NULL, flags, f.attrs[3], f.attrs[1], f.attrs[2], &((gameentity *)ents[i])->schan);
+                            playsound(f.attrs[0], both ? f.o : e.o, NULL, flags, f.attrs[3], f.attrs[1], f.attrs[2], &f.schan);
                         }
                         break;
                     }
@@ -1145,8 +1146,7 @@ namespace entities
             vec pos = ents[ent]->o;
             switch(ents[ent]->type)
             {
-                case ACTOR:
-                    if(d->type == ENT_PLAYER) break;
+                case PLAYERSTART: case ACTOR:
                     if(tryspawn(d, pos, ents[ent]->attrs[1], ents[ent]->attrs[2])) return;
                     break;
                 case CHECKPOINT:
@@ -1161,10 +1161,10 @@ namespace entities
                     if(tryspawn(d, pos, yaw, pitch)) return;
                     break;
                 }
-                case PLAYERSTART:
-                    if(tryspawn(d, pos, ents[ent]->attrs[1], ents[ent]->attrs[2])) return;
+                default:
+                    physics::droptofloor(pos, ENT_DUMMY);
+                    if(tryspawn(d, pos, rnd(360), 0)) return;
                     break;
-                default: if(tryspawn(d, pos, rnd(360), 0)) return;
             }
         }
         else
@@ -1177,14 +1177,14 @@ namespace entities
                 {
                     case 0:
                         if(m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
-                            loopi(lastenttype[PLAYERSTART]) if(ents[i]->type == PLAYERSTART && ents[i]->attrs[0] == d->team && m_check(ents[i]->attrs[3], ents[i]->attrs[4], game::gamemode, game::mutators))
+                            loopi(lastent(PLAYERSTART)) if(ents[i]->type == PLAYERSTART && ents[i]->attrs[0] == d->team && m_check(ents[i]->attrs[3], ents[i]->attrs[4], game::gamemode, game::mutators))
                                 spawns.add(i);
                         break;
                     case 1: case 2:
-                        loopi(lastenttype[PLAYERSTART]) if(ents[i]->type == PLAYERSTART && (k == 2 || m_check(ents[i]->attrs[3], ents[i]->attrs[4], game::gamemode, game::mutators))) spawns.add(i);
+                        loopi(lastent(PLAYERSTART)) if(ents[i]->type == PLAYERSTART && (k == 2 || m_check(ents[i]->attrs[3], ents[i]->attrs[4], game::gamemode, game::mutators))) spawns.add(i);
                         break;
                     case 3:
-                        loopi(lastenttype[WEAPON]) if(ents[i]->type == WEAPON && m_check(ents[i]->attrs[2], ents[i]->attrs[3], game::gamemode, game::mutators)) spawns.add(i);
+                        loopi(lastent(WEAPON)) if(ents[i]->type == WEAPON && m_check(ents[i]->attrs[2], ents[i]->attrs[3], game::gamemode, game::mutators)) spawns.add(i);
                         break;
                     default: break;
                 }
@@ -2139,7 +2139,7 @@ namespace entities
             if(ents.inrange(enthover) && islightable(ents[enthover]))
                 renderfocus(enthover, renderentlight(e));
         }
-        loopi(lastenttype[LIGHTFX]) if(ents[i]->type == LIGHTFX && ents[i]->attrs[0] != LFX_SPOTLIGHT)
+        loopi(lastent(LIGHTFX)) if(ents[i]->type == LIGHTFX && ents[i]->attrs[0] != LFX_SPOTLIGHT)
         {
             if(ents[i]->spawned || ents[i]->lastemit)
             {
@@ -2159,7 +2159,7 @@ namespace entities
 
     void update()
     {
-        loopi(lastenttype[MAPSOUND])
+        loopi(lastent(MAPSOUND))
         {
             gameentity &e = *(gameentity *)ents[i];
             if(e.type == MAPSOUND && e.links.empty() && mapsounds.inrange(e.attrs[0]) && !issound(e.schan))
@@ -2177,7 +2177,7 @@ namespace entities
             renderfocus(i, renderentshow(e, i, game::player1->state == CS_EDITING ? ((entgroup.find(i) >= 0 || enthover == i) ? 1 : 2) : 3));
         if(!envmapping)
         {
-            int numents = m_edit(game::gamemode) ? ents.length() : lastusetype[EU_ITEM];
+            int numents = m_edit(game::gamemode) ? ents.length() : lastuse(EU_ITEM);
             loopi(numents)
             {
                 gameentity &e = *(gameentity *)ents[i];
@@ -2352,7 +2352,7 @@ namespace entities
     void drawparticles()
     {
         float maxdist = float(maxparticledistance)*float(maxparticledistance);
-        int numents = m_edit(game::gamemode) ? ents.length() : max(lastusetype[EU_ITEM], max(lastenttype[PARTICLES], lastenttype[TELEPORT]));
+        int numents = m_edit(game::gamemode) ? ents.length() : max(lastuse(EU_ITEM), max(lastent(PARTICLES), lastent(TELEPORT)));
         loopi(numents)
         {
             gameentity &e = *(gameentity *)ents[i];
