@@ -761,7 +761,7 @@ namespace entities
                     if(g->checkpoint == n || (m_trial(game::gamemode) && m_gsp3(game::gamemode, game::mutators) && g->team != T_ALPHA)) break;
                     if(e.attrs[6] == CP_START)
                     {
-                        if(g->cpmillis) break;
+                        if(g->cpmillis || (d->vel.iszero() && !d->move && !d->strafe)) break;
                         g->cpmillis = lastmillis;
                     }
                     else if(!g->cpmillis) break;
