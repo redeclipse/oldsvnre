@@ -1845,7 +1845,7 @@ namespace server
                         spawns[k ? T_NEUTRAL : sents[i].attrs[0]].add(i);
                         totalspawns++;
                     }
-                    if(!k && m_team(gamemode, mutators))
+                    if(totalspawns && m_team(gamemode, mutators))
                     {
                         loopi(numt) if(spawns[i+T_FIRST].ents.empty())
                         {
@@ -1856,8 +1856,18 @@ namespace server
                     }
                     if(totalspawns) break;
                 }
+                if(totalspawns && m_team(gamemode, mutators))
+                {
+                    int actt = numteams(gamemode, mutators), off = numt-actt;
+                    if(off > 0) loopk(off)
+                    {
+                        int t = T_ALPHA+k*2, v = t+2;
+                        if(isteam(gamemode, mutators, t, T_FIRST) && isteam(gamemode, mutators, v, T_FIRST))
+                            loopv(spawns[t].ents) spawns[v].add(spawns[t].ents[i]);
+                    }
+                }
             }
-            else
+            if(!totalspawns)
             { // use all neutral spawns
                 loopv(sents) if(sents[i].type == PLAYERSTART && sents[i].attrs[0] == T_NEUTRAL && (sents[i].attrs[5] == triggerid || !sents[i].attrs[5]) && m_check(sents[i].attrs[3], sents[i].attrs[4], gamemode, mutators))
                 {
@@ -4081,7 +4091,7 @@ namespace server
             else return;
         }
         int weap = -1, ammoamt = -1, dropped = -1, ammo = -1;
-        if(!gs.hasweap(attr, sweap) && w_carry(attr, sweap) && gs.carry(sweap) >= G(maxcarry)) weap = gs.drop(sweap);
+        if(m_classic(gamemode, mutators) && !gs.hasweap(attr, sweap) && w_carry(attr, sweap) && gs.carry(sweap) >= G(maxcarry)) weap = gs.drop(sweap);
         loopvk(clients) if(clients[k]->state.dropped.find(ent))
         {
             clients[k]->state.dropped.values(ent, ammoamt);

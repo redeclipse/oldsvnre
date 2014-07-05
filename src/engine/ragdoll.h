@@ -536,7 +536,7 @@ bool validragdoll(dynent *d, int millis)
 
 void moveragdoll(dynent *d, bool smooth)
 {
-    if(!curtime || !d->ragdoll) return;
+    if(!curtime || !d->ragdoll || (d->state != CS_DEAD && d->state != CS_WAITING)) return;
 
     if(!d->ragdoll->collidemillis || lastmillis < d->ragdoll->collidemillis)
     {
@@ -570,13 +570,13 @@ void cleanragdoll(dynent *d)
 
 void warpragdoll(dynent *d, const vec &vel, const vec &offset)
 {
-    if(!d->ragdoll) return;
+    if(!d->ragdoll || (d->state != CS_DEAD && d->state != CS_WAITING)) return;
     d->ragdoll->warppos(vel, offset);
 }
 
 void twitchragdoll(dynent *d, float vel)
 {
-    if(!d->ragdoll) return;
+    if(!d->ragdoll || (d->state != CS_DEAD && d->state != CS_WAITING)) return;
     d->ragdoll->twitch(vel);
 }
 

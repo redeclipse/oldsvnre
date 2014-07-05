@@ -554,7 +554,7 @@ namespace projs
                     {
                         loopv(projs) if(projs[i]->projtype == PRJ_ENT && projs[i] != &proj && entities::ents.inrange(projs[i]->id) && enttype[entities::ents[projs[i]->id]->type].usetype == EU_ITEM)
                             repel(projs[i]->o, itemrepulsion, itemrepelspeed);
-                        if(!speedmin) loopi(entities::lastusetype[EU_ITEM]) if(enttype[entities::ents[i]->type].usetype == EU_ITEM && entities::ents[i]->spawned)
+                        if(!speedmin) loopi(entities::lastuse(EU_ITEM)) if(enttype[entities::ents[i]->type].usetype == EU_ITEM && entities::ents[i]->spawned)
                             repel(entities::ents[i]->o, itemrepulsion, itemrepelspeed);
                     }
                     break;

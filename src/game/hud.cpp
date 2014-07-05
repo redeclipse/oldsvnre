@@ -1420,7 +1420,7 @@ namespace hud
                                     if(target->canuse(e.type, attr, e.attrs, sweap, lastmillis, W_S_ALL))
                                     {
                                         int drop = -1;
-                                        if(w_carry(target->weapselect, sweap) && target->ammo[attr] < 0 && w_carry(attr, sweap) && target->carry(sweap) >= maxcarry)
+                                        if(m_classic(game::gamemode, game::mutators) && w_carry(target->weapselect, sweap) && target->ammo[attr] < 0 && w_carry(attr, sweap) && target->carry(sweap) >= maxcarry)
                                             drop = target->drop(sweap);
                                         if(isweap(drop))
                                         {
@@ -2027,7 +2027,7 @@ namespace hud
         }
         else
         {
-            loopi(entities::lastusetype[EU_ITEM])
+            loopi(entities::lastuse(EU_ITEM))
             {
                 gameentity &e = *(gameentity *)entities::ents[i];
                 drawentblip(w, h, blend, i, e.o, e.type, e.attrs, e.spawned, e.lastspawn, false);
