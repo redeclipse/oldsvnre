@@ -879,7 +879,7 @@ struct gameent : dynent, gamestate
         removesounds();
         cleartags();
         checktags();
-        respawn(-1, 100);
+        respawn(-1, 0, 0, 0);
     }
     ~gameent()
     {
@@ -893,7 +893,7 @@ struct gameent : dynent, gamestate
     static bool is(int t) { return t == ENT_PLAYER || t == ENT_AI; }
     static bool is(physent *d) { return d->type == ENT_PLAYER || d->type == ENT_AI; }
 
-    void setparams(bool reset = false, int gamemode = 0, int mutators = 0)
+    void setparams(bool reset, int gamemode, int mutators)
     {
         int type = clamp(actortype, 0, int(A_MAX-1));
         if(type >= A_ENEMY)
@@ -916,7 +916,7 @@ struct gameent : dynent, gamestate
         aboveeye = curscale;
     }
 
-    void setscale(float scale = 1, int millis = 0, bool reset = false, int gamemode = 0, int mutators = 0)
+    void setscale(float scale, int millis, bool reset, int gamemode, int mutators)
     {
         if(scale != curscale)
         {
@@ -960,9 +960,9 @@ struct gameent : dynent, gamestate
         }
     }
 
-    void clearstate(int gamemode = 0, int mutators = 0)
+    void clearstate(int gamemode, int mutators)
     {
-        loopi(IM_MAX) impulse[i] = 0;
+        for(int i = (m_trial(gamemode) && m_gsp2(gamemode, mutators) ? 1 : 0); i < IM_MAX; ++i) impulse[i] = 0;
         cplast = lasthit = lastkill = quake = turnmillis = turnside = spree = 0;
         turnroll = turnyaw = 0;
         lastteamhit = lastflag = respawned = suicided = lastnode = lastfoot = -1;
@@ -974,7 +974,7 @@ struct gameent : dynent, gamestate
         used.shrink(0);
     }
 
-    void respawn(int millis = 0, int heal = 0, int gamemode = 0, int mutators = 0)
+    void respawn(int millis, int heal, int gamemode, int mutators)
     {
         stopmoving(true);
         removesounds();
@@ -986,7 +986,7 @@ struct gameent : dynent, gamestate
     void editspawn(int gamemode, int mutators, int sweap = -1, int heal = 0)
     {
         stopmoving(true);
-        clearstate();
+        clearstate(gamemode, mutators);
         inmaterial = airmillis = floormillis = 0;
         inliquid = onladder = false;
         strafe = move = 0;
@@ -997,19 +997,19 @@ struct gameent : dynent, gamestate
         gamestate::editspawn(gamemode, mutators, sweap, heal);
     }
 
-    void resetstate(int millis, int heal)
+    void resetstate(int millis, int heal, int gamemode, int mutators)
     {
-        respawn(millis, heal);
+        respawn(millis, heal, gamemode, mutators);
         frags = deaths = totaldamage = 0;
     }
 
-    void mapchange(int millis, int heal)
+    void mapchange(int millis, int heal, int gamemode, int mutators)
     {
         checkpoint = -1;
         dominating.shrink(0);
         dominated.shrink(0);
         icons.shrink(0);
-        resetstate(millis, heal);
+        resetstate(millis, heal, gamemode, mutators);
         gamestate::mapchange();
     }
 

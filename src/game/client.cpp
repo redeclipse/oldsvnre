@@ -1992,7 +1992,7 @@ namespace client
                         parsestate(NULL, p);
                         break;
                     }
-                    f->respawn(lastmillis);
+                    f->respawn(lastmillis, m_health(game::gamemode, game::mutators, f->model), game::gamemode, game::mutators);
                     parsestate(f, p);
                     break;
                 }
@@ -2007,7 +2007,7 @@ namespace client
                         break;
                     }
                     if(f == game::player1 && editmode) toggleedit();
-                    f->respawn(lastmillis);
+                    f->respawn(lastmillis, m_health(game::gamemode, game::mutators, f->model), game::gamemode, game::mutators);
                     parsestate(f, p);
                     game::respawned(f, true, ent);
                     break;
@@ -2168,7 +2168,12 @@ namespace client
                         int lcn = getint(p);
                         if(p.overread() || lcn < 0) break;
                         gameent *f = game::newclient(lcn);
-                        if(f && f!=game::player1 && !f->ai) f->respawn();
+                        if(!f)
+                        {
+                            parsestate(NULL, p);
+                            break;
+                        }
+                        if(f && f != game::player1 && !f->ai) f->respawn(lastmillis, m_health(game::gamemode, game::mutators, f->model), game::gamemode, game::mutators);
                         parsestate(f, p, true);
                         f->setscale(game::rescale(f), 0, true, game::gamemode, game::mutators);
                     }
@@ -2579,15 +2584,16 @@ namespace client
                 {
                     int tn = getint(p), ent = getint(p);
                     gameent *t = game::getclient(tn);
-                    if(!t)
+                    if(!t || !m_trial(game::gamemode))
                     {
+                        if(ent < 0) break;
                         if(getint(p) < 0) break;
                         loopi(2) getint(p);
                         break;
                     }
                     if(ent >= 0)
                     {
-                        if(m_trial(game::gamemode) && entities::ents.inrange(ent) && entities::ents[ent]->type == CHECKPOINT)
+                        if(entities::ents.inrange(ent) && entities::ents[ent]->type == CHECKPOINT)
                         {
                             if(t != game::player1 && !t->ai && (!t->cpmillis || entities::ents[ent]->attrs[6] == CP_START))
                                 t->cpmillis = lastmillis;
@@ -2605,7 +2611,8 @@ namespace client
                             t->cplast = laptime;
                             t->cptime = getint(p);
                             t->points = getint(p);
-                            t->cpmillis = t->impulse[IM_METER] = 0;
+                            t->cpmillis = 0;
+                            if(!m_gsp2(game::gamemode, game::mutators)) t->impulse[IM_METER] = 0;
                             if(showlaptimes > (t != game::focus ? (t->actortype > A_PLAYER ? 2 : 1) : 0))
                             {
                                 defformatstring(best)("%s", timestr(t->cptime));

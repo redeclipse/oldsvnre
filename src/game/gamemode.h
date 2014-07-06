@@ -96,12 +96,12 @@ gametypes gametype[] = {
         G_TRIAL, (1<<G_F_GSP), 0,
         {
             (1<<G_M_MULTI)|(1<<G_M_FFA)|(1<<G_M_FREESTYLE)|(1<<G_M_VAMPIRE)|(1<<G_M_RESIZE)|(1<<G_M_HARD)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3),
-            (1<<G_M_MULTI)|(1<<G_M_FFA)|(1<<G_M_FREESTYLE)|(1<<G_M_VAMPIRE)|(1<<G_M_RESIZE)|(1<<G_M_HARD)|(1<<G_M_GSP1)|(1<<G_M_GSP2),
-            (1<<G_M_MULTI)|(1<<G_M_FFA)|(1<<G_M_INSTA)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_FREESTYLE)|(1<<G_M_VAMPIRE)|(1<<G_M_RESIZE)|(1<<G_M_HARD)|(1<<G_M_GSP1)|(1<<G_M_GSP2),
-            (1<<G_M_MULTI)|(1<<G_M_INSTA)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_FREESTYLE)|(1<<G_M_VAMPIRE)|(1<<G_M_RESIZE)|(1<<G_M_HARD)|(1<<G_M_GSP1)|(1<<G_M_GSP3)
+            (1<<G_M_MULTI)|(1<<G_M_FFA)|(1<<G_M_FREESTYLE)|(1<<G_M_VAMPIRE)|(1<<G_M_RESIZE)|(1<<G_M_HARD)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3),
+            (1<<G_M_MULTI)|(1<<G_M_FFA)|(1<<G_M_FREESTYLE)|(1<<G_M_VAMPIRE)|(1<<G_M_RESIZE)|(1<<G_M_HARD)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3),
+            (1<<G_M_MULTI)|(1<<G_M_INSTA)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_FREESTYLE)|(1<<G_M_VAMPIRE)|(1<<G_M_RESIZE)|(1<<G_M_HARD)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3)
         },
-        "time-trial", "trial", { "marathon", "battle", "gauntlet" },
-        "compete for the fastest time completing a lap", { "compete for the most number of laps", "players are solid and can attack each other", "teams take turns running the gauntlet" },
+        "time-trial", "trial", { "marathon", "endurance", "gauntlet" },
+        "compete for the fastest time completing a lap", { "compete for the most number of laps", "impulse meter does not reset at all", "teams take turns running the gauntlet" },
     }
 };
 mutstypes mutstype[] = {
@@ -174,7 +174,7 @@ mutstypes mutstype[] = {
     {
         G_M_HARD, (1<<G_M_HARD),
         (1<<G_M_MULTI)|(1<<G_M_FFA)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_DUEL)|(1<<G_M_SURVIVOR)|(1<<G_M_CLASSIC)|(1<<G_M_ONSLAUGHT)|(1<<G_M_FREESTYLE)|(1<<G_M_VAMPIRE)|(1<<G_M_RESIZE)|(1<<G_M_HARD)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3),
-        "hard", "no regeneration, no radar"
+        "hard", "no regeneration, no radar, no impulse reset"
     },
     {
         G_M_GSP1, (1<<G_M_GSP1),
@@ -238,10 +238,11 @@ extern mutstypes mutstype[];
 #define m_loadout(a,b)      (!m_classic(a, b) && !m_sweaps(a, b))
 #define m_duke(a,b)         (m_duel(a, b) || m_survivor(a, b))
 #define m_regen(a,b)        (!m_hard(a,b) && (G(duelregen) || !m_duke(a, b)) && !m_insta(a, b))
-#define m_ghost(a,b)        (m_trial(a) && !m_gsp2(a, b) && !m_gsp3(a, b))
+#define m_ghost(a,b)        (m_trial(a) && !m_gsp3(a, b))
 #define m_bots(a)           (m_fight(a) && !m_trial(a))
 #define m_nopoints(a,b)     (m_duke(a, b) || (m_bomber(a) && m_gsp1(a, b)) || m_trial(a))
 #define m_laptime(a,b)      (m_trial(a) && !m_gsp1(a, b))
+#define m_impulsemeter(a,b) ((m_trial(a) && m_gsp2(a, b)) || !m_freestyle(a, b))
 
 #define m_weapon(a,b)       (m_medieval(a, b) ? W_SWORD : (m_kaboom(a, b) ? W_GRENADE : (m_insta(a, b) ? G(instaweapon) : (m_trial(a) ? G(trialweapon) : G(spawnweapon)))))
 #define m_xdelay(a,b,c)     (m_play(a) ? (m_trial(a) ? (!m_gsp3(a, b) || c == T_ALPHA ? G(trialdelay) : G(trialdelayex)) : (m_bomber(a) ? G(bomberdelay) : (m_insta(a, b) ? G(instadelay) : G(spawndelay)))) : 0)
