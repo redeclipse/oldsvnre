@@ -830,25 +830,29 @@ namespace server
         enumerate(idents, ident, id, {
             if(id.flags&IDF_SERVER && !(id.flags&IDF_READONLY) && (all || !(id.flags&IDF_WORLD))) // reset vars
             {
+                bool check = !(id.flags&IDF_ADMIN) && !(id.flags&IDF_WORLD);
                 const char *val = NULL;
-                numgamevars++;
+                if(check) numgamevars++;
                 switch(id.type)
                 {
                     case ID_VAR:
                     {
                         setvar(id.name, id.def.i, true);
+                        if(check && *id.storage.i != id.bin.i) numgamemods++;
                         if(flush) val = intstr(&id);
                         break;
                     }
                     case ID_FVAR:
                     {
                         setfvar(id.name, id.def.f, true);
+                        if(check && *id.storage.f != id.bin.f) numgamemods++;
                         if(flush) val = floatstr(*id.storage.f);
                         break;
                     }
                     case ID_SVAR:
                     {
                         setsvar(id.name, id.def.s && *id.def.s ? id.def.s : "", true);
+                        if(check && strcmp(*id.storage.s, id.bin.s)) numgamemods++;
                         if(flush) val = *id.storage.s;
                         break;
                     }
@@ -2906,7 +2910,7 @@ namespace server
 
     void checkvar(ident *id, const char *arg)
     {
-        if(id && id->flags&IDF_SERVER && !(id->flags&IDF_ADMIN) && !(id->flags&IDF_WORLD)) switch(id->type)
+        if(id && id->flags&IDF_SERVER && !(id->flags&IDF_READONLY) && !(id->flags&IDF_ADMIN) && !(id->flags&IDF_WORLD)) switch(id->type)
         {
             case ID_VAR:
             {
@@ -2933,7 +2937,7 @@ namespace server
     }
 
     bool servcmd(int nargs, const char *cmd, const char *arg)
-    { // incoming command from scripts
+    { // incoming commands
 #ifndef STANDALONE
         if(::connected(false, false)) return false;
 #endif
