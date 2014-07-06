@@ -587,7 +587,7 @@ namespace game
     void announce(int idx, gameent *d, bool forced)
     {
         if(idx < 0) return;
-        physent *t = !d || d == game::player1 || forced ? camera1 : d;
+        physent *t = !d || d == player1 || forced ? camera1 : d;
         bool ispl = d && !forced, inuse = false;
         int *chan = ispl ? &d->aschan : &announcerchan;
         if(issound(*chan))
@@ -1037,6 +1037,13 @@ namespace game
         }
     }
 
+    bool canregenimpulse(gameent *d)
+    {
+        if(d->state == CS_ALIVE && impulseregen > 0 && (!impulseregendelay || lastmillis-d->impulse[IM_REGEN] >= impulseregendelay))
+            return true;
+        return false;
+    }
+
     void checkoften(gameent *d, bool local)
     {
         adjustscaled(d->quake, quakefade);
@@ -1101,6 +1108,33 @@ namespace game
         d->o.z += d->airmillis ? offset : d->height;
 
         d->checktags();
+
+        if(m_impulsemeter(gamemode, mutators) && canregenimpulse(d) && d->impulse[IM_METER] > 0)
+        {
+            bool onfloor = d->physstate >= PHYS_SLOPE || d->onladder || physics::liquidcheck(d),
+                 collect = true; // collect time until we are able to act upon it
+            int timeslice = int((curtime+d->impulse[IM_COLLECT])*impulseregen);
+            #define impulsemod(x,y) \
+                if(collect && (x)) \
+                { \
+                    if(y > 0) { if(timeslice > 0) timeslice = int(timeslice*y); } \
+                    else collect = false; \
+                }
+            impulsemod(d->running(), impulseregenrun);
+            impulsemod(d->move || d->strafe, impulseregenmove);
+            impulsemod((!onfloor && PHYS(gravity) > 0) || d->sliding(), impulseregeninair);
+            impulsemod(onfloor && d->crouching() && !d->sliding(), impulseregencrouch);
+            impulsemod(d->sliding(), impulseregenslide);
+            if(collect)
+            {
+                if(timeslice > 0)
+                {
+                    if((d->impulse[IM_METER] -= timeslice) < 0) d->impulse[IM_METER] = 0;
+                    d->impulse[IM_COLLECT] = 0;
+                }
+                else d->impulse[IM_COLLECT] += curtime;
+            }
+        }
 
         loopi(W_MAX) if(d->weapstate[i] != W_S_IDLE && (intermission || d->weapselect != i || d->weapstate[i] != W_S_ZOOM))
         {
@@ -1923,7 +1957,7 @@ namespace game
         gameent *d;
         int numdyns = numdynents();
         loopi(numdyns) if((d = (gameent *)iterdynents(i)) && (gameent::is(d)))
-            d->mapchange(lastmillis, m_health(gamemode, mutators, d->model));
+            d->mapchange(lastmillis, m_health(gamemode, mutators, d->model), gamemode, mutators);
         if(!client::demoplayback && m_loadout(gamemode, mutators) && autoloadweap && *favloadweaps)
             chooseloadweap(player1, favloadweaps);
         entities::spawnplayer(player1); // prevent the player from being in the middle of nowhere
@@ -2823,8 +2857,8 @@ namespace game
             if(!intermission)
             {
                 entities::update();
-                if(m_capture(game::gamemode)) capture::update();
-                else if(m_bomber(game::gamemode)) bomber::update();
+                if(m_capture(gamemode)) capture::update();
+                else if(m_bomber(gamemode)) bomber::update();
                 if(player1->state == CS_ALIVE) weapons::shoot(player1, worldpos);
             }
             otherplayers();
@@ -3422,8 +3456,8 @@ namespace game
         float blend = opacity(d, third);
         if(d->state == CS_ALIVE)
         {
-            bool useth = hud::teamhurttime && m_team(game::gamemode, game::mutators) && game::focus == game::player1 &&
-                 d->team == game::player1->team && d->lastteamhit >= 0 && lastmillis-d->lastteamhit <= hud::teamhurttime,
+            bool useth = hud::teamhurttime && m_team(gamemode, mutators) && focus == player1 &&
+                 d->team == player1->team && d->lastteamhit >= 0 && lastmillis-d->lastteamhit <= hud::teamhurttime,
                  hashint = playerhint&(d->team != focus->team ? 2 : 1);
             if(d != focus && (useth || hashint))
             {

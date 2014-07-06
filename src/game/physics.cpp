@@ -323,7 +323,7 @@ namespace physics
                 if(m_capture(game::gamemode)) scale *= capturecarryspeed;
                 else if(m_bomber(game::gamemode)) scale *= bombercarryspeed;
             }
-            if(!m_freestyle(game::gamemode, game::mutators))
+            if(m_impulsemeter(game::gamemode, game::mutators))
             {
                 if(impulsecostscale) cost = int(cost*scale);
                 int diff = impulsemeter-e->impulse[IM_METER];
@@ -696,13 +696,6 @@ namespace physics
         return !collided;
     }
 
-    bool canregenimpulse(gameent *d)
-    {
-        if(impulseregen > 0 && (!impulseregendelay || lastmillis-d->impulse[IM_REGEN] >= impulseregendelay))
-            return true;
-        return false;
-    }
-
     bool impulseplayer(gameent *d, bool &onfloor, bool melee = false)
     {
         bool power = !melee && onfloor && impulsemethod&1 && d->sliding(true) && d->action[AC_JUMP];
@@ -760,39 +753,12 @@ namespace physics
     void modifyinput(gameent *d, vec &m, bool wantsmove, int millis)
     {
         bool onfloor = d->physstate >= PHYS_SLOPE || d->onladder || liquidcheck(d);
-        if(!m_freestyle(game::gamemode, game::mutators) && d->impulse[IM_METER] > 0 && canregenimpulse(d))
-        {
-            bool collect = true; // collect time until it is able to act upon it
-            int timeslice = int((millis+d->impulse[IM_COLLECT])*impulseregen);
-            #define impulsemod(x,y) \
-                if(collect && (x)) \
-                { \
-                    if(y > 0) { if(timeslice > 0) timeslice = int(timeslice*y); } \
-                    else collect = false; \
-                }
-            impulsemod(d->running(), impulseregenrun);
-            impulsemod(d->move || d->strafe, impulseregenmove);
-            impulsemod((!onfloor && PHYS(gravity) > 0) || d->sliding(), impulseregeninair);
-            impulsemod(onfloor && d->crouching() && !d->sliding(), impulseregencrouch);
-            impulsemod(d->sliding(), impulseregenslide);
-            if(collect)
-            {
-                if(timeslice > 0)
-                {
-                    if((d->impulse[IM_METER] -= timeslice) < 0) d->impulse[IM_METER] = 0;
-                    d->impulse[IM_COLLECT] = 0;
-                }
-                else d->impulse[IM_COLLECT] += millis;
-            }
-        }
-
         if(d->turnside && (!allowimpulse(d, IM_A_PARKOUR) || d->impulse[IM_TYPE] != IM_T_SKATE || (impulseskate && lastmillis-d->impulse[IM_TIME] > impulseskate) || d->vel.magnitude() <= 1))
         {
             d->turnside = 0;
             d->resetphys(true);
             onfloor = false;
         }
-
         if(d->turnside)
         {
             if(d->action[AC_JUMP] && canimpulse(d, IM_A_PARKOUR, true))
