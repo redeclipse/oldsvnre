@@ -14,9 +14,6 @@ namespace physics
     VAR(IDF_PERSIST, physinterp, 0, 1, 1);
 
     FVAR(IDF_PERSIST, impulsekick, 0, 150, 180); // determines the minimum yaw angle to switch between wall kick and run
-    FVAR(IDF_PERSIST, impulsekickup, 0, 89.9f, 89.9f); // reflection pitch angle
-    FVAR(IDF_PERSIST, impulsevaultup, 0, 89.9f, 89.9f); // reflection pitch angle
-
     VAR(IDF_PERSIST, impulsemethod, 0, 3, 3); // determines which impulse method to use, 0 = none, 1 = power jump, 2 = power slide, 3 = both
     VAR(IDF_PERSIST, impulseaction, 0, 3, 3); // determines how impulse action works, 0 = off, 1 = impulse jump, 2 = impulse dash, 3 = both
     FVAR(IDF_PERSIST, impulseroll, 0, 15, 89);
@@ -806,9 +803,9 @@ namespace physics
                 if(mag > 0)
                 {
                     vec rft;
-                    vecfromyawpitch(d->yaw, 0.f, 1, 0, rft);
+                    vecfromyawpitch(d->yaw, d->pitch, 1, 0, rft);
                     d->vel = vec(rft).mul(mag).add(keepvel);
-                    d->vel.z += mag/2;
+                    //d->vel.z += mag/2;
                     d->doimpulse(cost, IM_T_KICK, lastmillis);
                     d->turnmillis = PHYSMILLIS;
                     d->turnside = 0; d->turnyaw = d->turnroll = 0;
@@ -923,7 +920,7 @@ namespace physics
                         if(mag > 0)
                         {
                             vec rft;
-                            vecfromyawpitch(d->yaw, vault ? impulsevaultup : impulsekickup, 1, 0, rft);
+                            vecfromyawpitch(d->yaw, vault ? 89.9f : fabs(d->pitch), 1, 0, rft);
                             rft.reflect(face);
                             d->vel = vec(rft).mul(mag).add(keepvel);
                             d->doimpulse(cost, vault ? IM_T_VAULT : IM_T_KICK, lastmillis);
