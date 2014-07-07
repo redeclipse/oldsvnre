@@ -403,6 +403,7 @@ enum { DISC_NONE = 0, DISC_EOP, DISC_CN, DISC_KICK, DISC_MSGERR, DISC_IPBAN, DIS
 
 extern void *getinfo(int i);
 extern const char *gethostname(int i);
+extern const char *gethostip(int i);
 extern void sendf(int cn, int chan, const char *format, ...);
 extern void sendfile(int cn, int chan, stream *file, const char *format = "", ...);
 extern void sendpacket(int cn, int chan, ENetPacket *packet, int exclude = -1);
@@ -618,7 +619,7 @@ struct clientdata
     int type;
     int num;
     ENetPeer *peer;
-    string hostname;
+    string hostname, hostip;
     void *info;
 };
 

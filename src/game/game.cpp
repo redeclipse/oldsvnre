@@ -1339,7 +1339,7 @@ namespace game
                 }
                 if(d->actortype < A_ENEMY && !issound(d->vschan)) playsound(S_PAIN, d->o, d, 0, -1, -1, -1, &d->vschan);
                 d->lastpain = lastmillis;
-                playsound(WSND2(weap, WS(flags), S_W_IMPACT), vec(d->center()).add(vec(dir).mul(dist)), NULL, 0, clamp(int(255*scale), 25, 255));
+                playsound(WSND2(weap, WS(flags), S_W_IMPACT), vec(d->center()).add(vec(dir).mul(dist)), NULL, 0, clamp(int(255*scale), 32, 255));
             }
             if(d->actortype < A_ENEMY || actor[d->actortype].canmove)
             {
@@ -1829,8 +1829,13 @@ namespace game
         if(!players.inrange(cn)) return;
         gameent *d = players[cn];
         if(!d) return;
-        if(d->name[0] && client::showpresence >= (client::waiting(false) ? 2 : 1) && (d->actortype == A_PLAYER || ai::showaiinfo))
-            conoutft(CON_EVENT, "\fo%s (%s) left the game (%s)", colourname(d), d->hostname, reason >= 0 ? disc_reasons[reason] : "normal");
+        if(d->name[0] && client::showpresence >= (client::waiting(false) ? 2 : 1))
+        {
+            if(d->actortype == A_PLAYER)
+                conoutft(CON_EVENT, "\fo%s (%s) left the game (%s)", colourname(d), d->hostname, reason >= 0 ? disc_reasons[reason] : "normal");
+            else if(d->actortype == A_BOT && ai::showaiinfo)
+                conoutft(CON_EVENT, "\fo%s was removed from the game (%s)", colourname(d), reason >= 0 ? disc_reasons[reason] : "normal");
+        }
         gameent *e = NULL;
         int numdyns = numdynents();
         loopi(numdyns) if((e = (gameent *)iterdynents(i)))
@@ -2145,7 +2150,7 @@ namespace game
 
     void particletrack(particle *p, uint type, int &ts,  bool lastpass)
     {
-        if(!p || !p->owner || (p->owner->type != ENT_PLAYER && p->owner->type != ENT_AI)) return;
+        if(!p || !p->owner || !gameent::is(p->owner)) return;
         gameent *d = (gameent *)p->owner;
         switch(type&0xFF)
         {
@@ -3104,7 +3109,7 @@ namespace game
             if((anim>>ANIM_SECONDARY)&ANIM_INDEX) switch(anim&ANIM_INDEX)
             {
                 case ANIM_IDLE: case ANIM_MELEE: case ANIM_PISTOL: case ANIM_SWORD:
-                case ANIM_SHOTGUN: case ANIM_SMG: case ANIM_FLAMER: case ANIM_PLASMA: case ANIM_CONVULSER:
+                case ANIM_SHOTGUN: case ANIM_SMG: case ANIM_FLAMER: case ANIM_PLASMA: case ANIM_ZAPPER:
                 case ANIM_RIFLE: case ANIM_GRENADE: case ANIM_MINE: case ANIM_ROCKET:
                 {
                     anim = (anim>>ANIM_SECONDARY) | ((anim&((1<<ANIM_SECONDARY)-1))<<ANIM_SECONDARY);

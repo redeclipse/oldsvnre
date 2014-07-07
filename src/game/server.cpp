@@ -1358,26 +1358,22 @@ namespace server
             mutate(smuts, mut->intermission());
             sendf(-1, 1, "ri2", N_TICK, 0);
         }
-        if(req)
+        if(req || !G(intermlimit))
         {
             checkdemorecord(true);
             if(!maprequest && G(votelimit))
             {
                 sendf(-1, 1, "ri", N_NEWGAME);
                 maprequest = true;
-                if(!(interm = totalmillis+G(votelimit))) interm = 1;
+                interm = totalmillis+G(votelimit);
             }
-            else // if they can't vote, no point in waiting for them to do so
+            else
             {
-                interm = 0;
+                interm = totalmillis+1;
                 checkvotes(true);
             }
         }
-        else
-        {
-            maprequest = false;
-            if(!(interm = totalmillis+G(intermlimit))) interm = 1;
-        }
+        else interm = totalmillis+G(intermlimit);
     }
 
     bool wantsovertime()
@@ -3239,7 +3235,7 @@ namespace server
 
     void sendservinit(clientinfo *ci)
     {
-        sendf(ci->clientnum, 1, "ri3si2", N_SERVERINIT, ci->clientnum, GAMEVERSION, gethostname(ci->clientnum), ci->sessionid, serverpass[0] ? 1 : 0);
+        sendf(ci->clientnum, 1, "ri3s2i2", N_SERVERINIT, ci->clientnum, GAMEVERSION, gethostname(ci->clientnum), gethostip(ci->clientnum), ci->sessionid, serverpass[0] ? 1 : 0);
     }
 
     bool restorescore(clientinfo *ci)
@@ -3299,6 +3295,7 @@ namespace server
             putint(p, ci->privilege);
             sendstring(ci->name, p);
             sendstring(gethostname(ci->clientnum), p);
+            sendstring(gethostip(ci->clientnum), p);
             sendstring(ci->handle, p);
             sendstring(ci->state.vanity, p);
         }
@@ -3731,7 +3728,7 @@ namespace server
                             c.type = ipinfo::BAN;
                             c.time = totalmillis ? totalmillis : 1;
                             c.reason = newstring("team killing is not permitted");
-                            srvoutf(-3, "\fs\fcbanned\fS %s (%s): %s", colourname(v), gethostname(v->clientnum), c.reason);
+                            srvoutf(-3, "\fs\fcbanned\fS %s (%s/%s): %s", colourname(v), gethostname(v->clientnum), gethostip(v->clientnum), c.reason);
                             updatecontrols = true;
                         }
                         else if(G(teamkillkick) && v->state.warnings[WARN_TEAMKILL][0] >= G(teamkillkick))
@@ -5880,7 +5877,7 @@ namespace server
                                     c.type = value; \
                                     c.time = totalmillis ? totalmillis : 1; \
                                     c.reason = newstring(text); \
-                                    if(text[0]) srvoutf(-3, "\fP%s added \fs\fc" #y "\fS on %s (%s): %s", name, colourname(cp), gethostname(cp->clientnum), text); \
+                                    if(text[0]) srvoutf(-3, "\fP%s added \fs\fc" #y "\fS on %s (%s/%s): %s", name, colourname(cp), gethostname(cp->clientnum), gethostip(cp->clientnum), text); \
                                     else srvoutf(-3, "\fP%s added \fs\fc" #y "\fS on %s", name, colourname(cp)); \
                                     if(value == ipinfo::BAN) updatecontrols = true; \
                                     else if(value == ipinfo::LIMIT) cp->swapteam = 0; \

@@ -397,6 +397,7 @@ void process(ENetPacket *packet, int sender, int chan);
 int getservermtu() { return serverhost ? serverhost->mtu : -1; }
 void *getinfo(int i)            { return !clients.inrange(i) || clients[i]->type==ST_EMPTY ? NULL : clients[i]->info; }
 const char *gethostname(int i)  { int o = server::peerowner(i); return !clients.inrange(o) || clients[o]->type==ST_EMPTY ? "unknown" : clients[o]->hostname; }
+const char *gethostip(int i)    { int o = server::peerowner(i); return !clients.inrange(o) || clients[o]->type==ST_EMPTY ? "0.0.0.0" : clients[o]->hostip; }
 int getnumclients()             { return clients.length(); }
 uint getclientip(int n)         { int o = server::peerowner(n); return clients.inrange(o) && clients[o]->type==ST_TCPIP ? clients[o]->peer->address.host : 0; }
 
@@ -562,6 +563,7 @@ void localconnect(bool force)
         clientdata &c = *clients[cn];
         c.peer = NULL;
         copystring(c.hostname, "localhost");
+        copystring(c.hostip, "127.0.0.1");
         conoutf("\fglocal client %d connected", c.num);
         client::gameconnect(false);
         server::clientconnect(c.num, 0, true);
@@ -861,9 +863,22 @@ void serverslice(uint timeout)  // main server update, called from main loop in 
                 clientdata &c = *clients[cn];
                 c.peer = event.peer;
                 c.peer->data = &c;
-                if(enet_address_get_host(&c.peer->address, c.hostname, sizeof(c.hostname)) < 0)
-                    if(enet_address_get_host_ip(&c.peer->address, c.hostname, sizeof(c.hostname)) < 0)
-                        copystring(c.hostname, "unknown");
+                if(enet_address_get_host_ip(&c.peer->address, c.hostip, sizeof(c.hostip)) >= 0)
+                {
+                    if(enet_address_get_host(&c.peer->address, c.hostname, sizeof(c.hostname)) >= 0)
+                    {
+                        ENetAddress address;
+                        string hostname;
+                        if(enet_address_set_host(&address, c.hostname) < 0 || enet_address_get_host_ip(&address, hostname, sizeof(hostname)) < 0 || strcmp(hostname, c.hostname))
+                            copystring(c.hostname, c.hostip);
+                    }
+                    else copystring(c.hostname, c.hostip);
+                }
+                else
+                {
+                    copystring(c.hostname, "unknown");
+                    copystring(c.hostip, "0.0.0.0");
+                }
                 int reason = server::clientconnect(c.num, c.peer->address.host);
                 if(reason) disconnect_client(c.num, reason);
                 break;

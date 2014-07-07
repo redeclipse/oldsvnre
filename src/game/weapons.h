@@ -1,7 +1,7 @@
 enum
 {
     W_MELEE = 0, W_PISTOL, W_OFFSET, // end of unselectable weapon set
-    W_SWORD = W_OFFSET, W_SHOTGUN, W_SMG, W_FLAMER, W_PLASMA, W_CONVULSER, W_RIFLE, W_ITEM,
+    W_SWORD = W_OFFSET, W_SHOTGUN, W_SMG, W_FLAMER, W_PLASMA, W_ZAPPER, W_RIFLE, W_ITEM,
     W_GRENADE = W_ITEM, W_MINE, W_BOOM, W_ROCKET = W_BOOM, // end of item weapon set
     W_MAX, W_LOADOUT = W_ITEM-W_OFFSET // if you add to this at all, check all arrays with W_MAX
 };
@@ -49,8 +49,8 @@ enum
     S_SMG       = S_SHOTGUN+S_W_MAX,
     S_FLAMER    = S_SMG+S_W_MAX,
     S_PLASMA    = S_FLAMER+S_W_MAX,
-    S_CONVULSER   = S_PLASMA+S_W_MAX,
-    S_RIFLE     = S_CONVULSER+S_W_MAX,
+    S_ZAPPER   = S_PLASMA+S_W_MAX,
+    S_RIFLE     = S_ZAPPER+S_W_MAX,
     S_GRENADE   = S_RIFLE+S_W_MAX,
     S_MINE      = S_GRENADE+S_W_MAX,
     S_ROCKET    = S_MINE+S_W_MAX,
@@ -101,7 +101,7 @@ struct hitmsg { int flags, proj, target, dist; ivec dir, vel; };
 #include "weapdef.h"
 
 WPSVAR(0, name,
-    "melee",    "pistol",   "sword",    "shotgun",  "smg",      "flamer",   "plasma",   "convulser",    "rifle",    "grenade",  "mine",     "rocket"
+    "melee",    "pistol",   "sword",    "shotgun",  "smg",      "flamer",   "plasma",   "zapper",   "rifle",    "grenade",  "mine",     "rocket"
 );
 WPFVARM(0, aidist, 0, FVAR_MAX,
     16.0f,      512.0f,     48.0f,      64.0f,      512.0f,     64.0f,      512.0f,     64.f,       768.0f,     384.0f,     128.0f,     1024.0f,
@@ -122,7 +122,7 @@ WPVARM(0, ammosub, 0, VAR_MAX,
     0,          1,          0,          2,          5,          5,          20,         5,          1,          1,          1,          1
 );
 WPVARM(0, attackdelay, 1, VAR_MAX,
-    500,        125,        600,        750,        90,         150,        300,        125,        750,        1000,       1000,       1500,
+    500,        125,        500,        850,        90,         150,        300,        120,        750,        1000,       1000,       1500,
     1000,       200,        800,        1250,       500,        750,        2000,       750,        750,        1000,       1000,       1500
 );
 WPFVARK(0, blend, 0, 1,
@@ -196,10 +196,10 @@ WPVARM(0, cooktime, 0, VAR_MAX,
     0,          0,          0,          0,          0,          0,          2000,       500,        500,        3000,       0,          0
 );
 WPVARK(0, damage, VAR_MIN, VAR_MAX,
-    30,         25,         32,         8,          18,         8,          15,         8,          45,         100,        150,        200,
-    40,         35,         64,         4,          5,          8,          10,         8,          150,        100,        150,        200,
-    30,         25,         32,         8,          18,         8,          15,         8,          10,         100,        150,        200,
-    40,         35,         64,         8,          5,          8,          10,         8,          10,         100,        150,        200
+    30,         25,         30,         6,          15,         10,         15,         10,         40,         100,        100,        200,
+    40,         35,         65,         6,          5,          10,         10,         10,         100,        100,        100,        200,
+    30,         25,         30,         6,          15,         10,         15,         10,         10,         100,        100,        200,
+    40,         35,         65,         6,          5,          10,         10,         10,         10,         100,        100,        200
 );
 WPFVARK(0, damageself, FVAR_MIN, FVAR_MAX,
     1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,
@@ -394,9 +394,9 @@ WPVAR(0, muts, -G_M_ALL, G_M_ALL,
     0,          -G_M_SW,    -G_M_SW,    -G_M_SW,    -G_M_SW,    -G_M_SW,    -G_M_SW,    -G_M_SW,    -G_M_SW,    0,          -G_M_IM,    -G_M_DK
 );
 WPFVARK(0, partblend, 0, 1,
-    1.0f,       0.3f,       1.0f,       1.0f,       1.0f,       1.0f,       0.6f,       0.75f,      1.0f,       1.0f,       1.0f,       1.0f,
+    1.0f,       0.3f,       1.0f,       1.0f,       1.0f,       1.0f,       0.75f,      0.75f,      1.0f,       1.0f,       1.0f,       1.0f,
     1.0f,       0.6f,       1.0f,       1.0f,       1.0f,       0.15f,      1.0f,       0.75f,      1.0f,       1.0f,       1.0f,       1.0f,
-    1.0f,       0.3f,       1.0f,       1.0f,       1.0f,       1.0f,       0.6f,       0.75f,      1.0f,       1.0f,       1.0f,       1.0f,
+    1.0f,       0.3f,       1.0f,       1.0f,       1.0f,       1.0f,       0.75f,      0.75f,      1.0f,       1.0f,       1.0f,       1.0f,
     1.0f,       0.6f,       1.0f,       1.0f,       1.0f,       0.15f,      1.0f,       0.75f,      1.0f,       1.0f,       1.0f,       1.0f
 );
 WPVARK(IDF_HEX, partcol, -3, 0xFFFFFF,
@@ -418,16 +418,16 @@ WPFVARK(0, partlen, 0, FVAR_MAX,
     0.0f,       16.0f,      0.0f,       7.5f,       7.5f,       0.0f,       0.0f,       1024.0f,    512.0f,     0.0f,       4.0f,       0.0f
 );
 WPFVARK(0, partsize, 0, FVAR_MAX,
-    1.0f,       0.125f,     1.0f,       0.75f,      0.6f,       10.0f,      6.0f,       4.0f,       2.0f,       1.0f,       2.0f,       1.0f,
+    1.0f,       0.125f,     1.0f,       0.75f,      0.6f,       10.0f,      10.0f,      4.0f,       2.0f,       1.0f,       2.0f,       1.0f,
     2.0f,       0.25f,      1.25f,      0.45f,      0.4f,       12.0f,      24.0f,      3.0f,       3.0f,       1.0f,       2.0f,       1.0f,
-    1.0f,       0.125f,     1.0f,       0.45f,      0.4f,       10.0f,      6.0f,       3.0f,       1.0f,       1.0f,       2.0f,       1.0f,
+    1.0f,       0.125f,     1.0f,       0.45f,      0.4f,       10.0f,      10.0f,      3.0f,       1.0f,       1.0f,       2.0f,       1.0f,
     2.0f,       0.25f,      1.25f,      0.45f,      0.4f,       12.0f,      24.0f,      3.0f,       3.0f,       1.0f,       2.0f,       1.0f
 );
 WPVARK(0, parttype, 0, W_MAX-1,
-    W_MELEE,    W_PISTOL,   W_SWORD,    W_SHOTGUN,  W_SMG,      W_FLAMER,   W_PLASMA,   W_CONVULSER,    W_RIFLE,    W_GRENADE,  W_MINE,     W_ROCKET,
-    W_MELEE,    W_PISTOL,   W_SWORD,    W_SHOTGUN,  W_SMG,      W_FLAMER,   W_PLASMA,   W_CONVULSER,    W_RIFLE,    W_GRENADE,  W_MINE,     W_ROCKET,
-    W_MELEE,    W_PISTOL,   W_SWORD,    W_SHOTGUN,  W_SMG,      W_FLAMER,   W_PLASMA,   W_CONVULSER,    W_RIFLE,    W_GRENADE,  W_MINE,     W_ROCKET,
-    W_MELEE,    W_PISTOL,   W_SWORD,    W_SHOTGUN,  W_SMG,      W_FLAMER,   W_PLASMA,   W_CONVULSER,    W_RIFLE,    W_GRENADE,  W_MINE,     W_ROCKET
+    W_MELEE,    W_PISTOL,   W_SWORD,    W_SHOTGUN,  W_SMG,      W_FLAMER,   W_PLASMA,   W_ZAPPER,    W_RIFLE,    W_GRENADE,  W_MINE,     W_ROCKET,
+    W_MELEE,    W_PISTOL,   W_SWORD,    W_SHOTGUN,  W_SMG,      W_FLAMER,   W_PLASMA,   W_ZAPPER,    W_RIFLE,    W_GRENADE,  W_MINE,     W_ROCKET,
+    W_MELEE,    W_PISTOL,   W_SWORD,    W_SHOTGUN,  W_SMG,      W_FLAMER,   W_PLASMA,   W_ZAPPER,    W_RIFLE,    W_GRENADE,  W_MINE,     W_ROCKET,
+    W_MELEE,    W_PISTOL,   W_SWORD,    W_SHOTGUN,  W_SMG,      W_FLAMER,   W_PLASMA,   W_ZAPPER,    W_RIFLE,    W_GRENADE,  W_MINE,     W_ROCKET
 );
 WPVARK(0, proxdelay, 0, VAR_MAX,
     0,          0,          0,          0,          0,          0,          0,          0,          0,          0,          3000,       0,
@@ -480,7 +480,7 @@ WPFVARM(0, relativity, 0, FVAR_MAX,
     0.0f,       0.05f,      0.0f,       0.35f,      0.25f,      0.15f,      0.15f,      0.9f,       0.1f,       0.75f,      0.65f,      0.0f
 );
 WPVAR(0, reloaddelay, 0, VAR_MAX,
-    50,         1000,       50,         750,        1250,       1250,       1750,       1750,       1500,       800,        1400,       2200
+    50,         1000,       50,         850,        1250,       1250,       1750,       1750,       1500,       800,        1400,       2200
 );
 WPVARK(0, residual, 0, WR_ALL,
     0,          0,          WR(BLEED),  0,          0,          WR(BURN),   0,          WR(SHOCK),  0,          WR(BURN),   WR(SHOCK),  WR(BURN),
@@ -688,10 +688,10 @@ weaptypes weaptype[] =
             "plasma", "weapons/plasma/item", "weapons/plasma/vwep", "weapons/plasma/hwep", "", ""
     },
     {
-            ANIM_CONVULSER,        S_CONVULSER,   1,
+            ANIM_ZAPPER,        S_ZAPPER,   1,
             false,      false,      true,       false,
             { 0, 0 },               12,         0,
-            "convulser", "weapons/convulser/item", "weapons/convulser/vwep", "weapons/convulser/hwep", "", ""
+            "zapper", "weapons/zapper/item", "weapons/zapper/vwep", "weapons/zapper/hwep", "", ""
     },
     {
             ANIM_RIFLE,         S_RIFLE,    1,
@@ -718,7 +718,7 @@ weaptypes weaptype[] =
             "rocket", "weapons/rocket/item", "weapons/rocket/vwep", "weapons/rocket/hwep", "weapons/rocket/proj",  ""
     }
 };
-SVAR(0, weapname, "melee pistol sword shotgun smg flamer plasma convulser rifle grenade mine rocket");
+SVAR(0, weapname, "melee pistol sword shotgun smg flamer plasma zapper rifle grenade mine rocket");
 VAR(0, weapidxmelee, 1, W_MELEE, -1);
 VAR(0, weapidxpistol, 1, W_PISTOL, -1);
 VAR(0, weapidxsword, 1, W_SWORD, -1);
@@ -726,7 +726,7 @@ VAR(0, weapidxshotgun, 1, W_SHOTGUN, -1);
 VAR(0, weapidxsmg, 1, W_SMG, -1);
 VAR(0, weapidxflamer, 1, W_FLAMER, -1);
 VAR(0, weapidxplasma, 1, W_PLASMA, -1);
-VAR(0, weapidxconvulser, 1, W_CONVULSER, -1);
+VAR(0, weapidxzapper, 1, W_ZAPPER, -1);
 VAR(0, weapidxrifle, 1, W_RIFLE, -1);
 VAR(0, weapidxgrenade, 1, W_GRENADE, -1);
 VAR(0, weapidxmine, 1, W_MINE, -1);

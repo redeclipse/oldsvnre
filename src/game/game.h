@@ -213,7 +213,7 @@ enum
     ANIM_SMG, ANIM_SMG_PRIMARY, ANIM_SMG_SECONDARY, ANIM_SMG_RELOAD,
     ANIM_FLAMER, ANIM_FLAMER_PRIMARY, ANIM_FLAMER_SECONDARY, ANIM_FLAMER_RELOAD,
     ANIM_PLASMA, ANIM_PLASMA_PRIMARY, ANIM_PLASMA_SECONDARY, ANIM_PLASMA_RELOAD,
-    ANIM_CONVULSER, ANIM_CONVULSER_PRIMARY, ANIM_CONVULSER_SECONDARY, ANIM_CONVULSER_RELOAD,
+    ANIM_ZAPPER, ANIM_ZAPPER_PRIMARY, ANIM_ZAPPER_SECONDARY, ANIM_ZAPPER_RELOAD,
     ANIM_RIFLE, ANIM_RIFLE_PRIMARY, ANIM_RIFLE_SECONDARY, ANIM_RIFLE_RELOAD,
     ANIM_GRENADE, ANIM_GRENADE_PRIMARY, ANIM_GRENADE_SECONDARY, ANIM_GRENADE_RELOAD, ANIM_GRENADE_POWER,
     ANIM_MINE, ANIM_MINE_PRIMARY, ANIM_MINE_SECONDARY, ANIM_MINE_RELOAD,
@@ -829,7 +829,7 @@ const char * const animnames[] =
     "smg", "smg primary", "smg secondary", "smg reload",
     "flamer", "flamer primary", "flamer secondary", "flamer reload",
     "plasma", "plasma primary", "plasma secondary", "plasma reload",
-    "convulser", "convulser primary", "convulser secondary", "convulser reload",
+    "zapper", "zapper primary", "zapper secondary", "zapper reload",
     "rifle", "rifle primary", "rifle secondary", "rifle reload",
     "grenade", "grenade primary", "grenade secondary", "grenade reload", "grenade power",
     "mine", "mine primary", "mine secondary", "mine reload",
@@ -862,7 +862,7 @@ struct gameent : dynent, gamestate
     float deltayaw, deltapitch, newyaw, newpitch, turnyaw, turnroll;
     vec head, torso, muzzle, origin, eject, waist, jet[3], legs, hrad, trad, lrad, toe[2];
     bool action[AC_MAX], conopen, k_up, k_down, k_left, k_right, obliterated, headless;
-    string hostname, name, handle, info, obit;
+    string hostname, hostip, name, handle, info, obit;
     vector<gameent *> dominating, dominated;
     vector<eventicon> icons;
     vector<stunevent> stuns;
@@ -875,6 +875,7 @@ struct gameent : dynent, gamestate
         state = CS_DEAD;
         type = ENT_PLAYER;
         copystring(hostname, "unknown");
+        copystring(hostip, "0.0.0.0");
         name[0] = handle[0] = info[0] = obit[0] = 0;
         removesounds();
         cleartags();

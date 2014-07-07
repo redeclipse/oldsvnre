@@ -95,9 +95,9 @@ gametypes gametype[] = {
     {
         G_TRIAL, (1<<G_F_GSP), 0,
         {
-            (1<<G_M_MULTI)|(1<<G_M_FFA)|(1<<G_M_FREESTYLE)|(1<<G_M_VAMPIRE)|(1<<G_M_RESIZE)|(1<<G_M_HARD)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3),
-            (1<<G_M_MULTI)|(1<<G_M_FFA)|(1<<G_M_FREESTYLE)|(1<<G_M_VAMPIRE)|(1<<G_M_RESIZE)|(1<<G_M_HARD)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3),
-            (1<<G_M_MULTI)|(1<<G_M_FFA)|(1<<G_M_FREESTYLE)|(1<<G_M_VAMPIRE)|(1<<G_M_RESIZE)|(1<<G_M_HARD)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3),
+            (1<<G_M_MULTI)|(1<<G_M_FFA)|(1<<G_M_FREESTYLE)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3),
+            (1<<G_M_MULTI)|(1<<G_M_FFA)|(1<<G_M_FREESTYLE)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3),
+            (1<<G_M_MULTI)|(1<<G_M_FFA)|(1<<G_M_FREESTYLE)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3),
             (1<<G_M_MULTI)|(1<<G_M_INSTA)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_FREESTYLE)|(1<<G_M_VAMPIRE)|(1<<G_M_RESIZE)|(1<<G_M_HARD)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3)
         },
         "time-trial", "trial", { "marathon", "endurance", "gauntlet" },
