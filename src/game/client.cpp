@@ -607,6 +607,13 @@ namespace client
     }
     ICOMMAND(0, getclienthost, "i", (int *cn), result(getclienthost(*cn)));
 
+    const char *getclientip(int cn)
+    {
+        gameent *d = game::getclient(cn);
+        return d ? d->hostip : "";
+    }
+    ICOMMAND(0, getclientip, "i", (int *cn), result(getclientip(*cn)));
+
     int getclientteam(int cn)
     {
         gameent *d = game::getclient(cn);
@@ -1760,7 +1767,7 @@ namespace client
                         return;
                     }
                     getstring(game::player1->hostname, p);
-                    if(!game::player1->hostname[0]) copystring(game::player1->hostname, "unknown");
+                    getstring(game::player1->hostip, p);
                     sessionid = getint(p);
                     game::player1->clientnum = mycn;
                     if(getint(p)) conoutft(CON_EVENT, "\fothe server is password protected");
@@ -1944,7 +1951,7 @@ namespace client
                     while(*namestr && iscubespace(*namestr)) namestr++;
                     if(!*namestr) namestr = copystring(name, "unnamed");
                     getstring(d->hostname, p);
-                    if(!d->hostname[0]) copystring(d->hostname, "unknown");
+                    getstring(d->hostip, p);
                     getstring(d->handle, p);
                     getstring(text, p);
                     if(d == game::focus && d->team != team) hud::lastteam = 0;

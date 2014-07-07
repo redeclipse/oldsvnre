@@ -129,9 +129,8 @@ struct gui : guient
                     }
                     if(!t) break;
                     int w = x2-x1, h = y2-y1, tw = guiskinsize ? guiskinsize : t->w, th = guiskinsize ? guiskinsize : t->h;
-                    bool fullx = tw >= w, fully = th >= h;
                     float pw = tw*0.25f, ph = th*0.25f, qw = tw*0.5f, qh = th*0.5f, px = 0, py = 0, tx = 0, ty = 0;
-                    int cw = fullx ? 0 : int(floorf(w/qw))-1, ch = fully ? 1 : int(floorf(h/qh))+1;
+                    int cw = max(int(floorf(w/qw))-1, 0), ch = max(int(floorf(h/qh))+1, 2);
 
                     glBindTexture(GL_TEXTURE_2D, t->id);
                     glColor4f((colour>>16)/255.f, ((colour>>8)&0xFF)/255.f, (colour&0xFF)/255.f, blend);
@@ -140,9 +139,8 @@ struct gui : guient
                     loopi(ch)
                     {
                         bool cond = !i || i == ch-1;
-                        float vph = fully ? h : (cond ? ph : qh), vth = fully ? 1.f : (cond ? 0.25f : 0.5f);
-                        if(fully) ty = 0;
-                        else if(i && cond)
+                        float vph = cond ? ph : qh, vth = cond ? 0.25f : 0.5f;
+                        if(i && cond)
                         {
                             float off = h-py;
                             if(off > vph)
@@ -153,16 +151,7 @@ struct gui : guient
                             }
                             ty = 1-vth;
                         }
-                        if(fullx)
-                        {
-                            tx = 0;
-                            glTexCoord2f(tx, ty); glVertex2f(x1+px, y1+py);
-                            glTexCoord2f(tx+1.f, ty); glVertex2f(x1+px+w, y1+py);
-                            glTexCoord2f(tx+1.f, ty+vth); glVertex2f(x1+px+w, y1+py+vph);
-                            glTexCoord2f(tx, ty+vth); glVertex2f(x1+px, y1+py+vph);
-                            xtraverts += 4;
-                        }
-                        else loopj(3) switch(j)
+                        loopj(3) switch(j)
                         {
                             case 0: case 2:
                             {

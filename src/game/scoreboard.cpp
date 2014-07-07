@@ -48,6 +48,7 @@ namespace hud
     VAR(IDF_PERSIST, scorespectators, 0, 1, 1);
     VAR(IDF_PERSIST, scoreconnecting, 0, 0, 1);
     VAR(IDF_PERSIST, scorehostinfo, 0, 0, 1);
+    VAR(IDF_PERSIST, scoreipinfo, 0, 0, 1);
     VAR(IDF_PERSIST, scoreicons, 0, 1, 1);
     VAR(IDF_PERSIST|IDF_HEX, scorehilight, 0, 0xFFFFFF, 0xFFFFFF);
     VAR(IDF_PERSIST, scoreimage, 0, 0, 1);
@@ -252,9 +253,9 @@ namespace hud
         else scoresoff = scoreson = false;
     }
 
-    const char *scorehost(gameent *d)
+    const char *scorehost(gameent *d, bool hostname = true)
     {
-        if(d->actortype > A_PLAYER)
+        if(hostname && d->actortype > A_PLAYER)
         {
             static string hoststr;
             hoststr[0] = 0;
@@ -268,7 +269,7 @@ namespace hud
             concatstring(hoststr, owner);
             return hoststr;
         }
-        return d->hostname;
+        return hostname ? d->hostname : d->hostip;
     }
 
     void renderscoreboard(guient &g, bool firstpass)
@@ -461,8 +462,10 @@ namespace hud
                     uifont(g, numgroups > 1 ? "little" : "reduced", {
                         float namepad = 0;
                         float handlepad = 0;
+                        float ippad = 0;
                         float hostpad = 0;
                         bool hashandle = false;
+                        bool hasip = false;
                         bool hashost = false;
                         bool hasbots = false;
                         loopk(numgroups)
@@ -476,9 +479,18 @@ namespace hud
                                     handlepad = max(handlepad, (float)text_width(o->handle)/guibound[0]*0.51f);
                                     hashandle = true;
                                 }
+                                if(scoreipinfo)
+                                {
+                                    const char *host = scorehost(o, false);
+                                    if(host && *host)
+                                    {
+                                        ippad = max(ippad, (float)text_width(host)/guibound[0]*0.51f);
+                                        if(o->ownernum != game::player1->clientnum) hasip = true;
+                                    }
+                                }
                                 if(scorehostinfo)
                                 {
-                                    const char *host = scorehost(o);
+                                    const char *host = scorehost(o, true);
                                     if(host && *host)
                                     {
                                         hostpad = max(hostpad, (float)text_width(host)/guibound[0]*0.51f);
@@ -697,6 +709,19 @@ namespace hud
                                         }));
                                     });
                                 }
+                                if(scoreipinfo && hasip)
+                                {
+                                    uilist(g, {
+                                        uilist(g, {
+                                           //if(scorebgrows > 1) g.background(bgcolor, scorebgblend);
+                                           uicenter(g, uipad(g, ippad, g.space(1); g.strut(1)));
+                                        });
+                                        loopscoregroup(uilist(g, {
+                                            if((scorehilight && o == game::player1) || scorebgrows > 2) g.background(i%2 ? bgc2 : bgc1, scorebgblend, scorehilight && o == game::player1 ? scorehilight : -1, scorebgblend, scorehilight && o == game::player1);
+                                            uicenter(g, uipad(g, 0.5f, g.textf("%s", 0xFFFFFF, NULL, 0, scorehost(o, false))));
+                                        }));
+                                    });
+                                }
                                 if(scorehostinfo && hashost)
                                 {
                                     uilist(g, {
@@ -706,7 +731,7 @@ namespace hud
                                         });
                                         loopscoregroup(uilist(g, {
                                             if((scorehilight && o == game::player1) || scorebgrows > 2) g.background(i%2 ? bgc2 : bgc1, scorebgblend, scorehilight && o == game::player1 ? scorehilight : -1, scorebgblend, scorehilight && o == game::player1);
-                                            uicenter(g, uipad(g, 0.5f, g.textf("%s", 0xFFFFFF, NULL, 0, scorehost(o))));
+                                            uicenter(g, uipad(g, 0.5f, g.textf("%s", 0xFFFFFF, NULL, 0, scorehost(o, true))));
                                         }));
                                     });
                                 }

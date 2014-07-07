@@ -123,7 +123,7 @@ namespace ai
             {
                 case W_PISTOL: return true; break;
                 case W_MELEE: case W_ROCKET: default: return false; break;
-                case W_SWORD: case W_SHOTGUN: case W_SMG: case W_FLAMER: case W_PLASMA: case W_CONVULSER: case W_GRENADE: case W_MINE:
+                case W_SWORD: case W_SHOTGUN: case W_SMG: case W_FLAMER: case W_PLASMA: case W_ZAPPER: case W_GRENADE: case W_MINE:
                     if(rnd(d->skill*3) <= d->skill) return false;
                     break;
                 case W_RIFLE: if(weaprange(d, d->weapselect, false, e->o.squaredist(d->o))) return false; break;
@@ -201,18 +201,16 @@ namespace ai
         getwaypoints();
 
         gameent *o = game::newclient(on);
+        if(!o) return;
         bool resetthisguy = false;
-
         string m;
-        if(o) copystring(m, game::colourname(o));
-        else formatstring(m)("\fs\faunknown [\fs\fr%d\fS]\fS", on);
-
+        copystring(m, game::colourname(o));
         if(!d->name[0])
         {
-            if(showaiinfo && client::showpresence >= (client::waiting(false) ? 2 : 1))
+            if(at == A_BOT && showaiinfo && client::showpresence >= (client::waiting(false) ? 2 : 1))
             {
                 if(showaiinfo > 1) conoutft(CON_EVENT, "\fg%s assigned to %s at skill %d", game::colourname(d, name), m, sk);
-                else conoutft(CON_EVENT, "\fg%s joined the game", game::colourname(d, name));//, m, sk);
+                else conoutft(CON_EVENT, "\fg%s was added to the game", game::colourname(d, name));//, m, sk);
             }
             game::specreset(d);
             resetthisguy = true;
@@ -221,11 +219,11 @@ namespace ai
         {
             if(d->ownernum != on)
             {
-                if(showaiinfo && client::showpresence >= (client::waiting(false) ? 2 : 1))
+                if(at == A_BOT && showaiinfo && client::showpresence >= (client::waiting(false) ? 2 : 1))
                     conoutft(CON_EVENT, "\fg%s reassigned to %s", game::colourname(d, name), m);
                 resetthisguy = true;
             }
-            if(d->skill != sk && showaiinfo > 1 && client::showpresence >= (client::waiting(false) ? 2 : 1))
+            if(at == A_BOT && d->skill != sk && showaiinfo > 1 && client::showpresence >= (client::waiting(false) ? 2 : 1))
                 conoutft(CON_EVENT, "\fg%s changed skill to %d", game::colourname(d, name), sk);
         }
 
@@ -240,7 +238,8 @@ namespace ai
         d->model = md;
         d->setvanity(vn);
 
-        formatstring(d->hostname)("bot#%d", d->ownernum);
+        copystring(d->hostname, o->hostname);
+        copystring(d->hostip, o->hostip);
 
         if(resetthisguy) projs::remove(d);
         if(d->ownernum >= 0 && game::player1->clientnum == d->ownernum)
@@ -1721,18 +1720,21 @@ namespace ai
             if(!m_edit(game::gamemode) && d->team != e->team) continue;
             if(strncmp(w[0], "bots", 4))
             {
-                if(strncasecmp(w[0], e->name, strlen(e->name))) continue;
-                switch(w[0][strlen(e->name)])
+                size_t len = strlen(e->name);
+                if(!len || strncasecmp(w[0], e->name, len)) continue;
+                switch(w[0][len])
                 {
-                    case 0: case ':': case ',': case ';': break;
+                    case 0: break;
+                    case ':': case ',': case ';': len++; break;
                     default: continue;
                 }
+                if(w[0][len] != 0) continue;
             }
+            int pos = 1;
             const char *affirm[4] = { "roger", "okay", "will do", "i'm on it" };
-            if(!strcasecmp(w[1], "defend"))
+            if(!strcasecmp(w[pos], "defend"))
             {
-                int pos = 2;
-                if(!strcasecmp(w[pos], "the")) pos++;
+                pos++;
                 if(!strcasecmp(w[pos], "me"))
                 {
                     e->ai->clear();
@@ -1758,70 +1760,60 @@ namespace ai
                         defend = true;
                         break;
                     }
-                    if(!defend) switch(game::gamemode)
+                    if(!defend)
                     {
-                        case G_CAPTURE:
+                        if(!strcasecmp(w[pos], "the")) pos++;
+                        switch(game::gamemode)
                         {
-                            if(!strcasecmp(w[pos], "flag"))
+                            case G_CAPTURE:
                             {
-                                loopv(capture::st.flags) if(capture::st.flags[i].team == e->team)
+                                if(!strcasecmp(w[pos], "flag"))
                                 {
-                                    e->ai->clear();
-                                    e->ai->addstate(AI_S_DEFEND, AI_T_AFFINITY, i, AI_A_PROTECT, d->clientnum);
-                                    botsay(e, reply, "%s: %s, defending the flag", d->name, affirm[rnd(4)]);
-                                    break;
+                                    loopv(capture::st.flags) if(capture::st.flags[i].team == e->team)
+                                    {
+                                        e->ai->clear();
+                                        e->ai->addstate(AI_S_DEFEND, AI_T_AFFINITY, i, AI_A_PROTECT, d->clientnum);
+                                        botsay(e, reply, "%s: %s, defending the flag", d->name, affirm[rnd(4)]);
+                                        break;
+                                    }
                                 }
+                                else if(!strcasecmp(w[pos], "base"))
+                                {
+                                    loopv(capture::st.flags) if(capture::st.flags[i].team == e->team)
+                                    {
+                                        e->ai->clear();
+                                        e->ai->addstate(AI_S_DEFEND, AI_T_ENTITY, capture::st.flags[i].ent, AI_A_PROTECT, d->clientnum);
+                                        botsay(e, reply, "%s: %s, defending base for the flag", d->name, affirm[rnd(4)]);
+                                        break;
+                                    }
+                                }
+                                else botsay(e, reply, "%s: 'me', 'here', 'flag', 'base', or a player", d->name);
+                                break;
                             }
-                            else if(!strcasecmp(w[pos], "base"))
+                            case G_BOMBER:
                             {
-                                loopv(capture::st.flags) if(capture::st.flags[i].team == e->team)
+                                if(!strcasecmp(w[pos], "goal") || !strcasecmp(w[pos], "base"))
                                 {
-                                    e->ai->clear();
-                                    e->ai->addstate(AI_S_DEFEND, AI_T_ENTITY, capture::st.flags[i].ent, AI_A_PROTECT, d->clientnum);
-                                    botsay(e, reply, "%s: %s, defending base for the flag", d->name, affirm[rnd(4)]);
-                                    break;
+                                    loopv(bomber::st.flags) if(!isbomberaffinity(bomber::st.flags[i]) && bomber::st.flags[i].team == e->team)
+                                    {
+                                        e->ai->clear();
+                                        e->ai->addstate(AI_S_DEFEND, AI_T_AFFINITY, i, AI_A_PROTECT, d->clientnum);
+                                        botsay(e, reply, "%s: %s, defending the goal", d->name, affirm[rnd(4)]);
+                                        break;
+                                    }
                                 }
+                                else botsay(e, reply, "%s: 'me', 'here', 'goal', or a player", d->name);
+                                break;
                             }
-                            else botsay(e, reply, "%s: 'me', 'here', 'flag', 'base', or a player", d->name);
-                            break;
+                            default: botsay(e, reply, "%s: 'me', 'here', or a player", d->name); break;
                         }
-                        case G_BOMBER:
-                        {
-                            if(!strcasecmp(w[pos], "goal") || !strcasecmp(w[pos], "base"))
-                            {
-                                loopv(bomber::st.flags) if(!isbomberaffinity(bomber::st.flags[i]) && bomber::st.flags[i].team == e->team)
-                                {
-                                    e->ai->clear();
-                                    e->ai->addstate(AI_S_DEFEND, AI_T_AFFINITY, i, AI_A_PROTECT, d->clientnum);
-                                    botsay(e, reply, "%s: %s, defending the goal", d->name, affirm[rnd(4)]);
-                                    break;
-                                }
-                            }
-                            else botsay(e, reply, "%s: 'me', 'here', 'goal', or a player", d->name);
-                            break;
-                        }
-                        default: botsay(e, reply, "%s: 'me', 'here', or a player", d->name); break;
                     }
                 }
             }
-            else if(!strcasecmp(w[1], "attack"))
+            else if(!strcasecmp(w[pos], "attack"))
             {
-                int pos = 2;
+                pos++;
                 if(!strcasecmp(w[pos], "the")) pos++;
-#if 0
-                bool attack = false;
-                gameent *f = NULL;
-                int numdyns = game::numdynents();
-                loopi(numdyns) if((f = (gameent *)game::iterdynents(i)) && f != e && f->state == CS_ALIVE && f->team != e->team && !strcmp(w[pos], f->name))
-                {
-                    e->ai->clear();
-                    e->ai->addstate(AI_S_PURSUE, AI_T_ACTOR, f->clientnum, AI_A_HASTE, d->clientnum);
-                    botsay(e, reply, "%s: %s, attacking %s", d->name, affirm[rnd(4)], f->name);
-                    attack = true;
-                    break;
-                }
-                if(!attack)
-#endif
                 switch(game::gamemode)
                 {
                     case G_CAPTURE:
@@ -1877,13 +1869,13 @@ namespace ai
                     default: botsay(e, reply, "%s: name of player?", d->name); break;
                 }
             }
-            else if(!strcasecmp(w[1], "forget"))
+            else if(!strcasecmp(w[pos], "forget"))
             {
                 loopvrev(e->ai->state) if(e->ai->state[i].owner == d->clientnum) e->ai->state.remove(i);
                 const char *quip[4] = { "back to what i was doing then", "resuming previous operations", "i am no longer your slave", "jolly good show then" };
                 botsay(e, reply, "%s: %s, %s", d->name, affirm[rnd(4)], quip[rnd(4)]);
             }
-            else if(!strcasecmp(w[1], "reset"))
+            else if(!strcasecmp(w[pos], "reset"))
             {
                 e->ai->reset(true, false);
                 const char *quip[4] = { "what was i doing again?", "duh... off i go..", "who were you again?", "ummmm... wtf do i do now?" };

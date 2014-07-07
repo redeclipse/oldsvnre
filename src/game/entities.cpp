@@ -1758,7 +1758,7 @@ namespace entities
                         if(e.attrs[0] >= 9) e.attrs[0]++;
                     }
                     if(mtype == MAP_MAPZ && gver <= 221)
-                    { // insert convulser before rifle (7 -> 8) after plasma (6)
+                    { // insert zapper before rifle (7 -> 8) after plasma (6)
                         if(e.attrs[0] >= 7) e.attrs[0]++;
                     }
                     break;

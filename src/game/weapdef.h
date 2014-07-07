@@ -7,7 +7,7 @@
         GVAR(flags, smg##name, mn, w04, mx); \
         GVAR(flags, flamer##name, mn, w05, mx); \
         GVAR(flags, plasma##name, mn, w06, mx); \
-        GVAR(flags, convulser##name, mn, w07, mx); \
+        GVAR(flags, zapper##name, mn, w07, mx); \
         GVAR(flags, rifle##name, mn, w08, mx); \
         GVAR(flags, grenade##name, mn, w09, mx); \
         GVAR(flags, mine##name, mn, w10, mx); \
@@ -20,7 +20,7 @@
             &sv_smg##name, \
             &sv_flamer##name, \
             &sv_plasma##name, \
-            &sv_convulser##name, \
+            &sv_zapper##name, \
             &sv_rifle##name, \
             &sv_grenade##name, \
             &sv_mine##name, \
@@ -35,7 +35,7 @@
         GVAR(flags, smg##name##1, mn, w104, mx);     GVAR(flags, smg##name##2, mn, w204, mx); \
         GVAR(flags, flamer##name##1, mn, w105, mx);  GVAR(flags, flamer##name##2, mn, w205, mx); \
         GVAR(flags, plasma##name##1, mn, w106, mx);  GVAR(flags, plasma##name##2, mn, w206, mx); \
-        GVAR(flags, convulser##name##1, mn, w107, mx);   GVAR(flags, convulser##name##2, mn, w207, mx); \
+        GVAR(flags, zapper##name##1, mn, w107, mx);  GVAR(flags, zapper##name##2, mn, w207, mx); \
         GVAR(flags, rifle##name##1, mn, w108, mx);   GVAR(flags, rifle##name##2, mn, w208, mx);\
         GVAR(flags, grenade##name##1, mn, w109, mx); GVAR(flags, grenade##name##2, mn, w209, mx); \
         GVAR(flags, mine##name##1, mn, w110, mx);    GVAR(flags, mine##name##2, mn, w210, mx); \
@@ -48,7 +48,7 @@
             { &sv_smg##name##1,      &sv_smg##name##2 }, \
             { &sv_flamer##name##1,   &sv_flamer##name##2 }, \
             { &sv_plasma##name##1,   &sv_plasma##name##2 }, \
-            { &sv_convulser##name##1,    &sv_convulser##name##2 }, \
+            { &sv_zapper##name##1,   &sv_zapper##name##2 }, \
             { &sv_rifle##name##1,    &sv_rifle##name##2 }, \
             { &sv_grenade##name##1,  &sv_grenade##name##2 }, \
             { &sv_mine##name##1,     &sv_mine##name##2 }, \
@@ -63,7 +63,7 @@
         GFVAR(flags, smg##name, mn, w04, mx); \
         GFVAR(flags, flamer##name, mn, w05, mx); \
         GFVAR(flags, plasma##name, mn, w06, mx); \
-        GFVAR(flags, convulser##name, mn, w07, mx); \
+        GFVAR(flags, zapper##name, mn, w07, mx); \
         GFVAR(flags, rifle##name, mn, w08, mx); \
         GFVAR(flags, grenade##name, mn, w09, mx); \
         GFVAR(flags, mine##name, mn, w10, mx); \
@@ -76,7 +76,7 @@
             &sv_smg##name, \
             &sv_flamer##name, \
             &sv_plasma##name, \
-            &sv_convulser##name, \
+            &sv_zapper##name, \
             &sv_rifle##name, \
             &sv_grenade##name, \
             &sv_mine##name, \
@@ -91,7 +91,7 @@
         GFVAR(flags, smg##name##1, mn, w104, mx);     GFVAR(flags, smg##name##2, mn, w204, mx); \
         GFVAR(flags, flamer##name##1, mn, w105, mx);  GFVAR(flags, flamer##name##2, mn, w205, mx); \
         GFVAR(flags, plasma##name##1, mn, w106, mx);  GFVAR(flags, plasma##name##2, mn, w206, mx); \
-        GFVAR(flags, convulser##name##1, mn, w107, mx);   GFVAR(flags, convulser##name##2, mn, w207, mx); \
+        GFVAR(flags, zapper##name##1, mn, w107, mx);  GFVAR(flags, zapper##name##2, mn, w207, mx); \
         GFVAR(flags, rifle##name##1, mn, w108, mx);   GFVAR(flags, rifle##name##2, mn, w208, mx);\
         GFVAR(flags, grenade##name##1, mn, w109, mx); GFVAR(flags, grenade##name##2, mn, w209, mx); \
         GFVAR(flags, mine##name##1, mn, w110, mx);    GFVAR(flags, mine##name##2, mn, w210, mx); \
@@ -104,7 +104,7 @@
             { &sv_smg##name##1,      &sv_smg##name##2 }, \
             { &sv_flamer##name##1,   &sv_flamer##name##2 }, \
             { &sv_plasma##name##1,   &sv_plasma##name##2 }, \
-            { &sv_convulser##name##1,    &sv_convulser##name##2 }, \
+            { &sv_zapper##name##1,   &sv_zapper##name##2 }, \
             { &sv_rifle##name##1,    &sv_rifle##name##2 }, \
             { &sv_grenade##name##1,  &sv_grenade##name##2 }, \
             { &sv_mine##name##1,     &sv_mine##name##2 }, \
@@ -119,7 +119,7 @@
         GSVAR(flags, smg##name, w04); \
         GSVAR(flags, flamer##name, w05); \
         GSVAR(flags, plasma##name, w06); \
-        GSVAR(flags, convulser##name, w07); \
+        GSVAR(flags, zapper##name, w07); \
         GSVAR(flags, rifle##name, w08); \
         GSVAR(flags, grenade##name, w09); \
         GSVAR(flags, mine##name, w10); \
@@ -132,7 +132,7 @@
             &sv_smg##name, \
             &sv_flamer##name, \
             &sv_plasma##name, \
-            &sv_convulser##name, \
+            &sv_zapper##name, \
             &sv_rifle##name, \
             &sv_grenade##name, \
             &sv_mine##name, \
@@ -147,7 +147,7 @@
         GSVAR(flags, smg##name##1, w104);     GSVAR(flags, smg##name##2, w204); \
         GSVAR(flags, flamer##name##1, w105);  GSVAR(flags, flamer##name##2, w205); \
         GSVAR(flags, plasma##name##1, w106);  GSVAR(flags, plasma##name##2, w206); \
-        GSVAR(flags, convulser##name##1, w107);   GSVAR(flags, convulser##name##2, w207); \
+        GSVAR(flags, zapper##name##1, w107);  GSVAR(flags, zapper##name##2, w207); \
         GSVAR(flags, rifle##name##1, w108);   GSVAR(flags, rifle##name##2, w208);\
         GSVAR(flags, grenade##name##1, w109); GSVAR(flags, grenade##name##2, w209); \
         GSVAR(flags, mine##name##1, w110);    GSVAR(flags, mine##name##2, w210); \
@@ -160,7 +160,7 @@
             { &sv_smg##name##1,      &sv_smg##name##2 }, \
             { &sv_flamer##name##1,   &sv_flamer##name##2 }, \
             { &sv_plasma##name##1,   &sv_plasma##name##2 }, \
-            { &sv_convulser##name##1,    &sv_convulser##name##2 }, \
+            { &sv_zapper##name##1,   &sv_zapper##name##2 }, \
             { &sv_rifle##name##1,    &sv_rifle##name##2 }, \
             { &sv_grenade##name##1,  &sv_grenade##name##2 }, \
             { &sv_mine##name##1,     &sv_mine##name##2 }, \
@@ -180,7 +180,7 @@
         GVAR(flags, smg##name, mn, w04, mx); \
         GVAR(flags, flamer##name, mn, w05, mx); \
         GVAR(flags, plasma##name, mn, w06, mx); \
-        GVAR(flags, convulser##name, mn, w07, mx); \
+        GVAR(flags, zapper##name, mn, w07, mx); \
         GVAR(flags, rifle##name, mn, w08, mx); \
         GVAR(flags, grenade##name, mn, w09, mx); \
         GVAR(flags, mine##name, mn, w10, mx); \
@@ -193,7 +193,7 @@
             &smg##name, \
             &flamer##name, \
             &plasma##name, \
-            &convulser##name, \
+            &zapper##name, \
             &rifle##name, \
             &grenade##name, \
             &mine##name, \
@@ -208,7 +208,7 @@
         GVAR(flags, smg##name##1, mn, w104, mx);     GVAR(flags, smg##name##2, mn, w204, mx); \
         GVAR(flags, flamer##name##1, mn, w105, mx);  GVAR(flags, flamer##name##2, mn, w205, mx); \
         GVAR(flags, plasma##name##1, mn, w106, mx);  GVAR(flags, plasma##name##2, mn, w206, mx); \
-        GVAR(flags, convulser##name##1, mn, w107, mx);   GVAR(flags, convulser##name##2, mn, w207, mx); \
+        GVAR(flags, zapper##name##1, mn, w107, mx);  GVAR(flags, zapper##name##2, mn, w207, mx); \
         GVAR(flags, rifle##name##1, mn, w108, mx);   GVAR(flags, rifle##name##2, mn, w208, mx);\
         GVAR(flags, grenade##name##1, mn, w109, mx); GVAR(flags, grenade##name##2, mn, w209, mx); \
         GVAR(flags, mine##name##1, mn, w110, mx);    GVAR(flags, mine##name##2, mn, w210, mx); \
@@ -221,7 +221,7 @@
             { &smg##name##1,      &smg##name##2 }, \
             { &flamer##name##1,   &flamer##name##2 }, \
             { &plasma##name##1,   &plasma##name##2 }, \
-            { &convulser##name##1,    &convulser##name##2 }, \
+            { &zapper##name##1,   &zapper##name##2 }, \
             { &rifle##name##1,    &rifle##name##2 }, \
             { &grenade##name##1,  &grenade##name##2 }, \
             { &mine##name##1,     &mine##name##2 }, \
@@ -236,7 +236,7 @@
         GFVAR(flags, smg##name, mn, w04, mx); \
         GFVAR(flags, flamer##name, mn, w05, mx); \
         GFVAR(flags, plasma##name, mn, w06, mx); \
-        GFVAR(flags, convulser##name, mn, w07, mx); \
+        GFVAR(flags, zapper##name, mn, w07, mx); \
         GFVAR(flags, rifle##name, mn, w08, mx); \
         GFVAR(flags, grenade##name, mn, w09, mx); \
         GFVAR(flags, mine##name, mn, w10, mx); \
@@ -249,7 +249,7 @@
             &smg##name, \
             &flamer##name, \
             &plasma##name, \
-            &convulser##name, \
+            &zapper##name, \
             &rifle##name, \
             &grenade##name, \
             &mine##name, \
@@ -264,7 +264,7 @@
         GFVAR(flags, smg##name##1, mn, w104, mx);     GFVAR(flags, smg##name##2, mn, w204, mx); \
         GFVAR(flags, flamer##name##1, mn, w105, mx);  GFVAR(flags, flamer##name##2, mn, w205, mx); \
         GFVAR(flags, plasma##name##1, mn, w106, mx);  GFVAR(flags, plasma##name##2, mn, w206, mx); \
-        GFVAR(flags, convulser##name##1, mn, w107, mx);   GFVAR(flags, convulser##name##2, mn, w207, mx); \
+        GFVAR(flags, zapper##name##1, mn, w107, mx);  GFVAR(flags, zapper##name##2, mn, w207, mx); \
         GFVAR(flags, rifle##name##1, mn, w108, mx);   GFVAR(flags, rifle##name##2, mn, w208, mx);\
         GFVAR(flags, grenade##name##1, mn, w109, mx); GFVAR(flags, grenade##name##2, mn, w209, mx); \
         GFVAR(flags, mine##name##1, mn, w110, mx);    GFVAR(flags, mine##name##2, mn, w210, mx); \
@@ -277,7 +277,7 @@
             { &smg##name##1,      &smg##name##2 }, \
             { &flamer##name##1,   &flamer##name##2 }, \
             { &plasma##name##1,   &plasma##name##2 }, \
-            { &convulser##name##1,    &convulser##name##2 }, \
+            { &zapper##name##1,   &zapper##name##2 }, \
             { &rifle##name##1,    &rifle##name##2 }, \
             { &grenade##name##1,  &grenade##name##2 }, \
             { &mine##name##1,     &mine##name##2 }, \
@@ -292,7 +292,7 @@
         GSVAR(flags, smg##name, w04); \
         GSVAR(flags, flamer##name, w05); \
         GSVAR(flags, plasma##name, w06); \
-        GSVAR(flags, convulser##name, w07); \
+        GSVAR(flags, zapper##name, w07); \
         GSVAR(flags, rifle##name, w08); \
         GSVAR(flags, grenade##name, w09); \
         GSVAR(flags, mine##name, w10); \
@@ -305,7 +305,7 @@
             &smg##name, \
             &flamer##name, \
             &plasma##name, \
-            &convulser##name, \
+            &zapper##name, \
             &rifle##name, \
             &grenade##name, \
             &mine##name, \
@@ -320,7 +320,7 @@
         GSVAR(flags, smg##name##1, w104);     GSVAR(flags, smg##name##2, w204); \
         GSVAR(flags, flamer##name##1, w105);  GSVAR(flags, flamer##name##2, w205); \
         GSVAR(flags, plasma##name##1, w106);  GSVAR(flags, plasma##name##2, w206); \
-        GSVAR(flags, convulser##name##1, w107);   GSVAR(flags, convulser##name##2, w207); \
+        GSVAR(flags, zapper##name##1, w107);  GSVAR(flags, zapper##name##2, w207); \
         GSVAR(flags, rifle##name##1, w108);   GSVAR(flags, rifle##name##2, w208);\
         GSVAR(flags, grenade##name##1, w109); GSVAR(flags, grenade##name##2, w209); \
         GSVAR(flags, mine##name##1, w110);    GSVAR(flags, mine##name##2, w210); \
@@ -333,7 +333,7 @@
             { &smg##name##1,      &smg##name##2 }, \
             { &flamer##name##1,   &flamer##name##2 }, \
             { &plasma##name##1,   &plasma##name##2 }, \
-            { &convulser##name##1,  &convulser##name##2 }, \
+            { &zapper##name##1,   &zapper##name##2 }, \
             { &rifle##name##1,    &rifle##name##2 }, \
             { &grenade##name##1,  &grenade##name##2 }, \
             { &mine##name##1,     &mine##name##2 }, \
@@ -348,7 +348,7 @@
         GVAR(flags, smg##name, mn, w04, mx); \
         GVAR(flags, flamer##name, mn, w05, mx); \
         GVAR(flags, plasma##name, mn, w06, mx); \
-        GVAR(flags, convulser##name, mn, w07, mx); \
+        GVAR(flags, zapper##name, mn, w07, mx); \
         GVAR(flags, rifle##name, mn, w08, mx); \
         GVAR(flags, grenade##name, mn, w09, mx); \
         GVAR(flags, mine##name, mn, w10, mx); \
@@ -362,7 +362,7 @@
         GVAR(flags, smg##name##1, mn, w104, mx);     GVAR(flags, smg##name##2, mn, w204, mx); \
         GVAR(flags, flamer##name##1, mn, w105, mx);  GVAR(flags, flamer##name##2, mn, w205, mx); \
         GVAR(flags, plasma##name##1, mn, w106, mx);  GVAR(flags, plasma##name##2, mn, w206, mx); \
-        GVAR(flags, convulser##name##1, mn, w107, mx);   GVAR(flags, convulser##name##2, mn, w207, mx); \
+        GVAR(flags, zapper##name##1, mn, w107, mx);  GVAR(flags, zapper##name##2, mn, w207, mx); \
         GVAR(flags, rifle##name##1, mn, w108, mx);   GVAR(flags, rifle##name##2, mn, w208, mx);\
         GVAR(flags, grenade##name##1, mn, w109, mx); GVAR(flags, grenade##name##2, mn, w209, mx); \
         GVAR(flags, mine##name##1, mn, w110, mx);    GVAR(flags, mine##name##2, mn, w210, mx); \
@@ -376,7 +376,7 @@
         GFVAR(flags, smg##name, mn, w04, mx); \
         GFVAR(flags, flamer##name, mn, w05, mx); \
         GFVAR(flags, plasma##name, mn, w06, mx); \
-        GFVAR(flags, convulser##name, mn, w07, mx); \
+        GFVAR(flags, zapper##name, mn, w07, mx); \
         GFVAR(flags, rifle##name, mn, w08, mx); \
         GFVAR(flags, grenade##name, mn, w09, mx); \
         GFVAR(flags, mine##name, mn, w10, mx); \
@@ -390,7 +390,7 @@
         GFVAR(flags, smg##name##1, mn, w104, mx);     GFVAR(flags, smg##name##2, mn, w204, mx); \
         GFVAR(flags, flamer##name##1, mn, w105, mx);  GFVAR(flags, flamer##name##2, mn, w205, mx); \
         GFVAR(flags, plasma##name##1, mn, w106, mx);  GFVAR(flags, plasma##name##2, mn, w206, mx); \
-        GFVAR(flags, convulser##name##1, mn, w107, mx);   GFVAR(flags, convulser##name##2, mn, w207, mx); \
+        GFVAR(flags, zapper##name##1, mn, w107, mx);  GFVAR(flags, zapper##name##2, mn, w207, mx); \
         GFVAR(flags, rifle##name##1, mn, w108, mx);   GFVAR(flags, rifle##name##2, mn, w208, mx);\
         GFVAR(flags, grenade##name##1, mn, w109, mx); GFVAR(flags, grenade##name##2, mn, w209, mx); \
         GFVAR(flags, mine##name##1, mn, w110, mx);    GFVAR(flags, mine##name##2, mn, w210, mx); \
@@ -404,7 +404,7 @@
         GSVAR(flags, smg##name, w04); \
         GSVAR(flags, flamer##name, w05); \
         GSVAR(flags, plasma##name, w06); \
-        GSVAR(flags, convulser##name, w07); \
+        GSVAR(flags, zapper##name, w07); \
         GSVAR(flags, rifle##name, w08); \
         GSVAR(flags, grenade##name, w09); \
         GSVAR(flags, mine##name, w10); \
@@ -418,7 +418,7 @@
         GSVAR(flags, smg##name##1, w104);     GSVAR(flags, smg##name##2, w204); \
         GSVAR(flags, flamer##name##1, w105);  GSVAR(flags, flamer##name##2, w205); \
         GSVAR(flags, plasma##name##1, w106);  GSVAR(flags, plasma##name##2, w206); \
-        GSVAR(flags, convulser##name##1, w107);   GSVAR(flags, convulser##name##2, w207); \
+        GSVAR(flags, zapper##name##1, w107);  GSVAR(flags, zapper##name##2, w207); \
         GSVAR(flags, rifle##name##1, w108);   GSVAR(flags, rifle##name##2, w208);\
         GSVAR(flags, grenade##name##1, w109); GSVAR(flags, grenade##name##2, w209); \
         GSVAR(flags, mine##name##1, w110);    GSVAR(flags, mine##name##2, w210); \
