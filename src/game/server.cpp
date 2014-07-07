@@ -4370,8 +4370,20 @@ namespace server
 
     void serverupdate()
     {
-        loopvrev(connects) if(totalmillis-connects[i]->connectmillis > 15000) disconnect_client(connects[i]->clientnum, DISC_TIMEOUT);
-        loopvrev(control) if(control[i].flag == ipinfo::TEMPORARY && totalmillis-control[i].time > 4*60*60000) control.remove(i);
+        loopvrev(connects) if(totalmillis-connects[i]->connectmillis >= G(connecttimeout)) disconnect_client(connects[i]->clientnum, DISC_TIMEOUT);
+        if(G(bantimeout)) loopvrev(control) if(control[i].flag == ipinfo::TEMPORARY)
+        {
+            int timeout = 0;
+            switch(control[i].type)
+            {
+                case ipinfo::ALLOW: timeout = G(allowtimeout); break;
+                case ipinfo::BAN: timeout = G(bantimeout); break;
+                case ipinfo::MUTE: timeout = G(mutetimeout); break;
+                case ipinfo::LIMIT: timeout = G(limittimeout); break;
+                default: break;
+            }
+            if(timeout && totalmillis-control[i].time >= timeout) control.remove(i);
+        }
         if(updatecontrols)
         {
             loopvrev(clients)
@@ -4385,6 +4397,7 @@ namespace server
                 if(clients[i]->kicked)
                 {
                     disconnect_client(clients[i]->clientnum, DISC_KICK);
+                    continue;
                 }
             }
             updatecontrols = false;

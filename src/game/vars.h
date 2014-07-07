@@ -54,6 +54,12 @@ GVAR(IDF_ADMIN, vetolock, 0, PRIV_OPERATOR, PRIV_CREATOR);
 GVAR(IDF_ADMIN, editlock, 0, PRIV_OPERATOR, PRIV_CREATOR);
 GVAR(IDF_ADMIN, masterlock, 0, PRIV_MODERATOR, PRIV_CREATOR);
 
+GVAR(IDF_ADMIN, connecttimeout, 5000, 15000, VAR_MAX); // disconnected when attempt exceeds this time
+GVAR(IDF_ADMIN, allowtimeout, 0, 3600000, VAR_MAX); // temporary allows last this long
+GVAR(IDF_ADMIN, bantimeout, 0, 14400000, VAR_MAX); // temporary bans last this long
+GVAR(IDF_ADMIN, mutetimeout, 0, 3600000, VAR_MAX); // temporary mutes last this long
+GVAR(IDF_ADMIN, limittimeout, 0, 3600000, VAR_MAX); // temporary limits last this long
+
 GVAR(IDF_ADMIN, overflowlock, 0, PRIV_MODERATOR, PRIV_CREATOR); // normal message queue override
 GVAR(IDF_ADMIN, overflowsize, 0, 255, VAR_MAX); // kick if queued messages >= this
 
@@ -137,7 +143,7 @@ GVAR(IDF_ADMIN, smallmapmax, 0, 6, VAR_MAX); // maximum number of players for a 
 GVAR(IDF_ADMIN, mediummapmax, 0, 12, VAR_MAX); // maximum number of players for a medium map
 
 GVAR(IDF_ADMIN, waitforplayers, 0, 30000, VAR_MAX); // wait this long for players to load the map
-GVAR(IDF_ADMIN, waitforplayerannounce, 0, 5000, VAR_MAX); // update everyone on the progress every this often
+GVAR(IDF_ADMIN, waitforplayerannounce, 0, 0, VAR_MAX); // update everyone on the progress every this often
 
 namespace server
 {
