@@ -1105,7 +1105,7 @@ namespace ai
             if(insight) d->ai->enemyseen = lastmillis;
             if(d->ai->dontmove || insight || hasseen || quick)
             {
-                frame *= insight || d->skill > 100 ? 2.f : (hasseen || quick ? 1.5f : 1.f);
+                frame *= insight || d->skill > 100 ? 1.5f : (hasseen || quick ? 1.25f : 1.f);
                 if(lockon(d, e, actor[d->actortype].canstrafe ? 32 : 16, weaptype[d->weapselect].melee))
                 {
                     frame *= 2.f;
@@ -1146,7 +1146,7 @@ namespace ai
             {
                 if(b.acttype == AI_A_NORMAL && (d->health <= m_health(game::gamemode, game::mutators, d->model)/3 || (iswaypoint(d->ai->targnode) && obstacles.find(d->ai->targnode, d))))
                     b.acttype = AI_A_HASTE;
-                if(b.acttype == AI_A_HASTE) frame *= 2+(max(m_health(game::gamemode, game::mutators, d->model)/3, 1)/float(max(d->health, 1)));
+                if(b.acttype == AI_A_HASTE) frame *= 1+(max(m_health(game::gamemode, game::mutators, d->model)/3, 1)/float(max(d->health, 1)));
             }
             else frame *= 2;
             game::scaleyawpitch(d->yaw, d->pitch, d->ai->targyaw, d->ai->targpitch, frame, frame*0.5f);
