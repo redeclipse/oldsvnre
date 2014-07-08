@@ -362,10 +362,18 @@ void checkpings()
         getstring(text, p);
         filtertext(si->sdesc, text);
         si->players.deletearrays();
+        si->handles.deletearrays();
         loopi(si->numplayers)
         {
+            if(p.overread()) break;
             getstring(text, p);
-            if(text[0]) si->players.add(newstring(text));
+            si->players.add(newstring(text));
+        }
+        loopi(si->numplayers)
+        {
+            if(p.overread()) break;
+            getstring(text, p);
+            si->handles.add(newstring(text));
         }
         sortedservers = false;
     }

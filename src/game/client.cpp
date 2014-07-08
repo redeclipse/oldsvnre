@@ -2984,6 +2984,10 @@ namespace client
                     if(idx < 0) intret(si->players.length());
                     else if(si->players.inrange(idx)) result(si->players[idx]);
                     break;
+                case 3:
+                    if(idx < 0) intret(si->handles.length());
+                    else if(si->handles.inrange(idx)) result(si->handles[idx]);
+                    break;
             }
         }
     }

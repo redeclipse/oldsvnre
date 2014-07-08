@@ -448,7 +448,7 @@ struct serverinfo
     int numplayers, lastping, lastinfo, nextping, ping, resolved, port, priority;
     int pings[MAXPINGS];
     vector<int> attr;
-    vector<char *> players;
+    vector<char *> players, handles;
     ENetAddress address;
 
     serverinfo(uint ip, int port, int priority = 0)
@@ -474,6 +474,7 @@ struct serverinfo
         clearpings();
         attr.setsize(0);
         players.deletearrays();
+        handles.deletearrays();
         numplayers = 0;
     }
 

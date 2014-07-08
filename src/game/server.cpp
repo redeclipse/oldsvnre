@@ -4505,12 +4505,14 @@ namespace server
     void queryreply(ucharbuf &req, ucharbuf &p)
     {
         if(!getint(req)) return;
-        putint(p, numclients());
-        putint(p, 8);                   // number of attrs following
-        putint(p, GAMEVERSION);         // 1
-        putint(p, gamemode);            // 2
-        putint(p, mutators);            // 3
-        putint(p, timeremaining);       // 4
+        vector<clientinfo *> q;
+        loopv(clients) if(clients[i]->clientnum >= 0 && clients[i]->name[0] && clients[i]->state.actortype == A_PLAYER) q.add(clients[i]);
+        putint(p, q.length());
+        putint(p, 8); // number of attrs following
+        putint(p, GAMEVERSION); // 1
+        putint(p, gamemode); // 2
+        putint(p, mutators); // 3
+        putint(p, timeremaining); // 4
         putint(p, G(serverclients)); // 5
         putint(p, serverpass[0] ? MM_PASSWORD : (m_local(gamemode) ? MM_PRIVATE : mastermode)); // 6
         putint(p, numgamevars); // 7
@@ -4527,12 +4529,11 @@ namespace server
             sendstring(cname, p);
             #endif
         }
-        vector<clientinfo *> q;
-        loopv(clients) if(clients[i]->clientnum >= 0 && clients[i]->name[0] && clients[i]->state.actortype == A_PLAYER) q.add(clients[i]);
         if(!q.empty())
         {
             q.sort(querysort);
             loopv(q) sendstring(colourname(q[i]), p);
+            loopv(q) sendstring(q[i]->handle, p);
         }
         sendqueryreply(p);
     }
