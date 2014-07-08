@@ -133,7 +133,7 @@ namespace physics
             }
         }
     }
-    //ICOMMAND(0, action, "iD", (int *i, int *n), doaction(*i, *n!=0)); // deprecated
+
     ICOMMAND(0, primary, "D", (int *n), doaction(AC_PRIMARY, *n!=0));
     ICOMMAND(0, secondary, "D", (int *n), doaction(AC_SECONDARY, *n!=0));
     ICOMMAND(0, reload, "D", (int *n), doaction(AC_RELOAD, *n!=0));

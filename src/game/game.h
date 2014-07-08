@@ -20,18 +20,17 @@
 
 enum
 {
-    S_JUMP = S_GAMESPECIFIC, S_IMPULSE, S_LAND, S_PAIN, S_DEATH,
+    S_JUMP = S_GAMESPECIFIC, S_IMPULSE, S_LAND, S_FOOTSTEP, S_SWIMSTEP, S_PAIN, S_DEATH,
     S_SPLASH1, S_SPLASH2, S_UNDERWATER, S_SPLOSH, S_DEBRIS, S_BURNLAVA, S_BURNING,
     S_EXTINGUISH, S_SHELL, S_ITEMUSE, S_ITEMSPAWN,
     S_REGEN, S_DAMAGE, S_DAMAGE2, S_DAMAGE3, S_DAMAGE4, S_DAMAGE5, S_DAMAGE6, S_DAMAGE7, S_DAMAGE8,
-    S_BURNED, S_BLEED, S_SHOCK, S_RESPAWN, S_CHAT, S_ERROR, S_ALARM, S_CATCH,
+    S_BURNED, S_BLEED, S_SHOCK, S_RESPAWN, S_CHAT, S_ERROR, S_ALARM, S_CATCH, S_BOUNCE,
     S_V_FLAGSECURED, S_V_FLAGOVERTHROWN, S_V_FLAGPICKUP, S_V_FLAGDROP, S_V_FLAGRETURN, S_V_FLAGSCORE, S_V_FLAGRESET,
     S_V_BOMBSTART, S_V_BOMBDUEL, S_V_BOMBPICKUP, S_V_BOMBSCORE, S_V_BOMBRESET,
-    S_V_NOTIFY, S_V_FIGHT, S_V_CHECKPOINT, S_V_OVERTIME, S_V_ONEMINUTE, S_V_HEADSHOT,
+    S_V_NOTIFY, S_V_FIGHT, S_V_START, S_V_CHECKPOINT, S_V_COMPLETE, S_V_OVERTIME, S_V_ONEMINUTE, S_V_HEADSHOT,
     S_V_SPREE, S_V_SPREE2, S_V_SPREE3, S_V_SPREE4, S_V_MULTI, S_V_MULTI2, S_V_MULTI3,
     S_V_REVENGE, S_V_DOMINATE, S_V_FIRSTBLOOD, S_V_BREAKER,
-    S_V_YOUWIN, S_V_YOULOSE, S_V_DRAW,
-    S_V_FRAGGED, S_V_BALWARN, S_V_BALALERT,
+    S_V_YOUWIN, S_V_YOULOSE, S_V_DRAW, S_V_FRAGGED, S_V_BALWARN, S_V_BALALERT,
     S_GAME
 };
 
@@ -51,7 +50,7 @@ enum { TA_MANUAL = 0, TA_AUTO, TA_ACTION, TA_MAX };
 #define TRIGGERIDS      16
 #define TRIGSTATE(a,b)  (b%2 ? !a : a)
 
-enum { CP_RESPAWN = 0, CP_START, CP_FINISH, CP_LAST, CP_MAX };
+enum { CP_RESPAWN = 0, CP_START, CP_FINISH, CP_LAST, CP_MAX, CP_ALL = (1<<CP_RESPAWN)|(1<<CP_START)|(1<<CP_FINISH)|(1<<CP_LAST) };
 
 enum { TELE_NOAFFIN = 0, TELE_MAX };
 
@@ -172,12 +171,12 @@ enttypes enttype[] = {
                 "affinity",     { "team",   "yaw",      "pitch",    "modes",    "muts",     "id" }
     },
     {
-        CHECKPOINT,     1,          48,     16,     EU_AUTO,    8,          3,          5,
+        CHECKPOINT,     1,          48,     16,     EU_AUTO,    7,          3,          5,
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             (1<<ENT_PLAYER)|(1<<ENT_AI),
             false,  true,   false,      true,       false,
-                "checkpoint",   { "radius", "yaw",      "pitch",    "modes",    "muts",     "id",       "type",     "sound" }
+                "checkpoint",   { "radius", "yaw",      "pitch",    "modes",    "muts",     "id",       "type" }
     },
     {
         UNUSED1,        -1,         0,      0,      EU_NONE,    0,          -1,         -1,
@@ -235,8 +234,6 @@ const int pulsecols[PULSE_MAX][PULSECOLOURS] = {
 
 #include "gamemode.h"
 #include "weapons.h"
-
-enum { S_BOUNCE = S_OTHERS, S_FOOTSTEP, S_SWIMSTEP, S_V_START, S_V_COMPLETE, S_MAX } ;
 
 enum
 {

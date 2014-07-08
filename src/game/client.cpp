@@ -15,6 +15,9 @@ namespace client
     VAR(IDF_PERSIST, showservervariables, 0, 0, 1); // determines if variables set by the server are printed to the console
     VAR(IDF_PERSIST, showmapvotes, 0, 1, 3); // shows map votes, 1 = only mid-game (not intermision), 2 = at all times, 3 = verbose
 
+    VAR(IDF_PERSIST, checkpointannounce, 0, 5, 7); // 0 = never, &1 = active players, &2 = all players, &4 = all players in gauntlet
+    VAR(IDF_PERSIST, checkpointannouncefilter, 0, CP_ALL, CP_ALL); // which checkpoint types to announce for
+
     int state() { return game::player1->state; }
     ICOMMAND(0, getplayerstate, "", (), intret(state()));
     ICOMMAND(0, isloadingmap, "", (), intret(lightmapping ? 2 : (game::maptime <= 0 ? 1 : 0)));
@@ -2595,15 +2598,17 @@ namespace client
                     {
                         if(entities::ents.inrange(ent) && entities::ents[ent]->type == CHECKPOINT)
                         {
-                            if(t != game::player1 && !t->ai && (!t->cpmillis || entities::ents[ent]->attrs[6] == CP_START))
-                                t->cpmillis = lastmillis;
-                            entities::execlink(t, ent, false);
-                            if(entities::ents[ent]->attrs[7]&(t != game::focus ? 2 : 1)) switch(entities::ents[ent]->attrs[6])
+                            if(t != game::player1 && !t->ai && (!t->cpmillis || entities::ents[ent]->attrs[6] == CP_START)) t->cpmillis = lastmillis;
+                            if((checkpointannounce&(t != game::focus ? 2 : 1) || (m_gsp3(game::gamemode, game::mutators) && checkpointannounce&4)) && checkpointannouncefilter&(1<<entities::ents[ent]->attrs[6]))
                             {
-                                case CP_START: game::announce(S_V_START, t); break;
-                                case CP_FINISH: case CP_LAST: game::announce(S_V_COMPLETE, t); break;
-                                default: game::announce(S_V_CHECKPOINT, t); break;
+                                switch(entities::ents[ent]->attrs[6])
+                                {
+                                    case CP_START: game::announce(S_V_START, t); break;
+                                    case CP_FINISH: case CP_LAST: game::announce(S_V_COMPLETE, t); break;
+                                    default: game::announce(S_V_CHECKPOINT, t); break;
+                                }
                             }
+                            entities::execlink(t, ent, false);
                         }
                         int laptime = getint(p);
                         if(laptime >= 0)

@@ -49,12 +49,12 @@ enum
     S_SMG       = S_SHOTGUN+S_W_MAX,
     S_FLAMER    = S_SMG+S_W_MAX,
     S_PLASMA    = S_FLAMER+S_W_MAX,
-    S_ZAPPER   = S_PLASMA+S_W_MAX,
+    S_ZAPPER    = S_PLASMA+S_W_MAX,
     S_RIFLE     = S_ZAPPER+S_W_MAX,
     S_GRENADE   = S_RIFLE+S_W_MAX,
     S_MINE      = S_GRENADE+S_W_MAX,
     S_ROCKET    = S_MINE+S_W_MAX,
-    S_OTHERS    = S_ROCKET+S_W_MAX
+    S_MAX       = S_ROCKET+S_W_MAX
 };
 
 enum
