@@ -20,7 +20,7 @@ VAR(IDF_PERSIST, guitextfade, 1, 200, 255);
 VAR(IDF_PERSIST, guisepsize, 1, 8, 128);
 VAR(IDF_PERSIST, guiscaletime, 0, 250, VAR_MAX);
 
-VAR(IDF_PERSIST, guitooltipwidth, -1, 512, VAR_MAX);
+VAR(IDF_PERSIST, guitooltipwidth, -1, 768, VAR_MAX);
 VAR(IDF_PERSIST, guistatuswidth, -1, 2048, VAR_MAX);
 
 VAR(IDF_PERSIST, guiskinned, 0, 2, 3); // 0 = no backgrounds, 1 = drawn backgrounds, 2 = skinned backgrounds, 3 = skinned with overlay border
