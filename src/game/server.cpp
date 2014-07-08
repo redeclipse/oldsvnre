@@ -5030,7 +5030,7 @@ namespace server
                     }
                     else if(idx == SPHY_BOOST || idx == SPHY_DASH)
                     {
-                        if(!cp->state.isalive(gamemillis) || (cp->state.lastboost && gamemillis-cp->state.lastboost <= G(impulsedelay))) break;
+                        if(!cp->state.isalive(gamemillis) || (cp->state.lastboost && gamemillis-cp->state.lastboost <= G(impulseboostdelay))) break;
                         cp->state.lastboost = gamemillis;
                     }
                     QUEUE_MSG;

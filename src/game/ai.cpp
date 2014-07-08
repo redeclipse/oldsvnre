@@ -1268,6 +1268,13 @@ namespace ai
         }
 
         bool timepassed = d->weapstate[d->weapselect] == W_S_IDLE && (d->ammo[d->weapselect] <= 0 || lastmillis-d->weaplast[d->weapselect] >= max(6000-(d->skill*50), weaponswitchdelay));
+
+        if(!firing && (!occupied || d->ammo[d->weapselect] <= 0) && timepassed && d->hasweap(d->weapselect, sweap) && weapons::weapreload(d, d->weapselect))
+        {
+            d->ai->lastaction = lastmillis;
+            return true;
+        }
+
         if(!firing && timepassed)
         {
             int weap = d->ai->weappref;
@@ -1285,12 +1292,6 @@ namespace ai
                 d->ai->lastaction = lastmillis;
                 return true;
             }
-        }
-
-        if(!firing && (!occupied || d->ammo[d->weapselect] <= 0) && timepassed && d->hasweap(d->weapselect, sweap) && weapons::weapreload(d, d->weapselect))
-        {
-            d->ai->lastaction = lastmillis;
-            return true;
         }
 
         return occupied;

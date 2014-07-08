@@ -218,6 +218,7 @@ GFVAR(0, itemrelativity, FVAR_MIN, 1, FVAR_MAX);
 GFVAR(0, itemliquidcoast, 0, 1.75f, FVAR_MAX);
 GFVAR(0, itemweight, FVAR_MIN, 150, FVAR_MAX);
 GFVAR(0, itemspeedmin, 0, 0, FVAR_MAX);
+GFVAR(0, itemspeedmax, 0, 0, FVAR_MAX);
 GFVAR(0, itemrepulsion, 0, 8, FVAR_MAX);
 GFVAR(0, itemrepelspeed, 0, 25, FVAR_MAX);
 
@@ -266,11 +267,12 @@ GVAR(0, capturepickuppoints, 0, 3, VAR_MAX); // points added to score
 GVAR(0, capturecollide, 0, BOUNCE_GEOM, VAR_MAX);
 GVAR(0, captureextinguish, 0, 6, 7);
 GVAR(0, captureinteracts, 0, 3, 3);
-GFVAR(0, capturerelativity, 0, 0.25f, FVAR_MAX);
+GFVAR(0, capturerelativity, 0, 0.125f, FVAR_MAX);
 GFVAR(0, captureelasticity, FVAR_MIN, 0.65f, FVAR_MAX);
 GFVAR(0, captureliquidcoast, FVAR_MIN, 1.75f, FVAR_MAX);
-GFVAR(0, captureweight, FVAR_MIN, 250, FVAR_MAX);
+GFVAR(0, captureweight, FVAR_MIN, 300, FVAR_MAX);
 GFVAR(0, capturespeedmin, 0, 0, FVAR_MAX);
+GFVAR(0, capturespeedmax, 0, 100, FVAR_MAX);
 GFVAR(0, capturerepulsion, 0, 16, FVAR_MAX);
 GFVAR(0, capturerepelspeed, 0, 25, FVAR_MAX);
 GFVAR(0, capturethreshold, 0, 0, FVAR_MAX); // if someone 'warps' more than this distance, auto-drop
@@ -322,6 +324,7 @@ GVAR(0, bomberlockondelay, 0, 250, VAR_MAX);
 GFVAR(0, bomberspeed, 0, 250, FVAR_MAX);
 GFVAR(0, bomberspeeddelta, 0, 1000, FVAR_MAX);
 GFVAR(0, bomberspeedmin, 0, 65, FVAR_MAX);
+GFVAR(0, bomberspeedmax, 0, 200, FVAR_MAX);
 GVAR(0, bombercollide, 0, BOUNCE_GEOM, VAR_MAX);
 GVAR(0, bomberextinguish, 0, 6, 7);
 GVAR(0, bomberinteracts, 0, 3, 3);
@@ -395,9 +398,11 @@ GFVAR(0, impulsemelee, 0, 0.75f, FVAR_MAX); // melee modifier
 GFVAR(0, impulsemeleeredir, 0, 1, FVAR_MAX); // how much of the old velocity is redirected into the new one
 GFVAR(0, impulseparkour, 0, 1, FVAR_MAX); // parkour modifier
 GFVAR(0, impulseparkourredir, 0, 1, FVAR_MAX); // how much of the old velocity is redirected into the new one
-GFVAR(0, impulseparkourkick, 0, 1.4f, FVAR_MAX); // parkour kick modifier
+GFVAR(0, impulseparkourkick, 0, 1.5f, FVAR_MAX); // parkour kick modifier
 GFVAR(0, impulseparkourkickredir, 0, 1, FVAR_MAX); // how much of the old velocity is redirected into the new one
-GFVAR(0, impulseparkourvault, 0, 1.4f, FVAR_MAX); // parkour vault modifier
+GFVAR(0, impulseparkourclimb, 0, 1.4f, FVAR_MAX); // parkour climb modifier
+GFVAR(0, impulseparkourclimbredir, 0, 1, FVAR_MAX); // how much of the old velocity is redirected into the new one
+GFVAR(0, impulseparkourvault, 0, 1.5f, FVAR_MAX); // parkour vault modifier
 GFVAR(0, impulseparkourvaultredir, 0, 1, FVAR_MAX); // how much of the old velocity is redirected into the new one
 GFVAR(0, impulseparkournorm, 0, 0.5f, FVAR_MAX); // minimum parkour surface z normal
 GVAR(0, impulseallowed, 0, IM_A_ALL, IM_A_ALL); // impulse actions allowed; bit: 0 = off, 1 = dash, 2 = boost, 4 = parkour
@@ -405,8 +410,9 @@ GVAR(0, impulsestyle, 0, 1, 3); // impulse style; 0 = off, 1 = touch and count, 
 GVAR(0, impulsecount, 0, 6, VAR_MAX); // number of impulse actions per air transit
 GVAR(0, impulseslip, 0, 250, VAR_MAX); // time before floor friction kicks back in
 GVAR(0, impulseslide, 0, 1000, VAR_MAX); // time before powerslides end
-GVAR(0, impulsedelay, 0, 250, VAR_MAX); // minimum time between boosts
-GVAR(0, impulsedashdelay, 0, 1000, VAR_MAX); // minimum time between dashes/powerslides
+GVAR(0, impulsejumpdelay, 0, 100, VAR_MAX); // minimum time after jump for boost
+GVAR(0, impulseboostdelay, 0, 250, VAR_MAX); // minimum time between boosts
+GVAR(0, impulsedashdelay, 0, 500, VAR_MAX); // minimum time between dashes/powerslides
 GVAR(0, impulsekickdelay, 0, 350, VAR_MAX); // minimum time between wall kicks/climbs
 GFVAR(0, impulsevaultmin, FVAR_NONZERO, 0.25f, FVAR_MAX); // minimum percentage of height for vault
 GFVAR(0, impulsevaultmax, FVAR_NONZERO, 1.f, FVAR_MAX); // maximum percentage of height for vault
