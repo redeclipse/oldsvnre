@@ -1436,10 +1436,7 @@ namespace client
             if(d->falling.x || d->falling.y || d->falling.z > 0) flags |= 1<<6;
         }
         if(d->conopen) flags |= 1<<8;
-        if(d->action[AC_JUMP]) flags |= 1<<9;
-        if(d->action[AC_WALK]) flags |= 1<<10;
-        if(d->action[AC_CROUCH]) flags |= 1<<11;
-        if(d->action[AC_SPECIAL]) flags |= 1<<12;
+        loopk(AC_TOTAL) if(d->action[k]) flags |= 1<<(9+k);
         putuint(q, flags);
         loopk(3)
         {
@@ -1684,16 +1681,12 @@ namespace client
                 d->turnside = (physstate>>7)&2 ? -1 : (physstate>>7)&1;
                 d->impulse[IM_METER] = meter;
                 d->conopen = flags&(1<<8) ? true : false;
-                #define actmod(x,y) \
-                { \
-                    bool val = d->action[x]; \
-                    d->action[x] = flags&(1<<y) ? true : false; \
-                    if(val != d->action[x]) d->actiontime[x] = lastmillis; \
+                loopk(AC_TOTAL)
+                {
+                    bool val = d->action[k];
+                    d->action[k] = flags&(1<<(9+k)) ? true : false;
+                    if(val != d->action[k]) d->actiontime[k] = lastmillis;
                 }
-                actmod(AC_JUMP, 9);
-                actmod(AC_WALK, 10);
-                actmod(AC_CROUCH, 11);
-                actmod(AC_SPECIAL, 12);
                 vec oldpos(d->o);
                 d->o = o;
                 d->o.z += d->height;

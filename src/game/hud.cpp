@@ -348,6 +348,13 @@ namespace hud
     VAR(IDF_PERSIST, inventoryconopen, 0, 1, 1);
     FVAR(IDF_PERSIST, inventoryconopenblend, 0, 0.5f, 1);
     VAR(IDF_PERSIST, inventoryconopenflash, 0, 0, 1);
+    VAR(IDF_PERSIST, inventoryinput, 0, 1, 2); // 0 = off, 1 = if focus is not player1, 2 = always
+    FVAR(IDF_PERSIST, inventoryinputblend, 0, 0.75f, 1);
+    VAR(IDF_PERSIST, inventoryinputfilter, 0, AC_ALL, AC_ALL);
+    VAR(IDF_PERSIST, inventoryinputlinger, 0, AC_ALL, AC_ALL);
+    VAR(IDF_PERSIST, inventoryinputdelay, 0, 125, VAR_MAX);
+    VAR(IDF_PERSIST, inventoryinputactive, 0, 0x22FF22, 0xFFFFFF);
+    VAR(IDF_PERSIST, inventoryinputcolour, 0, 0x888888, 0xFFFFFF);
 
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, meleetex, "<grey>textures/weapons/melee", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, pistoltex, "<grey>textures/weapons/pistol", 3);
@@ -2662,6 +2669,32 @@ namespace hud
                     }
                     sy += drawitem(chattex, x, y-sy, s, 0, false, true, gr, gg, gb, fade);
                 }
+            }
+            if(inventoryinput >= (game::focus != game::player1 ? 1 : 2))
+            {
+                static const char *actionnames[AC_TOTAL] = {
+                    "shoot1", "shoot2", "reload", "use", "jump", "walk", "crouch", "special", "drop", "affinity"
+                };
+                pushfont("little");
+
+                sy += draw_textx("\f{\f[%d]\f(%s)}", x+s/2, y-sy, 255, 255, 255, int(blend*inventoryinputblend*255), TEXT_CENTER_UP, -1, -1,
+                        game::focus->move == -1 ? inventoryinputactive : inventoryinputcolour, arrowdowntex);
+
+                sy += draw_textx("\f{\f[%d]\f(%s)}  \f{\f[%d]\f(%s)}", x+s/2, y-sy, 255, 255, 255, int(blend*inventoryinputblend*255), TEXT_CENTER_UP, -1, -1,
+                        game::focus->strafe == 1 ? inventoryinputactive : inventoryinputcolour, arrowlefttex,
+                        game::focus->strafe == -1 ? inventoryinputactive : inventoryinputcolour, arrowrighttex);
+
+                sy += draw_textx("\f{\f[%d]\f(%s)}", x+s/2, y-sy, 255, 255, 255, int(blend*inventoryinputblend*255), TEXT_CENTER_UP, -1, -1,
+                        game::focus->move == 1 ? inventoryinputactive : inventoryinputcolour, arrowtex);
+
+                loopi(AC_TOTAL) if(inventoryinputfilter&(1<<i))
+                {
+                    bool active = game::focus->action[i] || (inventoryinputlinger&(1<<i) && game::focus->actiontime[i] && lastmillis-abs(game::focus->actiontime[i]) <= inventoryinputdelay);
+                    sy += draw_textx("\f{\f[%d]%s}", x+s/2, y-sy, 255, 255, 255, int(blend*inventoryinputblend*255), TEXT_CENTER_UP, -1, -1,
+                            active ? inventoryinputactive : inventoryinputcolour, actionnames[i]);
+                }
+
+                popfont();
             }
         }
         else

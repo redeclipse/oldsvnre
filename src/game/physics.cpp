@@ -18,6 +18,7 @@ namespace physics
     VAR(IDF_PERSIST, impulseaction, 0, 3, 3); // determines how impulse action works, 0 = off, 1 = impulse jump, 2 = impulse dash, 3 = both
     FVAR(IDF_PERSIST, impulseroll, 0, 15, 89);
 
+    VAR(IDF_PERSIST, jumpstyle, 0, 1, 1); // 0 = unpressed on action, 1 = remains pressed
     VAR(IDF_PERSIST, dashstyle, 0, 1, 1); // 0 = only with impulse, 1 = double tap
     VAR(IDF_PERSIST, crouchstyle, 0, 0, 2); // 0 = press and hold, 1 = double-tap toggle, 2 = toggle
     VAR(IDF_PERSIST, walkstyle, 0, 0, 2); // 0 = press and hold, 1 = double-tap toggle, 2 = toggle
@@ -37,7 +38,13 @@ namespace physics
         {
             gameent *e = (gameent *)d;
             if(!kick && impulsestyle == 1 && e->impulse[IM_TYPE] > IM_T_NONE && e->impulse[IM_TYPE] < IM_T_WALL) return false;
-            if(e->impulse[IM_TIME] && lastmillis-e->impulse[IM_TIME] <= (e->impulse[IM_TYPE] == IM_T_KICK || e->impulse[IM_TYPE] == IM_T_VAULT ? impulsekickdelay : impulsedelay)) return false;
+            int time = e->impulse[IM_TIME], delay = e->impulse[IM_TYPE] == IM_T_KICK || e->impulse[IM_TYPE] == IM_T_VAULT ? impulsekickdelay : impulseboostdelay;
+            if(!time)
+            {
+                time = e->impulse[IM_JUMP];
+                delay = impulsejumpdelay;
+            }
+            if(time && delay && lastmillis-time <= delay) return false;
             if(!m_freestyle(game::gamemode, game::mutators) && impulsestyle <= 2 && e->impulse[IM_COUNT] >= impulsecount) return false;
             return true;
         }
@@ -699,19 +706,19 @@ namespace physics
     bool impulseplayer(gameent *d, bool &onfloor, bool melee = false)
     {
         bool power = !melee && onfloor && impulsemethod&1 && d->sliding(true) && d->action[AC_JUMP];
-        if(power || d->ai || impulseaction || melee)
+        if(power || d->actortype >= A_BOT || impulseaction || melee)
         {
             bool dash = false, pulse = false;
             if(melee) { dash = onfloor; pulse = !onfloor; }
             else if(!power)
             {
                 if(onfloor) dash = impulseaction&2 && d->action[AC_DASH] && (!d->impulse[IM_TIME] || lastmillis-d->impulse[IM_TIME] > impulsedashdelay);
-                else pulse = ((d->ai || impulseaction&1) && d->action[AC_JUMP]) || ((d->ai || impulseaction&2) && d->action[AC_DASH]);
+                else pulse = ((d->actortype >= A_BOT || impulseaction&1) && d->action[AC_JUMP]) || ((d->actortype >= A_BOT || impulseaction&2) && d->action[AC_DASH]);
             }
             if(!canimpulse(d, dash ? IM_A_DASH : IM_A_BOOST, false)) return false;
             if(power || dash || pulse)
             {
-                bool mchk = !melee || onfloor, action = mchk && (d->ai || melee || impulseaction&2);
+                bool mchk = !melee || onfloor, action = mchk && (d->actortype >= A_BOT || melee || impulseaction&2);
                 int move = action ? d->move : 0, strafe = action ? d->strafe : 0;
                 bool moving = mchk && (move || strafe);
                 float skew = power ? impulsepower : (moving ? impulseboost : impulsejump);
@@ -769,9 +776,8 @@ namespace physics
                 if(mag > 0)
                 {
                     vec rft;
-                    vecfromyawpitch(d->yaw, d->pitch, 1, 0, rft);
+                    vecfromyawpitch(d->yaw, d->actortype >= A_BOT ? 89.9f : d->pitch, 1, 0, rft);
                     d->vel = vec(rft).mul(mag).add(keepvel);
-                    //d->vel.z += mag/2;
                     d->doimpulse(cost, IM_T_KICK, lastmillis);
                     d->turnmillis = PHYSMILLIS;
                     d->turnside = 0; d->turnyaw = d->turnroll = 0;
@@ -799,8 +805,7 @@ namespace physics
                     }
                     d->resetphys();
                     d->impulse[IM_JUMP] = lastmillis;
-                    onfloor = false;
-                    d->action[AC_JUMP] = false;
+                    d->action[AC_JUMP] = onfloor = false;
                     client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_JUMP);
                     playsound(S_JUMP, d->o, d);
                     regularshape(PART_SMOKE, int(d->radius), 0x222222, 21, 20, 250, d->feetpos(), 1, 1, -10, 0, 10.f);
@@ -882,11 +887,11 @@ namespace physics
                     {
                         int cost = impulsecost;
                         vec keepvel = vec(d->vel).add(d->falling);
-                        float mag = impulsevelocity(d, vault ? impulseparkourvault : impulseparkourkick, cost, IM_A_PARKOUR, vault ? impulseparkourvaultredir : impulseparkourkickredir, keepvel);
+                        float mag = impulsevelocity(d, vault ? impulseparkourvault : impulseparkourclimb, cost, IM_A_PARKOUR, vault ? impulseparkourvaultredir : impulseparkourclimbredir, keepvel);
                         if(mag > 0)
                         {
                             vec rft;
-                            vecfromyawpitch(d->yaw, vault ? 89.9f : fabs(d->pitch), 1, 0, rft);
+                            vecfromyawpitch(d->yaw, vault || d->actortype >= A_BOT ? 89.9f : fabs(d->pitch), 1, 0, rft);
                             rft.reflect(face);
                             d->vel = vec(rft).mul(mag).add(keepvel);
                             d->doimpulse(cost, vault ? IM_T_VAULT : IM_T_KICK, lastmillis);
@@ -956,11 +961,7 @@ namespace physics
             if(!m.iszero()) m.normalize();
         }
         if(!d->turnside && (d->physstate >= PHYS_SLOPE || d->onladder || liquidcheck(d))) d->resetjump();
-        if(local)
-        {
-            if(game::allowmove(d)) modifyinput(d, m, wantsmove, millis);
-            else d->action[AC_JUMP] = d->action[AC_CROUCH] = false;
-        }
+        if(local && game::allowmove(d)) modifyinput(d, m, wantsmove, millis);
         if(d->physstate == PHYS_FALL && !d->onladder && !d->turnside)
         {
             if(!d->airmillis) d->airmillis = lastmillis ? lastmillis : 1;
@@ -1153,7 +1154,7 @@ namespace physics
                 gameent *d = (gameent *)pl;
                 if(!d->airmillis)
                 {
-                    if(local && impulsemethod&2 && timeinair >= impulsedelay && d->move == 1 && allowimpulse(d, IM_A_DASH) && d->action[AC_CROUCH])
+                    if(local && impulsemethod&2 && timeinair >= impulseboostdelay && d->move == 1 && allowimpulse(d, IM_A_DASH) && d->action[AC_CROUCH])
                     {
                         d->action[AC_DASH] = true;
                         d->actiontime[AC_DASH] = lastmillis;

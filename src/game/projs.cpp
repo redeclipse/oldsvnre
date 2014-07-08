@@ -535,14 +535,12 @@ namespace projs
                 }
                 vecfromyawpitch(aim[0][1], aim[1][1], 1, 0, dir[1]);
             }
-            float speedmin = proj.speedmin;
             #define repel(x,r,z) \
             { \
                 if(overlapsbox(proj.o, r, r, x, r, r)) \
                 { \
                     vec nrm = vec(proj.o).sub(x).normalize(); \
                     dir[1].add(nrm).normalize(); \
-                    speedmin = max(speedmin, z); \
                     break; \
                 } \
             }
@@ -554,7 +552,7 @@ namespace projs
                     {
                         loopv(projs) if(projs[i]->projtype == PRJ_ENT && projs[i] != &proj && entities::ents.inrange(projs[i]->id) && enttype[entities::ents[projs[i]->id]->type].usetype == EU_ITEM)
                             repel(projs[i]->o, itemrepulsion, itemrepelspeed);
-                        if(!speedmin) loopi(entities::lastuse(EU_ITEM)) if(enttype[entities::ents[i]->type].usetype == EU_ITEM && entities::ents[i]->spawned)
+                        loopi(entities::lastuse(EU_ITEM)) if(enttype[entities::ents[i]->type].usetype == EU_ITEM && entities::ents[i]->spawned)
                             repel(entities::ents[i]->o, itemrepulsion, itemrepelspeed);
                     }
                     break;
@@ -569,7 +567,12 @@ namespace projs
                     break;
                 }
             }
-            if(!dir[1].iszero()) proj.vel = vec(dir[1]).mul(max(mag, speedmin));
+            if(!dir[1].iszero())
+            {
+                mag = max(mag, proj.speedmin);
+                if(proj.speedmax > 0) mag = min(mag, proj.speedmax);
+                proj.vel = vec(dir[1]).mul(mag);
+            }
         }
         else proj.vel = vec(0, 0, 0);
     }
@@ -672,7 +675,12 @@ namespace projs
                 proj.o = proj.lastgood;
                 if(insideworld(proj.o) && !collide(&proj, dir, 0, false))
                 {
-                    if(rev) proj.vel = vec(proj.o).sub(orig).normalize().mul(max(max(proj.vel.magnitude()*proj.elasticity, 1.f), proj.speedmin));
+                    if(rev)
+                    {
+                        float mag = max(max(proj.vel.magnitude()*proj.elasticity, proj.speedmin), 1.f);
+                        if(proj.speedmax > 0) mag = min(mag, proj.speedmax);
+                        proj.vel = vec(proj.o).sub(orig).normalize().mul(mag);
+                    }
                     return true;
                 }
                 else proj.o = orig;
@@ -685,7 +693,12 @@ namespace projs
                 proj.o.add(vec((int(yaw+k*45)%360)*RAD, j*45*RAD).mul(proj.radius*i));
                 if(insideworld(proj.o) && !collide(&proj, dir, 0, false))
                 {
-                    if(rev) proj.vel = vec(proj.o).sub(orig).normalize().mul(max(max(proj.vel.magnitude()*proj.elasticity, 1.f), proj.speedmin));
+                    if(rev)
+                    {
+                        float mag = max(max(proj.vel.magnitude()*proj.elasticity, proj.speedmin), 1.f);
+                        if(proj.speedmax > 0) mag = min(mag, proj.speedmax);
+                        proj.vel = vec(proj.o).sub(orig).normalize().mul(mag);
+                    }
                     return true;
                 }
                 else proj.o = orig;
@@ -791,6 +804,7 @@ namespace projs
                 proj.weight = WF(WK(proj.flags), proj.weap, weight, WS(proj.flags));
                 proj.projcollide = WF(WK(proj.flags), proj.weap, collide, WS(proj.flags));
                 proj.speedmin = WF(WK(proj.flags), proj.weap, speedmin, WS(proj.flags));
+                proj.speedmax = WF(WK(proj.flags), proj.weap, speedmax, WS(proj.flags));
                 proj.extinguish = WF(WK(proj.flags), proj.weap, extinguish, WS(proj.flags))|4;
                 proj.interacts = WF(WK(proj.flags), proj.weap, interacts, WS(proj.flags));
                 proj.mdl = weaptype[proj.weap].proj;
@@ -917,6 +931,7 @@ namespace projs
                 proj.weight = itemweight;
                 proj.projcollide = itemcollide;
                 proj.speedmin = itemspeedmin;
+                proj.speedmax = itemspeedmax;
                 proj.escaped = true;
                 float mag = proj.inertia.magnitude();
                 if(mag <= 50)
@@ -952,6 +967,7 @@ namespace projs
                         proj.relativity = bomberrelativity;
                         proj.liquidcoast = bomberliquidcoast;
                         proj.speedmin = bomberspeedmin;
+                        proj.speedmax = bomberspeedmax;
                         break;
                     case G_CAPTURE: default:
                         proj.mdl = "props/flag";
@@ -963,6 +979,7 @@ namespace projs
                         proj.relativity = capturerelativity;
                         proj.liquidcoast = captureliquidcoast;
                         proj.speedmin = capturespeedmin;
+                        proj.speedmax = capturespeedmax;
                         break;
                 }
                 break;
@@ -1700,13 +1717,14 @@ namespace projs
                     if(!WK(proj.flags) && !m_insta(game::gamemode, game::mutators) && W2(proj.weap, fragweap, WS(proj.flags)) >= 0)
                     {
                         int f = W2(proj.weap, fragweap, WS(proj.flags)), w = f%W_MAX,
-                            life = W2(proj.weap, fragtime, WS(proj.flags)), delay = 0;
+                            life = W2(proj.weap, fragtime, WS(proj.flags)), delay = W2(proj.weap, fragtimedelay, WS(proj.flags));
                         float mag = max(proj.vel.magnitude(), W2(proj.weap, fragspeedmin, WS(proj.flags))),
                               scale = W2(proj.weap, fragscale, WS(proj.flags))*proj.curscale,
                               offset = proj.hit || proj.stick ? W2(proj.weap, fragoffset, WS(proj.flags)) : 1e-6f,
                               skew = proj.hit || proj.stuck ? W2(proj.weap, fragskew, WS(proj.flags)) : W2(proj.weap, fragspread, WS(proj.flags));
                         vec dir = vec(proj.stuck ? proj.norm : proj.vel).normalize(),
                             pos = vec(proj.o).sub(vec(dir).mul(offset));
+                        if(W2(proj.weap, fragspeedmax, WS(proj.flags)) > 0) mag = min(mag, W2(proj.weap, fragspeedmax, WS(proj.flags)));
                         if(W2(proj.weap, fragjump, WS(proj.flags)) > 0) life -= int(ceilf(life*W2(proj.weap, fragjump, WS(proj.flags))));
                         loopi(W2(proj.weap, fragrays, WS(proj.flags)))
                         {
@@ -1716,7 +1734,7 @@ namespace projs
                             if(skew > 0) to.add(vec(rnd(2001)-1000, rnd(2001)-1000, rnd(2001)-1000).normalize().mul(skew*mag));
                             if(W2(proj.weap, fragrel, WS(proj.flags)) != 0) to.add(vec(dir).mul(W2(proj.weap, fragrel, WS(proj.flags))*mag));
                             create(pos, to, proj.local, proj.owner, PRJ_SHOT, max(life, 1), W2(proj.weap, fragtime, WS(proj.flags)), delay, W2(proj.weap, fragspeed, WS(proj.flags)), proj.id, w, -1, (f >= W_MAX ? HIT_ALT : 0)|HIT_FLAK, scale, true, &proj);
-                            delay += W2(proj.weap, fragdelay, WS(proj.flags));
+                            delay += W2(proj.weap, fragtimeiter, WS(proj.flags));
                         }
                     }
                     if(proj.local)
@@ -2018,6 +2036,7 @@ namespace projs
             {
                 vec dir = vec(proj.vel).normalize();
                 float amt = clamp(bomberspeeddelta*secs, 1e-8f, 1.f), mag = max(proj.vel.magnitude(), bomberspeedmin);
+                if(bomberspeedmax > 0) mag = min(mag, bomberspeedmax);
                 dir.mul(1.f-amt).add(targ.mul(amt)).normalize();
                 if(!dir.iszero()) (proj.vel = dir).mul(mag);
             }

@@ -362,6 +362,7 @@ enum { SINFO_NONE = 0, SINFO_STATUS, SINFO_NAME, SINFO_PORT, SINFO_QPORT, SINFO_
 enum { SSTAT_OPEN = 0, SSTAT_LOCKED, SSTAT_PRIVATE, SSTAT_FULL, SSTAT_UNKNOWN, SSTAT_MAX };
 
 enum { AC_PRIMARY = 0, AC_SECONDARY, AC_RELOAD, AC_USE, AC_JUMP, AC_WALK, AC_CROUCH, AC_SPECIAL, AC_DROP, AC_AFFINITY, AC_TOTAL, AC_DASH = AC_TOTAL, AC_MAX };
+#define AC_ALL (1<<AC_PRIMARY)|(1<<AC_SECONDARY)|(1<<AC_RELOAD)|(1<<AC_USE)|(1<<AC_JUMP)|(1<<AC_WALK)|(1<<AC_CROUCH)|(1<<AC_SPECIAL)|(1<<AC_DROP)|(1<<AC_AFFINITY)
 enum { IM_METER = 0, IM_TYPE, IM_TIME, IM_REGEN, IM_COUNT, IM_COLLECT, IM_SLIP, IM_SLIDE, IM_JUMP, IM_MAX };
 enum { IM_A_NONE = 0, IM_A_DASH = 1<<0, IM_A_BOOST = 1<<1, IM_A_PARKOUR = 1<<2, IM_A_ALL = IM_A_DASH|IM_A_BOOST|IM_A_PARKOUR, IM_A_RELAX = IM_A_PARKOUR };
 enum { IM_T_NONE = 0, IM_T_BOOST, IM_T_DASH, IM_T_MELEE, IM_T_KICK, IM_T_VAULT, IM_T_SKATE, IM_T_MAX, IM_T_WALL = IM_T_MELEE };
@@ -1362,7 +1363,7 @@ struct projent : dynent
 {
     vec from, to, dest, norm, inertia, sticknrm, stickpos, effectpos, lastgood;
     int addtime, lifetime, lifemillis, waittime, spawntime, fadetime, lastradial, lasteffect, lastbounce, beenused, extinguish, stuck;
-    float movement, distance, lifespan, lifesize, speedmin;
+    float movement, distance, lifespan, lifesize, speedmin, speedmax;
     bool local, limited, escaped, child;
     int projtype, projcollide, interacts;
     float elasticity, reflectivity, relativity, liquidcoast;
@@ -1394,7 +1395,7 @@ struct projent : dynent
         effectpos = vec(-1e16f, -1e16f, -1e16f);
         addtime = lifetime = lifemillis = waittime = spawntime = fadetime = lastradial = lasteffect = lastbounce = beenused = flags = 0;
         schan = id = weap = value = -1;
-        movement = distance = lifespan = speedmin = 0;
+        movement = distance = lifespan = speedmin = speedmax = 0;
         curscale = speedscale = lifesize = 1;
         extinguish = stuck = interacts = 0;
         limited = escaped = child = false;
