@@ -264,11 +264,12 @@ namespace aiman
         }
         else if(m_bots(gamemode) && blimit > 0)
         {
-            switch(G(botbalance))
+            int bb = m_botbal(gamemode, mutators);
+            switch(bb)
             {
-                case -1: balance = max(people, m_duel(gamemode, mutators) ? 2 : G(numplayers)); break; // use distributed map players
+                case -1: balance = max(people, G(numplayers)); break; // use distributed map players
                 case  0: balance = 0; break; // no bots
-                default: balance = max(people, m_duel(gamemode, mutators) ? 2 : G(botbalance)); break; // balance to at least this
+                default: balance = max(people, bb); break; // balance to at least this
             }
             if(m_team(gamemode, mutators) && balance > 0)
             { // skew this if teams are unbalanced
@@ -383,6 +384,8 @@ namespace aiman
                     checkold(botoffset);
                     checkold(enemylimit);
                     checkold(numplayers);
+                    int bb = m_botbal(gamemode, mutators);
+                    if(oldbotbalance != bb) { dorefresh = 1; oldbotbalance = bb; }
                 }
                 if(dorefresh)
                 {

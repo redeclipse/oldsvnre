@@ -240,6 +240,7 @@ extern mutstypes mutstype[];
 #define m_regen(a,b)        (!m_hard(a,b) && (G(duelregen) || !m_duke(a, b)) && !m_insta(a, b))
 #define m_ghost(a,b)        (m_trial(a) && !m_gsp3(a, b))
 #define m_bots(a)           (m_fight(a) && !m_trial(a))
+#define m_botbal(a,b)       (m_duel(a, b) ? G(botbalanceduel) : (m_survivor(a, b) ? G(botbalancesurvivor) : G(botbalance)))
 #define m_nopoints(a,b)     (m_duke(a, b) || (m_bomber(a) && m_gsp1(a, b)) || m_trial(a))
 #define m_laptime(a,b)      (m_trial(a) && !m_gsp1(a, b))
 #define m_impulsemeter(a,b) ((m_trial(a) && m_gsp2(a, b)) || !m_freestyle(a, b))
