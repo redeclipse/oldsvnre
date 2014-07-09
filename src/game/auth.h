@@ -192,6 +192,7 @@ namespace auth
     int allowconnect(clientinfo *ci, bool connecting = true, const char *pwd = "", const char *authname = "")
     {
         if(ci->local) { tryident(ci, connecting, pwd, authname); return DISC_NONE; }
+        if(ci->version.game != GAMEVERSION) return DISC_INCOMPATIBLE;
         if(m_local(gamemode)) return DISC_PRIVATE;
         if(tryident(ci, connecting, pwd, authname)) return DISC_NONE;
         // above here are short circuits
@@ -199,13 +200,14 @@ namespace auth
         uint ip = getclientip(ci->clientnum);
         if(!ip || !checkipinfo(control, ipinfo::ALLOW, ip))
         {
-            if(mastermode >= MM_PRIVATE || serverpass[0] || (G(connectlock) && !haspriv(ci, G(connectlock)))) return DISC_PRIVATE;
+            if(mastermode >= MM_PRIVATE || serverpass[0] || (G(connectlock) && !haspriv(ci, G(connectlock)))) return DISC_PASSWORD;
             ipinfo *info = checkipinfo(control, ipinfo::BAN, ip);
             if(info)
             {
                 srvmsgftforce(ci->clientnum, CON_EVENT, "\foyou are \fs\fcbanned\fS: \fy%s", info->reason && *info->reason ? info->reason : "no reason specified");
                 return DISC_IPBAN;
             }
+            if(ci->purity != 2 && G(serverpure) >= (ci->purity != 0 ? 2 : 3)) return DISC_PURE;
         }
         return DISC_NONE;
     }
@@ -318,15 +320,26 @@ namespace auth
             if(servcmd(2, w[1], w[2])) conoutf("master server variable synced: %s", w[1]);
             versioning = oldversion;
         }
+        else if(!strcmp(w[0], "version"))
+        {
+            verinfo &v = versions.add();
+            v.type = atoi(w[1]);
+            v.flag = verinfo::GLOBAL; // master info
+            v.game = atoi(w[2]);
+            v.platform = atoi(w[3]);
+            v.arch = atoi(w[4]);
+            v.crc = uint(atoi(w[5]));
+            updatecontrols = true;
+        }
         else loopj(ipinfo::MAXTYPES) if(!strcmp(w[0], ipinfotypes[j]))
         {
-            ipinfo &p = control.add();
-            p.ip = uint(atoi(w[1]));
-            p.mask = uint(atoi(w[2]));
-            p.type = j;
-            p.flag = ipinfo::GLOBAL; // master info
-            p.time = totalmillis ? totalmillis : 1;
-            if(w[3] && *w[3]) p.reason = newstring(w[3]);
+            ipinfo &c = control.add();
+            c.ip = uint(atoi(w[1]));
+            c.mask = uint(atoi(w[2]));
+            c.type = j;
+            c.flag = ipinfo::GLOBAL; // master info
+            c.time = totalmillis ? totalmillis : 1;
+            if(w[3] && *w[3]) c.reason = newstring(w[3]);
             updatecontrols = true;
             break;
         }
@@ -336,11 +349,12 @@ namespace auth
     void regserver()
     {
         loopvrev(control) if(control[i].flag == ipinfo::GLOBAL) control.remove(i);
+        loopvrev(versions) if(versions[i].flag == verinfo::GLOBAL) versions.remove(i);
         if(quickcheck) requestmasterf("quick\n");
         else
         {
             conoutf("updating master server");
-            requestmasterf("server %d\n", serverport);
+            requestmasterf("server %d %d %d %d %u\n", serverport, GAMEVERSION, versionplatform, versionarch, versioncrc);
         }
         lastactivity = totalmillis;
     }

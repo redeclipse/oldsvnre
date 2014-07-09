@@ -318,9 +318,10 @@ namespace server
     struct clientinfo
     {
         servstate state;
+        verinfo version;
         string name, handle, mapvote, authname, clientmap;
         int clientnum, connectmillis, sessionid, overflow, ping, team, lastteam, lastplayerinfo,
-            modevote, mutsvote, lastvote, privilege, gameoffset, lastevent, wslen, mapcrc, swapteam;
+            modevote, mutsvote, lastvote, privilege, gameoffset, lastevent, wslen, mapcrc, swapteam, purity;
         bool connected, ready, local, timesync, online, wantsmap, failedmap, connectauth, warned, kicked;
         vector<gameevent *> events;
         vector<uchar> position, messages;
@@ -362,7 +363,7 @@ namespace server
 
         void reset()
         {
-            ping = lastplayerinfo = 0;
+            ping = lastplayerinfo = purity = 0;
             name[0] = handle[0] = 0;
             privilege = PRIV_NONE;
             connected = ready = local = online = wantsmap = failedmap = connectauth = kicked = false;
@@ -372,6 +373,7 @@ namespace server
             needclipboard = 0;
             cleanclipboard();
             mapchange(false);
+            version.reset();
         }
 
         int getmillis(int millis, int id)
@@ -2887,7 +2889,7 @@ namespace server
         {
             clientinfo *ci = clients[i];
             if(ci->state.actortype > A_PLAYER || ci->clientmap[0] || ci->mapcrc >= 0 || (req < 0 && ci->warned)) continue;
-            srvmsgf(req, "\fy\fs%s\fS has modified map \"%s\"", colourname(ci), smapname);
+            srvmsgf(req, "\fy%s is using a modified map", colourname(ci));
             if(req < 0) ci->warned = true;
         }
         if(crcs.empty() || crcs.length() < 2) return;
@@ -2898,7 +2900,7 @@ namespace server
             {
                 clientinfo *ci = clients[j];
                 if(ci->state.actortype > A_PLAYER || !ci->clientmap[0] || ci->mapcrc != info.crc || (req < 0 && ci->warned)) continue;
-                srvmsgf(req, "\fy\fs%s\fS has modified map \"%s\"", colourname(ci), smapname);
+                srvmsgf(req, "\fys%s is using modified map", colourname(ci));
                 if(req < 0) ci->warned = true;
             }
         }
@@ -3235,7 +3237,7 @@ namespace server
 
     void sendservinit(clientinfo *ci)
     {
-        sendf(ci->clientnum, 1, "ri3s2i2", N_SERVERINIT, ci->clientnum, GAMEVERSION, gethostname(ci->clientnum), gethostip(ci->clientnum), ci->sessionid, serverpass[0] ? 1 : 0);
+        sendf(ci->clientnum, 1, "ri3s2i", N_SERVERINIT, ci->clientnum, GAMEVERSION, gethostname(ci->clientnum), gethostip(ci->clientnum), ci->sessionid);
     }
 
     bool restorescore(clientinfo *ci)
@@ -4832,6 +4834,27 @@ namespace server
             ci->ready = true;
             aiman::poke();
         }
+        else if(m_fight(gamemode) && G(serverpure)) switch(ci->purity)
+        {
+            case 2:
+            {
+                int ver = -1;
+                loopv(versions) if(versions[i].type == verinfo::CLIENT)
+                {
+                    verinfo &v = versions[i];
+                    if(v.game != ci->version.game || v.platform != ci->version.platform || v.arch != ci->version.arch) continue;
+                    if(v.crc == ci->version.crc)
+                    {
+                        ver = i;
+                        break; // we have a match
+                    }
+                }
+                srvoutf(-3, "\fy%s is using an official build (%s)", colourname(ci), versions.inrange(ver) && versions[ver].name ? versions[ver].name : "unknown");
+                break;
+            }
+            case 1: srvoutf(-3, "\fy%s is using an unofficial build for an unrestricted version", colourname(ci)); break;
+            default: case 0: srvoutf(-3, "\fy%s is using an unofficial build", colourname(ci)); break;
+        }
     }
 
     void parsepacket(int sender, int chan, packetbuf &p)     // has to parse exactly each byte of the packet
@@ -4862,6 +4885,31 @@ namespace server
                     string password = "", authname = "";
                     getstring(text, p); copystring(password, text);
                     getstring(text, p); copystring(authname, text);
+
+                    ci->version.type = verinfo::CLIENT;
+                    ci->version.flag = verinfo::LOCAL;
+                    ci->version.game = getint(p);
+                    ci->version.platform = getint(p);
+                    ci->version.arch = getint(p);
+                    ci->version.crc = getuint(p);
+                    ci->purity = 0;
+                    if(sup_platform(ci->version.platform) && sup_arch(ci->version.arch))
+                    {
+                        bool fp = false;
+                        loopv(versions) if(versions[i].type == verinfo::CLIENT)
+                        {
+                            verinfo &v = versions[i];
+                            if(v.game != ci->version.game || v.platform != ci->version.platform || v.arch != ci->version.arch) continue;
+                            fp = true;
+                            if(v.crc == ci->version.crc)
+                            {
+                                ci->purity = 2;
+                                break; // we have a match
+                            }
+                        }
+                        if(!fp) ci->purity = 1; // it is "valid" but no specific matches
+                    }
+
                     int disc = auth::allowconnect(ci, true, password, authname);
                     if(disc)
                     {
@@ -5891,15 +5939,15 @@ namespace server
                                     c.type = value; \
                                     c.time = totalmillis ? totalmillis : 1; \
                                     c.reason = newstring(text); \
-                                    if(text[0]) srvoutf(-3, "\fP%s added \fs\fc" #y "\fS on %s (%s/%s): %s", name, colourname(cp), gethostname(cp->clientnum), gethostip(cp->clientnum), text); \
-                                    else srvoutf(-3, "\fP%s added \fs\fc" #y "\fS on %s", name, colourname(cp)); \
+                                    if(text[0]) srvoutf(-3, "%s added \fs\fc" #y "\fS on %s (%s/%s): %s", name, colourname(cp), gethostname(cp->clientnum), gethostip(cp->clientnum), text); \
+                                    else srvoutf(-3, "%s added \fs\fc" #y "\fS on %s", name, colourname(cp)); \
                                     if(value == ipinfo::BAN) updatecontrols = true; \
                                     else if(value == ipinfo::LIMIT) cp->swapteam = 0; \
                                 } \
                                 else \
                                 { \
-                                    if(text[0]) srvoutf(-3, "\fP%s \fs\fckicked\fS %s: %s", name, colourname(cp), text); \
-                                    else srvoutf(-3, "\fP%s \fs\fckicked\fS %s", name, colourname(cp)); \
+                                    if(text[0]) srvoutf(-3, "%s \fs\fckicked\fS %s: %s", name, colourname(cp), text); \
+                                    else srvoutf(-3, "%s \fs\fckicked\fS %s", name, colourname(cp)); \
                                     cp->kicked = updatecontrols = true; \
                                 } \
                             } \
@@ -5937,12 +5985,12 @@ namespace server
                     if(quarantine && cp->state.quarantine)
                     {
                         defformatstring(name)("%s", colourname(ci));
-                        srvoutf(-3, "\fP%s \fs\fcquarantined\fS %s", name, colourname(cp));
+                        srvoutf(-3, "%s \fs\fcquarantined\fS %s", name, colourname(cp));
                     }
                     else if(wasq && !cp->state.quarantine)
                     {
                         defformatstring(name)("%s", colourname(ci));
-                        srvoutf(-3, "\fP%s \fs\fcreleased\fS %s from \fs\fcquarantine\fS", name, colourname(cp));
+                        srvoutf(-3, "%s \fs\fcreleased\fS %s from \fs\fcquarantine\fS", name, colourname(cp));
                     }
                     break;
                 }

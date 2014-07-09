@@ -3,24 +3,33 @@
 
 #include "cube.h"
 
-#define LAN_PORT         28799
-#define MASTER_PORT      28800
-#define SERVER_PORT      28801
+#define LAN_PORT 28799
+#define MASTER_PORT 28800
+#define SERVER_PORT 28801
 
-extern int versioning, versionmajor, versionminor, versionpatch;
-extern char *versionstring, *versionname, *versionuname, *versionrelease, *versionurl, *versionmaster;
-#define CUR_VER_MAKE(a,b,c)  (((a)<<16) | ((b)<<8) | (c))
-#define CUR_VER              CUR_VER_MAKE(versionmajor, versionminor, versionpatch)
-#define CUR_VERSION          (versionmajor*100)+(versionminor*10)+versionpatch
+extern int versioning, versionmajor, versionminor, versionpatch, versionplatform, versionarch, versionstandalone;
+extern char *versionstring, *versionname, *versionuname, *versionrelease, *versionurl, *versionmaster, *versionplatname, *versionplatlongname;
+extern uint versioncrc;
+#define CUR_VER_MAKE(a,b,c) (((a)<<16) | ((b)<<8) | (c))
+#define CUR_VER CUR_VER_MAKE(versionmajor, versionminor, versionpatch)
+#define CUR_VERSION (versionmajor*100)+(versionminor*10)+versionpatch
 
 #ifdef WIN32
-#define CUR_PLATFORM         "win"
+#define CUR_PLATFORM 0
+#define CUR_PLATID
 #elif defined(__APPLE__)
-#define CUR_PLATFORM         "mac"
+#define CUR_PLATFORM 1
 #else
-#define CUR_PLATFORM         "nix"
+#define CUR_PLATFORM 2
 #endif
-#define CUR_ARCH             (int(8*sizeof(void *)))
+#define CUR_ARCH (int(8*sizeof(void *)))
+
+#define MAX_PLATFORMS 3
+
+#define sup_platform(a) (a >= 0 && a < MAX_PLATFORMS)
+#define sup_arch(a) (a == 32 || a == 64)
+
+extern const char *platnames[MAX_PLATFORMS], *platlongnames[MAX_PLATFORMS];
 
 #ifdef STANDALONE
 extern void setupmaster();
@@ -31,6 +40,35 @@ extern int masterserver, masterport;
 extern char *masterip;
 extern int nextcontrolversion();
 #endif
+
+extern void setcrc(const char *bin);
+
+struct verinfo
+{
+    enum { CLIENT = 0, SERVER, NUM };
+    enum { LOCAL = 0, GLOBAL };
+    int type, flag, version;
+    int game, platform, arch;
+    uint crc;
+    char *name;
+
+    verinfo() : name(NULL) { reset(); }
+    ~verinfo()
+    {
+        if(name) delete[] name;
+        name = NULL;
+    }
+
+    void reset()
+    {
+        if(name) delete[] name;
+        name = NULL;
+        type = flag = version = game = platform = arch = -1;
+        crc = 0;
+    }
+};
+extern vector<verinfo> versions;
+extern void addverinfo(int type, int flag, int game, int platform, int arch, uint crc, const char *name = NULL);
 
 #include "irc.h"
 #include "sound.h"

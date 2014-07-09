@@ -4,7 +4,7 @@ namespace client
 {
     bool sendplayerinfo = false, sendcrcinfo = false, sendgameinfo = false, isready = false, remote = false,
         demoplayback = false, needsmap = false, gettingmap = false, waitplayers = false;
-    int lastping = 0, sessionid = 0, lastplayerinfo = 0;
+    int lastping = 0, sessionid = 0, sessionver = 0, lastplayerinfo = 0;
     string connectpass = "";
     int needclipboard = -1;
 
@@ -913,7 +913,7 @@ namespace client
     {
         if(editmode) toggleedit();
         gettingmap = needsmap = remote = isready = sendgameinfo = sendplayerinfo = false;
-        sessionid = 0;
+        sessionid = sessionver = 0;
         ignores.shrink(0);
         messages.shrink(0);
         mapvotes.shrink(0);
@@ -1400,7 +1400,9 @@ namespace client
     void sendintro()
     {
         packetbuf p(MAXTRANS, ENET_PACKET_FLAG_RELIABLE);
+
         putint(p, N_CONNECT);
+
         sendstring(game::player1->name, p);
         putint(p, game::player1->colour);
         putint(p, game::player1->model);
@@ -1413,6 +1415,12 @@ namespace client
         }
         sendstring(hash, p);
         sendstring(authconnect ? accountname : "", p);
+
+        putint(p, GAMEVERSION);
+        putint(p, versionplatform);
+        putint(p, versionarch);
+        putuint(p, versioncrc);
+
         sendclientpacket(p.finalize(), 1);
     }
 
@@ -1753,25 +1761,27 @@ namespace client
             if(verbose > 5) conoutf("[client] msg: %d, prev: %d", type, prevtype);
             switch(type)
             {
-                case N_SERVERINIT:                 // welcome messsage from the server
+                case N_SERVERINIT: // welcome messsage from the server
                 {
-                    int mycn = getint(p), gver = getint(p);
-                    if(gver!=GAMEVERSION)
-                    {
-                        conoutft(CON_EVENT, "\fryou are using a different game version (you: \fs\fc%d\fS, server: \fs\fc%d\fS)", GAMEVERSION, gver);
-                        disconnect();
-                        return;
-                    }
+                    game::player1->clientnum = getint(p);
+                    sessionver = getint(p);
                     getstring(game::player1->hostname, p);
                     getstring(game::player1->hostip, p);
                     sessionid = getint(p);
-                    game::player1->clientnum = mycn;
-                    if(getint(p)) conoutft(CON_EVENT, "\fothe server is password protected");
-                    else if(verbose >= 2) conoutf("\fythe server welcomes us, yay");
+                    if(sessionver != GAMEVERSION)
+                    {
+                        conoutft(CON_EVENT, "\frerror: this server is running an incompatible protocol (%d v %d)", sessionver, GAMEVERSION);
+                        disconnect();
+                        return;
+                    }
+                    conoutf("connected, starting negotiation with server");
                     sendintro();
                     break;
                 }
-                case N_WELCOME: isready = true; break;
+                case N_WELCOME:
+                    conoutf("negotiation with server complete");
+                    isready = true;
+                    break;
 
                 case N_CLIENT:
                 {

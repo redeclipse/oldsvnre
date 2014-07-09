@@ -6,6 +6,12 @@
 #include <shlobj.h>
 #endif
 
+const char *platnames[MAX_PLATFORMS] = {
+    "win", "nix", "osx"
+}, *platlongnames[MAX_PLATFORMS] = {
+    "windows", "linux/bsd", "macosx"
+};
+
 VAR(0, version, 1, 0, -1);
 VAR(0, versioning, 1, 0, -1);
 VAR(0, versionmajor, 0, 0, VAR_MAX);
@@ -16,10 +22,38 @@ SVAR(0, versionname, "");
 SVAR(0, versionuname, "");
 SVAR(0, versionrelease, "");
 SVAR(0, versionurl, "");
+SVAR(IDF_READONLY, versionplatname, platnames[CUR_PLATFORM]);
+SVAR(IDF_READONLY, versionplatlongname, platlongnames[CUR_PLATFORM]);
+VAR(IDF_READONLY, versionplatform, 0, CUR_PLATFORM, VAR_MAX);
+VAR(IDF_READONLY, versionarch, 0, CUR_ARCH, VAR_MAX);
+#ifdef STANDALONE
+VAR(IDF_READONLY, versionstandalone, 0, 1, 1);
+#else
+VAR(IDF_READONLY, versionstandalone, 0, 0, 1);
+#endif
+uint versioncrc = 0;
+
+vector<verinfo> versions;
+void addverinfo(int type, int flag, int game, int platform, int arch, uint crc, const char *name)
+{
+    if(type < 0 || type >= verinfo::NUM || game <= 0 || !sup_platform(platform) || !sup_arch(arch)) return;
+    verinfo &v = versions.add();
+    v.type = type;
+    v.flag = flag;
+#ifdef STANDALONE
+    v.version = nextcontrolversion();
+#endif
+    v.game = game;
+    v.platform = platform;
+    v.arch = arch;
+    v.crc = crc;
+    if(name && *name) v.name = newstring(name);
+}
+ICOMMAND(0, addversion, "iiiiis", (int *type, int *game, int *platform, int *arch, int *crc, char *name), addverinfo(*type, verinfo::LOCAL, *game, *platform, *arch, uint(*crc), name));
 
 VAR(0, rehashing, 1, 0, -1);
 
-extern const char * const disc_reasons[] = { "normal", "end of packet", "client num", "user was kicked", "message error", "address is banned", "server is in private mode", "server is full", "connection timed out", "packet overflow", "server shutting down" };
+const char * const disc_reasons[] = { "normal", "end of packet", "client num", "user was kicked", "message error", "address is banned", "server is in private mode", "server is password protected", "server requires pure official builds", "server is at maximum capacity", "server and client are incompatible", "connection timed out", "packet overflow", "server shutting down" };
 
 SVAR(IDF_PERSIST, logtimeformat, "%c");
 SVAR(IDF_PERSIST, filetimeformat, "%Y%m%d%H%M%S");
@@ -525,10 +559,15 @@ void sendfile(int cn, int chan, stream *file, const char *format, ...)
 
 void disconnect_client(int n, int reason)
 {
-    if(clients[n]->type!=ST_TCPIP) return;
-    enet_peer_disconnect(clients[n]->peer, reason);
-    server::clientdisconnect(n, false, reason);
+    if(clients[n]->type==ST_TCPIP) enet_peer_disconnect(clients[n]->peer, reason);
+    server::clientdisconnect(n, clients[n]->type==ST_LOCAL, reason);
     delclient(n);
+    if(clients[n]->type==ST_LOCAL) loopv(clients) if(i != n && clients[i] && clients[i]->type==ST_LOCAL)
+    {
+        clientdata &c = *clients[i];
+        server::clientdisconnect(c.num, true);
+        delclient(c.num);
+    }
 }
 
 void kicknonlocalclients(int reason)
@@ -1366,7 +1405,7 @@ void setupserver()
 
 void initgame()
 {
-    conoutf("identity: %s v%s-%s %d bit (%s)", versionname, versionstring, CUR_PLATFORM, CUR_ARCH, versionrelease);
+    conoutf("identity: v%s-%s %d bit %s (%s) [0x%x]", versionstring, versionplatname, versionarch, versionstandalone ? "server" : "client", versionrelease, versioncrc);
     server::start();
     loopv(gameargs)
     {
@@ -1621,6 +1660,16 @@ void rehash(bool reload)
 }
 ICOMMAND(0, rehash, "i", (int *nosave), if(!(identflags&IDF_WORLD)) rehash(*nosave ? false : true));
 
+void setcrc(const char *bin)
+{
+    if(!bin || !*bin) return;
+    size_t len = 0;
+    char *buf = loadfile(bin, &len, false);
+    if(!buf) return;
+    versioncrc = crc32(0, (const Bytef *)buf, len);
+    delete[] buf;
+}
+
 #ifdef STANDALONE
 #include <signal.h>
 volatile int errors = 0;
@@ -1667,9 +1716,9 @@ void reloadsignal(int signum)
 int main(int argc, char **argv)
 {
     clocktime = time(NULL); // initialise
-
     setlogfile(NULL);
     setlocations(true);
+    setcrc(argv[0]);
 
     char *initscript = NULL;
     for(int i = 1; i<argc; i++)
