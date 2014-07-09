@@ -42,7 +42,7 @@ void setcaption(const char *text, const char *text2)
     {
         copystring(prevtext, text);
         copystring(prevtext2, text2);
-        defformatstring(caption)("%s v%s-%s %d bit (%s)%s%s%s%s", versionname, versionstring, CUR_PLATFORM, CUR_ARCH, versionrelease, text[0] ? ": " : "", text, text2[0] ? " - " : "", text2);
+        defformatstring(caption)("%s v%s-%s %d bit (%s)%s%s%s%s", versionname, versionstring, versionplatname, versionarch, versionrelease, text[0] ? ": " : "", text, text2[0] ? " - " : "", text2);
         SDL_WM_SetCaption(caption, NULL);
     }
 }
@@ -875,7 +875,6 @@ int main(int argc, char **argv)
     #endif
 
     clocktime = time(NULL); // initialise
-
     setlogfile(NULL);
     setlocations(true);
 
@@ -889,6 +888,7 @@ int main(int argc, char **argv)
         }
     }
     setlogfile("log.txt");
+    setcrc(argv[0]);
     execfile("init.cfg", false);
     for(int i = 1; i<argc; i++)
     {
