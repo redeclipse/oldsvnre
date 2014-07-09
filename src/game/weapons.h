@@ -2,7 +2,7 @@ enum
 {
     W_MELEE = 0, W_PISTOL, W_OFFSET, // end of unselectable weapon set
     W_SWORD = W_OFFSET, W_SHOTGUN, W_SMG, W_FLAMER, W_PLASMA, W_ZAPPER, W_RIFLE, W_ITEM,
-    W_GRENADE = W_ITEM, W_MINE, W_BOOM, W_ROCKET = W_BOOM, // end of item weapon set
+    W_GRENADE = W_ITEM, W_MINE, W_ROCKET, // end of item weapon set
     W_MAX, W_LOADOUT = W_ITEM-W_OFFSET // if you add to this at all, check all arrays with W_MAX
 };
 #define isweap(a)       (a >= 0 && a < W_MAX)
@@ -402,9 +402,9 @@ WPVAR(0, muts, -G_M_ALL, G_M_ALL,
     0,          -G_M_SW,    -G_M_SW,    -G_M_SW,    -G_M_SW,    -G_M_SW,    -G_M_SW,    -G_M_SW,    -G_M_SW,    0,          -G_M_IM,    -G_M_DK
 );
 WPFVARK(0, partblend, 0, 1,
-    1.0f,       0.3f,       1.0f,       1.0f,       1.0f,       1.0f,       0.75f,      0.75f,      1.0f,       1.0f,       1.0f,       1.0f,
+    1.0f,       0.3f,       1.0f,       1.0f,       1.0f,       0.8f,       0.75f,      0.75f,      1.0f,       1.0f,       1.0f,       1.0f,
     1.0f,       0.6f,       1.0f,       1.0f,       1.0f,       0.15f,      1.0f,       0.75f,      1.0f,       1.0f,       1.0f,       1.0f,
-    1.0f,       0.3f,       1.0f,       1.0f,       1.0f,       1.0f,       0.75f,      0.75f,      1.0f,       1.0f,       1.0f,       1.0f,
+    1.0f,       0.3f,       1.0f,       1.0f,       1.0f,       0.8f,       0.75f,      0.75f,      1.0f,       1.0f,       1.0f,       1.0f,
     1.0f,       0.6f,       1.0f,       1.0f,       1.0f,       0.15f,      1.0f,       0.75f,      1.0f,       1.0f,       1.0f,       1.0f
 );
 WPVARK(IDF_HEX, partcol, -3, 0xFFFFFF,
@@ -426,9 +426,9 @@ WPFVARK(0, partlen, 0, FVAR_MAX,
     0.0f,       16.0f,      0.0f,       7.5f,       7.5f,       0.0f,       0.0f,       1024.0f,    512.0f,     0.0f,       4.0f,       0.0f
 );
 WPFVARK(0, partsize, 0, FVAR_MAX,
-    1.0f,       0.125f,     1.0f,       0.75f,      0.6f,       10.0f,      10.0f,      4.0f,       2.0f,       1.0f,       2.0f,       1.0f,
+    1.0f,       0.125f,     1.0f,       0.75f,      0.6f,       8.0f,       10.0f,      4.0f,       2.0f,       1.0f,       2.0f,       1.0f,
     2.0f,       0.25f,      1.25f,      0.45f,      0.4f,       12.0f,      24.0f,      3.0f,       3.0f,       1.0f,       2.0f,       1.0f,
-    1.0f,       0.125f,     1.0f,       0.45f,      0.4f,       10.0f,      10.0f,      3.0f,       1.0f,       1.0f,       2.0f,       1.0f,
+    1.0f,       0.125f,     1.0f,       0.45f,      0.4f,       8.0f,       10.0f,      3.0f,       1.0f,       1.0f,       2.0f,       1.0f,
     2.0f,       0.25f,      1.25f,      0.45f,      0.4f,       12.0f,      24.0f,      3.0f,       3.0f,       1.0f,       2.0f,       1.0f
 );
 WPVARK(0, parttype, 0, W_MAX-1,
