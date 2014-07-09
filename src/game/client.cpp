@@ -1419,7 +1419,7 @@ namespace client
         putint(p, GAMEVERSION);
         putint(p, versionplatform);
         putint(p, versionarch);
-        putuint(p, versioncrc);
+        putint(p, versioncrc);
 
         sendclientpacket(p.finalize(), 1);
     }

@@ -4842,12 +4842,9 @@ namespace server
                 loopv(versions) if(versions[i].type == verinfo::CLIENT)
                 {
                     verinfo &v = versions[i];
-                    if(v.game != ci->version.game || v.platform != ci->version.platform || v.arch != ci->version.arch) continue;
-                    if(v.crc == ci->version.crc)
-                    {
-                        ver = i;
-                        break; // we have a match
-                    }
+                    if(v.game != ci->version.game || v.platform != ci->version.platform || v.arch != ci->version.arch || v.crc != ci->version.crc) continue;
+                    ver = i;
+                    break; // we have a match
                 }
                 srvoutf(-3, "\fy%s is using an official build (%s)", colourname(ci), versions.inrange(ver) && versions[ver].name ? versions[ver].name : "unknown");
                 break;
@@ -4891,7 +4888,7 @@ namespace server
                     ci->version.game = getint(p);
                     ci->version.platform = getint(p);
                     ci->version.arch = getint(p);
-                    ci->version.crc = getuint(p);
+                    ci->version.crc = uint(getint(p));
                     ci->purity = 0;
                     if(sup_platform(ci->version.platform) && sup_arch(ci->version.arch))
                     {
@@ -4900,12 +4897,10 @@ namespace server
                         {
                             verinfo &v = versions[i];
                             if(v.game != ci->version.game || v.platform != ci->version.platform || v.arch != ci->version.arch) continue;
-                            fp = true;
-                            if(v.crc == ci->version.crc)
-                            {
-                                ci->purity = 2;
-                                break; // we have a match
-                            }
+                            fp = true; // definition exists for this platform
+                            if(v.crc != ci->version.crc) continue;
+                            ci->purity = 2;
+                            break; // we have a match
                         }
                         if(!fp) ci->purity = 1; // it is "valid" but no specific matches
                     }
