@@ -48,6 +48,7 @@ void addverinfo(int type, int flag, int game, int platform, int arch, uint crc, 
     v.arch = arch;
     v.crc = crc;
     if(name && *name) v.name = newstring(name);
+    //conoutf("added version: %d %s %d 0x%x %s", v.game, platnames[v.platform], v.arch, v.crc, v.name ? v.name : "untitled");
 }
 ICOMMAND(0, addversion, "iiiiis", (int *type, int *game, int *platform, int *arch, int *crc, char *name), addverinfo(*type, verinfo::LOCAL, *game, *platform, *arch, uint(*crc), name));
 
@@ -423,6 +424,7 @@ void cleanupserver()
 void reloadserver()
 {
     loopvrev(control) if(control[i].flag == ipinfo::LOCAL) control.remove(i);
+    loopvrev(versions) if(versions[i].flag == ipinfo::LOCAL) control.remove(i);
     server::reload();
 }
 
@@ -1210,6 +1212,7 @@ static void setupwindow(const char *title)
     atexit(cleanupwindow);
 
     if(!setupsystemtray(WM_APP)) fatal("failed adding to system tray");
+    conoutf("identity: v%s-%s %d bit %s (%s) [0x%x]", versionstring, versionplatname, versionarch, versionstandalone ? "server" : "client", versionrelease, versioncrc);
 }
 
 static char *parsecommandline(const char *src, vector<char *> &args)
