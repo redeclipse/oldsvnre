@@ -558,10 +558,11 @@ namespace bomber
         bomberstate::flag &f = st.flags[i];
         if(f.owner)
         {
-            bool forever = m_gsp1(game::gamemode, game::mutators) || m_gsp2(game::gamemode, game::mutators) || (m_gsp3(game::gamemode, game::mutators) && d->team != T_OMEGA);
+            if(!d->ai || f.owner != d) return;
+            bool forever = m_gsp1(game::gamemode, game::mutators) || m_gsp2(game::gamemode, game::mutators) || (m_gsp3(game::gamemode, game::mutators) && d->team != T_OMEGA) || !findtarget(d);
             if(!carrytime && forever) return;
             int takemillis = lastmillis-f.taketime, length = forever ? carrytime-550-bomberlockondelay : min(carrytime, 1000);
-            if(d->ai && f.owner == d && takemillis >= length)
+            if(takemillis >= length)
             {
                 if(d->action[AC_AFFINITY])
                 {
