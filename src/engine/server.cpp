@@ -7,9 +7,9 @@
 #endif
 
 const char *platnames[MAX_PLATFORMS] = {
-    "win", "nix", "osx"
+    "win", "osx", "nix"
 }, *platlongnames[MAX_PLATFORMS] = {
-    "windows", "linux/bsd", "macosx"
+    "windows", "macosx", "linux/bsd"
 };
 
 VAR(0, version, 1, 0, -1);
