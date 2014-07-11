@@ -3145,8 +3145,8 @@ ICOMMAND(0, ~, "i", (int *a), intret(~*a));
 ICOMMAND(0, ^~, "ii", (int *a, int *b), intret(*a ^ ~*b));
 ICOMMAND(0, &~, "ii", (int *a, int *b), intret(*a & ~*b));
 ICOMMAND(0, |~, "ii", (int *a, int *b), intret(*a | ~*b));
-ICOMMAND(0, <<, "ii", (int *a, int *b), intret(*a << *b));
-ICOMMAND(0, >>, "ii", (int *a, int *b), intret(*a >> *b));
+ICOMMAND(0, <<, "ii", (int *a, int *b), intret(*b < 32 ? *a << max(*b, 0) : 0));
+ICOMMAND(0, >>, "ii", (int *a, int *b), intret(*b < 32 ? *a >> max(*b, 0) : 0));
 ICOMMAND(0, &&, "e1V", (tagval *args, int numargs),
 {
     if(!numargs) intret(1);
