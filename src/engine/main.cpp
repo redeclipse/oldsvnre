@@ -1002,8 +1002,9 @@ int main(int argc, char **argv)
     conoutf("loading sound..");
     initsound();
 
-    conoutf("loading defaults..");
+    game::start();
 
+    conoutf("loading defaults..");
     if(!execfile("config/stdlib.cfg", false)) fatal("cannot find data files");
     if(!setfont("default")) fatal("no default font specified");
     inbetweenframes = true;

@@ -3266,7 +3266,7 @@ namespace server
         sendf(-1, 1, "ri9vi", N_RESUME, ci->clientnum, gs.state, gs.points, gs.frags, gs.deaths, gs.health, gs.cptime, gs.weapselect, W_MAX, &gs.ammo[0], -1);
     }
 
-    void putinitclient(clientinfo *ci, packetbuf &p)
+    void putinitclient(clientinfo *ci, packetbuf &p, bool setup = true)
     {
         if(ci->state.actortype > A_PLAYER)
         {
@@ -3287,10 +3287,13 @@ namespace server
         }
         else
         {
-            putint(p, N_CLIENTSETUP);
-            sendstring(gethostname(ci->clientnum), p);
-            sendstring(gethostip(ci->clientnum), p);
-            ci->state.version.put(p);
+            if(setup)
+            {
+                putint(p, N_CLIENTSETUP);
+                sendstring(gethostname(ci->clientnum), p);
+                sendstring(gethostip(ci->clientnum), p);
+                ci->state.version.put(p);
+            }
 
             putint(p, N_CLIENTINIT);
             putint(p, ci->clientnum);
@@ -3314,7 +3317,7 @@ namespace server
     void sendinitclientself(clientinfo *ci)
     {
         packetbuf p(MAXTRANS, ENET_PACKET_FLAG_RELIABLE);
-        putinitclient(ci, p);
+        putinitclient(ci, p, false);
         sendpacket(ci->clientnum, 1, p.finalize(), ci->clientnum);
     }
 
@@ -4862,13 +4865,13 @@ namespace server
                     getstring(text, p);
                     ci->state.setvanity(text);
 
-                    string password = "";
+                    string password = "", authname = "";
                     getstring(text, p); copystring(password, text);
-                    getstring(text, p); filtertext(ci->authname, text, true, true, true, 100);
+                    getstring(text, p); filtertext(authname, text, true, true, true, 100);
 
                     ci->state.version.get(p);
 
-                    int disc = auth::allowconnect(ci, password);
+                    int disc = auth::allowconnect(ci, authname, password);
                     if(disc)
                     {
                         disconnect_client(sender, disc);

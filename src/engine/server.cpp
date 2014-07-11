@@ -1390,9 +1390,6 @@ void initgame()
 {
     conoutf("identity: v%s-%s%d %s (%s) [0x%x]", versionstring, versionplatname, versionarch, versionstandalone ? "server" : "client", versionrelease, versioncrc);
     server::start();
-#ifndef STANDALONE
-    game::start();
-#endif
     loopv(gameargs)
     {
 #ifndef STANDALONE
