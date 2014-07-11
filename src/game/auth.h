@@ -101,7 +101,7 @@ namespace auth
         lastactivity = totalmillis;
     }
 
-    bool tryauth(clientinfo *ci)
+    bool tryauth(clientinfo *ci, const char *authname = "")
     {
         if(!ci) return false;
         if(!connectedmaster() && !quickauthchecks)
@@ -114,6 +114,7 @@ namespace auth
             srvmsgftforce(ci->clientnum, CON_EVENT, "\foplease wait, still processing previous attempt..");
             return true;
         }
+        copystring(ci->authname, authname);
         reqauth(ci);
         return true;
     }
@@ -163,17 +164,16 @@ namespace auth
         }
     }
 
-    bool tryident(clientinfo *ci, const char *pwd = "")
+    bool tryident(clientinfo *ci, const char *authname = "", const char *pwd = "")
     {
-        if(*ci->authname)
+        if(*authname)
         {
             if(ci->connectauth) return true;
-            if(tryauth(ci))
+            if(tryauth(ci, authname))
             {
                 ci->connectauth = true;
                 return true;
             }
-            else ci->authname[0] = 0;
         }
         if(*pwd)
         {
@@ -189,12 +189,12 @@ namespace auth
         return false;
     }
 
-    int allowconnect(clientinfo *ci, const char *pwd = "")
+    int allowconnect(clientinfo *ci, const char *authname = "", const char *pwd = "")
     {
-        if(ci->local) { tryident(ci, pwd); return DISC_NONE; }
+        if(ci->local) { tryident(ci, authname, pwd); return DISC_NONE; }
         if(ci->state.version.game != GAMEVERSION) return DISC_INCOMPATIBLE;
         if(m_local(gamemode)) return DISC_PRIVATE;
-        if(tryident(ci, pwd)) return DISC_NONE;
+        if(tryident(ci, authname, pwd)) return DISC_NONE;
         // above here are short circuits
         if(numclients() >= G(serverclients)) return DISC_MAXCLIENTS;
         uint ip = getclientip(ci->clientnum);
