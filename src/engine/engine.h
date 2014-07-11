@@ -30,6 +30,8 @@ extern uint versioncrc;
 #define sup_arch(a) (a == 32 || a == 64)
 
 extern const char *platnames[MAX_PLATFORMS], *platlongnames[MAX_PLATFORMS];
+#define plat_name(a) (sup_platform(a) ? platnames[a] : "unk")
+#define plat_longname(a) (sup_platform(a) ? platlongnames[a] : "unknown")
 
 #ifdef STANDALONE
 extern void setupmaster();
@@ -42,33 +44,6 @@ extern int nextcontrolversion();
 #endif
 
 extern void setcrc(const char *bin);
-
-struct verinfo
-{
-    enum { CLIENT = 0, SERVER, NUM };
-    enum { LOCAL = 0, GLOBAL };
-    int type, flag, version;
-    int game, platform, arch;
-    uint crc;
-    char *name;
-
-    verinfo() : name(NULL) { reset(); }
-    ~verinfo()
-    {
-        if(name) delete[] name;
-        name = NULL;
-    }
-
-    void reset()
-    {
-        if(name) delete[] name;
-        name = NULL;
-        type = flag = version = game = platform = arch = -1;
-        crc = 0;
-    }
-};
-extern vector<verinfo> versions;
-extern void addverinfo(int type, int flag, int game, int platform, int arch, uint crc, const char *name = NULL);
 
 #include "irc.h"
 #include "sound.h"
@@ -314,6 +289,7 @@ static inline bool pvsoccluded(const ivec &bborigin, int size)
 extern bool hasVBO, hasDRE, hasOQ, hasTR, hasFBO, hasDS, hasTF, hasBE, hasBC, hasCM, hasNP2, hasTC, hasS3TC, hasFXT1, hasTE, hasMT, hasD3, hasAF, hasVP2, hasVP3, hasPP, hasMDA, hasTE3, hasTE4, hasVP, hasFP, hasGLSL, hasGM, hasNVFB, hasSGIDT, hasSGISH, hasDT, hasSH, hasNVPCF, hasRN, hasPBO, hasFBB, hasUBO, hasBUE, hasMBR, hasFC, hasTEX;
 extern int hasstencil;
 extern int glversion, glslversion;
+extern char *gfxvendor, *gfxexts, *gfxrenderer, *gfxversion;
 
 extern bool envmapping, minimapping, renderedgame, modelpreviewing;
 extern const glmatrixf viewmatrix;

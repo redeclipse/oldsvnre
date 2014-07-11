@@ -42,7 +42,7 @@ void setcaption(const char *text, const char *text2)
     {
         copystring(prevtext, text);
         copystring(prevtext2, text2);
-        defformatstring(caption)("%s v%s-%s %d bit (%s)%s%s%s%s", versionname, versionstring, versionplatname, versionarch, versionrelease, text[0] ? ": " : "", text, text2[0] ? " - " : "", text2);
+        defformatstring(caption)("%s v%s-%s%d (%s)%s%s%s%s", versionname, versionstring, versionplatname, versionarch, versionrelease, text[0] ? ": " : "", text, text2[0] ? " - " : "", text2);
         SDL_WM_SetCaption(caption, NULL);
     }
 }

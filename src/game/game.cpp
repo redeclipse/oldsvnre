@@ -15,6 +15,25 @@ namespace game
     vector<gameent *> players, waiting;
     vector<cament *> cameras;
 
+    void start()
+    {
+        player1->version.major = versionmajor;
+        player1->version.minor = versionminor;
+        player1->version.patch = versionpatch;
+        player1->version.game = GAMEVERSION;
+        player1->version.platform = versionplatform;
+        player1->version.arch = versionarch;
+        player1->version.gpuglver = glversion;
+        player1->version.gpuglslver = glslversion;
+        player1->version.crc = versioncrc;
+        if(player1->version.gpuvendor) delete[] player1->version.gpuvendor;
+        player1->version.gpuvendor = newstring(gfxvendor);
+        if(player1->version.gpurenderer) delete[] player1->version.gpurenderer;
+        player1->version.gpurenderer = newstring(gfxrenderer);
+        if(player1->version.gpuversion) delete[] player1->version.gpuversion;
+        player1->version.gpuversion = newstring(gfxversion);
+    }
+
     FVAR(IDF_WORLD, illumlevel, 0, 0, 2);
     VAR(IDF_WORLD, illumradius, 0, 0, VAR_MAX);
     #define OBITVARS(name) \
@@ -780,7 +799,7 @@ namespace game
             entities::spawnplayer(d, ent, true);
             client::addmsg(N_SPAWN, "ri", d->clientnum);
         }
-        d->setscale(rescale(d), 0, true, gamemode, mutators);
+        d->setscale(rescale(d), 0, true);
 
         if(d == player1) specreset();
         else if(d == focus) resetcamera();
@@ -1048,7 +1067,7 @@ namespace game
     {
         adjustscaled(d->quake, quakefade);
 
-        d->setscale(rescale(d), curtime, false, gamemode, mutators);
+        d->setscale(rescale(d), curtime, false);
         d->speedscale = d->curscale;
         if(d->actortype > A_PLAYER)
         {

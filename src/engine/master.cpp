@@ -42,9 +42,8 @@ struct masterclient
     enet_uint32 lastping, lastpong, lastactivity;
     vector<authreq> authreqs;
     bool isserver, isquick, ishttp, listserver, shouldping, shouldpurge;
-    verinfo version;
 
-    masterclient() : inputpos(0), outputpos(0), port(MASTER_PORT), numpings(0), lastcontrol(-1), lastping(0), lastpong(0), lastactivity(0), isserver(false), isquick(false), ishttp(false), listserver(false), shouldping(false), shouldpurge(false) { version.reset(); }
+    masterclient() : inputpos(0), outputpos(0), port(MASTER_PORT), numpings(0), lastcontrol(-1), lastping(0), lastpong(0), lastactivity(0), isserver(false), isquick(false), ishttp(false), listserver(false), shouldping(false), shouldpurge(false) {}
 };
 
 static vector<masterclient *> masterclients;
@@ -239,7 +238,6 @@ int nextcontrolversion()
         controlversion = 0;
         loopv(masterclients) masterclients[i]->lastcontrol = -1;
         loopv(control) if(control[i].flag == ipinfo::LOCAL) control[i].version = controlversion;
-        loopv(versions) if(versions[i].flag == verinfo::LOCAL) versions[i].version = controlversion;
     }
     return controlversion;
 }
@@ -305,19 +303,11 @@ bool checkmasterclientinput(masterclient &c)
             else
             {
                 if(w[1]) c.port = clamp(atoi(w[1]), 1, VAR_MAX);
-                c.version.type = verinfo::SERVER;
-                c.version.flag = verinfo::LOCAL;
-                if(w[2]) c.version.game = atoi(w[2]);
-                if(w[3]) c.version.platform = atoi(w[3]);
-                if(w[4]) c.version.arch = atoi(w[4]);
-                if(w[5]) c.version.crc = uint(atoi(w[5]));
                 c.shouldping = true;
                 c.numpings = 0;
                 c.lastcontrol = controlversion;
                 loopv(control) if(control[i].flag == ipinfo::LOCAL)
                     masteroutf(c, "%s %u %u \"%s\"\n", ipinfotypes[control[i].type], control[i].ip, control[i].mask, control[i].reason);
-                loopv(versions) if(versions[i].flag == verinfo::LOCAL)
-                    masteroutf(c, "version %d %d %d %d %u\n", versions[i].type, versions[i].game, versions[i].platform, versions[i].arch, versions[i].crc);
                 if(c.isserver)
                 {
                     masteroutf(c, "echo \"server updated (port %d), sending ping request (on port %d)\"\n", c.port, c.port+1);
@@ -410,8 +400,6 @@ void checkmaster()
         {
             loopv(control) if(control[i].flag == ipinfo::LOCAL && control[i].version > c.lastcontrol)
                 masteroutf(c, "%s %u %u %s\n", ipinfotypes[control[i].type], control[i].ip, control[i].mask, control[i].reason);
-            loopv(versions) if(versions[i].flag == verinfo::LOCAL && versions[i].version > c.lastcontrol)
-                masteroutf(c, "version %d %d %d %d %u\n", versions[i].type, versions[i].game, versions[i].platform, versions[i].arch, versions[i].crc);
             c.lastcontrol = controlversion;
         }
         if(c.outputpos < c.output.length()) ENET_SOCKETSET_ADD(writeset, c.socket);

@@ -27,9 +27,6 @@ GVAR(IDF_ADMIN, serveropen, 0, 3, 3);
 GSVAR(IDF_ADMIN, serverdesc, "");
 GSVAR(IDF_ADMIN, servermotd, "");
 
-GVAR(IDF_ADMIN, serverpure, 0, 1, 3); // 0 = off, 1 = announce build purity, 2 = lock out official with mismatches, 3 = lock out all
-GVAR(IDF_ADMIN, serverpurelock, 0, PRIV_OPERATOR, PRIV_CREATOR);
-
 GVAR(IDF_ADMIN, autoadmin, 0, 0, 1);
 
 GVAR(IDF_ADMIN, connectlock, 0, PRIV_NONE, PRIV_CREATOR);

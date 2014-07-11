@@ -1416,10 +1416,7 @@ namespace client
         sendstring(hash, p);
         sendstring(authconnect ? accountname : "", p);
 
-        putint(p, GAMEVERSION);
-        putint(p, versionplatform);
-        putint(p, versionarch);
-        putint(p, versioncrc);
+        game::player1->version.put(p);
 
         sendclientpacket(p.finalize(), 1);
     }
@@ -1939,6 +1936,22 @@ namespace client
                     break;
                 }
 
+                case N_CLIENTSETUP:
+                {
+                    int cn = getint(p);
+                    gameent *d = game::newclient(cn);
+                    if(!d)
+                    {
+                        verinfo dummy;
+                        loopi(2) getstring(text, p);
+                        dummy.get(p);
+                        break;
+                    }
+                    getstring(d->hostname, p);
+                    getstring(d->hostip, p);
+                    d->version.get(p);
+                }
+
                 case N_CLIENTINIT: // another client either connected or changed name/team
                 {
                     int cn = getint(p);
@@ -1946,40 +1959,38 @@ namespace client
                     if(!d)
                     {
                         loopi(4) getint(p);
-                        loopi(4) getstring(text, p);
+                        loopi(3) getstring(text, p);
                         break;
                     }
                     int colour = getint(p), model = getint(p), team = clamp(getint(p), int(T_NEUTRAL), int(T_ENEMY)), priv = getint(p);
-                    string name;
-                    getstring(name, p);
+                    string name = ""; getstring(name, p);
                     filtertext(name, name, true, true, true, MAXNAMELEN);
                     const char *namestr = name;
                     while(*namestr && iscubespace(*namestr)) namestr++;
                     if(!*namestr) namestr = copystring(name, "unnamed");
-                    getstring(d->hostname, p);
-                    getstring(d->hostip, p);
+                    string vanity = ""; getstring(vanity, p);
                     getstring(d->handle, p);
-                    getstring(text, p);
                     if(d == game::focus && d->team != team) hud::lastteam = 0;
                     d->team = team;
                     d->privilege = priv;
-                    if(d->name[0]) d->setinfo(namestr, colour, model, text); // already connected
+                    if(d->name[0]) d->setinfo(namestr, colour, model, vanity); // already connected
                     else // new client
                     {
-                        d->setinfo(namestr, colour, model, text);
+                        d->setinfo(namestr, colour, model, vanity);
                         if(showpresence >= (waiting(false) ? 2 : 1))
                         {
                             if(priv > PRIV_NONE)
                             {
-                                if(d->handle[0]) conoutft(CON_EVENT, "\fg%s (%s) has joined the game (\fs\fy%s\fS: \fs\fc%s\fS)", game::colourname(d), d->hostname, hud::privname(d->privilege), d->handle);
-                                else conoutft(CON_EVENT, "\fg%s (%s) has joined the game (\fs\fylocal %s\fS)", game::colourname(d), d->hostname, hud::privname(d->privilege));
+                                if(d->handle[0]) conoutft(CON_EVENT, "\fg%s (%s) has joined the game (\fs\fy%s\fS: \fs\fc%s\fS) [%d.%d.%d-%s%d, %s]", game::colourname(d), d->hostname, hud::privname(d->privilege), d->handle, d->version.major, d->version.minor, d->version.patch, plat_name(d->version.platform), d->version.arch, d->version.gpurenderer);
+                                else conoutft(CON_EVENT, "\fg%s (%s) has joined the game (\fs\fylocal %s\fS) [%d.%d.%d-%s%d, %s]", game::colourname(d), d->hostname, hud::privname(d->privilege), d->version.major, d->version.minor, d->version.patch, plat_name(d->version.platform), d->version.arch, d->version.gpurenderer);
                             }
-                            else conoutft(CON_EVENT, "\fg%s (%s) has joined the game", game::colourname(d), d->hostname);
+                            else conoutft(CON_EVENT, "\fg%s (%s) has joined the game [%d.%d.%d-%s%d, %s]", game::colourname(d), d->hostname, d->version.major, d->version.minor, d->version.patch, plat_name(d->version.platform), d->version.arch, d->version.gpurenderer);
                         }
                         if(needclipboard >= 0) needclipboard++;
                         game::specreset(d);
                     }
-                    break;}
+                    break;
+                }
 
                 case N_DISCONNECT:
                 {
@@ -2188,7 +2199,7 @@ namespace client
                         }
                         if(f && f != game::player1 && !f->ai) f->respawn(lastmillis, m_health(game::gamemode, game::mutators, f->model), game::gamemode, game::mutators);
                         parsestate(f, p, true);
-                        f->setscale(game::rescale(f), 0, true, game::gamemode, game::mutators);
+                        f->setscale(game::rescale(f), 0, true);
                     }
                     break;
                 }
