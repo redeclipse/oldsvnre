@@ -101,7 +101,7 @@ namespace auth
         lastactivity = totalmillis;
     }
 
-    bool tryauth(clientinfo *ci, const char *user)
+    bool tryauth(clientinfo *ci)
     {
         if(!ci) return false;
         if(!connectedmaster() && !quickauthchecks)
@@ -114,7 +114,6 @@ namespace auth
             srvmsgftforce(ci->clientnum, CON_EVENT, "\foplease wait, still processing previous attempt..");
             return true;
         }
-        filtertext(ci->authname, user, true, true, true, 100);
         reqauth(ci);
         return true;
     }
@@ -164,16 +163,17 @@ namespace auth
         }
     }
 
-    bool tryident(clientinfo *ci, bool connecting = true, const char *pwd = "", const char *authname = "")
+    bool tryident(clientinfo *ci, const char *pwd = "")
     {
-        if(*authname)
+        if(*ci->authname)
         {
             if(ci->connectauth) return true;
-            if(tryauth(ci, authname))
+            if(tryauth(ci))
             {
                 ci->connectauth = true;
                 return true;
             }
+            else ci->authname[0] = 0;
         }
         if(*pwd)
         {
@@ -189,12 +189,12 @@ namespace auth
         return false;
     }
 
-    int allowconnect(clientinfo *ci, bool connecting = true, const char *pwd = "", const char *authname = "")
+    int allowconnect(clientinfo *ci, const char *pwd = "")
     {
-        if(ci->local) { tryident(ci, connecting, pwd, authname); return DISC_NONE; }
-        if(ci->version.game != GAMEVERSION) return DISC_INCOMPATIBLE;
+        if(ci->local) { tryident(ci, pwd); return DISC_NONE; }
+        if(ci->state.version.game != GAMEVERSION) return DISC_INCOMPATIBLE;
         if(m_local(gamemode)) return DISC_PRIVATE;
-        if(tryident(ci, connecting, pwd, authname)) return DISC_NONE;
+        if(tryident(ci, pwd)) return DISC_NONE;
         // above here are short circuits
         if(numclients() >= G(serverclients)) return DISC_MAXCLIENTS;
         uint ip = getclientip(ci->clientnum);
@@ -207,7 +207,6 @@ namespace auth
                 srvmsgftforce(ci->clientnum, CON_EVENT, "\foyou are \fs\fcbanned\fS: \fy%s", info->reason && *info->reason ? info->reason : "no reason specified");
                 return DISC_IPBAN;
             }
-            if(ci->purity != 2 && G(serverpure) >= (ci->purity != 0 ? 2 : 3)) return DISC_PURE;
         }
         return DISC_NONE;
     }
@@ -220,7 +219,7 @@ namespace auth
         if(ci->connectauth)
         {
             ci->connectauth = false;
-            int disc = allowconnect(ci, false);
+            int disc = allowconnect(ci);
             if(disc) { disconnect_client(ci->clientnum, disc); return; }
             connected(ci);
         }
@@ -270,7 +269,7 @@ namespace auth
         if(ci->connectauth)
         {
             ci->connectauth = false;
-            int disc = allowconnect(ci, false);
+            int disc = allowconnect(ci);
             if(disc) { disconnect_client(ci->clientnum, disc); return; }
             connected(ci);
         }
@@ -320,17 +319,6 @@ namespace auth
             if(servcmd(2, w[1], w[2])) conoutf("master server variable synced: %s", w[1]);
             versioning = oldversion;
         }
-        else if(!strcmp(w[0], "version"))
-        {
-            verinfo &v = versions.add();
-            v.type = atoi(w[1]);
-            v.flag = verinfo::GLOBAL; // master info
-            v.game = atoi(w[2]);
-            v.platform = atoi(w[3]);
-            v.arch = atoi(w[4]);
-            v.crc = uint(atoi(w[5]));
-            updatecontrols = true;
-        }
         else loopj(ipinfo::MAXTYPES) if(!strcmp(w[0], ipinfotypes[j]))
         {
             ipinfo &c = control.add();
@@ -349,12 +337,11 @@ namespace auth
     void regserver()
     {
         loopvrev(control) if(control[i].flag == ipinfo::GLOBAL) control.remove(i);
-        loopvrev(versions) if(versions[i].flag == verinfo::GLOBAL) versions.remove(i);
         if(quickcheck) requestmasterf("quick\n");
         else
         {
             conoutf("updating master server");
-            requestmasterf("server %d %d %d %d %u\n", serverport, GAMEVERSION, versionplatform, versionarch, versioncrc);
+            requestmasterf("server %d\n", serverport);
         }
         lastactivity = totalmillis;
     }

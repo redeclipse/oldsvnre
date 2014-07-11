@@ -92,6 +92,7 @@ namespace physics
 
 namespace game
 {
+    extern void start();
     extern bool clientoption(char *arg);
     extern void preload();
     extern void updateworld();

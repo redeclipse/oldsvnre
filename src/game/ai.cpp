@@ -228,7 +228,6 @@ namespace ai
         }
 
         if((d->actortype = at) >= A_ENEMY) d->type = ENT_AI;
-
         d->setname(name);
         d->spawnpoint = et;
         d->ownernum = on;
@@ -238,8 +237,10 @@ namespace ai
         d->model = md;
         d->setvanity(vn);
 
+        // copy owner's info
         copystring(d->hostname, o->hostname);
         copystring(d->hostip, o->hostip);
+        d->version.grab(o->version);
 
         if(resetthisguy) projs::remove(d);
         if(d->ownernum >= 0 && game::player1->clientnum == d->ownernum)

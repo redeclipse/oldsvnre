@@ -256,7 +256,7 @@ extern const char *sendmaptypes[SENDMAP_MAX];
 // network messages codes, c2s, c2c, s2c
 enum
 {
-    N_CONNECT = 0, N_SERVERINIT, N_WELCOME, N_CLIENTINIT, N_POS, N_SPHY, N_TEXT, N_COMMAND, N_ANNOUNCE, N_DISCONNECT,
+    N_CONNECT = 0, N_SERVERINIT, N_WELCOME, N_CLIENTINIT, N_CLIENTSETUP, N_POS, N_SPHY, N_TEXT, N_COMMAND, N_ANNOUNCE, N_DISCONNECT,
     N_SHOOT, N_DESTROY, N_STICKY, N_SUICIDE, N_DIED, N_POINTS, N_DAMAGE, N_SHOTFX,
     N_LOADW, N_TRYSPAWN, N_SPAWNSTATE, N_SPAWN, N_DROP, N_WSELECT,
     N_MAPCHANGE, N_MAPVOTE, N_CLEARVOTE, N_CHECKPOINT, N_ITEMSPAWN, N_ITEMUSE, N_TRIGGER, N_EXECLINK,
@@ -281,7 +281,7 @@ char msgsizelookup(int msg)
 {
     static const int msgsizes[] =               // size inclusive message token, 0 for variable or not-checked sizes
     {
-        N_CONNECT, 0, N_SERVERINIT, 5, N_WELCOME, 1, N_CLIENTINIT, 0, N_POS, 0, N_SPHY, 0, N_TEXT, 0, N_COMMAND, 0,
+        N_CONNECT, 0, N_SERVERINIT, 5, N_WELCOME, 1, N_CLIENTINIT, 0, N_CLIENTSETUP, 0, N_POS, 0, N_SPHY, 0, N_TEXT, 0, N_COMMAND, 0,
         N_ANNOUNCE, 0, N_DISCONNECT, 3,
         N_SHOOT, 0, N_DESTROY, 0, N_STICKY, 0, N_SUICIDE, 4, N_DIED, 0, N_POINTS, 4, N_DAMAGE, 14, N_SHOTFX, 0,
         N_LOADW, 0, N_TRYSPAWN, 2, N_SPAWNSTATE, 0, N_SPAWN, 0,
@@ -444,6 +444,86 @@ static inline void modecheck(int &mode, int &muts, int trying = 0)
     }
 }
 
+struct verinfo
+{
+    int type, flag, version;
+    int major, minor, patch, game, platform, arch, gpuglver, gpuglslver;
+    uint crc;
+    char *gpuvendor, *gpurenderer, *gpuversion;
+
+    verinfo() : gpuvendor(NULL), gpurenderer(NULL), gpuversion(NULL) { reset(); }
+    ~verinfo() { reset(); }
+
+    void reset()
+    {
+        if(gpuvendor) delete[] gpuvendor;
+        if(gpurenderer) delete[] gpurenderer;
+        if(gpuversion) delete[] gpuversion;
+        gpuvendor = gpurenderer = gpuversion = NULL;
+        type = flag = version = 0;
+        major = minor = patch = game = arch = gpuglver = gpuglslver = 0;
+        platform = -1;
+        crc = 0;
+    }
+
+    template <class T>
+    void get(T &p)
+    {
+        string text = "";
+        major = getint(p);
+        minor = getint(p);
+        patch = getint(p);
+        game = getint(p);
+        platform = getint(p);
+        arch = getint(p);
+        gpuglver = getint(p);
+        gpuglslver = getint(p);
+        crc = uint(getint(p));
+        if(gpuvendor) delete[] gpuvendor;
+        getstring(text, p); gpuvendor = newstring(text);
+        if(gpurenderer) delete[] gpurenderer;
+        getstring(text, p); gpurenderer = newstring(text);
+        if(gpuversion) delete[] gpuversion;
+        getstring(text, p); gpuversion = newstring(text);
+    }
+
+    template <class T>
+    void put(T &p)
+    {
+        putint(p, major);
+        putint(p, minor);
+        putint(p, patch);
+        putint(p, game);
+        putint(p, platform);
+        putint(p, arch);
+        putint(p, gpuglver);
+        putint(p, gpuglslver);
+        putint(p, crc);
+        sendstring(gpuvendor, p);
+        sendstring(gpurenderer, p);
+        sendstring(gpuversion, p);
+    }
+
+    void grab(verinfo &v)
+    {
+        major = v.major;
+        minor = v.minor;
+        patch = v.patch;
+        game = v.game;
+        platform = v.platform;
+        arch = v.arch;
+        gpuglver = v.gpuglver;
+        gpuglslver = v.gpuglslver;
+        crc = v.crc;
+        if(gpuvendor) delete[] gpuvendor;
+        gpuvendor = newstring(v.gpuvendor);
+        if(gpurenderer) delete[] gpurenderer;
+        gpurenderer = newstring(v.gpurenderer);
+        if(gpuversion) delete[] gpuversion;
+        gpuversion = newstring(v.gpuversion);
+    }
+};
+
 // inherited by gameent and server clients
 struct gamestate
 {
@@ -454,6 +534,8 @@ struct gamestate
     bool quarantine;
     string vanity;
     vector<int> loadweap, lastweap;
+    verinfo version;
+
     gamestate() : colour(0), model(0), weapselect(W_MELEE), lastdeath(0), lastspawn(0), lastrespawn(0), lastpain(0), lastregen(0), lastbuff(0),
         actortype(A_PLAYER), spawnpoint(-1), ownernum(-1), skill(0), points(0), frags(0), deaths(0), cpmillis(0), cptime(0), quarantine(false)
     {
@@ -892,7 +974,7 @@ struct gameent : dynent, gamestate
     static bool is(int t) { return t == ENT_PLAYER || t == ENT_AI; }
     static bool is(physent *d) { return d->type == ENT_PLAYER || d->type == ENT_AI; }
 
-    void setparams(bool reset, int gamemode, int mutators)
+    void setparams(bool reset)
     {
         int type = clamp(actortype, 0, int(A_MAX-1));
         if(type >= A_ENEMY)
@@ -915,16 +997,16 @@ struct gameent : dynent, gamestate
         aboveeye = curscale;
     }
 
-    void setscale(float scale, int millis, bool reset, int gamemode, int mutators)
+    void setscale(float scale, int millis, bool reset)
     {
         if(scale != curscale)
         {
             if(state == CS_ALIVE && millis > 0)
                 curscale = scale > curscale ? min(curscale+millis/2000.f, scale) : max(curscale-millis/2000.f, scale);
             else curscale = scale;
-            setparams(reset, gamemode, mutators);
+            setparams(reset);
         }
-        else if(reset) setparams(reset, gamemode, mutators);
+        else if(reset) setparams(reset);
     }
 
     int getprojid()
@@ -961,13 +1043,13 @@ struct gameent : dynent, gamestate
 
     void clearstate(int gamemode, int mutators)
     {
-        for(int i = (m_trial(gamemode) && m_gsp2(gamemode, mutators) ? 1 : 0); i < IM_MAX; ++i) impulse[i] = 0;
+        loopi(IM_MAX) impulse[i] = 0;
         cplast = lasthit = lastkill = quake = turnmillis = turnside = spree = 0;
         turnroll = turnyaw = 0;
         lastteamhit = lastflag = respawned = suicided = lastnode = lastfoot = -1;
         obit[0] = 0;
         obliterated = headless = false;
-        setscale(1, 0, true, gamemode, mutators);
+        setscale(1, 0, true);
         icons.shrink(0);
         stuns.shrink(0);
         used.shrink(0);

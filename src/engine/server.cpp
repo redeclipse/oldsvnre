@@ -22,8 +22,8 @@ SVAR(0, versionname, "");
 SVAR(0, versionuname, "");
 SVAR(0, versionrelease, "");
 SVAR(0, versionurl, "");
-SVAR(IDF_READONLY, versionplatname, platnames[CUR_PLATFORM]);
-SVAR(IDF_READONLY, versionplatlongname, platlongnames[CUR_PLATFORM]);
+SVAR(IDF_READONLY, versionplatname, plat_name(CUR_PLATFORM));
+SVAR(IDF_READONLY, versionplatlongname, plat_longname(CUR_PLATFORM));
 VAR(IDF_READONLY, versionplatform, 0, CUR_PLATFORM, VAR_MAX);
 VAR(IDF_READONLY, versionarch, 0, CUR_ARCH, VAR_MAX);
 #ifdef STANDALONE
@@ -32,25 +32,6 @@ VAR(IDF_READONLY, versionstandalone, 0, 1, 1);
 VAR(IDF_READONLY, versionstandalone, 0, 0, 1);
 #endif
 uint versioncrc = 0;
-
-vector<verinfo> versions;
-void addverinfo(int type, int flag, int game, int platform, int arch, uint crc, const char *name)
-{
-    if(type < 0 || type >= verinfo::NUM || game <= 0 || !sup_platform(platform) || !sup_arch(arch)) return;
-    verinfo &v = versions.add();
-    v.type = type;
-    v.flag = flag;
-#ifdef STANDALONE
-    v.version = nextcontrolversion();
-#endif
-    v.game = game;
-    v.platform = platform;
-    v.arch = arch;
-    v.crc = crc;
-    if(name && *name) v.name = newstring(name);
-    //conoutf("added version: %d %s %d 0x%x %s", v.game, platnames[v.platform], v.arch, v.crc, v.name ? v.name : "untitled");
-}
-ICOMMAND(0, addversion, "iiiiis", (int *type, int *game, int *platform, int *arch, int *crc, char *name), addverinfo(*type, verinfo::LOCAL, *game, *platform, *arch, uint(*crc), name));
 
 VAR(0, rehashing, 1, 0, -1);
 
@@ -424,7 +405,6 @@ void cleanupserver()
 void reloadserver()
 {
     loopvrev(control) if(control[i].flag == ipinfo::LOCAL) control.remove(i);
-    loopvrev(versions) if(versions[i].flag == ipinfo::LOCAL) control.remove(i);
     server::reload();
 }
 
@@ -1212,7 +1192,7 @@ static void setupwindow(const char *title)
     atexit(cleanupwindow);
 
     if(!setupsystemtray(WM_APP)) fatal("failed adding to system tray");
-    conoutf("identity: v%s-%s %d bit %s (%s) [0x%x]", versionstring, versionplatname, versionarch, versionstandalone ? "server" : "client", versionrelease, versioncrc);
+    conoutf("identity: v%s-%s%d %s (%s) [0x%x]", versionstring, versionplatname, versionarch, versionstandalone ? "server" : "client", versionrelease, versioncrc);
 }
 
 static char *parsecommandline(const char *src, vector<char *> &args)
@@ -1408,8 +1388,11 @@ void setupserver()
 
 void initgame()
 {
-    conoutf("identity: v%s-%s %d bit %s (%s) [0x%x]", versionstring, versionplatname, versionarch, versionstandalone ? "server" : "client", versionrelease, versioncrc);
+    conoutf("identity: v%s-%s%d %s (%s) [0x%x]", versionstring, versionplatname, versionarch, versionstandalone ? "server" : "client", versionrelease, versioncrc);
     server::start();
+#ifndef STANDALONE
+    game::start();
+#endif
     loopv(gameargs)
     {
 #ifndef STANDALONE

@@ -318,10 +318,9 @@ namespace server
     struct clientinfo
     {
         servstate state;
-        verinfo version;
         string name, handle, mapvote, authname, clientmap;
         int clientnum, connectmillis, sessionid, overflow, ping, team, lastteam, lastplayerinfo,
-            modevote, mutsvote, lastvote, privilege, gameoffset, lastevent, wslen, mapcrc, swapteam, purity;
+            modevote, mutsvote, lastvote, privilege, gameoffset, lastevent, wslen, mapcrc, swapteam;
         bool connected, ready, local, timesync, online, wantsmap, failedmap, connectauth, warned, kicked;
         vector<gameevent *> events;
         vector<uchar> position, messages;
@@ -363,7 +362,7 @@ namespace server
 
         void reset()
         {
-            ping = lastplayerinfo = purity = 0;
+            ping = lastplayerinfo = 0;
             name[0] = handle[0] = 0;
             privilege = PRIV_NONE;
             connected = ready = local = online = wantsmap = failedmap = connectauth = kicked = false;
@@ -373,7 +372,6 @@ namespace server
             needclipboard = 0;
             cleanclipboard();
             mapchange(false);
-            version.reset();
         }
 
         int getmillis(int millis, int id)
@@ -3289,6 +3287,11 @@ namespace server
         }
         else
         {
+            putint(p, N_CLIENTSETUP);
+            sendstring(gethostname(ci->clientnum), p);
+            sendstring(gethostip(ci->clientnum), p);
+            ci->state.version.put(p);
+
             putint(p, N_CLIENTINIT);
             putint(p, ci->clientnum);
             putint(p, ci->state.colour);
@@ -3296,10 +3299,8 @@ namespace server
             putint(p, ci->team);
             putint(p, ci->privilege);
             sendstring(ci->name, p);
-            sendstring(gethostname(ci->clientnum), p);
-            sendstring(gethostip(ci->clientnum), p);
-            sendstring(ci->handle, p);
             sendstring(ci->state.vanity, p);
+            sendstring(ci->handle, p);
         }
     }
 
@@ -4596,7 +4597,7 @@ namespace server
         }
 
         uchar operator[](int msg) const { return msg >= 0 && msg < NUMMSG ? msgmask[msg] : 0; }
-    } msgfilter(-1, N_CONNECT, N_SERVERINIT, N_CLIENTINIT, N_WELCOME, N_NEWGAME, N_MAPCHANGE, N_SERVMSG, N_DAMAGE, N_SHOTFX, N_DIED, N_POINTS, N_SPAWNSTATE, N_ITEMACC, N_ITEMSPAWN, N_TICK, N_DISCONNECT, N_CURRENTPRIV, N_PONG, N_RESUME, N_SCOREAFFIN, N_SCORE, N_ANNOUNCE, N_SENDDEMOLIST, N_SENDDEMO, N_DEMOPLAYBACK, N_REGEN, N_CLIENT, N_AUTHCHAL, -2, N_REMIP, N_NEWMAP, N_CLIPBOARD, -3, N_EDITENT, N_EDITLINK, N_EDITVAR, N_EDITF, N_EDITT, N_EDITM, N_FLIP, N_COPY, N_PASTE, N_ROTATE, N_REPLACE, N_DELCUBE, -4, N_POS, N_SPAWN, N_DESTROY, NUMMSG),
+    } msgfilter(-1, N_CONNECT, N_SERVERINIT, N_CLIENTINIT, N_CLIENTSETUP, N_WELCOME, N_NEWGAME, N_MAPCHANGE, N_SERVMSG, N_DAMAGE, N_SHOTFX, N_DIED, N_POINTS, N_SPAWNSTATE, N_ITEMACC, N_ITEMSPAWN, N_TICK, N_DISCONNECT, N_CURRENTPRIV, N_PONG, N_RESUME, N_SCOREAFFIN, N_SCORE, N_ANNOUNCE, N_SENDDEMOLIST, N_SENDDEMO, N_DEMOPLAYBACK, N_REGEN, N_CLIENT, N_AUTHCHAL, -2, N_REMIP, N_NEWMAP, N_CLIPBOARD, -3, N_EDITENT, N_EDITLINK, N_EDITVAR, N_EDITF, N_EDITT, N_EDITM, N_FLIP, N_COPY, N_PASTE, N_ROTATE, N_REPLACE, N_DELCUBE, -4, N_POS, N_SPAWN, N_DESTROY, NUMMSG),
       connectfilter(-1, N_CONNECT, -2, N_AUTHANS, -3, N_PING, NUMMSG);
 
     int checktype(int type, clientinfo *ci)
@@ -4823,34 +4824,16 @@ namespace server
         int amt = numclients();
         if(ci->privilege > PRIV_NONE)
         {
-            if(ci->handle[0]) relayf(2, "\fg%s (%s) has joined the game (\fs\fy%s\fS: \fs\fc%s\fS) (%d %s)", colourname(ci), gethostname(ci->clientnum), privname(ci->privilege), ci->handle, amt, amt != 1 ? "players" : "player");
-            else relayf(2, "\fg%s (%s) has joined the game (\fs\fylocal %s\fS) (%d %s)", colourname(ci), gethostname(ci->clientnum), privname(ci->privilege), amt, amt != 1 ? "players" : "player");
+            if(ci->handle[0]) relayf(2, "\fg%s (%s) has joined the game (\fs\fy%s\fS: \fs\fc%s\fS) [%d.%d.%d-%s%d, %s] (%d %s)", colourname(ci), gethostname(ci->clientnum), privname(ci->privilege), ci->handle, ci->state.version.major, ci->state.version.minor, ci->state.version.patch, plat_name(ci->state.version.platform), ci->state.version.arch, ci->state.version.gpurenderer, amt, amt != 1 ? "players" : "player");
+            else relayf(2, "\fg%s (%s) has joined the game (\fs\fylocal %s\fS) [%d.%d.%d-%s%d, %s] (%d %s)", colourname(ci), gethostname(ci->clientnum), privname(ci->privilege), ci->state.version.major, ci->state.version.minor, ci->state.version.patch, plat_name(ci->state.version.platform), ci->state.version.arch, ci->state.version.gpurenderer, amt, amt != 1 ? "players" : "player");
         }
-        else relayf(2, "\fg%s (%s) has joined the game (%d %s)", colourname(ci), gethostname(ci->clientnum), amt, amt != 1 ? "players" : "player");
+        else relayf(2, "\fg%s (%s) has joined the game [%d.%d.%d-%s%d, %s] (%d %s)", colourname(ci), gethostname(ci->clientnum), ci->state.version.major, ci->state.version.minor, ci->state.version.patch, plat_name(ci->state.version.platform), ci->state.version.arch, ci->state.version.gpurenderer, amt, amt != 1 ? "players" : "player");
 
         if(m_demo(gamemode)) setupdemoplayback();
         else if(m_edit(gamemode))
         {
             ci->ready = true;
             aiman::poke();
-        }
-        else if(m_fight(gamemode) && G(serverpure)) switch(ci->purity)
-        {
-            case 2:
-            {
-                int ver = -1;
-                loopv(versions) if(versions[i].type == verinfo::CLIENT)
-                {
-                    verinfo &v = versions[i];
-                    if(v.game != ci->version.game || v.platform != ci->version.platform || v.arch != ci->version.arch || v.crc != ci->version.crc) continue;
-                    ver = i;
-                    break; // we have a match
-                }
-                srvoutf(-3, "\fy%s is using an official build (%s)", colourname(ci), versions.inrange(ver) && versions[ver].name ? versions[ver].name : "unknown");
-                break;
-            }
-            case 1: srvoutf(-3, "\fy%s is using an unofficial build for an unrestricted version", colourname(ci)); break;
-            default: case 0: srvoutf(-3, "\fy%s is using an unofficial build", colourname(ci)); break;
         }
     }
 
@@ -4879,33 +4862,13 @@ namespace server
                     getstring(text, p);
                     ci->state.setvanity(text);
 
-                    string password = "", authname = "";
+                    string password = "";
                     getstring(text, p); copystring(password, text);
-                    getstring(text, p); copystring(authname, text);
+                    getstring(text, p); filtertext(ci->authname, text, true, true, true, 100);
 
-                    ci->version.type = verinfo::CLIENT;
-                    ci->version.flag = verinfo::LOCAL;
-                    ci->version.game = getint(p);
-                    ci->version.platform = getint(p);
-                    ci->version.arch = getint(p);
-                    ci->version.crc = uint(getint(p));
-                    ci->purity = 0;
-                    if(sup_platform(ci->version.platform) && sup_arch(ci->version.arch))
-                    {
-                        bool fp = false;
-                        loopv(versions) if(versions[i].type == verinfo::CLIENT)
-                        {
-                            verinfo &v = versions[i];
-                            if(v.game != ci->version.game || v.platform != ci->version.platform || v.arch != ci->version.arch) continue;
-                            fp = true; // definition exists for this platform
-                            if(v.crc != ci->version.crc) continue;
-                            ci->purity = 2;
-                            break; // we have a match
-                        }
-                        if(!fp) ci->purity = 1; // it is "valid" but no specific matches
-                    }
+                    ci->state.version.get(p);
 
-                    int disc = auth::allowconnect(ci, true, password, authname);
+                    int disc = auth::allowconnect(ci, password);
                     if(disc)
                     {
                         disconnect_client(sender, disc);
@@ -6218,7 +6181,8 @@ namespace server
                 case N_AUTHTRY:
                 {
                     getstring(text, p);
-                    auth::tryauth(ci, text);
+                    filtertext(ci->authname, text, true, true, true, 100);
+                    if(!auth::tryauth(ci)) ci->authname[0] = 0;
                     break;
                 }
 
