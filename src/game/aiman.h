@@ -389,14 +389,15 @@ namespace aiman
                 }
                 if(dorefresh)
                 {
-                    dorefresh -= curtime;
+                    if(dorefresh > 0) dorefresh -= curtime;
                     if(dorefresh <= 0)
                     {
-                        bool allow = true;
-                        if(smode) if(!smode->aibalance()) allow = false;
-                        if(allow) mutate(smuts, if(!mut->aibalance()) { allow = false; break; });
-                        dorefresh = allow ? 0 : 1;
-                        if(allow) checksetup();
+                        if(canbalancenow())
+                        {
+                            dorefresh = 0;
+                            checksetup();
+                        }
+                        else dorefresh = -1;
                     }
                 }
                 checkenemies();

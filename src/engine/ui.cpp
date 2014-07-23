@@ -195,7 +195,7 @@ struct gui : guient
                         if(!i) ty += vth;
                     }
                     glEnd();
-                    drawn =true;
+                    drawn = true;
                 }
                 if(drawn) break; // otherwise fallback
             }

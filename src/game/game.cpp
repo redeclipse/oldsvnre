@@ -994,12 +994,12 @@ namespace game
 
     float rescale(gameent *d)
     {
-        float total = actorscale;
-        if(d->actortype > A_PLAYER)
+        float total = d->actortype != A_PLAYER ? (d->actortype >= A_ENEMY ? enemyscale : botscale) : PLAYER(d->model, scale);
+        if(d->actortype >= A_ENEMY)
         {
-            bool hasent = d->actortype >= A_ENEMY && entities::ents.inrange(d->spawnpoint) && entities::ents[d->spawnpoint]->type == ACTOR;
-            if(hasent && entities::ents[d->spawnpoint]->attrs[9] > 0) total *= (entities::ents[d->spawnpoint]->attrs[9]/100.f)*enemyscale;
-            else total *= actor[clamp(d->actortype, int(A_PLAYER), int(A_MAX-1))].scale*(d->actortype >= A_ENEMY ? enemyscale : botscale);
+            bool hasent = entities::ents.inrange(d->spawnpoint) && entities::ents[d->spawnpoint]->type == ACTOR;
+            if(hasent && entities::ents[d->spawnpoint]->attrs[9] > 0) total *= (entities::ents[d->spawnpoint]->attrs[9]/100.f);
+            else total *= actor[clamp(d->actortype, int(A_PLAYER), int(A_MAX-1))].scale;
         }
         if(d->state != CS_SPECTATOR && d->state != CS_EDITING)
         {
@@ -2158,7 +2158,7 @@ namespace game
             d->suicided = lastmillis;
         }
     }
-    ICOMMAND(0, kill, "",  (), { suicide(player1, 0); });
+    ICOMMAND(0, suicide, "",  (), { suicide(player1, 0); });
 
     vec rescolour(dynent *d, int c)
     {

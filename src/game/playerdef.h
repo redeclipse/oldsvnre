@@ -1,60 +1,58 @@
 #ifdef GAMESERVER
     #define PPVAR(flags, name, mn, mx, w00) \
-        GVAR(flags, actor##name, mn, w00, mx); \
-        int *sv_actor_stat_##name[] = { \
-            &sv_actor##name, \
-            &sv_actor##name \
+        GVAR(flags, player##name, mn, w00, mx); \
+        int *sv_player_stat_##name[] = { \
+            &sv_player##name, \
+            &sv_player##name \
         };
 
     #define PPFVAR(flags, name, mn, mx, w00) \
-        GFVAR(flags, actor##name, mn, w00, mx); \
-        float *sv_actor_stat_##name[] = { \
-            &sv_actor##name, \
-            &sv_actor##name \
+        GFVAR(flags, player##name, mn, w00, mx); \
+        float *sv_player_stat_##name[] = { \
+            &sv_player##name, \
+            &sv_player##name \
         };
 
     #define PPSVAR(flags, name, w00) \
-        GSVAR(flags, actor##name, w00); \
-        char **sv_actor_stat_##name[] = { \
-            &sv_actor##name, \
-            &sv_actor##name \
+        GSVAR(flags, player##name, w00); \
+        char **sv_player_stat_##name[] = { \
+            &sv_player##name, \
+            &sv_player##name \
         };
 
-    #define PLAYER(t,name)         (*sv_actor_stat_##name[t])
-    #define PLAYERSTR(a,t,attr)    defformatstring(a)("sv_%s%s", playertypes[t][4], #attr)
+    #define PLAYER(t,name)         (*sv_player_stat_##name[t])
 #else
 #ifdef GAMEWORLD
     #define PPVAR(flags, name, mn, mx, w00) \
-        GVAR(flags, actor##name, mn, w00, mx); \
-        int *actor_stat_##name[] = { \
-            &actor##name, \
-            &actor##name \
+        GVAR(flags, player##name, mn, w00, mx); \
+        int *player_stat_##name[] = { \
+            &player##name, \
+            &player##name \
         };
 
     #define PPFVAR(flags, name, mn, mx, w00) \
-        GFVAR(flags, actor##name, mn, w00, mx); \
-        float *actor_stat_##name[] = { \
-            &actor##name, \
-            &actor##name \
+        GFVAR(flags, player##name, mn, w00, mx); \
+        float *player_stat_##name[] = { \
+            &player##name, \
+            &player##name \
         };
 
     #define PPSVAR(flags, name, w00) \
-        GSVAR(flags, actor##name, w00); \
-        char **actor_stat_##name[] = { \
-            &actor##name, \
-            &actor##name \
+        GSVAR(flags, player##name, w00); \
+        char **player_stat_##name[] = { \
+            &player##name, \
+            &player##name \
         };
 #else
     #define PPVAR(flags, name, mn, mx, w00) \
-        GVAR(flags, actor##name, mn, w00, mx); \
-        extern int *actor_stat_##name[];
+        GVAR(flags, player##name, mn, w00, mx); \
+        extern int *player_stat_##name[];
     #define PPFVAR(flags, name, mn, mx, w00) \
-        GFVAR(flags, actor##name, mn, w00, mx); \
-        extern float *actor_stat_##name[];
+        GFVAR(flags, player##name, mn, w00, mx); \
+        extern float *player_stat_##name[];
     #define PPSVAR(flags, name, w00) \
-        GSVAR(flags, actor##name, w00); \
-        extern char **actor_stat_##name[];
+        GSVAR(flags, player##name, w00); \
+        extern char **player_stat_##name[];
 #endif
-    #define PLAYER(t,name)         (*actor_stat_##name[t])
-    #define PLAYERSTR(a,t,attr)    defformatstring(a)("%s%s", playertypes[t][4], #attr)
+    #define PLAYER(t,name)         (*player_stat_##name[t])
 #endif

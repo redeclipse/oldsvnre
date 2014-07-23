@@ -587,7 +587,7 @@ namespace client
     {
         return mdl >= 0 ? playertypes[mdl%PLAYERTYPES][clamp(idx, 0, 5)] : "";
     }
-    ICOMMAND(0, getmodelname, "iiN", (int *mdl, int *idx, int *numargs), result(getmodelname(*mdl, *numargs >= 2 ? *idx : 4)));
+    ICOMMAND(0, getmodelname, "iiN", (int *mdl, int *idx, int *numargs), result(getmodelname(*mdl, *numargs >= 2 ? *idx : 5)));
 
     const char *getclientvanity(int cn)
     {

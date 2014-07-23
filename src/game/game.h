@@ -651,8 +651,11 @@ struct gamestate
     {
         if(isweap(weap))
         {
-            lastweap.add(weapselect);
-            setweapstate(weapselect, W_S_SWITCH, delay, millis);
+            if(isweap(weapselect))
+            {
+                lastweap.add(weapselect);
+                setweapstate(weapselect, W_S_SWITCH, delay, millis);
+            }
             weapselect = weap;
             setweapstate(weap, state, delay, millis);
         }
@@ -661,7 +664,7 @@ struct gamestate
     bool weapwaited(int weap, int millis, int skip = 0)
     {
         if(weap != weapselect) skip &= ~(1<<W_S_RELOAD);
-        if(!weapwait[weap] || weapstate[weap] == W_S_IDLE || weapstate[weap] == W_S_POWER || weapstate[weap] == W_S_ZOOM || (skip && skip&(1<<weapstate[weap]))) return true;
+        if(!weapwait[weap] || W_S_EXCLUDE&(1<<weapstate[weap]) || (skip && skip&(1<<weapstate[weap]))) return true;
         return millis-weaplast[weap] >= weapwait[weap];
     }
 
