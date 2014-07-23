@@ -95,43 +95,45 @@ namespace weapons
     {
         if(game::intermission || a < -1 || b < -1 || a >= W_MAX || b >= W_MAX) return;
         if(weapselectdelay && lastweapselect && totalmillis-lastweapselect < weapselectdelay) return;
-        if(!d->weapwaited(d->weapselect, lastmillis, G(weaponinterrupts))) return;
-        int s = slot(d, d->weapselect);
-        loopi(W_MAX) // only loop the amount of times we have weaps for
+        if(d->weapwaited(d->weapselect, lastmillis, G(weaponinterrupts)))
         {
-            if(a >= 0) s = a;
-            else s += b;
-            while(s > W_MAX-1) s -= W_MAX;
-            while(s < 0) s += W_MAX;
-
-            int n = slot(d, s, true);
-            if(a < 0)
-            { // weapon skipping when scrolling
-                int p = m_weapon(game::gamemode, game::mutators);
-                #define skipweap(q,w) \
-                { \
-                    if(q && n == w && (d->actortype >= A_ENEMY || w != W_MELEE || p == W_MELEE || d->weapselect == W_MELEE)) switch(q) \
-                    { \
-                        case 10: continue; break; \
-                        case 7: case 8: case 9: if(d->carry(p, 5, w) > (q-7)) continue; break; \
-                        case 4: case 5: case 6: if(d->carry(p, 1, w) > (q-3)) continue; break; \
-                        case 1: case 2: case 3: if(d->carry(p, 0, w) > q) continue; break; \
-                        case 0: default: break; \
-                    } \
-                }
-                skipweap(skipspawnweapon, p);
-                skipweap(skipmelee, W_MELEE);
-                skipweap(skippistol, W_PISTOL);
-                skipweap(skipgrenade, W_GRENADE);
-                skipweap(skipmine, W_MINE);
-            }
-
-            if(weapselect(d, n, G(weaponinterrupts)))
+            int s = slot(d, d->weapselect);
+            loopi(W_MAX) // only loop the amount of times we have weaps for
             {
-                lastweapselect = totalmillis;
-                return;
+                if(a >= 0) s = a;
+                else s += b;
+                while(s > W_MAX-1) s -= W_MAX;
+                while(s < 0) s += W_MAX;
+
+                int n = slot(d, s, true);
+                if(a < 0)
+                { // weapon skipping when scrolling
+                    int p = m_weapon(game::gamemode, game::mutators);
+                    #define skipweap(q,w) \
+                    { \
+                        if(q && n == w && (d->actortype >= A_ENEMY || w != W_MELEE || p == W_MELEE || d->weapselect == W_MELEE)) switch(q) \
+                        { \
+                            case 10: continue; break; \
+                            case 7: case 8: case 9: if(d->carry(p, 5, w) > (q-7)) continue; break; \
+                            case 4: case 5: case 6: if(d->carry(p, 1, w) > (q-3)) continue; break; \
+                            case 1: case 2: case 3: if(d->carry(p, 0, w) > q) continue; break; \
+                            case 0: default: break; \
+                        } \
+                    }
+                    skipweap(skipspawnweapon, p);
+                    skipweap(skipmelee, W_MELEE);
+                    skipweap(skippistol, W_PISTOL);
+                    skipweap(skipgrenade, W_GRENADE);
+                    skipweap(skipmine, W_MINE);
+                }
+
+                if(weapselect(d, n, G(weaponinterrupts)))
+                {
+                    lastweapselect = totalmillis;
+                    return;
+                }
+                else if(a >= 0) break;
             }
-            else if(a >= 0) break;
         }
         game::errorsnd(d);
     }

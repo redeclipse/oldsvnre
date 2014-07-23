@@ -95,8 +95,8 @@ struct score
 #define PLAYERTYPES 2
 #ifdef GAMESERVER
 const char *playertypes[PLAYERTYPES][6] = {
-    { "actors/player/male/hwep",      "actors/player/male",     "actors/player/male/body",      "actors/player/male/headless",      "actor",   "male" },
-    { "actors/player/female/hwep",    "actors/player/female",   "actors/player/male/body",      "actors/player/female/headless",    "actor",   "female" }
+    { "actors/player/male/hwep",      "actors/player/male",     "actors/player/male/body",      "actors/player/male/headless",      "player",   "male" },
+    { "actors/player/female/hwep",    "actors/player/female",   "actors/player/male/body",      "actors/player/female/headless",    "player",   "female" }
 };
 float playerdims[PLAYERTYPES][3] = {
     { 3,      3,      14 },

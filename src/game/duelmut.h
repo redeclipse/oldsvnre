@@ -383,19 +383,7 @@ struct duelservmode : servmode
         }
     }
 
-    bool wantsovertime()
-    {
-        if(dueltime < 0 && duelround > 0) return true;
-        return false;
-    }
-
-    bool aibalance()
-    {
-        if(dueltime < 0 && duelround > 0) return false;
-        return true;
-    }
-
-    void reset(bool empty)
+    void reset()
     {
         dueltime = G(duelcooloff);
         duelround = duelwins = 0;
@@ -403,6 +391,23 @@ struct duelservmode : servmode
         duelcheck = dueldeath = -1;
         shrink();
         duelqueue.shrink(0);
+    }
+
+    bool wantsovertime()
+    {
+        if(dueltime < 0 && duelround > 0) return true;
+        return false;
+    }
+
+    bool canbalance()
+    {
+        if(dueltime < 0 && duelround > 0) return false;
+        return true;
+    }
+
+    void balance(int oldbalance)
+    {
+        reset();
     }
 } duelmutator;
 #endif

@@ -4,7 +4,7 @@ struct captureservmode : capturestate, servmode
 
     captureservmode() : hasflaginfo(false) {}
 
-    void reset(bool empty)
+    void reset()
     {
         capturestate::reset();
         hasflaginfo = false;

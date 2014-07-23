@@ -5,7 +5,7 @@ struct bomberservmode : bomberstate, servmode
 
     bomberservmode() : hasflaginfo(false), bombertime(-1) {}
 
-    void reset(bool empty)
+    void reset()
     {
         bomberstate::reset();
         hasflaginfo = false;

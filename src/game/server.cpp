@@ -455,7 +455,7 @@ namespace server
         virtual void changeteam(clientinfo *ci, int oldteam, int newteam) {}
         virtual void initclient(clientinfo *ci, packetbuf &p, bool connecting) {}
         virtual void update() {}
-        virtual void reset(bool empty) {}
+        virtual void reset() {}
         virtual void layout() {}
         virtual void balance(int oldbalance) {}
         virtual void intermission() {}
@@ -465,8 +465,7 @@ namespace server
         virtual void regen(clientinfo *ci, int &total, int &amt, int &delay) {}
         virtual void checkclient(clientinfo *ci) {}
         virtual void scoreaffinity(clientinfo *ci, bool win = true) {}
-
-        virtual bool aibalance() { return true; }
+        virtual bool canbalance() { return true; }
     };
 
     vector<srventity> sents;
@@ -755,13 +754,20 @@ namespace server
             if(G(maxalivequeue)) playing.removeobj(ci);
         }
 
-        void reset(bool empty)
+        void reset()
         {
             spawnq.shrink(0);
             playing.shrink(0);
         }
     } spawnmutator;
 
+    bool canbalancenow()
+    {
+        bool ret = true;
+        if(smode) if(!smode->canbalance()) ret = false;
+        if(ret) mutate(smuts, if(!mut->canbalance()) { ret = false; break; });
+        return ret;
+    }
 
     SVAR(0, serverpass, "");
     SVAR(0, adminpass, "");
@@ -1594,7 +1600,7 @@ namespace server
                         nextteambalance = gamemillis+G(teambalancedelay);
                         ancmsgft(-1, S_V_BALWARN, CON_EVENT, "\fy\fs\fzoyWARNING:\fS \fs\fcteams\fS will be \fs\fcbalanced\fS in \fs\fc%d\fS %s", secs, secs != 1 ? "seconds" : "second");
                     }
-                    else
+                    else if(canbalancenow())
                     {
                         int moved = 0;
                         loopi(nt) for(int team = i+T_FIRST, iters = tc[i].length(); iters > 0 && tc[i].length() > mid; iters--)
@@ -2761,8 +2767,8 @@ namespace server
         loopv(savedscores) savedscores[i].mapchange();
         setuptriggers(false);
         setupspawns(false);
-        if(smode) smode->reset(false);
-        mutate(smuts, mut->reset(false));
+        if(smode) smode->reset();
+        mutate(smuts, mut->reset());
         aiman::clearai();
         aiman::poke();
         mapcrc = 0;
@@ -2794,8 +2800,8 @@ namespace server
         smuts.add(&spawnmutator);
         if(m_duke(gamemode, mutators)) smuts.add(&duelmutator);
         if(m_vampire(gamemode, mutators)) smuts.add(&vampiremutator);
-        if(smode) smode->reset(false);
-        mutate(smuts, mut->reset(false));
+        if(smode) smode->reset();
+        mutate(smuts, mut->reset());
 
         if(m_local(gamemode)) kicknonlocalclients(DISC_PRIVATE);
 
@@ -3961,13 +3967,12 @@ namespace server
                 if(G(serverdebug)) srvmsgf(ci->clientnum, "sync error: shoot [%d] failed - current state disallows it", weap);
                 return;
             }
-            else if(gs.weapload[gs.weapselect] > 0)
+            if(gs.weapload[gs.weapselect] > 0)
             {
                 takeammo(ci, gs.weapselect, gs.weapload[gs.weapselect]);
                 gs.weapload[gs.weapselect] = -gs.weapload[gs.weapselect]; // the client should already do this for themself
                 sendf(-1, 1, "ri5x", N_RELOAD, ci->clientnum, gs.weapselect, gs.weapload[gs.weapselect], gs.ammo[gs.weapselect], ci->clientnum);
             }
-            else return;
         }
         takeammo(ci, weap, sub);
         gs.setweapstate(weap, WS(flags) ? W_S_SECONDARY : W_S_PRIMARY, W2(weap, attackdelay, WS(flags)), millis);
@@ -3992,21 +3997,20 @@ namespace server
             sendf(ci->clientnum, 1, "ri3", N_WSELECT, ci->clientnum, gs.weapselect);
             return;
         }
-        if(!gs.canswitch(weap, m_weapon(gamemode, mutators), millis, (1<<W_S_SWITCH)))
+        if(!gs.canswitch(weap, m_weapon(gamemode, mutators), millis))
         {
-            if(!gs.canswitch(weap, m_weapon(gamemode, mutators), millis, (1<<W_S_SWITCH)|(1<<W_S_RELOAD)))
+            if(!gs.canswitch(weap, m_weapon(gamemode, mutators), millis, G(weaponinterrupts)))
             {
                 if(G(serverdebug)) srvmsgf(ci->clientnum, "sync error: switch [%d] failed - current state disallows it", weap);
                 sendf(-1, 1, "ri3", N_WSELECT, ci->clientnum, gs.weapselect);
                 return;
             }
-            else if(gs.weapload[gs.weapselect] > 0)
+            if(gs.weapload[gs.weapselect] > 0)
             {
                 takeammo(ci, gs.weapselect, gs.weapload[gs.weapselect]);
                 gs.weapload[gs.weapselect] = -gs.weapload[gs.weapselect]; // the client should already do this for themself
                 sendf(-1, 1, "ri5x", N_RELOAD, ci->clientnum, gs.weapselect, gs.weapload[gs.weapselect], gs.ammo[gs.weapselect], ci->clientnum);
             }
-            else return;
         }
         gs.weapswitch(weap, millis, G(weaponswitchdelay));
         sendf(-1, 1, "ri3x", N_WSELECT, ci->clientnum, weap, ci->clientnum);
@@ -4021,19 +4025,18 @@ namespace server
             return;
         }
         int sweap = m_weapon(gamemode, mutators);
-        if(!gs.candrop(weap, sweap, millis, (1<<W_S_SWITCH)))
+        if(!gs.candrop(weap, sweap, millis))
         {
-            if(!gs.candrop(weap, sweap, millis, (1<<W_S_SWITCH)|(1<<W_S_RELOAD)))
+            if(!gs.candrop(weap, sweap, millis, G(weaponinterrupts)))
             {
                 if(G(serverdebug)) srvmsgf(ci->clientnum, "sync error: drop [%d] failed - current state disallows it", weap);
                 return;
             }
-            else if(gs.weapload[weap] > 0)
+            if(gs.weapload[weap] > 0)
             {
                 takeammo(ci, weap, gs.weapload[weap]);
                 gs.weapload[weap] = -gs.weapload[weap];
             }
-            else return;
         }
         int dropped = -1, ammo = -1, nweap = gs.bestweap(sweap, true); // switch to best weapon
         if(sents.inrange(gs.entid[weap]))
@@ -4082,20 +4085,19 @@ namespace server
             return;
         }
         int sweap = m_weapon(gamemode, mutators), attr = w_attr(gamemode, mutators, sents[ent].type, sents[ent].attrs[0], sweap);
-        if(!gs.canuse(sents[ent].type, attr, sents[ent].attrs, sweap, millis, (1<<W_S_SWITCH)))
+        if(!gs.canuse(sents[ent].type, attr, sents[ent].attrs, sweap, millis))
         {
-            if(!gs.canuse(sents[ent].type, attr, sents[ent].attrs, sweap, millis, (1<<W_S_SWITCH)|(1<<W_S_RELOAD)))
+            if(!gs.canuse(sents[ent].type, attr, sents[ent].attrs, sweap, millis, G(weaponinterrupts)))
             {
                 if(G(serverdebug)) srvmsgf(ci->clientnum, "sync error: use [%d] failed - current state disallows it", ent);
                 return;
             }
-            else if(gs.weapload[gs.weapselect] > 0)
+            if(gs.weapload[gs.weapselect] > 0)
             {
                 takeammo(ci, gs.weapselect, gs.weapload[gs.weapselect]);
                 gs.weapload[gs.weapselect] = -gs.weapload[gs.weapselect]; // the client should already do this for themself
                 sendf(-1, 1, "ri5x", N_RELOAD, ci->clientnum, gs.weapselect, gs.weapload[gs.weapselect], gs.ammo[gs.weapselect], ci->clientnum);
             }
-            else return;
         }
         int weap = -1, ammoamt = -1, dropped = -1, ammo = -1;
         if(m_classic(gamemode, mutators) && !gs.hasweap(attr, sweap) && w_carry(attr, sweap) && gs.carry(sweap) >= G(maxcarry)) weap = gs.drop(sweap);
@@ -4344,7 +4346,7 @@ namespace server
                                 total = ci->state.health;
                                 low = m_health(gamemode, mutators, ci->state.model);
                             }
-                            int rgn = ci->state.health, heal = clamp(ci->state.health+amt, low, total), eff = heal-rgn;
+                            int heal = clamp(ci->state.health+amt, low, total), eff = heal-ci->state.health;
                             if(eff)
                             {
                                 ci->state.health = heal;
@@ -6142,8 +6144,8 @@ namespace server
                         copystring(smapname, "maps/untitled");
                         sents.shrink(0);
                         hasgameinfo = true;
-                        if(smode) smode->reset(true);
-                        mutate(smuts, mut->reset(true));
+                        if(smode) smode->reset();
+                        mutate(smuts, mut->reset());
                     }
                     QUEUE_MSG;
                     break;

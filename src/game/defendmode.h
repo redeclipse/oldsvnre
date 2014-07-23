@@ -5,7 +5,7 @@ struct defendservmode : defendstate, servmode
 
     defendservmode() : scoresec(0), hasflaginfo(false) {}
 
-    void reset(bool empty)
+    void reset()
     {
         defendstate::reset();
         scoresec = 0;
