@@ -6027,6 +6027,7 @@ namespace server
                         if(p.overread()) break;
                         if(inrange && k < MAXENTATTRS) sents[n].attrs[k] = attr;
                     }
+                    if(!ci || ci->state.state==CS_SPECTATOR) break;
                     if(inrange)
                     {
                         if(oldtype == PLAYERSTART || sents[n].type == PLAYERSTART) setupspawns(true);
@@ -6252,7 +6253,11 @@ namespace server
                         return;
                     }
                     loopi(size-1) getint(p);
-                    if(ci) QUEUE_MSG;
+                    if(ci) switch(msgfilter[type])
+                    {
+                        case 2: case 3: if(ci->state.state != CS_SPECTATOR) QUEUE_MSG; break;
+                        default: QUEUE_MSG; break;
+                    }
                     break;
                 }
             }
