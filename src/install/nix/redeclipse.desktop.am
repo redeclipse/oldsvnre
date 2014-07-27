@@ -2,7 +2,7 @@
 Type=Application
 Version=1.0
 Name=Red Eclipse
-Name[de]=Roter Eklipse
+Name[de]=Rote Eklipse
 Name[es]=Eclipse Rojo
 Name[gl]=Eclipse Vermello
 Name[it]=Eclisse Rosso
@@ -14,7 +14,7 @@ GenericName[it]=Sparatutto in prima persona
 GenericName[pt]=Jogo de tiros em primeira pessoa
 GenericName[sv]=Förstapersonsskjutare
 Comment=First-person shooter with agile gameplay and built-in editor.
-Comment[de]=Ego-Shooter Spiel mit agilen Gameplay und integriertem Editor.
+Comment[de]=Ego-Shooter-Spiel mit agilem Gameplay und integriertem Editor.
 Comment[es]=Juego de tiros en primera persona con jugabilidad ágil y editor incorporado.
 Comment[gl]=Xogo de tiros en primeira persoa con xogo áxil e editor incorporado.
 Comment[it]=Sparatutto in prima persona con agile gameplay ed editor incorporato.
