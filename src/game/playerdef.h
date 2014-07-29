@@ -54,5 +54,5 @@
         GSVAR(flags, player##name, w00); \
         extern char **player_stat_##name[];
 #endif
-    #define PLAYER(t,name)         (*player_stat_##name[t])
+    #define PLAYER(t,name)         (*player_stat_##name[t%PLAYERTYPES])
 #endif

@@ -1057,12 +1057,7 @@ namespace projs
                 }
                 dir = vec(proj.yaw*RAD, proj.pitch*RAD);
             }
-            vec rel = vec(proj.vel).add(dir);
-            if(proj.relativity > 0)
-            {
-                if(proj.owner) loopi(3) if(proj.inertia[i]*rel[i] < 0) proj.inertia[i] = 0;
-                rel.add(proj.inertia.mul(proj.relativity));
-            }
+            vec rel = vec(proj.vel).add(dir).add(proj.inertia.mul(proj.relativity));
             proj.vel = vec(rel).add(vec(dir).mul(physics::movevelocity(&proj)));
         }
         if(proj.projtype != PRJ_SHOT) spherecheck(proj);

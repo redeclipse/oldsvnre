@@ -151,7 +151,7 @@ struct bomberservmode : bomberstate, servmode
         if(!canplay(hasflaginfo) || !flags.inrange(i) || ci->state.state!=CS_ALIVE || ci->state.actortype >= A_ENEMY) return;
         flag &f = flags[i];
         if(!isbomberaffinity(f) || f.owner >= 0 || !f.enabled) return;
-        if(f.lastowner == ci->clientnum && f.droptime && (G(bomberpickupdelay) < 0 || gamemillis-f.droptime <= max(G(bomberpickupdelay), 500))) return;
+        if(f.lastowner == ci->clientnum && f.droptime && gamemillis-f.droptime <= G(bomberpickupdelay)) return;
         if(m_gsp3(gamemode, mutators) && ci->team != T_OMEGA && G(bomberattackreset))
         {
             if(!f.droptime) return;
