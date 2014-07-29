@@ -579,7 +579,7 @@ namespace bomber
         }
         if(!f.droptime && m_gsp3(game::gamemode, game::mutators) && d->team != T_OMEGA && bomberattackreset) return;
         if(f.pickuptime && lastmillis-f.pickuptime <= 1000) return;
-        if(f.lastowner == d && f.droptime && (bomberpickupdelay < 0 || lastmillis-f.droptime <= max(bomberpickupdelay, 500))) return;
+        if(f.lastowner == d && f.droptime && lastmillis-f.droptime <= bomberpickupdelay) return;
         if(o.dist(f.pos()) <= enttype[AFFINITY].radius/2)
         {
             client::addmsg(N_TAKEAFFIN, "ri2", d->clientnum, i);

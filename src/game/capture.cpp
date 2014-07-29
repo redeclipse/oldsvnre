@@ -28,11 +28,18 @@ namespace capture
         capturestate::flag &f = st.flags[n];
         if(!entities::ents.inrange(f.ent) || f.owner) return false;
         if(f.pickuptime && lastmillis-f.pickuptime <= 1000) return false;
-        if(f.team == d->team && (m_gsp2(game::gamemode, game::mutators) || (!f.droptime && (m_gsp1(game::gamemode, game::mutators) || check || !d->action[AC_AFFINITY]))))
+        if(f.team == d->team)
+        {
+            if(m_gsp2(game::gamemode, game::mutators)) return false;
+            if(!f.droptime)
+            {
+                if(m_gsp1(game::gamemode, game::mutators)) return false;
+                if(!check && !d->action[AC_AFFINITY]) return false;
+            }
+        }
+        if(f.lastowner == d && f.droptime && lastmillis-f.droptime <= capturepickupdelay)
             return false;
-        if(f.lastowner == d && f.droptime && (capturepickupdelay < 0 || lastmillis-f.droptime <= max(capturepickupdelay, 500)))
-            return false;
-        if(d->feetpos().dist(f.pos()) > enttype[AFFINITY].radius*2/3) return false;
+        if((f.pos()).dist(d->feetpos()) > enttype[AFFINITY].radius*2/3) return false;
         return true;
     }
 
@@ -121,8 +128,8 @@ namespace capture
                     hasflags.add(i);
                     if(f.team == game::focus->team) ownflag = true;
                 }
-                else if(game::focus == game::player1 && canpickup(game::focus, i, true)) pickup.add(i);
-                else if(f.team == game::focus->team)
+                if(canpickup(game::focus, i, true)) pickup.add(i);
+                if(f.team == game::focus->team)
                 {
                     if(f.owner && f.owner->team != game::focus->team) taken.add(i);
                     else if(f.droptime) droppedflags.add(i);
@@ -130,9 +137,6 @@ namespace capture
             }
             if(!hasflags.empty())
             {
-                pushfont("emphasis");
-                char *str = buildflagstr(hasflags, hasflags.length() <= 3);
-                ty += draw_textx("Holding: \fs%s\fS", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, str)*hud::noticescale;
                 if(capturebuffing&(ownflag ? 8 : 32))
                 {
                     pushfont("reduced");
@@ -140,6 +144,9 @@ namespace capture
                     else ty += draw_textx("Buffing \fs\fyALL\fS team-mates", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1)*hud::noticescale;
                     popfont();
                 }
+                pushfont("emphasis");
+                char *str = buildflagstr(hasflags, hasflags.length() <= 3);
+                ty += draw_textx("Holding: \fs%s\fS", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, str)*hud::noticescale;
                 popfont();
             }
             if(!pickup.empty())
@@ -153,21 +160,23 @@ namespace capture
             {
                 SEARCHBINDCACHE(altkey)("affinity", 0, "\f{\fs\fzuy", "\fS}");
                 pushfont("reduced");
-                ty += draw_textx("Press %s to %s", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, altkey, !pickup.empty() ? "pick up" : "throw away")*hud::noticescale;
+                ty += draw_textx("Press %s to %s", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, altkey, !hasflags.empty() ? "drop" : "pick up")*hud::noticescale;
                 popfont();
             }
-            pushfont("default");
             if(!taken.empty())
             {
+                pushfont("default");
                 char *str = buildflagstr(taken, taken.length() <= 3);
                 ty += draw_textx("%s taken: \fs%s\fS", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, taken.length() == 1 ? "Flag" : "Flags", str)*hud::noticescale;
+                popfont();
             }
             if(!droppedflags.empty())
             {
+                pushfont("default");
                 char *str = buildflagstr(droppedflags, droppedflags.length() <= 3);
                 ty += draw_textx("%s dropped: \fs%s\fS", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, droppedflags.length() == 1 ? "Flag" : "Flags", str)*hud::noticescale;
+                popfont();
             }
-            popfont();
         }
     }
 
@@ -541,7 +550,7 @@ namespace capture
         loopv(st.flags)
         {
             capturestate::flag &f = st.flags[i];
-            if(!entities::ents.inrange(f.ent) || f.owner >= 0) continue;
+            if(!entities::ents.inrange(f.ent) || f.owner) continue;
             if(f.droptime)
             {
                 f.droploc = f.pos();

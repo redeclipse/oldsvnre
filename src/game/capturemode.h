@@ -72,7 +72,7 @@ struct captureservmode : capturestate, servmode
             loopvk(flags)
             {
                 flag &f = flags[k];
-                if(f.team == ci->team && (f.owner < 0 || (f.owner == ci->clientnum && i == k && gamemillis-f.taketime >= max(G(capturepickupdelay), 500))) && !f.droptime && (!f.nextreset || r.team != ci->team) && newpos.dist(f.spawnloc) <= enttype[AFFINITY].radius*2/3)
+                if(f.team == ci->team && (f.owner < 0 || (f.owner == ci->clientnum && i == k && gamemillis-f.taketime >= G(capturepickupdelay))) && !f.droptime && (!f.nextreset || r.team != ci->team) && newpos.dist(f.spawnloc) <= enttype[AFFINITY].radius*2/3)
                 {
                     capturestate::returnaffinity(i, gamemillis);
                     if(r.team != ci->team)
@@ -95,10 +95,10 @@ struct captureservmode : capturestate, servmode
 
     void takeaffinity(clientinfo *ci, int i)
     {
-        if(!canplay(hasflaginfo) || !flags.inrange(i) || ci->state.state!=CS_ALIVE || !ci->team || ci->state.actortype >= A_ENEMY) return;
+        if(!canplay(hasflaginfo) || !flags.inrange(i) || ci->state.state != CS_ALIVE || !ci->team || ci->state.actortype >= A_ENEMY) return;
         flag &f = flags[i];
         if(f.owner >= 0 || (f.team == ci->team && (f.nextreset || m_gsp2(gamemode, mutators) || (m_gsp1(gamemode, mutators) && !f.droptime)))) return;
-        if(f.lastowner == ci->clientnum && f.droptime && (G(capturepickupdelay) < 0 || gamemillis-f.droptime <= max(G(capturepickupdelay), 500))) return;
+        if(f.lastowner == ci->clientnum && f.droptime && gamemillis-f.droptime <= G(capturepickupdelay)) return;
         if(m_gsp1(gamemode, mutators) && f.team == ci->team)
         {
             capturestate::returnaffinity(i, gamemillis);

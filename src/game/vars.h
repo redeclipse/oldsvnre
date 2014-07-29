@@ -257,7 +257,7 @@ GVAR(0, capturelimit, 0, 0, VAR_MAX); // finish when score is this or more
 GVAR(0, captureresetdelay, 0, 30000, VAR_MAX);
 GVAR(0, capturedefenddelay, 0, 15000, VAR_MAX);
 GVAR(0, captureprotectdelay, 0, 15000, VAR_MAX);
-GVAR(0, capturepickupdelay, -1, 2500, VAR_MAX);
+GVAR(0, capturepickupdelay, 500, 2500, VAR_MAX);
 GVAR(0, captureteampenalty, -1, 7500, VAR_MAX);
 GVAR(0, captureresetpenalty, -1, 3500, VAR_MAX);
 GFVAR(0, capturecarryspeed, 0, 0.9f, FVAR_MAX);
@@ -267,10 +267,10 @@ GVAR(0, capturepickuppoints, 0, 3, VAR_MAX); // points added to score
 GVAR(0, capturecollide, 0, BOUNCE_GEOM, VAR_MAX);
 GVAR(0, captureextinguish, 0, 6, 7);
 GVAR(0, captureinteracts, 0, 3, 3);
-GFVAR(0, capturerelativity, 0, 0.125f, FVAR_MAX);
+GFVAR(0, capturerelativity, 0, 0, FVAR_MAX);
 GFVAR(0, captureelasticity, FVAR_MIN, 0.65f, FVAR_MAX);
 GFVAR(0, captureliquidcoast, FVAR_MIN, 1.75f, FVAR_MAX);
-GFVAR(0, captureweight, FVAR_MIN, 300, FVAR_MAX);
+GFVAR(0, captureweight, FVAR_MIN, 400, FVAR_MAX);
 GFVAR(0, capturespeedmin, 0, 0, FVAR_MAX);
 GFVAR(0, capturespeedmax, 0, 100, FVAR_MAX);
 GFVAR(0, capturerepulsion, 0, 16, FVAR_MAX);
@@ -309,7 +309,7 @@ GVAR(0, bomberattackreset, 0, 1, 1); // defenders reset rather than carry the ba
 GVAR(0, bomberattackwinner, 0, 1, 1); // declare the winner when the final team exceeds best score
 GFVAR(0, bomberbasketmindist, 0, 48, FVAR_MAX); // prohibit baskets less than this far away
 GVAR(0, bomberresetdelay, 0, 15000, VAR_MAX);
-GVAR(0, bomberpickupdelay, -1, 5000, VAR_MAX);
+GVAR(0, bomberpickupdelay, 500, 5000, VAR_MAX);
 GVAR(0, bombercarrytime, 0, 15000, VAR_MAX);
 GFVAR(0, bombercarryspeed, 0, 0.9f, FVAR_MAX);
 GFVAR(0, bomberdropheight, 0, 8, FVAR_MAX);
