@@ -16,7 +16,6 @@ namespace capture
             vec o = d->feetpos(capturedropheight), inertia = vec(d->vel).add(d->falling);
             client::addmsg(N_DROPAFFIN, "ri8", d->clientnum, -1, int(o.x*DMF), int(o.y*DMF), int(o.z*DMF), int(inertia.x*DMF), int(inertia.y*DMF), int(inertia.z*DMF));
             d->action[AC_AFFINITY] = false;
-            d->actiontime[AC_AFFINITY] = 0;
             return true;
         }
         return false;
@@ -521,8 +520,6 @@ namespace capture
     {
         if(!st.flags.inrange(i)) return;
         capturestate::flag &f = st.flags[i];
-        d->action[AC_AFFINITY] = false;
-        d->actiontime[AC_AFFINITY] = 0;
         playsound(S_CATCH, d->o, d);
         affinityeffect(i, d->team, d->feetpos(), f.pos(true), 1, f.team == d->team ? "SECURED" : "TAKEN");
         game::announcef(f.team == d->team ? S_V_FLAGSECURED : S_V_FLAGPICKUP, CON_SELF, d, true, "\fa%s %s the %s flag", game::colourname(d), f.team == d->team ? "secured" : (f.droptime ? "picked up" : "stole"), game::colourteam(f.team, "flagtex"));
@@ -538,7 +535,6 @@ namespace capture
             client::addmsg(N_TAKEAFFIN, "ri2", d->clientnum, i);
             st.flags[i].pickuptime = lastmillis;
             d->action[AC_AFFINITY] = false;
-            d->actiontime[AC_AFFINITY] = 0;
         }
     }
 

@@ -539,8 +539,6 @@ namespace bomber
     {
         if(!st.flags.inrange(i)) return;
         bomberstate::flag &f = st.flags[i];
-        d->action[AC_AFFINITY] = false;
-        d->actiontime[AC_AFFINITY] = 0;
         playsound(S_CATCH, d->o, d);
         if(!f.droptime)
         {
