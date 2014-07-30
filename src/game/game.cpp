@@ -1333,7 +1333,7 @@ namespace game
         bool burning = burn(d, weap, flags), bleeding = bleed(d, weap, flags), shocking = shock(d, weap, flags);
         if(!local || burning || bleeding || shocking)
         {
-            float scale = isweap(weap) ? damage/float(WF(WK(flags), weap, damage, WS(flags))) : 1.f;
+            float scale = isweap(weap) && WF(WK(flags), weap, damage, WS(flags)) ? damage/float(WF(WK(flags), weap, damage, WS(flags))) : 1.f;
             if(hithurts(flags))
             {
                 if(d == focus) hud::damage(damage, v->o, v, weap, flags);
@@ -1358,7 +1358,7 @@ namespace game
                 }
                 if(d->actortype < A_ENEMY && !issound(d->vschan)) playsound(S_PAIN, d->o, d, 0, -1, -1, -1, &d->vschan);
                 d->lastpain = lastmillis;
-                playsound(WSND2(weap, WS(flags), S_W_IMPACT), vec(d->center()).add(vec(dir).mul(dist)), NULL, 0, clamp(int(255*scale), 32, 255));
+                playsound(WSND2(weap, WS(flags), S_W_IMPACT), vec(d->center()).add(vec(dir).mul(dist)), NULL, 0, clamp(int(255*scale), 64, 255));
             }
             if(d->actortype < A_ENEMY || actor[d->actortype].canmove)
             {
@@ -1370,7 +1370,7 @@ namespace game
                     if(shockstun&4 && s > 0) d->vel.mul(1.f-clamp(s, 0.f, 1.f));
                     if(shockstun&8 && g > 0) d->falling.mul(1.f-clamp(g, 0.f, 1.f));
                 }
-                else if(isweap(weap) && !burning && !bleeding && !shocking && WF(WK(flags), weap, damage, WS(flags)) != 0)
+                else if(isweap(weap) && !burning && !bleeding && !shocking && WF(WK(flags), weap, damage, WS(flags)))
                 {
                     if(WF(WK(flags), weap, stun, WS(flags)))
                     {
