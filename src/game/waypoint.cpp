@@ -167,7 +167,11 @@ namespace ai
     static inline void invalidatewpcache(int wp)
     {
         if(++numinvalidatewpcaches >= 1000) { numinvalidatewpcaches = 0; invalidatedwpcaches = (1<<NUMWPCACHES)-1; }
-        else loopi(NUMWPCACHES) if((wp >= wpcaches[i].firstwp && wp <= wpcaches[i].lastwp) || i+1 >= NUMWPCACHES) { invalidatedwpcaches |= 1<<i; break; }
+        else
+        {
+            loopi(WPCACHE_DYNAMIC) if(wp >= wpcaches[i].firstwp && wp <= wpcaches[i].lastwp) { invalidatedwpcaches |= 1<<i; return; }
+            invalidatedwpcaches |= 1<<WPCACHE_DYNAMIC;
+        }
     }
 
     void clearwpcache(bool full = true)
@@ -208,7 +212,7 @@ namespace ai
 
         #define CHECKCLOSEST(index) do { \
             int n = (index); \
-            if(waypoints.inrange(n)) \
+            if(n < waypoints.length()) \
             { \
                 waypoint &w = waypoints[n]; \
                 if(!links || w.haslinks()) \
@@ -222,7 +226,6 @@ namespace ai
         wpcachenode *curnode;
         loop(which, NUMWPCACHES) for(curnode = &wpcaches[which].nodes[0], wpcachestack.setsize(0);;)
         {
-            if(!curnode) continue;
             int axis = curnode->axis();
             float dist1 = pos[axis] - curnode->split[0], dist2 = curnode->split[1] - pos[axis];
             if(dist1 >= mindist)
@@ -267,7 +270,7 @@ namespace ai
         float mindist2 = mindist*mindist, maxdist2 = maxdist*maxdist;
         #define CHECKWITHIN(index) do { \
             int n = (index); \
-            if(waypoints.inrange(n)) \
+            if(n < waypoints.length()) \
             { \
                 const waypoint &w = waypoints[n]; \
                 float dist = w.o.squaredist(pos); \
@@ -277,7 +280,6 @@ namespace ai
         wpcachenode *curnode;
         loop(which, NUMWPCACHES) for(curnode = &wpcaches[which].nodes[0], wpcachestack.setsize(0);;)
         {
-            if(!curnode) continue;
             int axis = curnode->axis();
             float dist1 = pos[axis] - curnode->split[0], dist2 = curnode->split[1] - pos[axis];
             if(dist1 >= maxdist)
@@ -321,7 +323,7 @@ namespace ai
         float limit2 = limit*limit;
         #define CHECKNEAR(index) do { \
             int n = (index); \
-            if(ai::waypoints.inrange(n)) \
+            if(n < ai::waypoints.length()) \
             { \
                 const waypoint &w = ai::waypoints[n]; \
                 if(w.o.squaredist(pos) < limit2) add(owner, above, n); \
@@ -330,7 +332,6 @@ namespace ai
         wpcachenode *curnode;
         loop(which, NUMWPCACHES) for(curnode = &wpcaches[which].nodes[0], wpcachestack.setsize(0);;)
         {
-            if(!curnode) continue;
             int axis = curnode->axis();
             float dist1 = pos[axis] - curnode->split[0], dist2 = curnode->split[1] - pos[axis];
             if(dist1 >= limit)
@@ -511,6 +512,7 @@ namespace ai
         if(waypoints.length() > MAXWAYPOINTS) return -1;
         int n = waypoints.length();
         waypoints.add(waypoint(o, weight >= 0 ? weight : getweight(o)));
+        invalidatewpcache(n);
         return n;
     }
 
