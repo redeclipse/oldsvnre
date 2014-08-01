@@ -256,7 +256,7 @@ extern const char *sendmaptypes[SENDMAP_MAX];
 // network messages codes, c2s, c2c, s2c
 enum
 {
-    N_CONNECT = 0, N_SERVERINIT, N_WELCOME, N_CLIENTINIT, N_CLIENTSETUP, N_POS, N_SPHY, N_TEXT, N_COMMAND, N_ANNOUNCE, N_DISCONNECT,
+    N_CONNECT = 0, N_SERVERINIT, N_WELCOME, N_CLIENTINIT, N_POS, N_SPHY, N_TEXT, N_COMMAND, N_ANNOUNCE, N_DISCONNECT,
     N_SHOOT, N_DESTROY, N_STICKY, N_SUICIDE, N_DIED, N_POINTS, N_DAMAGE, N_SHOTFX,
     N_LOADW, N_TRYSPAWN, N_SPAWNSTATE, N_SPAWN, N_DROP, N_WSELECT,
     N_MAPCHANGE, N_MAPVOTE, N_CLEARVOTE, N_CHECKPOINT, N_ITEMSPAWN, N_ITEMUSE, N_TRIGGER, N_EXECLINK,
@@ -281,7 +281,7 @@ char msgsizelookup(int msg)
 {
     static const int msgsizes[] =               // size inclusive message token, 0 for variable or not-checked sizes
     {
-        N_CONNECT, 0, N_SERVERINIT, 5, N_WELCOME, 1, N_CLIENTINIT, 0, N_CLIENTSETUP, 0, N_POS, 0, N_SPHY, 0, N_TEXT, 0, N_COMMAND, 0,
+        N_CONNECT, 0, N_SERVERINIT, 5, N_WELCOME, 1, N_CLIENTINIT, 0, N_POS, 0, N_SPHY, 0, N_TEXT, 0, N_COMMAND, 0,
         N_ANNOUNCE, 0, N_DISCONNECT, 3,
         N_SHOOT, 0, N_DESTROY, 0, N_STICKY, 0, N_SUICIDE, 4, N_DIED, 0, N_POINTS, 4, N_DAMAGE, 14, N_SHOTFX, 0,
         N_LOADW, 0, N_TRYSPAWN, 2, N_SPAWNSTATE, 0, N_SPAWN, 0,
@@ -516,11 +516,11 @@ struct verinfo
         gpuglslver = v.gpuglslver;
         crc = v.crc;
         if(gpuvendor) delete[] gpuvendor;
-        gpuvendor = newstring(v.gpuvendor);
+        gpuvendor = newstring(v.gpuvendor ? v.gpuvendor : "");
         if(gpurenderer) delete[] gpurenderer;
-        gpurenderer = newstring(v.gpurenderer);
+        gpurenderer = newstring(v.gpurenderer ? v.gpurenderer : "");
         if(gpuversion) delete[] gpuversion;
-        gpuversion = newstring(v.gpuversion);
+        gpuversion = newstring(v.gpuversion ? v.gpuversion : "");
     }
 };
 

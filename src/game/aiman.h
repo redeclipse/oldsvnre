@@ -361,7 +361,7 @@ namespace aiman
             {
                 if(!dorefresh)
                 {
-                    #define checkold(n) if(old##n != G(n)) { dorefresh = 1; old##n = G(n); }
+                    #define checkold(n) if(old##n != G(n)) { dorefresh = -1; old##n = G(n); }
                     if(m_onslaught(gamemode, mutators))
                     {
                         checkold(enemyskillmin);

@@ -196,6 +196,18 @@ namespace ai
         if(d->ai) DELETEP(d->ai);
     }
 
+    void checkinfo(gameent *d)
+    {
+        if(d->ownernum < 0 || *d->hostip) return;
+        gameent *o = game::getclient(d->ownernum);
+        if(o && *o->hostip)
+        {
+            copystring(d->hostname, o->hostname);
+            copystring(d->hostip, o->hostip);
+            d->version.grab(o->version);
+        }
+    }
+
     void init(gameent *d, int at, int et, int on, int sk, int bn, char *name, int tm, int cl, int md, const char *vn)
     {
         getwaypoints();
@@ -237,11 +249,6 @@ namespace ai
         d->model = md;
         d->setvanity(vn);
 
-        // copy owner's info
-        copystring(d->hostname, o->hostname);
-        copystring(d->hostip, o->hostip);
-        d->version.grab(o->version);
-
         if(resetthisguy) projs::remove(d);
         if(d->ownernum >= 0 && game::player1->clientnum == d->ownernum)
         {
@@ -254,6 +261,7 @@ namespace ai
             }
         }
         else if(d->ai) destroy(d);
+        checkinfo(d);
     }
 
     void update()
@@ -271,7 +279,10 @@ namespace ai
             }
             int c = 0;
             loopv(game::players) if(game::players[i] && game::players[i]->ai)
+            {
+                checkinfo(game::players[i]);
                 think(game::players[i], ++c == iteration ? true : false);
+            }
             if(c && ++iteration > c) iteration = 0;
         }
     }
