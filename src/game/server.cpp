@@ -2567,7 +2567,7 @@ namespace server
                 if(smode) smode->entergame(ci);
                 mutate(smuts, mut->entergame(ci));
             }
-            if(ci->state.actortype == A_PLAYER) aiman::poke();
+            if(ci->state.actortype == A_PLAYER && ci->ready) aiman::poke();
         }
         if(flags&TT_INFO) sendf(-1, 1, "ri3", N_SETTEAM, ci->clientnum, ci->team);
     }
@@ -3272,7 +3272,7 @@ namespace server
         sendf(-1, 1, "ri9vi", N_RESUME, ci->clientnum, gs.state, gs.points, gs.frags, gs.deaths, gs.health, gs.cptime, gs.weapselect, W_MAX, &gs.ammo[0], -1);
     }
 
-    void putinitclient(clientinfo *ci, packetbuf &p, bool setup = true)
+    void putinitclient(clientinfo *ci, packetbuf &p)
     {
         if(ci->state.actortype > A_PLAYER)
         {
@@ -3293,14 +3293,6 @@ namespace server
         }
         else
         {
-            if(setup)
-            {
-                putint(p, N_CLIENTSETUP);
-                sendstring(gethostname(ci->clientnum), p);
-                sendstring(gethostip(ci->clientnum), p);
-                ci->state.version.put(p);
-            }
-
             putint(p, N_CLIENTINIT);
             putint(p, ci->clientnum);
             putint(p, ci->state.colour);
@@ -3310,6 +3302,9 @@ namespace server
             sendstring(ci->name, p);
             sendstring(ci->state.vanity, p);
             sendstring(ci->handle, p);
+            sendstring(gethostname(ci->clientnum), p);
+            sendstring(gethostip(ci->clientnum), p);
+            ci->state.version.put(p);
         }
     }
 
@@ -3323,7 +3318,7 @@ namespace server
     void sendinitclientself(clientinfo *ci)
     {
         packetbuf p(MAXTRANS, ENET_PACKET_FLAG_RELIABLE);
-        putinitclient(ci, p, false);
+        putinitclient(ci, p);
         sendpacket(ci->clientnum, 1, p.finalize(), ci->clientnum);
     }
 
@@ -3333,7 +3328,6 @@ namespace server
         {
             clientinfo *ci = clients[i];
             if(!ci->connected || ci->clientnum == exclude) continue;
-
             putinitclient(ci, p);
         }
     }
@@ -4270,7 +4264,7 @@ namespace server
             ci->state.quarantine = quarantine;
             ci->state.timeplayed += totalmillis-ci->state.lasttimeplayed;
             setteam(ci, T_NEUTRAL, TT_INFO);
-            aiman::poke();
+            if(ci->ready) aiman::poke();
         }
         else if(ci->state.state == CS_SPECTATOR && !val)
         {
@@ -4282,7 +4276,7 @@ namespace server
             ci->state.lasttimeplayed = totalmillis;
             ci->state.quarantine = false;
             waiting(ci, DROP_RESET);
-            aiman::poke();
+            if(ci->ready) aiman::poke();
         }
         return true;
     }
@@ -4602,7 +4596,7 @@ namespace server
         }
 
         uchar operator[](int msg) const { return msg >= 0 && msg < NUMMSG ? msgmask[msg] : 0; }
-    } msgfilter(-1, N_CONNECT, N_SERVERINIT, N_CLIENTINIT, N_CLIENTSETUP, N_WELCOME, N_NEWGAME, N_MAPCHANGE, N_SERVMSG, N_DAMAGE, N_SHOTFX, N_DIED, N_POINTS, N_SPAWNSTATE, N_ITEMACC, N_ITEMSPAWN, N_TICK, N_DISCONNECT, N_CURRENTPRIV, N_PONG, N_RESUME, N_SCOREAFFIN, N_SCORE, N_ANNOUNCE, N_SENDDEMOLIST, N_SENDDEMO, N_DEMOPLAYBACK, N_REGEN, N_CLIENT, N_AUTHCHAL, -2, N_REMIP, N_NEWMAP, N_CLIPBOARD, -3, N_EDITENT, N_EDITLINK, N_EDITVAR, N_EDITF, N_EDITT, N_EDITM, N_FLIP, N_COPY, N_PASTE, N_ROTATE, N_REPLACE, N_DELCUBE, -4, N_POS, N_SPAWN, N_DESTROY, NUMMSG),
+    } msgfilter(-1, N_CONNECT, N_SERVERINIT, N_CLIENTINIT, N_WELCOME, N_NEWGAME, N_MAPCHANGE, N_SERVMSG, N_DAMAGE, N_SHOTFX, N_DIED, N_POINTS, N_SPAWNSTATE, N_ITEMACC, N_ITEMSPAWN, N_TICK, N_DISCONNECT, N_CURRENTPRIV, N_PONG, N_RESUME, N_SCOREAFFIN, N_SCORE, N_ANNOUNCE, N_SENDDEMOLIST, N_SENDDEMO, N_DEMOPLAYBACK, N_REGEN, N_CLIENT, N_AUTHCHAL, -2, N_REMIP, N_NEWMAP, N_CLIPBOARD, -3, N_EDITENT, N_EDITLINK, N_EDITVAR, N_EDITF, N_EDITT, N_EDITM, N_FLIP, N_COPY, N_PASTE, N_ROTATE, N_REPLACE, N_DELCUBE, -4, N_POS, N_SPAWN, N_DESTROY, NUMMSG),
       connectfilter(-1, N_CONNECT, -2, N_AUTHANS, -3, N_PING, NUMMSG);
 
     int checktype(int type, clientinfo *ci)
@@ -6027,7 +6021,6 @@ namespace server
                         if(p.overread()) break;
                         if(inrange && k < MAXENTATTRS) sents[n].attrs[k] = attr;
                     }
-                    if(!ci || ci->state.state==CS_SPECTATOR) break;
                     if(inrange)
                     {
                         if(oldtype == PLAYERSTART || sents[n].type == PLAYERSTART) setupspawns(true);
@@ -6253,11 +6246,7 @@ namespace server
                         return;
                     }
                     loopi(size-1) getint(p);
-                    if(ci) switch(msgfilter[type])
-                    {
-                        case 2: case 3: if(ci->state.state != CS_SPECTATOR) QUEUE_MSG; break;
-                        default: QUEUE_MSG; break;
-                    }
+                    if(ci) QUEUE_MSG;
                     break;
                 }
             }

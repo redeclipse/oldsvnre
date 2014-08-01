@@ -1211,7 +1211,7 @@ template <class T, int SIZE> struct reversequeue : queue<T, SIZE>
 
 inline char *newstring(size_t l)                { return new char[l+1]; }
 inline char *newstring(const char *s, size_t l) { return copystring(newstring(l), s, l+1); }
-inline char *newstring(const char *s)           { size_t l = strlen(s); char *d = newstring(l); memcpy(d, s, l+1); return d; }
+inline char *newstring(const char *s)           { if(!s) s = ""; size_t l = strlen(s); char *d = newstring(l); memcpy(d, s, l+1); return d; }
 
 #if defined(WIN32) && !defined(__GNUC__)
 #ifdef _DEBUG

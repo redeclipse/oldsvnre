@@ -1936,30 +1936,16 @@ namespace client
                     break;
                 }
 
-                case N_CLIENTSETUP:
-                {
-                    int cn = getint(p);
-                    gameent *d = game::newclient(cn);
-                    if(!d)
-                    {
-                        verinfo dummy;
-                        loopi(2) getstring(text, p);
-                        dummy.get(p);
-                        break;
-                    }
-                    getstring(d->hostname, p);
-                    getstring(d->hostip, p);
-                    d->version.get(p);
-                }
-
                 case N_CLIENTINIT: // another client either connected or changed name/team
                 {
-                    int cn = getint(p);
-                    gameent *d = game::newclient(cn);
+                    int tcn = getint(p);
+                    gameent *d = game::newclient(tcn);
                     if(!d)
                     {
                         loopi(4) getint(p);
-                        loopi(3) getstring(text, p);
+                        loopi(5) getstring(text, p);
+                        verinfo dummy;
+                        dummy.get(p);
                         break;
                     }
                     int colour = getint(p), model = getint(p), team = clamp(getint(p), int(T_NEUTRAL), int(T_ENEMY)), priv = getint(p);
@@ -1970,6 +1956,9 @@ namespace client
                     if(!*namestr) namestr = copystring(name, "unnamed");
                     string vanity = ""; getstring(vanity, p);
                     getstring(d->handle, p);
+                    getstring(d->hostname, p);
+                    getstring(d->hostip, p);
+                    if(d != game::player1) d->version.get(p);
                     if(d == game::focus && d->team != team) hud::lastteam = 0;
                     d->team = team;
                     d->privilege = priv;
@@ -2324,8 +2313,8 @@ namespace client
 
                 case N_CLIPBOARD:
                 {
-                    int cn = getint(p), unpacklen = getint(p), packlen = getint(p);
-                    gameent *d = game::getclient(cn);
+                    int tcn = getint(p), unpacklen = getint(p), packlen = getint(p);
+                    gameent *d = game::getclient(tcn);
                     ucharbuf q = p.subbuf(max(packlen, 0));
                     if(d) unpackeditinfo(d->edit, q.buf, q.maxlen, unpacklen);
                     break;
