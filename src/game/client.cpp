@@ -1939,12 +1939,12 @@ namespace client
                 case N_CLIENTINIT: // another client either connected or changed name/team
                 {
                     int tcn = getint(p);
+                    verinfo dummy;
                     gameent *d = game::newclient(tcn);
                     if(!d)
                     {
                         loopi(4) getint(p);
                         loopi(5) getstring(text, p);
-                        verinfo dummy;
                         dummy.get(p);
                         break;
                     }
@@ -1959,6 +1959,7 @@ namespace client
                     getstring(d->hostname, p);
                     getstring(d->hostip, p);
                     if(d != game::player1) d->version.get(p);
+                    else dummy.get(p);
                     if(d == game::focus && d->team != team) hud::lastteam = 0;
                     d->team = team;
                     d->privilege = priv;
