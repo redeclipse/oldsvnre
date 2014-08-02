@@ -877,7 +877,7 @@ void rendermodel(entitylight *light, const char *mdl, int anim, const vec &o, fl
         glEnable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE);
 
-        if(d && showboundingbox==1)
+        if(d && showboundingbox==1 && (d->type == ENT_PLAYER || d->type == ENT_AI))
         {
             if(d->ragdoll && (d->state == CS_DEAD || d->state == CS_WAITING))
             {
