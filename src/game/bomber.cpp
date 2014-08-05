@@ -108,7 +108,7 @@ namespace bomber
         loopv(st.flags)
         {
             bomberstate::flag &f = st.flags[i];
-            if(!entities::ents.inrange(f.ent) || hasbombs.find(i) >= 0 || !f.enabled) continue;
+            if(hasbombs.find(i) >= 0 || !f.enabled) continue;
             vec pos = f.pos(true), dir = vec(pos).sub(camera1->o), colour = isbomberaffinity(f) ? pulsecolour() : vec::hexcolor(TEAM(f.team, colour));
             float area = 3, size = hud::radaraffinitysize;
             if(isbomberaffinity(f))
@@ -185,7 +185,7 @@ namespace bomber
         {
             if(y-sy-size < m) break;
             bomberstate::flag &f = st.flags[i];
-            if(!entities::ents.inrange(f.ent) || !f.enabled) continue;
+            if(!f.enabled) continue;
             int millis = lastmillis-f.displaytime;
             vec colour = pulsecolour();
             float skew = hud::inventoryskew, wait = f.droptime ? clamp((lastmillis-f.droptime)/float(bomberresetdelay), 0.f, 1.f) : (f.owner ? clamp((lastmillis-f.taketime)/float(carrytime), 0.f, 1.f) : 1.f);
@@ -257,7 +257,6 @@ namespace bomber
         loopv(st.flags) // flags/bases
         {
             bomberstate::flag &f = st.flags[i];
-            if(!entities::ents.inrange(f.ent)) continue;
             cament *c = cameras.add(new cament);
             c->o = f.pos(true);
             c->o.z += enttype[AFFINITY].radius/2;
@@ -290,15 +289,13 @@ namespace bomber
         loopv(st.flags) // flags/bases
         {
             bomberstate::flag &f = st.flags[i];
-            if(!entities::ents.inrange(f.ent)) continue;
             float trans = 1;
             if(!isbomberaffinity(f) || !f.interptime)
             {
                 int millis = lastmillis-f.displaytime;
                 if(millis <= 1000) trans *= float(millis)/1000.f;
             }
-            entitylight *light = &entities::ents[f.ent]->light;
-            if(!f.enabled) light->material[0] = f.light.material[0] = bvec(0, 0, 0);
+            if(!f.enabled) f.baselight.material[0] = f.light.material[0] = bvec(0, 0, 0);
             else if(isbomberaffinity(f))
             {
                 vec above(f.pos(true, true));
@@ -313,7 +310,7 @@ namespace bomber
                     float amt = (millis <= delay ? millis/float(delay) : 1.f-((millis-delay)/float(delay)));
                     flashcolour(effect.r, effect.g, effect.b, 1.f, 0.f, 0.f, amt);
                 }
-                light->material[0] = f.light.material[0] = bvec::fromcolor(effect);
+                f.baselight.material[0] = f.light.material[0] = bvec::fromcolor(effect);
                 if(f.owner != game::focus || game::thirdpersonview(true) || !rendernormally)
                 {
                     if(f.owner == game::focus) trans *= 0.25f;
@@ -335,7 +332,7 @@ namespace bomber
                 vec above = f.above;
                 float blend = clamp(camera1->o.dist(above)/enttype[AFFINITY].radius, 0.f, 1.f);
                 vec effect = vec::hexcolor(TEAM(f.team, colour)).mul(trans);
-                light->material[0] = f.light.material[0] = bvec::fromcolor(effect);
+                f.baselight.material[0] = f.light.material[0] = bvec::fromcolor(effect);
                 int pcolour = effect.tohexcolor();
                 part_explosion(above, enttype[AFFINITY].radius/4*trans, PART_SHOCKBALL, 1, pcolour, 1.f, trans*blend*0.25f);
                 above.z += enttype[AFFINITY].radius/4*trans;
@@ -345,7 +342,7 @@ namespace bomber
                 part_icon(above, textureload(hud::teamtexname(f.team), 3), 2, trans*blend, 0, 0, 1, TEAM(f.team, colour));
             }
             if(!m_gsp1(game::gamemode, game::mutators))
-                rendermodel(light, "props/point", ANIM_MAPMODEL|ANIM_LOOP, f.render, entities::ents[f.ent]->attrs[1], 0, 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, 1);
+                rendermodel(&f.baselight, "props/point", ANIM_MAPMODEL|ANIM_LOOP, f.render, f.yaw, 0, 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, 1);
         }
     }
 
@@ -354,7 +351,7 @@ namespace bomber
         loopv(st.flags)
         {
             bomberstate::flag &f = st.flags[i];
-            if(!entities::ents.inrange(f.ent) || !f.enabled) continue;
+            if(!f.enabled) continue;
             float trans = 1.f;
             int millis = lastmillis-f.displaytime;
             if(millis <= 1000) trans = float(millis)/1000.f;
@@ -382,7 +379,7 @@ namespace bomber
                 case T_OMEGA: team = T_NEUTRAL; break; // ball
                 default: continue; // remove
             }
-            st.addaffinity(e.o, team, i);
+            st.addaffinity(e.o, team, e.attrs[1], e.attrs[2]);
             if(st.flags.length() >= MAXPARAMS) break;
         }
     }
@@ -395,7 +392,8 @@ namespace bomber
         {
             bomberstate::flag &f = st.flags[i];
             putint(p, f.team);
-            putint(p, f.ent);
+            putint(p, f.yaw);
+            putint(p, f.pitch);
             loopj(3) putint(p, int(f.spawnloc[j]*DMF));
         }
     }
@@ -411,7 +409,7 @@ namespace bomber
         while(st.flags.length() > numflags) st.flags.pop();
         loopi(numflags)
         {
-            int team = getint(p), ent = getint(p), enabled = getint(p), owner = getint(p), dropped = 0;
+            int team = getint(p), yaw = getint(p), pitch = getint(p), enabled = getint(p), owner = getint(p), dropped = 0;
             vec spawnloc(0, 0, 0), droploc(0, 0, 0), inertia(0, 0, 0);
             loopj(3) spawnloc[j] = getint(p)/DMF;
             if(owner < 0)
@@ -429,7 +427,8 @@ namespace bomber
             bomberstate::flag &f = st.flags[i];
             f.reset();
             f.team = team;
-            f.ent = ent;
+            f.yaw = yaw;
+            f.pitch = pitch;
             f.enabled = enabled != 0;
             f.spawnloc = f.render = f.above = spawnloc;
             f.render.z += 2;
@@ -500,15 +499,11 @@ namespace bomber
         if(f.enabled && value)
         {
             destroyaffinity(f.pos(true, true));
-            if(isbomberaffinity(f))
+            if(isbomberaffinity(f) && value == 2)
             {
-                if(value == 2)
-                {
-                    affinityeffect(i, T_NEUTRAL, f.pos(true, true), f.spawnloc, 3, "RESET");
-                    game::announcef(S_V_BOMBRESET, CON_SELF, NULL, true, "\fathe \fs\fzwvbomb\fS has been reset");
-                    isreset = true;
-                }
-                entities::execlink(NULL, f.ent, false);
+                affinityeffect(i, T_NEUTRAL, f.pos(true, true), f.spawnloc, 3, "RESET");
+                game::announcef(S_V_BOMBRESET, CON_SELF, NULL, true, "\fathe \fs\fzwvbomb\fS has been reset");
+                isreset = true;
             }
         }
         st.returnaffinity(i, lastmillis, value!=0, isreset);
@@ -527,8 +522,6 @@ namespace bomber
         }
         affinityeffect(goal, d->team, g.spawnloc, f.spawnloc, 3, "DESTROYED");
         destroyaffinity(g.spawnloc);
-        entities::execlink(NULL, f.ent, false);
-        entities::execlink(NULL, g.ent, false);
         hud::teamscore(d->team).total = score;
         defformatstring(gteam)("%s", game::colourteam(g.team, "bombtex"));
         game::announcef(S_V_BOMBSCORE, CON_SELF, d, true, "\fa%s destroyed the %s base for team %s%s (score: \fs\fc%d\fS, time taken: \fs\fc%s\fS)", game::colourname(d), gteam, game::colourteam(d->team), extra, score, timestr(lastmillis-f.inittime));
@@ -544,7 +537,6 @@ namespace bomber
         {
             affinityeffect(i, d->team, d->feetpos(), f.pos(true, true), 1, "TAKEN");
             game::announcef(S_V_BOMBPICKUP, CON_SELF, d, true, "\fa%s picked up the \fs\fzwv\f($bombtex)bomb\fS", game::colourname(d));
-            entities::execlink(NULL, f.ent, false);
         }
         st.takeaffinity(i, d, lastmillis);
         if(d->ai) aihomerun(d, d->ai->state.last());
@@ -593,7 +585,7 @@ namespace bomber
         loopv(st.flags)
         {
             bomberstate::flag &f = st.flags[i];
-            if(!entities::ents.inrange(f.ent) || !f.enabled || !isbomberaffinity(f)) continue;
+            if(!f.enabled || !isbomberaffinity(f)) continue;
             if(f.droptime)
             {
                 vec pos = f.pos();
@@ -619,7 +611,7 @@ namespace bomber
             loopv(st.flags)
             {
                 bomberstate::flag &g = st.flags[i];
-                if(isbombertarg(g, ai::owner(d)) && (goal < 0 || g.pos().squaredist(pos) < st.flags[goal].pos().squaredist(pos)))
+                if(isbombertarg(g, d->team) && (goal < 0 || g.pos().squaredist(pos) < st.flags[goal].pos().squaredist(pos)))
                     goal = i;
             }
             if(st.flags.inrange(goal) && ai::makeroute(d, b, st.flags[goal].pos()))
@@ -637,13 +629,6 @@ namespace bomber
         return false;
     }
 
-    int aiowner(gameent *d)
-    {
-        loopv(st.flags) if(entities::ents.inrange(st.flags[i].ent) && entities::ents[d->spawnpoint]->links.find(st.flags[i].ent) >= 0)
-            return st.flags[i].team;
-        return d->team;
-    }
-
     bool aicheck(gameent *d, ai::aistate &b)
     {
         if(d->actortype == A_BOT)
@@ -653,7 +638,7 @@ namespace bomber
             {
                 bomberstate::flag &g = st.flags[i];
                 if(g.owner == d) return aihomerun(d, b);
-                else if((g.owner && ai::owner(g.owner) != ai::owner(d)) || g.droptime) taken.add(i);
+                else if((g.owner && g.owner->team != d->team) || g.droptime) taken.add(i);
             }
             if(!ai::badhealth(d)) while(!taken.empty())
             {
@@ -675,20 +660,19 @@ namespace bomber
         loopvj(st.flags)
         {
             bomberstate::flag &f = st.flags[j];
-            if(!entities::ents.inrange(f.ent) || !f.enabled) continue;
-            int owner = ai::owner(d);
-            bool home = isbomberhome(f, owner) || isbombertarg(f, owner);
+            if(!f.enabled) continue;
+            bool home = isbomberhome(f, d->team) || isbombertarg(f, d->team);
             if(d->actortype == A_BOT && m_duke(game::gamemode, game::mutators) && home) continue;
             static vector<int> targets; // build a list of others who are interested in this
             targets.setsize(0);
-            bool regen = d->actortype != A_BOT || f.team != owner || !m_regen(game::gamemode, game::mutators) || d->health >= m_health(game::gamemode, game::mutators, d->model);
+            bool regen = d->actortype != A_BOT || f.team != d->team || !m_regen(game::gamemode, game::mutators) || d->health >= m_health(game::gamemode, game::mutators, d->model);
             ai::checkothers(targets, d, home || d->actortype != A_BOT ? ai::AI_S_DEFEND : ai::AI_S_PURSUE, ai::AI_T_AFFINITY, j, true);
             if(d->actortype == A_BOT)
             {
                 gameent *e = NULL;
                 int numdyns = game::numdynents();
                 float mindist = enttype[AFFINITY].radius*4; mindist *= mindist;
-                loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && !e->ai && e->state == CS_ALIVE && owner == ai::owner(e))
+                loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && !e->ai && e->state == CS_ALIVE && d->team == e->team)
                 {
                     if(targets.find(e->clientnum) < 0 && (f.owner == e || e->feetpos().squaredist(f.pos()) <= mindist))
                         targets.add(e->clientnum);
@@ -718,7 +702,7 @@ namespace bomber
                     n.target = j;
                     n.targtype = ai::AI_T_AFFINITY;
                     n.score = pos.squaredist(f.pos())/(!regen ? 100.f : 1.f);
-                    n.tolerance = f.team != owner ? 0.5f : 0.25f;
+                    n.tolerance = f.team != d->team ? 0.5f : 0.25f;
                     n.team = true;
                     n.acttype = ai::AI_A_PROTECT;
                 }
@@ -742,7 +726,7 @@ namespace bomber
                     loopvk(targets) if((t = game::getclient(targets[k])))
                     {
                         ai::interest &n = interests.add();
-                        bool team = owner == ai::owner(t);
+                        bool team = d->team == t->team;
                         if(d->actortype == A_BOT && m_duke(game::gamemode, game::mutators) && team) continue;
                         n.state = team ? ai::AI_S_DEFEND : ai::AI_S_PURSUE;
                         n.node = t->lastnode;
@@ -768,8 +752,8 @@ namespace bomber
         if(st.flags.inrange(b.target))
         {
             bomberstate::flag &f = st.flags[b.target];
-            if(isbomberaffinity(f) && f.owner && ai::owner(d) != ai::owner(f.owner) && ai::violence(d, b, f.owner, 4)) return true;
-            int walk = f.owner && ai::owner(f.owner) != ai::owner(d) ? 1 : 0;
+            if(isbomberaffinity(f) && f.owner && d->team != f.owner->team && ai::violence(d, b, f.owner, 4)) return true;
+            int walk = f.owner && f.owner->team != d->team ? 1 : 0;
             if(d->actortype == A_BOT)
             {
                 if((!m_regen(game::gamemode, game::mutators) || d->health >= m_health(game::gamemode, game::mutators, d->model)) && lastmillis-b.millis >= (201-d->skill)*33)
@@ -782,7 +766,7 @@ namespace bomber
                         gameent *e = NULL;
                         int numdyns = game::numdynents();
                         float mindist = enttype[AFFINITY].radius*4; mindist *= mindist;
-                        loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && !e->ai && e->state == CS_ALIVE && ai::owner(d) == ai::owner(e))
+                        loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && !e->ai && e->state == CS_ALIVE && d->team == e->team)
                         {
                             if(targets.find(e->clientnum) < 0 && (f.owner == e || e->feetpos().squaredist(f.pos()) <= mindist))
                                 targets.add(e->clientnum);
@@ -815,18 +799,18 @@ namespace bomber
         if(st.flags.inrange(b.target) && d->actortype == A_BOT)
         {
             bomberstate::flag &f = st.flags[b.target];
-            if(!entities::ents.inrange(f.ent) || !f.enabled) return false;
+            if(!f.enabled) return false;
             if(isbomberaffinity(f))
             {
                 if(f.owner)
                 {
                     if(d == f.owner) return aihomerun(d, b);
-                    else if(ai::owner(d) != ai::owner(f.owner)) return ai::violence(d, b, f.owner, 4);
+                    else if(d->team != f.owner->team) return ai::violence(d, b, f.owner, 4);
                     else return ai::defense(d, b, f.pos());
                 }
                 return ai::makeroute(d, b, f.pos());
             }
-            if(isbombertarg(f, ai::owner(d)))
+            if(isbombertarg(f, d->team))
             {
                 loopv(st.flags) if(st.flags[i].owner == d && ai::makeroute(d, b, f.pos()))
                 {

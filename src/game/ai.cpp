@@ -43,18 +43,6 @@ namespace ai
     float viewfieldx(int x) { return x <= 100 ? clamp((VIEWMIN+(VIEWMAX-VIEWMIN))/100.f*float(x), float(VIEWMIN), float(VIEWMAX)) : float(VIEWMAX); }
     float viewfieldy(int x) { return viewfieldx(x)*3.f/4.f; }
 
-    int owner(gameent *d)
-    {
-        if(!d) return -1;
-        if(d->actortype >= A_ENEMY && entities::ents.inrange(d->spawnpoint))
-        {
-            if(m_capture(game::gamemode)) return capture::aiowner(d);
-            else if(m_defend(game::gamemode)) return defend::aiowner(d);
-            else if(m_bomber(game::gamemode)) return bomber::aiowner(d);
-        }
-        return d->team;
-    }
-
     float weapmindist(int weap, bool alt)
     {
         if(weaptype[weap].melee) return 0.f;
@@ -80,9 +68,8 @@ namespace ai
     {
         if(d && e && d != e && !passive(e) && e->state == CS_ALIVE && (!solid || physics::issolid(e, d)))
         {
-            int dt = owner(d), et = owner(e);
-            if(dt == T_ENEMY && et == T_ENEMY) return false;
-            if(!m_team(game::gamemode, game::mutators) || dt != et) return true;
+            if(d->team == T_ENEMY && e->team == T_ENEMY) return false;
+            if(!m_team(game::gamemode, game::mutators) || d->team != e->team) return true;
         }
         return false;
     }
@@ -295,14 +282,7 @@ namespace ai
         loopi(numdyns) if((e = (gameent *)game::iterdynents(i)))
         {
             if(targets.find(e->clientnum) >= 0) continue;
-            if(teams)
-            {
-                int dt = owner(d), et = owner(e);
-                if(dt != T_ENEMY || et != T_ENEMY)
-                {
-                    if(m_team(game::gamemode, game::mutators) && dt != et) continue;
-                }
-            }
+            if(teams && (d->team != T_ENEMY || e->team != T_ENEMY) && m_team(game::gamemode, game::mutators) && d->team != e->team) continue;
             if(members) (*members)++;
             if(e == d || !e->ai || e->state != CS_ALIVE || e->actortype != d->actortype) continue;
             aistate &b = e->ai->getstate();
@@ -493,7 +473,7 @@ namespace ai
     {
         gameent *e = NULL;
         int numdyns = game::numdynents();
-        loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && e != d && (all || e->actortype == A_PLAYER) && owner(d) == owner(e))
+        loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && e != d && (all || e->actortype == A_PLAYER) && d->team == e->team)
         {
             interest &n = interests.add();
             n.state = AI_S_DEFEND;
@@ -737,7 +717,7 @@ namespace ai
             {
                 if(check(d, b)) return true;
                 gameent *e = game::getclient(b.target);
-                if(e && ai::owner(d) == ai::owner(e))
+                if(e && d->team == e->team)
                 {
                     if(e->state == CS_ALIVE) return defense(d, b, e->feetpos());
                     if(b.owner >= 0) return patrol(d, b, d->feetpos());
@@ -1790,6 +1770,7 @@ namespace ai
                                         break;
                                     }
                                 }
+                                #if 0
                                 else if(!strcasecmp(w[pos], "base"))
                                 {
                                     loopv(capture::st.flags) if(capture::st.flags[i].team == e->team)
@@ -1800,7 +1781,8 @@ namespace ai
                                         break;
                                     }
                                 }
-                                else botsay(e, reply, "%s: 'me', 'here', 'flag', 'base', or a player", d->name);
+                                #endif
+                                else botsay(e, reply, "%s: 'me', 'here', 'flag', or a player", d->name);
                                 break;
                             }
                             case G_BOMBER:
@@ -1841,6 +1823,7 @@ namespace ai
                                 break;
                             }
                         }
+                        #if 0
                         else if(!strcasecmp(w[pos], "base"))
                         {
                             loopv(capture::st.flags) if(capture::st.flags[i].team != e->team)
@@ -1851,7 +1834,9 @@ namespace ai
                                 break;
                             }
                         }
-                        else botsay(e, reply, "%s: 'flag', 'base', or a player", d->name);
+                        #endif
+                        else botsay(e, reply, "%s: 'flag', or a player", d->name);
+
                         break;
                     }
                     case G_BOMBER:

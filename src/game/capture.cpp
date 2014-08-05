@@ -25,7 +25,7 @@ namespace capture
     {
         if(!st.flags.inrange(n)) return false;
         capturestate::flag &f = st.flags[n];
-        if(!entities::ents.inrange(f.ent) || f.owner) return false;
+        if(f.owner) return false;
         if(f.pickuptime && lastmillis-f.pickuptime <= 1000) return false;
         if(f.team == d->team)
         {
@@ -51,11 +51,10 @@ namespace capture
     void drawblips(int w, int h, float blend)
     {
         static vector<int> hasflags; hasflags.setsize(0);
-        loopv(st.flags) if(entities::ents.inrange(st.flags[i].ent) && st.flags[i].owner == game::focus) hasflags.add(i);
+        loopv(st.flags) if(st.flags[i].owner == game::focus) hasflags.add(i);
         loopv(st.flags)
         {
             capturestate::flag &f = st.flags[i];
-            if(!entities::ents.inrange(f.ent)) continue;
             loopk(2)
             {
                 vec dir, pos, colour = vec::hexcolor(TEAM(f.team, colour));
@@ -121,7 +120,6 @@ namespace capture
             loopv(st.flags)
             {
                 capturestate::flag &f = st.flags[i];
-                if(!entities::ents.inrange(f.ent)) continue;
                 if(f.owner == game::focus)
                 {
                     hasflags.add(i);
@@ -234,7 +232,6 @@ namespace capture
         loopv(st.flags) // flags/bases
         {
             capturestate::flag &f = st.flags[i];
-            if(!entities::ents.inrange(f.ent)) continue;
             cament *c = cameras.add(new cament);
             c->o = f.pos(true);
             c->o.z += enttype[AFFINITY].radius*2/3;
@@ -275,7 +272,7 @@ namespace capture
         loopv(st.flags)
         {
             capturestate::flag &f = st.flags[i];
-            if(!entities::ents.inrange(f.ent) || !f.owner) continue;
+            if(!f.owner) continue;
             while(numflags.length() <= f.owner->clientnum)
             {
                 numflags.add(0);
@@ -286,11 +283,9 @@ namespace capture
         loopv(st.flags) // flags/bases
         {
             capturestate::flag &f = st.flags[i];
-            if(!entities::ents.inrange(f.ent)) continue;
             vec pos = f.pos(true);
             float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(capturedelay), 0.f, 1.f) : ((m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team) ? clamp((lastmillis-f.taketime)/float(captureprotectdelay), 0.f, 1.f) : 0.f),
                   blend = (!f.owner && (!f.droptime || m_gsp2(game::gamemode, game::mutators)) && f.team == game::focus->team ? camera1->o.distrange(pos, enttype[AFFINITY].radius, enttype[AFFINITY].radius/8) : 1.f)*(f.owner && f.owner == game::focus ? (game::thirdpersonview(true) ? (f.owner != game::player1 ? followflagblend : thirdflagblend) : firstflagblend) : freeflagblend);
-            entitylight *light = &entities::ents[f.ent]->light;
             vec effect = vec::hexcolor(TEAM(f.team, colour));
             int colour = effect.tohexcolor();
             if(wait > 0.5f)
@@ -299,9 +294,9 @@ namespace capture
                 float amt = (millis <= delay ? millis/float(delay) : 1.f-((millis-delay)/float(delay)));
                 flashcolour(effect.r, effect.g, effect.b, 0.65f, 0.65f, 0.65f, amt);
             }
-            light->material[0] = f.light.material[0] = bvec::fromcolor(effect);
+            f.baselight.material[0] = f.light.material[0] = bvec::fromcolor(effect);
             if(!f.owner && !f.droptime)
-                rendermodel(&f.light, "props/flag", ANIM_MAPMODEL|ANIM_LOOP, pos, entities::ents[f.ent]->attrs[1], entities::ents[f.ent]->attrs[2], 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, blend);
+                rendermodel(&f.light, "props/flag", ANIM_MAPMODEL|ANIM_LOOP, pos, f.yaw, f.pitch, 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, blend);
             else if(!f.owner || f.owner != game::focus || game::thirdpersonview(true) || !(rendernormally))
             {
                 vec flagpos = pos;
@@ -334,7 +329,7 @@ namespace capture
                     //flagpos.z += 3;
                 }
             }
-            rendermodel(light, "props/point", ANIM_MAPMODEL|ANIM_LOOP, f.render, entities::ents[f.ent]->attrs[1], 0, 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, 1);
+            rendermodel(&f.baselight, "props/point", ANIM_MAPMODEL|ANIM_LOOP, f.render, f.yaw, 0, 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, 1);
             vec above = f.above;
             above.z += !f.owner && !f.droptime ? enttype[AFFINITY].radius*2/3 : 3;
             blend = camera1->o.distrange(above, enttype[AFFINITY].radius, enttype[AFFINITY].radius/8);
@@ -359,7 +354,6 @@ namespace capture
         loopv(st.flags)
         {
             capturestate::flag &f = st.flags[i];
-            if(!entities::ents.inrange(f.ent)) continue;
             if(f.owner || f.droptime)
                 adddynlight(vec(f.above).add(vec(0, 0, enttype[AFFINITY].radius/2)), enttype[AFFINITY].radius, vec::hexcolor(TEAM(f.team, colour)), 0, 0, DL_KEEP);
             adddynlight(vec(f.pos(true)).add(vec(0, 0, enttype[AFFINITY].radius/2)), enttype[AFFINITY].radius, vec::hexcolor(TEAM(f.team, colour)), 0, 0, DL_KEEP);
@@ -378,7 +372,7 @@ namespace capture
             gameentity &e = *(gameentity *)entities::ents[i];
             if(!m_check(e.attrs[3], e.attrs[4], game::gamemode, game::mutators) || !isteam(game::gamemode, game::mutators, e.attrs[0], T_FIRST))
                 continue;
-            st.addaffinity(e.o, e.attrs[0], i);
+            st.addaffinity(e.o, e.attrs[0], e.attrs[1], e.attrs[2]);
             if(st.flags.length() >= MAXPARAMS) break;
         }
     }
@@ -391,7 +385,8 @@ namespace capture
         {
             capturestate::flag &f = st.flags[i];
             putint(p, f.team);
-            putint(p, f.ent);
+            putint(p, f.yaw);
+            putint(p, f.pitch);
             loopj(3) putint(p, int(f.spawnloc[j]*DMF));
         }
     }
@@ -407,7 +402,7 @@ namespace capture
         while(st.flags.length() > numflags) st.flags.pop();
         loopi(numflags)
         {
-            int team = getint(p), ent = getint(p), owner = getint(p), dropped = 0;
+            int team = getint(p), yaw = getint(p), pitch = getint(p), owner = getint(p), dropped = 0;
             vec spawnloc(0, 0, 0), droploc(0, 0, 0), inertia(0, 0, 0);
             loopj(3) spawnloc[j] = getint(p)/DMF;
             if(owner < 0)
@@ -425,7 +420,8 @@ namespace capture
             capturestate::flag &f = st.flags[i];
             f.reset();
             f.team = team;
-            f.ent = ent;
+            f.yaw = yaw;
+            f.pitch = pitch;
             f.spawnloc = f.render = f.above = spawnloc;
             f.render.z += 2;
             physics::droptofloor(f.render);
@@ -481,7 +477,6 @@ namespace capture
         capturestate::flag &f = st.flags[i];
         affinityeffect(i, d->team, d->feetpos(), f.above, m_gsp(game::gamemode, game::mutators) ? 3 : 2, "RETURNED");
         game::announcef(S_V_FLAGRETURN, CON_SELF, d, true, "\fa%s returned the %s flag (time taken: \fs\fc%s\fS)", game::colourname(d), game::colourteam(f.team, "flagtex"), timestr(lastmillis-(m_gsp1(game::gamemode, game::mutators) ? f.droptime : f.taketime)));
-        entities::execlink(NULL, f.ent, false);
         st.returnaffinity(i, lastmillis);
     }
 
@@ -494,7 +489,6 @@ namespace capture
             affinityeffect(i, T_NEUTRAL, f.droploc, f.above, 3, "RESET");
             game::announcef(S_V_FLAGRESET, CON_SELF, NULL, true, "\fathe %s flag has been reset", game::colourteam(f.team, "flagtex"));
         }
-        entities::execlink(NULL, f.ent, false);
         st.returnaffinity(i, lastmillis);
     }
 
@@ -506,10 +500,8 @@ namespace capture
         {
             capturestate::flag &g = st.flags[goal];
             affinityeffect(goal, d->team, g.above, f.above, 3, "CAPTURED");
-            entities::execlink(NULL, g.ent, false);
         }
         else affinityeffect(goal, d->team, f.pos(true), f.above, 3, "CAPTURED");
-        entities::execlink(NULL, f.ent, false);
         hud::teamscore(d->team).total = score;
         defformatstring(fteam)("%s", game::colourteam(f.team, "flagtex"));
         game::announcef(S_V_FLAGSCORE, CON_SELF, d, true, "\fa%s captured the %s flag for team %s (score: \fs\fc%d\fS, time taken: \fs\fc%s\fS)", game::colourname(d), fteam, game::colourteam(d->team), score, timestr(lastmillis-f.taketime));
@@ -523,7 +515,6 @@ namespace capture
         playsound(S_CATCH, d->o, d);
         affinityeffect(i, d->team, d->feetpos(), f.pos(true), 1, f.team == d->team ? "SECURED" : "TAKEN");
         game::announcef(f.team == d->team ? S_V_FLAGSECURED : S_V_FLAGPICKUP, CON_SELF, d, true, "\fa%s %s the %s flag", game::colourname(d), f.team == d->team ? "secured" : (f.droptime ? "picked up" : "stole"), game::colourteam(f.team, "flagtex"));
-        entities::execlink(NULL, f.ent, false);
         st.takeaffinity(i, d, lastmillis);
         if(d->ai) aihomerun(d, d->ai->state.last());
     }
@@ -546,7 +537,7 @@ namespace capture
         loopv(st.flags)
         {
             capturestate::flag &f = st.flags[i];
-            if(!entities::ents.inrange(f.ent) || f.owner) continue;
+            if(f.owner) continue;
             if(f.droptime)
             {
                 f.droploc = f.pos();
@@ -605,13 +596,6 @@ namespace capture
         return false;
     }
 
-    int aiowner(gameent *d)
-    {
-        loopv(st.flags) if(entities::ents.inrange(st.flags[i].ent) && entities::ents[d->spawnpoint]->links.find(st.flags[i].ent) >= 0)
-            return st.flags[i].team;
-        return d->team;
-    }
-
     bool aicheck(gameent *d, ai::aistate &b)
     {
         if(d->actortype == A_BOT)
@@ -624,7 +608,7 @@ namespace capture
                 {
                     if(!m_gsp3(game::gamemode, game::mutators)) return aihomerun(d, b);
                 }
-                else if(g.team == ai::owner(d) && (m_gsp3(game::gamemode, game::mutators) || (g.owner && ai::owner(g.owner) != ai::owner(d)) || g.droptime))
+                else if(g.team == d->team && (m_gsp3(game::gamemode, game::mutators) || (g.owner && g.owner->team != d->team) || g.droptime))
                     taken.add(i);
             }
             if(!ai::badhealth(d)) while(!taken.empty())
@@ -647,7 +631,7 @@ namespace capture
         loopvj(st.flags)
         {
             capturestate::flag &f = st.flags[j];
-            bool home = f.team == ai::owner(d);
+            bool home = f.team == d->team;
             if(d->actortype == A_BOT && m_duke(game::gamemode, game::mutators) && home) continue;
             static vector<int> targets; // build a list of others who are interested in this
             targets.setsize(0);
@@ -658,7 +642,7 @@ namespace capture
                 gameent *e = NULL;
                 int numdyns = game::numdynents();
                 float mindist = enttype[AFFINITY].radius*4; mindist *= mindist;
-                loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && !e->ai && e->state == CS_ALIVE && ai::owner(d) == ai::owner(e))
+                loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && !e->ai && e->state == CS_ALIVE && d->team == e->team)
                 {
                     if(targets.find(e->clientnum) < 0 && (f.owner == e || e->feetpos().squaredist(aiflagpos(d, f)) <= mindist))
                         targets.add(e->clientnum);
@@ -712,7 +696,7 @@ namespace capture
                     loopvk(targets) if((t = game::getclient(targets[k])))
                     {
                         ai::interest &n = interests.add();
-                        bool team = ai::owner(d) == ai::owner(t);
+                        bool team = d->team == t->team;
                         n.state = team ? ai::AI_S_DEFEND : ai::AI_S_PURSUE;
                         n.node = t->lastnode;
                         n.target = t->clientnum;
@@ -737,8 +721,8 @@ namespace capture
         if(st.flags.inrange(b.target))
         {
             capturestate::flag &f = st.flags[b.target];
-            if(f.team == ai::owner(d) && f.owner && ai::owner(f.owner) != ai::owner(d) && ai::violence(d, b, f.owner, 4)) return true;
-            int walk = f.owner && ai::owner(f.owner) != ai::owner(d) ? 1 : 0;
+            if(f.team == d->team && f.owner && f.owner->team != d->team && ai::violence(d, b, f.owner, 4)) return true;
+            int walk = f.owner && f.owner->team != d->team ? 1 : 0;
             if(d->actortype == A_BOT)
             {
                 if((!m_regen(game::gamemode, game::mutators) || d->health >= m_health(game::gamemode, game::mutators, d->model)) && lastmillis-b.millis >= (201-d->skill)*33)
@@ -751,7 +735,7 @@ namespace capture
                         gameent *e = NULL;
                         int numdyns = game::numdynents();
                         float mindist = enttype[AFFINITY].radius*4; mindist *= mindist;
-                        loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && !e->ai && e->state == CS_ALIVE && ai::owner(d) == ai::owner(e))
+                        loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && !e->ai && e->state == CS_ALIVE && d->team == e->team)
                         {
                             if(targets.find(e->clientnum) < 0 && (f.owner == e || e->feetpos().squaredist(aiflagpos(d, f)) <= mindist))
                                 targets.add(e->clientnum);
@@ -780,7 +764,7 @@ namespace capture
                     capturestate::flag &g = st.flags[i];
                     if(pos.squaredist(aiflagpos(d, g)) <= mindist)
                     {
-                        if(g.owner && ai::owner(g.owner) == ai::owner(d) && !walk) walk = 1;
+                        if(g.owner && g.owner->team == d->team && !walk) walk = 1;
                         if(g.droptime && ai::makeroute(d, b, aiflagpos(d, g))) return true;
                     }
                 }
@@ -795,12 +779,12 @@ namespace capture
         if(st.flags.inrange(b.target) && d->actortype == A_BOT)
         {
             capturestate::flag &f = st.flags[b.target];
-            if(f.team != ai::owner(d))
+            if(f.team != d->team)
             {
                 if(f.owner)
                 {
                     if(d == f.owner) return aihomerun(d, b);
-                    else if(ai::owner(d) != ai::owner(f.owner)) return ai::violence(d, b, f.owner, 4);
+                    else if(d->team != f.owner->team) return ai::violence(d, b, f.owner, 4);
                     else return ai::defense(d, b, aiflagpos(d, f));
                 }
                 return ai::makeroute(d, b, aiflagpos(d, f));

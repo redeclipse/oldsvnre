@@ -311,7 +311,6 @@ namespace ai
     extern bool targetable(gameent *d, gameent *e, bool solid = false);
     extern bool cansee(gameent *d, vec &x, vec &y, bool force = false, vec &targ = aitarget);
     extern bool altfire(gameent *d, gameent *e);
-    extern int owner(gameent *d);
 
     extern void init(gameent *d, int at, int et, int on, int sk, int bn, char *name, int tm, int cl, int md, const char *vn = "");
 

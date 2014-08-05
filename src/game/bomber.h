@@ -13,7 +13,7 @@ struct bomberstate
     struct flag
     {
         vec droploc, droppos, inertia, spawnloc;
-        int team, ent, droptime, taketime;
+        int team, yaw, pitch, droptime, taketime;
         bool enabled;
         float distance;
 #ifdef GAMESERVER
@@ -24,14 +24,10 @@ struct bomberstate
         projent *proj;
         int displaytime, pickuptime, movetime, inittime, viewtime, rendertime, interptime;
         vec viewpos, renderpos, interppos, render, above;
-        entitylight light;
+        entitylight light, baselight;
 #endif
 
-        flag()
-#ifndef GAMESERVER
-          : ent(-1)
-#endif
-        { reset(); }
+        flag() { reset(); }
 
         void reset()
         {
@@ -47,7 +43,7 @@ struct bomberstate
             viewpos = renderpos = vec(-1, -1, -1);
 #endif
             team = T_NEUTRAL;
-            taketime = droptime = 0;
+            yaw = pitch = taketime = droptime = 0;
             enabled = false;
             distance = 0;
         }
@@ -109,13 +105,14 @@ struct bomberstate
         flags.shrink(0);
     }
 
-    void addaffinity(const vec &o, int team, int ent)
+    void addaffinity(const vec &o, int team, int yaw, int pitch)
     {
         flag &f = flags.add();
         f.reset();
         f.team = team;
         f.spawnloc = o;
-        f.ent = ent;
+        f.yaw = yaw;
+        f.pitch = pitch;
 #ifndef GAMESERVER
         f.render = f.above = o;
         f.render.z += 2;

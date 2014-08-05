@@ -31,7 +31,6 @@ namespace defend
         loopv(st.flags) // flags/bases
         {
             defendstate::flag &f = st.flags[i];
-            if(!entities::ents.inrange(f.ent)) continue;
             cament *c = cameras.add(new cament);
             c->o = f.o;
             c->o.z += enttype[AFFINITY].radius*2/3;
@@ -62,13 +61,11 @@ namespace defend
         loopv(st.flags)
         {
             defendstate::flag &b = st.flags[i];
-            if(!entities::ents.inrange(b.ent)) continue;
             float occupy = b.occupied(defendinstant, defendcount);
-            entitylight *light = &entities::ents[b.ent]->light;
             vec effect = skewcolour(b.owner, b.enemy, occupy);
             int colour = effect.tohexcolor();
-            light->material[0] = bvec::fromcolor(effect);
-            rendermodel(light, "props/point", ANIM_MAPMODEL|ANIM_LOOP, b.render, entities::ents[b.ent]->attrs[1], 0, 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, 1);
+            b.baselight.material[0] = bvec::fromcolor(effect);
+            rendermodel(&b.baselight, "props/point", ANIM_MAPMODEL|ANIM_LOOP, b.render, b.yaw, 0, 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, 1);
             if(b.enemy && b.owner)
             {
                 defformatstring(bowner)("%s", game::colourteam(b.owner));
@@ -101,7 +98,6 @@ namespace defend
         loopv(st.flags)
         {
             defendstate::flag &f = st.flags[i];
-            if(!entities::ents.inrange(f.ent)) continue;
             float occupy = f.occupied(defendinstant, defendcount);
             adddynlight(vec(f.o).add(vec(0, 0, enttype[AFFINITY].radius)), enttype[AFFINITY].radius*2, skewcolour(f.owner, f.enemy, occupy), 0, 0, DL_KEEP);
         }
@@ -226,17 +222,9 @@ namespace defend
                 }
                 case 0: team = T_NEUTRAL; break;
             }
-            defendstate::flag &b = st.flags.add();
-            b.o = b.render = e->o;
-            b.render.z += 2;
-            physics::droptofloor(b.render);
             defformatstring(alias)("point_%d", e->attrs[4]);
             const char *name = getalias(alias);
-            if(name[0]) copystring(b.name, name);
-            else formatstring(b.name)("#%d", st.flags.length());
-            b.ent = i;
-            b.kinship = team;
-            b.reset();
+            st.addaffinity(e->o, team, e->attrs[1], e->attrs[2], name);
         }
         if(!st.flags.length()) return; // map doesn't seem to support this mode at all..
         int bases[T_ALL] = {0};
@@ -269,10 +257,9 @@ namespace defend
                 }
             }
             if(!st.flags.inrange(smallest)) smallest = rnd(st.flags.length());
-            int ent = st.flags[smallest].ent;
             copystring(st.flags[smallest].name, "center");
             st.flags[smallest].kinship = T_NEUTRAL;
-            loopv(st.flags) if(st.flags[i].ent != ent) st.flags.remove(i--);
+            for(int i = st.flags.length()-1; i >= 0 && i != smallest; --i) st.flags.remove(i);
         }
     }
 
@@ -284,7 +271,8 @@ namespace defend
         {
             defendstate::flag &b = st.flags[i];
             putint(p, b.kinship);
-            putint(p, b.ent);
+            putint(p, b.yaw);
+            putint(p, b.pitch);
             loopj(3) putint(p, int(b.o[j]*DMF));
             sendstring(b.name, p);
         }
@@ -296,7 +284,7 @@ namespace defend
         while(st.flags.length() > numflags) st.flags.pop();
         loopi(numflags)
         {
-            int kin = getint(p), ent = getint(p), converted = getint(p), owner = getint(p), enemy = getint(p);
+            int kin = getint(p), yaw = getint(p), pitch = getint(p), converted = getint(p), owner = getint(p), enemy = getint(p);
             vec o;
             loopj(3) o[j] = getint(p)/DMF;
             string name;
@@ -304,7 +292,7 @@ namespace defend
             if(p.overread()) break;
             if(i >= MAXPARAMS) continue;
             while(!st.flags.inrange(i)) st.flags.add();
-            st.initaffinity(i, kin, ent, o, owner, enemy, converted, name);
+            st.initaffinity(i, kin, yaw, pitch, o, owner, enemy, converted, name);
         }
     }
 
@@ -325,7 +313,6 @@ namespace defend
                     game::announcef(S_V_FLAGSECURED, CON_SELF, d, true, "\fateam %s secured \fw%s", game::colourteam(owner), b.name);
                     part_textcopy(vec(b.o).add(vec(0, 0, enttype[AFFINITY].radius)), "<super>\fzZeSECURED", PART_TEXT, game::eventiconfade, TEAM(owner, colour), 3, 1, -10);
                     if(game::dynlighteffects) adddynlight(b.o, enttype[AFFINITY].radius*2, vec::hexcolor(TEAM(owner, colour)).mul(2.f), 500, 250);
-                    entities::execlink(NULL, b.ent, false);
                 }
             }
             else if(b.owner)
@@ -337,7 +324,6 @@ namespace defend
                 game::announcef(S_V_FLAGOVERTHROWN, CON_SELF, d, true, "\fateam %s overthrew \fw%s", game::colourteam(enemy), b.name);
                 part_textcopy(vec(b.o).add(vec(0, 0, enttype[AFFINITY].radius)), "<super>\fzZeOVERTHROWN", PART_TEXT, game::eventiconfade, TEAM(enemy, colour), 3, 1, -10);
                 if(game::dynlighteffects) adddynlight(b.o, enttype[AFFINITY].radius*2, vec::hexcolor(TEAM(enemy, colour)).mul(2.f), 500, 250);
-                entities::execlink(NULL, b.ent, false);
             }
             b.converted = converted;
         }
@@ -348,13 +334,6 @@ namespace defend
     void setscore(int team, int total)
     {
         hud::teamscore(team).total = total;
-    }
-
-    int aiowner(gameent *d)
-    {
-        loopv(st.flags) if(entities::ents.inrange(st.flags[i].ent) && entities::ents[d->spawnpoint]->links.find(st.flags[i].ent) >= 0)
-            return st.flags[i].owner ? st.flags[i].owner : st.flags[i].enemy;
-        return d->team;
     }
 
     bool aicheck(gameent *d, ai::aistate &b)
@@ -376,13 +355,13 @@ namespace defend
                 gameent *e = NULL;
                 bool regen = !m_regen(game::gamemode, game::mutators) || d->health >= m_health(game::gamemode, game::mutators, d->model);
                 int numdyns = game::numdynents();
-                loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && !e->ai && e->state == CS_ALIVE && ai::owner(d) == ai::owner(e))
+                loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && !e->ai && e->state == CS_ALIVE && d->team == e->team)
                 {
                     vec ep = e->feetpos();
                     if(targets.find(e->clientnum) < 0 && ep.squaredist(f.o) <= (enttype[AFFINITY].radius*enttype[AFFINITY].radius))
                         targets.add(e->clientnum);
                 }
-                if((!regen && f.owner == ai::owner(d)) || (targets.empty() && (f.owner != ai::owner(d) || f.enemy)))
+                if((!regen && f.owner == d->team) || (targets.empty() && (f.owner != d->team || f.enemy)))
                 {
                     ai::interest &n = interests.add();
                     n.state = ai::AI_S_DEFEND;
@@ -404,8 +383,8 @@ namespace defend
         {
             defendstate::flag &f = st.flags[b.target];
             bool regen = d->actortype != A_BOT || !m_regen(game::gamemode, game::mutators) || d->health >= m_health(game::gamemode, game::mutators, d->model);
-            int walk = f.enemy && f.enemy != ai::owner(d) ? 1 : 0;
-            if(regen && (!f.enemy && ai::owner(d) == f.owner))
+            int walk = f.enemy && f.enemy != d->team ? 1 : 0;
+            if(regen && (!f.enemy && d->team == f.owner))
             {
                 static vector<int> targets; // build a list of others who are interested in this
                 targets.setsize(0);
@@ -415,7 +394,7 @@ namespace defend
                     gameent *e = NULL;
                     int numdyns = game::numdynents();
                     float mindist = enttype[AFFINITY].radius*4; mindist *= mindist;
-                    loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && !e->ai && e->state == CS_ALIVE && ai::owner(d) == ai::owner(e))
+                    loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && !e->ai && e->state == CS_ALIVE && d->team == e->team)
                     {
                         vec ep = e->feetpos();
                         if(targets.find(e->clientnum) < 0 && ep.squaredist(f.o) <= mindist)

@@ -2045,7 +2045,6 @@ namespace game
 
     int findcolour(gameent *d, bool tone, bool mix)
     {
-        int team = d->actortype >= A_ENEMY ? ai::owner(d) : d->team;
         if(tone)
         {
             int col = d->actortype >= A_ENEMY ? 0 : d->colour;
@@ -2069,7 +2068,7 @@ namespace game
                 if(mix)
                 {
                     int r1 = (col>>16), g1 = ((col>>8)&0xFF), b1 = (col&0xFF),
-                        c = TEAM(team, colour), r2 = (c>>16), g2 = ((c>>8)&0xFF), b2 = (c&0xFF),
+                        c = TEAM(d->team, colour), r2 = (c>>16), g2 = ((c>>8)&0xFF), b2 = (c&0xFF),
                         r3 = clamp(int((r1*(1-playertonemix))+(r2*playertonemix)), 0, 255),
                         g3 = clamp(int((g1*(1-playertonemix))+(g2*playertonemix)), 0, 255),
                         b3 = clamp(int((b1*(1-playertonemix))+(b2*playertonemix)), 0, 255);
@@ -2078,7 +2077,7 @@ namespace game
                 return col;
             }
         }
-        return TEAM(team, colour);
+        return TEAM(d->team, colour);
     }
 
     int getcolour(gameent *d, int level)

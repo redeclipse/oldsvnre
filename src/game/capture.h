@@ -9,7 +9,7 @@ struct capturestate
     struct flag
     {
         vec droploc, inertia, spawnloc;
-        int team, ent, droptime, taketime;
+        int team, yaw, pitch, droptime, taketime;
 #ifdef GAMESERVER
         int owner, lastowner, nextreset;
         vector<int> votes;
@@ -18,14 +18,10 @@ struct capturestate
         projent *proj;
         int displaytime, pickuptime, movetime, viewtime, interptime;
         vec viewpos, interppos, render, above;
-        entitylight light;
+        entitylight light, baselight;
 #endif
 
-        flag()
-#ifndef GAMESERVER
-          : ent(-1)
-#endif
-        { reset(); }
+        flag() { reset(); }
 
         void reset()
         {
@@ -41,7 +37,7 @@ struct capturestate
             displaytime = pickuptime = movetime = viewtime = interptime = 0;
 #endif
             team = T_NEUTRAL;
-            taketime = droptime = 0;
+            yaw = pitch = taketime = droptime = 0;
         }
 
 #ifndef GAMESERVER
@@ -78,13 +74,14 @@ struct capturestate
         flags.shrink(0);
     }
 
-    void addaffinity(const vec &o, int team, int ent)
+    void addaffinity(const vec &o, int team, int yaw, int pitch)
     {
         flag &f = flags.add();
         f.reset();
         f.team = team;
         f.spawnloc = o;
-        f.ent = ent;
+        f.yaw = yaw;
+        f.pitch = pitch;
 #ifndef GAMESERVER
         f.render = f.above = o;
         f.render.z += 2;
