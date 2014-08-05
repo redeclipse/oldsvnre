@@ -28,6 +28,7 @@ GSVAR(IDF_ADMIN, serverdesc, "");
 GSVAR(IDF_ADMIN, servermotd, "");
 
 GVAR(IDF_ADMIN, autoadmin, 0, 0, 1);
+GVAR(IDF_ADMIN, queryinterval, 0, 5000, VAR_MAX); // rebuild client list for server queries this often
 
 GVAR(IDF_ADMIN, connectlock, 0, PRIV_NONE, PRIV_CREATOR);
 GVAR(IDF_ADMIN, messagelock, 0, PRIV_NONE, PRIV_CREATOR);
@@ -142,7 +143,8 @@ GFVAR(IDF_ADMIN, votethreshold, 0, 0.5f, 1); // auto-pass votes when this many a
 GVAR(IDF_ADMIN, smallmapmax, 0, 6, VAR_MAX); // maximum number of players for a small map
 GVAR(IDF_ADMIN, mediummapmax, 0, 12, VAR_MAX); // maximum number of players for a medium map
 
-GVAR(IDF_ADMIN, waitforplayers, 0, 30000, VAR_MAX); // wait this long for players to load the map
+GVAR(IDF_ADMIN, waitforplayers, 0, 2, 2); // wait this long for players, 0 = off, 1 = load the map, 2 = join the game
+GVAR(IDF_ADMIN, waitforplayertime, 1000, 30000, VAR_MAX); // wait this long for players to be ready
 GVAR(IDF_ADMIN, waitforplayerannounce, 0, 0, VAR_MAX); // update everyone on the progress every this often
 
 namespace server
@@ -242,14 +244,15 @@ GFVAR(0, damageselfscale, FVAR_MIN, 1, FVAR_MAX); // 0 = off, anything else = sc
 GVAR(0, damageteam, 0, 1, 2); // 0 = off, 1 = non-bots damage team, 2 = all players damage team
 GFVAR(0, damageteamscale, FVAR_MIN, 1, FVAR_MAX); // 0 = off, anything else = scale for damage
 
-GVAR(0, teambalance, 0, 4, 4); // 0 = off, 1 = by number then rank, 2 = by rank then number, 3 = by number and enforce, 4 = number, enforce, and reassign
-GVAR(0, teambalanceduel, 0, 0, 1); // allow teambalance in duel
-GVAR(0, teambalanceplaying, 2, 2, VAR_MAX); // min players before teambalance 4 reassignments occur
-GVAR(0, teambalanceamt, 2, 2, VAR_MAX); // max-min offset before teambalance 4 reassignments occur
-GVAR(0, teambalancewait, 10000, 60000, VAR_MAX); // how long before teambalance 4 can happen again
-GVAR(0, teambalancedelay, 2000, 15000, VAR_MAX); // how long before teambalance 4 reassignments start
+GVAR(0, teambalance, 0, 6, 6); // 0 = off, 1 = by number then skill, 2 = by skill then number, 3 = by number and enforce, 4 = number, enforce, reassign, 5 = skill, number, enforce, reassign, 6 = skill during gamewait, revert to 4 otherwise
+GVAR(0, teambalanceduel, 0, 0, 1); // allow reassignments in duel
+GVAR(0, teambalanceplaying, 2, 2, VAR_MAX); // min players before reassignments occur
+GVAR(0, teambalanceamt, 2, 2, VAR_MAX); // max-min offset before reassignments occur
+GVAR(0, teambalancewait, 10000, 60000, VAR_MAX); // how long before can happen again
+GVAR(0, teambalancedelay, 2000, 15000, VAR_MAX); // how long before reassignments start
 GVAR(0, teambalanceswap, 0, 1, 1); // allow swap requests if unable to change team
-GVAR(0, teambalancestyle, 0, 2, 3); // when moving players, sort by: 0 = top of list, 1 = lowest time played, 2 = lowest points, 3 = lowest frags
+GVAR(0, teambalancelock, 0, PRIV_PLAYER, PRIV_CREATOR); // level at which one can override swap and automatically reassign a lower player
+GVAR(0, teambalancestyle, 0, 4, 4); // when moving players, sort by: 0 = top of list, 1 = lowest time played, 2 = lowest points, 3 = lowest frags, 4 = lowest skill
 
 GVAR(0, trialgauntletwinner, 0, 1, 1); // declare the winner when the final team exceeds best score
 
