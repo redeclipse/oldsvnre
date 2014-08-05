@@ -290,7 +290,7 @@ GVAR(0, captureregenextra, 0, 2, VAR_MAX); // add this to regen when buffed
 
 GVAR(0, defendlimit, 0, 0, VAR_MAX); // finish when score is this or more
 GVAR(0, defendpoints, 0, 1, VAR_MAX); // points added to score
-GVAR(0, defendinterval, 0, 10, VAR_MAX);
+GVAR(0, defendinterval, 0, 100, VAR_MAX);
 GVAR(0, defendhold, 1, 100, VAR_MAX); // points needed to gain a score point
 GVAR(0, defendoccupy, 1, 100, VAR_MAX); // points needed to occupy in regular games
 GVAR(0, defendking, 1, 100, VAR_MAX); // points needed to occupy in king of the hill

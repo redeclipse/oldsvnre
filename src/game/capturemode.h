@@ -188,7 +188,8 @@ struct captureservmode : capturestate, servmode
         {
             flag &f = flags[i];
             putint(p, f.team);
-            putint(p, f.ent);
+            putint(p, f.yaw);
+            putint(p, f.pitch);
             putint(p, f.owner);
             loopj(3) putint(p, int(f.spawnloc[j]*DMF));
             if(f.owner<0)
@@ -269,11 +270,11 @@ struct captureservmode : capturestate, servmode
         {
             loopi(numflags)
             {
-                int team = getint(p), ent = getint(p);
+                int team = getint(p), yaw = getint(p), pitch = getint(p);
                 vec o;
                 loopj(3) o[j] = getint(p)/DMF;
                 if(p.overread()) break;
-                if(!hasflaginfo && i < MAXPARAMS) addaffinity(o, team, ent);
+                if(!hasflaginfo && i < MAXPARAMS) addaffinity(o, team, yaw, pitch);
             }
             if(!hasflaginfo)
             {

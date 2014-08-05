@@ -12,22 +12,20 @@ struct defendstate
     struct flag
     {
         vec o;
-        int kinship, ent, owner, enemy;
+        int kinship, yaw, pitch, owner, enemy;
         string name;
 #ifndef GAMESERVER
         string info;
         bool hasflag;
         int lasthad;
         vec render, above;
+        entitylight baselight;
 #endif
         int owners, enemies, converted, points;
 
         flag()
         {
             kinship = T_NEUTRAL;
-#ifndef GAMESERVER
-            ent = -1;
-#endif
             reset();
         }
 
@@ -42,7 +40,7 @@ struct defendstate
         {
             noenemy();
             owner = kinship;
-            owners = points = 0;
+            yaw = pitch = owners = points = 0;
 #ifndef GAMESERVER
             hasflag = false;
             lasthad = 0;
@@ -132,9 +130,11 @@ struct defendstate
         flags.shrink(0);
     }
 
-    void addaffinity(const vec &o, int team, int ent, const char *name)
+    void addaffinity(const vec &o, int team, int yaw, int pitch, const char *name)
     {
         flag &b = flags.add();
+        b.kinship = team;
+        b.reset();
         b.o = o;
 #ifndef GAMESERVER
         b.render = b.above = o;
@@ -142,19 +142,19 @@ struct defendstate
         physics::droptofloor(b.render);
         if(b.render.z >= b.above.z-1) b.above.z += (b.render.z-(b.above.z-1))+2;
 #endif
-        b.kinship = team;
-        b.reset();
-        b.ent = ent;
+        b.yaw = yaw;
+        b.pitch = pitch;
         copystring(b.name, name);
     }
 
-    void initaffinity(int i, int kin, int ent, vec &o, int owner, int enemy, int converted, const char *name)
+    void initaffinity(int i, int kin, int yaw, int pitch, vec &o, int owner, int enemy, int converted, const char *name)
     {
         if(!flags.inrange(i)) return;
         flag &b = flags[i];
         b.kinship = kin;
         b.reset();
-        b.ent = ent;
+        b.yaw = yaw;
+        b.pitch = pitch;
         b.o = o;
 #ifndef GAMESERVER
         b.render = b.above = o;
@@ -214,7 +214,6 @@ namespace defend
     extern void preload();
     extern void render();
     extern void adddynlights();
-    extern int aiowner(gameent *d);
     extern void aifind(gameent *d, ai::aistate &b, vector<ai::interest> &interests);
     extern bool aicheck(gameent *d, ai::aistate &b);
     extern bool aidefense(gameent *d, ai::aistate &b);

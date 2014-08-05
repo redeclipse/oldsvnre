@@ -116,7 +116,8 @@ struct defendservmode : defendstate, servmode
         {
             flag &b = flags[i];
             putint(p, b.kinship);
-            putint(p, b.ent);
+            putint(p, b.yaw);
+            putint(p, b.pitch);
             putint(p, b.converted);
             putint(p, b.owner);
             putint(p, b.enemy);
@@ -225,13 +226,13 @@ struct defendservmode : defendstate, servmode
         {
             loopi(numflags)
             {
-                int kin = getint(p), ent = getint(p);
+                int kin = getint(p), yaw = getint(p), pitch = getint(p);
                 vec o;
                 loopj(3) o[j] = getint(p)/DMF;
                 string name;
                 getstring(name, p);
                 if(p.overread()) break;
-                if(!hasflaginfo && i < MAXPARAMS) addaffinity(o, kin, ent, name);
+                if(!hasflaginfo && i < MAXPARAMS) addaffinity(o, kin, yaw, pitch, name);
             }
             if(!hasflaginfo)
             {
