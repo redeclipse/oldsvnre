@@ -252,6 +252,18 @@ namespace server
             yaw = pitch = roll = 0;
         }
 
+        void updatetimeplayed(bool last = true)
+        {
+            timeplayed += totalmillis-lasttimeplayed;
+            if(last) lasttimeplayed = totalmillis;
+        }
+
+        float scoretime(bool update = true)
+        {
+            if(update) updatetimeplayed();
+            return score/float(max(timeplayed, 1));
+        }
+
         vec feetpos(float offset = 0) const { return vec(o).add(vec(0, 0, offset)); }
         vec headpos(float offset = 0) const { return vec(o).add(vec(0, 0, offset+actor[actortype].height)); }
         vec center() const { return vec(o).add(vec(0, 0, actor[actortype].height*0.5f)); }
@@ -1417,6 +1429,96 @@ namespace server
         return result;
     }
 
+    void doteambalance(bool init)
+    {
+        vector<clientinfo *> tc[T_TOTAL];
+        int numplaying = 0;
+        loopv(clients)
+        {
+            clientinfo *cp = clients[i];
+            if(!cp->team || cp->state.state == CS_SPECTATOR || cp->state.actortype > A_PLAYER) continue;
+            cp->state.updatetimeplayed();
+            tc[cp->team-T_FIRST].add(cp);
+            numplaying++;
+        }
+        if(numplaying >= G(teambalanceplaying))
+        {
+            int nt = numteams(gamemode, mutators), mid = numplaying/nt, pmax = -1, pmin = -1;
+            loopi(nt)
+            {
+                int cl = tc[i].length();
+                if(pmax < 0 || cl > pmax) pmax = cl;
+                if(pmin < 0 || cl < pmin) pmin = cl;
+            }
+            int offset = pmax-pmin;
+            if(offset >= G(teambalanceamt))
+            {
+                if(!init && !nextteambalance)
+                {
+                    int secs = G(teambalancedelay)/1000;
+                    nextteambalance = gamemillis+G(teambalancedelay);
+                    ancmsgft(-1, S_V_BALWARN, CON_EVENT, "\fy\fs\fzoyWARNING:\fS \fs\fcteams\fS will be \fs\fcbalanced\fS in \fs\fc%d\fS %s", secs, secs != 1 ? "seconds" : "second");
+                }
+                else if(init || canbalancenow())
+                {
+                    int moved = 0;
+                    loopi(nt) for(int team = i+T_FIRST, iters = tc[i].length(); iters > 0 && tc[i].length() > mid; iters--)
+                    {
+                        int id = -1;
+                        loopvj(tc[i])
+                        {
+                            clientinfo *cp = tc[i][j];
+                            if(m_swapteam(gamemode, mutators) && cp->swapteam && cp->swapteam == team) { id = j; break; }
+                            switch(G(teambalancestyle))
+                            {
+                                case 1: if(id < 0 || tc[i][id]->state.timeplayed > cp->state.timeplayed) id = j; break;
+                                case 2: if(id < 0 || tc[i][id]->state.points > cp->state.points) id = j; break;
+                                case 3: if(id < 0 || tc[i][id]->state.frags > cp->state.frags) id = j; break;
+                                case 4: if(id < 0 || tc[i][id]->state.scoretime(false) > cp->state.scoretime(false)) id = j; break;
+                                case 0: default: if(id < 0) id = j; break;
+                            }
+                            if(!G(teambalancestyle) && !m_swapteam(gamemode, mutators)) break;
+                        }
+                        if(id >= 0)
+                        {
+                            clientinfo *cp = tc[i][id];
+                            cp->swapteam = T_NEUTRAL; // make them rechoose if necessary
+                            int team = chooseteam(cp);
+                            if(team != cp->team)
+                            {
+                                setteam(cp, team, (m_balreset(gamemode, mutators) ? TT_RESET : 0)|TT_INFOSM, false);
+                                cp->state.lastdeath = 0;
+                                tc[i].removeobj(cp);
+                                tc[team-T_FIRST].add(cp);
+                                moved++;
+                            }
+                        }
+                        else break; // won't get any more
+                    }
+                    if(!init)
+                    {
+                        if(moved) ancmsgft(-1, S_V_BALALERT, CON_EVENT, "\fy\fs\fzoyALERT:\fS \fs\fcteams\fS have now been \fs\fcbalanced\fS");
+                        else ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fy\fs\fzoyALERT:\fS \fs\fcteams\fS failed to be \fs\fcbalanced\fS");
+                    }
+                    lastteambalance = gamemillis+G(teambalancewait);
+                    nextteambalance = 0;
+                }
+            }
+            else
+            {
+                if(!init && nextteambalance) ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fy\fs\fzoyALERT:\fS \fs\fcteams\fS no longer need to be \fs\fcbalanced\fS");
+                lastteambalance = gamemillis+(nextteambalance ? G(teambalancewait) : G(teambalancedelay));
+                nextteambalance = 0;
+            }
+        }
+        else
+        {
+            if(!init && nextteambalance) ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fy\fs\fzoyALERT:\fS \fs\fcteams\fS are no longer able to be \fs\fcbalanced\fS");
+            lastteambalance = gamemillis+(nextteambalance ? G(teambalancewait) : G(teambalancedelay));
+            nextteambalance = 0;
+        }
+    }
+
     void checklimits()
     {
         if(!m_fight(gamemode)) return;
@@ -1570,91 +1672,7 @@ namespace server
         }
         if(m_balteam(gamemode, mutators, 4) && !inovertime && !interm && gamemillis >= G(teambalancewait) &&
            (!lastteambalance || gamemillis >= lastteambalance) && (!nextteambalance || gamemillis >= nextteambalance))
-        {
-            vector<clientinfo *> tc[T_TOTAL];
-            int numplaying = 0;
-            loopv(clients)
-            {
-                clientinfo *cp = clients[i];
-                if(!cp->team || cp->state.state == CS_SPECTATOR || cp->state.actortype > A_PLAYER) continue;
-                cp->state.timeplayed += totalmillis-cp->state.lasttimeplayed;
-                cp->state.lasttimeplayed = totalmillis;
-                tc[cp->team-T_FIRST].add(cp);
-                numplaying++;
-            }
-            if(numplaying >= G(teambalanceplaying))
-            {
-                int nt = numteams(gamemode, mutators), mid = numplaying/nt, pmax = -1, pmin = -1;
-                loopi(nt)
-                {
-                    int cl = tc[i].length();
-                    if(pmax < 0 || cl > pmax) pmax = cl;
-                    if(pmin < 0 || cl < pmin) pmin = cl;
-                }
-                int offset = pmax-pmin;
-                if(offset >= G(teambalanceamt))
-                {
-                    if(!nextteambalance)
-                    {
-                        int secs = G(teambalancedelay)/1000;
-                        nextteambalance = gamemillis+G(teambalancedelay);
-                        ancmsgft(-1, S_V_BALWARN, CON_EVENT, "\fy\fs\fzoyWARNING:\fS \fs\fcteams\fS will be \fs\fcbalanced\fS in \fs\fc%d\fS %s", secs, secs != 1 ? "seconds" : "second");
-                    }
-                    else if(canbalancenow())
-                    {
-                        int moved = 0;
-                        loopi(nt) for(int team = i+T_FIRST, iters = tc[i].length(); iters > 0 && tc[i].length() > mid; iters--)
-                        {
-                            int id = -1;
-                            loopvj(tc[i])
-                            {
-                                clientinfo *cp = tc[i][j];
-                                if(m_swapteam(gamemode, mutators) && cp->swapteam && cp->swapteam == team) { id = j; break; }
-                                switch(G(teambalancestyle))
-                                {
-                                    case 1: if(id < 0 || tc[i][id]->state.timeplayed > cp->state.timeplayed) id = j; break;
-                                    case 2: if(id < 0 || tc[i][id]->state.points > cp->state.points) id = j; break;
-                                    case 3: if(id < 0 || tc[i][id]->state.frags > cp->state.frags) id = j; break;
-                                    case 0: default: if(id < 0) id = j; break;
-                                }
-                                if(!G(teambalancestyle) && !m_swapteam(gamemode, mutators)) break;
-                            }
-                            if(id >= 0)
-                            {
-                                clientinfo *cp = tc[i][id];
-                                cp->swapteam = T_NEUTRAL; // make them rechoose if necessary
-                                int team = chooseteam(cp);
-                                if(team != cp->team)
-                                {
-                                    setteam(cp, team, (m_balreset(gamemode, mutators) ? TT_RESET : 0)|TT_INFOSM, false);
-                                    cp->state.lastdeath = 0;
-                                    tc[i].removeobj(cp);
-                                    tc[team-T_FIRST].add(cp);
-                                    moved++;
-                                }
-                            }
-                            else break; // won't get any more
-                        }
-                        if(moved) ancmsgft(-1, S_V_BALALERT, CON_EVENT, "\fy\fs\fzoyALERT:\fS \fs\fcteams\fS have now been \fs\fcbalanced\fS");
-                        else ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fy\fs\fzoyALERT:\fS \fs\fcteams\fS failed to be \fs\fcbalanced\fS");
-                        lastteambalance = gamemillis+G(teambalancewait);
-                        nextteambalance = 0;
-                    }
-                }
-                else
-                {
-                    if(nextteambalance) ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fy\fs\fzoyALERT:\fS \fs\fcteams\fS no longer need to be \fs\fcbalanced\fS");
-                    lastteambalance = gamemillis+(nextteambalance ? G(teambalancewait) : G(teambalancedelay));
-                    nextteambalance = 0;
-                }
-            }
-            else
-            {
-                if(nextteambalance) ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fy\fs\fzoyALERT:\fS \fs\fcteams\fS are no longer able to be \fs\fcbalanced\fS");
-                lastteambalance = gamemillis+(nextteambalance ? G(teambalancewait) : G(teambalancedelay));
-                nextteambalance = 0;
-            }
-        }
+                doteambalance(false);
     }
 
     bool hasitem(int i)
@@ -2478,8 +2496,7 @@ namespace server
             clientinfo *oi = clients[i];
             if(oi->clientnum != ci->clientnum && scorecmp(ci, ip, oi->name, oi->handle, getclientip(oi->clientnum)))
             {
-                oi->state.timeplayed += totalmillis-oi->state.lasttimeplayed;
-                oi->state.lasttimeplayed = totalmillis;
+                oi->state.updatetimeplayed();
                 static savedscore curscore;
                 curscore.save(oi->state);
                 return &curscore;
@@ -2513,7 +2530,7 @@ namespace server
 
     void savescore(clientinfo *ci)
     {
-        ci->state.timeplayed += totalmillis-ci->state.lasttimeplayed;
+        ci->state.updatetimeplayed(false);
         savedscore *sc = findscore(ci, true);
         if(sc)
         {
@@ -2544,6 +2561,28 @@ namespace server
             cp->state.lastdeath = 0;
             ancmsgft(cp->clientnum, S_V_BALALERT, CON_EVENT, "\fyyou have been moved to %s as previously requested", colourteam(oldteam));
             return;
+        }
+        if(haspriv(ci, G(teambalancelock)))
+        {
+            int worst = -1;
+            float csk = ci->state.scoretime(), wsk = 0;
+            loopv(clients) if(clients[i] && clients[i] != ci)
+            {
+                clientinfo *cp = clients[i];
+                if(cp->state.actortype != A_PLAYER || (newteam && cp->team != newteam)) continue;
+                float psk = cp->state.scoretime();
+                if(psk > csk || worst < 0 || psk > wsk) continue;
+                worst = i;
+                wsk = psk;
+            }
+            if(worst >= 0)
+            {
+                clientinfo *cp = clients[worst];
+                setteam(cp, oldteam, TT_RESET|TT_INFOSM, false);
+                cp->state.lastdeath = 0;
+                ancmsgft(cp->clientnum, S_V_BALALERT, CON_EVENT, "\fyyou have been moved to %s by higher skilled player %s", colourteam(oldteam), colourname(ci));
+                return;
+            }
         }
     }
 
@@ -2610,6 +2649,7 @@ namespace server
             int team = -1, bal = human ? G(teambalance) : 1;
             if(human)
             {
+                if(bal == 6 && !gamewait) bal = 4;
                 if(m_coop(gamemode, mutators)) return mapbals[curbalance][0];
                 int teams[3][3] = {
                     { suggest, ci->team, -1 },
@@ -2635,9 +2675,7 @@ namespace server
                     return team; // swapteam
                 if(ci->state.actortype > A_PLAYER || (ci->state.actortype == A_PLAYER && cp->state.actortype == A_PLAYER))
                 { // remember: ai just balance teams
-                    cp->state.timeplayed += totalmillis-cp->state.lasttimeplayed;
-                    cp->state.lasttimeplayed = totalmillis;
-                    ts.score += cp->state.score/float(max(cp->state.timeplayed, 1));
+                    ts.score += cp->state.scoretime();
                     ts.clients++;
                 }
             }
@@ -2649,7 +2687,7 @@ namespace server
                     teamcheck &ts = teamchecks[i];
                     switch(bal)
                     {
-                        case 2:
+                        case 2: case 5: case 6:
                         {
                             if(!worst || (team > 0 && ts.team == team && ts.score <= worst->score) || ts.score < worst->score || ((team <= 0 || worst->team != team) && ts.score == worst->score && ts.clients < worst->clients))
                                 worst = &ts;
@@ -3234,6 +3272,7 @@ namespace server
         {
             clientinfo *cs = clients[i];
             if(cs->state.actortype > A_PLAYER || !cs->name[0] || !cs->online || cs->wantsmap || cs->warned) continue;
+            cs->state.updatetimeplayed();
             if(!best || cs->state.timeplayed > best->state.timeplayed) best = cs;
         }
         return best;
@@ -4262,7 +4301,7 @@ namespace server
             sendf(-1, 1, "ri3", N_SPECTATOR, ci->clientnum, quarantine ? 2 : 1);
             ci->state.state = CS_SPECTATOR;
             ci->state.quarantine = quarantine;
-            ci->state.timeplayed += totalmillis-ci->state.lasttimeplayed;
+            ci->state.updatetimeplayed(false);
             setteam(ci, T_NEUTRAL, TT_INFO);
             if(ci->ready) aiman::poke();
         }
@@ -4407,18 +4446,22 @@ namespace server
 
         if(gamewait)
         {
-            if(interm || !needswait() || totalmillis-gamewait >= G(waitforplayers)) gamewait = 0;
+            if(interm || !needswait() || totalmillis-gamewait >= G(waitforplayertime)) gamewait = 0;
             else
             {
                 int numwait = 0;
-                loopv(clients) if(!clients[i]->ready) numwait++;
+                loopv(clients) if(!clients[i]->ready || (G(waitforplayers) == 2 && clients[i]->state.state == CS_SPECTATOR)) numwait++;
                 if(!numwait) gamewait = lastwaitinfo = 0;
-                else if(G(waitforplayerannounce) && numclients() > 1 && (!lastwaitinfo || totalmillis-lastwaitinfo >= G(waitforplayerannounce)))
+                else if(G(waitforplayerannounce) && (!lastwaitinfo || totalmillis-lastwaitinfo >= G(waitforplayerannounce)) && numwait != numclients())
                 {
-                    if(numwait != numclients())
-                        srvoutf(-3, "\fawaiting for \fs\fc%d\fS %s to be ready..", numwait, numwait != 1 ? "players" : "player");
+                    srvoutf(-3, "\fawaiting for \fs\fc%d\fS %s to be ready..", numwait, numwait != 1 ? "players" : "player");
                     lastwaitinfo = totalmillis;
                 }
+            }
+            if(!gamewait)
+            {
+                if(m_team(gamemode, mutators)) doteambalance(true);
+                if(m_dm(gamemode) && !m_duke(gamemode, mutators)) sendf(-1, 1, "ri3s", N_ANNOUNCE, S_V_FIGHT, CON_INFO, "match start, fight!");
             }
         }
         if(numclients())
@@ -4497,19 +4540,26 @@ namespace server
         else shouldcheckvotes = true;
     }
 
+    int lastquerysort = 0;
     static int querysort(const clientinfo *a, const clientinfo *b)
     {
         if(a->state.points > b->state.points) return -1;
         if(a->state.points < b->state.points) return 1;
         return strcmp(a->name, b->name);
     }
+    vector<clientinfo *> queryplayers;
 
     void queryreply(ucharbuf &req, ucharbuf &p)
     {
         if(!getint(req)) return;
-        vector<clientinfo *> q;
-        loopv(clients) if(clients[i]->clientnum >= 0 && clients[i]->name[0] && clients[i]->state.actortype == A_PLAYER) q.add(clients[i]);
-        putint(p, q.length());
+        if(!lastquerysort || totalmillis-lastquerysort >= G(queryinterval))
+        {
+            queryplayers.setsize(0);
+            loopv(clients) if(clients[i]->clientnum >= 0 && clients[i]->name[0] && clients[i]->state.actortype == A_PLAYER) queryplayers.add(clients[i]);
+            queryplayers.sort(querysort);
+            lastquerysort = totalmillis;
+        }
+        putint(p, queryplayers.length());
         putint(p, 8); // number of attrs following
         putint(p, GAMEVERSION); // 1
         putint(p, gamemode); // 2
@@ -4531,11 +4581,10 @@ namespace server
             sendstring(cname, p);
             #endif
         }
-        if(!q.empty())
+        if(!queryplayers.empty())
         {
-            q.sort(querysort);
-            loopv(q) sendstring(colourname(q[i]), p);
-            loopv(q) sendstring(q[i]->handle, p);
+            loopv(queryplayers) sendstring(colourname(queryplayers[i]), p);
+            loopv(queryplayers) sendstring(queryplayers[i]->handle, p);
         }
         sendqueryreply(p);
     }
@@ -5957,7 +6006,7 @@ namespace server
                     int who = getint(p), team = getint(p);
                     clientinfo *cp = (clientinfo *)getinfo(who);
                     if(!cp || !m_team(gamemode, mutators) || m_local(gamemode) || cp->state.actortype >= A_ENEMY) break;
-                    if(who<0 || who>=getnumclients() || !haspriv(ci, G(teamlock), "change the team of others")) break;
+                    if(who < 0 || who >= getnumclients() || !haspriv(ci, G(teamlock), "change the team of others")) break;
                     if(cp->state.state == CS_SPECTATOR || !allowteam(cp, team, T_FIRST, false)) break;
                     setteam(cp, team, TT_RESETX);
                     break;
