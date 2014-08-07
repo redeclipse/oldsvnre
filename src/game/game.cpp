@@ -3367,14 +3367,14 @@ namespace game
                         }
                         else if(!d->hasweap(weap, m_weapon(gamemode, mutators))) showweap = false;
                         else if(millis <= off*2) weapscale = (millis-off)/float(off);
-                        weapflags = animflags = ANIM_SWITCH+(d->weapstate[weap]-W_S_SWITCH);
+                        weapflags = animflags = d->weapstate[weap] == W_S_SWITCH ? ANIM_SWITCH : ANIM_USE;
                         break;
                     }
                     case W_S_POWER: case W_S_ZOOM:
                     {
                         switch(weaptype[weap].anim)
                         {
-                            case ANIM_GRENADE: case ANIM_MINE: weapflags = animflags = weaptype[weap].anim+d->weapstate[weap]; break;
+                            case ANIM_GRENADE: weapflags = animflags = ANIM_GRENADE_POWER; break;
                             default: weapflags = animflags = weaptype[weap].anim|ANIM_LOOP; break;
                         }
                         break;
