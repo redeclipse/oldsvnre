@@ -2171,7 +2171,7 @@ namespace client
                     int trg = getint(p), weap = getint(p);
                     gameent *m = game::getclient(trg);
                     if(!m || !isweap(weap)) break;
-                    weapons::weapselect(m, weap, G(weaponinterrupts), false);
+                    weapons::weapselect(m, weap, (1<<W_S_SWITCH)|(1<<W_S_RELOAD), false);
                     break;
                 }
 

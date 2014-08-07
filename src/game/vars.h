@@ -451,7 +451,6 @@ GVAR(0, zoomtime, 1, 250, VAR_MAX);
 GFVAR(0, radialscale, 0, 1, FVAR_MAX);
 GFVAR(0, radiallimited, 0, 0.75f, FVAR_MAX);
 GFVAR(0, damagescale, 0, 1, FVAR_MAX);
-GVAR(0, weaponinterrupts, 0, W_S_INTERRUPT, W_S_ALL); // what weapon states can have their delay interrupted
 GVAR(0, weaponswitchdelay, 0, 500, VAR_MAX);
 
 GFVAR(0, pushscale, 0, 1, FVAR_MAX);

@@ -1199,7 +1199,7 @@ namespace ai
         {
             if(d->ai->dontmove && haswaited && !firing && d->carry(sweap, 1) > 1)
             {
-                loopirev(W_ITEM) if(i != d->ai->weappref && d->candrop(i, sweap, lastmillis, G(weaponinterrupts)))
+                loopirev(W_ITEM) if(i != d->ai->weappref && d->candrop(i, sweap, lastmillis, (1<<W_S_SWITCH)|(1<<W_S_RELOAD)))
                 {
                     client::addmsg(N_DROP, "ri3", d->clientnum, lastmillis-game::maptime, i);
                     d->setweapstate(d->weapselect, W_S_WAIT, weaponswitchdelay, lastmillis);
@@ -1245,7 +1245,7 @@ namespace ai
                         {
                             extentity &e = *entities::ents[ent];
                             int attr = w_attr(game::gamemode, game::mutators, e.type, e.attrs[0], sweap);
-                            if(d->canuse(e.type, attr, e.attrs, sweap, lastmillis, G(weaponinterrupts)))
+                            if(d->canuse(e.type, attr, e.attrs, sweap, lastmillis, (1<<W_S_SWITCH)|(1<<W_S_RELOAD)))
                             {
                                 if(!wantsweap(d, attr)) break;
                                 d->action[AC_USE] = true;
@@ -1279,7 +1279,7 @@ namespace ai
                     break;
                 }
             }
-            if(isweap(weap) && weap != d->weapselect && weapons::weapselect(d, weap, G(weaponinterrupts)))
+            if(isweap(weap) && weap != d->weapselect && weapons::weapselect(d, weap, (1<<W_S_SWITCH)|(1<<W_S_RELOAD)))
             {
                 d->ai->lastaction = lastmillis;
                 return true;

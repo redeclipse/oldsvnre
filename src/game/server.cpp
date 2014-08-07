@@ -4030,9 +4030,9 @@ namespace server
             sendf(ci->clientnum, 1, "ri3", N_WSELECT, ci->clientnum, gs.weapselect);
             return;
         }
-        if(!gs.canswitch(weap, m_weapon(gamemode, mutators), millis))
+        if(!gs.canswitch(weap, m_weapon(gamemode, mutators), millis, (1<<W_S_SWITCH)))
         {
-            if(!gs.canswitch(weap, m_weapon(gamemode, mutators), millis, G(weaponinterrupts)))
+            if(!gs.canswitch(weap, m_weapon(gamemode, mutators), millis, (1<<W_S_SWITCH)|(1<<W_S_RELOAD)))
             {
                 if(G(serverdebug)) srvmsgf(ci->clientnum, "sync error: switch [%d] failed - current state disallows it", weap);
                 sendf(-1, 1, "ri3", N_WSELECT, ci->clientnum, gs.weapselect);
@@ -4058,17 +4058,18 @@ namespace server
             return;
         }
         int sweap = m_weapon(gamemode, mutators);
-        if(!gs.candrop(weap, sweap, millis))
+        if(!gs.candrop(weap, sweap, millis, (1<<W_S_SWITCH)))
         {
-            if(!gs.candrop(weap, sweap, millis, G(weaponinterrupts)))
+            if(!gs.candrop(weap, sweap, millis, (1<<W_S_SWITCH)|(1<<W_S_RELOAD)))
             {
                 if(G(serverdebug)) srvmsgf(ci->clientnum, "sync error: drop [%d] failed - current state disallows it", weap);
                 return;
             }
-            if(gs.weapload[weap] > 0)
+            if(gs.weapload[gs.weapselect] > 0)
             {
-                takeammo(ci, weap, gs.weapload[weap]);
-                gs.weapload[weap] = -gs.weapload[weap];
+                takeammo(ci, gs.weapselect, gs.weapload[gs.weapselect]);
+                gs.weapload[gs.weapselect] = -gs.weapload[gs.weapselect];
+                sendf(-1, 1, "ri5x", N_RELOAD, ci->clientnum, gs.weapselect, gs.weapload[gs.weapselect], gs.ammo[gs.weapselect], ci->clientnum);
             }
         }
         int dropped = -1, ammo = -1, nweap = gs.bestweap(sweap, true); // switch to best weapon
@@ -4118,9 +4119,9 @@ namespace server
             return;
         }
         int sweap = m_weapon(gamemode, mutators), attr = w_attr(gamemode, mutators, sents[ent].type, sents[ent].attrs[0], sweap);
-        if(!gs.canuse(sents[ent].type, attr, sents[ent].attrs, sweap, millis))
+        if(!gs.canuse(sents[ent].type, attr, sents[ent].attrs, sweap, millis, (1<<W_S_SWITCH)))
         {
-            if(!gs.canuse(sents[ent].type, attr, sents[ent].attrs, sweap, millis, G(weaponinterrupts)))
+            if(!gs.canuse(sents[ent].type, attr, sents[ent].attrs, sweap, millis, (1<<W_S_SWITCH)|(1<<W_S_RELOAD)))
             {
                 if(G(serverdebug)) srvmsgf(ci->clientnum, "sync error: use [%d] failed - current state disallows it", ent);
                 return;

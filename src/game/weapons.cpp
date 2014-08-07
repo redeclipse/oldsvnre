@@ -53,7 +53,7 @@ namespace weapons
             interrupts &= ~(1<<W_S_RELOAD);
             if(!d->canswitch(weap, m_weapon(game::gamemode, game::mutators), lastmillis, interrupts))
             {
-                if(!d->canswitch(weap, m_weapon(game::gamemode, game::mutators), lastmillis, (1<<W_S_RELOAD))) return false;
+                if(!d->canswitch(weap, m_weapon(game::gamemode, game::mutators), lastmillis, filter)) return false;
                 else if(!isweap(d->weapselect) || d->weapload[d->weapselect] <= 0) return false;
                 else
                 {
@@ -95,7 +95,7 @@ namespace weapons
     {
         if(game::intermission || a < -1 || b < -1 || a >= W_MAX || b >= W_MAX) return;
         if(weapselectdelay && lastweapselect && totalmillis-lastweapselect < weapselectdelay) return;
-        if(d->weapwaited(d->weapselect, lastmillis, G(weaponinterrupts)))
+        if(d->weapwaited(d->weapselect, lastmillis, (1<<W_S_SWITCH)|(1<<W_S_RELOAD)))
         {
             int s = slot(d, d->weapselect);
             loopi(W_MAX) // only loop the amount of times we have weaps for
@@ -127,7 +127,7 @@ namespace weapons
                     skipweap(skipmine, W_MINE);
                 }
 
-                if(weapselect(d, n, G(weaponinterrupts)))
+                if(weapselect(d, n, (1<<W_S_SWITCH)|(1<<W_S_RELOAD)))
                 {
                     lastweapselect = totalmillis;
                     return;
@@ -144,13 +144,22 @@ namespace weapons
         if(game::intermission) return;
         int weap = isweap(w) ? w : d->weapselect, sweap = m_weapon(game::gamemode, game::mutators);
         d->action[AC_DROP] = false;
-        if(d->candrop(weap, sweap, lastmillis, G(weaponinterrupts)))
+        if(!d->candrop(weap, sweap, lastmillis, (1<<W_S_SWITCH)))
         {
-            client::addmsg(N_DROP, "ri3", d->clientnum, lastmillis-game::maptime, weap);
-            d->setweapstate(weap, W_S_WAIT, weaponswitchdelay, lastmillis);
-            return;
+            if(!d->candrop(weap, sweap, lastmillis, (1<<W_S_SWITCH)|(1<<W_S_RELOAD)) || !isweap(d->weapselect) || d->weapload[d->weapselect] <= 0)
+            {
+                game::errorsnd(d);
+                return;
+            }
+            else
+            {
+                int offset = d->weapload[d->weapselect];
+                d->ammo[d->weapselect] = max(d->ammo[d->weapselect]-offset, 0);
+                d->weapload[d->weapselect] = -d->weapload[d->weapselect];
+            }
         }
-        game::errorsnd(d);
+        client::addmsg(N_DROP, "ri3", d->clientnum, lastmillis-game::maptime, weap);
+        d->setweapstate(weap, W_S_WAIT, weaponswitchdelay, lastmillis);
     }
 
     bool autoreload(gameent *d, int flags = 0)

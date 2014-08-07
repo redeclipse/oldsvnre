@@ -570,12 +570,11 @@ namespace entities
                     gameent *f = (gameent *)d;
                     if(game::allowmove(f))
                     {
-                        int interrupts = G(weaponinterrupts), sweap = m_weapon(game::gamemode, game::mutators), attr = w_attr(game::gamemode, game::mutators, e.type, e.attrs[0], sweap);
-                        interrupts &= ~(1<<W_S_RELOAD);
-                        if(!f->canuse(e.type, attr, e.attrs, sweap, lastmillis, interrupts))
+                        int sweap = m_weapon(game::gamemode, game::mutators), attr = w_attr(game::gamemode, game::mutators, e.type, e.attrs[0], sweap);
+                        if(!f->canuse(e.type, attr, e.attrs, sweap, lastmillis, (1<<W_S_SWITCH)))
                         {
                             if(e.type != WEAPON) return false;
-                            else if(!f->canuse(e.type, attr, e.attrs, sweap, lastmillis, (1<<W_S_RELOAD))) return true;
+                            else if(!f->canuse(e.type, attr, e.attrs, sweap, lastmillis, (1<<W_S_SWITCH)|(1<<W_S_RELOAD))) return true;
                             else if(!isweap(f->weapselect) || f->weapload[f->weapselect] <= 0) return true;
                             else
                             {
