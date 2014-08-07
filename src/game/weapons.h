@@ -16,9 +16,7 @@ enum {
 };
 enum {
     W_S_IDLE = 0, W_S_PRIMARY, W_S_SECONDARY, W_S_RELOAD, W_S_SWITCH, W_S_USE, W_S_POWER, W_S_ZOOM, W_S_WAIT, W_S_MAX,
-    W_S_INTERRUPT = (1<<W_S_RELOAD)|(1<<W_S_SWITCH),
-    W_S_EXCLUDE = (1<<W_S_IDLE)|(1<<W_S_POWER)|(1<<W_S_ZOOM),
-    W_S_ALL = (1<<W_S_PRIMARY)|(1<<W_S_SECONDARY)|(1<<W_S_RELOAD)|(1<<W_S_SWITCH)
+    W_S_EXCLUDE = (1<<W_S_IDLE)|(1<<W_S_POWER)|(1<<W_S_ZOOM)
 };
 
 enum
