@@ -1,7 +1,7 @@
 #include "engine.h"
 
-VAR(IDF_PERSIST, oqdynent, 0, 1, 1);
-VAR(IDF_PERSIST, animationinterpolationtime, 0, 150, 1000);
+VAR(0, oqdynent, 0, 1, 1);
+VAR(0, animationinterpolationtime, 0, 150, 1000);
 
 model *loadingmodel = NULL;
 
@@ -740,7 +740,7 @@ void endmodelquery()
     modelattached.setsize(minattached);
 }
 
-VAR(IDF_PERSIST, maxmodelradiusdistance, 10, 200, 1000);
+VAR(0, maxmodelradiusdistance, 10, 200, 1000);
 
 void rendermodelquery(model *m, dynent *d, const vec &center, float radius)
 {
