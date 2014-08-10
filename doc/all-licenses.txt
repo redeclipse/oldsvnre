@@ -38,57 +38,56 @@ Files: doc/man/cube2font.1 doc/man/redeclipse.6.am
 Copyright: 2011-2012, Martin Erik "arand" Werner <martinerikwerner@gmail.com>
 License: ZLib
 
-Files: game/fps/maps/biolytic* game/fps/maps/darkness* game/fps/maps/mist*
-       game/fps/maps/nova* game/fps/maps/panic* game/fps/maps/oneiroi*
-       game/fps/maps/processing* game/fps/maps/tranquility*
-       game/fps/maps/vault*
+Files: data/maps/biolytic* data/maps/darkness* data/maps/mist* data/maps/nova*
+       data/maps/panic* data/maps/oneiroi* data/maps/processing*
+       data/maps/tranquility* data/maps/vault*
 Copyright: 2009-2013, Derek "favorito" Ponicki <favorito.redeclipse@gmail.com>
 License: Zlib
 
-Files: game/fps/maps/deadsimple*
+Files: data/maps/deadsimple*
 Copyright: Jonathan 'Wicked' Roels
            2013 Ulukai <jonathan.denil@gmail.com>
 License: CC-BY-SA-3.0
 
-Files: game/fps/maps/ares* game/fps/maps/canals* game/fps/maps/conflict*
+Files: data/maps/ares* data/maps/canals* data/maps/conflict*
 Copyright: 2011-2013, Ulukai <jonathan.denil@gmail.com>
 License: CC-BY-SA-3.0
 
-Files: game/fps/maps/keystone2k* game/fps/maps/livefire*
+Files: data/maps/keystone2k* data/maps/livefire*
 Copyright: 2012-2013, John_III <snaginneb@yahoo.com>
 License: CC-BY-SA-3.0
 
-Files: game/fps/maps/neodrive* game/fps/maps/hawk*
+Files: data/maps/neodrive* data/maps/hawk*
 Copyright: 2012-2013, Kirill "TristamK" Kolesnikov <tristamk@bk.ru>
 License: CC-BY-SA-3.0
 
-Files: game/fps/maps/cutec*
+Files: data/maps/cutec*
 Copyright: 2012-2013, Raiden
 License: CC-BY-SA-3.0
 
-Files: game/fps/maps/erosion* game/fps/maps/suspended*
+Files: data/maps/erosion* data/maps/suspended*
 Copyright: 2012-2013 Matt "greasepirate" Kalt
 License: CC-BY-3.0
 
-Files: game/fps/maps/battlefield*
+Files: data/maps/battlefield*
 Copyright: 2012-2013, Quinton Reeves, Ulukai <jonathan.denil@gmail.com>
 License: CC-BY-SA-3.0+
 
-Files: game/fps/maps/cyanide*
+Files: data/maps/cyanide*
 Copyright: 2013 Ricky Thomson "unixfreak" <punkalert@gmail.com>
 License: CC-BY-SA-3.0
 
-Files: game/fps/maps/steelrat*
+Files: data/maps/steelrat*
 Copyright: 2012 Kirill "TristamK" Kolesnikov <tristamk@bk.ru>
            2012-2013 D.a.M.i.E.n. <daymeenn@gmail.com>
 License: CC-BY-SA-3.0
 
-Files: game/fps/maps/venus*
+Files: data/maps/venus*
 Copyright: 2011-2013, Red Eclipse Team
            2013, Ulukai <jonathan.denil@gmail.com>
 License: CC-BY-SA-3.0
 
-Files: game/fps/maps/bloodlust*
+Files: data/maps/bloodlust*
 Copyright: 2013 Joseph "ballist1c" Calabria
            2013 Matt "greaserpirate" Kalt
 License: CC-BY-SA-3.0
@@ -157,6 +156,14 @@ Files: data/philipk/
 Copyright: Philip Klevestav <philipk@philipk.net>
 License: CC-BY-3.0
 
+Files: data/particles/bullet.png
+       data/particles/energy.png
+       data/particles/scorch.png
+       data/particles/blob.png
+Copyright: public-domain
+License: public-domain
+ public-domain sources
+
 Files: data/particles/smoke.png data/particles/explosion.png
 Copyright: RaZgRiZ
 License:
@@ -165,6 +172,7 @@ License:
  author is credited for the original work.
 
 Files: data/particles/blood.png
+       data/particles/fire.png
 Copyright: FischKopF
 License: public-domain
  Created by FischKopF, source: http://www.quadropolis.us/node/2693
