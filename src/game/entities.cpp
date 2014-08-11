@@ -2,7 +2,7 @@
 namespace entities
 {
     vector<extentity *> ents;
-    int lastenttype[MAXENTTYPES], lastusetype[EU_MAX], numactors = 0;
+    int lastenttype[MAXENTTYPES], lastusetype[EU_MAX], numactors = 0, lastroutenode = -1;
 
     VAR(IDF_PERSIST, showlighting, 0, 0, 1);
     VAR(IDF_PERSIST, showentmodels, 0, 1, 2);
@@ -21,6 +21,10 @@ namespace entities
     FVAR(IDF_PERSIST, simpleitemsize, 0, 5, 8);
     FVAR(IDF_PERSIST, simpleitemblend, 0, 1, 1);
     FVAR(IDF_PERSIST, simpleitemhalo, 0, 0.5f, 1);
+
+    //VAR(0, routenum, -1, -1, VAR_MAX); // selected route in time trial
+    //VAR(0, droproute, -1, -1, VAR_MAX);
+    //VAR(IDF_WORLD, routedist, 0, 32, VAR_MAX);
 
     vector<extentity *> &getents() { return ents; }
     int lastent(int type) { return type >= 0 && type < MAXENTTYPES ? clamp(lastenttype[type], 0, ents.length()) : 0; }
@@ -1932,7 +1936,7 @@ namespace entities
             progress(i/float(ents.length()), "updating entities...");
             if(mtype == MAP_MAPZ && gver <= 212)
             {
-                if(e.type == UNUSED1) e.type = NOTUSED;
+                if(e.type == ROUTE) e.type = NOTUSED;
                 else if(e.type == UNUSED2)
                 {
                     ai::oldwaypoint &o = ai::oldwaypoints.add();
@@ -1942,7 +1946,7 @@ namespace entities
                     e.type = NOTUSED;
                 }
             }
-            if(mtype == MAP_MAPZ && gver <= 221 && (e.type == UNUSED1 || e.type == UNUSED2)) e.type = NOTUSED;
+            if(mtype == MAP_MAPZ && gver <= 221 && (e.type == ROUTE || e.type == UNUSED2)) e.type = NOTUSED;
             if(e.type < MAXENTTYPES)
             {
                 lastenttype[e.type] = max(lastenttype[e.type], i+1);

@@ -1263,52 +1263,48 @@ namespace hud
     {
         glPushMatrix();
         glScalef(noticescale, noticescale, 1);
-        pushfont("default");
         int ty = int(((hudheight/2)+(hudheight/2*noticeoffset))/noticescale), tx = int((hudwidth/2)/noticescale),
             tf = int(255*hudblend*noticeblend), tr = 255, tg = 255, tb = 255,
             tw = int((hudwidth-((hudsize*edgesize)*2+(hudsize*inventoryleft)+(hudsize*inventoryright)))/noticescale);
         if(noticestone) skewcolour(tr, tg, tb, noticestone);
 
-        if(hastkwarn(game::focus)) // first and foremost
-            ty += draw_textx("\fzryDo NOT shoot team-mates", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
-
+        pushfont("emphasis");
         if(lastmillis-game::maptime <= noticetitle)
         {
-
             ty += draw_textx("%s", tx, ty, 255, 255, 255, tf, TEXT_CENTERED, -1, tw, *maptitle ? maptitle : mapname);
             pushfont("reduced");
             if(*mapauthor) ty += draw_textx("by %s", tx, ty, 255, 255, 255, tf, TEXT_CENTERED, -1, tw, mapauthor);
-            popfont();
-            pushfont("little");
             defformatstring(gname)("%s", server::gamename(game::gamemode, game::mutators, 0, 32));
             ty += draw_textx("[ \fs\fa%s\fS ]", tx, ty, 255, 255, 255, tf, TEXT_CENTERED, -1, tw, gname);
             popfont();
+            ty += FONTH/3;
         }
+        if(game::intermission)
+            ty += draw_textx("Intermission", tx, ty, 255, 255, 255, tf, TEXT_CENTERED, -1, tw)+FONTH/3;
+        else if(client::demoplayback && showdemoplayback)
+            ty += draw_textx("Demo Playback in Progress", tx, ty, 255, 255, 255, tf, TEXT_CENTERED, -1, tw)+FONTH/3;
+        else if(client::waitplayers) ty += draw_textx("Waiting for players", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw)+FONTH/3;
+        else if(hastkwarn(game::focus)) // first and foremost
+            ty += draw_textx("\fzryDo NOT shoot team-mates", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1)+FONTH/3;
+        popfont();
 
+        pushfont("default");
         if(game::player1->quarantine)
         {
-            pushfont("emphasis");
             ty += draw_textx("You are \fzoyQUARANTINED", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw);
-            popfont();
-            ty += draw_textx("Please await instructions from a moderator", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw);
+            ty += draw_textx("Please await instructions from a moderator", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw)+FONTH/3;
         }
         else if(game::player1->state == CS_SPECTATOR)
-            ty += draw_textx("[ %s ]", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, specviewname());
+            ty += draw_textx("[ %s ]", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, specviewname())+FONTH/3;
         else if(game::player1->state == CS_WAITING && showname())
-            ty += draw_textx("[ %s ]", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, game::colourname(game::focus));
+            ty += draw_textx("[ %s ]", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, game::colourname(game::focus))+FONTH/3;
 
-
-        if(game::intermission)
-            ty += draw_textx("Intermission", tx, ty, 255, 255, 255, tf, TEXT_CENTERED, -1, tw);
-        else if(client::demoplayback && showdemoplayback)
-            ty += draw_textx("Demo Playback in Progress", tx, ty, 255, 255, 255, tf, TEXT_CENTERED, -1, tw);
-        else if(client::waitplayers) ty += draw_textx("Waiting for players", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw);
         if(!game::intermission)
         {
             gameent *target = game::player1->state != CS_SPECTATOR ? game::player1 : game::focus;
             if(target->state == CS_DEAD || target->state == CS_WAITING)
             {
-                int sdelay = m_delay(game::gamemode, game::mutators, target->team), delay = target->respawnwait(lastmillis, sdelay);
+                int delay = target->respawnwait(lastmillis, m_delay(game::gamemode, game::mutators, target->team));
                 SEARCHBINDCACHE(attackkey)("primary", 0);
                 if(delay || m_duke(game::gamemode, game::mutators) || (m_fight(game::gamemode) && maxalive > 0))
                 {

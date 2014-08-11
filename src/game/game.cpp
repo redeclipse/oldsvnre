@@ -118,6 +118,8 @@ namespace game
     VAR(IDF_PERSIST, editfov, 1, 120, 179);
     VAR(IDF_PERSIST, specfov, 1, 120, 179);
 
+    VAR(IDF_PERSIST, specresetstyle, 0, 1, 1); // 0 = back to player1, 1 = stay at camera
+
     VAR(IDF_PERSIST, followmode, 0, 1, 1); // 0 = never, 1 = tv
     VARF(IDF_PERSIST, specmode, 0, 1, 1, specreset()); // 0 = float, 1 = tv
     VARF(IDF_PERSIST, waitmode, 0, 1, 1, specreset()); // 0 = float, 1 = tv
@@ -647,7 +649,15 @@ namespace game
     void resetfollow()
     {
         follow = spectvfollow = -1;
+        if(specresetstyle && (player1->state == CS_WAITING || player1->state == CS_SPECTATOR))
+        {
+            player1->o = camera1->o;
+            player1->yaw = camera1->yaw;
+            player1->pitch = camera1->pitch;
+            player1->resetinterp();
+        }
         focus = player1;
+        resetcamera();
     }
 
     void specreset(gameent *d, bool clear)
@@ -708,21 +718,21 @@ namespace game
         if(tvmode(true, true))
         {
             if(!tvmode(true, false)) followmode = 0;
-            else { specmode = 0; specreset(); }
+            else specmode = 0;
         }
         else if(focus != player1) followmode = 1;
         else specmode = 1;
-        resetfollow();
+        specreset();
     });
     ICOMMAND(0, waitmodeswitch, "", (), {
         if(tvmode(true, true))
         {
             if(!tvmode(true, false)) followmode = 0;
-            else { waitmode = 0; specreset(); }
+            else waitmode = 0;
         }
         else if(focus != player1) followmode = 1;
         else waitmode = 1;
-        resetfollow();
+        specreset();
     });
 
     bool followswitch(int n, bool other)
@@ -813,7 +823,7 @@ namespace game
                 regularshape(PART_SPARK, d->height*2, getcolour(d, playerundertone), 53, 50, 350, d->center(), 1.5f, 1, 1, 0, 35);
                 regularshape(PART_SPARK, d->height*2, getcolour(d, playerovertone), 53, 50, 350, d->center(), 1.5f, 1, 1, 0, 35);
             }
-            if(local && entities::ents.inrange(ent) && entities::ents[ent]->type == PLAYERSTART) entities::execlink(d, ent, true);
+            if(entities::ents.inrange(ent) && entities::ents[ent]->type == PLAYERSTART) entities::execlink(d, ent, false);
         }
         ai::respawned(d, local, ent);
     }
