@@ -284,7 +284,7 @@ ICOMMAND(0, ircpass, "ss", (const char *name, const char *s), {
 ICOMMAND(0, ircauth, "sss", (const char *name, const char *s, const char *t), {
     ircnet *n = ircfind(name);
     if(!n) { conoutf("no such ircnet: %s", name); return; }
-    if(!s || !*s || !t || !*t) { ircprintf(n, 4, NULL, "current authority is: %s (%s)", n->authname, n->authpass && *n->authpass ? "<set>" : "<not set>"); return; }
+    if(!s || !*s || !t || !*t) { ircprintf(n, 4, NULL, "current auth details are: %s (%s)", n->authname, n->authpass && *n->authpass ? "<set>" : "<not set>"); return; }
     copystring(n->authname, s);
     copystring(n->authpass, t);
 });

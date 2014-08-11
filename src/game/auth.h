@@ -215,7 +215,7 @@ namespace auth
     {
         if(!ci) return;
         ci->authreq = ci->authname[0] = 0;
-        srvmsgftforce(ci->clientnum, CON_EVENT, "\foauthority request failed, please check your credentials");
+        srvmsgftforce(ci->clientnum, CON_EVENT, "\foauth request failed, please check your credentials");
         if(ci->connectauth)
         {
             ci->connectauth = false;

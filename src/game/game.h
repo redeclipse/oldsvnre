@@ -4,7 +4,7 @@
 #include "engine.h"
 
 #define GAMEID "fps"
-#define GAMEVERSION 223
+#define GAMEVERSION 224
 
 #define DEMO_MAGIC "RED_ECLIPSE_DEMO"
 #define DEMO_VERSION GAMEVERSION
@@ -39,7 +39,7 @@ enum                                // entity types
     NOTUSED = ET_EMPTY, LIGHT = ET_LIGHT, MAPMODEL = ET_MAPMODEL, PLAYERSTART = ET_PLAYERSTART, ENVMAP = ET_ENVMAP, PARTICLES = ET_PARTICLES,
     MAPSOUND = ET_SOUND, LIGHTFX = ET_LIGHTFX, SUNLIGHT = ET_SUNLIGHT, WEAPON = ET_GAMESPECIFIC,
     TELEPORT, ACTOR, TRIGGER, PUSHER, AFFINITY, CHECKPOINT,
-    UNUSED1, UNUSED2,
+    ROUTE, UNUSED2,
     MAXENTTYPES
 };
 
@@ -163,7 +163,7 @@ enttypes enttype[] = {
                 "pusher",       { "yaw",    "pitch",    "force",    "maxrad",   "minrad",   "type" }
     },
     {
-        AFFINITY,       1,          48,     32,     EU_NONE,    7,          3,          5,
+        AFFINITY,       1,          48,     32,     EU_NONE,    6,          3,          5,
             0, 0, 0,
             false,  false,  false,      false,      false,
                 "affinity",     { "team",   "yaw",      "pitch",    "modes",    "muts",     "id" }
@@ -177,13 +177,13 @@ enttypes enttype[] = {
                 "checkpoint",   { "radius", "yaw",      "pitch",    "modes",    "muts",     "id",       "type" }
     },
     {
-        UNUSED1,        -1,         0,      0,      EU_NONE,    0,          -1,         -1,
-            0, 0, 0,
-            true,   false,  false,      false,      false,
-                "none",         { "" }
+        ROUTE,          1,         224,      0,     EU_NONE,    6,          -1,         -1,
+            (1<<ROUTE), (1<<ROUTE), 0,
+            false,   false,  false,      false,      false,
+                "route",         { "num",   "yaw",      "pitch",    "move",     "strafe",   "action" }
     },
     {
-        UNUSED2,        -1,         0,      0,      EU_NONE,    0,          -1,         -1,
+        UNUSED2,        -1,          0,     16,      EU_NONE,    0,          -1,         -1,
             0, 0, 0,
             true,   false,  false,      false,      false,
                 "none",         { "" }

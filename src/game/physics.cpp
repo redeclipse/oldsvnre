@@ -1122,8 +1122,7 @@ namespace physics
         }
         else
         {
-            pl->inliquid = 0;
-            pl->onladder = false;
+            pl->inliquid = pl->onladder = false;
             pl->submerged = 0;
             modifyvelocity(pl, local, floating, millis);
         }

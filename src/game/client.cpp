@@ -2629,7 +2629,7 @@ namespace client
                             t->points = getint(p);
                             t->cpmillis = 0;
                             if(!m_gsp2(game::gamemode, game::mutators)) t->impulse[IM_METER] = 0;
-                            if(showlaptimes > (t != game::focus ? (t->actortype > A_PLAYER ? 2 : 1) : 0))
+                            if(showlaptimes >= (t != game::focus ? (t->actortype > A_PLAYER ? 3 : 2) : 1))
                             {
                                 defformatstring(best)("%s", timestr(t->cptime));
                                 conoutft(t != game::player1 ? CON_INFO : CON_SELF, "%s completed in \fs\fg%s\fS (best: \fs\fy%s\fS, laps: \fs\fc%d\fS)", game::colourname(t), timestr(t->cplast), best, t->points);
