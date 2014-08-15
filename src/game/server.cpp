@@ -676,14 +676,14 @@ namespace server
             if(ci->state.actortype >= A_ENEMY) return true;
             else if(tryspawn)
             {
-                if(m_balance(gamemode, mutators) && G(balancenospawn) && nextbalance && nextbalance >= gamemillis) return false;
+                if(m_balance(gamemode, mutators) && G(balancenospawn) && nextbalance && m_balreset(gamemode, mutators)) return false;
                 if(m_loadout(gamemode, mutators) && !chkloadweap(ci)) return false;
                 if(spawnqueue(true) && spawnq.find(ci) < 0 && playing.find(ci) < 0) queue(ci);
                 return true;
             }
             else
             {
-                if(m_balance(gamemode, mutators) && G(balancenospawn) && nextbalance && nextbalance >= gamemillis) return false;
+                if(m_balance(gamemode, mutators) && G(balancenospawn) && nextbalance && m_balreset(gamemode, mutators)) return false;
                 if(m_loadout(gamemode, mutators) && !chkloadweap(ci, false)) return false;
                 int delay = ci->state.actortype >= A_ENEMY && ci->state.lastdeath ? G(enemyspawntime) : m_delay(gamemode, mutators, ci->team);
                 if(delay && ci->state.respawnwait(gamemillis, delay)) return false;
@@ -1627,7 +1627,6 @@ namespace server
                 {
                     int oldbalance = curbalance;
                     if(++curbalance >= numt) curbalance = 0; // safety first
-                    nextbalance = 0;
                     if(smode) smode->balance(oldbalance);
                     mutate(smuts, mut->balance(oldbalance));
                     static vector<clientinfo *> assign[T_TOTAL];
@@ -1667,6 +1666,7 @@ namespace server
                     ancmsgft(-1, S_V_BALALERT, CON_EVENT, "\fy\fs\fzoyALERT:\fS \fs\fcteams\fS have %sbeen \fs\fcreassigned\fS%s", delpart > 0 ? "now " : "", !m_forcebal(gamemode, mutators) ? " for map symmetry" : "");
                     if(smode) smode->layout();
                     mutate(smuts, mut->layout());
+                    nextbalance = 0;
                 }
             }
         }

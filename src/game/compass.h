@@ -103,14 +103,14 @@ ICOMMAND(0, compass, "sss", (char *n, char *a, char *b), if(curcompass)
         char code = '1';
         while(true)
         {
-            if(code > '9') code = 'a';
             if(curcompass->locate(code) < 0) break;
-            else if(code >= 'z')
+            code++;
+            if(code > '9' && code < 'A') code = 'A';
+            else if(code > 'Z')
             {
                 code = 0;
                 break;
             }
-            code++;
         }
         if(code) addaction(n, code, a);
     }
