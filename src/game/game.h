@@ -177,10 +177,10 @@ enttypes enttype[] = {
                 "checkpoint",   { "radius", "yaw",      "pitch",    "modes",    "muts",     "id",       "type" }
     },
     {
-        ROUTE,          1,         224,      16,    EU_NONE,    7,          -1,         -1,
+        ROUTE,          1,         224,      16,    EU_NONE,    6,          -1,         -1,
             (1<<ROUTE), 0, 0,
             false,   false,  false,      false,      false,
-                "route",         { "num",   "yaw",      "pitch",    "move",     "strafe",   "action",   "inhibit" }
+                "route",         { "num",   "yaw",      "pitch",    "move",     "strafe",   "action" }
     },
     {
         UNUSED2,        -1,          0,      0,     EU_NONE,    0,          -1,         -1,
