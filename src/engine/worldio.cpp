@@ -1733,7 +1733,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                     }
                 }
             }
-            entities::initents(f, maptype, hdr.version, hdr.gameid, hdr.gamever);
+            entities::initents(maptype, hdr.version, hdr.gameid, hdr.gamever);
 
             progress(0, "initialising config...");
             mapcrc = f->getcrc();
