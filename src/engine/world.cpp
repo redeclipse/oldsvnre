@@ -1023,7 +1023,7 @@ bool emptymap(int scale, bool force, char *mname, bool nocfg)   // main empty wo
 
     initlights();
     allchanged(true);
-
+    entities::initents(MAP_MAPZ, hdr.version, hdr.gameid, hdr.gamever);
     game::startmap(nocfg ? "" : "maps/untitled", NULL, true);
     return true;
 }

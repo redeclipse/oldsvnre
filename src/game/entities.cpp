@@ -2,7 +2,7 @@
 namespace entities
 {
     vector<extentity *> ents;
-    int lastenttype[MAXENTTYPES], lastusetype[EU_MAX], numactors = 0, lastroutenode = -1;
+    int lastenttype[MAXENTTYPES], lastusetype[EU_MAX], numactors = 0, lastroutenode = -1, lastroutetime = 0;
 
     VAR(IDF_PERSIST, showlighting, 0, 0, 1);
     VAR(IDF_PERSIST, showentmodels, 0, 1, 2);
@@ -22,9 +22,11 @@ namespace entities
     FVAR(IDF_PERSIST, simpleitemblend, 0, 1, 1);
     FVAR(IDF_PERSIST, simpleitemhalo, 0, 0.5f, 1);
 
-    //VAR(0, routenum, -1, -1, VAR_MAX); // selected route in time trial
-    //VAR(0, droproute, -1, -1, VAR_MAX);
-    //VAR(IDF_WORLD, routedist, 0, 32, VAR_MAX);
+    VARF(0, routeid, -1, -1, VAR_MAX, lastroutenode = -1; lastroutetime = 0); // selected route in time trial
+    VARF(0, droproute, 0, 0, 1, lastroutenode = -1; lastroutetime = 0; if(routeid < 0) routeid = 0);
+    VAR(IDF_HEX, routecolour, 0, 0xFF22FF, 0xFFFFFF);
+    VAR(0, droproutedist, 1, 16, VAR_MAX);
+    VAR(0, routemaxdist, 0, 64, VAR_MAX);
 
     vector<extentity *> &getents() { return ents; }
     int lastent(int type) { return type >= 0 && type < MAXENTTYPES ? clamp(lastenttype[type], 0, ents.length()) : 0; }
@@ -1878,9 +1880,10 @@ namespace entities
         }
     }
 
-    void initents(stream *g, int mtype, int mver, char *gid, int gver)
+    void initents(int mtype, int mver, char *gid, int gver)
     {
-        numactors = 0;
+        lastroutenode = routeid = -1;
+        numactors = lastroutetime = droproute = 0;
         ai::oldwaypoints.setsize(0);
         loopv(ents)
         {
@@ -2172,6 +2175,40 @@ namespace entities
                 playsound(e.attrs[0], e.o, NULL, flags, e.attrs[3], e.attrs[1], e.attrs[2], &e.schan);
             }
         }
+        if((m_edit(game::gamemode) || m_trial(game::gamemode)) && routeid >= 0 && droproute)
+        {
+            if(game::player1->state == CS_ALIVE)
+            {
+                vec o = game::player1->feetpos();
+                if(ents.inrange(lastroutenode) && ents[lastroutenode]->o.dist(o) >= droproutedist) lastroutenode = -1;
+                if(lastroutenode < 0) loopi(lastent(ROUTE)) if(ents[i]->type == ROUTE && ents[i]->attrs[0] == routeid)
+                {
+                    float dist = ents[i]->o.dist(o);
+                    if(dist < droproutedist && (lastroutenode < 0 || dist < ents[lastroutenode]->o.dist(o)))
+                        lastroutenode = i;
+                }
+                int n = ents.length();
+                extentity &e = *ents.add(newent());
+                e.type = ROUTE;
+                e.o = o;
+                e.attrs.add(0, max(5, enttype[ROUTE].numattrs));
+                e.attrs[0] = routeid;
+                e.attrs[1] = int(game::player1->yaw);
+                e.attrs[2] = int(game::player1->pitch);
+                e.attrs[3] = game::player1->move;
+                e.attrs[4] = game::player1->strafe;
+                loopi(AC_MAX) if(game::player1->action[i] || (abs(game::player1->actiontime[i]) > lastroutetime))
+                    e.attrs[5] = (1<<i);
+                if(ents.inrange(lastroutenode)) ents[lastroutenode]->links.add(n);
+                lastenttype[ROUTE] = lastroutenode = n;
+                lastroutetime = lastmillis;
+            }
+            else if(lastroutenode >= 0)
+            {
+                lastroutenode = -1;
+                lastroutetime = 0;
+            }
+        }
     }
 
     void render()
@@ -2267,6 +2304,12 @@ namespace entities
             case TELEPORT:
                 if(e.attrs[4]) maketeleport(e);
                 break;
+            case ROUTE:
+            {
+                if(e.attrs[0] != routeid || (!m_edit(game::gamemode) && !m_trial(game::gamemode))) break;
+                loopv(e.links) if(ents.inrange(e.links[i]) && ents[e.links[i]]->type == ROUTE && (!routemaxdist || e.o.dist(ents[e.links[i]]->o) <= routemaxdist))
+                    part_flare(e.o, ents[e.links[i]]->o, 1, PART_LIGHTNING_FLARE, routecolour);
+            }
             default: break;
         }
 
@@ -2356,10 +2399,12 @@ namespace entities
     {
         float maxdist = float(maxparticledistance)*float(maxparticledistance);
         int numents = m_edit(game::gamemode) ? ents.length() : max(lastuse(EU_ITEM), max(lastent(PARTICLES), lastent(TELEPORT)));
+        bool hasroute = (m_edit(game::gamemode) || m_trial(game::gamemode)) && routeid >= 0;
+        if(hasroute) numents = max(numents, lastent(ROUTE));
         loopi(numents)
         {
             gameentity &e = *(gameentity *)ents[i];
-            if(e.type != PARTICLES && e.type != TELEPORT && !m_edit(game::gamemode) && enttype[e.type].usetype != EU_ITEM) continue;
+            if(e.type != PARTICLES && e.type != TELEPORT && e.type != ROUTE && !m_edit(game::gamemode) && enttype[e.type].usetype != EU_ITEM) continue;
             else if(e.o.squaredist(camera1->o) > maxdist) continue;
             float skew = 1;
             bool active = false;

@@ -8,7 +8,7 @@ namespace entities
     extern void readent(stream *g, int mtype, int mver, char *gid, int gver, int id);
     extern void writeent(stream *g, int id);
     extern void remapents(vector<int> &idxs);
-    extern void initents(stream *g, int mtype, int mver, char *gid, int gver);
+    extern void initents(int mtype, int mver, char *gid, int gver);
     extern float dropheight(extentity &e);
     extern void fixentity(int n, bool recurse = true, bool create = false);
     extern bool cansee(int n);
