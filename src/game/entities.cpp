@@ -2180,28 +2180,34 @@ namespace entities
             if(game::player1->state == CS_ALIVE)
             {
                 vec o = game::player1->feetpos();
-                if(ents.inrange(lastroutenode) && ents[lastroutenode]->o.dist(o) >= droproutedist) lastroutenode = -1;
-                if(lastroutenode < 0) loopi(lastent(ROUTE)) if(ents[i]->type == ROUTE && ents[i]->attrs[0] == routeid)
+                int curnode = lastroutenode;
+                if(curnode < 0 || (ents.inrange(curnode) && ents[curnode]->o.dist(o) >= droproutedist))
                 {
-                    float dist = ents[i]->o.dist(o);
-                    if(dist < droproutedist && (lastroutenode < 0 || dist < ents[lastroutenode]->o.dist(o)))
-                        lastroutenode = i;
+                    loopi(lastent(ROUTE)) if(ents[i]->type == ROUTE && ents[i]->attrs[0] == routeid)
+                    {
+                        float dist = ents[i]->o.dist(o);
+                        if(dist < droproutedist && (curnode < 0 || dist < ents[curnode]->o.dist(o)))
+                            curnode = i;
+                    }
                 }
-                int n = ents.length();
-                extentity &e = *ents.add(newent());
-                e.type = ROUTE;
-                e.o = o;
-                e.attrs.add(0, max(5, enttype[ROUTE].numattrs));
-                e.attrs[0] = routeid;
-                e.attrs[1] = int(game::player1->yaw);
-                e.attrs[2] = int(game::player1->pitch);
-                e.attrs[3] = game::player1->move;
-                e.attrs[4] = game::player1->strafe;
-                loopi(AC_MAX) if(game::player1->action[i] || (abs(game::player1->actiontime[i]) > lastroutetime))
-                    e.attrs[5] = (1<<i);
-                if(ents.inrange(lastroutenode)) ents[lastroutenode]->links.add(n);
-                lastenttype[ROUTE] = lastroutenode = n;
-                lastroutetime = lastmillis;
+                if(curnode < 0)
+                {
+                    int n = ents.length();
+                    extentity &e = *ents.add(newent());
+                    e.type = ROUTE;
+                    e.o = o;
+                    e.attrs.add(0, max(5, enttype[ROUTE].numattrs));
+                    e.attrs[0] = routeid;
+                    e.attrs[1] = int(game::player1->yaw);
+                    e.attrs[2] = int(game::player1->pitch);
+                    e.attrs[3] = game::player1->move;
+                    e.attrs[4] = game::player1->strafe;
+                    loopi(AC_MAX) if(game::player1->action[i] || (abs(game::player1->actiontime[i]) > lastroutetime))
+                        e.attrs[5] = (1<<i);
+                    if(ents.inrange(lastroutenode)) ents[lastroutenode]->links.add(n);
+                    lastenttype[ROUTE] = lastroutenode = n;
+                    lastroutetime = lastmillis;
+                }
             }
             else if(lastroutenode >= 0)
             {
