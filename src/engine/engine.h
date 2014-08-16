@@ -769,8 +769,8 @@ extern int getmatvec(vec v);
 extern int fullbright, fullbrightlevel;
 extern vector<int> entgroup;
 
-extern void newentity(int type, const attrvector &attrs);
-extern void newentity(const vec &v, int type, const attrvector &attrs);
+extern int newentity(int type, const attrvector &attrs);
+extern int newentity(const vec &v, int type, const attrvector &attrs);
 
 // menu
 enum { MN_BACK = 0, MN_INPUT, MN_MAX };

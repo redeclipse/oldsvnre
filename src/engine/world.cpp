@@ -699,27 +699,29 @@ extentity *newentity(bool local, const vec &o, int type, const attrvector &attrs
     return &e;
 }
 
-void newentity(const vec &v, int type, const attrvector &attrs)
+int newentity(const vec &v, int type, const attrvector &attrs)
 {
-    int idx;
+    int idx = -1;
     extentity *t = newentity(true, v, type, attrs, idx);
-    if(!t) return;
+    if(!t) return -1;
     t->type = ET_EMPTY;
     enttoggle(idx);
     makeundoent();
     entedit(idx, e.type = type);
+    return idx;
 }
 
-void newentity(int type, const attrvector &attrs)
+int newentity(int type, const attrvector &attrs)
 {
-    int idx;
+    int idx = -1;
     extentity *t = newentity(true, camera1->o, type, attrs, idx);
-    if(!t) return;
+    if(!t) return -1;
     dropentity(*t);
     t->type = ET_EMPTY;
     enttoggle(idx);
     makeundoent();
     entedit(idx, e.type = type);
+    return idx;
 }
 
 void entattrs(const char *str, attrvector &attrs)
