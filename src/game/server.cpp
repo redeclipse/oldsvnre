@@ -974,6 +974,11 @@ namespace server
         loopvrev(control) if(control[i].type == ipinfo::LIMIT && control[i].flag == ipinfo::TEMPORARY) control.remove(i);
     }
 
+    void resetexcepts()
+    {
+        loopvrev(control) if(control[i].type == ipinfo::EXCEPT && control[i].flag == ipinfo::TEMPORARY) control.remove(i);
+    }
+
     void cleanup(bool init = false)
     {
         setpause(false);
@@ -982,6 +987,7 @@ namespace server
         if(G(resetbansonend)) resetbans();
         if(G(resetmutesonend)) resetmutes();
         if(G(resetlimitsonend)) resetlimits();
+        if(G(resetexceptsonend)) resetexcepts();
         if(G(resetvarsonend) || init) resetgamevars(true, true);
         changemap();
         lastrotatecycle = clocktime;
@@ -2297,6 +2303,7 @@ namespace server
         if(G(resetbansonend) >= 2) resetbans();
         if(G(resetmutesonend) >= 2) resetmutes();
         if(G(resetlimitsonend) >= 2) resetlimits();
+        if(G(resetexceptsonend) >= 2) resetexcepts();
     }
 
     bool checkvotes(bool force)
@@ -2741,7 +2748,7 @@ namespace server
     //    return false;
     //}
 
-    bool allowstate(clientinfo *ci, int n)
+    bool allowstate(clientinfo *ci, int n, int lock = -1)
     {
         if(!ci) return false;
         switch(n)
@@ -2750,8 +2757,9 @@ namespace server
             {
                 if(ci->state.quarantine) return false;
                 uint ip = getclientip(ci->clientnum);
-                if(ci->state.actortype == A_PLAYER && mastermode >= MM_LOCKED && ci->state.state == CS_SPECTATOR && ip && !checkipinfo(control, ipinfo::ALLOW, ip))
-                    return false;
+                if(ci->state.actortype == A_PLAYER)
+                    if(mastermode >= MM_LOCKED && ip && !checkipinfo(control, ipinfo::ALLOW, ip) && !haspriv(ci, lock, "spawn"))
+                        return false;
                 if(ci->state.state == CS_ALIVE || ci->state.state == CS_WAITING) return false;
                 if(ci->state.lastdeath && gamemillis-ci->state.lastdeath <= DEATHMILLIS) return false;
                 //if(crclocked(ci)) return false;
@@ -2770,7 +2778,8 @@ namespace server
             case ALST_EDIT: // edit on/off
             {
                 uint ip = getclientip(ci->clientnum);
-                if(ci->state.quarantine || ci->state.actortype != A_PLAYER || !m_edit(gamemode) || (mastermode >= MM_LOCKED && ci->state.state == CS_SPECTATOR && ip && !checkipinfo(control, ipinfo::ALLOW, ip))) return false;
+                if(ci->state.quarantine || ci->state.actortype != A_PLAYER || !m_edit(gamemode)) return false;
+                if(mastermode >= MM_LOCKED && ip && !checkipinfo(control, ipinfo::ALLOW, ip) && !haspriv(ci, lock, "edit")) return false;
                 break;
             }
             default: break;
@@ -3765,7 +3774,7 @@ namespace server
                         uint ip = getclientip(v->clientnum);
                         v->state.warnings[WARN_TEAMKILL][0]++;
                         v->state.warnings[WARN_TEAMKILL][1] = totalmillis ? totalmillis : 1;
-                        if(ip && G(teamkillban) && v->state.warnings[WARN_TEAMKILL][0] >= G(teamkillban) && !haspriv(v, PRIV_MODERATOR) && !checkipinfo(control, ipinfo::ALLOW, ip))
+                        if(ip && G(teamkillban) && v->state.warnings[WARN_TEAMKILL][0] >= G(teamkillban) && !haspriv(v, PRIV_MODERATOR) && !checkipinfo(control, ipinfo::EXCEPT, ip))
                         {
                             ipinfo &c = control.add();
                             c.ip = ip;
@@ -4422,6 +4431,7 @@ namespace server
                 case ipinfo::BAN: timeout = G(bantimeout); break;
                 case ipinfo::MUTE: timeout = G(mutetimeout); break;
                 case ipinfo::LIMIT: timeout = G(limittimeout); break;
+                case ipinfo::EXCEPT: timeout = G(excepttimeout); break;
                 default: break;
             }
             if(timeout && totalmillis-control[i].time >= timeout) control.remove(i);
@@ -4431,7 +4441,7 @@ namespace server
             loopvrev(clients)
             {
                 uint ip = getclientip(clients[i]->clientnum);
-                if(ip && !haspriv(clients[i], G(banlock)) && checkipinfo(control, ipinfo::BAN, ip) && !checkipinfo(control, ipinfo::ALLOW, ip))
+                if(ip && !haspriv(clients[i], G(banlock)) && checkipinfo(control, ipinfo::BAN, ip) && !checkipinfo(control, ipinfo::EXCEPT, ip))
                 {
                     disconnect_client(clients[i]->clientnum, DISC_IPBAN);
                     continue;
@@ -4671,9 +4681,9 @@ namespace server
             // server-only messages
             case 1: return ci ? -1 : type;
             // only allowed in coop-edit
-            case 2: if(m_edit(gamemode) && ci && ci->state.state != CS_SPECTATOR) break; return -1;
+            case 2: if(m_edit(gamemode) && ci && ci->state.state == CS_EDITING) break; return -1;
             // only allowed in coop-edit, no overflow check
-            case 3: return m_edit(gamemode) && ci && ci->state.state != CS_SPECTATOR ? type : -1;
+            case 3: return m_edit(gamemode) && ci && ci->state.state == CS_EDITING ? type : -1;
             // no overflow check
             case 4: return type;
         }
@@ -5097,7 +5107,7 @@ namespace server
                 {
                     int val = getint(p);
                     if(!ci || ci->state.actortype > A_PLAYER) break;
-                    if(!allowstate(ci, val ? ALST_EDIT : ALST_WALK) && !haspriv(ci, G(editlock), val ? "enter editmode" : "exit editmode"))
+                    if(!allowstate(ci, val ? ALST_EDIT : ALST_WALK, G(editlock)))
                     {
                         if(G(serverdebug)) srvmsgf(ci->clientnum, "sync error: unable to switch state %s - %d [%d, %d]", colourname(ci), ci->state.state, ci->state.lastdeath, gamemillis);
                         spectator(ci);
@@ -5163,9 +5173,10 @@ namespace server
                         checkmaps();
                     }
                     #endif
-                    if(!allowstate(cp, ALST_TRY))
+                    if(!allowstate(cp, ALST_TRY, m_edit(gamemode) ? G(spawneditlock) : G(spawnlock)))
                     {
                         if(G(serverdebug)) srvmsgf(cp->clientnum, "sync error: unable to spawn %s - %d [%d, %d]", colourname(cp), cp->state.state, cp->state.lastdeath, gamemillis);
+                        spectator(cp);
                         break;
                     }
                     if(smode) smode->canspawn(cp, true);
@@ -5215,6 +5226,7 @@ namespace server
                     if(!allowstate(cp, ALST_SPAWN))
                     {
                         if(G(serverdebug)) srvmsgf(cp->clientnum, "sync error: unable to spawn %s - %d [%d, %d]", colourname(cp), cp->state.state, cp->state.lastdeath, gamemillis);
+                        spectator(cp);
                         break;
                     }
                     cp->state.lastrespawn = -1;
@@ -5510,12 +5522,9 @@ namespace server
                     getstring(text, p);
                     clientinfo *cp = (clientinfo *)getinfo(lcn);
                     if(!hasclient(cp, ci)) break;
+                    if(!haspriv(cp, G(messagelock), "send messages on this server")) break;
                     uint ip = getclientip(cp->clientnum);
-                    if(!ip || !checkipinfo(control, ipinfo::ALLOW, ip))
-                    {
-                        if(!haspriv(cp, G(messagelock), "send messages on this server")) break;
-                        if(ip && checkipinfo(control, ipinfo::MUTE, ip) && !haspriv(cp, G(mutelock), "send messages while muted")) break;
-                    }
+                    if(ip && checkipinfo(control, ipinfo::MUTE, ip) && !checkipinfo(control, ipinfo::EXCEPT, ip) && !haspriv(cp, G(mutelock), "send messages while muted")) break;
                     if(G(floodlock))
                     {
                         int numlines = 0;
@@ -5530,7 +5539,7 @@ namespace server
                             {
                                 cp->state.warnings[WARN_CHAT][0]++;
                                 cp->state.warnings[WARN_CHAT][1] = totalmillis ? totalmillis : 1;
-                                if(ip && G(floodmute) && cp->state.warnings[WARN_CHAT][0] >= G(floodmute) && !checkipinfo(control, ipinfo::ALLOW, ip) && !haspriv(cp, G(mutelock)))
+                                if(ip && G(floodmute) && cp->state.warnings[WARN_CHAT][0] >= G(floodmute) && !checkipinfo(control, ipinfo::EXCEPT, ip) && !haspriv(cp, G(mutelock)))
                                 {
                                     ipinfo &c = control.add();
                                     c.ip = ip;
@@ -5584,11 +5593,11 @@ namespace server
                 case N_SETPLAYERINFO:
                 {
                     uint ip = getclientip(ci->clientnum);
-                    if(ci->lastplayerinfo && (!ip || !checkipinfo(control, ipinfo::ALLOW, ip)))
+                    if(ci->lastplayerinfo)
                     {
                         bool allow = true;
                         if(!haspriv(ci, G(setinfolock), "change player info on this server")) allow = false;
-                        else if(ip && checkipinfo(control, ipinfo::MUTE, ip) && !haspriv(ci, G(mutelock), "change player info while muted")) allow = false;
+                        else if(ip && checkipinfo(control, ipinfo::MUTE, ip) && !checkipinfo(control, ipinfo::EXCEPT, ip) && !haspriv(ci, G(mutelock), "change player info while muted")) allow = false;
                         else if(totalmillis-ci->lastplayerinfo < G(setinfowait)) allow = false;
                         if(!allow)
                         {
@@ -5638,15 +5647,16 @@ namespace server
                         break;
                     }
                     uint ip = getclientip(ci->clientnum);
-                    if(ip && checkipinfo(control, ipinfo::LIMIT, ip) && !checkipinfo(control, ipinfo::ALLOW, ip) && !haspriv(ci, G(limitlock), "change teams while limited")) break;
+                    if(ip && checkipinfo(control, ipinfo::LIMIT, ip) && !checkipinfo(control, ipinfo::EXCEPT, ip) && !haspriv(ci, G(limitlock), "change teams while limited")) break;
                     int newteam = requestswap(ci, team);
                     if(newteam != team || newteam == ci->team) break;
                     bool reset = true;
                     if(ci->state.state == CS_SPECTATOR)
                     {
-                        if(!allowstate(ci, ALST_TRY) && !haspriv(ci, G(speclock), "exit spectator"))
+                        if(!allowstate(ci, ALST_TRY, m_edit(gamemode) ? G(spawneditlock) : G(spawnlock)))
                         {
                             if(G(serverdebug)) srvmsgf(ci->clientnum, "sync error: unable to spawn %s - %d [%d, %d]", colourname(ci), ci->state.state, ci->state.lastdeath, gamemillis);
+                            spectator(ci);
                             break;
                         }
                         if(!spectate(ci, false)) break;
@@ -5910,6 +5920,7 @@ namespace server
                         CONTROLSWITCH(ipinfo::BAN, ban);
                         CONTROLSWITCH(ipinfo::MUTE, mute);
                         CONTROLSWITCH(ipinfo::LIMIT, limit);
+                        CONTROLSWITCH(ipinfo::EXCEPT, except);
                         default: break;
                     }
                     #undef CONTROLSWITCH
@@ -5926,14 +5937,14 @@ namespace server
                             if(haspriv(ci, G(y##lock), #y " players") && m >= 0) \
                             { \
                                 clientinfo *cp = (clientinfo *)getinfo(m); \
-                                if(!cp || cp->state.ownernum >= 0 || (value != ipinfo::ALLOW && !cmppriv(ci, cp, #y))) break; \
+                                if(!cp || cp->state.ownernum >= 0 || (value != ipinfo::EXCEPT && !cmppriv(ci, cp, #y))) break; \
                                 uint ip = getclientip(cp->clientnum); \
                                 if(!ip) break; \
-                                if(checkipinfo(control, ipinfo::ALLOW, ip)) \
+                                if(checkipinfo(control, ipinfo::EXCEPT, ip)) \
                                 { \
                                     if(!haspriv(ci, PRIV_ADMINISTRATOR, #y " protected players")) break; \
                                     else if(value >= ipinfo::BAN) loopvrev(control) \
-                                        if(control[i].type == ipinfo::ALLOW && (ip & control[i].mask) == control[i].ip) \
+                                        if(control[i].type == ipinfo::EXCEPT && (ip & control[i].mask) == control[i].ip) \
                                             control.remove(i); \
                                 } \
                                 string name; \
@@ -5967,6 +5978,7 @@ namespace server
                         CONTROLSWITCH(ipinfo::BAN, ban);
                         CONTROLSWITCH(ipinfo::MUTE, mute);
                         CONTROLSWITCH(ipinfo::LIMIT, limit);
+                        CONTROLSWITCH(ipinfo::EXCEPT, except);
                         default: break;
                     }
                     #undef CONTROLSWITCH
@@ -5982,9 +5994,10 @@ namespace server
                         if(G(serverdebug)) srvmsgf(cp->clientnum, "sync error: unable to modify spectator %s - %d [%d, %d]", colourname(cp), cp->state.state, cp->state.lastdeath, gamemillis);
                         break;
                     }
-                    if((sn != sender || !allowstate(cp, val ? ALST_SPEC : ALST_TRY)) && !haspriv(ci, G(speclock), sn != sender ? "control other players" : (val ? "enter spectator" : "exit spectator")))
+                    if(sn != sender ? !haspriv(ci, max(m_edit(gamemode) ? G(spawneditlock) : G(spawnlock), G(speclock)), "control other players") : !allowstate(cp, val ? ALST_SPEC : ALST_TRY, m_edit(gamemode) ? G(spawneditlock) : G(spawnlock)))
                     {
                         if(G(serverdebug)) srvmsgf(cp->clientnum, "sync error: unable to modify spectator %s - %d [%d, %d]", colourname(cp), cp->state.state, cp->state.lastdeath, gamemillis);
+                        spectate(cp, true);
                         break;
                     }
                     bool spec = val != 0, quarantine = cp != ci && val == 2, wasq = cp->state.quarantine;
@@ -6182,7 +6195,7 @@ namespace server
                 case N_NEWMAP:
                 {
                     int size = getint(p);
-                    if(ci->state.state == CS_SPECTATOR) break;
+                    if(ci->state.state != CS_EDITING) break;
                     if(size >= 0)
                     {
                         copystring(smapname, "maps/untitled");
@@ -6249,14 +6262,14 @@ namespace server
                     goto genericmsg;
 
                 case N_PASTE:
-                    if(ci->state.state!=CS_SPECTATOR) sendclipboard(ci);
+                    if(ci->state.state == CS_EDITING) sendclipboard(ci);
                     goto genericmsg;
 
                 case N_CLIPBOARD:
                 {
                     int unpacklen = getint(p), packlen = getint(p);
                     ci->cleanclipboard(false);
-                    if(ci->state.state==CS_SPECTATOR)
+                    if(ci->state.state != CS_EDITING)
                     {
                         if(packlen > 0) p.subbuf(packlen);
                         break;

@@ -51,8 +51,11 @@ GVAR(IDF_ADMIN, allowlock, 0, PRIV_OPERATOR, PRIV_CREATOR);
 GVAR(IDF_ADMIN, banlock, 0, PRIV_OPERATOR, PRIV_CREATOR);
 GVAR(IDF_ADMIN, mutelock, 0, PRIV_MODERATOR, PRIV_CREATOR);
 GVAR(IDF_ADMIN, limitlock, 0, PRIV_MODERATOR, PRIV_CREATOR);
+GVAR(IDF_ADMIN, exceptlock, 0, PRIV_MODERATOR, PRIV_CREATOR);
 GVAR(IDF_ADMIN, vetolock, 0, PRIV_OPERATOR, PRIV_CREATOR);
 GVAR(IDF_ADMIN, editlock, 0, PRIV_OPERATOR, PRIV_CREATOR);
+GVAR(IDF_ADMIN, spawnlock, 0, PRIV_MODERATOR, PRIV_CREATOR); // if locked, require this to spawn
+GVAR(IDF_ADMIN, spawneditlock, 0, PRIV_MODERATOR, PRIV_CREATOR); // if locked in editmode, require this to spawn
 GVAR(IDF_ADMIN, masterlock, 0, PRIV_MODERATOR, PRIV_CREATOR);
 
 GVAR(IDF_ADMIN, connecttimeout, 5000, 15000, VAR_MAX); // disconnected when attempt exceeds this time
@@ -60,6 +63,7 @@ GVAR(IDF_ADMIN, allowtimeout, 0, 3600000, VAR_MAX); // temporary allows last thi
 GVAR(IDF_ADMIN, bantimeout, 0, 14400000, VAR_MAX); // temporary bans last this long
 GVAR(IDF_ADMIN, mutetimeout, 0, 3600000, VAR_MAX); // temporary mutes last this long
 GVAR(IDF_ADMIN, limittimeout, 0, 3600000, VAR_MAX); // temporary limits last this long
+GVAR(IDF_ADMIN, excepttimeout, 0, 3600000, VAR_MAX); // temporary allows last this long
 
 GVAR(IDF_ADMIN, overflowlock, 0, PRIV_MODERATOR, PRIV_CREATOR); // normal message queue override
 GVAR(IDF_ADMIN, overflowsize, 0, 255, VAR_MAX); // kick if queued messages >= this
@@ -83,6 +87,7 @@ GVAR(IDF_ADMIN, resetallowsonend, 0, 1, 2); // reset allows on end (1: just when
 GVAR(IDF_ADMIN, resetbansonend, 0, 1, 2); // reset bans on end (1: just when empty, 2: when matches end)
 GVAR(IDF_ADMIN, resetmutesonend, 0, 1, 2); // reset mutes on end (1: just when empty, 2: when matches end)
 GVAR(IDF_ADMIN, resetlimitsonend, 0, 1, 2); // reset limits on end (1: just when empty, 2: when matches end)
+GVAR(IDF_ADMIN, resetexceptsonend, 0, 1, 2); // reset excepts on end (1: just when empty, 2: when matches end)
 GVAR(IDF_ADMIN, resetvarsonend, 0, 1, 2); // reset variables on end (1: just when empty, 2: when matches end)
 GVAR(IDF_ADMIN, resetmmonend, 0, 2, 2); // reset mastermode on end (1: just when empty, 2: when matches end)
 

@@ -198,7 +198,7 @@ namespace auth
         // above here are short circuits
         if(numclients() >= G(serverclients)) return DISC_MAXCLIENTS;
         uint ip = getclientip(ci->clientnum);
-        if(!ip || !checkipinfo(control, ipinfo::ALLOW, ip))
+        if(!ip || !checkipinfo(control, ipinfo::EXCEPT, ip))
         {
             if(mastermode >= MM_PRIVATE || serverpass[0] || (G(connectlock) && !haspriv(ci, G(connectlock)))) return DISC_PASSWORD;
             ipinfo *info = checkipinfo(control, ipinfo::BAN, ip);

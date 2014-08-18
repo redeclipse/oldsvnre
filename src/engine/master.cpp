@@ -414,7 +414,7 @@ void checkmaster()
     {
         ENetAddress address;
         ENetSocket masterclientsocket = enet_socket_accept(mastersocket, &address);
-        if(masterclients.length() >= MASTER_LIMIT || (checkipinfo(control, ipinfo::BAN, address.host) && !checkipinfo(control, ipinfo::ALLOW, address.host)))
+        if(masterclients.length() >= MASTER_LIMIT || (checkipinfo(control, ipinfo::BAN, address.host) && !checkipinfo(control, ipinfo::EXCEPT, address.host)))
             enet_socket_destroy(masterclientsocket);
         else if(masterclientsocket!=ENET_SOCKET_NULL)
         {
@@ -471,7 +471,7 @@ void checkmaster()
             else { purgemasterclient(i--); continue; }
         }
         /* if(c.output.length() > OUTPUT_LIMIT) { purgemasterclient(i--); continue; } */
-        if(ENET_TIME_DIFFERENCE(totalmillis, c.lastactivity) >= (c.isserver ? SERVER_TIME : CLIENT_TIME) || (checkipinfo(control, ipinfo::BAN, c.address.host) && !checkipinfo(control, ipinfo::ALLOW, c.address.host)))
+        if(ENET_TIME_DIFFERENCE(totalmillis, c.lastactivity) >= (c.isserver ? SERVER_TIME : CLIENT_TIME) || (checkipinfo(control, ipinfo::BAN, c.address.host) && !checkipinfo(control, ipinfo::EXCEPT, c.address.host)))
         {
             purgemasterclient(i--);
             continue;
