@@ -812,11 +812,13 @@ namespace client
     ICOMMAND(0, ban, "ss", (char *s, char *m), addcontrol(s, ipinfo::BAN, m));
     ICOMMAND(0, mute, "ss", (char *s, char *m), addcontrol(s, ipinfo::MUTE, m));
     ICOMMAND(0, limit, "ss", (char *s, char *m), addcontrol(s, ipinfo::LIMIT, m));
+    ICOMMAND(0, except, "ss", (char *s, char *m), addcontrol(s, ipinfo::EXCEPT, m));
 
     ICOMMAND(0, clearallows, "", (), addmsg(N_CLRCONTROL, "ri", ipinfo::ALLOW));
     ICOMMAND(0, clearbans, "", (), addmsg(N_CLRCONTROL, "ri", ipinfo::BAN));
     ICOMMAND(0, clearmutes, "", (), addmsg(N_CLRCONTROL, "ri", ipinfo::MUTE));
     ICOMMAND(0, clearlimits, "", (), addmsg(N_CLRCONTROL, "ri", ipinfo::LIMIT));
+    ICOMMAND(0, clearexcepts, "", (), addmsg(N_CLRCONTROL, "ri", ipinfo::EXCEPT));
 
     vector<int> ignores;
     void ignore(int cn)
