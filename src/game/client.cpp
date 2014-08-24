@@ -880,8 +880,8 @@ namespace client
 
     void tryauth()
     {
-        if(!accountname[0]) return;
-        addmsg(N_AUTHTRY, "rs", accountname);
+        if(accountname[0]) addmsg(N_AUTHTRY, "rs", accountname);
+        else conoutft(CON_INFO, "\frno account set for \fcauth");
     }
     ICOMMAND(0, auth, "", (), tryauth());
 
