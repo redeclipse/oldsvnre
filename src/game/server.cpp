@@ -2751,12 +2751,12 @@ namespace server
     bool allowstate(clientinfo *ci, int n, int lock = -1)
     {
         if(!ci) return false;
+        uint ip = getclientip(ci->clientnum);
         switch(n)
         {
             case ALST_TRY: // try spawn
             {
                 if(ci->state.quarantine) return false;
-                uint ip = getclientip(ci->clientnum);
                 if(ci->state.actortype == A_PLAYER)
                     if(mastermode >= MM_LOCKED && ip && !checkipinfo(control, ipinfo::ALLOW, ip) && !haspriv(ci, lock, "spawn"))
                         return false;
@@ -2774,10 +2774,9 @@ namespace server
                 break;
             }
             case ALST_SPEC: return ci->state.actortype == A_PLAYER; // spec
-            case ALST_WALK: if(ci->state.quarantine || ci->state.state != CS_EDITING) return false;
+            case ALST_WALK: if(ci->state.state != CS_EDITING) return false;
             case ALST_EDIT: // edit on/off
             {
-                uint ip = getclientip(ci->clientnum);
                 if(ci->state.quarantine || ci->state.actortype != A_PLAYER || !m_edit(gamemode)) return false;
                 if(mastermode >= MM_LOCKED && ip && !checkipinfo(control, ipinfo::ALLOW, ip) && !haspriv(ci, lock, "edit")) return false;
                 break;
@@ -6243,8 +6242,9 @@ namespace server
                 case N_AUTHTRY:
                 {
                     getstring(text, p);
-                    filtertext(ci->authname, text, true, true, true, 100);
-                    if(!auth::tryauth(ci)) ci->authname[0] = 0;
+                    string authname = "";
+                    filtertext(authname, text, true, true, true, 100);
+                    auth::tryauth(ci, authname);
                     break;
                 }
 
