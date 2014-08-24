@@ -455,7 +455,7 @@ int playsound(int n, const vec &pos, physent *d, int flags, int vol, int maxrad,
 
         bool liquid = isliquid(lookupmaterial(camera1->o)&MATF_VOLUME);
         calcvol(flags, v, slot->vol, x, y, o, &cvol, &cpan, liquid || isliquid(mat&MATF_VOLUME));
-        bool nocull = flags&SND_NOCULL || (d && game::camerapos(d).dist(camera1->o) <= minrad);
+        bool nocull = flags&SND_NOCULL || o.dist(camera1->o) <= minrad;
 
         if(nocull || !soundcull || cvol > 0)
         {

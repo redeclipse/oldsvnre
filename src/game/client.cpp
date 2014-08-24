@@ -24,9 +24,9 @@ namespace client
 
     int maxmsglen() { return G(messagelength); }
 
-    int otherclients(bool nospec)
+    int otherclients(bool self, bool nospec)
     {
-        int n = 0; // ai don't count
+        int n = self ? 1 : 0;
         loopv(game::players) if(game::players[i] && game::players[i]->actortype == A_PLAYER && (!nospec || game::players[i]->state != CS_SPECTATOR)) n++;
         return n;
     }
@@ -659,6 +659,34 @@ namespace client
     }
     ICOMMAND(0, getclienthandle, "i", (int *cn), result(getclienthandle(*cn)));
 
+    void getclientversion(int cn, int prop)
+    {
+        gameent *d = cn >= 0 ? game::getclient(cn) : game::player1;
+        if(d) switch(prop)
+        {
+            case 0: intret(d->version.major); break;
+            case 1: intret(d->version.minor); break;
+            case 2: intret(d->version.patch); break;
+            case 3: intret(d->version.game); break;
+            case 4: intret(d->version.platform); break;
+            case 5: intret(d->version.arch); break;
+            case 6: intret(d->version.gpuglver); break;
+            case 7: intret(d->version.gpuglslver); break;
+            case 8: intret(d->version.crc); break;
+            case 9: result(d->version.gpuvendor); break;
+            case 10: result(d->version.gpurenderer); break;
+            case 11: result(d->version.gpuversion); break;
+            case 12: result(plat_name(d->version.platform)); break;
+            case 13:
+            {
+                defformatstring(str)("%d.%d.%d-%s%d", d->version.major, d->version.minor, d->version.patch, plat_name(d->version.platform), d->version.arch);
+                result(str);
+            }
+            default: break;
+        }
+    }
+    ICOMMAND(0, getclientversion, "ii", (int *cn, int *prop), getclientversion(*cn, *prop));
+
     bool isspectator(int cn)
     {
         gameent *d = game::getclient(cn);
@@ -723,12 +751,12 @@ namespace client
                 case 1:
                 {
                     list = newstring(G(allowmaps));
-                    mapcull(list, reqmode, reqmuts, numplayers(), G(mapsfilter), true);
+                    mapcull(list, reqmode, reqmuts, otherclients(true), G(mapsfilter), true);
                     break;
                 }
                 case 2:
                 {
-                    maplist(list, reqmode, reqmuts, numplayers(), G(mapsfilter), true);
+                    maplist(list, reqmode, reqmuts, otherclients(true), G(mapsfilter), true);
                     break;
                 }
                 case 0: default: break;
@@ -1971,12 +1999,13 @@ namespace client
                         d->setinfo(namestr, colour, model, vanity);
                         if(showpresence >= (waiting(false) ? 2 : 1))
                         {
+                            int amt = otherclients(true);
                             if(priv > PRIV_NONE)
                             {
-                                if(d->handle[0]) conoutft(CON_EVENT, "\fg%s (%s) has joined the game (\fs\fy%s\fS: \fs\fc%s\fS) [%d.%d.%d-%s%d, %s]", game::colourname(d), d->hostname, hud::privname(d->privilege), d->handle, d->version.major, d->version.minor, d->version.patch, plat_name(d->version.platform), d->version.arch, d->version.gpurenderer);
-                                else conoutft(CON_EVENT, "\fg%s (%s) has joined the game (\fs\fylocal %s\fS) [%d.%d.%d-%s%d, %s]", game::colourname(d), d->hostname, hud::privname(d->privilege), d->version.major, d->version.minor, d->version.patch, plat_name(d->version.platform), d->version.arch, d->version.gpurenderer);
+                                if(d->handle[0]) conoutft(CON_EVENT, "\fg%s (%s) has joined the game (\fs\fy%s\fS: \fs\fc%s\fS) [%d.%d.%d-%s%d] (%d %s)", game::colourname(d), d->hostname, hud::privname(d->privilege), d->handle, d->version.major, d->version.minor, d->version.patch, plat_name(d->version.platform), d->version.arch, amt, amt != 1 ? "players" : "player");
+                                else conoutft(CON_EVENT, "\fg%s (%s) has joined the game (\fs\fylocal %s\fS) [%d.%d.%d-%s%d] (%d %s)", game::colourname(d), d->hostname, hud::privname(d->privilege), d->version.major, d->version.minor, d->version.patch, plat_name(d->version.platform), d->version.arch, amt, amt != 1 ? "players" : "player");
                             }
-                            else conoutft(CON_EVENT, "\fg%s (%s) has joined the game [%d.%d.%d-%s%d, %s]", game::colourname(d), d->hostname, d->version.major, d->version.minor, d->version.patch, plat_name(d->version.platform), d->version.arch, d->version.gpurenderer);
+                            else conoutft(CON_EVENT, "\fg%s (%s) has joined the game [%d.%d.%d-%s%d] (%d %s)", game::colourname(d), d->hostname, d->version.major, d->version.minor, d->version.patch, plat_name(d->version.platform), d->version.arch, amt, amt != 1 ? "players" : "player");
                         }
                         if(needclipboard >= 0) needclipboard++;
                         game::specreset(d);
