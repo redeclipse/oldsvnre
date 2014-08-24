@@ -1861,7 +1861,10 @@ namespace game
         if(d->name[0] && client::showpresence >= (client::waiting(false) ? 2 : 1))
         {
             if(d->actortype == A_PLAYER)
-                conoutft(CON_EVENT, "\fo%s (%s) left the game (%s)", colourname(d), d->hostname, reason >= 0 ? disc_reasons[reason] : "normal");
+            {
+                int amt = client::otherclients(); // not including self to disclude this player
+                conoutft(CON_EVENT, "\fo%s (%s) left the game (%s) (%d %s)", colourname(d), d->hostname, reason >= 0 ? disc_reasons[reason] : "normal", amt, amt != 1 ? "players" : "player");
+            }
             else if(d->actortype == A_BOT && ai::showaiinfo)
                 conoutft(CON_EVENT, "\fo%s was removed from the game (%s)", colourname(d), reason >= 0 ? disc_reasons[reason] : "normal");
         }

@@ -185,9 +185,8 @@ namespace ai
 
     void checkinfo(gameent *d)
     {
-        if(d->ownernum < 0 || *d->hostip) return;
         gameent *o = game::getclient(d->ownernum);
-        if(o && *o->hostip)
+        if(o)
         {
             copystring(d->hostname, o->hostname);
             copystring(d->hostip, o->hostip);

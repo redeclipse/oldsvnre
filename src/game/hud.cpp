@@ -1312,7 +1312,7 @@ namespace hud
                     else if(delay) ty += draw_textx("%s: Down for \fs\fy%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, target == game::player1 && target->state == CS_WAITING ? "Please Wait" : "Fragged", timestr(delay, -1));
                     else if(target == game::player1 && target->state == CS_WAITING && m_fight(game::gamemode) && maxalive > 0 && maxalivequeue)
                     {
-                        int n = game::numwaiting(), x = max(int(G(maxalive)*G(maxplayers)), max(int(client::otherclients(true)*G(maxalivethreshold)), G(maxaliveminimum)));
+                        int n = game::numwaiting(), x = max(int(G(maxalive)*G(maxplayers)), max(int(client::otherclients(true, true)*G(maxalivethreshold)), G(maxaliveminimum)));
                         if(m_team(game::gamemode, game::mutators))
                         {
                             if(x%2) x++;

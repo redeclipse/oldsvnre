@@ -153,7 +153,11 @@ namespace auth
         }
         if(val >= 0)
         {
-            if(ci->connected && *msg) srvoutforce(ci, -2, "%s", msg);
+            if(*msg)
+            {
+                if(ci->connected) srvoutforce(ci, -2, "%s", msg);
+                else sendf(ci->clientnum, 1, "ri2s", N_SERVMSG, CON_EVENT, msg);
+            }
             sendf(ci->connected ? -1 : ci->clientnum, 1, "ri3s", N_CURRENTPRIV, ci->clientnum, ci->privilege, ci->handle);
         }
         if(paused)
