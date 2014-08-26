@@ -237,6 +237,7 @@ void guinohitfx(uint *contents)
 //@DOC name and icon are optional
 SVAR(0, guirollovername, "");
 SVAR(0, guirolloveraction, "");
+SVAR(0, guirollovertype, "");
 
 void guibutton(char *name, char *action, char *altact, char *icon, int *colour)
 {
@@ -257,11 +258,9 @@ void guibutton(char *name, char *action, char *altact, char *icon, int *colour)
     {
         setsvar("guirollovername", name, true);
         setsvar("guirolloveraction", action, true);
+        setsvar("guirollovertype", "button", true);
     }
 }
-
-SVAR(0, guirolloverimgpath, "");
-SVAR(0, guirolloverimgaction, "");
 
 void guiimage(char *path, char *action, float *scale, int *overlaid, char *altpath, char *altact, int *colour)
 {
@@ -286,8 +285,9 @@ void guiimage(char *path, char *action, float *scale, int *overlaid, char *altpa
     }
     else if(ret&GUI_ROLLOVER)
     {
-        setsvar("guirolloverimgpath", path, true);
-        setsvar("guirolloverimgaction", action, true);
+        setsvar("guirollovername", path, true);
+        setsvar("guirolloveraction", action, true);
+        setsvar("guirollovertype", "image", true);
     }
 }
 
@@ -314,8 +314,9 @@ void guislice(char *path, char *action, float *scale, float *start, float *end, 
     }
     else if(ret&GUI_ROLLOVER)
     {
-        setsvar("guirolloverimgpath", path, true);
-        setsvar("guirolloverimgaction", action, true);
+        setsvar("guirollovername", path, true);
+        setsvar("guirolloveraction", action, true);
+        setsvar("guirollovertype", "image", true);
     }
 }
 
@@ -688,6 +689,13 @@ void guiplayerpreview(int *model, int *color, int *team, int *weap, char *vanity
             if(shouldclearmenu) clearlater = true;
         }
     }
+    else if(ret&GUI_ROLLOVER)
+    {
+        defformatstring(str)("%d %d %d %d %s", *model, *color, *team, *weap, vanity);
+        setsvar("guirollovername", str, true);
+        setsvar("guirolloveraction", action, true);
+        setsvar("guirollovertype", "player", true);
+    }
 }
 COMMAND(0, guiplayerpreview, "iiiissfifgs");
 
@@ -721,6 +729,13 @@ void guimodelpreview(char *model, char *animspec, char *action, float *scale, in
             updatelater.add().schedule(act);
             if(shouldclearmenu) clearlater = true;
         }
+    }
+    else if(ret&GUI_ROLLOVER)
+    {
+        defformatstring(str)("%d %s", *model, animspec);
+        setsvar("guirollovername", str, true);
+        setsvar("guirolloveraction", action, true);
+        setsvar("guirollovertype", "model", true);
     }
 }
 COMMAND(0, guimodelpreview, "sssfiffs");

@@ -1392,8 +1392,7 @@ namespace UI
         if(isopen != p) uimillis = (isopen = p) ? totalmillis : -totalmillis;
         setsvar("guirollovername", "", true);
         setsvar("guirolloveraction", "", true);
-        setsvar("guirolloverimgpath", "", true);
-        setsvar("guirolloverimgaction", "", true);
+        setsvar("guirollovertype", "", true);
     }
 
     void render()
