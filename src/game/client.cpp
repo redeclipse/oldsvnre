@@ -2813,7 +2813,7 @@ namespace client
                     getstring(text, p);
                     if(accountname[0] && accountpass[0])
                     {
-                        conoutft(CON_EVENT, "\fyidentifying as: \fc%s", accountname);
+                        //conoutft(CON_EVENT, "\fyidentifying as: \fc%s", accountname);
                         vector<char> buf;
                         answerchallenge(accountpass, text, buf);
                         addmsg(N_AUTHANS, "ris", id, buf.getbuf());
