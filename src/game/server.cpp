@@ -3288,7 +3288,7 @@ namespace server
 
     void sendservinit(clientinfo *ci)
     {
-        sendf(ci->clientnum, 1, "ri3s2i", N_SERVERINIT, ci->clientnum, GAMEVERSION, gethostname(ci->clientnum), gethostip(ci->clientnum), ci->sessionid);
+        sendf(ci->clientnum, 1, "ri3ssi", N_SERVERINIT, ci->clientnum, GAMEVERSION, gethostname(ci->clientnum), gethostip(ci->clientnum), ci->sessionid);
     }
 
     bool restorescore(clientinfo *ci)
@@ -6213,8 +6213,12 @@ namespace server
                     getstring(text, p);
                     if(val != 0)
                     {
-                        if(adminpass[0] && (ci->local || (text[0] && checkpassword(ci, adminpass, text))))
-                            auth::setprivilege(ci, 1, PRIV_ADMINISTRATOR);
+                        if(text[0])
+                        {
+                            if(!adminpass[0]) srvmsgft(ci->clientnum, CON_EVENT, "\fraccess denied, no administrator passsword set");
+                            else if(!checkpassword(ci, adminpass, text)) srvmsgft(ci->clientnum, CON_EVENT, "\fraccess denied, invalid administrator password");
+                            else auth::setprivilege(ci, 1, PRIV_ADMINISTRATOR);
+                        }
                         else if(ci->privilege < PRIV_ELEVATED)
                         {
                             bool fail = false;
