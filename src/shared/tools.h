@@ -466,7 +466,7 @@ template <class T> struct vector
         *this = v;
     }
 
-    ~vector() { shrink(0); if(buf) delete[] (uchar *)buf; }
+    ~vector() { shrink(0); if(buf) free(buf); }
 
     vector<T> &operator=(const vector<T> &v)
     {
@@ -558,15 +558,10 @@ template <class T> struct vector
     {
         int olen = alen;
         if(!alen) alen = max(MINSIZE, sz);
-        else while(alen < sz) alen *= 2;
+        else while(alen < sz) alen += alen/2;
         if(alen <= olen) return;
-        uchar *newbuf = new uchar[alen*sizeof(T)];
-        if(olen > 0)
-        {
-            memcpy(newbuf, (void *)buf, olen*sizeof(T));
-            delete[] (uchar *)buf;
-        }
-        buf = (T *)newbuf;
+        buf = (T *)realloc(buf, alen*sizeof(T));
+        if(!buf) abort();
     }
 
     databuf<T> reserve(int sz)
@@ -759,15 +754,13 @@ template <class T> struct smallvector
 
     void growbuf(int sz)
     {
-        int olen = len;
         len = max(sz, 0);
-        uchar *newbuf = len > 0 ? new uchar[len*sizeof(T)] : NULL;
-        if(olen > 0)
+        if(len)
         {
-            if(len > 0) memcpy(newbuf, buf, min(len, olen)*sizeof(T));
-            delete[] (uchar *)buf;
-        }
-        buf = (T *)newbuf;
+            buf = (T *)realloc(buf, len*sizeof(T));
+            if(!buf) abort();
+        } 
+        else if(buf) { free(buf); buf = NULL; }
     }
 
     T &add(const T &x)
