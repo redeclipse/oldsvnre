@@ -278,7 +278,7 @@ void gets2c()           // get updates from the server
             }
             else
             {
-                if(!discmillis || event.data) conoutft(CON_MESG, "\frserver network error, disconnecting (%s) ...", disc_reasons[event.data]);
+                if(!discmillis || event.data) conoutft(CON_MESG, "\frserver disconnected (%s) ...", disc_reasons[event.data]);
                 disconnect();
             }
             return;

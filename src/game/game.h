@@ -757,50 +757,57 @@ struct gamestate
     void spawnstate(int gamemode, int mutators, int sweap = -1, int heal = 0)
     {
         weapreset(true);
-        if(!isweap(sweap))
-        {
-            if(actortype >= A_ENEMY) sweap = W_MELEE;
-            else if(m_kaboom(gamemode, mutators)) sweap = W_GRENADE;
-            else sweap = isweap(m_weapon(gamemode, mutators)) ? m_weapon(gamemode, mutators) : W_PISTOL;
-        }
-        if(isweap(sweap)) ammo[sweap] = max(1, W(sweap, ammomax));
-        if(sweap != W_MELEE) ammo[W_MELEE] = max(1, W(W_MELEE, ammomax));
-        if(sweap != W_GRENADE && G(spawngrenades) >= (m_insta(gamemode, mutators) || m_trial(gamemode) ? 2 : 1))
-            ammo[W_GRENADE] = max(1, W(W_GRENADE, ammomax));
-        if(sweap != W_MINE && (m_kaboom(gamemode, mutators) || G(spawnmines) >= (m_insta(gamemode, mutators) || m_trial(gamemode) ? 2 : 1)))
-            ammo[W_MINE] = max(1, W(W_MINE, ammomax));
-        if(actortype < A_ENEMY && m_loadout(gamemode, mutators))
-        {
-            vector<int> aweap;
-            loopj(G(maxcarry))
-            {
-                if(!loadweap.inrange(j)) aweap.add(0);
-                else if(loadweap[j] < W_OFFSET || loadweap[j] >= W_ITEM || hasweap(loadweap[j], sweap))
-                {
-                    int r = rnd(W_ITEM-W_OFFSET)+W_OFFSET; // random
-                    int iters = 0;
-                    while(hasweap(r, sweap) || !m_check(W(r, modes), W(r, muts), gamemode, mutators))
-                    {
-                        if(++iters > W_MAX)
-                        {
-                            r = 0;
-                            break;
-                        }
-                        if(++r >= W_ITEM) r = W_OFFSET;
-                    }
-                    aweap.add(r);
-                }
-                else aweap.add(loadweap[j]);
-                ammo[aweap[j]] = max(1, W(aweap[j], ammomax));
-            }
-            weapselect = aweap[0]; // if '0' isn't present, maxcarry isn't doing its job
-        }
-        else
-        {
-            loadweap.shrink(0);
-            weapselect = sweap;
-        }
         health = heal ? heal : m_health(gamemode, mutators, model);
+        int s = sweap;
+        if(!isweap(s))
+        {
+            if(actortype >= A_ENEMY) s = W_MELEE;
+            else if(m_kaboom(gamemode, mutators)) s = W_GRENADE;
+            else s = isweap(m_weapon(gamemode, mutators)) ? m_weapon(gamemode, mutators) : W_PISTOL;
+        }
+        if(isweap(s))
+        {
+            ammo[s] = max(1, W(s, ammomax));
+            weapselect = s;
+        }
+        if(s != W_MELEE) ammo[W_MELEE] = max(1, W(W_MELEE, ammomax));
+        if(actortype < A_ENEMY)
+        {
+            if(!m_trial(gamemode))
+            {
+                if(s != W_GRENADE && G(spawngrenades) >= (m_insta(gamemode, mutators) ? 2 : 1))
+                    ammo[W_GRENADE] = max(1, W(W_GRENADE, ammomax));
+                if(s != W_MINE && (m_kaboom(gamemode, mutators) || G(spawnmines) >= (m_insta(gamemode, mutators) ? 2 : 1)))
+                    ammo[W_MINE] = max(1, W(W_MINE, ammomax));
+            }
+            if(m_loadout(gamemode, mutators))
+            {
+                int n = 0;
+                vector<int> aweap;
+                loopj(W_LOADOUT) aweap.add(loadweap.inrange(j) ? loadweap[j] : 0);
+                loopvj(aweap)
+                {
+                    if(!aweap[j]) // specifically asking for random
+                    {
+                        for(int t = rnd(W_ITEM-W_OFFSET)+W_OFFSET, r = 0; r < W_LOADOUT; r++)
+                        {
+                            if(t >= W_OFFSET && t < W_ITEM && !hasweap(t, sweap) && m_check(W(t, modes), W(t, muts), gamemode, mutators) && !W(t, disabled))
+                            {
+                                aweap[j] = t;
+                                break;
+                            }
+                            else if(++t >= W_ITEM) t = W_OFFSET;
+                        }
+                    }
+                    if(aweap[j] >= W_OFFSET && aweap[j] < W_ITEM && !hasweap(aweap[j], sweap) && m_check(W(aweap[j], modes), W(aweap[j], muts), gamemode, mutators) && !W(aweap[j], disabled))
+                    {
+                        ammo[aweap[j]] = max(1, W(aweap[j], ammomax));
+                        if(!n) weapselect = aweap[j];
+                        if(++n >= G(maxcarry)) break;
+                    }
+                }
+            }
+        }
     }
 
     void editspawn(int gamemode, int mutators, int sweap = -1, int heal = 0)

@@ -877,7 +877,7 @@ namespace game
                 if(!m_edit(gamemode) && index < W_MAX)
                 {
                     weap = w_attr(gamemode, mutators, WEAPON, weap, m_weapon(gamemode, mutators));
-                    if(!isweap(weap) || (m_loadout(gamemode, mutators) && weap < W_ITEM) || !m_check(W(weap, modes), W(weap, muts), gamemode, mutators))
+                    if(!isweap(weap) || W(weap, disabled) || (m_loadout(gamemode, mutators) && weap < W_ITEM) || !m_check(W(weap, modes), W(weap, muts), gamemode, mutators))
                         weap = -1;
                 }
                 if(isweap(weap)) return vec::hexcolor(W(weap, colour));
@@ -1975,7 +1975,7 @@ namespace game
     }
     ICOMMAND(0, loadweap, "sii", (char *s, int *n, int *r), chooseloadweap(player1, s, *n!=0, *r!=0, true));
     ICOMMAND(0, getloadweap, "i", (int *n), intret(player1->loadweap.inrange(*n) ? player1->loadweap[*n] : -1));
-    ICOMMAND(0, allowedweap, "i", (int *n), intret(isweap(*n) && m_check(W(*n, modes), W(*n, muts), gamemode, mutators) ? 1 : 0));
+    ICOMMAND(0, allowedweap, "i", (int *n), intret(isweap(*n) && m_check(W(*n, modes), W(*n, muts), gamemode, mutators) && !W(*n, disabled) ? 1 : 0));
     ICOMMAND(0, hasloadweap, "bb", (int *g, int *m), intret(m_loadout(m_game(*g) ? *g : gamemode, *m >= 0 ? *m : mutators) ? 1 : 0));
 
     void startmap(const char *name, const char *reqname, bool empty)    // called just after a map load
