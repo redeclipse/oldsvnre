@@ -1490,13 +1490,13 @@ namespace server
                         {
                             clientinfo *cp = tc[i][id];
                             cp->swapteam = T_NEUTRAL; // make them rechoose if necessary
-                            int team = chooseteam(cp);
-                            if(team != cp->team)
+                            int t = chooseteam(cp, -1, true);
+                            if(t != cp->team)
                             {
-                                setteam(cp, team, (m_balreset(gamemode, mutators) ? TT_RESET : 0)|TT_INFOSM, false);
+                                setteam(cp, t, (m_balreset(gamemode, mutators) ? TT_RESET : 0)|TT_INFOSM, false);
                                 cp->state.lastdeath = 0;
                                 tc[i].removeobj(cp);
-                                tc[team-T_FIRST].add(cp);
+                                tc[t-T_FIRST].add(cp);
                                 moved++;
                             }
                         }
@@ -2648,16 +2648,15 @@ namespace server
         return false;
     }
 
-    int chooseteam(clientinfo *ci, int suggest)
+    int chooseteam(clientinfo *ci, int suggest, bool wantbal)
     {
         if(ci->state.actortype >= A_ENEMY) return T_ENEMY;
         else if(m_fight(gamemode) && m_team(gamemode, mutators) && ci->state.state != CS_SPECTATOR && ci->state.state != CS_EDITING)
         {
             bool human = ci->state.actortype == A_PLAYER;
-            int team = -1, bal = human ? G(teambalance) : 1;
+            int team = -1, bal = human && !wantbal && (G(teambalance) != 6 || gamewait) ? G(teambalance) : 1;
             if(human)
             {
-                if(bal == 6 && !gamewait) bal = 4;
                 if(m_coop(gamemode, mutators)) return mapbals[curbalance][0];
                 int teams[3][3] = {
                     { suggest, ci->team, -1 },
