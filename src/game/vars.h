@@ -249,7 +249,7 @@ GFVAR(0, damageselfscale, FVAR_MIN, 1, FVAR_MAX); // 0 = off, anything else = sc
 GVAR(0, damageteam, 0, 1, 2); // 0 = off, 1 = non-bots damage team, 2 = all players damage team
 GFVAR(0, damageteamscale, FVAR_MIN, 1, FVAR_MAX); // 0 = off, anything else = scale for damage
 
-GVAR(0, teambalance, 0, 6, 6); // 0 = off, 1 = by number then skill, 2 = by skill then number, 3 = by number and enforce, 4 = number, enforce, reassign, 5 = skill, number, enforce, reassign, 6 = skill during gamewait, revert to 4 otherwise
+GVAR(0, teambalance, 0, 5, 6); // 0 = off, 1 = by number then skill, 2 = by skill then number, 3 = by number and enforce, 4 = number, enforce, reassign, 5 = skill, number, enforce, reassign, 6 = skill during gamewait, revert to 4 otherwise
 GVAR(0, teambalanceduel, 0, 0, 1); // allow reassignments in duel
 GVAR(0, teambalanceplaying, 2, 2, VAR_MAX); // min players before reassignments occur
 GVAR(0, teambalanceamt, 2, 2, VAR_MAX); // max-min offset before reassignments occur

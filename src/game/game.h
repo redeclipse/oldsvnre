@@ -843,7 +843,7 @@ namespace server
     struct clientinfo;
     extern void waiting(clientinfo *ci, int drop = 0, bool doteam = true, bool exclude = false);
     extern void setteam(clientinfo *ci, int team, int flags = TT_RESET, bool swaps = true);
-    extern int chooseteam(clientinfo *ci, int suggest = -1);
+    extern int chooseteam(clientinfo *ci, int suggest = -1, bool wantbal = false);
 #endif
 }
 
