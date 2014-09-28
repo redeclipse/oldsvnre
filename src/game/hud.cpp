@@ -28,6 +28,7 @@ namespace hud
     VAR(IDF_PERSIST, showconsole, 0, 2, 2);
     VAR(IDF_PERSIST, shownotices, 0, 3, 4);
     VAR(IDF_PERSIST, showevents, 0, 3, 7);
+    VAR(IDF_PERSIST, showloadingmapbg, 0, 1, 1);
 
     VAR(IDF_PERSIST, showfps, 0, 0, 3);
     VAR(IDF_PERSIST, showstats, 0, 1, 2);
@@ -3006,7 +3007,7 @@ namespace hud
         glColor4f(1, 1, 1, 1);
 
         Texture *t = NULL;
-        if(*mapname && strcmp(mapname, "maps/untitled"))
+        if(showloadingmapbg && *mapname && strcmp(mapname, "maps/untitled"))
         {
             defformatstring(tex)("<blur:2>%s", mapname);
             t = textureload(tex, 3, true, false);

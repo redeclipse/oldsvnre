@@ -393,7 +393,7 @@ void checkmaster()
             {
                 c.listserver = false;
                 c.shouldping = false;
-                masteroutf(c, "error \"ping attempts failed (tried %d times on port %d), server will not be listed\n", c.numpings, c.port+1);
+                masteroutf(c, "error \"ping attempts failed (tried %d times on port %d), server will not be listed\"\n", c.numpings, c.port+1);
             }
         }
         if(c.isserver && c.lastcontrol < controlversion)

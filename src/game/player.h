@@ -77,7 +77,7 @@ TPSVAR(0, name,
     "neutral",  "alpha",    "omega",    "kappa",    "sigma",    "enemy"
 );
 TPVAR(IDF_HEX, colour, 0, 0xFFFFFF,
-    0x90A090,   0x5F66FF,   0xFF4F44,   0xFFD022,   0x22FF22,   0x6F6F6F
+    0x90A090,   0x5F66FF,   0xFF4F44,   0xFFD022,   0x22FF22,   0xB0B0B0
 );
 
 struct score

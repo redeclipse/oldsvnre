@@ -135,13 +135,13 @@ struct bomberservmode : bomberstate, servmode
             if(isbombertarg(flags[k], ci->team) && newpos.dist(flags[k].spawnloc) <= enttype[AFFINITY].radius/2) scorebomb(ci, i, k);
     }
 
-    void returnaffinity(int i, int v) // 0 = disable, 1 = return and wait, 2 = return instantly
+    void returnaffinity(int i, bool enabled)
     {
-        bomberstate::returnaffinity(i, gamemillis, v == 2);
-        sendf(-1, 1, "ri3", N_RESETAFFIN, i, flags[i].enabled ? v : 0);
-        if(v && !flags[i].enabled)
+        bomberstate::returnaffinity(i, gamemillis, enabled);
+        sendf(-1, 1, "ri3", N_RESETAFFIN, i, flags[i].enabled ? 1 : 0);
+        if(enabled && !flags[i].enabled)
         {
-            loopvj(flags) if(flags[j].enabled) returnaffinity(j, 0);
+            loopvj(flags) if(flags[j].enabled) returnaffinity(j, false);
             if(bombertime >= 0) bombertime = gamemillis+G(bomberdelay);
         }
     }
@@ -156,7 +156,7 @@ struct bomberservmode : bomberstate, servmode
         {
             if(!f.droptime) return;
             if(!m_nopoints(gamemode, mutators) && (!f.droptime || f.lastowner != ci->clientnum)) givepoints(ci, G(bomberpickuppoints));
-            returnaffinity(i, 2);
+            returnaffinity(i, false);
         }
         else
         {
@@ -172,14 +172,14 @@ struct bomberservmode : bomberstate, servmode
         flag &f = flags[i];
         if(!isbomberaffinity(f) || f.owner >= 0 || !f.droptime || f.votes.find(ci->clientnum) >= 0 || !f.enabled) return;
         f.votes.add(ci->clientnum);
-        if(f.votes.length() >= numclients()/2) returnaffinity(i, 2);
+        if(f.votes.length() >= numclients()/2) returnaffinity(i, false);
     }
 
     void layout()
     {
         if(!canplay(hasflaginfo)) return;
         bombertime = -1;
-        loopv(flags) if(flags[i].owner >= 0 || flags[i].droptime) returnaffinity(i, 0);
+        loopv(flags) if(flags[i].owner >= 0 || flags[i].droptime) returnaffinity(i, false);
         bombertime = gamemillis+G(bomberdelay);
     }
 
@@ -267,7 +267,7 @@ struct bomberservmode : bomberstate, servmode
                 }
                 continue;
             }
-            if(f.droptime && gamemillis-f.droptime >= G(bomberresetdelay)) returnaffinity(i, 2);
+            if(f.droptime && gamemillis-f.droptime >= G(bomberresetdelay)) returnaffinity(i, false);
         }
     }
 

@@ -1092,7 +1092,7 @@ namespace server
     {
         if(tone)
         {
-            int col = ci->state.actortype < A_ENEMY ? ci->state.colour : 0;
+            int col = ci->state.actortype < A_ENEMY ? ci->state.colour : 0x060606;
             if(!col && isweap(ci->state.weapselect)) col = W(ci->state.weapselect, colour);
             if(col) return col;
         }
