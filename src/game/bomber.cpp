@@ -491,22 +491,20 @@ namespace bomber
         playsound(WSND2(W_GRENADE, false, S_W_EXPLODE), o, NULL, 0, 255);
     }
 
-    void resetaffinity(int i, int value)
+    void resetaffinity(int i, int enabled)
     {
         if(!st.flags.inrange(i)) return;
         bomberstate::flag &f = st.flags[i];
-        bool isreset = false;
-        if(f.enabled && value)
+        if(f.enabled && enabled)
         {
             destroyaffinity(f.pos(true, true));
-            if(isbomberaffinity(f) && value == 2)
+            if(isbomberaffinity(f))
             {
                 affinityeffect(i, T_NEUTRAL, f.pos(true, true), f.spawnloc, 3, "RESET");
                 game::announcef(S_V_BOMBRESET, CON_SELF, NULL, true, "\fathe \fs\fzwvbomb\fS has been reset");
-                isreset = true;
             }
         }
-        st.returnaffinity(i, lastmillis, value!=0, isreset);
+        st.returnaffinity(i, lastmillis, enabled!=0);
     }
 
     VAR(IDF_PERSIST, showbomberdists, 0, 2, 2); // 0 = off, 1 = self only, 2 = all

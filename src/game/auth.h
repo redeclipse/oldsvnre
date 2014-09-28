@@ -132,13 +132,12 @@ namespace auth
                 formatstring(msg)("\fy%s identified as \fs\fc%s\fS", colourname(ci), ci->authname);
                 if(ci->privilege > PRIV_PLAYER)
                 {
-                    defformatstring(msgx)(" (\fs\fc%s\fS)", privname(privilege));
+                    defformatstring(msgx)(" (\fs\fc%s%s\fS)", local ? "local " : "", privname(privilege));
                     concatstring(msg, msgx);
                 }
                 copystring(ci->handle, ci->authname);
             }
-            else formatstring(msg)("\fy%s elevated to \fs\fc%s\fS", colourname(ci), privname(privilege, true));
-            if(local) concatstring(msg, " [\fs\falocal\fS]");
+            else formatstring(msg)("\fy%s elevated to \fs\fc%s%s\fS", colourname(ci), local ? "local " : "", privname(privilege, true));
         }
         else
         {

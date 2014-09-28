@@ -2060,7 +2060,7 @@ namespace game
     {
         if(tone)
         {
-            int col = d->actortype >= A_ENEMY ? 0 : d->colour;
+            int col = d->actortype >= A_ENEMY ? 0x060606 : d->colour;
             if(!col && isweap(d->weapselect))
             {
                 col = W(d->weapselect, colour);
