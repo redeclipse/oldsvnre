@@ -730,7 +730,7 @@ extern bool limitsky();
 extern int mouseaction[2], guibound[2];
 extern bool guiactionon;
 
-extern int guishadow, guiclicktab, guitextblend, guitextfade, guilinesize, guisepsize, guiscaletime,
+extern int guishadow, guiclicktab, guitextblend, guitextfade, guisepsize, guiscaletime,
     guibgcolour, guibordercolour, guihovercolour, guitooltips, guitooltiptime,
     guitooltipcolour, guitooltipbordercolour, guifieldbgcolour, guifieldbordercolour, guifieldactivecolour, guiactivecolour;
 extern float guibgblend, guiborderblend, guihoverscale, guihoverblend, guitooltipblend, guitooltipborderblend, guifieldbgblend, guifieldborderblend, guifieldactiveblend, guiactiveblend;
