@@ -759,7 +759,7 @@ template <class T> struct smallvector
         {
             buf = (T *)realloc(buf, len*sizeof(T));
             if(!buf) abort();
-        } 
+        }
         else if(buf) { free(buf); buf = NULL; }
     }
 
@@ -1201,6 +1201,11 @@ template <class T, int SIZE> struct reversequeue : queue<T, SIZE>
     T &operator[](int offset) { return queue<T, SIZE>::added(offset); }
     const T &operator[](int offset) const { return queue<T, SIZE>::added(offset); }
 };
+
+template<size_t N> inline bool matchstring(const char *s, size_t len, const char (&d)[N])
+{
+    return len == N-1 && !memcmp(s, d, N-1);
+}
 
 inline char *newstring(size_t l)                { return new char[l+1]; }
 inline char *newstring(const char *s, size_t l) { return copystring(newstring(l), s, l+1); }
