@@ -992,7 +992,7 @@ namespace game
 
     float spawnfade(gameent *d)
     {
-        int len = d->actortype >= A_ENEMY ? (actor[d->actortype].living ? min(ai::aideadfade, enemyspawntime ? enemyspawntime : INT_MAX-1) : 500) : m_delay(gamemode, mutators, d->team);
+        int len = d->actortype >= A_ENEMY ? (actor[d->actortype].living ? min(ai::aideadfade, enemyspawntime) : 500) : m_delay(gamemode, mutators, d->team);
         if(len > 0)
         {
             int interval = min(len/3, ragdolleffect), over = max(len-interval, 1), millis = lastmillis-d->lastdeath;
@@ -1013,7 +1013,7 @@ namespace game
         }
         if(d->state != CS_SPECTATOR && d->state != CS_EDITING)
         {
-            if(m_resize(gamemode, mutators) || d->actortype >= A_ENEMY)
+            if(m_resize(gamemode, mutators))
             {
                 float minscale = 1, amtscale = m_insta(gamemode, mutators) ? 1+(d->spree*instaresizeamt) : max(d->health, 1)/float(d->actortype >= A_ENEMY ? actor[d->actortype].health*enemystrength : m_health(gamemode, mutators, d->model));
                 if(m_resize(gamemode, mutators))
@@ -1370,7 +1370,7 @@ namespace game
                 d->lastpain = lastmillis;
                 playsound(WSND2(weap, WS(flags), S_W_IMPACT), vec(d->center()).add(vec(dir).mul(dist)), NULL, 0, clamp(int(255*scale), 64, 255));
             }
-            if(d->actortype < A_ENEMY || actor[d->actortype].canmove)
+            if(actor[d->actortype].canmove)
             {
                 if(weap == -1 && shocking && shockstun)
                 {
@@ -3033,16 +3033,11 @@ namespace game
 
     void renderclient(gameent *d, int third, float trans, float size, int team, modelattach *attachments, bool secondary, int animflags, int animdelay, int lastaction, bool early)
     {
-#if 0
-        const char *mdl = playertypes[0][third];
-        if(d->actortype >= A_ENEMY) mdl = actor[d->actortype%A_MAX].playermodel[third];
-        else mdl = playertypes[d->model%PLAYERTYPES][third];
-#else
         int idx = third == 1 && d->headless && !nogore && headlessmodels ? 3 : third;
         const char *mdl = playertypes[forceplayermodel >= 0 ? forceplayermodel : 0][idx];
         if(d->actortype >= A_ENEMY && d->actortype != A_GRUNT) mdl = actor[d->actortype%A_MAX].playermodel[idx];
         else if(forceplayermodel < 0) mdl = playertypes[d->model%PLAYERTYPES][idx];
-#endif
+
         bool onfloor = d->physstate >= PHYS_SLOPE || d->onladder || physics::liquidcheck(d);
         float yaw = d->yaw, pitch = d->pitch, roll = calcroll(focus);
         vec o = third ? d->feetpos() : camerapos(d);
@@ -3332,7 +3327,7 @@ namespace game
         }
         int team = m_fight(gamemode) && m_team(gamemode, mutators) ? d->team : T_NEUTRAL,
             weap = d->weapselect, lastaction = 0, animflags = ANIM_IDLE|ANIM_LOOP, weapflags = animflags, weapaction = 0, animdelay = 0;
-        bool secondary = false, showweap = third != 2 && isweap(weap) && (d->actortype < A_ENEMY || actor[d->actortype].useweap);
+        bool secondary = false, showweap = third != 2 && isweap(weap) && actor[d->actortype].useweap;
         float weapscale = 1.f;
         if(d->state == CS_DEAD || d->state == CS_WAITING)
         {
