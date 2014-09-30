@@ -28,7 +28,15 @@ GSVAR(IDF_ADMIN, serverdesc, "");
 GSVAR(IDF_ADMIN, servermotd, "");
 
 GVAR(IDF_ADMIN, autoadmin, 0, 0, 1);
+
 GVAR(IDF_ADMIN, queryinterval, 0, 5000, VAR_MAX); // rebuild client list for server queries this often
+GVAR(IDF_ADMIN, masterinterval, 300000, 300000, VAR_MAX); // keep connection alive every this often
+GVAR(IDF_ADMIN, connecttimeout, 5000, 15000, VAR_MAX); // disconnected when attempt exceeds this time
+GVAR(IDF_ADMIN, allowtimeout, 0, 3600000, VAR_MAX); // temporary allows last this long
+GVAR(IDF_ADMIN, bantimeout, 0, 14400000, VAR_MAX); // temporary bans last this long
+GVAR(IDF_ADMIN, mutetimeout, 0, 3600000, VAR_MAX); // temporary mutes last this long
+GVAR(IDF_ADMIN, limittimeout, 0, 3600000, VAR_MAX); // temporary limits last this long
+GVAR(IDF_ADMIN, excepttimeout, 0, 3600000, VAR_MAX); // temporary allows last this long
 
 GVAR(IDF_ADMIN, connectlock, 0, PRIV_NONE, PRIV_CREATOR);
 GVAR(IDF_ADMIN, messagelock, 0, PRIV_NONE, PRIV_CREATOR);
@@ -57,13 +65,6 @@ GVAR(IDF_ADMIN, editlock, 0, PRIV_OPERATOR, PRIV_CREATOR);
 GVAR(IDF_ADMIN, spawnlock, 0, PRIV_MODERATOR, PRIV_CREATOR); // if locked, require this to spawn
 GVAR(IDF_ADMIN, spawneditlock, 0, PRIV_MODERATOR, PRIV_CREATOR); // if locked in editmode, require this to spawn
 GVAR(IDF_ADMIN, masterlock, 0, PRIV_MODERATOR, PRIV_CREATOR);
-
-GVAR(IDF_ADMIN, connecttimeout, 5000, 15000, VAR_MAX); // disconnected when attempt exceeds this time
-GVAR(IDF_ADMIN, allowtimeout, 0, 3600000, VAR_MAX); // temporary allows last this long
-GVAR(IDF_ADMIN, bantimeout, 0, 14400000, VAR_MAX); // temporary bans last this long
-GVAR(IDF_ADMIN, mutetimeout, 0, 3600000, VAR_MAX); // temporary mutes last this long
-GVAR(IDF_ADMIN, limittimeout, 0, 3600000, VAR_MAX); // temporary limits last this long
-GVAR(IDF_ADMIN, excepttimeout, 0, 3600000, VAR_MAX); // temporary allows last this long
 
 GVAR(IDF_ADMIN, overflowlock, 0, PRIV_MODERATOR, PRIV_CREATOR); // normal message queue override
 GVAR(IDF_ADMIN, overflowsize, 0, 255, VAR_MAX); // kick if queued messages >= this

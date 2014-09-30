@@ -4420,7 +4420,24 @@ namespace server
 
     void serverupdate()
     {
-        loopvrev(connects) if(totalmillis-connects[i]->connectmillis >= G(connecttimeout)) disconnect_client(connects[i]->clientnum, DISC_TIMEOUT);
+        loopvrev(connects) if(totalmillis-connects[i]->connectmillis >= G(connecttimeout))
+        {
+            clientinfo *ci = connects[i];
+            if(ci->connectauth)
+            { // auth might have stalled
+                ci->connectauth = false;
+                ci->authreq = ci->authname[0] = 0;
+                srvmsgftforce(ci->clientnum, CON_EVENT, "\founable to verify, authority request timed out");
+                int disc = auth::allowconnect(ci);
+                if(disc) disconnect_client(ci->clientnum, disc);
+                else
+                {
+                    ci->connectmillis = totalmillis; // in case it doesn't work
+                    connected(ci);
+                }
+            }
+            else disconnect_client(ci->clientnum, DISC_TIMEOUT);
+        }
         if(G(bantimeout)) loopvrev(control) if(control[i].flag == ipinfo::TEMPORARY)
         {
             int timeout = 0;
@@ -4942,11 +4959,7 @@ namespace server
                 {
                     uint id = (uint)getint(p);
                     getstring(text, p);
-                    if(!auth::answerchallenge(ci, id, text))
-                    {
-                        disconnect_client(sender, ci->connectauth);
-                        return;
-                    }
+                    if(!auth::answerchallenge(ci, id, text)) auth::authfailed(ci->authreq);
                     break;
                 }
 
