@@ -302,24 +302,33 @@ bool checkmasterclientinput(masterclient &c)
             }
             else
             {
+                ENetAddress address = { ENET_HOST_ANY, enet_uint16(c.port) };
                 if(w[1]) c.port = clamp(atoi(w[1]), 1, VAR_MAX);
-                c.shouldping = true;
-                c.numpings = 0;
-                c.lastcontrol = controlversion;
-                loopv(control) if(control[i].flag == ipinfo::LOCAL)
-                    masteroutf(c, "%s %u %u \"%s\"\n", ipinfotypes[control[i].type], control[i].ip, control[i].mask, control[i].reason);
-                if(c.isserver)
+                if(w[2] && strcmp(w[2], "*") && (enet_address_set_host(&address, w[2]) < 0 || address.host != c.address.host))
                 {
-                    masteroutf(c, "echo \"server updated (port %d), sending ping request (on port %d)\"\n", c.port, c.port+1);
-                    conoutf("master peer %s updated server info (%d)",  c.name, c.port);
+                    c.listserver = c.shouldping = false;
+                    masteroutf(c, "echo \"serverip \"%s\" does not match origin \"%s\", server will not be listed\n", w[2], c.name);
                 }
                 else
                 {
-                    if(*masterscriptserver) masteroutf(c, "%s\n", masterscriptserver);
-                    masteroutf(c, "echo \"server registered (port %d), sending ping request (on port %d)\"\n", c.port, c.port+1);
-                    conoutf("master peer %s registered as a server (%d)", c.name, c.port);
+                    c.shouldping = true;
+                    c.numpings = 0;
+                    c.lastcontrol = controlversion;
+                    loopv(control) if(control[i].flag == ipinfo::LOCAL)
+                        masteroutf(c, "%s %u %u \"%s\"\n", ipinfotypes[control[i].type], control[i].ip, control[i].mask, control[i].reason);
+                    if(c.isserver)
+                    {
+                        masteroutf(c, "echo \"server updated (port %d), sending ping request (on port %d)\"\n", c.port, c.port+1);
+                        conoutf("master peer %s updated server info (%d)",  c.name, c.port);
+                    }
+                    else
+                    {
+                        if(*masterscriptserver) masteroutf(c, "%s\n", masterscriptserver);
+                        masteroutf(c, "echo \"server registered (port %d), sending ping request (on port %d)\"\n", c.port, c.port+1);
+                        conoutf("master peer %s registered as a server (%d)", c.name, c.port);
+                    }
+                    c.isserver = true;
                 }
-                c.isserver = true;
             }
             found = true;
         }
@@ -391,8 +400,7 @@ void checkmaster()
             }
             else
             {
-                c.listserver = false;
-                c.shouldping = false;
+                c.listserver = c.shouldping = false;
                 masteroutf(c, "error \"ping attempts failed (tried %d times on port %d), server will not be listed\"\n", c.numpings, c.port+1);
             }
         }

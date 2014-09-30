@@ -1305,7 +1305,11 @@ int setupserversockets()
     ENetAddress address = { ENET_HOST_ANY, enet_uint16(serverport) };
     if(*serverip)
     {
-        if(enet_address_set_host(&address, serverip) < 0) conoutf("\frWARNING: server address not resolved");
+        if(enet_address_set_host(&address, serverip) < 0)
+        {
+            setsvar("serverip", "");
+            conoutf("\frWARNING: server address not resolved");
+        }
         else serveraddress.host = address.host;
     }
 

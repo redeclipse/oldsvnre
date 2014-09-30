@@ -344,7 +344,7 @@ namespace auth
         else
         {
             conoutf("updating master server");
-            requestmasterf("server %d\n", serverport);
+            requestmasterf("server %d %s\n", serverport, *serverip ? serverip : "*");
         }
         lastactivity = totalmillis;
     }
@@ -364,7 +364,7 @@ namespace auth
             loopv(clients) if(clients[i]->authreq) reqauth(clients[i]);
             loopv(connects) if(connects[i]->authreq) reqauth(connects[i]);
         }
-        if(!quickcheck && totalmillis-lastactivity > 30*60*1000) regserver();
+        if(!quickcheck && totalmillis-lastactivity > G(masterinterval)) regserver();
     }
 
     void masterconnected()
