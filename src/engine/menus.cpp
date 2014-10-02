@@ -515,29 +515,47 @@ void guinameslider(char *var, char *names, char *list, char *onchange, int *reve
 
 void guicheckbox(char *name, char *var, float *on, float *off, char *onchange, int *colour)
 {
+    if(!cgui) return;
     bool enabled = getfval(var) != *off, two = getfvarmax(var) == 2, next = two && getfval(var) == 1.0f;
-    if(cgui && cgui->button(name, *colour >= 0 ? *colour : 0xFFFFFF, enabled ? (two && !next ? "checkboxtwo" : "checkboxon") : "checkbox", 0xFFFFFF)&GUI_UP)
+    int ret = cgui->button(name, *colour >= 0 ? *colour : 0xFFFFFF, enabled ? (two && !next ? "checkboxtwo" : "checkboxon") : "checkbox", 0xFFFFFF);
+    if(ret&GUI_UP) updateval(var, enabled ? (two && next ? 2.0f : *off) : (*on || *off ? *on : 1.0f), onchange);
+    else if(ret&GUI_ROLLOVER)
     {
-        updateval(var, enabled ? (two && next ? 2.0f : *off) : (*on || *off ? *on : 1.0f), onchange);
+        setsvar("guirollovername", name, true);
+        setsvar("guirolloveraction", var, true);
+        setsvar("guirollovertype", "checkbox", true);
     }
 }
 
 void guiradio(char *name, char *var, float *n, char *onchange, int *colour)
 {
+    if(!cgui) return;
     bool enabled = getfval(var)==*n;
-    if(cgui && cgui->button(name, *colour >= 0 ? *colour : 0xFFFFFF, enabled ? "radioboxon" : "radiobox", *colour >= 0 ? *colour : 0xFFFFFF)&GUI_UP)
+    int ret = cgui->button(name, *colour >= 0 ? *colour : 0xFFFFFF, enabled ? "radioboxon" : "radiobox", *colour >= 0 ? *colour : 0xFFFFFF);
+    if(ret&GUI_UP)
     {
         if(!enabled) updateval(var, *n, onchange);
+    }
+    else if(ret&GUI_ROLLOVER)
+    {
+        setsvar("guirollovername", name, true);
+        setsvar("guirolloveraction", var, true);
+        setsvar("guirollovertype", "radio", true);
     }
 }
 
 void guibitfield(char *name, char *var, int *mask, char *onchange, int *colour)
 {
+    if(!cgui) return;
     int val = getval(var);
     bool enabled = (val & *mask) != 0;
-    if(cgui && cgui->button(name, *colour >= 0 ? *colour : 0xFFFFFF, enabled ? "checkboxon" : "checkbox", *colour >= 0 ? *colour : 0xFFFFFF)&GUI_UP)
+    int ret = cgui->button(name, *colour >= 0 ? *colour : 0xFFFFFF, enabled ? "checkboxon" : "checkbox", *colour >= 0 ? *colour : 0xFFFFFF);
+    if(ret&GUI_UP) updateval(var, enabled ? val & ~*mask : val | *mask, onchange);
+    else if(ret&GUI_ROLLOVER)
     {
-        updateval(var, enabled ? val & ~*mask : val | *mask, onchange);
+        setsvar("guirollovername", name, true);
+        setsvar("guirolloveraction", var, true);
+        setsvar("guirollovertype", "bitfield", true);
     }
 }
 
