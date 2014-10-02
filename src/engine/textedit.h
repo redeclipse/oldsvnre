@@ -750,10 +750,12 @@ TEXTCOMMAND(textmode, "i", (int *m), // (1= keep while focused, 2= keep while us
     else intret(top->mode);
 );
 TEXTCOMMAND(textsave, "s", (char *file),  // saves the topmost (filename is optional)
+    if(identflags&IDF_WORLD) return;
     if(*file) top->setfile(copypath(file));
     top->save();
 );
 TEXTCOMMAND(textload, "s", (char *file), // loads into the topmost editor, returns filename if no args
+    if(identflags&IDF_WORLD) return;
     if(*file)
     {
         top->setfile(copypath(file));
@@ -763,11 +765,12 @@ TEXTCOMMAND(textload, "s", (char *file), // loads into the topmost editor, retur
 );
 TEXTCOMMAND(textinit, "sss", (char *name, char *file, char *initval), // loads into named editor if no file assigned and editor has been rendered
 {
+    char *f = identflags&IDF_WORLD ? NULL : file;
     editor *e = NULL;
     loopv(editors) if(!strcmp(editors[i]->name, name)) { e = editors[i]; break; }
-    if(e && e->rendered && !e->filename && *file && (e->lines.empty() || (e->lines.length() == 1 && !strcmp(e->lines[0].text, initval))))
+    if(e && e->rendered && !e->filename && f && *f && (e->lines.empty() || (e->lines.length() == 1 && !strcmp(e->lines[0].text, initval))))
     {
-        e->setfile(copypath(file));
+        e->setfile(copypath(f));
         e->load();
     }
 });
