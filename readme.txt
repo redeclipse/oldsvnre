@@ -91,7 +91,7 @@ The project is Free and Open Source meaning that you can both use it for free, a
 * Sébastien "sinma" Chauvel
 * Taiyo Rawle
 * Vadim Peretokin
-* Viktor "Unnamed" Hahn
+* Viktor "Unnamed" Hahn - Maps, Models, and other improvements
 * Wayne Bennett
 * Zachery "SkiingPenguins" Slocum - Skyboxes
 * "4rson" - Maps and Support
