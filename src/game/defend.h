@@ -1,9 +1,7 @@
 #ifdef GAMESERVER
     #define defendstate stfservstate
-    #define defendinstant (m_gsp1(gamemode, mutators) || m_gsp2(gamemode, mutators))
     #define defendcount (m_gsp2(gamemode, mutators) ? G(defendking) : G(defendoccupy))
 #else
-    #define defendinstant (m_gsp1(game::gamemode, game::mutators) || m_gsp2(game::gamemode, game::mutators))
     #define defendcount (m_gsp2(game::gamemode, game::mutators) ? G(defendking) : G(defendoccupy))
 #endif
 

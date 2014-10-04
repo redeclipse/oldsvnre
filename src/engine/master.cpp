@@ -170,11 +170,10 @@ void reqauth(masterclient &c, uint id, char *name, char *hostname)
 void confauth(masterclient &c, uint id, const char *val)
 {
     purgeauths(c);
-
+    string ip;
+    if(enet_address_get_host_ip(&c.address, ip, sizeof(ip)) < 0) copystring(ip, "-");
     loopv(c.authreqs) if(c.authreqs[i].id == id)
     {
-        string ip;
-        if(enet_address_get_host_ip(&c.address, ip, sizeof(ip)) < 0) copystring(ip, "-");
         if(checkchallenge(val, c.authreqs[i].answer))
         {
             masteroutf(c, "succauth %u \"%s\" \"%s\"\n", id, c.authreqs[i].user->name, c.authreqs[i].user->flags);
