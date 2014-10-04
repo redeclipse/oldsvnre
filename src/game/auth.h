@@ -137,7 +137,7 @@ namespace auth
                 }
                 copystring(ci->handle, ci->authname);
             }
-            else formatstring(msg)("\fy%s elevated to \fs\fc%s%s\fS", colourname(ci), local ? "local " : "", privname(privilege, true));
+            else formatstring(msg)("\fy%s elevated to \fs\fc%s%s\fS", colourname(ci), local ? "local " : "", privname(privilege));
         }
         else
         {
