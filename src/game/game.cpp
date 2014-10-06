@@ -1374,11 +1374,11 @@ namespace game
             {
                 if(weap == -1 && shocking && shockstun)
                 {
-                    float amt = WRS(d->health <= 0 ? deadstunscale : hitstunscale, stun, gamemode, mutators),
+                    float amt = WRS(flags&HIT_WAVE || !hithurts(flags) ? wavestunscale : (d->health <= 0 ? deadstunscale : hitstunscale), stun, gamemode, mutators),
                           s = G(shockstunscale)*amt, g = G(shockstunfall)*amt;
-                    d->addstun(weap, lastmillis, G(shockstuntime), shockstun&1 ? s : 0.f, shockstun&2 ? g : 0.f);
-                    if(shockstun&4 && s > 0) d->vel.mul(1.f-clamp(s, 0.f, 1.f));
-                    if(shockstun&8 && g > 0) d->falling.mul(1.f-clamp(g, 0.f, 1.f));
+                    d->addstun(weap, lastmillis, G(shockstuntime), shockstun&W_N_STADD ? s : 0.f, shockstun&W_N_GRADD ? g : 0.f);
+                    if(shockstun&W_N_STIMM && s > 0) d->vel.mul(1.f-clamp(s, 0.f, 1.f));
+                    if(shockstun&W_N_GRIMM && g > 0) d->falling.mul(1.f-clamp(g, 0.f, 1.f));
                 }
                 else if(isweap(weap) && !burning && !bleeding && !shocking && WF(WK(flags), weap, damage, WS(flags)))
                 {
