@@ -1,7 +1,7 @@
 = Red Eclipse =
 
 * A Free, Casual Arena Shooter; released as Open Source
-* Available for Windows, GNU/Linux, BSD, and OSX
+* Available for Windows, GNU/Linux, BSD, and OS X
 * Parkour, impulse boosts, dashing, and other tricks
 * Favourite gamemodes with an array of mutators and variables
 * Builtin editor lets you create your own maps cooperatively online
@@ -14,7 +14,7 @@ Red Eclipse is a fun-filled new take on the casual first person arena shooter, b
 Wiki: http://redeclipse.net/wiki
 Forum: http://redeclipse.net/forum
 
-The project is a Free and Open Source game, built on Cube Engine 2 using SDL and OpenGL which allows it to be ported to many platforms; you can download a package for Windows, GNU/Linux, BSD, and Mac OSX; or grab a development copy from our Subversion repository and live on the bleeding edge.
+The project is a Free and Open Source game, built on Cube Engine 2 using SDL and OpenGL which allows it to be ported to many platforms; you can download a package for Windows, GNU/Linux, BSD, and Mac OS X; or grab a development copy from our Subversion repository and live on the bleeding edge.
 
 Download: http://redeclipse.net/download
 Subversion: http://redeclipse.net/devel
