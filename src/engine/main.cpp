@@ -962,7 +962,7 @@ int main(int argc, char **argv)
     //#endif
 
     par |= SDL_INIT_TIMER|SDL_INIT_VIDEO|SDL_INIT_NOPARACHUTE;
-    if(SDL_Init(par) < 0) fatal("Unable to initialize SDL: %s", SDL_GetError());
+    if(SDL_Init(par) < 0) fatal("error initialising SDL: %s", SDL_GetError());
 
     conoutf("loading video..");
     const SDL_VideoInfo *video = SDL_GetVideoInfo();

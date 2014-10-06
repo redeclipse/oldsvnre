@@ -64,7 +64,7 @@ void setupmaster()
 {
     if(masterserver)
     {
-        conoutf("init: master (%s:%d)", *masterip ? masterip : "*", masterport);
+        conoutf("loading master (%s:%d)..", *masterip ? masterip : "*", masterport);
         ENetAddress address = { ENET_HOST_ANY, enet_uint16(masterport) };
         if(*masterip && enet_address_set_host(&address, masterip) < 0) fatal("failed to resolve master address: %s", masterip);
         if((mastersocket = enet_socket_create(ENET_SOCKET_TYPE_STREAM)) == ENET_SOCKET_NULL) fatal("failed to create master server socket");
