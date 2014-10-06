@@ -3597,10 +3597,17 @@ namespace server
             else if(isghost(m, v)) nodamage++;
         }
 
-        if(isweap(weap) && (WF(WK(flags), weap, residualundo, WS(flags))&WR(BURN)) && m->state.burning(gamemillis, G(burntime)))
+        if(isweap(weap) && WF(WK(flags), weap, residualundo, WS(flags)))
         {
-            m->state.lastres[WR_BURN] = m->state.lastrestime[WR_BURN] = 0;
-            sendf(-1, 1, "ri3", N_SPHY, m->clientnum, SPHY_EXTINGUISH);
+            if(WF(WK(flags), weap, residualundo, WS(flags))&WR(BURN) && m->state.burning(gamemillis, G(burntime)))
+            {
+                m->state.lastres[WR_BURN] = m->state.lastrestime[WR_BURN] = 0;
+                sendf(-1, 1, "ri3", N_SPHY, m->clientnum, SPHY_EXTINGUISH);
+            }
+            if(WF(WK(flags), weap, residualundo, WS(flags))&WR(BLEED) && m->state.bleeding(gamemillis, G(bleedtime)))
+                m->state.lastres[WR_BLEED] = m->state.lastrestime[WR_BLEED] = 0;
+            if(WF(WK(flags), weap, residualundo, WS(flags))&WR(SHOCK) && m->state.shocking(gamemillis, G(shocktime)))
+                m->state.lastres[WR_SHOCK] = m->state.lastrestime[WR_SHOCK] = 0;
         }
 
         if(nodamage || !hithurts(realflags))
