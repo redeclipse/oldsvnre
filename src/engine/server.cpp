@@ -27,9 +27,9 @@ SVAR(IDF_READONLY, versionplatlongname, plat_longname(CUR_PLATFORM));
 VAR(IDF_READONLY, versionplatform, 0, CUR_PLATFORM, VAR_MAX);
 VAR(IDF_READONLY, versionarch, 0, CUR_ARCH, VAR_MAX);
 #ifdef STANDALONE
-VAR(IDF_READONLY, versionstandalone, 0, 1, 1);
+VAR(IDF_READONLY, versionisserver, 0, 1, 1);
 #else
-VAR(IDF_READONLY, versionstandalone, 0, 0, 1);
+VAR(IDF_READONLY, versionisserver, 0, 0, 1);
 #endif
 uint versioncrc = 0;
 
@@ -1192,7 +1192,7 @@ static void setupwindow(const char *title)
     atexit(cleanupwindow);
 
     if(!setupsystemtray(WM_APP)) fatal("failed adding to system tray");
-    conoutf("identity: v%s-%s%d %s (%s) [0x%x]", versionstring, versionplatname, versionarch, versionstandalone ? "server" : "client", versionrelease, versioncrc);
+    conoutf("identity: v%s-%s%d %s (%s) [0x%x]", versionstring, versionplatname, versionarch, versionisserver ? "server" : "client", versionrelease, versioncrc);
 }
 
 static char *parsecommandline(const char *src, vector<char *> &args)
@@ -1383,8 +1383,8 @@ void setupserver()
 #ifdef STANDALONE
     setupmaster();
 #endif
-    conoutf("init: server (%s:%d)", *serverip ? serverip : "*", serverport);
-    if(setupserversockets() && verbose) conoutf("\fggame server started");
+    conoutf("loading server (%s:%d)..", *serverip ? serverip : "*", serverport);
+    if(setupserversockets() && verbose) conoutf("game server started");
 #ifndef STANDALONE
     if(servertype >= 3) serverloop();
 #endif
@@ -1392,7 +1392,7 @@ void setupserver()
 
 void initgame()
 {
-    conoutf("identity: v%s-%s%d %s (%s) [0x%x]", versionstring, versionplatname, versionarch, versionstandalone ? "server" : "client", versionrelease, versioncrc);
+    conoutf("identity: v%s-%s%d %s (%s) [0x%x]", versionstring, versionplatname, versionarch, versionisserver ? "server" : "client", versionrelease, versioncrc);
     server::start();
     loopv(gameargs)
     {
