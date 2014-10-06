@@ -28,10 +28,11 @@
 
     $app['targets']['arch'] = array('name' => 'Arch', 'url' => 'http://aur.archlinux.org/packages.php?ID=47449', 'nav' => -1, 'redir' => 1);
     $app['targets']['chakra'] = array('name' => 'Chakra', 'url' => 'http://www.chakra-project.org/packages/index.php?act=search&subdir=&sortby=date&order=descending&searchpattern=redeclipse', 'nav' => -1, 'redir' => 1);
+    $app['targets']['debian'] = array('name' => 'Debian', 'url' => 'https://packages.debian.org/search?keywords=redeclipse', 'nav' => -1, 'redir' => 1);
     $app['targets']['slackware'] = array('name' => 'Slackware', 'url' => 'http://slackbuilds.org/repository/14.0/games/redeclipse/', 'nav' => -1, 'redir' => 1);
     $app['targets']['gentoo'] = array('name' => 'Gentoo', 'url' => 'http://git.overlays.gentoo.org/gitweb/?p=proj/gamerlay.git;a=tree;f=games-fps/redeclipse;h=3487897cbfb5a353ed5dae6add04d888b6cf8ae7;hb=HEAD', 'nav' => -1, 'redir' => 1);
 
-    $app['platforms'] = array('windows' => 0, 'linux' => 0, 'macosx' => 0, 'arch' => 1, 'chakra' => 1, 'slackware' => 1, 'gentoo' => 1);
+    $app['platforms'] = array('windows' => 0, 'linux' => 0, 'macosx' => 0, 'arch' => 1, 'chakra' => 1, 'debian' => 1, 'slackware' => 1, 'gentoo' => 1);
 
     $app['targets']['apply'] = array('name' => 'Apply', 'url' => 'http://docs.google.com/forms/d/1ZuvNFCIivYY_b5YLpCa_pnsbdR4oRdPplIkcbBexCDU/viewform', 'nav' => -1, 'redir' => 1);
     $app['targets']['guidelines'] = array('name' => 'Guidelines', 'url' => 'http://redeclipse.net/wiki/Multiplayer_Guidelines', 'nav' => -1, 'redir' => 1);
