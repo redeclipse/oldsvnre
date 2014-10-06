@@ -831,8 +831,8 @@ namespace game
     vec pulsecolour(physent *d, int i, int cycle)
     {
         size_t seed = size_t(d) + (lastmillis/cycle);
-        int n = detrnd(seed, PULSECOLOURS), n2 = detrnd(seed + 1, PULSECOLOURS);
-        return vec::hexcolor(pulsecols[i][n]).lerp(vec::hexcolor(pulsecols[i][n2]), (lastmillis%cycle)/float(cycle));
+        int n = detrnd(seed, PULSECOLOURS), n2 = detrnd(seed + 1, PULSECOLOURS), q = clamp(i, 0, int(PULSE_LAST));
+        return vec::hexcolor(pulsecols[q][n]).lerp(vec::hexcolor(pulsecols[q][n2]), (lastmillis%cycle)/float(cycle));
     }
 
     int hexpulsecolour(physent *d, int i, int cycle)
@@ -850,11 +850,8 @@ namespace game
                 switch(index)
                 {
                     case 0: break; // off
-                    case 1: case 2: case 3:
+                    case 1: case 2: case 3: case 4:
                         return vec::hexcolor(pulsecols[index-1][clamp((lastmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)]);
-                        break;
-                    case 4: case 5: case 6:
-                        return pulsecolour(camera1, index-4, 50);
                         break;
                     default: break;
                 }
