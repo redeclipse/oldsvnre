@@ -42,7 +42,7 @@ SVAR(IDF_PERSIST, filetimeformat, "%Y%m%d%H%M%S");
 const char *gettime(time_t ctime, const char *format)
 {
     static string buf;
-    if(!ctime) ctime = clocktime;
+    if(!ctime) ctime = currenttime;
     struct tm *t = localtime(&ctime);
     if(!strftime(buf, sizeof(buf), format && *format ? format : logtimeformat, t)) buf[0] = '\0';
     return buf;
@@ -191,7 +191,7 @@ void console(int type, const char *s, ...)
     defvformatstring(sf, s, s);
     string osf;
     filtertext(osf, sf);
-    if(*logtimeformat) logoutf("%s %s", gettime(clocktime, logtimeformat), osf);
+    if(*logtimeformat) logoutf("%s %s", gettime(currenttime, logtimeformat), osf);
     else logoutf("%s", osf);
 #ifndef STANDALONE
     conline(type, sf, 0);
@@ -246,7 +246,7 @@ VAR(0, serverlanport, 0, LAN_PORT, VAR_MAX);
 SVAR(0, serverip, "");
 
 int curtime = 0, totalmillis = 1, lastmillis = 1, timescale = 100, paused = 0, timeerr = 0;
-time_t clocktime = 0;
+time_t clocktime = 0, currenttime = 0, clockoffset = 0;
 uint totalsecs = 0;
 const char *load = NULL;
 vector<char *> gameargs;
@@ -952,7 +952,10 @@ int getclockmillis()
 
 int updatetimer(bool limit)
 {
-    clocktime = time(NULL);
+    currenttime = time(NULL);
+    clocktime = mktime(gmtime(&currenttime));
+    clockoffset = currenttime-clocktime;
+
     int millis = getclockmillis();
 #ifndef STANDALONE
     if(limit) limitfps(millis, totalmillis);
@@ -1702,7 +1705,10 @@ void reloadsignal(int signum)
 
 int main(int argc, char **argv)
 {
-    clocktime = time(NULL); // initialise
+    currenttime = time(NULL); // initialise
+    clocktime = mktime(gmtime(&currenttime));
+    clockoffset = currenttime-clocktime;
+
     setlogfile(NULL);
     setlocations(true);
     setcrc(argv[0]);

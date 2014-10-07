@@ -42,7 +42,7 @@ namespace hud
     VAR(IDF_PERSIST, scoredeaths, 0, 2, 2);
     VAR(IDF_PERSIST, scoreratios, 0, 0, 2);
     VAR(IDF_PERSIST, scoreclientnum, 0, 1, 1);
-    VAR(IDF_PERSIST, scoretimestyle, -1, 1, 3);
+    VAR(IDF_PERSIST, scoretimestyle, -1, 1, 1);
     VAR(IDF_PERSIST, scoretrialstyle, -1, 0, 3);
     VAR(IDF_PERSIST, scorebotinfo, 0, 0, 1);
     VAR(IDF_PERSIST, scorespectators, 0, 1, 1);
@@ -857,7 +857,7 @@ namespace hud
                 if(m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
                 {
                     realpos++;
-                    if(!pos || (m_laptime(game::gamemode, game::mutators) ? sg.total > groups[lastpos]->total : sg.total < groups[lastpos]->total))
+                    if(!pos || (m_laptime(game::gamemode, game::mutators) ? ((!sg.total && groups[lastpos]->total) || sg.total > groups[lastpos]->total) : sg.total < groups[lastpos]->total))
                     {
                         pos = realpos;
                         lastpos = k;
@@ -875,7 +875,7 @@ namespace hud
                     {
                         gameent *d = sg.players[j];
                         realpos++;
-                        if(!pos || (m_laptime(game::gamemode, game::mutators) ? d->cptime > sg.players[lastpos]->cptime : d->points < sg.players[lastpos]->points))
+                        if(!pos || (m_laptime(game::gamemode, game::mutators) ? ((!d->cptime && sg.players[lastpos]->cptime) || d->cptime > sg.players[lastpos]->cptime) : d->points < sg.players[lastpos]->points))
                         {
                             pos = realpos;
                             lastpos = j;
@@ -883,7 +883,7 @@ namespace hud
                         if((d != game::focus) == !i) continue;
                         float sk = numout && inventoryscoreshrink > 0 ? 1.f-min(numout*inventoryscoreshrink, inventoryscoreshrinkmax) : 1;
                         int score = m_laptime(game::gamemode, game::mutators) ? d->cptime : d->points,
-                            offset = sg.players.length() > 1 ? score-(m_laptime(game::gamemode, game::mutators) ? sg.players[j ? 0 : 1]->cptime : sg.players[j ? 0 : 1]->points) : 0;
+                            offset = (sg.players.length() > 1 && (!m_laptime(game::gamemode, game::mutators) || score)) ? score-(m_laptime(game::gamemode, game::mutators) ? sg.players[j ? 0 : 1]->cptime : sg.players[j ? 0 : 1]->points) : 0;
                         sy += drawscoreitem(playertex, game::getcolour(d, game::playerteamtone), x, y+sy, s, sk*inventoryscoresize, blend*inventoryblend, pos, score, offset, game::colourname(d));
                         if(++numout >= count) return sy;
                     }

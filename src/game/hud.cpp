@@ -269,7 +269,7 @@ namespace hud
     VAR(IDF_PERSIST, inventorydate, 0, 0, 1);
     SVAR(IDF_PERSIST, inventorydateformat, "%H:%M:%S");
     VAR(IDF_PERSIST, inventorytime, 0, 1, 1);
-    VAR(IDF_PERSIST, inventorytimestyle, -1, 1, 3);
+    VAR(IDF_PERSIST, inventorytimestyle, -1, 1, 1);
     VAR(IDF_PERSIST, inventoryscore, 0, 1, VAR_MAX);
     VAR(IDF_PERSIST, inventoryscorespec, 0, 2, VAR_MAX);
     VAR(IDF_PERSIST, inventoryscorebg, 0, 0, 1);
@@ -2864,7 +2864,7 @@ namespace hud
                 if(!m_hard(game::gamemode, game::mutators) && radarstyle == 3 && !hasinput(true) && (game::focus->state == CS_EDITING ? showeditradar >= 1 : chkcond(showradar, !game::tvmode() || (game::focus != game::player1 && radarstyle==3))))
                     cm += int(max(w, h)/2*radarcorner*2);
                 if(inventorydate)
-                    cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorydateskew, "super", fade*inventorydateblend, "%s", gettime(clocktime, inventorydateformat));
+                    cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorydateskew, "super", fade*inventorydateblend, "%s", gettime(currenttime, inventorydateformat));
                 if(inventorytime)
                 {
                     if(m_edit(game::gamemode)) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fgediting\fS");

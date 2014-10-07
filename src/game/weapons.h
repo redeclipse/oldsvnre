@@ -195,7 +195,7 @@ WPVARM(0, cooked, 0, W_C_ALL,
 );
 WPVARM(0, cooktime, 0, VAR_MAX,
     0,          0,          0,          0,          0,          0,          0,          0,          0,          3000,       0,          0,
-    0,          0,          0,          0,          0,          0,          2000,       500,        500,        3000,       0,          0
+    0,          0,          0,          0,          0,          0,          2000,       250,        500,        3000,       0,          0
 );
 WPVARK(0, damage, VAR_MIN, VAR_MAX,
     30,         25,         30,         6,          15,         7,          15,         10,         35,         100,        100,        200,
@@ -479,7 +479,7 @@ WPFVARK(0, radius, FVAR_NONZERO, FVAR_MAX,
     1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f
 );
 WPVARM(0, rays, 0, MAXPARAMS,
-    1,          1,          1,          20,         1,          1,          1,          1,          1,          1,          1,          1,
+    1,          1,          1,          22,         1,          1,          1,          1,          1,          1,          1,          1,
     1,          1,          1,          1,          1,          1,          1,          5,          1,          1,          1,          1
 );
 WPFVARK(0, reflectivity, 0, FVAR_MAX,

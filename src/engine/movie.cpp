@@ -825,7 +825,7 @@ namespace recorder
         return 1.0f - float(dps)/float(dps+file->videofps); // strictly speaking should lock to read dps - 1.0=perfect, 0.5=half of frames are beingdropped
     }
 
-    int gettime()
+    int gettimet()
     {
         return inbetweenframes ? getclockmillis() : totalmillis;
     }
@@ -888,7 +888,7 @@ namespace recorder
         }
         else if(state == REC_OK)
         {
-            uint nextframe = (max(gettime() - starttime, 0)*file->videofps)/1000;
+            uint nextframe = (max(gettimet() - starttime, 0)*file->videofps)/1000;
             soundbuffer &s = soundbuffers.add();
             s.load((uchar *)stream, len, nextframe);
         }
@@ -921,7 +921,7 @@ namespace recorder
         }
         conoutf("movie recording to: %s %dx%d @ %dfps%s", file->filename, file->videow, file->videoh, file->videofps, (file->soundfrequency>0)?" + sound":"");
 
-        starttime = gettime();
+        starttime = gettimet();
         loopi(file->videofps) stats[i] = 0;
         statsindex = 0;
         dps = 0;
@@ -1121,7 +1121,7 @@ namespace recorder
         }
         SDL_LockMutex(videolock);
         if(moviesync && videobuffers.full()) SDL_CondWait(shouldread, videolock);
-        uint nextframe = (max(gettime() - starttime, 0)*file->videofps)/1000;
+        uint nextframe = (max(gettimet() - starttime, 0)*file->videofps)/1000;
         if(!videobuffers.full() && (lastframe == ~0U || nextframe > lastframe))
         {
             videobuffer &m = videobuffers.adding();
