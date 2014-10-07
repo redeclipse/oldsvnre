@@ -6255,9 +6255,6 @@ namespace server
                     break; // don't broadcast the password
                 }
 
-                case N_ADDBOT: getint(p); break;
-                case N_DELBOT: break;
-
                 case N_AUTHTRY:
                 {
                     getstring(text, p);

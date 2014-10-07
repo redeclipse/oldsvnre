@@ -24,24 +24,15 @@ struct menu : guicb
         cgui = &g;
         cmenu = this;
         guipasses = passes;
-        if(!passes)
-        {
-            world = (identflags&IDF_WORLD)!=0;
-            guiactionon = false;
-        }
-        if(initscript)
-        {
-            if(world && passes) { WITHWORLD(execute(initscript)); }
-            else execute(initscript);
-        }
+        if(!passes) guiactionon = false;
+        int oldflags = identflags;
+        if(world) identflags |= IDF_WORLD;
+        if(initscript) execute(initscript);
         cgui->start(menustart, menuscale, &menutab, useinput, usetitle, usebgfx);
         cgui->tab(header ? header : name);
-        if(contents)
-        {
-            if(world && passes) { WITHWORLD(execute(contents)); }
-            else execute(contents);
-        }
+        if(contents) execute(contents);
         cgui->end();
+        identflags = oldflags;
         guipasses = -1;
         cmenu = NULL;
         cgui = NULL;
@@ -159,6 +150,7 @@ void pushgui(menu *m, int pos = -1, int tab = 0)
         m->menustart = totalmillis;
         if(tab > 0) m->menutab = tab;
         m->usetitle = tab >= 0 ? true : false;
+        m->world = (identflags&IDF_WORLD)!=0;
     }
 }
 
@@ -172,6 +164,7 @@ void restoregui(int pos, int tab = 0)
         m->passes = 0;
         m->menustart = totalmillis;
         if(tab > 0) m->menutab = tab;
+        m->world = (identflags&IDF_WORLD)!=0;
     }
 }
 
@@ -184,6 +177,7 @@ void showgui(const char *name, int tab)
     else if(pos < menustack.length()-1) restoregui(pos, tab);
     else
     {
+        m->world = (identflags&IDF_WORLD)!=0;
         m->menutab = tab;
         return;
     }

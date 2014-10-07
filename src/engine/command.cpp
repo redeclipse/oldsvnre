@@ -3359,15 +3359,6 @@ void strsplice(const char *s, const char *vals, int *skip, int *count)
 }
 COMMAND(0, strsplice, "ssii");
 
-void nonworld(uint *contents)
-{
-    int oldflags = identflags;
-    identflags &= ~IDF_WORLD;
-    execute(contents);
-    identflags = oldflags;
-}
-COMMAND(0, nonworld, "e");
-
 struct sleepcmd
 {
     int delay, millis;
