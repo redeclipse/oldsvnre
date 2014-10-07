@@ -2,7 +2,7 @@
 
 extern int verbose, curtime, lastmillis, totalmillis, timescale, paused;
 extern uint totalsecs;
-extern time_t clocktime;
+extern time_t clocktime, currenttime, clockoffset;
 extern int servertype, serverport, serverlanport, servermasterport;
 extern char *servermaster, *serverip;
 extern ENetAddress masteraddress;

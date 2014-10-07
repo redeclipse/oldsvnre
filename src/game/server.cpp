@@ -424,7 +424,7 @@ namespace server
     {
         string info;
         uchar *data;
-        int len;
+        int ctime, len;
     };
 
     vector<demofile> demos;
@@ -2132,7 +2132,7 @@ namespace server
         if(!num) num = demos.length();
         if(!demos.inrange(num-1)) return;
         demofile &d = demos[num-1];
-        sendf(cn, 2, "rim", N_SENDDEMO, d.len, d.data);
+        sendf(cn, 2, "ri2m", N_SENDDEMO, d.ctime, d.len, d.data);
     }
 
     void sendwelcome(clientinfo *ci);
@@ -2229,10 +2229,9 @@ namespace server
         if(!demotmp) return;
         int len = (int)min(demotmp->size(), stream::offset((G(demomaxsize)<<20) + 0x10000));
         demofile &d = demos.add();
-        char *timestr = ctime(&clocktime), *trim = timestr + strlen(timestr);
-        while(trim>timestr && iscubespace(*--trim)) *trim = '\0';
-        formatstring(d.info)("%s: %s, %s, %.2f%s", timestr, gamename(gamemode, mutators, 0, 32), smapname, len > 1024*1024 ? len/(1024*1024.f) : len/1024.0f, len > 1024*1024 ? "MB" : "kB");
-        srvoutf(4, "\fydemo \fs\fc%s\fS recorded", d.info);
+        d.ctime = clocktime;
+        formatstring(d.info)("%s on %s [%.2f%s]", gamename(gamemode, mutators, 0, 32), smapname, len > 1024*1024 ? len/(1024*1024.f) : len/1024.0f, len > 1024*1024 ? "MB" : "kB");
+        srvoutf(4, "\fydemo \fs\fc%s\fS recorded (\fs\fw%s UTC\fS)", d.info, gettime(d.ctime, "%c"));
         d.data = new uchar[len];
         d.len = len;
         demotmp->seek(0, SEEK_SET);
@@ -2277,8 +2276,6 @@ namespace server
         demotmp = opentempfile("demorecord", "w+b");
         stream *f = opengzfile(NULL, "wb", demotmp);
         if(!f) { DELETEP(demotmp); return; }
-
-        //srvoutf(4, "\fyrecording demo");
 
         demorecord = f;
 
@@ -6070,14 +6067,12 @@ namespace server
                 }
 
                 case N_LISTDEMOS:
-                    //if(ci->state.state==CS_SPECTATOR) break;
                     listdemos(sender);
                     break;
 
                 case N_GETDEMO:
                 {
                     int n = getint(p);
-                    //if(ci->state.state==CS_SPECTATOR) break;
                     senddemo(sender, n);
                     break;
                 }

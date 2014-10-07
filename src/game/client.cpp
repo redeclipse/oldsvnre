@@ -1181,11 +1181,12 @@ namespace client
         {
             case N_SENDDEMO:
             {
+                int ctime = getint(p);
                 data += p.length();
                 len -= p.length();
                 string fname;
-                if(*filetimeformat) formatstring(fname)("demos/%s.dmo", gettime(clocktime, filetimeformat));
-                else formatstring(fname)("demos/%u.dmo", uint(clocktime));
+                if(*filetimeformat) formatstring(fname)("demos/%s.dmo", gettime(ctime, filetimeformat));
+                else formatstring(fname)("demos/%u.dmo", uint(ctime));
                 stream *demo = openfile(fname, "wb");
                 if(!demo) return;
                 conoutft(CON_EVENT, "\fyreceived demo: \fc%s", fname);

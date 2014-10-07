@@ -236,7 +236,7 @@ void screenshot(char *sname)
     glReadPixels(0, 0, screen->w, screen->h, GL_RGB, GL_UNSIGNED_BYTE, image.data);
     string fname;
     if(sname && *sname) copystring(fname, sname);
-    else formatstring(fname)("screenshots/%s", *filetimeformat ? gettime(clocktime, filetimeformat) : (*mapname ? mapname : "screen"));
+    else formatstring(fname)("screenshots/%s", *filetimeformat ? gettime(currenttime, filetimeformat) : (*mapname ? mapname : "screen"));
     saveimage(fname, image, imageformat, compresslevel, true);
 }
 
@@ -874,7 +874,10 @@ int main(int argc, char **argv)
     #endif
     #endif
 
-    clocktime = time(NULL); // initialise
+    currenttime = time(NULL); // initialise
+    clocktime = mktime(gmtime(&currenttime));
+    clockoffset = currenttime-clocktime;
+
     setlogfile(NULL);
     setlocations(true);
 
