@@ -101,6 +101,7 @@ The project is Free and Open Source meaning that you can both use it for free, a
 * "FaTony"
 * "FearFighter"
 * "Fleeky" - Models
+* "littlebabyjesus"
 * "John_III" - Maps and Models
 * "Korsi" - Maps
 * "Raiden" - Maps
