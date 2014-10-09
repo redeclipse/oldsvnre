@@ -914,10 +914,10 @@ namespace game
                         float scale = powering ? 1.f+(amt*1.5f) : (d->weapstate[d->weapselect] == W_S_IDLE ? 1.f : (reloading ? (amt-0.5f)*2 : amt));
                         adddynlight(d->ejectpos(d->weapselect), 16*scale, col, 0, 0, DL_KEEP);
                     }
-                    if(d->weapselect == W_SWORD || powering)
+                    if(d->weapselect == W_FLAMER || d->weapselect == W_SWORD || d->weapselect == W_ZAPPER || powering)
                     {
                         static float powerdl[W_MAX] = {
-                            0, 16, 18, 20, 18, 20, 24, 24, 18, 18, 18, 18
+                            0, 8, 16, 16, 16, 18, 20, 4, 18, 16, 16, 16
                         };
                         if(powerdl[d->weapselect] > 0)
                         {
@@ -3454,14 +3454,13 @@ namespace game
         {
             if(third != 2)
             {
-                const char *muzzle = "tag_weapon";
-                if(hasweapon)
-                {
-                    muzzle = "tag_muzzle";
-                    if(weaptype[weap].eject) a[ai++] = modelattach("tag_eject", &d->eject);
-                }
-                a[ai++] = modelattach(muzzle, &d->muzzle);
+                a[ai++] = modelattach(hasweapon ? "tag_muzzle" : "tag_weapon", &d->muzzle);
                 a[ai++] = modelattach("tag_weapon", &d->origin);
+                if(weaptype[weap].eject || weaptype[weap].tape)
+                {
+                    a[ai++] = modelattach("tag_eject", &d->eject[0]);
+                    a[ai++] = modelattach("tag_eject2", &d->eject[1]);
+                }
             }
             if(third && d->wantshitbox())
             {
@@ -3536,7 +3535,8 @@ namespace game
                 float amt = 1-((lastmillis-d->weaplast[W_MELEE])/float(d->weapwait[W_MELEE]));
                 part_create(PART_HINT, 1, pos, TEAM(d->team, colour), 2.f, amt*blend, 0, 0);
             }
-            bool last = lastmillis-d->weaplast[d->weapselect] > 0,
+            int millis = lastmillis-d->weaplast[d->weapselect];
+            bool last = millis > 0 && millis < d->weapwait[d->weapselect],
                  powering = last && d->weapstate[d->weapselect] == W_S_POWER,
                  reloading = last && d->weapstate[d->weapselect] == W_S_RELOAD,
                  secondary = physics::secondaryweap(d);
@@ -3558,7 +3558,7 @@ namespace game
                 findorientation(d->o, d->yaw, d->pitch, v);
                 part_flare(origin, v, 1, PART_FLARE, colour, 0.5f*amt, amt*blend);
             }
-            if(d->weapselect == W_SWORD || powering)
+            if(d->weapselect == W_SWORD || d->weapselect == W_ZAPPER || powering)
             {
                 static const struct powerfxs {
                     int type, parttype;
@@ -3566,12 +3566,12 @@ namespace game
                 } powerfx[W_MAX] = {
                     { 0, 0, 0, 0 },
                     { 2, PART_SPARK, 0.1f, 1.5f },
-                    { 4, PART_LIGHTNING, 1, 1 },
+                    { 4, PART_LIGHTNING, 2.f, 1 },
                     { 2, PART_SPARK, 0.15f, 2 },
                     { 2, PART_SPARK, 0.1f, 2 },
                     { 2, PART_FIREBALL, 0.1f, 6 },
                     { 1, PART_PLASMA, 0.05f, 2 },
-                    { 2, PART_ELECTRIC, 0.05f, 2.5f },
+                    { 4, PART_LIGHTNING, 0.75f, 1 },
                     { 2, PART_PLASMA, 0.05f, 2.5f },
                     { 3, PART_PLASMA, 0.1f, 0.125f },
                     { 0, 0, 0, 0 },
@@ -3593,7 +3593,7 @@ namespace game
                     }
                     case 4:
                     {
-                        part_flare(d->originpos(), d->muzzlepos(d->weapselect), 1, powerfx[d->weapselect].parttype, colour, W2(d->weapselect, partsize, secondary)*0.75f, blend);
+                        part_flare(d->ejectpos(d->weapselect), d->ejectpos(d->weapselect, true), 1, powerfx[d->weapselect].parttype, colour, powerfx[d->weapselect].size*max(amt, 0.25f), max(amt*0.25f, 0.05f)*blend);
                         break;
                     }
                     case 0: default: break;
