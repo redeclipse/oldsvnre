@@ -946,7 +946,7 @@ struct gameent : dynent, gamestate
         actiontime[AC_MAX], impulse[IM_MAX], smoothmillis, turnmillis, turnside, aschan, cschan, vschan, wschan, pschan, fschan, sschan[2],
         lasthit, lastteamhit, lastkill, lastattacker, lastpoints, quake, spree, lastfoot;
     float deltayaw, deltapitch, newyaw, newpitch, turnyaw, turnroll;
-    vec head, torso, muzzle, origin, eject, waist, jet[3], legs, hrad, trad, lrad, toe[2];
+    vec head, torso, muzzle, origin, eject[2], waist, jet[3], legs, hrad, trad, lrad, toe[2];
     bool action[AC_MAX], conopen, k_up, k_down, k_left, k_right, obliterated, headless;
     string hostname, hostip, name, handle, info, obit;
     vector<gameent *> dominating, dominated;
@@ -1100,7 +1100,7 @@ struct gameent : dynent, gamestate
         gamestate::mapchange();
     }
 
-    void cleartags() { head = torso = muzzle = origin = eject = waist = jet[0] = jet[1] = jet[2] = toe[0] = toe[1] = vec(-1, -1, -1); }
+    void cleartags() { head = torso = muzzle = origin = eject[0] = eject[1] = waist = jet[0] = jet[1] = jet[2] = toe[0] = toe[1] = vec(-1, -1, -1); }
 
     vec checkfootpos(int foot)
     {
@@ -1190,15 +1190,15 @@ struct gameent : dynent, gamestate
         return originpos(weap == W_MELEE, secondary);
     }
 
-    vec checkejectpos()
+    vec checkejectpos(bool alt = false)
     {
-        if(eject == vec(-1, -1, -1)) eject = checkmuzzlepos();
-        return eject;
+        if(eject[alt ? 1 : 0] == vec(-1, -1, -1)) eject[alt ? 1 : 0] = alt ? checkoriginpos() : checkmuzzlepos();
+        return eject[alt ? 1 : 0];
     }
 
-    vec ejectpos(int weap = -1)
+    vec ejectpos(int weap = -1, bool alt = false)
     {
-        if(isweap(weap) && weap != W_MELEE) return checkejectpos();
+        if(isweap(weap) && weap != W_MELEE) return checkejectpos(alt);
         return muzzlepos();
     }
 
@@ -1262,7 +1262,7 @@ struct gameent : dynent, gamestate
     {
         checkoriginpos();
         checkmuzzlepos();
-        checkejectpos();
+        loopi(2) checkejectpos(i!=0);
         if(wantshitbox()) checkhitboxes();
     }
 
