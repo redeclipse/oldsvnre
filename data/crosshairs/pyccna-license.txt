@@ -1,4 +1,4 @@
-Some files within this directory are:
+The textures labelled fed & trident in this directory are:
 
 Copyright (C) 2014 by pyccna.
     Creative Commons Attribution ShareAlike 3.0 License (CC-BY-SA)
