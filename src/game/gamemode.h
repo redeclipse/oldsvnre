@@ -89,8 +89,8 @@ gametypes gametype[] = {
             (1<<G_M_MULTI)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_DUEL)|(1<<G_M_SURVIVOR)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_FREESTYLE)|(1<<G_M_VAMPIRE)|(1<<G_M_RESIZE)|(1<<G_M_HARD)|(1<<G_M_GSP2)|(1<<G_M_GSP3),
             (1<<G_M_MULTI)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_FREESTYLE)|(1<<G_M_VAMPIRE)|(1<<G_M_RESIZE)|(1<<G_M_HARD)|(1<<G_M_GSP2)|(1<<G_M_GSP3)
         },
-        "bomber-ball", "bomber", { "hold", "touchdown", "attack" },
-        "throw the bomb into the enemy goal to score", { "hold the bomb as long as possible to score", "carry the bomb into the enemy goal to score", "teams take turns attacking and defending" },
+        "bomber-ball", "bomber", { "hold", "basket", "attack" },
+        "carry the bomb into the enemy goal to score", { "hold the bomb as long as possible to score", "throw the bomb into the enemy goal to score", "teams take turns attacking and defending" },
     },
     {
         G_TRIAL, (1<<G_F_GSP), 0,

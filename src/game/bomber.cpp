@@ -513,7 +513,7 @@ namespace bomber
         if(!st.flags.inrange(relay) || !st.flags.inrange(goal)) return;
         bomberstate::flag &f = st.flags[relay], &g = st.flags[goal];
         string extra; extra[0] = 0;
-        if(!m_gsp2(game::gamemode, game::mutators) && showbomberdists >= (d != game::player1 ? 2 : 1))
+        if(m_gsp2(game::gamemode, game::mutators) && showbomberdists >= (d != game::player1 ? 2 : 1))
         {
             if(f.droptime) formatstring(extra)(" from \fs\fy%.2f\fom\fS", f.droppos.dist(g.spawnloc)/8.f);
             else copystring(extra, " with a \fs\fytouchdown\fS");
@@ -547,7 +547,7 @@ namespace bomber
         if(f.owner)
         {
             if(!d->ai || f.owner != d) return;
-            bool forever = m_gsp1(game::gamemode, game::mutators) || m_gsp2(game::gamemode, game::mutators) || (m_gsp3(game::gamemode, game::mutators) && d->team != T_OMEGA) || findtarget(d) < 0;
+            bool forever = m_gsp1(game::gamemode, game::mutators) || (m_gsp3(game::gamemode, game::mutators) && d->team != T_OMEGA) || findtarget(d) < 0;
             if(!carrytime && forever) return;
             int takemillis = lastmillis-f.taketime, length = forever ? carrytime-550-bomberlockondelay : min(carrytime, 1000);
             if(takemillis >= length)

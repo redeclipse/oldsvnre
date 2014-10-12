@@ -3209,7 +3209,7 @@ namespace game
                 flashcolour(e->light.material[1].r, e->light.material[1].g, e->light.material[1].b, uchar(192), uchar(192), uchar(192), amt);
                 flashcolour(e->light.effect.r, e->light.effect.g, e->light.effect.b, 1.f, 1.f, 1.f, amt);
             }
-            if(m_bomber(gamemode) && m_gsp1(gamemode, mutators) && bomber::carryaffinity(d))
+            if(m_bomber(gamemode) && bomber::carryaffinity(d))
             {
                 vec col = rescolour(d, PULSE_DISCO);
                 e->light.material[1] = bvec::fromcolor(e->light.material[1].tocolor().max(col));
