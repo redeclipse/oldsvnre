@@ -954,7 +954,7 @@ namespace projs
                 vectoyawpitch(dir, proj.yaw, proj.pitch);
                 proj.reflectivity = 0.f;
                 proj.escaped = true;
-                proj.fadetime = 500;
+                proj.fadetime = 1;
                 switch(game::gamemode)
                 {
                     case G_BOMBER:
@@ -1758,7 +1758,7 @@ namespace projs
     {
         if(proj.o.z < 0) return 0; // remove, always..
         int chk = 0;
-        if(proj.extinguish&(1|2))
+        if(proj.extinguish&1 || proj.extinguish&2)
         {
             if(mat < 0) mat = lookupmaterial(proj.o);
             if(proj.extinguish&1 && (mat&MATF_VOLUME) == MAT_WATER) chk |= 1;

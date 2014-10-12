@@ -119,7 +119,7 @@ struct captureservmode : capturestate, servmode
         flag &f = flags[i];
         if(f.owner >= 0 || !f.droptime || f.votes.find(ci->clientnum) >= 0) return;
         f.votes.add(ci->clientnum);
-        if(f.votes.length() >= numclients()/2)
+        if(f.votes.length() >= int(floorf(numclients()*0.5f)))
         {
             f.nextreset = gamemillis;
             clientinfo *last = (clientinfo *)getinfo(f.lastowner);
