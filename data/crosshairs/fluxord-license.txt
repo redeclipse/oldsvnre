@@ -1,4 +1,4 @@
-All files within this directory and sub-directories are:
+Some files within this directory are:
 
 Copyright (C) 2011 by fluxord.
     Creative Commons Attribution ShareAlike 3.0 License (CC-BY-SA)
