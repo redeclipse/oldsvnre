@@ -495,7 +495,7 @@ namespace bomber
     {
         if(!st.flags.inrange(i)) return;
         bomberstate::flag &f = st.flags[i];
-        if(f.enabled && enabled)
+        if(f.enabled && !enabled)
         {
             destroyaffinity(f.pos(true, true));
             if(isbomberaffinity(f))

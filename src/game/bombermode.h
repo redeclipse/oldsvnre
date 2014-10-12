@@ -137,11 +137,13 @@ struct bomberservmode : bomberstate, servmode
 
     void returnaffinity(int i, bool enabled)
     {
+        flag &f = flags[i];
+        bool wasenabled = isbomberaffinity(f) && f.enabled;
         bomberstate::returnaffinity(i, gamemillis, enabled);
-        sendf(-1, 1, "ri3", N_RESETAFFIN, i, flags[i].enabled ? 1 : 0);
-        if(enabled && !flags[i].enabled)
+        sendf(-1, 1, "ri3", N_RESETAFFIN, i, f.enabled ? 1 : 0);
+        if(wasenabled && !f.enabled)
         {
-            loopvj(flags) if(flags[j].enabled) returnaffinity(j, false);
+            loopvj(flags) if(i != j && flags[j].enabled) returnaffinity(j, false);
             if(bombertime >= 0) bombertime = gamemillis+G(bomberdelay);
         }
     }
@@ -166,13 +168,13 @@ struct bomberservmode : bomberstate, servmode
         }
     }
 
-    void resetaffinity(clientinfo *ci, int i, bool force = false)
+    void resetaffinity(clientinfo *ci, int i)
     {
         if(!canplay(hasflaginfo) || !flags.inrange(i) || ci->state.ownernum >= 0) return;
         flag &f = flags[i];
         if(!isbomberaffinity(f) || f.owner >= 0 || !f.droptime || f.votes.find(ci->clientnum) >= 0 || !f.enabled) return;
         f.votes.add(ci->clientnum);
-        if(f.votes.length() >= numclients()/2) returnaffinity(i, false);
+        if(f.votes.length() >= int(floorf(numclients()*0.5f))) returnaffinity(i, false);
     }
 
     void layout()
