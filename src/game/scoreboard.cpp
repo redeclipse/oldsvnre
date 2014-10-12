@@ -677,7 +677,7 @@ namespace hud
                                     });
                                 }
 
-                                if(scoreclientnum || game::player1->privilege&PRIV_TYPE >= PRIV_ELEVATED)
+                                if(scoreclientnum || (game::player1->privilege&PRIV_TYPE) >= PRIV_ELEVATED)
                                 {
                                     uilist(g, {
                                         uilist(g, {

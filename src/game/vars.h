@@ -313,7 +313,7 @@ GVAR(0, defendregenextra, 0, 2, VAR_MAX); // add this to regen when buffed
 
 GVAR(0, bomberlimit, 0, 0, VAR_MAX); // finish when score is this or more (non-hold)
 GVAR(0, bomberholdlimit, 0, 0, VAR_MAX); // finish when score is this or more (hold)
-GVAR(0, bomberbasketonly, 0, 1, 1); // prohibit touchdowns in normal game
+GVAR(0, bomberbasketonly, 0, 1, 1); // prohibit touchdowns in basket game
 GVAR(0, bomberattackreset, 0, 1, 1); // defenders reset rather than carry the ball
 GVAR(0, bomberattackwinner, 0, 1, 1); // declare the winner when the final team exceeds best score
 GFVAR(0, bomberbasketmindist, 0, 48, FVAR_MAX); // prohibit baskets less than this far away
