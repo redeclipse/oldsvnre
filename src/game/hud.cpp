@@ -2318,18 +2318,11 @@ namespace hud
         return teamtexs[clamp(team, 0, T_MAX-1)];
     }
 
-    const char *privname(int priv, int actortype)
-    {
-        if(actortype != A_PLAYER) return "bot";
-        const char *privnames[PRIV_MAX] = { "none", "player", "supporter", "moderator", "operator", "administrator", "developer", "creator" };
-        return privnames[clamp(priv, 0, PRIV_MAX-1)];
-    }
-
     const char *privtex(int priv, int actortype)
     {
-        if(actortype > A_PLAYER) return privbottex;
+        if(actortype != A_PLAYER) return privbottex;
         const char *privtexs[PRIV_MAX] = { privnonetex, privplayertex, privsupportertex, privmoderatortex, privoperatortex, privadministratortex, privdevelopertex, privcreatortex };
-        return privtexs[clamp(priv, 0, PRIV_MAX-1)];
+        return privtexs[clamp(priv&PRIV_TYPE, 0, int(priv&PRIV_LOCAL ? PRIV_ADMINISTRATOR : PRIV_LAST))];
     }
 
     const char *itemtex(int type, int stype)

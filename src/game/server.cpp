@@ -1051,23 +1051,6 @@ namespace server
         }
     }
 
-    const char *privname(int type, bool prefix = false, int actortype = A_PLAYER)
-    {
-        if(actortype != A_PLAYER) return prefix ? "a bot" : "bot";
-        switch(type)
-        {
-            case PRIV_CREATOR: return prefix ? "a creator" : "creator";
-            case PRIV_DEVELOPER: return prefix ? "a developer" : "developer";
-            case PRIV_ADMINISTRATOR: return prefix ? "an administrator" : "administrator";
-            case PRIV_OPERATOR: return prefix ? "an operator" : "operator";
-            case PRIV_MODERATOR: return prefix ? "a moderator" : "moderator";
-            case PRIV_SUPPORTER: return prefix ? "a supporter" : "supporter";
-            case PRIV_PLAYER: return prefix ? "a player" : "player";
-            case PRIV_MAX: return prefix ? "connected locally" : "local";
-            default: return prefix ? "playing alone" : "alone";
-        }
-    }
-
     int numclients(int exclude, bool nospec, int actortype)
     {
         int n = 0;
@@ -1099,11 +1082,21 @@ namespace server
         return TEAM(ci->team, colour);
     }
 
+    const char *privname(int priv, int actortype)
+    {
+        if(actortype != A_PLAYER) return "bot";
+        const char *privnames[2][PRIV_MAX] = {
+            { "none", "global player", "global supporter", "global moderator", "global operator", "global administrator", "developer", "creator" },
+            { "none", "local player", "local supporter", "local moderator", "local operator", "local administrator", "none", "none" }
+        };
+        return privnames[priv&PRIV_LOCAL ? 1 : 0][clamp(priv&PRIV_TYPE, 0, int(priv&PRIV_LOCAL ? PRIV_ADMINISTRATOR : PRIV_LAST))];
+    }
+
     const char *privnamex(int priv, int actortype)
     {
         if(actortype != A_PLAYER) return "bot";
         const char *privnames[PRIV_MAX] = { "none", "player", "supporter", "moderator", "operator", "administrator", "developer", "creator" };
-        return privnames[clamp(priv, 0, PRIV_MAX-1)];
+        return privnames[clamp(priv&PRIV_TYPE, 0, int(priv&PRIV_LOCAL ? PRIV_ADMINISTRATOR : PRIV_LAST))];
     }
 
     const char *colourname(clientinfo *ci, char *name = NULL, bool icon = true, bool dupname = true, int colour = 3)
@@ -1161,10 +1154,10 @@ namespace server
 
     bool haspriv(clientinfo *ci, int flag, const char *msg = NULL)
     {
-        if(ci->local || ci->privilege >= flag) return true;
+        if(ci->local || (ci->privilege&PRIV_TYPE) >= flag) return true;
         else if(mastermask()&MM_AUTOAPPROVE && flag <= PRIV_ELEVATED && !numclients(ci->clientnum)) return true;
         else if(msg && *msg)
-            srvmsgft(ci->clientnum, CON_CHAT, "\fraccess denied, you need to be \fs\fc%s\fS to \fs\fc%s\fS", privname(flag, true), msg);
+            srvmsgft(ci->clientnum, CON_CHAT, "\fraccess denied, you need to be \fs\fc%s\fS to \fs\fc%s\fS", privname(flag), msg);
         return false;
     }
 
@@ -1172,7 +1165,7 @@ namespace server
     {
         string str = "";
         if(msg && *msg) formatstring(str)("%s %s", msg, colourname(cp));
-        if(haspriv(ci, cp->local ? PRIV_MAX : cp->privilege, str)) return true;
+        if(haspriv(ci, cp->local ? PRIV_ADMINISTRATOR : cp->privilege&PRIV_TYPE, str)) return true;
         return false;
     }
 
@@ -3128,11 +3121,7 @@ namespace server
             const char *name = &id->name[3], *val = NULL;
             int locked = max(id->flags&IDF_ADMIN ? PRIV_ADMINISTRATOR : 0, G(varslock));
             #ifndef STANDALONE
-            if(servertype < 3)
-            {
-                if(!strcmp(id->name, "sv_gamespeed")) locked = PRIV_MAX;
-                if(!strcmp(id->name, "sv_gamepaused")) locked = PRIV_MAX;
-            }
+            if(servertype < 3 && (!strcmp(id->name, "sv_gamespeed") || !strcmp(id->name, "sv_gamepaused"))) locked = PRIV_ADMINISTRATOR;
             #endif
             if(!strcmp(id->name, "sv_gamespeed") && G(gamespeedlock) > locked) locked = G(gamespeedlock);
             else if(id->type == ID_VAR)
@@ -4901,10 +4890,10 @@ namespace server
         if(restorescore(ci)) sendresume(ci);
         sendinitclient(ci);
         int amt = numclients();
-        if(ci->privilege > PRIV_NONE)
+        if((ci->privilege&PRIV_TYPE) > PRIV_NONE)
         {
             if(ci->handle[0]) relayf(2, "\fg%s (%s) has joined the game (\fs\fy%s\fS: \fs\fc%s\fS) [%d.%d.%d-%s%d] (%d %s)", colourname(ci), gethostname(ci->clientnum), privname(ci->privilege), ci->handle, ci->state.version.major, ci->state.version.minor, ci->state.version.patch, plat_name(ci->state.version.platform), ci->state.version.arch, amt, amt != 1 ? "players" : "player");
-            else relayf(2, "\fg%s (%s) has joined the game (\fs\fylocal %s\fS) [%d.%d.%d-%s%d] (%d %s)", colourname(ci), gethostname(ci->clientnum), privname(ci->privilege), ci->state.version.major, ci->state.version.minor, ci->state.version.patch, plat_name(ci->state.version.platform), ci->state.version.arch, amt, amt != 1 ? "players" : "player");
+            else relayf(2, "\fg%s (%s) has joined the game (\fs\fy%s\fS) [%d.%d.%d-%s%d] (%d %s)", colourname(ci), gethostname(ci->clientnum), privname(ci->privilege), ci->state.version.major, ci->state.version.minor, ci->state.version.patch, plat_name(ci->state.version.platform), ci->state.version.arch, amt, amt != 1 ? "players" : "player");
         }
         else relayf(2, "\fg%s (%s) has joined the game [%d.%d.%d-%s%d] (%d %s)", colourname(ci), gethostname(ci->clientnum), ci->state.version.major, ci->state.version.minor, ci->state.version.patch, plat_name(ci->state.version.platform), ci->state.version.arch, amt, amt != 1 ? "players" : "player");
 
@@ -6234,7 +6223,7 @@ namespace server
                             else if(!checkpassword(ci, adminpass, text)) srvmsgft(ci->clientnum, CON_EVENT, "\fraccess denied, invalid administrator password");
                             else auth::setprivilege(ci, 1, PRIV_ADMINISTRATOR);
                         }
-                        else if(ci->privilege < PRIV_ELEVATED)
+                        else if((ci->privilege&PRIV_TYPE) < PRIV_ELEVATED)
                         {
                             bool fail = false;
                             if(!(mastermask()&MM_AUTOAPPROVE))
@@ -6242,7 +6231,7 @@ namespace server
                                 srvmsgft(ci->clientnum, CON_EVENT, "\fraccess denied, you need a \fs\fcpassword/account\fS to \fs\fcelevate privileges\fS");
                                 fail = true;
                             }
-                            else loopv(clients) if(ci != clients[i] && clients[i]->privilege >= PRIV_ELEVATED)
+                            else loopv(clients) if(ci != clients[i] && (clients[i]->privilege&PRIV_TYPE) >= PRIV_ELEVATED)
                             {
                                 srvmsgft(ci->clientnum, CON_EVENT, "\fraccess denied, there is already another player with elevated privileges");
                                 fail = true;

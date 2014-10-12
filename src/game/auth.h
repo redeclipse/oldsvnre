@@ -121,34 +121,34 @@ namespace auth
 
     void setprivilege(clientinfo *ci, int val, int flags = 0, bool authed = false, bool local = true)
     {
-        int privilege = ci->privilege;
+        int privilege = ci->privilege&PRIV_TYPE;
         string msg = "";
         if(val > 0)
         {
-            if(ci->privilege >= flags) return;
-            privilege = ci->privilege = flags;
+            if((ci->privilege&PRIV_TYPE) >= flags) return;
+            privilege = ci->privilege = flags|(local ? PRIV_LOCAL : 0);
             if(authed)
             {
                 formatstring(msg)("\fy%s identified as \fs\fc%s\fS", colourname(ci), ci->authname);
-                if(ci->privilege > PRIV_PLAYER)
+                if((ci->privilege&PRIV_TYPE) > PRIV_PLAYER)
                 {
-                    defformatstring(msgx)(" (\fs\fc%s%s\fS)", local ? "local " : "", privname(privilege));
+                    defformatstring(msgx)(" (\fs\fc%s\fS)", privname(privilege));
                     concatstring(msg, msgx);
                 }
                 copystring(ci->handle, ci->authname);
             }
-            else formatstring(msg)("\fy%s elevated to \fs\fc%s%s\fS", colourname(ci), local ? "local " : "", privname(privilege));
+            else formatstring(msg)("\fy%s elevated to \fs\fc%s\fS", colourname(ci), privname(privilege));
         }
         else
         {
-            if(!ci->privilege) return;
+            if(!(ci->privilege&PRIV_TYPE)) return;
             ci->privilege = PRIV_NONE;
             ci->handle[0] = 0;
             int others = 0;
-            loopv(clients) if(clients[i]->privilege >= PRIV_MODERATOR || clients[i]->local) others++;
+            loopv(clients) if((clients[i]->privilege&PRIV_TYPE) >= PRIV_MODERATOR || clients[i]->local) others++;
             if(!others) mastermode = MM_OPEN;
-            if(!val && privilege >= PRIV_ELEVATED)
-                formatstring(msg)("\fy%s is no longer \fs\fc%s\fS", colourname(ci), privname(privilege, true));
+            if(!val && (privilege&PRIV_TYPE) >= PRIV_ELEVATED)
+                formatstring(msg)("\fy%s relinquished \fs\fc%s\fS status", colourname(ci), privname(privilege));
         }
         if(val >= 0)
         {
@@ -162,7 +162,7 @@ namespace auth
         if(paused)
         {
             int others = 0;
-            loopv(clients) if(clients[i]->privilege >= PRIV_ADMINISTRATOR || clients[i]->local) others++;
+            loopv(clients) if((clients[i]->privilege&PRIV_TYPE) >= PRIV_ADMINISTRATOR || clients[i]->local) others++;
             if(!others) setpause(false);
         }
     }

@@ -341,7 +341,10 @@ static inline void adjustscaled(T &n, int s)
 #define MAXNAMELEN 24
 enum { SAY_NONE = 0, SAY_ACTION = 1<<0, SAY_TEAM = 1<<1, SAY_NUM = 2 };
 
-enum { PRIV_NONE = 0, PRIV_PLAYER, PRIV_SUPPORTER, PRIV_MODERATOR, PRIV_OPERATOR, PRIV_ADMINISTRATOR, PRIV_DEVELOPER, PRIV_CREATOR, PRIV_MAX, PRIV_START = PRIV_PLAYER, PRIV_ELEVATED = PRIV_MODERATOR };
+enum {
+    PRIV_NONE = 0, PRIV_PLAYER, PRIV_SUPPORTER, PRIV_MODERATOR, PRIV_OPERATOR, PRIV_ADMINISTRATOR, PRIV_DEVELOPER, PRIV_CREATOR, PRIV_MAX,
+    PRIV_START = PRIV_PLAYER, PRIV_ELEVATED = PRIV_MODERATOR, PRIV_LAST = PRIV_CREATOR, PRIV_TYPE = 0xFF, PRIV_LOCAL = 1<<8
+};
 
 #define MM_MODE 0xF
 #define MM_AUTOAPPROVE 0x1000
@@ -837,6 +840,8 @@ namespace server
     extern void hashpassword(int cn, int sessionid, const char *pwd, char *result, int maxlen = MAXSTRLEN);
     extern bool servcmd(int nargs, const char *cmd, const char *arg);
     extern const char *gamename(int mode, int muts, int compact = 0, int limit = 0);
+    extern const char *privname(int priv = PRIV_NONE, int actortype = A_PLAYER);
+    extern const char *privnamex(int priv = PRIV_NONE, int actortype = A_PLAYER);
 #ifdef GAMESERVER
     struct clientinfo;
     extern void waiting(clientinfo *ci, int drop = 0, bool doteam = true, bool exclude = false);
@@ -1636,7 +1641,6 @@ namespace hud
     extern void damage(int n, const vec &loc, gameent *v, int weap, int flags);
     extern const char *teamtexname(int team = T_NEUTRAL);
     extern const char *itemtex(int type, int stype);
-    extern const char *privname(int priv = PRIV_NONE, int actortype = A_PLAYER);
     extern const char *privtex(int priv = PRIV_NONE, int actortype = A_PLAYER);
     extern bool canshowscores();
     extern void showscores(bool on, bool interm = false, bool onauto = true, bool ispress = false);
