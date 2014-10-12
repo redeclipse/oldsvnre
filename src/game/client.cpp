@@ -642,7 +642,7 @@ namespace client
     {
         if(!d) return false;
         if(!priv || (d == game::player1 && !remote)) return true;
-        return d->privilege >= priv;
+        return (d->privilege&PRIV_TYPE) >= priv;
     }
     ICOMMAND(0, issupporter, "i", (int *cn), intret(haspriv(game::getclient(*cn), PRIV_SUPPORTER) ? 1 : 0));
     ICOMMAND(0, ismoderator, "i", (int *cn), intret(haspriv(game::getclient(*cn), PRIV_MODERATOR) ? 1 : 0));
@@ -2003,8 +2003,8 @@ namespace client
                             int amt = otherclients(true);
                             if(priv > PRIV_NONE)
                             {
-                                if(d->handle[0]) conoutft(CON_EVENT, "\fg%s (%s) has joined the game (\fs\fy%s\fS: \fs\fc%s\fS) [%d.%d.%d-%s%d] (%d %s)", game::colourname(d), d->hostname, hud::privname(d->privilege), d->handle, d->version.major, d->version.minor, d->version.patch, plat_name(d->version.platform), d->version.arch, amt, amt != 1 ? "players" : "player");
-                                else conoutft(CON_EVENT, "\fg%s (%s) has joined the game (\fs\fylocal %s\fS) [%d.%d.%d-%s%d] (%d %s)", game::colourname(d), d->hostname, hud::privname(d->privilege), d->version.major, d->version.minor, d->version.patch, plat_name(d->version.platform), d->version.arch, amt, amt != 1 ? "players" : "player");
+                                if(d->handle[0]) conoutft(CON_EVENT, "\fg%s (%s) has joined the game (\fs\fy%s\fS: \fs\fc%s\fS) [%d.%d.%d-%s%d] (%d %s)", game::colourname(d), d->hostname, server::privname(d->privilege), d->handle, d->version.major, d->version.minor, d->version.patch, plat_name(d->version.platform), d->version.arch, amt, amt != 1 ? "players" : "player");
+                                else conoutft(CON_EVENT, "\fg%s (%s) has joined the game (\fs\fy%s\fS) [%d.%d.%d-%s%d] (%d %s)", game::colourname(d), d->hostname, server::privname(d->privilege), d->version.major, d->version.minor, d->version.patch, plat_name(d->version.platform), d->version.arch, amt, amt != 1 ? "players" : "player");
                             }
                             else conoutft(CON_EVENT, "\fg%s (%s) has joined the game [%d.%d.%d-%s%d] (%d %s)", game::colourname(d), d->hostname, d->version.major, d->version.minor, d->version.patch, plat_name(d->version.platform), d->version.arch, amt, amt != 1 ? "players" : "player");
                         }

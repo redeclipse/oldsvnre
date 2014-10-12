@@ -224,7 +224,7 @@ struct listrenderer : partrenderer
         p->blend = blend;
         p->grav = grav;
         p->collide = collide;
-        if((p->owner = pl) != NULL && (p->owner->type == ENT_PLAYER || p->owner->type == ENT_AI)) switch(type&0xFF)
+        if((p->owner = pl) != NULL && (p->owner->type == ENT_PLAYER || p->owner->type == ENT_AI)) switch(type&PT_TYPE)
         {
             case PT_TEXT: case PT_ICON: p->m.add(vec(p->o).sub(p->owner->abovehead())); break;
             default: break;
@@ -1129,7 +1129,7 @@ void renderparticles(bool mainpass)
             if(type&PT_RND4) concatstring(info, "r,");
             if(type&PT_FLIP) concatstring(info, "f,");
             if(type&PT_ONTOP) concatstring(info, "o,");
-            defformatstring(ds)("%d\t%s: %s %s", parts[i]->count(), partnames[type&0xFF], info, (title?title:""));
+            defformatstring(ds)("%d\t%s: %s %s", parts[i]->count(), partnames[type&PT_TYPE], info, (title?title:""));
             draw_text(ds, FONTH, (i+n/2)*FONTH);
         }
         glDisable(GL_BLEND);
@@ -1511,7 +1511,7 @@ void regularshape(int type, float radius, int color, int dir, int num, int fade,
 {
     if(!canemitparticles()) return;
 
-    int basetype = parts[type]->type&0xFF;
+    int basetype = parts[type]->type&PT_TYPE;
     bool flare = (basetype == PT_TAPE) || (basetype == PT_LIGHTNING),
          inv = (dir&0x20)!=0, taper = (dir&0x40)!=0;
     dir &= 0x1F;
