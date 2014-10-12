@@ -138,6 +138,7 @@ namespace hud
 
     VAR(IDF_PERSIST|IDF_HEX, inventorytone, -CTONE_MAX, -CTONE_TEAM-1, 0xFFFFFF);
     VAR(IDF_PERSIST|IDF_HEX, crosshairtone, -CTONE_MAX, 0, 0xFFFFFF);
+    VAR(IDF_PERSIST|IDF_HEX, hitcrosshairtone, -CTONE_MAX, 0, 0xFFFFFF);
     VAR(IDF_PERSIST|IDF_HEX, noticestone, -CTONE_MAX, 0, 0xFFFFFF);
     VAR(IDF_PERSIST|IDF_HEX, clipstone, -CTONE_MAX, -CTONE_TEAM-1, 0xFFFFFF);
     VAR(IDF_PERSIST|IDF_HEX, radartone, -CTONE_MAX, -CTONE_TEAM-1, 0xFFFFFF);
@@ -1210,7 +1211,12 @@ namespace hud
                     if(showindicator) drawindicator(game::focus->weapselect, cx, cy, int(indicatorsize*hudsize), physics::secondaryweap(game::focus));
                 }
                 if(crosshairhitspeed && totalmillis-game::focus->lasthit <= crosshairhitspeed)
-                    drawpointertex(getpointer(POINTER_HIT, game::focus->weapselect), cx-cs/2, cy-cs/2, cs, c.r, c.g, c.b, crosshairblend*hudblend);
+                {
+                    vec c2(1, 1, 1);
+                    if(hitcrosshairtone) skewcolour(c2.r, c2.g, c2.b, hitcrosshairtone);
+                    else c2 = c;
+                    drawpointertex(getpointer(POINTER_HIT, game::focus->weapselect), cx-cs/2, cy-cs/2, cs, c2.r, c2.g, c2.b, crosshairblend*hudblend);
+                }
                 if(crosshairdistance) draw_textx("\fa%.2f\fwm", w/3, h/2, 255, 255, 255, int(hudblend*255), TEXT_CENTERED, -1, -1, game::focus->o.dist(worldpos)/8.f);
             }
         }
