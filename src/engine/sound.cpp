@@ -59,7 +59,7 @@ FVAR(IDF_PERSIST, soundevtvol, 0, 1, FVAR_MAX);
 FVAR(IDF_PERSIST, soundevtscale, 0, 1, FVAR_MAX);
 FVAR(IDF_PERSIST, soundenvvol, 0, 1, FVAR_MAX);
 FVAR(IDF_PERSIST, soundenvscale, 0, 1, FVAR_MAX);
-VAR(IDF_PERSIST, soundcull, 0, 0, 1);
+VAR(IDF_PERSIST, soundcull, 0, 1, 1);
 
 VARF(IDF_PERSIST, musicvol, 0, 32, 255, changedvol = true);
 VAR(IDF_PERSIST, musicfadein, 0, 1000, VAR_MAX);
