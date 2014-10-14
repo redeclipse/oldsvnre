@@ -605,6 +605,8 @@ namespace server
         }
     } vampiremutator;
 
+    extern bool canbalancenow();
+
     struct spawnservmode : servmode // pseudo-mutator to regulate spawning clients
     {
         vector<clientinfo *> spawnq, playing;
