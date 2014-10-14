@@ -1621,10 +1621,10 @@ namespace server
                     if(delpart >= 1000)
                     {
                         int secs = delpart/1000;
-                        ancmsgft(-1, S_V_BALWARN, CON_EVENT, "\fy\fs\fzoyWARNING:\fS \fs\fcteams\fS will be \fs\fcreassigned\fS in \fs\fc%d\fS %s%s", secs, secs != 1 ? "seconds" : "second", !m_forcebal(gamemode, mutators) ? " for map symmetry" : "");
+                        ancmsgft(-1, S_V_BALWARN, CON_EVENT, "\fy\fs\fzoyWARNING:\fS \fs\fcteams\fS will be \fs\fcreassigned\fS in \fs\fc%d\fS %s %s", secs, secs != 1 ? "seconds" : "second", m_forcebal(gamemode, mutators) ? "to reassign roles" : "for map symmetry");
                     }
                 }
-                if(gamemillis >= nextbalance)
+                if(gamemillis >= nextbalance && canbalancenow())
                 {
                     int oldbalance = curbalance;
                     if(++curbalance >= numt) curbalance = 0; // safety first
