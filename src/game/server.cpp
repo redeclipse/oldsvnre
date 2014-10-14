@@ -677,14 +677,14 @@ namespace server
             if(ci->state.actortype >= A_ENEMY) return true;
             else if(tryspawn)
             {
-                if(m_balance(gamemode, mutators) && G(balancenospawn) && nextbalance && m_balreset(gamemode, mutators)) return false;
+                if(m_balance(gamemode, mutators) && G(balancenospawn) && nextbalance && m_balreset(gamemode, mutators) && canbalancenow()) return false;
                 if(m_loadout(gamemode, mutators) && !chkloadweap(ci)) return false;
                 if(spawnqueue(true) && spawnq.find(ci) < 0 && playing.find(ci) < 0) queue(ci);
                 return true;
             }
             else
             {
-                if(m_balance(gamemode, mutators) && G(balancenospawn) && nextbalance && m_balreset(gamemode, mutators)) return false;
+                if(m_balance(gamemode, mutators) && G(balancenospawn) && nextbalance && m_balreset(gamemode, mutators) && canbalancenow()) return false;
                 if(m_loadout(gamemode, mutators) && !chkloadweap(ci, false)) return false;
                 int delay = ci->state.actortype >= A_ENEMY && ci->state.lastdeath ? G(enemyspawntime) : m_delay(gamemode, mutators, ci->team);
                 if(delay && ci->state.respawnwait(gamemillis, delay)) return false;
