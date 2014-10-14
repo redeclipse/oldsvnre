@@ -263,6 +263,7 @@ GVAR(0, teambalancestyle, 0, 4, 4); // when moving players, sort by: 0 = top of 
 GVAR(0, trialgauntletwinner, 0, 1, 1); // declare the winner when the final team exceeds best score
 
 GVAR(0, capturelimit, 0, 0, VAR_MAX); // finish when score is this or more
+GVAR(0, captureresetstore, 0, 2, 15);
 GVAR(0, captureresetdelay, 0, 30000, VAR_MAX);
 GVAR(0, capturedefenddelay, 0, 15000, VAR_MAX);
 GVAR(0, captureprotectdelay, 0, 15000, VAR_MAX);

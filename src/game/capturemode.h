@@ -32,7 +32,7 @@ struct captureservmode : capturestate, servmode
                 iterflags++;
             }
             ivec p(vec(o).mul(DMF)), q(vec(dir).mul(DMF));
-            sendf(-1, 1, "ri3i7", N_DROPAFFIN, ci->clientnum, -1, i, p.x, p.y, p.z, q.x, q.y, q.z);
+            sendf(-1, 1, "ri3i7", N_DROPAFFIN, ci->clientnum, flags[i].dropoffset, i, p.x, p.y, p.z, q.x, q.y, q.z);
             capturestate::dropaffinity(i, o, dir, gamemillis);
         }
     }
@@ -164,7 +164,7 @@ struct captureservmode : capturestate, servmode
                     }
                 }
             }
-            else if(f.owner < 0 && f.droptime && gamemillis-f.droptime >= capturedelay)
+            else if(f.owner < 0 && f.droptime && f.dropleft(gamemillis, capturestore) >= capturedelay)
             {
                 capturestate::returnaffinity(i, gamemillis);
                 sendf(-1, 1, "ri3", N_RESETAFFIN, i, 2);
@@ -197,6 +197,7 @@ struct captureservmode : capturestate, servmode
                 putint(p, f.droptime);
                 if(f.droptime)
                 {
+                    putint(p, f.dropoffset);
                     loopj(3) putint(p, int(f.droploc[j]*DMF));
                     loopj(3) putint(p, int(f.inertia[j]*DMF));
                 }
