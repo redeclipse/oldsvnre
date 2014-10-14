@@ -1398,6 +1398,7 @@ namespace server
     {
         if(smode && smode->wantsovertime()) return true;
         mutate(smuts, if(mut->wantsovertime()) return true);
+        if(!G(overtimeallow) || m_balance(gamemode, mutators)) return false;
         bool result = false;
         if(m_team(gamemode, mutators))
         {
@@ -1544,7 +1545,7 @@ namespace server
                 bool wantsoneminute = true;
                 if(!timeremaining)
                 {
-                    if(!inovertime && !m_balance(gamemode, mutators) && G(overtimeallow) && wantsovertime())
+                    if(!inovertime && wantsovertime())
                     {
                         limit = oldtimelimit = G(overtimelimit);
                         if(limit)
@@ -1663,7 +1664,7 @@ namespace server
                         cs.total = scores[tot];
                         sendf(-1, 1, "ri3", N_SCORE, cs.team, cs.total);
                     }
-                    ancmsgft(-1, S_V_BALALERT, CON_EVENT, "\fy\fs\fzoyALERT:\fS \fs\fcteams\fS have %sbeen \fs\fcreassigned\fS%s", delpart > 0 ? "now " : "", !m_forcebal(gamemode, mutators) ? " for map symmetry" : "");
+                    ancmsgft(-1, S_V_BALALERT, CON_EVENT, "\fy\fs\fzoyALERT:\fS \fs\fcteams\fS have %sbeen \fs\fcreassigned\fS %s", delpart > 0 ? "now " : "", m_forcebal(gamemode, mutators) ? "to switch roles" : "for map symmetry");
                     if(smode) smode->layout();
                     mutate(smuts, mut->layout());
                     nextbalance = 0;
