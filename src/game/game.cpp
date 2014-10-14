@@ -1915,62 +1915,58 @@ namespace game
         return -1;
     }
 
-    void chooseloadweap(gameent *d, const char *list, bool saved = false, bool respawn = false, bool echo = false)
+    void chooseloadweap(gameent *d, const char *list, bool saved = false, bool echo = false)
     {
-        if(m_loadout(gamemode, mutators))
+        if(saved && d != player1) saved = false;
+        vector<int> items;
+        if(list && *list)
         {
-            if(saved && d != player1) saved = false;
-            vector<int> items;
-            if(list && *list)
+            vector<char *> chunk;
+            explodelist(list, chunk);
+            loopv(chunk)
             {
-                vector<char *> chunk;
-                explodelist(list, chunk);
-                loopv(chunk)
-                {
-                    if(!chunk[i] || !*chunk[i] || !isnumeric(*chunk[i])) continue;
-                    int v = parseint(chunk[i]);
-                    items.add(v >= W_OFFSET && v < W_ITEM ? v : 0);
-                    if(items.length() >= W_LOADOUT) break;
-                }
-                chunk.deletearrays();
+                if(!chunk[i] || !*chunk[i] || !isnumeric(*chunk[i])) continue;
+                int v = parseint(chunk[i]);
+                items.add(v >= W_OFFSET && v < W_ITEM ? v : 0);
+                if(items.length() >= W_LOADOUT) break;
             }
-            int r = max(maxcarry, items.length());
-            while(d->loadweap.length() < r) d->loadweap.add(0);
-            loopi(r)
-            {
-                int n = d->loadweap.find(items[i]);
-                d->loadweap[i] = n < 0 || n >= i ? items[i] : 0;
-            }
-            client::addmsg(N_LOADW, "ri3v", d->clientnum, respawn && !m_duke(gamemode, mutators) ? 1 : 0, d->loadweap.length(), d->loadweap.length(), d->loadweap.getbuf());
-            vector<char> value, msg;
-            loopi(r)
-            {
-                if(saved)
-                {
-                    if(!value.empty()) value.add(' ');
-                    value.add(char(d->loadweap[i]+48));
-                }
-                int colour = W(d->loadweap[i] ? d->loadweap[i] : W_MELEE, colour);
-                const char *pre = msg.empty() ? "" : (i == r-1 ? ", and " : ", "),
-                           *tex = d->loadweap[i] ? hud::itemtex(WEAPON, d->loadweap[i]) : hud::questiontex,
-                           *name = d->loadweap[i] ? W(d->loadweap[i], name) : "random";
-                defformatstring(weap)("%s\fs\f[%d]\f(%s)%s\fS", pre, colour, tex, name);
-                msg.put(weap, strlen(weap));
-            }
-            msg.add('\0');
-            value.add('\0');
-            const char *msgstr = msg.getbuf(), *valstr = value.getbuf();
-            if(valstr && *valstr) setsvar("favloadweaps", value.getbuf(), true);
-            if(d == player1 && echo && msgstr && *msgstr)
-            {
-                conoutft(CON_SELF, "weapon selection is now: %s", msgstr);
-                if(respawn && m_duke(gamemode, mutators))
-                    conoutft(CON_SELF, "skipping request to respawn while playing %s", m_duel(gamemode, mutators) ? "duel" : "survivor");
-            }
+            chunk.deletearrays();
         }
-        else conoutft(CON_MESG, "\foweapon selection is not currently available");
+        int r = max(maxcarry, items.length());
+        while(d->loadweap.length() < r) d->loadweap.add(0);
+        loopi(r)
+        {
+            int n = d->loadweap.find(items[i]);
+            d->loadweap[i] = n < 0 || n >= i ? items[i] : 0;
+        }
+        client::addmsg(N_LOADW, "ri2v", d->clientnum, d->loadweap.length(), d->loadweap.length(), d->loadweap.getbuf());
+        vector<char> value, msg;
+        loopi(r)
+        {
+            if(saved)
+            {
+                if(!value.empty()) value.add(' ');
+                value.add(char(d->loadweap[i]+48));
+            }
+            int colour = W(d->loadweap[i] ? d->loadweap[i] : W_MELEE, colour);
+            const char *pre = msg.empty() ? "" : (i == r-1 ? ", and " : ", "),
+                       *tex = d->loadweap[i] ? hud::itemtex(WEAPON, d->loadweap[i]) : hud::questiontex,
+                       *name = d->loadweap[i] ? W(d->loadweap[i], name) : "random";
+            defformatstring(weap)("%s\fs\f[%d]\f(%s)%s\fS", pre, colour, tex, name);
+            msg.put(weap, strlen(weap));
+        }
+        msg.add('\0');
+        value.add('\0');
+        const char *msgstr = msg.getbuf(), *valstr = value.getbuf();
+        if(valstr && *valstr) setsvar("favloadweaps", value.getbuf(), true);
+        if(d == player1 && echo && msgstr && *msgstr)
+        {
+            conoutft(CON_SELF, "weapon selection is now: %s", msgstr);
+            if(respawn && m_duke(gamemode, mutators))
+                conoutft(CON_SELF, "skipping request to respawn while playing %s", m_duel(gamemode, mutators) ? "duel" : "survivor");
+        }
     }
-    ICOMMAND(0, loadweap, "sii", (char *s, int *n, int *r), chooseloadweap(player1, s, *n!=0, *r!=0, true));
+    ICOMMAND(0, loadweap, "sii", (char *s, int *n), chooseloadweap(player1, s, *n!=0, true));
     ICOMMAND(0, getloadweap, "i", (int *n), intret(player1->loadweap.inrange(*n) ? player1->loadweap[*n] : -1));
     ICOMMAND(0, allowedweap, "i", (int *n), intret(isweap(*n) && m_check(W(*n, modes), W(*n, muts), gamemode, mutators) && !W(*n, disabled) ? 1 : 0));
     ICOMMAND(0, hasloadweap, "bb", (int *g, int *m), intret(m_loadout(m_game(*g) ? *g : gamemode, *m >= 0 ? *m : mutators) ? 1 : 0));

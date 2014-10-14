@@ -1502,7 +1502,7 @@ namespace ai
                         d->loadweap.shrink(0);
                         d->loadweap.add(d->ai->weappref);
                         if(maxcarry > 1) loopj(maxcarry-1) d->loadweap.add(0);
-                        client::addmsg(N_LOADW, "ri3v", d->clientnum, 1, d->loadweap.length(), d->loadweap.length(), d->loadweap.getbuf());
+                        client::addmsg(N_LOADW, "ri2v", d->clientnum, d->loadweap.length(), d->loadweap.length(), d->loadweap.getbuf());
                     }
                     client::addmsg(N_TRYSPAWN, "ri", d->clientnum);
                     d->respawned = lastmillis;
