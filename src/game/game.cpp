@@ -1959,12 +1959,7 @@ namespace game
         value.add('\0');
         const char *msgstr = msg.getbuf(), *valstr = value.getbuf();
         if(valstr && *valstr) setsvar("favloadweaps", value.getbuf(), true);
-        if(d == player1 && echo && msgstr && *msgstr)
-        {
-            conoutft(CON_SELF, "weapon selection is now: %s", msgstr);
-            if(respawn && m_duke(gamemode, mutators))
-                conoutft(CON_SELF, "skipping request to respawn while playing %s", m_duel(gamemode, mutators) ? "duel" : "survivor");
-        }
+        if(d == player1 && echo && msgstr && *msgstr) conoutft(CON_SELF, "weapon selection is now: %s", msgstr);
     }
     ICOMMAND(0, loadweap, "sii", (char *s, int *n), chooseloadweap(player1, s, *n!=0, true));
     ICOMMAND(0, getloadweap, "i", (int *n), intret(player1->loadweap.inrange(*n) ? player1->loadweap[*n] : -1));
