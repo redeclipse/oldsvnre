@@ -1,15 +1,17 @@
 #ifdef GAMESERVER
 #define capturedelay (m_gsp2(gamemode, mutators) ? G(capturedefenddelay) : G(captureresetdelay))
+#define capturestore (G(captureresetstore)&((m_gsp1(gamemode, mutators) ? 1 : 0)|(m_gsp2(gamemode, mutators) ? 2 : 0)|(m_gsp3(gamemode, mutators) ? 4 : 0)|(!m_gsp1(gamemode, mutators) && !m_gsp2(gamemode, mutators) && !m_gsp3(gamemode, mutators) ? 8 : 0)))
 #define capturestate captureservstate
 #else
 #define capturedelay (m_gsp2(game::gamemode, game::mutators) ? G(capturedefenddelay) : G(captureresetdelay))
+#define capturestore (G(captureresetstore)&((m_gsp1(game::gamemode, game::mutators) ? 1 : 0)|(m_gsp2(game::gamemode, game::mutators) ? 2 : 0)|(m_gsp3(game::gamemode, game::mutators) ? 4 : 0)|(!m_gsp1(game::gamemode, game::mutators) && !m_gsp2(game::gamemode, game::mutators) && !m_gsp3(game::gamemode, game::mutators) ? 8 : 0)))
 #endif
 struct capturestate
 {
     struct flag
     {
         vec droploc, inertia, spawnloc;
-        int team, yaw, pitch, droptime, taketime;
+        int team, yaw, pitch, droptime, taketime, dropoffset;
 #ifdef GAMESERVER
         int owner, lastowner, nextreset;
         vector<int> votes;
@@ -37,7 +39,7 @@ struct capturestate
             displaytime = pickuptime = movetime = viewtime = interptime = 0;
 #endif
             team = T_NEUTRAL;
-            yaw = pitch = taketime = droptime = 0;
+            yaw = pitch = taketime = droptime = dropoffset = 0;
         }
 
 #ifndef GAMESERVER
@@ -66,6 +68,11 @@ struct capturestate
             return position();
         }
 #endif
+
+        int dropleft(int t, bool b)
+        {
+            return (t-droptime)+(b ? dropoffset : 0);
+        }
     };
     vector<flag> flags;
 
@@ -123,6 +130,7 @@ struct capturestate
 #endif
     {
         flag &f = flags[i];
+        if(f.droptime) f.dropoffset += t-f.droptime;
 #ifndef GAMESERVER
         interp(i, t);
 #endif
@@ -144,9 +152,10 @@ struct capturestate
 #endif
     }
 
-    void dropaffinity(int i, const vec &o, const vec &p, int t)
+    void dropaffinity(int i, const vec &o, const vec &p, int t, int offset = -1)
     {
         flag &f = flags[i];
+        if(offset >= 0) f.dropoffset = offset;
 #ifndef GAMESERVER
         interp(i, t);
 #endif
@@ -171,7 +180,7 @@ struct capturestate
 #ifndef GAMESERVER
         interp(i, t);
 #endif
-        f.droptime = f.taketime = 0;
+        f.droptime = f.taketime = f.dropoffset = 0;
 #ifdef GAMESERVER
         f.owner = -1;
         f.votes.shrink(0);
