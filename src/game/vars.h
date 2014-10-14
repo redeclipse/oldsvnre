@@ -184,6 +184,7 @@ GVAR(0, duelprotect, 0, 5000, VAR_MAX); // .. in duel/survivor matches
 GVAR(0, instaprotect, 0, 3000, VAR_MAX); // .. in instagib matches
 
 GVAR(0, balancemaps, -1, -1, 1); // determined if map team balancing is used: -1 = map default, 0 = off, 1 = on
+GVAR(0, balancereset, 0, 2, 2); // reset players when balancing them, 0 = off, 1 = only when necessary, 2 = always
 GVAR(0, balancedelay, 0, 10000, 30000); // before mapbalance forces
 GVAR(0, balancenospawn, 0, 1, 1); // prevent respawning when waiting to balance
 GVAR(0, balanceduke, 0, 1, 1); // enable in duel/survivor
