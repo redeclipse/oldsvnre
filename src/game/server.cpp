@@ -5193,7 +5193,7 @@ namespace server
 
                 case N_LOADW:
                 {
-                    int lcn = getint(p), r = getint(p), n = getint(p);
+                    int lcn = getint(p), n = getint(p);
                     clientinfo *cp = (clientinfo *)getinfo(lcn);
                     vector<int> items;
                     loopk(n)
@@ -5202,11 +5202,9 @@ namespace server
                         if(p.overread()) break;
                         if(n <= W_LOADOUT) items.add(w);
                     }
-                    if(!hasclient(cp, ci) || !m_loadout(gamemode, mutators)) break;
+                    if(!hasclient(cp, ci)) break;
                     cp->state.loadweap.shrink(0);
                     loopvk(items) cp->state.loadweap.add(items[k]);
-                    if(chkloadweap(cp) && r && cp->state.state == CS_ALIVE)
-                        waiting(cp, DROP_WEAPONS);
                     break;
                 }
 
