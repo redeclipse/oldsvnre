@@ -3572,7 +3572,7 @@ namespace game
                 {
                     case 1: case 2:
                     {
-                        regularshape(powerfx[d->weapselect].parttype, 1+(amt*powerfx[d->weapselect].radius), colour, powerfx[d->weapselect].type == 2 ? 21 : 53, 5, 60+int(30*amt), d->muzzlepos(d->weapselect), powerfx[d->weapselect].size*max(amt, 0.25f), max(amt*0.25f, 0.05f)*blend, 1, 0, 5+(amt*5));
+                        regularshape(powerfx[d->weapselect].parttype, 1+(amt*powerfx[d->weapselect].radius), colour, powerfx[d->weapselect].type == 2 ? 21 : 53, 5, 60+int(30*amt), d->muzzlepos(d->weapselect), powerfx[d->weapselect].size*max(amt, 0.25f), max(amt, 0.1f)*blend, 1, 0, 5+(amt*5));
                         break;
                     }
                     case 3:
@@ -3584,7 +3584,7 @@ namespace game
                     }
                     case 4:
                     {
-                        part_flare(d->ejectpos(d->weapselect), d->ejectpos(d->weapselect, true), 1, powerfx[d->weapselect].parttype, colour, powerfx[d->weapselect].size*max(amt, 0.25f), max(amt*0.25f, 0.05f)*blend);
+                        part_flare(d->ejectpos(d->weapselect), d->ejectpos(d->weapselect, true), 1, powerfx[d->weapselect].parttype, colour, powerfx[d->weapselect].size*max(amt, 0.25f), max(amt, 0.1f)*blend);
                         break;
                     }
                     case 0: default: break;

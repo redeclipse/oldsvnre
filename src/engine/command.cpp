@@ -3007,14 +3007,13 @@ ICOMMAND(0, loopfiles, "rsse", (ident *id, char *dir, char *ext, uint *body),
     if(files.length()) poparg(*id);
 });
 
-void findfile_(char *name)
+ICOMMAND(0, findfile, "s", (char *name),
 {
     string fname;
     copystring(fname, name);
     path(fname);
     intret(findzipfile(fname) || fileexists(fname, "e") || findfile(fname, "e") ? 1 : 0);
-}
-COMMANDN(0, findfile, findfile_, "s");
+});
 
 struct sortitem
 {
