@@ -669,7 +669,7 @@ struct gamestate
 
     bool candrop(int weap, int sweap, int millis, int skip = 0)
     {
-        if(weapwaited(weapselect, millis, skip) && weap >= W_OFFSET && hasweap(weap, sweap) && weapwaited(weap, millis, skip) && w_item(weap, sweap))
+        if(w_item(weap, sweap) && hasweap(weap, sweap, 1) && weapwaited(weap, millis, skip) && weapwaited(weapselect, millis, skip))
             return true;
         return false;
     }
