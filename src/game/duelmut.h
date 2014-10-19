@@ -54,7 +54,11 @@ struct duelservmode : servmode
     {
         if(ci->state.actortype < A_ENEMY && ci->state.state != CS_SPECTATOR)
         {
-            if(ci->state.actortype == A_PLAYER && waitforhumans) doreset();
+            if(ci->state.actortype == A_PLAYER && waitforhumans)
+            {
+                doreset();
+                waitforhumans = false;
+            }
             int n = duelqueue.find(ci);
             if(top)
             {
