@@ -121,27 +121,27 @@ namespace auth
 
     void setprivilege(clientinfo *ci, int val, int flags = 0, bool authed = false)
     {
-        int privilege = ci->privilege;
         string msg = "";
         if(val > 0)
         {
             if((ci->privilege&PRIV_TYPE) >= (flags&PRIV_TYPE)) return;
-            privilege = ci->privilege = flags;
+            ci->privilege = flags;
             if(authed)
             {
                 formatstring(msg)("\fy%s identified as \fs\fc%s\fS", colourname(ci), ci->authname);
                 if((ci->privilege&PRIV_TYPE) > PRIV_PLAYER)
                 {
-                    defformatstring(msgx)(" (\fs\fc%s\fS)", privname(privilege));
+                    defformatstring(msgx)(" (\fs\fc%s\fS)", privname(ci->privilege));
                     concatstring(msg, msgx);
                 }
                 copystring(ci->handle, ci->authname);
             }
-            else formatstring(msg)("\fy%s elevated to \fs\fc%s\fS", colourname(ci), privname(privilege));
+            else formatstring(msg)("\fy%s elevated to \fs\fc%s\fS", colourname(ci), privname(ci->privilege));
         }
         else
         {
             if(!(ci->privilege&PRIV_TYPE)) return;
+            int privilege = ci->privilege;
             ci->privilege = PRIV_NONE;
             ci->handle[0] = 0;
             int others = 0;
