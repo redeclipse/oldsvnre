@@ -6222,7 +6222,7 @@ namespace server
                         {
                             if(!adminpass[0]) srvmsgft(ci->clientnum, CON_EVENT, "\fraccess denied, no administrator passsword set");
                             else if(!checkpassword(ci, adminpass, text)) srvmsgft(ci->clientnum, CON_EVENT, "\fraccess denied, invalid administrator password");
-                            else auth::setprivilege(ci, 1, PRIV_ADMINISTRATOR);
+                            else auth::setprivilege(ci, 1, PRIV_ADMINISTRATOR|PRIV_LOCAL);
                         }
                         else if((ci->privilege&PRIV_TYPE) < PRIV_ELEVATED)
                         {
@@ -6238,7 +6238,7 @@ namespace server
                                 fail = true;
                                 break;
                             }
-                            if(!fail) auth::setprivilege(ci, 1, PRIV_ELEVATED);
+                            if(!fail) auth::setprivilege(ci, 1, PRIV_ELEVATED|PRIV_LOCAL);
                         }
                     }
                     else auth::setprivilege(ci, 0);

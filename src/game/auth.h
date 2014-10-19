@@ -119,14 +119,14 @@ namespace auth
         return true;
     }
 
-    void setprivilege(clientinfo *ci, int val, int flags = 0, bool authed = false, bool local = true)
+    void setprivilege(clientinfo *ci, int val, int flags = 0, bool authed = false)
     {
-        int privilege = ci->privilege&PRIV_TYPE;
+        int privilege = ci->privilege;
         string msg = "";
         if(val > 0)
         {
-            if((ci->privilege&PRIV_TYPE) >= flags) return;
-            privilege = ci->privilege = flags|(local ? PRIV_LOCAL : 0);
+            if((ci->privilege&PRIV_TYPE) >= (flags&PRIV_TYPE)) return;
+            privilege = ci->privilege = flags;
             if(authed)
             {
                 formatstring(msg)("\fy%s identified as \fs\fc%s\fS", colourname(ci), ci->authname);
@@ -182,7 +182,7 @@ namespace auth
         {
             if(adminpass[0] && checkpassword(ci, adminpass, pwd))
             {
-                if(G(autoadmin) || G(connectlock)) setprivilege(ci, 1, PRIV_ADMINISTRATOR);
+                if(G(autoadmin) || G(connectlock)) setprivilege(ci, 1, PRIV_ADMINISTRATOR|PRIV_LOCAL);
                 return true;
             }
             if(serverpass[0] && checkpassword(ci, serverpass, pwd)) return true;
@@ -267,7 +267,7 @@ namespace auth
                 local = true;
             }
         }
-        if(n > PRIV_NONE) setprivilege(ci, 1, n, true, local);
+        if(n > PRIV_NONE) setprivilege(ci, 1, n|(local ? PRIV_LOCAL : 0), true);
         else ci->authname[0] = 0;
         if(ci->connectauth)
         {
