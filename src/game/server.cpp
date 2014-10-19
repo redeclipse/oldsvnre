@@ -6220,7 +6220,7 @@ namespace server
                     {
                         if(text[0])
                         {
-                            if(!adminpass[0]) srvmsgft(ci->clientnum, CON_EVENT, "\fraccess denied, no administrator passsword set");
+                            if(!adminpass[0]) srvmsgft(ci->clientnum, CON_EVENT, "\fraccess denied, no administrator password set");
                             else if(!checkpassword(ci, adminpass, text)) srvmsgft(ci->clientnum, CON_EVENT, "\fraccess denied, invalid administrator password");
                             else auth::setprivilege(ci, 1, PRIV_ADMINISTRATOR|PRIV_LOCAL);
                         }
