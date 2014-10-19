@@ -29,7 +29,7 @@ namespace hud
     vector<scoregroup *> groups;
     scoregroup spectators;
 
-    VAR(IDF_PERSIST, autoscores, 0, 2, 3); // 1 = when dead, 2 = also in spectv, 3 = and in waittv too
+    VAR(IDF_PERSIST, autoscores, 0, 1, 3); // 1 = when dead, 2 = also in spectv, 3 = and in waittv too
     VAR(IDF_PERSIST, scoresdelay, 0, 0, VAR_MAX); // otherwise use respawn delay
     VAR(IDF_PERSIST, scoresinfo, 0, 1, 1);
     VAR(IDF_PERSIST, scorehandles, 0, 1, 1);
