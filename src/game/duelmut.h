@@ -2,9 +2,33 @@
 struct duelservmode : servmode
 {
     int duelround, dueltime, duelcheck, dueldeath, duelwinner, duelwins;
+    bool waitforhumans;
     vector<clientinfo *> duelqueue, allowed, playing, respawns;
 
     duelservmode() {}
+
+    void shrink()
+    {
+        allowed.shrink(0);
+        playing.shrink(0);
+        respawns.shrink(0);
+    }
+
+    void doreset()
+    {
+        dueltime = G(duelcooloff);
+        duelcheck = dueldeath = -1;
+    }
+
+    void reset()
+    {
+        waitforhumans = true;
+        shrink();
+        duelqueue.shrink(0);
+        doreset();
+        duelround = duelwins = 0;
+        duelwinner = -1;
+    }
 
     bool checkready(clientinfo *ci)
     {
@@ -30,6 +54,7 @@ struct duelservmode : servmode
     {
         if(ci->state.actortype < A_ENEMY && ci->state.state != CS_SPECTATOR)
         {
+            if(ci->state.actortype == A_PLAYER && waitforhumans) doreset();
             int n = duelqueue.find(ci);
             if(top)
             {
@@ -162,17 +187,9 @@ struct duelservmode : servmode
         }
     }
 
-    void shrink()
-    {
-        allowed.shrink(0);
-        playing.shrink(0);
-        respawns.shrink(0);
-    }
-
     void clear()
     {
-        duelcheck = dueldeath = -1;
-        dueltime = G(duelcooloff);
+        doreset();
         bool reset = false;
         if(m_duel(gamemode, mutators) && G(duelcycle)&(m_team(gamemode, mutators) ? 2 : 1) && duelwinner >= 0 && duelwins > 0)
         {
@@ -201,7 +218,7 @@ struct duelservmode : servmode
 
     void update()
     {
-        if(!canplay()) return;
+        if(!canplay() || waitforhumans) return;
         if(dueltime >= 0)
         {
             if(dueltime && ((dueltime -= curtime) <= 0)) dueltime = 0;
@@ -383,16 +400,6 @@ struct duelservmode : servmode
         }
     }
 
-    void reset()
-    {
-        dueltime = G(duelcooloff);
-        duelround = duelwins = 0;
-        duelwinner = -1;
-        duelcheck = dueldeath = -1;
-        shrink();
-        duelqueue.shrink(0);
-    }
-
     bool wantsovertime()
     {
         if(dueltime < 0 && duelround > 0) return true;
@@ -407,7 +414,7 @@ struct duelservmode : servmode
 
     void balance(int oldbalance)
     {
-        reset();
+        doreset();
     }
 } duelmutator;
 #endif
