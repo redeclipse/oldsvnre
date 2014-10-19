@@ -292,7 +292,7 @@ WPFVARM(0, fragoffset, 0, FVAR_MAX,
 );
 WPVARM(0, fragrays, 1, MAXPARAMS,
     5,          5,          5,          5,          5,          5,          5,          5,          5,          25,         30,         35,
-    5,          5,          5,          20,         30,         5,          5,          5,          5,          25,         10,         35
+    5,          5,          5,          22,         30,         5,          5,          5,          5,          25,         10,         35
 );
 WPFVARM(0, fragrel, FVAR_MIN, FVAR_MAX,
     1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       0.0f,       0.0f,       0.0f,

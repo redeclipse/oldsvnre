@@ -2943,7 +2943,7 @@ namespace server
             {
                 clientinfo *ci = clients[j];
                 if(ci->state.actortype > A_PLAYER || !ci->clientmap[0] || ci->mapcrc != info.crc || (req < 0 && ci->warned)) continue;
-                srvmsgf(req, "\fys%s is using modified map", colourname(ci));
+                srvmsgf(req, "\fy%s is using modified map", colourname(ci));
                 if(req < 0) ci->warned = true;
             }
         }
