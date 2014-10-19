@@ -35,6 +35,7 @@ VAR(IDF_PERSIST|IDF_HEX, guihovercolour, -1, 0xF0A0A0, 0xFFFFFF);
 FVAR(IDF_PERSIST, guihoverscale, 0, 0.3f, 1);
 FVAR(IDF_PERSIST, guihoverblend, 0, 0.9f, 1);
 
+VAR(IDF_PERSIST, guistatusline, 0, 1, 1);
 VAR(IDF_PERSIST, guitooltips, 0, 1, 1);
 VAR(IDF_PERSIST, guitooltiptime, 0, 500, VAR_MAX);
 VAR(IDF_PERSIST, guitooltipfade, 0, 500, VAR_MAX);
@@ -1219,7 +1220,7 @@ struct gui : guient
         }
         else
         {
-            if(statusstr && *statusstr)
+            if(guistatusline && statusstr && *statusstr)
             {
                 gui::pushfont("little");
                 int width, height, tw = min(statuswidth ? statuswidth : (guistatuswidth ? guistatuswidth : -1), int(screen->w*(1/uiscale.y)));
