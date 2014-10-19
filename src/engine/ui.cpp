@@ -1203,7 +1203,7 @@ struct gui : guient
     {
         if(guilayoutpass)
         {
-            if(needsinput && hastitle) uibuttons();
+            if(needsinput) uibuttons();
             xsize = max(tx, xsize);
             ysize = max(ty, ysize);
             ysize = max(ysize, guibound[1]);
@@ -1230,7 +1230,7 @@ struct gui : guient
                 draw_text(statusstr, x1+guibound[0], y1+guibound[1]/4, 255, 255, 255, 255, TEXT_CENTERED|TEXT_NO_INDENT, -1, tw);
                 gui::popfont();
             }
-            if(needsinput && hastitle) uibuttons();
+            if(needsinput) uibuttons();
             if((guitooltips || tooltipforce) && tooltipstr && *tooltipstr)
             {
                 if(!tooltip || !lasttooltip || strcmp(tooltip, tooltipstr))
