@@ -1781,7 +1781,7 @@ namespace ai
                                     }
                                 }
                                 #endif
-                                else botsay(e, reply, "%s: 'me', 'here', 'flag', or a player", d->name);
+                                else botsay(e, reply, "%s: 'me', 'here', or 'flag'", d->name);
                                 break;
                             }
                             case G_BOMBER:
@@ -1796,10 +1796,10 @@ namespace ai
                                         break;
                                     }
                                 }
-                                else botsay(e, reply, "%s: 'me', 'here', 'goal', or a player", d->name);
+                                else botsay(e, reply, "%s: 'me', 'here', or 'goal'", d->name);
                                 break;
                             }
-                            default: botsay(e, reply, "%s: 'me', 'here', or a player", d->name); break;
+                            default: botsay(e, reply, "%s: 'me', or 'here'", d->name); break;
                         }
                     }
                 }
@@ -1834,7 +1834,7 @@ namespace ai
                             }
                         }
                         #endif
-                        else botsay(e, reply, "%s: 'flag', or a player", d->name);
+                        else botsay(e, reply, "%s: 'flag' is the only option", d->name);
 
                         break;
                     }
@@ -1860,10 +1860,10 @@ namespace ai
                                 break;
                             }
                         }
-                        else botsay(e, reply, "%s: 'goal', 'ball', or a player", d->name);
+                        else botsay(e, reply, "%s: 'goal', or 'ball'", d->name);
                         break;
                     }
-                    default: botsay(e, reply, "%s: name of player?", d->name); break;
+                    default: botsay(e, reply, "%s: sorry, no attack directions in this game", d->name); break;
                 }
             }
             else if(!strcasecmp(w[pos], "forget"))
