@@ -572,7 +572,8 @@ struct gamestate
                 case 2: if(ammo[weap] > 0) return true; break; // only with actual ammo
                 case 3: if(ammo[weap] > 0 && canreload(weap, sweap)) return true; break; // only reloadable with actual ammo
                 case 4: if(ammo[weap] >= (canreload(weap, sweap) ? 0 : W(weap, ammomax))) return true; break; // only reloadable or those with < max
-                case 5: if(w_carry(weap, sweap) || (!canreload(weap, sweap) && weap >= W_OFFSET)) return true; break; // special case for usable weapons
+                case 5: if(weap != sweap && weap >= W_ITEM) return true; break; // special case to determine drop in loadout games
+                case 6: if(weap != sweap && weap >= W_OFFSET) return true; break; // special case to determine drop in classic games
             }
         }
         return false;
@@ -667,9 +668,9 @@ struct gamestate
         return millis-weaplast[weap] >= weapwait[weap];
     }
 
-    bool candrop(int weap, int sweap, int millis, int skip = 0)
+    bool candrop(int weap, int sweap, int millis, bool load, int skip = 0)
     {
-        if(w_item(weap, sweap) && hasweap(weap, sweap, 1) && weapwaited(weap, millis, skip) && weapwaited(weapselect, millis, skip))
+        if(hasweap(weap, sweap, load ? 5 : 6) && weapwaited(weap, millis, skip) && weapwaited(weapselect, millis, skip))
             return true;
         return false;
     }

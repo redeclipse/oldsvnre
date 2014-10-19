@@ -144,9 +144,9 @@ namespace weapons
         if(game::intermission) return;
         int weap = isweap(w) ? w : d->weapselect, sweap = m_weapon(game::gamemode, game::mutators);
         d->action[AC_DROP] = false;
-        if(!d->candrop(weap, sweap, lastmillis, (1<<W_S_SWITCH)))
+        if(!d->candrop(weap, sweap, lastmillis, m_loadout(game::gamemode, game::mutators), (1<<W_S_SWITCH)))
         {
-            if(!d->candrop(weap, sweap, lastmillis, (1<<W_S_SWITCH)|(1<<W_S_RELOAD)) || !isweap(d->weapselect) || d->weapload[d->weapselect] <= 0)
+            if(!d->candrop(weap, sweap, lastmillis, m_loadout(game::gamemode, game::mutators), (1<<W_S_SWITCH)|(1<<W_S_RELOAD)) || !isweap(d->weapselect) || d->weapload[d->weapselect] <= 0)
             {
                 game::errorsnd(d);
                 return;
