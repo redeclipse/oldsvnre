@@ -4314,12 +4314,12 @@ namespace server
         {
             if(ci->clientmap[0] || ci->mapcrc) checkmaps();
             //if(crclocked(ci)) return false;
-            if(smode) smode->entergame(ci);
-            mutate(smuts, mut->entergame(ci));
             ci->state.state = CS_DEAD;
             ci->state.lasttimeplayed = totalmillis;
             ci->state.quarantine = false;
             waiting(ci, DROP_RESET);
+            if(smode) smode->entergame(ci);
+            mutate(smuts, mut->entergame(ci));
             if(ci->ready) aiman::poke();
         }
         return true;

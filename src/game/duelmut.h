@@ -52,30 +52,24 @@ struct duelservmode : servmode
 
     void queue(clientinfo *ci, bool pos = true, bool top = false, bool wait = true)
     {
-        if(ci->state.actortype < A_ENEMY && ci->state.state != CS_SPECTATOR)
+        if(ci->state.actortype >= A_ENEMY || ci->state.state == CS_SPECTATOR) return;
+        if(ci->state.actortype == A_PLAYER && waitforhumans) waitforhumans = false;
+        int n = duelqueue.find(ci);
+        if(top)
         {
-            if(ci->state.actortype == A_PLAYER && waitforhumans)
-            {
-                doreset();
-                waitforhumans = false;
-            }
-            int n = duelqueue.find(ci);
-            if(top)
-            {
-                if(n >= 0) duelqueue.remove(n);
-                duelqueue.insert(0, ci);
-                n = 0;
-            }
-            else if(n < 0)
-            {
-                n = duelqueue.length();
-                duelqueue.add(ci);
-            }
-            if(allowed.find(ci) >= 0) allowed.removeobj(ci);
-            if(respawns.find(ci) >= 0) respawns.removeobj(ci);
-            if(wait && ci->state.state != CS_WAITING) waiting(ci, DROP_RESET);
-            if(pos) position(ci, n);
+            if(n >= 0) duelqueue.remove(n);
+            duelqueue.insert(0, ci);
+            n = 0;
         }
+        else if(n < 0)
+        {
+            n = duelqueue.length();
+            duelqueue.add(ci);
+        }
+        if(allowed.find(ci) >= 0) allowed.removeobj(ci);
+        if(respawns.find(ci) >= 0) respawns.removeobj(ci);
+        if(wait && ci->state.state != CS_WAITING) waiting(ci, DROP_RESET);
+        if(pos) position(ci, n);
     }
 
     void entergame(clientinfo *ci) { queue(ci); }
