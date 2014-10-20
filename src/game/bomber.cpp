@@ -562,7 +562,7 @@ namespace bomber
             }
             return;
         }
-        if(!f.droptime && m_gsp3(game::gamemode, game::mutators) && d->team != T_OMEGA && bomberattackreset) return;
+        if(!f.droptime && m_gsp3(game::gamemode, game::mutators) && d->team == T_ALPHA && bomberattackreset) return;
         if(f.pickuptime && lastmillis-f.pickuptime <= 1000) return;
         if(f.lastowner == d && f.droptime && lastmillis-f.droptime <= bomberpickupdelay) return;
         if(o.dist(f.pos()) <= enttype[AFFINITY].radius/2)
@@ -600,7 +600,7 @@ namespace bomber
     bool aihomerun(gameent *d, ai::aistate &b)
     {
         vec pos = d->feetpos();
-        if(m_team(game::gamemode, game::mutators) && !m_gsp1(game::gamemode, game::mutators) && (!m_gsp3(game::gamemode, game::mutators) || d->team == T_OMEGA))
+        if(m_team(game::gamemode, game::mutators) && !m_gsp1(game::gamemode, game::mutators) && (!m_gsp3(game::gamemode, game::mutators) || d->team != T_ALPHA))
         {
             int goal = -1;
             loopv(st.flags)
