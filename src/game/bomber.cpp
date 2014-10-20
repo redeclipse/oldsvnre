@@ -544,7 +544,7 @@ namespace bomber
         if(f.owner)
         {
             if(!d->ai || f.owner != d) return;
-            bool forever = m_ffa(gamemode, mutators) || d->health >= m_health(game::gamemode, game::mutators, d->model)/3 || findtarget(d) < 0;
+            bool forever = m_ffa(game::gamemode, game::mutators) || d->health >= m_health(game::gamemode, game::mutators, d->model)/3 || findtarget(d) < 0;
             if(!carrytime && forever) return;
             int takemillis = lastmillis-f.taketime, length = forever ? carrytime-550-bomberlockondelay : min(carrytime, 1000);
             if(takemillis >= length)
