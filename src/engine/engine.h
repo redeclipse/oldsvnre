@@ -396,14 +396,14 @@ extern void calcmerges();
 extern int mergefaces(int orient, facebounds *m, int sz);
 extern void mincubeface(const cube &cu, int orient, const ivec &o, int size, const facebounds &orig, facebounds &cf, ushort nmat = MAT_AIR, ushort matmask = MATF_VOLUME);
 
-static inline bool insideworld(const vec &o)
+static inline bool insideworld(const vec &o, bool zup = true)
 {
-    return o.x>=0 && o.x<hdr.worldsize && o.y>=0 && o.y<hdr.worldsize && o.z>=0 && o.z<hdr.worldsize;
+    return o.x>=0 && o.x<hdr.worldsize && o.y>=0 && o.y<hdr.worldsize && o.z>=0 && (!zup || o.z<hdr.worldsize);
 }
 
-static inline bool insideworld(const ivec &o)
+static inline bool insideworld(const ivec &o, bool zup = true)
 {
-    return uint(o.x)<uint(hdr.worldsize) && uint(o.y)<uint(hdr.worldsize) && uint(o.z)<uint(hdr.worldsize);
+    return uint(o.x)<uint(hdr.worldsize) && uint(o.y)<uint(hdr.worldsize) && (!zup || uint(o.z)<uint(hdr.worldsize));
 }
 
 static inline cubeext &ext(cube &c)

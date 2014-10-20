@@ -290,11 +290,8 @@ namespace bomber
         {
             bomberstate::flag &f = st.flags[i];
             float trans = 1;
-            if(!isbomberaffinity(f) || !f.interptime)
-            {
-                int millis = lastmillis-f.displaytime;
-                if(millis <= 1000) trans *= float(millis)/1000.f;
-            }
+            int millis = lastmillis-f.displaytime;
+            if(millis <= 1000) trans *= float(millis)/1000.f;
             if(!f.enabled) f.baselight.material[0] = f.light.material[0] = bvec(0, 0, 0);
             else if(isbomberaffinity(f))
             {
@@ -547,7 +544,7 @@ namespace bomber
         if(f.owner)
         {
             if(!d->ai || f.owner != d) return;
-            bool forever = m_gsp1(game::gamemode, game::mutators) || (m_gsp3(game::gamemode, game::mutators) && d->team != T_OMEGA) || findtarget(d) < 0;
+            bool forever = m_ffa(gamemode, mutators) || d->health >= m_health(game::gamemode, game::mutators, d->model)/3 || findtarget(d) < 0;
             if(!carrytime && forever) return;
             int takemillis = lastmillis-f.taketime, length = forever ? carrytime-550-bomberlockondelay : min(carrytime, 1000);
             if(takemillis >= length)

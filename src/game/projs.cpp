@@ -667,7 +667,7 @@ namespace projs
     bool spherecheck(projent &proj, bool rev = false)
     {
         vec dir = vec(proj.vel).normalize();
-        if(!insideworld(proj.o) || collide(&proj, dir, 0, false))
+        if(collide(&proj, dir, 0, false))
         {
             vec orig = proj.o;
             if(!proj.lastgood.iszero())
@@ -1756,7 +1756,7 @@ namespace projs
 
     int check(projent &proj, const vec &dir, int mat = -1)
     {
-        if(proj.o.z < 0) return 0; // remove, always..
+        if(proj.projtype == PRJ_SHOT ? proj.o.z < 0 : !insideworld(proj.o, false)) return 0; // remove, always..
         int chk = 0;
         if(proj.extinguish&1 || proj.extinguish&2)
         {
