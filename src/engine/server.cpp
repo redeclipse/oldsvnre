@@ -32,6 +32,7 @@ VAR(IDF_READONLY, versionisserver, 0, 1, 1);
 VAR(IDF_READONLY, versionisserver, 0, 0, 1);
 #endif
 uint versioncrc = 0;
+ICOMMAND(0, platname, "ii", (int *p, int *g), result(*p >= 0 && *p < MAX_PLATFORMS ? (*g!=0 ? plat_longname(*p) : plat_name(*p)) : ""));
 
 VAR(0, rehashing, 1, 0, -1);
 
