@@ -80,7 +80,7 @@ struct captureservmode : capturestate, servmode
                         int score = addscore(ci->team);
                         sendf(-1, 1, "ri5", N_SCOREAFFIN, ci->clientnum, i, k, score);
                         mutate(smuts, mut->scoreaffinity(ci));
-                        givepoints(ci, G(capturepoints));
+                        if(!m_nopoints(gamemode, mutators)) givepoints(ci, G(capturepoints));
                         if(!m_balance(gamemode, mutators) && G(capturelimit) && score >= G(capturelimit))
                         {
                             ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fyscore limit has been reached");
@@ -102,13 +102,13 @@ struct captureservmode : capturestate, servmode
         if(m_gsp1(gamemode, mutators) && f.team == ci->team)
         {
             capturestate::returnaffinity(i, gamemillis);
-            givepoints(ci, G(capturepoints));
+            if(!m_nopoints(gamemode, mutators)) givepoints(ci, G(capturepoints));
             sendf(-1, 1, "ri3", N_RETURNAFFIN, ci->clientnum, i);
         }
         else
         {
             capturestate::takeaffinity(i, ci->clientnum, gamemillis);
-            if(f.team != ci->team && (!f.droptime || f.lastowner != ci->clientnum)) givepoints(ci, G(capturepickuppoints));
+            if(!m_nopoints(gamemode, mutators) && ((f.team != ci->team && !f.droptime) || f.lastowner != ci->clientnum)) givepoints(ci, G(capturepickuppoints));
             sendf(-1, 1, "ri3", N_TAKEAFFIN, ci->clientnum, i);
         }
     }
@@ -153,7 +153,7 @@ struct captureservmode : capturestate, servmode
                 if(f.team != ci->team && f.taketime && gamemillis-f.taketime >= G(captureprotectdelay))
                 {
                     capturestate::returnaffinity(i, gamemillis);
-                    givepoints(ci, G(capturepoints));
+                    if(!m_nopoints(gamemode, mutators)) givepoints(ci, G(capturepoints));
                     int score = addscore(ci->team);
                     sendf(-1, 1, "ri5", N_SCOREAFFIN, ci->clientnum, i, -1, score);
                     mutate(smuts, mut->scoreaffinity(ci));

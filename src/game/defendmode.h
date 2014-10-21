@@ -52,7 +52,7 @@ struct defendservmode : defendstate, servmode
     {
         if(!points) return;
         flag &b = flags[i];
-        loopvk(clients) if(clients[k]->state.actortype < A_ENEMY && team == clients[k]->team && insideaffinity(b, clients[k]->state.o)) givepoints(clients[k], points);
+        if(!m_nopoints(gamemode, mutators)) loopvk(clients) if(clients[k]->state.actortype < A_ENEMY && team == clients[k]->team && insideaffinity(b, clients[k]->state.o)) givepoints(clients[k], points);
         score &cs = teamscore(team);
         cs.total += points;
         sendf(-1, 1, "ri3", N_SCORE, team, cs.total);
@@ -72,7 +72,7 @@ struct defendservmode : defendstate, servmode
                 if(!b.owners || !b.enemies)
                 {
                     int pts = b.occupy(b.enemy, G(defendpoints)*(b.enemies ? b.enemies : -(1+b.owners))*t, defendcount, m_gsp1(gamemode, mutators));
-                    if(pts > 0) loopvk(clients) if(clients[k]->state.actortype < A_ENEMY && b.owner == clients[k]->team && insideaffinity(b, clients[k]->state.o)) givepoints(clients[k], G(defendpoints));
+                    if(!m_nopoints(gamemode, mutators) && pts > 0) loopvk(clients) if(clients[k]->state.actortype < A_ENEMY && b.owner == clients[k]->team && insideaffinity(b, clients[k]->state.o)) givepoints(clients[k], G(defendpoints));
                 }
                 sendaffinity(i);
             }
