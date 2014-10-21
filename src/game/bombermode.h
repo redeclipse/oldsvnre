@@ -79,12 +79,12 @@ struct bomberservmode : bomberstate, servmode
         int total = 0;
         if(g.team != ci->team)
         {
-            givepoints(ci, G(bomberpoints));
+            if(!m_nopoints(gamemode, mutators)) givepoints(ci, G(bomberpoints));
             total = addscore(ci->team, 1);
         }
         else
         {
-            givepoints(ci, -G(bomberpenalty));
+            if(!m_nopoints(gamemode, mutators)) givepoints(ci, -G(bomberpenalty));
             total = addscore(ci->team, -1);
         }
         bomberstate::returnaffinity(relay, gamemillis, false);
