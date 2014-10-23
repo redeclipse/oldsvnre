@@ -30,6 +30,7 @@ namespace client
         loopv(game::players) if(game::players[i] && game::players[i]->actortype == A_PLAYER && (!nospec || game::players[i]->state != CS_SPECTATOR)) n++;
         return n;
     }
+    ICOMMAND(0, getclientcount, "ii", (int *s, int *n), intret(otherclients(*s!=0, *n!=0)));
 
     int numplayers()
     {
