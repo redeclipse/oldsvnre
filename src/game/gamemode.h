@@ -254,7 +254,7 @@ extern mutstypes mutstype[];
 #define m_swapteam(a,b)     (m_team(a, b) && (!m_trial(a) || m_gsp3(a, b)) && m_fight(a) && (G(teambalanceduel) || !m_duel(a, b)) && !m_coop(gamemode, mutators) && G(teambalance) >= 3 && G(teambalanceswap))
 #define m_balteam(a,b,c)    (m_team(a, b) && (!m_trial(a) || m_gsp3(a, b)) && m_fight(a) && (G(teambalanceduel) || !m_duel(a, b)) && !m_coop(gamemode, mutators) && G(teambalance) >= c)
 #define m_forcebal(a,b)     ((m_bomber(a) && m_gsp3(a, b)) || (m_trial(a) && m_gsp3(a, b)))
-#define m_balance(a,b)      (m_team(a, b) && (!m_trial(a) || m_gsp3(a, b)) && m_fight(a) && (m_forcebal(a, b) || ((G(balanceduke) || !m_duke(a, b)) && ((G(balancemaps) >= 0 ? G(balancemaps) : G(mapbalance)) >= (m_affinity(a) ? 1 : 2)))))
+#define m_balance(a,b,c)    (m_team(a, b) && (!m_trial(a) || m_gsp3(a, b)) && m_fight(a) && (m_forcebal(a, b) || ((G(balanceduke) || !m_duke(a, b)) && ((G(balancemaps) >= 0 ? G(balancemaps) : G(mapbalance)) >= (m_affinity(a) ? 1 : (c ? 2 : 3))))))
 #define m_balreset(a,b)     (G(balancereset) && (G(balancereset) == 2 || m_capture(a) || m_bomber(a) || m_trial(a) || m_duke(a, b)))
 
 #define w_carry(w1,w2)      (isweap(w1) && w1 != W_MELEE && (!isweap(w2) || (w1 != w2 && (w2 != W_GRENADE || w1 != W_MINE))) && (w1 == W_ROCKET || (w1 >= W_OFFSET && w1 < W_ITEM)))

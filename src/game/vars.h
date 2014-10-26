@@ -1,6 +1,6 @@
 GVAR(IDF_WORLD, numplayers, 0, 4, MAXCLIENTS); // 0 = determine from number of spawns
 GVAR(IDF_WORLD, maxplayers, 0, 0, MAXCLIENTS); // 0 = numplayers*3
-GVAR(IDF_WORLD, mapbalance, 0, 0, 2); // switches teams for asymmetrical maps, 0 = off, 1 = ctf/dnc/bb, 2 = all
+GVAR(IDF_WORLD, mapbalance, 0, 0, 3); // switches teams for asymmetrical maps, 0 = off, 1 = ctf/dnc/bb, 2 = with team spawns, 3 = forced
 
 GFVAR(IDF_WORLD, gravity, 0, 50.f, 1000); // gravity
 GFVAR(0, gravityscale, 0, 1, FVAR_MAX);
@@ -183,7 +183,7 @@ GVAR(0, spawnprotect, 0, 3000, VAR_MAX); // delay before damage can be dealt to 
 GVAR(0, duelprotect, 0, 5000, VAR_MAX); // .. in duel/survivor matches
 GVAR(0, instaprotect, 0, 3000, VAR_MAX); // .. in instagib matches
 
-GVAR(0, balancemaps, -1, -1, 1); // determined if map team balancing is used: -1 = map default, 0 = off, 1 = on
+GVAR(0, balancemaps, -1, -1, 3); // determined if map team balancing is used: -1 = map default, 0 = off, 1 = ctf/dnc/bb, 2 = with team spawns, 3 = forced
 GVAR(0, balancereset, 0, 2, 2); // reset players when balancing them, 0 = off, 1 = only when necessary, 2 = always
 GVAR(0, balancedelay, 0, 10000, 30000); // before mapbalance forces
 GVAR(0, balancenospawn, 0, 0, 1); // prevent respawning when waiting to balance

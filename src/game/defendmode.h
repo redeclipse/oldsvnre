@@ -143,7 +143,7 @@ struct defendservmode : defendstate, servmode
 
     void endcheck()
     {
-        if(m_balance(gamemode, mutators)) return;
+        if(m_balance(gamemode, mutators, teamspawns)) return;
         int maxscore = G(defendlimit) ? G(defendlimit) : INT_MAX-1;
         loopi(numteams(gamemode, mutators))
         {

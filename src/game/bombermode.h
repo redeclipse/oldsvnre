@@ -96,7 +96,7 @@ struct bomberservmode : bomberstate, servmode
             bomberstate::returnaffinity(j, gamemillis, false);
             sendf(-1, 1, "ri3", N_RESETAFFIN, j, 0);
         }
-        if(!m_balance(gamemode, mutators) && G(bomberlimit) && total >= G(bomberlimit))
+        if(!m_balance(gamemode, mutators, teamspawns) && G(bomberlimit) && total >= G(bomberlimit))
         {
             ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fyscore limit has been reached");
             startintermission();
@@ -245,7 +245,7 @@ struct bomberservmode : bomberstate, servmode
                             total = addscore(ci->team, score);
                             sendf(-1, 1, "ri3", N_SCORE, ci->team, total);
                         }
-                        if(!m_balance(gamemode, mutators) && G(bomberholdlimit) && total >= G(bomberholdlimit))
+                        if(!m_balance(gamemode, mutators, teamspawns) && G(bomberholdlimit) && total >= G(bomberholdlimit))
                         {
                             ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fyscore limit has been reached");
                             startintermission();
