@@ -2660,14 +2660,14 @@ namespace client
                             t->cplast = laptime;
                             t->cptime = getint(p);
                             t->points = getint(p);
-                            t->cpmillis = 0;
-                            if(!m_gsp2(game::gamemode, game::mutators)) t->impulse[IM_METER] = 0;
+                            t->cpmillis = t->impulse[IM_METER] = 0;
                             if(showlaptimes >= (t != game::focus ? (t->actortype > A_PLAYER ? 3 : 2) : 1))
                             {
                                 defformatstring(best)("%s", timestr(t->cptime));
                                 conoutft(t != game::player1 ? CON_INFO : CON_SELF, "%s completed in \fs\fg%s\fS (best: \fs\fy%s\fS, laps: \fs\fc%d\fS)", game::colourname(t), timestr(t->cplast), best, t->points);
                             }
                         }
+                        else if(!m_gsp2(game::gamemode, game::mutators)) t->impulse[IM_METER] = 0
                     }
                     else
                     {

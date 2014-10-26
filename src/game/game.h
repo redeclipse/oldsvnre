@@ -1057,8 +1057,8 @@ struct gameent : dynent, gamestate
 
     void clearstate(int gamemode, int mutators)
     {
-        loopi(IM_MAX) impulse[i] = 0;
-        cplast = lasthit = lastkill = quake = turnmillis = turnside = spree = 0;
+        loopi(IM_MAX) if(i != IM_METER || !m_trial(gamemode) || !m_gsp2(gamemode, mutators)) impulse[i] = 0;
+        lasthit = lastkill = quake = turnmillis = turnside = spree = 0;
         turnroll = turnyaw = 0;
         lastteamhit = lastflag = respawned = suicided = lastnode = lastfoot = -1;
         obit[0] = 0;
@@ -1095,12 +1095,12 @@ struct gameent : dynent, gamestate
     void resetstate(int millis, int heal, int gamemode, int mutators)
     {
         respawn(millis, heal, gamemode, mutators);
-        frags = deaths = totaldamage = 0;
+        checkpoint = -1;
+        frags = deaths = totaldamage = cplast = 0;
     }
 
     void mapchange(int millis, int heal, int gamemode, int mutators)
     {
-        checkpoint = -1;
         dominating.shrink(0);
         dominated.shrink(0);
         icons.shrink(0);
