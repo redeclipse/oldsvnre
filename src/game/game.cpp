@@ -1637,11 +1637,11 @@ namespace game
         }
         if(!log.empty())
         {
-            if(obitverbose == 2 || obitstyles) concatstring(d->obit, rnd(2) ? ", assisted by" : ", helped by");
+            if(obitverbose || obitstyles) concatstring(d->obit, rnd(2) ? ", assisted by" : ", helped by");
             else concatstring(d->obit, " +");
             loopv(log) if(log[i])
             {
-                if(obitverbose == 2 || obitstyles)
+                if(obitverbose || obitstyles)
                     concatstring(d->obit, log.length() > 1 && i == log.length()-1 ? " and " : (i ? ", " : " "));
                 else concatstring(d->obit, log.length() > 1 && i == log.length()-1 ? " + " : (i ? " + " : " "));
                 if(log[i]->actortype >= A_ENEMY) concatstring(d->obit, "a ");
