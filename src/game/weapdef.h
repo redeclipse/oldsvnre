@@ -436,6 +436,9 @@
 #define WPSVARK(flags, name, w100, w101, w102, w103, w104, w105, w106, w107, w108, w109, w110, w111, w200, w201, w202, w203, w204, w205, w206, w207, w208, w209, w210, w211, w300, w301, w302, w303, w304, w305, w306, w307, w308, w309, w310, w311, w400, w401, w402, w403, w404, w405, w406, w407, w408, w409, w410, w411) \
     WPSVARM(flags, name, w100, w101, w102, w103, w104, w105, w106, w107, w108, w109, w110, w111, w200, w201, w202, w203, w204, w205, w206, w207, w208, w209, w210, w211); \
     WPSVARM(flags, flak##name, w300, w301, w302, w303, w304, w305, w306, w307, w308, w309, w310, w311, w400, w401, w402, w403, w404, w405, w406, w407, w408, w409, w410, w411);
+#define WPSVARR(flags, name, w00, w01, w02, w03, w04, w05, w06, w07, w08, w09, w10, w11) \
+    WPSVARM(flags, name, w00, w01, w02, w03, w04, w05, w06, w07, w08, w09, w10, w11, w00, w01, w02, w03, w04, w05, w06, w07, w08, w09, w10, w11); \
+    WPSVARM(flags, flak##name, w00, w01, w02, w03, w04, w05, w06, w07, w08, w09, w10, w11, w00, w01, w02, w03, w04, w05, w06, w07, w08, w09, w10, w11);
 #define WF(c,w,v,s) (c ? W2(w, flak##v, s) : W2(w, v, s))
 #define WS(flags)  (flags&HIT_ALT)
 #define WK(flags)  (flags&HIT_FLAK)
