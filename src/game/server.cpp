@@ -1089,17 +1089,20 @@ namespace server
     {
         if(actortype != A_PLAYER) return "bot";
         const char *privnames[2][PRIV_MAX] = {
-            { "none", "global player", "global supporter", "global moderator", "global operator", "global administrator", "developer", "creator" },
-            { "none", "local player", "local supporter", "local moderator", "local operator", "local administrator", "none", "none" }
+            { "none", "player account", "global supporter", "global moderator", "global operator", "global administrator", "developer", "creator" },
+            { "none", "player account", "local supporter", "local moderator", "local operator", "local administrator", "none", "none" }
         };
         return privnames[priv&PRIV_LOCAL ? 1 : 0][clamp(priv&PRIV_TYPE, 0, int(priv&PRIV_LOCAL ? PRIV_ADMINISTRATOR : PRIV_LAST))];
     }
 
-    const char *privnamex(int priv, int actortype)
+    const char *privnamex(int priv, int actortype, bool local)
     {
         if(actortype != A_PLAYER) return "bot";
-        const char *privnames[PRIV_MAX] = { "none", "player", "supporter", "moderator", "operator", "administrator", "developer", "creator" };
-        return privnames[clamp(priv&PRIV_TYPE, 0, int(priv&PRIV_LOCAL ? PRIV_ADMINISTRATOR : PRIV_LAST))];
+        const char *privnames[2][PRIV_MAX] = {
+            { "none", "player", "supporter", "moderator", "operator", "administrator", "developer", "creator" },
+            { "none", "player", "localsupporter", "localmoderator", "localoperator", "localadministrator", "developer", "creator" }
+        };
+        return privnames[local && priv&PRIV_LOCAL ? 1 : 0][clamp(priv&PRIV_TYPE, 0, int(priv&PRIV_LOCAL ? PRIV_ADMINISTRATOR : PRIV_LAST))];
     }
 
     const char *colourname(clientinfo *ci, char *name = NULL, bool icon = true, bool dupname = true, int colour = 3)
@@ -1114,7 +1117,7 @@ namespace server
                 formatstring(colortmp)("\f[%d]", findcolour(ci));
                 concatstring(colored, colortmp);
             }
-            formatstring(colortmp)("\f($priv%stex)", privnamex(ci->privilege, ci->state.actortype));
+            formatstring(colortmp)("\f($priv%stex)", privnamex(ci->privilege, ci->state.actortype, true));
             concatstring(colored, colortmp);
         }
         if(colour&2)

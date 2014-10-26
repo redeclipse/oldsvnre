@@ -259,6 +259,7 @@ namespace auth
                 case 'a': case 'A': o = PRIV_ADMINISTRATOR; break;
                 case 'o': case 'O': o = PRIV_OPERATOR; break;
                 case 'm': case 'M': o = PRIV_MODERATOR; break;
+                case 's': case 'S': o = PRIV_SUPPORTER; break;
                 default: break;
             }
             if(o > n)

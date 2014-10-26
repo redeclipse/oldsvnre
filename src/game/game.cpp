@@ -398,7 +398,7 @@ namespace game
         {
             case 1:
             {
-                const char *id = server::privnamex(d->privilege, d->actortype);
+                const char *id = server::privnamex(d->privilege, d->actortype, true);
                 loopv(vanities[n].files)
                     if(vanities[n].files[i].proj == proj && !strcmp(vanities[n].files[i].id, id))
                         file = vanities[n].files[i].name;
@@ -2022,7 +2022,7 @@ namespace game
                 formatstring(colortmp)("\f[%d]", findcolour(d));
                 concatstring(colored, colortmp);
             }
-            formatstring(colortmp)("\f($priv%stex)", server::privnamex(d->privilege, d->actortype));
+            formatstring(colortmp)("\f($priv%stex)", server::privnamex(d->privilege, d->actortype, true));
             concatstring(colored, colortmp);
         }
         if(colour&2)
