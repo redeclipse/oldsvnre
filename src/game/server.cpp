@@ -486,6 +486,7 @@ namespace server
     vector<servmode *> smuts;
     #define mutate(a,b) { loopvk(a) { servmode *mut = a[k]; { b; } } }
     int curbalance = 0, nextbalance = 0, totalspawns = 0;
+    bool teamspawns = false;
 
     vector<score> scores;
     score &teamscore(int team)
@@ -679,14 +680,14 @@ namespace server
             if(ci->state.actortype >= A_ENEMY) return true;
             else if(tryspawn)
             {
-                if(m_balance(gamemode, mutators) && G(balancenospawn) && nextbalance && m_balreset(gamemode, mutators) && canbalancenow()) return false;
+                if(m_balance(gamemode, mutators, teamspawns) && G(balancenospawn) && nextbalance && m_balreset(gamemode, mutators) && canbalancenow()) return false;
                 if(m_loadout(gamemode, mutators) && !chkloadweap(ci)) return false;
                 if(spawnqueue(true) && spawnq.find(ci) < 0 && playing.find(ci) < 0) queue(ci);
                 return true;
             }
             else
             {
-                if(m_balance(gamemode, mutators) && G(balancenospawn) && nextbalance && m_balreset(gamemode, mutators) && canbalancenow()) return false;
+                if(m_balance(gamemode, mutators, teamspawns) && G(balancenospawn) && nextbalance && m_balreset(gamemode, mutators) && canbalancenow()) return false;
                 if(m_loadout(gamemode, mutators) && !chkloadweap(ci, false)) return false;
                 int delay = ci->state.actortype >= A_ENEMY && ci->state.lastdeath ? G(enemyspawntime) : m_delay(gamemode, mutators, ci->team);
                 if(delay && ci->state.respawnwait(gamemillis, delay)) return false;
@@ -1400,7 +1401,7 @@ namespace server
     {
         if(smode && smode->wantsovertime()) return true;
         mutate(smuts, if(mut->wantsovertime()) return true);
-        if(!G(overtimeallow) || m_balance(gamemode, mutators)) return false;
+        if(!G(overtimeallow) || m_balance(gamemode, mutators, teamspawns)) return false;
         bool result = false;
         if(m_team(gamemode, mutators))
         {
@@ -1585,7 +1586,7 @@ namespace server
             startintermission();
             return; // bail
         }
-        if(!m_balance(gamemode, mutators) && G(pointlimit) && m_dm(gamemode))
+        if(!m_balance(gamemode, mutators, teamspawns) && G(pointlimit) && m_dm(gamemode))
         {
             if(m_team(gamemode, mutators))
             {
@@ -1612,7 +1613,7 @@ namespace server
                 }
             }
         }
-        if(m_balance(gamemode, mutators) && gamelimit > 0 && curbalance < (numt-1))
+        if(m_balance(gamemode, mutators, teamspawns) && gamelimit > 0 && curbalance < (numt-1))
         {
             int delpart = min(gamelimit/(numt*2), G(balancedelay)), balpart = (gamelimit/numt*(curbalance+1))-delpart;
             if(gamemillis >= balpart)
@@ -1817,6 +1818,7 @@ namespace server
     void setupspawns(bool update)
     {
         totalspawns = 0;
+        teamspawns = m_team(gamemode, mutators);
         loopi(T_ALL) spawns[i].reset();
         if(update)
         {
@@ -1853,7 +1855,6 @@ namespace server
                 setmod(sv_maxplayers, 0);
                 return;
             }
-            bool teamspawns = m_team(gamemode, mutators);
             if(!teamspawns && m_duel(gamemode, mutators))
             { // iterate through teams so players spawn on opposite sides in duel
                 teamspawns = true;
@@ -1882,8 +1883,9 @@ namespace server
                         }
                     }
                     if(totalspawns) break;
+                    teamspawns = false;
                 }
-                if(totalspawns && m_team(gamemode, mutators))
+                if(totalspawns && teamspawns)
                 {
                     int actt = numteams(gamemode, mutators), off = numt-actt;
                     if(off > 0) loopk(off)
@@ -1896,25 +1898,31 @@ namespace server
             }
             if(!totalspawns)
             { // use all neutral spawns
+                teamspawns = false;
                 loopv(sents) if(sents[i].type == PLAYERSTART && sents[i].attrs[0] == T_NEUTRAL && (sents[i].attrs[5] == triggerid || !sents[i].attrs[5]) && m_check(sents[i].attrs[3], sents[i].attrs[4], gamemode, mutators))
                 {
                     spawns[T_NEUTRAL].add(i);
                     totalspawns++;
                 }
             }
-            if(!totalspawns) loopk(2)
+            if(!totalspawns)
             { // use all spawns
-                loopv(sents) if(sents[i].type == PLAYERSTART && (k || ((sents[i].attrs[5] == triggerid || !sents[i].attrs[5]) && m_check(sents[i].attrs[3], sents[i].attrs[4], gamemode, mutators))))
+                teamspawns = false;
+                loopk(2)
                 {
-                    spawns[T_NEUTRAL].add(i);
-                    totalspawns++;
+                    loopv(sents) if(sents[i].type == PLAYERSTART && (k || ((sents[i].attrs[5] == triggerid || !sents[i].attrs[5]) && m_check(sents[i].attrs[3], sents[i].attrs[4], gamemode, mutators))))
+                    {
+                        spawns[T_NEUTRAL].add(i);
+                        totalspawns++;
+                    }
+                    if(totalspawns) break;
                 }
-                if(totalspawns) break;
             }
 
             if(totalspawns) cplayers = totalspawns/2;
             else
             { // we can cheat and use weapons for spawns
+                teamspawns = false;
                 loopv(sents) if(sents[i].type == WEAPON)
                 {
                     spawns[T_NEUTRAL].add(i);
