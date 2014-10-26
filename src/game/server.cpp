@@ -1160,7 +1160,7 @@ namespace server
         if(ci->local || (ci->privilege&PRIV_TYPE) >= flag) return true;
         else if(mastermask()&MM_AUTOAPPROVE && flag <= PRIV_ELEVATED && !numclients(ci->clientnum)) return true;
         else if(msg && *msg)
-            srvmsgft(ci->clientnum, CON_CHAT, "\fraccess denied, you need to be \fs\fc%s\fS to \fs\fc%s\fS", privname(flag), msg);
+            srvmsgft(ci->clientnum, CON_CHAT, "\fraccess denied, you need to be \fs\fc%s\fS to \fs\fc%s\fS", privnamex(flag), msg);
         return false;
     }
 
