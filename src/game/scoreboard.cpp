@@ -560,7 +560,7 @@ namespace hud
                                     });
                                     loopscoregroup(uilist(g, {
                                         //if(scorebgrows > 2) g.background(i%2 ? bgc2 : bgc1, scorebgblend);
-                                        uicenter(g, uipad(g, 0.25f, uicenterlist(g, g.textf("\f($priv%stex)", game::findcolour(o), NULL, 0, server::privname(o->privilege, o->actortype)))));
+                                        uicenter(g, uipad(g, 0.25f, uicenterlist(g, g.textf("\f($priv%stex)", game::findcolour(o), NULL, 0, server::privnamex(o->privilege, o->actortype)))));
                                     }));
                                 });
 
