@@ -87,7 +87,7 @@ void searchbindlist(const char *action, int type, int limit, const char *s1, con
     int found = 0;
     enumerate(keyms, keym, km,
     {
-        char *act = ((!km.actions[type] || !*km.actions[type]) && type ? km.actions[keym::ACTION_DEFAULT] : km.actions[type]);
+        char *act = type && (!km.actions[type] || !*km.actions[type]) ? km.actions[keym::ACTION_DEFAULT] : km.actions[type];
         if(!strcmp(act, action))
         {
             if(!name1) name1 = km.name;
