@@ -516,6 +516,10 @@ namespace hud
     TVAR(IDF_PERSIST, privadministratortex, "<grey>textures/privs/administrator", 3);
     TVAR(IDF_PERSIST, privdevelopertex, "<grey>textures/privs/developer", 3);
     TVAR(IDF_PERSIST, privcreatortex, "<grey>textures/privs/creator", 3);
+    TVAR(IDF_PERSIST, privlocalsupportertex, "<grey>textures/privs/localsupporter", 3);
+    TVAR(IDF_PERSIST, privlocalmoderatortex, "<grey>textures/privs/localmoderator", 3);
+    TVAR(IDF_PERSIST, privlocaloperatortex, "<grey>textures/privs/localoperator", 3);
+    TVAR(IDF_PERSIST, privlocaladministratortex, "<grey>textures/privs/localadministrator", 3);
 
     VAR(IDF_PERSIST|IDF_HEX, privnonecolour, 0, 0x888888, 0xFFFFFF);
     VAR(IDF_PERSIST|IDF_HEX, privplayercolour, 0, 0xAAAAAA, 0xFFFFFF);
@@ -2327,8 +2331,11 @@ namespace hud
     const char *privtex(int priv, int actortype)
     {
         if(actortype != A_PLAYER) return privbottex;
-        const char *privtexs[PRIV_MAX] = { privnonetex, privplayertex, privsupportertex, privmoderatortex, privoperatortex, privadministratortex, privdevelopertex, privcreatortex };
-        return privtexs[clamp(priv&PRIV_TYPE, 0, int(priv&PRIV_LOCAL ? PRIV_ADMINISTRATOR : PRIV_LAST))];
+        const char *privtexs[2][PRIV_MAX] = {
+            { privnonetex, privplayertex, privsupportertex, privmoderatortex, privoperatortex, privadministratortex, privdevelopertex, privcreatortex },
+            { privnonetex, privplayertex, privlocalsupportertex, privlocalmoderatortex, privlocaloperatortex, privlocaladministratortex, privnonetex, privnonetex }
+        };
+        return privtexs[priv&PRIV_LOCAL ? 1 : 0][clamp(priv&PRIV_TYPE, 0, int(priv&PRIV_LOCAL ? PRIV_ADMINISTRATOR : PRIV_LAST))];
     }
 
     const char *itemtex(int type, int stype)

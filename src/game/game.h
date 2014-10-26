@@ -844,7 +844,7 @@ namespace server
     extern bool servcmd(int nargs, const char *cmd, const char *arg);
     extern const char *gamename(int mode, int muts, int compact = 0, int limit = 0);
     extern const char *privname(int priv = PRIV_NONE, int actortype = A_PLAYER);
-    extern const char *privnamex(int priv = PRIV_NONE, int actortype = A_PLAYER);
+    extern const char *privnamex(int priv = PRIV_NONE, int actortype = A_PLAYER, bool local = false);
 #ifdef GAMESERVER
     struct clientinfo;
     extern void waiting(clientinfo *ci, int drop = 0, bool doteam = true, bool exclude = false);
