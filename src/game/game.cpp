@@ -398,7 +398,7 @@ namespace game
         {
             case 1:
             {
-                const char *id = server::privname(d->privilege, d->actortype);
+                const char *id = server::privnamex(d->privilege, d->actortype);
                 loopv(vanities[n].files)
                     if(vanities[n].files[i].proj == proj && !strcmp(vanities[n].files[i].id, id))
                         file = vanities[n].files[i].name;
