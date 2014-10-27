@@ -908,24 +908,18 @@ namespace game
                          reloading = last && d->weapstate[d->weapselect] == W_S_RELOAD,
                          secondary = physics::secondaryweap(d);
                     float amt = last ? clamp(float(lastmillis-d->weaplast[d->weapselect])/d->weapwait[d->weapselect], 0.f, 1.f) : 0.f;
-                    vec col = WPCOL(d, d->weapselect, partcol, secondary);
+                    vec col = WPCOL(d, d->weapselect, lightcol, secondary);
                     if(d->weapselect == W_FLAMER && (!reloading || amt > 0.5f) && !physics::liquidcheck(d))
                     {
                         float scale = powering ? 1.f+(amt*1.5f) : (d->weapstate[d->weapselect] == W_S_IDLE ? 1.f : (reloading ? (amt-0.5f)*2 : amt));
                         adddynlight(d->ejectpos(d->weapselect), 16*scale, col, 0, 0, DL_KEEP);
                     }
-                    if(d->weapselect == W_FLAMER || d->weapselect == W_SWORD || d->weapselect == W_ZAPPER || powering)
+                    if((W(d->weapselect, lightpersist) || powering) && W(d->weapselect, lightradius) > 0)
                     {
-                        static float powerdl[W_MAX] = {
-                            0, 8, 16, 16, 16, 18, 20, 4, 18, 16, 16, 16
-                        };
-                        if(powerdl[d->weapselect] > 0)
-                        {
-                            float thresh = max(amt, 0.25f), size = 4+powerdl[d->weapselect]*thresh;
-                            int span = max(W2(d->weapselect, cooktime, physics::secondaryweap(d))/4, 500), interval = lastmillis%span, part = span/2;
-                            if(interval) size += size*0.5f*(interval <= part ? interval/float(part) : (span-interval)/float(part));
-                            adddynlight(d->muzzlepos(d->weapselect), size, vec(col).mul(thresh), 0, 0, DL_KEEP);
-                        }
+                        float thresh = max(amt, 0.25f), size = W(d->weapselect, lightradius)*thresh;
+                        int span = max(W2(d->weapselect, cooktime, physics::secondaryweap(d))/4, 500), interval = lastmillis%span, part = span/2;
+                        if(interval) size += size*0.5f*(interval <= part ? interval/float(part) : (span-interval)/float(part));
+                        adddynlight(d->muzzlepos(d->weapselect), size, vec(col).mul(thresh), 0, 0, DL_KEEP);
                     }
                 }
                 if(burntime && d->burning(lastmillis, burntime))
