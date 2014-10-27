@@ -394,6 +394,18 @@ WPFVARK(0, legdamage, FVAR_MIN, FVAR_MAX,
     0.3f,       0.325f,     0.3f,       0.3f,       0.25f,      0.25f,      0.25f,      0.25f,      0.3f,       0.2f,       0.2f,       0.2f,
     0.6f,       0.325f,     0.3f,       0.3f,       0.25f,      0.25f,      0.25f,      0.25f,      0.3f,       0.2f,       0.2f,       0.2f
 );
+WPVARK(IDF_HEX, lightcol, -PULSE_MAX, 0xFFFFFF,
+    0xEEEE22,   0xC0C0C0,   0x4040F0,   0xF0F020,   0xF05820,   -1,         0x40F0C8,   -4,         0xA020F0,   -1,         0x00F068,   -1,
+    0xEEEE22,   0xC0C0C0,   0x4040F0,   0xF0F020,   0xF05820,   0xF0F0F0,   0x40F0C8,   -4,         0xA020F0,   -1,         0x00F068,   -1,
+    0xEEEE22,   0xC0C0C0,   0x4040F0,   0xF0F020,   0xF05820,   -1,         0x40F0C8,   -4,         0xA020F0,   -1,         0x00F068,   -1,
+    0xEEEE22,   0xC0C0C0,   0x4040F0,   0xF0F020,   0xF05820,   0xF0F0F0,   0x40F0C8,   -4,         0xA020F0,   -1,         0x00F068,   -1
+);
+WPVAR(0, lightpersist, 0, 1,
+    0,          1,          0,          0,          0,          1,          0,          1,          0,          0,          0,          0
+);
+WPFVAR(0, lightradius, 0, FVAR_MAX,
+    0,          8,          8,          8,          8,          8,          16,         4,          16,         16,         16,         16
+);
 WPFVARK(0, liquidcoast, 0, FVAR_MAX,
     0.0f,       2.0f,       0.0f,       2.0f,       2.0f,       1.0f,       1.0f,       1.0f,       2.0f,       2.0f,       2.0f,       2.0f,
     0.0f,       2.0f,       0.0f,       2.0f,       2.0f,       1.0f,       1.0f,       1.0f,       2.0f,       2.0f,       2.0f,       2.0f,
@@ -630,7 +642,7 @@ WPFVARK(0, speedmax, 0, FVAR_MAX,
 );
 WPFVARM(0, spread, 0, FVAR_MAX,
     1.0f,       1.0f,       1.0f,       12.0f,      2.5f,       7.5f,       2.0f,       2.0f,       1.5f,       1.0f,       1.0f,       1.0f,
-    1.0f,       2.0f,       1.0f,       2.0f,       2.0f,       1.0f,       1.0f,       5.5f,      0.25f,      1.0f,       1.0f,       1.0f
+    1.0f,       2.0f,       1.0f,       2.0f,       2.0f,       1.0f,       1.0f,       5.5f,       0.25f,      1.0f,       1.0f,       1.0f
 );
 WPFVARM(0, spreadmax, 0, FVAR_MAX,
     0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,
