@@ -127,22 +127,23 @@ void connectserv(const char *name, int port, const char *password)
     }
 
     if(!clienthost)
+    {
         clienthost = enet_host_create(NULL, 2, server::numchannels(), rate*1024, rate*1024);
+        if(!clienthost)
+        {
+            conoutft(CON_MESG, "\frfailed creating client socket");
+            connectfail();
+            return;
+        }
+        clienthost->duplicatePeers = 0;
+    }
 
-    if(clienthost)
-    {
-        connpeer = enet_host_connect(clienthost, &address, server::numchannels(), 0);
-        enet_host_flush(clienthost);
-        connmillis = totalmillis;
-        connattempts = 0;
-        client::connectattempt(name ? name : "", port, password ? password : "", address);
-        conoutft(CON_MESG, "\fgconnecting to %s:[%d]", name != NULL ? name : "local server", port);
-    }
-    else
-    {
-        conoutft(CON_MESG, "\frfailed creating client socket");
-        connectfail();
-    }
+    connpeer = enet_host_connect(clienthost, &address, server::numchannels(), 0);
+    enet_host_flush(clienthost);
+    connmillis = totalmillis;
+    connattempts = 0;
+    client::connectattempt(name ? name : "", port, password ? password : "", address);
+    conoutft(CON_MESG, "\fgconnecting to %s:[%d]", name != NULL ? name : "local server", port);
 }
 
 void disconnect(int onlyclean, int async)
