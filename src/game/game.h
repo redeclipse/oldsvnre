@@ -4,7 +4,7 @@
 #include "engine.h"
 
 #define GAMEID "fps"
-#define GAMEVERSION 224
+#define GAMEVERSION 225
 
 #define DEMO_MAGIC "RED_ECLIPSE_DEMO"
 #define DEMO_VERSION GAMEVERSION
