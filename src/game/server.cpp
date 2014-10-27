@@ -2114,7 +2114,12 @@ namespace server
         packetbuf p(MAXTRANS, ENET_PACKET_FLAG_RELIABLE);
         putint(p, N_SENDDEMOLIST);
         putint(p, demos.length());
-        loopv(demos) sendstring(demos[i].info, p);
+        loopv(demos)
+        {
+            sendstring(demos[i].info, p);
+            putint(p, demos[i].len);
+            putint(p, demos[i].ctime);
+        }
         sendpacket(cn, 1, p.finalize());
     }
 
@@ -2237,10 +2242,10 @@ namespace server
         int len = (int)min(demotmp->size(), stream::offset((G(demomaxsize)<<20) + 0x10000));
         demofile &d = demos.add();
         d.ctime = clocktime;
-        formatstring(d.info)("%s on %s [%.2f%s]", gamename(gamemode, mutators, 0, 32), smapname, len > 1024*1024 ? len/(1024*1024.f) : len/1024.0f, len > 1024*1024 ? "MB" : "kB");
-        srvoutf(4, "\fydemo \fs\fc%s\fS recorded (\fs\fw%s UTC\fS)", d.info, gettime(d.ctime, "%c"));
         d.data = new uchar[len];
         d.len = len;
+        formatstring(d.info)("%s on %s", gamename(gamemode, mutators, 0, 32), smapname);
+        srvoutf(4, "\fydemo \fs\fc%s\fS recorded \fs\fc%s UTC\fS [\fs\fw%.2f%s\fS]", d.info, gettime(d.ctime, "%Y-%m-%d %H:%M.%S"), d.len > 1024*1024 ? d.len/(1024*1024.f) : d.len/1024.0f, d.len > 1024*1024 ? "MB" : "kB");
         demotmp->seek(0, SEEK_SET);
         demotmp->read(d.data, len);
         DELETEP(demotmp);

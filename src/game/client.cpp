@@ -2449,8 +2449,9 @@ namespace client
                     else loopi(demos)
                     {
                         getstring(text, p);
+                        int len = getint(p), ctime = getint(p);
                         if(p.overread()) break;
-                        conoutft(CON_EVENT, "\fademo: %d. %s", i+1, text);
+                        conoutft(CON_EVENT, "\fydemo: %2d. \fs\fc%s\fS recorded \fs\fc%s UTC\fS [\fs\fw%.2f%s\fS]", i+1, text, gettime(ctime, "%Y-%m-%d %H:%M.%S"), len > 1024*1024 ? len/(1024*1024.f) : len/1024.0f, len > 1024*1024 ? "MB" : "kB");
                     }
                     break;
                 }
