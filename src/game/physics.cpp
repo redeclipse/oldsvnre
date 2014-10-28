@@ -892,7 +892,7 @@ namespace physics
                         if(mag > 0)
                         {
                             vec rft;
-                            vecfromyawpitch(d->yaw, vault || d->actortype >= A_BOT ? 89.9f : fabs(d->pitch), 1, 0, rft);
+                            vecfromyawpitch(d->yaw, vault || d->actortype >= A_BOT || !kickstyle ? 89.9f : fabs(d->pitch), 1, 0, rft);
                             rft.reflect(face);
                             d->vel = vec(rft).mul(mag).add(keepvel);
                             d->doimpulse(cost, vault ? IM_T_VAULT : IM_T_KICK, lastmillis);
