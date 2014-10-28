@@ -776,7 +776,7 @@ extern void savetga(const char *filename, ImageData &image, int compress = 1, bo
 extern void saveimage(const char *name, ImageData &image, int format = IFMT_NONE, int compress = 9, bool flip = false, bool skip = false);
 extern SDL_Surface *loadsurface(const char *name, bool noload = false);
 extern bool loadimage(const char *name, ImageData &image);
-extern bool loaddds(const char *filename, ImageData &image);
+extern bool loaddds(const char *filename, ImageData &image, int force = 0);
 
 extern void resetmaterials();
 extern void resettextures(int n = 0);
