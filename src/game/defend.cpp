@@ -198,28 +198,23 @@ namespace defend
 
     void setup()
     {
+        int df = m_gsp2(game::gamemode, game::mutators) ? 0 : defendflags;
         loopv(entities::ents)
         {
             extentity *e = entities::ents[i];
             if(e->type != AFFINITY || !m_check(e->attrs[3], e->attrs[4], game::gamemode, game::mutators)) continue;
             int team = e->attrs[0];
-            switch(defendflags)
+            switch(df)
             {
                 case 3:
-                {
                     if(team && !isteam(game::gamemode, game::mutators, team, T_NEUTRAL)) team = T_NEUTRAL;
                     break;
-                }
                 case 2:
-                {
                     if(!isteam(game::gamemode, game::mutators, team, T_FIRST)) continue;
                     break;
-                }
                 case 1:
-                {
                     if(team && !isteam(game::gamemode, game::mutators, team, T_NEUTRAL)) continue;
                     break;
-                }
                 case 0: team = T_NEUTRAL; break;
             }
             defformatstring(alias)("point_%d", e->attrs[4]);
@@ -227,25 +222,28 @@ namespace defend
             st.addaffinity(e->o, team, e->attrs[1], e->attrs[2], name);
         }
         if(!st.flags.length()) return; // map doesn't seem to support this mode at all..
-        int bases[T_ALL] = {0};
-        bool hasteams = true;
-        loopv(st.flags) bases[st.flags[i].kinship]++;
-        loopi(numteams(game::gamemode, game::mutators)-1) if(!bases[i+1] || (bases[i+1] != bases[i+2]))
+        bool hasteams = df != 0;
+        if(hasteams)
         {
-            loopvk(st.flags) st.flags[k].kinship = T_NEUTRAL;
-            hasteams = false;
-            break;
+            int bases[T_ALL] = {0};
+            loopv(st.flags) bases[st.flags[i].kinship]++;
+            loopi(numteams(game::gamemode, game::mutators)-1) if(!bases[i+1] || (bases[i+1] != bases[i+2]))
+            {
+                loopvk(st.flags) st.flags[k].kinship = T_NEUTRAL;
+                hasteams = false;
+                break;
+            }
         }
         if(m_gsp2(game::gamemode, game::mutators))
         {
             vec average(0, 0, 0);
             int count = 0;
-            loopv(st.flags) if(!hasteams || st.flags[i].kinship != T_NEUTRAL)
+            loopv(st.flags)
             {
                 average.add(st.flags[i].o);
                 count++;
             }
-            int smallest = -1;
+            int smallest = rnd(st.flags.length());
             if(count)
             {
                 average.div(count);
@@ -256,10 +254,13 @@ namespace defend
                     dist = tdist;
                 }
             }
-            if(!st.flags.inrange(smallest)) smallest = rnd(st.flags.length());
-            copystring(st.flags[smallest].name, "center");
-            st.flags[smallest].kinship = T_NEUTRAL;
-            for(int i = st.flags.length()-1; i >= 0 && i != smallest; --i) st.flags.remove(i);
+            if(st.flags.inrange(smallest))
+            {
+                copystring(st.flags[smallest].name, "center");
+                st.flags[smallest].kinship = T_NEUTRAL;
+                loopi(smallest) st.flags.remove(0);
+                while(st.flags.length() > 1) st.flags.remove(1);
+            }
         }
     }
 
