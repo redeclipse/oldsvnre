@@ -154,7 +154,7 @@ namespace bomber
                     {
                         int delay = carrytime-(lastmillis-f.taketime);
                         pushfont("default");
-                        ty += draw_textx("Explodes in \fs\fzgy%s\fS", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, timestr(delay, -1))*hud::noticescale;
+                        ty += draw_textx("Explodes in \fs\fzgy%s\fS", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, timestr(delay))*hud::noticescale;
                         popfont();
                         if(m_gsp1(game::gamemode, game::mutators))
                         {
@@ -519,7 +519,7 @@ namespace bomber
         destroyaffinity(g.spawnloc);
         hud::teamscore(d->team).total = score;
         defformatstring(gteam)("%s", game::colourteam(g.team, "bombtex"));
-        game::announcef(S_V_BOMBSCORE, CON_SELF, d, true, "\fa%s destroyed the %s base for team %s%s (score: \fs\fc%d\fS, time taken: \fs\fc%s\fS)", game::colourname(d), gteam, game::colourteam(d->team), extra, score, timestr(lastmillis-f.inittime));
+        game::announcef(S_V_BOMBSCORE, CON_SELF, d, true, "\fa%s destroyed the %s base for team %s%s (score: \fs\fc%d\fS, time taken: \fs\fc%s\fS)", game::colourname(d), gteam, game::colourteam(d->team), extra, score, timestr(lastmillis-f.inittime, 1));
         st.returnaffinity(relay, lastmillis, false);
     }
 

@@ -270,7 +270,7 @@ namespace hud
     VAR(IDF_PERSIST, inventorydate, 0, 0, 1);
     SVAR(IDF_PERSIST, inventorydateformat, "%H:%M:%S");
     VAR(IDF_PERSIST, inventorytime, 0, 1, 1);
-    VAR(IDF_PERSIST, inventorytimestyle, -1, 1, 1);
+    VAR(IDF_PERSIST, inventorytimestyle, 0, 3, 4);
     VAR(IDF_PERSIST, inventoryscore, 0, 1, VAR_MAX);
     VAR(IDF_PERSIST, inventoryscorespec, 0, 2, VAR_MAX);
     VAR(IDF_PERSIST, inventoryscorebg, 0, 0, 1);
@@ -329,7 +329,7 @@ namespace hud
     VAR(IDF_PERSIST, inventoryvelocity, 0, 0, 2);
     FVAR(IDF_PERSIST, inventoryvelocityblend, 0, 1, 1);
     VAR(IDF_PERSIST, inventorytrial, 0, 2, 2);
-    VAR(IDF_PERSIST, inventorytrialstyle, -1, 0, 3);
+    VAR(IDF_PERSIST, inventorytrialstyle, 0, 1, 4);
     FVAR(IDF_PERSIST, inventorytrialblend, 0, 1, 1);
     VAR(IDF_PERSIST, inventorystatus, 0, 2, 3); // 0 = off, 1 = text, 2 = icon, 3 = icon + tex
     FVAR(IDF_PERSIST, inventorystatusblend, 0, 1, 1);
@@ -1342,7 +1342,7 @@ namespace hud
                 if(delay || m_duke(game::gamemode, game::mutators) || (m_fight(game::gamemode) && maxalive > 0))
                 {
                     if(client::waitplayers || m_duke(game::gamemode, game::mutators)) ty += draw_textx("Queued for new round", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw);
-                    else if(delay) ty += draw_textx("%s: Down for \fs\fy%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, target == game::player1 && target->state == CS_WAITING ? "Please Wait" : "Fragged", timestr(delay, -1));
+                    else if(delay) ty += draw_textx("%s: Down for \fs\fy%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, target == game::player1 && target->state == CS_WAITING ? "Please Wait" : "Fragged", timestr(delay));
                     else if(target == game::player1 && target->state == CS_WAITING && m_fight(game::gamemode) && maxalive > 0 && maxalivequeue)
                     {
                         int n = game::numwaiting(), x = max(int(G(maxalive)*G(maxplayers)), max(int(client::otherclients(true, true)*G(maxalivethreshold)), G(maxaliveminimum)));

@@ -54,13 +54,12 @@ const char *timestr(int dur, int style)
 {
     static string buf; buf[0] = 0;
     int tm = dur, ms = 0, ss = 0, mn = 0;
-    if(style < 2 && tm > 0)
+    if(tm > 0)
     {
         ms = tm%1000;
         tm = (tm-ms)/1000;
     }
-    if(style < 0 && tm > 0) ss = tm;
-    else if(style < 4 && tm > 0)
+    if(style > 0 && tm > 0)
     {
         ss = tm%60;
         tm = (tm-ss)/60;
@@ -68,11 +67,11 @@ const char *timestr(int dur, int style)
     }
     switch(style)
     {
-        case -1: formatstring(buf)("%d.%d", ss, ms/100); break;
-        case 0: formatstring(buf)("%d:%02d.%03d", mn, ss, ms); break;
-        case 1: formatstring(buf)("%d:%02d.%d", mn, ss, ms/100); break;
-        case 2: formatstring(buf)("%d:%02d", mn, ss); break;
-        case 3:
+        case 0: formatstring(buf)("%d.%d", tm, ms/100); break;
+        case 1: formatstring(buf)("%d:%02d.%03d", mn, ss, ms); break;
+        case 2: formatstring(buf)("%d:%02d.%d", mn, ss, ms/100); break;
+        case 3: formatstring(buf)("%d:%02d", mn, ss); break;
+        case 4:
         {
             if(mn > 0)
             {
