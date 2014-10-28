@@ -4938,55 +4938,66 @@ namespace server
         if(ci && !ci->connected)
         {
             if(chan==0) return;
-            else if(chan!=1) { disconnect_client(sender, DISC_MSGERR); return; }
-            else while(p.length() < p.maxlen) switch(checktype(getint(p), ci))
+            else if(chan!=1)
             {
-                case N_CONNECT:
+                conoutf("\fy[msg error] from: %d, chan: %d while connecting", sender, chan);
+                disconnect_client(sender, DISC_MSGERR);
+                return;
+            }
+            else while(p.length() < p.maxlen)
+            {
+                int curtype = getint(p);
+                prevtype = type;
+                switch(type = checktype(curtype, ci))
                 {
-                    getstring(text, p);
-                    filtertext(text, text, true, true, true, MAXNAMELEN);
-                    const char *namestr = text;
-                    while(*namestr && iscubespace(*namestr)) namestr++;
-                    if(!*namestr) namestr = copystring(text, "unnamed");
-                    copystring(ci->name, namestr, MAXNAMELEN+1);
-                    ci->state.colour = max(getint(p), 0);
-                    ci->state.model = max(getint(p), 0);
-                    getstring(text, p);
-                    ci->state.setvanity(text);
-
-                    string password = "", authname = "";
-                    getstring(text, p); copystring(password, text);
-                    getstring(text, p); filtertext(authname, text, true, true, true, 100);
-
-                    ci->state.version.get(p);
-
-                    int disc = auth::allowconnect(ci, authname, password);
-                    if(disc)
+                    case N_CONNECT:
                     {
-                        disconnect_client(sender, disc);
-                        return;
+                        getstring(text, p);
+                        filtertext(text, text, true, true, true, MAXNAMELEN);
+                        const char *namestr = text;
+                        while(*namestr && iscubespace(*namestr)) namestr++;
+                        if(!*namestr) namestr = copystring(text, "unnamed");
+                        copystring(ci->name, namestr, MAXNAMELEN+1);
+                        ci->state.colour = max(getint(p), 0);
+                        ci->state.model = max(getint(p), 0);
+                        getstring(text, p);
+                        ci->state.setvanity(text);
+
+                        string password = "", authname = "";
+                        getstring(text, p); copystring(password, text);
+                        getstring(text, p); filtertext(authname, text, true, true, true, 100);
+
+                        ci->state.version.get(p);
+
+                        int disc = auth::allowconnect(ci, authname, password);
+                        if(disc)
+                        {
+                            disconnect_client(sender, disc);
+                            return;
+                        }
+
+                        if(!ci->connectauth) connected(ci);
+
+                        break;
                     }
 
-                    if(!ci->connectauth) connected(ci);
+                    case N_AUTHANS:
+                    {
+                        uint id = (uint)getint(p);
+                        getstring(text, p);
+                        if(!auth::answerchallenge(ci, id, text)) auth::authfailed(ci->authreq);
+                        break;
+                    }
 
-                    break;
+                    case N_PING:
+                        getint(p);
+                        break;
+
+                    default:
+                        conoutf("\fy[msg error] from: %d, cur: %d, msg: %d, prev: %d", sender, curtype, type, prevtype);
+                        disconnect_client(sender, DISC_MSGERR);
+                        return;
                 }
-
-                case N_AUTHANS:
-                {
-                    uint id = (uint)getint(p);
-                    getstring(text, p);
-                    if(!auth::answerchallenge(ci, id, text)) auth::authfailed(ci->authreq);
-                    break;
-                }
-
-                case N_PING:
-                    getint(p);
-                    break;
-
-                default:
-                    disconnect_client(sender, DISC_MSGERR);
-                    return;
             }
             return;
         }

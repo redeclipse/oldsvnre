@@ -76,9 +76,8 @@ ICOMMAND(0, addlocalop, "ss", (char *n, char *f), localopadd(n, f));
 VAR(IDF_PERSIST, quickauthchecks, 0, 0, 1);
 namespace auth
 {
-    int lastconnect = 0, lastactivity = 0;
+    int lastconnect = 0, lastregister = 0, quickcheck = 0;
     uint nextauthreq = 1;
-    bool quickcheck = false;
 
     clientinfo *findauth(uint id)
     {
@@ -93,12 +92,18 @@ namespace auth
         ci->authreq = nextauthreq++;
         if(!connectedmaster())
         {
-            if(quickauthchecks) quickcheck = true;
+            if(quickauthchecks)
+            {
+                if(!ci->connectauth)
+                    srvmsgftforce(ci->clientnum, CON_EVENT, "\fyplease wait, connecting to master server for a quick match..");
+                quickcheck = totalmillis ? totalmillis : 1;
+            }
+            else srvmsgftforce(ci->clientnum, CON_EVENT, "\founable to verify, not connected to master server");
             return;
         }
-        if(!ci->connectauth) srvmsgftforce(ci->clientnum, CON_EVENT, "\fyplease wait, requesting credential match..");
+        if(!ci->connectauth)
+            srvmsgftforce(ci->clientnum, CON_EVENT, "\fyplease wait, requesting credential match from master server..");
         requestmasterf("reqauth %u %s %s\n", ci->authreq, ci->authname, gethostname(ci->clientnum));
-        lastactivity = totalmillis;
     }
 
     bool tryauth(clientinfo *ci, const char *authname = "")
@@ -106,7 +111,7 @@ namespace auth
         if(!ci) return false;
         if(!connectedmaster() && !quickauthchecks)
         {
-            if(!ci->local) srvmsgftforce(ci->clientnum, CON_EVENT, "\founable to verify, not connected to master server");
+            srvmsgftforce(ci->clientnum, CON_EVENT, "\founable to verify, not connected to master server");
             return false;
         }
         else if(ci->authreq)
@@ -218,7 +223,7 @@ namespace auth
     {
         if(!ci) return;
         ci->authreq = ci->authname[0] = 0;
-        srvmsgftforce(ci->clientnum, CON_EVENT, "\foauth request failed, please check your credentials");
+        srvmsgftforce(ci->clientnum, CON_EVENT, "\foidentity verification failed, please check your credentials");
         if(ci->connectauth)
         {
             ci->connectauth = false;
@@ -293,8 +298,8 @@ namespace auth
         {
             if(!isxdigit(*s)) { *s = '\0'; break; }
         }
+        //srvmsgftforce(ci->clientnum, CON_EVENT, "\fyconfirming identity with master server..");
         requestmasterf("confauth %u %s\n", id, val);
-        lastactivity = totalmillis;
         return true;
     }
 
@@ -341,45 +346,49 @@ namespace auth
     void regserver()
     {
         loopvrev(control) if(control[i].flag == ipinfo::GLOBAL) control.remove(i);
-        if(quickcheck) requestmasterf("quick\n");
+        lastregister = totalmillis ? totalmillis : 1;
+        if(quickcheck)
+        {
+            quickcheck = lastregister;
+            requestmasterf("quick\n");
+        }
         else
         {
             conoutf("updating master server");
             requestmasterf("server %d %s\n", serverport, *serverip ? serverip : "*");
         }
-        lastactivity = totalmillis;
     }
 
     void update()
     {
-        if(servertype < 2 && !quickcheck)
+        if(servertype < 2 && (!quickcheck || totalmillis-quickcheck >= 60*1000))
         {
             if(connectedmaster()) disconnectmaster();
             return;
         }
-        if(!connectedmaster() && (!lastconnect || totalmillis-lastconnect > 60*1000))
+        if(connectedmaster())
         {
-            lastconnect = totalmillis;
-            if(connectmaster() == ENET_SOCKET_NULL) return;
-            regserver();
-            loopv(clients) if(clients[i]->authreq) reqauth(clients[i]);
-            loopv(connects) if(connects[i]->authreq) reqauth(connects[i]);
+            if(!quickcheck && totalmillis-lastregister >= G(masterinterval)) regserver();
         }
-        if(!quickcheck && totalmillis-lastactivity > G(masterinterval)) regserver();
+        else if(!lastconnect || totalmillis-lastconnect >= 60*1000)
+        {
+            lastconnect = totalmillis ? totalmillis : 1;
+            if(connectmaster() == ENET_SOCKET_NULL) return;
+        }
     }
 
     void masterconnected()
     {
+        regserver();
+        loopv(clients) if(clients[i]->authreq) reqauth(clients[i]);
+        loopv(connects) if(connects[i]->authreq) reqauth(connects[i]);
     }
 
     void masterdisconnected()
     {
-        quickcheck = false;
-        loopvrev(clients)
-        {
-            clientinfo *ci = clients[i];
-            if(ci->authreq) authfailed(ci);
-        }
+        quickcheck = 0;
+        loopv(clients) if(clients[i]->authreq) authfailed(clients[i]);
+        loopv(connects) if(connects[i]->authreq) authfailed(connects[i]);
     }
 }
 
