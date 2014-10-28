@@ -1763,23 +1763,20 @@ namespace server
 
     void setuptriggers(bool update)
     {
+        triggerid = 0;
         loopi(TRIGGERIDS+1) triggers[i].reset(i);
-        if(update)
-        {
-            loopv(sents) if(sents[i].type == TRIGGER && sents[i].attrs[4] >= 2 && sents[i].attrs[0] >= 0 && sents[i].attrs[0] <= TRIGGERIDS+1 && m_check(sents[i].attrs[5], sents[i].attrs[6], gamemode, mutators))
-                triggers[sents[i].attrs[0]].ents.add(i);
-        }
-        else triggerid = 0;
+        if(!update) return;
 
-        if(triggerid <= 0)
-        {
-            static vector<int> valid; valid.setsize(0);
-            loopi(TRIGGERIDS) if(!triggers[i+1].ents.empty()) valid.add(triggers[i+1].id);
-            if(!valid.empty()) triggerid = valid[rnd(valid.length())];
-        }
+        loopv(sents) if(enttype[sents[i].type].idattr >= 0 && sents[i].attrs[enttype[sents[i].type].idattr] >= 0 && sents[i].attrs[enttype[sents[i].type].idattr] <= TRIGGERIDS && m_check(sents[i].attrs[5], sents[i].attrs[6], gamemode, mutators))
+            triggers[sents[i].attrs[enttype[sents[i].type].idattr]].ents.add(i);
 
-        if(triggerid > 0) loopi(TRIGGERIDS) if(triggers[i+1].id != triggerid) loopvk(triggers[i+1].ents)
+        vector<int> valid;
+        loopi(TRIGGERIDS) if(!triggers[i+1].ents.empty()) valid.add(triggers[i+1].id);
+        if(!valid.empty()) triggerid = valid[rnd(valid.length())];
+
+        loopi(TRIGGERIDS) if(triggers[i+1].id != triggerid) loopvk(triggers[i+1].ents)
         {
+            if(sents[triggers[i+1].ents[k]].type != TRIGGER) continue;
             bool spawn = sents[triggers[i+1].ents[k]].attrs[4]%2;
             if(spawn != sents[triggers[i+1].ents[k]].spawned)
             {
