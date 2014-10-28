@@ -477,7 +477,7 @@ namespace capture
         if(!st.flags.inrange(i)) return;
         capturestate::flag &f = st.flags[i];
         affinityeffect(i, d->team, d->feetpos(), f.above, m_gsp(game::gamemode, game::mutators) ? 3 : 2, "RETURNED");
-        game::announcef(S_V_FLAGRETURN, CON_SELF, d, true, "\fa%s returned the %s flag (time taken: \fs\fc%s\fS)", game::colourname(d), game::colourteam(f.team, "flagtex"), timestr(m_gsp1(game::gamemode, game::mutators) ? f.dropleft(lastmillis, capturestore) : lastmillis-f.taketime));
+        game::announcef(S_V_FLAGRETURN, CON_SELF, d, true, "\fa%s returned the %s flag (time taken: \fs\fc%s\fS)", game::colourname(d), game::colourteam(f.team, "flagtex"), timestr(m_gsp1(game::gamemode, game::mutators) ? f.dropleft(lastmillis, capturestore) : lastmillis-f.taketime, 1));
         st.returnaffinity(i, lastmillis);
     }
 
@@ -505,7 +505,7 @@ namespace capture
         else affinityeffect(goal, d->team, f.pos(true), f.above, 3, "CAPTURED");
         hud::teamscore(d->team).total = score;
         defformatstring(fteam)("%s", game::colourteam(f.team, "flagtex"));
-        game::announcef(S_V_FLAGSCORE, CON_SELF, d, true, "\fa%s captured the %s flag for team %s (score: \fs\fc%d\fS, time taken: \fs\fc%s\fS)", game::colourname(d), fteam, game::colourteam(d->team), score, timestr(lastmillis-f.taketime));
+        game::announcef(S_V_FLAGSCORE, CON_SELF, d, true, "\fa%s captured the %s flag for team %s (score: \fs\fc%d\fS, time taken: \fs\fc%s\fS)", game::colourname(d), fteam, game::colourteam(d->team), score, timestr(lastmillis-f.taketime, 1));
         st.returnaffinity(relay, lastmillis);
     }
 

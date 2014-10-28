@@ -98,7 +98,7 @@ namespace auth
                     srvmsgftforce(ci->clientnum, CON_EVENT, "\fyplease wait, connecting to master server for a quick match..");
                 quickcheck = totalmillis ? totalmillis : 1;
             }
-            else srvmsgftforce(ci->clientnum, CON_EVENT, "\founable to verify, not connected to master server");
+            else if(!ci->local) srvmsgftforce(ci->clientnum, CON_EVENT, "\founable to verify, not connected to master server");
             return;
         }
         if(!ci->connectauth)
@@ -111,7 +111,7 @@ namespace auth
         if(!ci) return false;
         if(!connectedmaster() && !quickauthchecks)
         {
-            srvmsgftforce(ci->clientnum, CON_EVENT, "\founable to verify, not connected to master server");
+            if(!ci->local) srvmsgftforce(ci->clientnum, CON_EVENT, "\founable to verify, not connected to master server");
             return false;
         }
         else if(ci->authreq)

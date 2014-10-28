@@ -42,8 +42,8 @@ namespace hud
     VAR(IDF_PERSIST, scoredeaths, 0, 2, 2);
     VAR(IDF_PERSIST, scoreratios, 0, 0, 2);
     VAR(IDF_PERSIST, scoreclientnum, 0, 1, 1);
-    VAR(IDF_PERSIST, scoretimestyle, -1, 1, 1);
-    VAR(IDF_PERSIST, scoretrialstyle, -1, 0, 3);
+    VAR(IDF_PERSIST, scoretimestyle, 0, 3, 4);
+    VAR(IDF_PERSIST, scoretrialstyle, 0, 1, 4);
     VAR(IDF_PERSIST, scorebotinfo, 0, 0, 1);
     VAR(IDF_PERSIST, scorespectators, 0, 1, 1);
     VAR(IDF_PERSIST, scoreconnecting, 0, 0, 1);
@@ -360,7 +360,7 @@ namespace hud
                                     {
                                         uicenterlist(g, uifont(g, "default", {
                                             if(client::waitplayers || m_duke(game::gamemode, game::mutators)) g.text("Queued for new round", 0xFFFFFF);
-                                            else if(delay) g.textf("%s: Down for \fs\fy%s\fS", 0xFFFFFF, NULL, 0, game::player1->state == CS_WAITING ? "Please Wait" : "Fragged", timestr(delay, -1));
+                                            else if(delay) g.textf("%s: Down for \fs\fy%s\fS", 0xFFFFFF, NULL, 0, game::player1->state == CS_WAITING ? "Please Wait" : "Fragged", timestr(delay));
                                             else if(game::player1->state == CS_WAITING && m_fight(game::gamemode) && maxalive > 0 && maxalivequeue)
                                             {
                                                 int n = game::numwaiting();
