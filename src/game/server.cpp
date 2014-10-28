@@ -1767,8 +1767,11 @@ namespace server
         loopi(TRIGGERIDS+1) triggers[i].reset(i);
         if(!update) return;
 
-        loopv(sents) if(enttype[sents[i].type].idattr >= 0 && sents[i].attrs[enttype[sents[i].type].idattr] >= 0 && sents[i].attrs[enttype[sents[i].type].idattr] <= TRIGGERIDS && m_check(sents[i].attrs[5], sents[i].attrs[6], gamemode, mutators))
+        loopv(sents) if(enttype[sents[i].type].idattr >= 0 && sents[i].attrs[enttype[sents[i].type].idattr] >= 0 && sents[i].attrs[enttype[sents[i].type].idattr] <= TRIGGERIDS)
+        {
+            if(enttype[sents[i].type].modesattr >= 0 && !m_check(sents[i].attrs[enttype[sents[i].type].modesattr], sents[i].attrs[enttype[sents[i].type].modesattr+1], gamemode, mutators)) continue;
             triggers[sents[i].attrs[enttype[sents[i].type].idattr]].ents.add(i);
+        }
 
         vector<int> valid;
         loopi(TRIGGERIDS) if(!triggers[i+1].ents.empty()) valid.add(triggers[i+1].id);
