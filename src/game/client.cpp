@@ -1541,57 +1541,60 @@ namespace client
     void sendmessages()
     {
         packetbuf p(MAXTRANS);
-        if(sendplayerinfo && (!lastplayerinfo || totalmillis-lastplayerinfo >= setinfowait))
+        if(isready)
         {
-            p.reliable();
-            sendplayerinfo = false;
-            lastplayerinfo = totalmillis ? totalmillis : 1;
-            putint(p, N_SETPLAYERINFO);
-            sendstring(game::player1->name, p);
-            putint(p, game::player1->colour);
-            putint(p, game::player1->model);
-            sendstring(game::player1->vanity, p);
-        }
-        if(sendcrcinfo)
-        {
-            p.reliable();
-            sendcrcinfo = false;
-            putint(p, N_MAPCRC);
-            sendstring(game::clientmap, p);
-            putint(p, game::clientmap[0] ? getmapcrc() : 0);
-        }
-        if(sendgameinfo && !needsmap)
-        {
-            p.reliable();
-            putint(p, N_GAMEINFO);
-            enumerate(idents, ident, id, {
-                if(id.flags&IDF_CLIENT && id.flags&IDF_WORLD) switch(id.type)
-                {
-                    case ID_VAR:
-                        putint(p, id.type);
-                        sendstring(id.name, p);
-                        putint(p, *id.storage.i);
-                        break;
-                    case ID_FVAR:
-                        putint(p, id.type);
-                        sendstring(id.name, p);
-                        putfloat(p, *id.storage.f);
-                        break;
-                    case ID_SVAR:
-                        putint(p, id.type);
-                        sendstring(id.name, p);
-                        sendstring(*id.storage.s, p);
-                        break;
-                    default: break;
-                }
-            });
-            putint(p, -1);
-            entities::putitems(p);
-            putint(p, -1);
-            if(m_capture(game::gamemode)) capture::sendaffinity(p);
-            else if(m_defend(game::gamemode)) defend::sendaffinity(p);
-            else if(m_bomber(game::gamemode)) bomber::sendaffinity(p);
-            sendgameinfo = false;
+            if(sendplayerinfo && (!lastplayerinfo || totalmillis-lastplayerinfo >= setinfowait))
+            {
+                p.reliable();
+                sendplayerinfo = false;
+                lastplayerinfo = totalmillis ? totalmillis : 1;
+                putint(p, N_SETPLAYERINFO);
+                sendstring(game::player1->name, p);
+                putint(p, game::player1->colour);
+                putint(p, game::player1->model);
+                sendstring(game::player1->vanity, p);
+            }
+            if(sendcrcinfo)
+            {
+                p.reliable();
+                sendcrcinfo = false;
+                putint(p, N_MAPCRC);
+                sendstring(game::clientmap, p);
+                putint(p, game::clientmap[0] ? getmapcrc() : 0);
+            }
+            if(sendgameinfo && !needsmap)
+            {
+                p.reliable();
+                putint(p, N_GAMEINFO);
+                enumerate(idents, ident, id, {
+                    if(id.flags&IDF_CLIENT && id.flags&IDF_WORLD) switch(id.type)
+                    {
+                        case ID_VAR:
+                            putint(p, id.type);
+                            sendstring(id.name, p);
+                            putint(p, *id.storage.i);
+                            break;
+                        case ID_FVAR:
+                            putint(p, id.type);
+                            sendstring(id.name, p);
+                            putfloat(p, *id.storage.f);
+                            break;
+                        case ID_SVAR:
+                            putint(p, id.type);
+                            sendstring(id.name, p);
+                            sendstring(*id.storage.s, p);
+                            break;
+                        default: break;
+                    }
+                });
+                putint(p, -1);
+                entities::putitems(p);
+                putint(p, -1);
+                if(m_capture(game::gamemode)) capture::sendaffinity(p);
+                else if(m_defend(game::gamemode)) defend::sendaffinity(p);
+                else if(m_bomber(game::gamemode)) bomber::sendaffinity(p);
+                sendgameinfo = false;
+            }
         }
         if(messages.length())
         {
@@ -2816,7 +2819,7 @@ namespace client
                     getstring(text, p);
                     if(accountname[0] && accountpass[0])
                     {
-                        //conoutft(CON_EVENT, "\fyidentifying as: \fc%s", accountname);
+                        //conoutft(CON_EVENT, "\fyidentifying as: \fs\fc%s\fS (\fs\fw%d\fS)", accountname, id);
                         vector<char> buf;
                         answerchallenge(accountpass, text, buf);
                         addmsg(N_AUTHANS, "ris", id, buf.getbuf());
