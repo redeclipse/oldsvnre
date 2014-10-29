@@ -72,7 +72,16 @@ struct duelservmode : servmode
         if(pos) position(ci, n);
     }
 
-    void entergame(clientinfo *ci) { queue(ci); }
+    void entergame(clientinfo *ci)
+    {
+        queue(ci);
+        if(m_affinity(gamemode)) switch(G(duelaffinity))
+        {
+            case 2: allowed.add(ci); // fall through because they need to be in respawns too
+            case 1: respawns.add(ci); break;
+            case 0: default: break;
+        }
+    }
     void leavegame(clientinfo *ci, bool disconnecting = false)
     {
         if(duelwinner == ci->clientnum)
