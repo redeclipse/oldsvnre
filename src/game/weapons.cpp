@@ -2,7 +2,7 @@
 namespace weapons
 {
     VAR(IDF_PERSIST, autoreloading, 0, 2, 4); // 0 = never, 1 = when empty, 2 = weapons that don't add a full clip, 3 = always (+1 zooming weaps too)
-    VAR(IDF_PERSIST, autoreloaddelay, 0, 0, VAR_MAX);
+    VAR(IDF_PERSIST, autodelayreload, 0, 0, VAR_MAX);
 
     VAR(IDF_PERSIST, skipspawnweapon, 0, 0, 6); // skip spawnweapon; 0 = never, 1 = if numweaps > 1 (+1), 3 = if carry > 0 (+2), 6 = always
     VAR(IDF_PERSIST, skipmelee, 0, 7, 10); // skip melee; 0 = never, 1 = if numweaps > 1 (+2), 4 = if carry > 0 (+2), 7 = if carry > 0 and is offset (+2), 10 = always
@@ -87,7 +87,7 @@ namespace weapons
         d->weapload[weap] = load;
         d->ammo[weap] = min(ammo, W(weap, ammomax));
         playsound(WSND(weap, S_W_RELOAD), d->o, d, 0, -1, -1, -1, &d->wschan);
-        d->setweapstate(weap, W_S_RELOAD, W(weap, reloaddelay), lastmillis);
+        d->setweapstate(weap, W_S_RELOAD, W(weap, delayreload), lastmillis);
         return true;
     }
 
@@ -168,7 +168,7 @@ namespace weapons
         {
             bool noammo = d->ammo[d->weapselect] < W2(d->weapselect, ammosub, WS(flags)),
                  noattack = !d->action[AC_PRIMARY] && !d->action[AC_SECONDARY];
-            if((noammo || noattack) && !d->action[AC_USE] && d->weapstate[d->weapselect] == W_S_IDLE && (noammo || lastmillis-d->weaplast[d->weapselect] >= autoreloaddelay))
+            if((noammo || noattack) && !d->action[AC_USE] && d->weapstate[d->weapselect] == W_S_IDLE && (noammo || lastmillis-d->weaplast[d->weapselect] >= autodelayreload))
                 return autoreloading >= (noammo ? 1 : (W(d->weapselect, ammoadd) < W(d->weapselect, ammomax) ? 2 : (W2(d->weapselect, cooked, true)&W_C_ZOOM ? 4 : 3)));
         }
         return false;

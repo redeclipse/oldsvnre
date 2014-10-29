@@ -4030,7 +4030,7 @@ namespace server
             }
         }
         takeammo(ci, weap, sub);
-        gs.setweapstate(weap, WS(flags) ? W_S_SECONDARY : W_S_PRIMARY, W2(weap, attackdelay, WS(flags)), millis);
+        gs.setweapstate(weap, WS(flags) ? W_S_SECONDARY : W_S_PRIMARY, W2(weap, delayattack, WS(flags)), millis);
         sendf(-1, 1, "ri8ivx", N_SHOTFX, ci->clientnum, weap, flags, scale, from.x, from.y, from.z, shots.length(), shots.length()*sizeof(shotmsg)/sizeof(int), shots.getbuf(), ci->clientnum);
         gs.weapshot[weap] = sub;
         gs.shotdamage += W2(weap, damage, WS(flags))*shots.length();
@@ -4120,7 +4120,7 @@ namespace server
             if(G(serverdebug)) srvmsgf(ci->clientnum, "sync error: reload [%d] failed - current state disallows it", weap);
             return;
         }
-        gs.setweapstate(weap, W_S_RELOAD, W(weap, reloaddelay), millis);
+        gs.setweapstate(weap, W_S_RELOAD, W(weap, delayreload), millis);
         int oldammo = gs.ammo[weap];
         gs.ammo[weap] = min(max(gs.ammo[weap], 0) + W(weap, ammoadd), W(weap, ammomax));
         gs.weapload[weap] = gs.ammo[weap]-oldammo;
