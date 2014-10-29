@@ -1135,7 +1135,7 @@ namespace projs
     void shootv(int weap, int flags, int sub, int offset, float scale, vec &from, vector<shotmsg> &shots, gameent *d, bool local)
     {
         int delay = W2(weap, timedelay, WS(flags)), iter = W2(weap, timeiter, WS(flags)),
-            attackdelay = W2(weap, attackdelay, WS(flags)),
+            delayattack = W2(weap, delayattack, WS(flags)),
             cook = W2(weap, cooktime, WS(flags)), cooked = W2(weap, cooked, WS(flags)),
             life = W2(weap, time, WS(flags)), speed = W2(weap, speed, WS(flags)),
             speedlimit = W2(weap, speedlimit, WS(flags));
@@ -1157,7 +1157,7 @@ namespace projs
             {
                 if(weap == W_FLAMER && !(WS(flags)))
                 {
-                    int ends = lastmillis+attackdelay+PHYSMILLIS;
+                    int ends = lastmillis+delayattack+PHYSMILLIS;
                     if(issound(d->wschan) && sounds[d->wschan].slotnum == slot) sounds[d->wschan].ends = ends;
                     else playsound(slot, d->o, d, SND_LOOP, vol, -1, -1, &d->wschan, ends);
                 }
@@ -1172,7 +1172,7 @@ namespace projs
                 }
             }
         }
-        if(attackdelay >= 5 && weap != W_MELEE)
+        if(delayattack >= 5 && weap != W_MELEE)
         {
             int colour = WHCOL(d, weap, partcol, WS(flags));
             float muz = muzzleblend*W2(weap, partblend, WS(flags));
@@ -1199,14 +1199,14 @@ namespace projs
             if(weapfx[weap].sparktime && weapfx[weap].sparknum)
                 part_splash(weap == W_FLAMER ? PART_FIREBALL : PART_SPARK, weapfx[weap].sparknum, weapfx[weap].sparktime, from, colour, weapfx[weap].sparksize, muz, 1, 0, weapfx[weap].sparkrad, 15);
             if(muzzlechk(muzzleflash, d) && weapfx[weap].partsize > 0)
-                part_create(weapfx[weap].parttype, attackdelay/3, from, colour, weapfx[weap].partsize, muz, 0, 0, d);
+                part_create(weapfx[weap].parttype, delayattack/3, from, colour, weapfx[weap].partsize, muz, 0, 0, d);
             if(muzzlechk(muzzleflare, d) && weapfx[weap].flaresize > 0)
             {
                 vec targ; findorientation(d->o, d->yaw, d->pitch, targ);
                 targ.sub(from).normalize().mul(weapfx[weap].flarelen).add(from);
-                part_flare(from, targ, attackdelay/2, PART_MUZZLE_FLARE, colour, weapfx[weap].flaresize, muz, 0, 0, d);
+                part_flare(from, targ, delayattack/2, PART_MUZZLE_FLARE, colour, weapfx[weap].flaresize, muz, 0, 0, d);
             }
-            int peak = attackdelay/4, fade = min(peak/2, 75);
+            int peak = delayattack/4, fade = min(peak/2, 75);
             adddynlight(from, 32, vec::hexcolor(colour).mul(0.5f), fade, peak - fade, DL_FLASH);
         }
         loopv(shots)
@@ -1214,7 +1214,7 @@ namespace projs
         if(ejectfade && weaptype[weap].eject && *weaptype[weap].eprj) loopi(clamp(sub, 1, W2(weap, ammosub, WS(flags))))
             create(from, from, local, d, PRJ_EJECT, rnd(ejectfade)+ejectfade, 0, delay, rnd(weaptype[weap].espeed)+weaptype[weap].espeed, 0, weap, -1, flags);
 
-        d->setweapstate(weap, WS(flags) ? W_S_SECONDARY : W_S_PRIMARY, attackdelay, lastmillis);
+        d->setweapstate(weap, WS(flags) ? W_S_SECONDARY : W_S_PRIMARY, delayattack, lastmillis);
         d->ammo[weap] = max(d->ammo[weap]-sub-offset, 0);
         d->weapshot[weap] = sub;
         if(offset > 0) d->weapload[weap] = -offset;
