@@ -81,8 +81,16 @@ namespace projs
         }
 
         float skew = clamp(scale, 0.f, 1.f)*damagescale;
+
+        if(flags&HIT_WHIPLASH) skew *= WF(WK(flags), weap, damagewhiplash, WS(flags));
+        else if(flags&HIT_HEAD) skew *= WF(WK(flags), weap, damagehead, WS(flags));
+        else if(flags&HIT_TORSO) skew *= WF(WK(flags), weap, damagetorso, WS(flags));
+        else if(flags&HIT_LEGS) skew *= WF(WK(flags), weap, damagelegs, WS(flags));
+        else return 0;
+
         if(radial > 0) skew *= clamp(1.f-dist/size, 1e-6f, 1.f);
         else if(WF(WK(flags), weap, taper, WS(flags))) skew *= clamp(dist, 0.f, 1.f);
+
         if(!m_insta(game::gamemode, game::mutators))
         {
             if(m_capture(game::gamemode) && capturebuffdelay)
@@ -101,13 +109,7 @@ namespace projs
                 if(target->lastbuff) skew /= bomberbuffshield;
             }
         }
-        if(!(flags&HIT_HEAD))
-        {
-            if(flags&HIT_WHIPLASH) skew *= WF(WK(flags), weap, whipdamage, WS(flags));
-            else if(flags&HIT_TORSO) skew *= WF(WK(flags), weap, torsodamage, WS(flags));
-            else if(flags&HIT_LEGS) skew *= WF(WK(flags), weap, legdamage, WS(flags));
-            else skew = 0;
-        }
+
         if(v == target)
         {
             float modify = WF(WK(flags), weap, damageself, WS(flags))*G(damageselfscale);
@@ -128,6 +130,7 @@ namespace projs
                 flags |= HIT_WAVE;
             }
         }
+
         return int(ceilf(WF(WK(flags), weap, damage, WS(flags))*skew));
     }
 
