@@ -5602,7 +5602,7 @@ namespace server
                     loopv(clients)
                     {
                         clientinfo *t = clients[i];
-                        if(t != cp && (!allowbroadcast(t->clientnum) || (flags&SAY_TEAM && cp->team != t->team))) continue;
+                        if(!allowbroadcast(t->clientnum) || (flags&SAY_TEAM && cp->team != t->team)) continue;
                         sendf(t->clientnum, 1, "ri3s", N_TEXT, cp->clientnum, flags, output);
                     }
                     defformatstring(m)("%s", colourname(cp));
