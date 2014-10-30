@@ -419,10 +419,11 @@ uint getclientip(int n)         { int o = server::peerowner(n); return clients.i
 
 void sendpacket(int n, int chan, ENetPacket *packet, int exclude)
 {
+    if(n < 0 || chan < 0) server::recordpacket(abs(chan), packet->data, packet->dataLength);
+    if(chan < 0) return; // was just a record packet
     if(n < 0)
     {
-        server::recordpacket(abs(chan), packet->data, packet->dataLength);
-        if(chan >= 0) loopv(clients) if(i != server::peerowner(exclude) && server::allowbroadcast(i)) sendpacket(i, chan, packet, exclude);
+        loopv(clients) if(i != server::peerowner(exclude) && server::allowbroadcast(i)) sendpacket(i, chan, packet, exclude);
         return;
     }
     switch(clients[n]->type)
@@ -431,10 +432,7 @@ void sendpacket(int n, int chan, ENetPacket *packet, int exclude)
         {
             int owner = server::peerowner(n);
             if(owner >= 0 && clients.inrange(owner) && owner != n && owner != server::peerowner(exclude))
-            {
-                //conoutf("redirect %d packet to %d [%d:%d]", n, owner, exclude, server::peerowner(exclude));
                 sendpacket(owner, chan, packet, exclude);
-            }
             break;
         }
         case ST_TCPIP:
