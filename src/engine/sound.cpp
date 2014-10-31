@@ -50,7 +50,7 @@ int soundsatonce = 0, lastsoundmillis = 0, musictime = -1, musicdonetime = -1;
 VARF(IDF_PERSIST, mastervol, 0, 255, 255, changedvol = true);
 VAR(IDF_PERSIST, soundvol, 0, 255, 255);
 VARF(0, soundmono, 0, 0, 1, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
-VARF(0, soundachans, 16, 256, 1024, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
+VARF(0, soundachans, 16, 64, 1024, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
 VARF(0, soundfreq, 0, 44100, 48000, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
 VARF(0, soundbufferlen, 128, 1024, VAR_MAX, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
 VAR(IDF_PERSIST, soundmaxrad, 0, 512, VAR_MAX);
@@ -61,7 +61,7 @@ FVAR(IDF_PERSIST, soundenvvol, 0, 1, FVAR_MAX);
 FVAR(IDF_PERSIST, soundenvscale, 0, 1, FVAR_MAX);
 VAR(IDF_PERSIST, soundcull, 0, 1, 1);
 
-VARF(IDF_PERSIST, musicvol, 0, 32, 255, changedvol = true);
+VARF(IDF_PERSIST, musicvol, 0, 64, 255, changedvol = true);
 VAR(IDF_PERSIST, musicfadein, 0, 1000, VAR_MAX);
 VAR(IDF_PERSIST, musicfadeout, 0, 2500, VAR_MAX);
 SVAR(0, titlemusic, "sounds/theme");
@@ -369,7 +369,7 @@ void updatesound(int chan)
 {
     sound &s = sounds[chan];
     bool waiting = (!(s.flags&SND_NODELAY) && Mix_Paused(chan));
-    if((s.flags&SND_NOCULL) || !soundcull || s.curvol > 0 || s.pos.dist(camera1->o) <= s.minrad)
+    if((s.flags&SND_NOCULL) || !soundcull || s.curvol > 0 || s.pos.dist(camera1->o) <= 0)
     {
         if(waiting)
         { // delay the sound based on average physical constants
@@ -455,7 +455,7 @@ int playsound(int n, const vec &pos, physent *d, int flags, int vol, int maxrad,
 
         bool liquid = isliquid(lookupmaterial(camera1->o)&MATF_VOLUME);
         calcvol(flags, v, slot->vol, x, y, o, &cvol, &cpan, liquid || isliquid(mat&MATF_VOLUME));
-        bool nocull = flags&SND_NOCULL || o.dist(camera1->o) <= minrad;
+        bool nocull = flags&SND_NOCULL || o.dist(camera1->o) <= 0;
 
         if(nocull || !soundcull || cvol > 0)
         {
@@ -468,7 +468,7 @@ int playsound(int n, const vec &pos, physent *d, int flags, int vol, int maxrad,
                 if((chan = Mix_PlayChannel(-1, sample->sound, flags&SND_LOOP ? -1 : 0)) < 0)
                 {
                     int lowest = -1;
-                    loopv(sounds) if(sounds[i].chan >= 0 && !(sounds[i].flags&SND_NOCULL) && !(sounds[i].flags&SND_MAP) && sounds[i].pos.dist(camera1->o) > sounds[i].minrad)
+                    loopv(sounds) if(sounds[i].chan >= 0 && !(sounds[i].flags&SND_NOCULL) && !(sounds[i].flags&SND_MAP) && sounds[i].pos.dist(camera1->o) > 0)
                         if((nocull || sounds[i].curvol < cvol) && (lowest < 0 || sounds[i].curvol < sounds[lowest].curvol))
                             lowest = i;
                     if(sounds.inrange(lowest))
