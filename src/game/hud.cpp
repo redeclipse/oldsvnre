@@ -29,6 +29,9 @@ namespace hud
     VAR(IDF_PERSIST, shownotices, 0, 3, 4);
     VAR(IDF_PERSIST, showevents, 0, 3, 7);
     VAR(IDF_PERSIST, showloadingmapbg, 0, 1, 1);
+    VAR(IDF_PERSIST, showloadinggpu, 0, 1, 1);
+    VAR(IDF_PERSIST, showloadingversion, 0, 1, 1);
+    VAR(IDF_PERSIST, showloadingurl, 0, 1, 1);
 
     VAR(IDF_PERSIST, showfps, 0, 0, 3);
     VAR(IDF_PERSIST, showstats, 0, 1, 2);
@@ -3083,9 +3086,9 @@ namespace hud
             else y -= draw_textx("%s", FONTH*7/2, y, 255, 255, 255, 255, TEXT_LEFT_UP, -1, -1, *ptitle ? ptitle : "please wait...");
         }
         y = h-bottom-FONTH/2;
-        y -= draw_textx("%s (%s v%s)", w-FONTH, y, 255, 255, 255, 255, TEXT_RIGHT_UP, -1, -1, gfxrenderer, gfxvendor, gfxversion);
-        y -= draw_textx("%s v%s-%s%d (%s)", w-FONTH, y, 255, 255, 255, 255, TEXT_RIGHT_UP, -1, -1, versionname, versionstring, versionplatname, versionarch, versionrelease);
-        if(*versionurl) y -= draw_textx("%s", w-FONTH, y, 255, 255, 255, 255, TEXT_RIGHT_UP, -1, -1, versionurl);
+        if(showloadinggpu) y -= draw_textx("%s (%s v%s)", w-FONTH, y, 255, 255, 255, 255, TEXT_RIGHT_UP, -1, -1, gfxrenderer, gfxvendor, gfxversion);
+        if(showloadingversion) y -= draw_textx("%s v%s-%s%d (%s)", w-FONTH, y, 255, 255, 255, 255, TEXT_RIGHT_UP, -1, -1, versionname, versionstring, versionplatname, versionarch, versionrelease);
+        if(showloadingurl && *versionurl) y -= draw_textx("%s", w-FONTH, y, 255, 255, 255, 255, TEXT_RIGHT_UP, -1, -1, versionurl);
         popfont();
     }
 
