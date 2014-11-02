@@ -3290,10 +3290,15 @@ namespace hud
         glColor3f(1, 1, 1);
 
         if(noview) drawbackground(hudwidth, hudheight, top, bottom);
-        else if(!client::waiting() && showhud)
+        else if(!client::waiting())
         {
-            left += drawheadsup(hudwidth, hudheight, edge, top, bottom, fade);
-            if(!texpaneltimer && !game::tvmode() && !client::waiting() && !hasinput(false)) drawevents(fade);
+            if(showhud)
+            {
+                left += drawheadsup(hudwidth, hudheight, edge, top, bottom, fade);
+                if(!texpaneltimer && !game::tvmode() && !client::waiting() && !hasinput(false)) drawevents(fade);
+            }
+            else if(!game::intermission && !client::waitplayers && game::focus == game::player1 && game::focus->state == CS_ALIVE && game::inzoom())
+                drawzoom(hudwidth, hudheight);
         }
         drawconsole(showconsole < 2 || noview ? 0 : 1, hudwidth, hudheight, edge*2, edge+top, hudwidth-edge*2, consolefade);
         if(showconsole >= 2 && !noview && showconsole && showhud)
