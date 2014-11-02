@@ -1891,7 +1891,7 @@ namespace game
         int numdyns = numdynents();
         loopi(numdyns) if((d = (gameent *)iterdynents(i)) && (gameent::is(d)))
             d->mapchange(lastmillis, m_health(gamemode, mutators, d->model), gamemode, mutators);
-        if(!client::demoplayback && autoloadweap && *favloadweaps) chooseloadweap(player1, favloadweaps);
+        if(!client::demoplayback && m_loadout(gamemode, mutators) && autoloadweap && *favloadweaps) chooseloadweap(player1, favloadweaps);
         entities::spawnplayer(player1); // prevent the player from being in the middle of nowhere
         specreset();
         resetsway();
