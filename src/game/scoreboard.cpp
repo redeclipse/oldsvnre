@@ -539,7 +539,11 @@ namespace hud
                                 uilist(g, uifont(g, "default", {
                                     if(scorebgrows) g.background(bgc2, scorebgblend);
                                     g.space(0.15f);
-                                    if(k == numgroups) g.text("spectators", 0xFFFFFF, spectatortex, colour);
+                                    if(k == numgroups)
+                                    {
+                                        g.text("spectators", 0xFFFFFF, spectatortex, colour);
+                                        g.spring();
+                                    }
                                     else if(sg.team > 0 && m_team(game::gamemode, game::mutators))
                                     {
                                         g.textf("team %s", 0xFFFFFF, teamtexname(sg.team), colour, TEAM(sg.team, name));
@@ -549,7 +553,11 @@ namespace hud
                                         else if(m_trial(game::gamemode)) g.textf("%d %s", 0xFFFFFF, NULL, 0, sg.total, sg.total != 1 ? "laps" : "lap");
                                         else g.textf("%d %s", 0xFFFFFF, NULL, 0, sg.total, sg.total != 1 ? "points" : "point");
                                     }
-                                    else g.text("free-for-all", 0xFFFFFF, playertex, colour);
+                                    else
+                                    {
+                                        g.text("free-for-all", 0xFFFFFF, playertex, colour);
+                                        g.spring();
+                                    }
                                     g.space(0.25f);
                                 }));
                                 g.pushlist();
