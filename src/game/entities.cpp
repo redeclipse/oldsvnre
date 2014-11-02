@@ -1125,7 +1125,7 @@ namespace entities
                         if(mapsounds.inrange(f.attrs[0]) && !issound(f.schan))
                         {
                             int flags = SND_MAP;
-                            loopk(SND_LAST)  if(f.attrs[4]&(1<<k)) flags |= 1<<k;
+                            loopk(SND_LAST) if(f.attrs[4]&(1<<k)) flags |= 1<<k;
                             playsound(f.attrs[0], both ? f.o : e.o, NULL, flags, f.attrs[3], f.attrs[1], f.attrs[2], &f.schan);
                         }
                         break;
