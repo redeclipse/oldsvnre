@@ -353,7 +353,7 @@ namespace hud
     VAR(IDF_PERSIST, inventoryconopen, 0, 1, 1);
     FVAR(IDF_PERSIST, inventoryconopenblend, 0, 0.5f, 1);
     VAR(IDF_PERSIST, inventoryconopenflash, 0, 0, 1);
-    VAR(IDF_PERSIST, inventoryinput, 0, 1, 2); // 0 = off, 1 = if focus is not player1, 2 = always
+    VAR(IDF_PERSIST, inventoryinput, 0, 0, 3); // bitwise, 1 = focus=player1, 2 = focus!=player1
     FVAR(IDF_PERSIST, inventoryinputblend, 0, 0.75f, 1);
     VAR(IDF_PERSIST, inventoryinputfilter, 0, AC_ALL, AC_ALL);
     VAR(IDF_PERSIST, inventoryinputlinger, 0, AC_ALL, AC_ALL);
@@ -2698,7 +2698,7 @@ namespace hud
                     sy += drawitem(chattex, x, y-sy, s, 0, false, true, gr, gg, gb, fade);
                 }
             }
-            if(inventoryinput >= (game::focus != game::player1 ? 1 : 2))
+            if(inventoryinput&(game::focus != game::player1 ? 2 : 1))
             {
                 static const char *actionnames[AC_TOTAL] = {
                     "shoot1", "shoot2", "reload", "use", "jump", "walk", "crouch", "special", "drop", "affinity"
