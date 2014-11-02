@@ -1891,8 +1891,7 @@ namespace game
         int numdyns = numdynents();
         loopi(numdyns) if((d = (gameent *)iterdynents(i)) && (gameent::is(d)))
             d->mapchange(lastmillis, m_health(gamemode, mutators, d->model), gamemode, mutators);
-        if(!client::demoplayback && m_loadout(gamemode, mutators) && autoloadweap && *favloadweaps)
-            chooseloadweap(player1, favloadweaps);
+        if(!client::demoplayback && autoloadweap && *favloadweaps) chooseloadweap(player1, favloadweaps);
         entities::spawnplayer(player1); // prevent the player from being in the middle of nowhere
         specreset();
         resetsway();
@@ -2345,17 +2344,19 @@ namespace game
             gameent *a = deathcamstyle > 1 ? d : getclient(d->lastattacker);
             if(a)
             {
+                float y = 0, p = 0;
                 vec dir = vec(a->center()).sub(camera1->o).normalize();
-                vectoyawpitch(dir, camera1->yaw, camera1->pitch);
+                vectoyawpitch(dir, y, p);
+                fixrange(y, p);
                 if(deathcamspeed > 0)
                 {
                     float speed = curtime/float(deathcamspeed);
-                    scaleyawpitch(yaw, pitch, camera1->yaw, camera1->pitch, speed, speed*4.f);
+                    scaleyawpitch(yaw, pitch, y, p, speed, speed*4.f);
                 }
                 else
                 {
-                    yaw = camera1->yaw;
-                    pitch = camera1->pitch;
+                    yaw = y;
+                    pitch = p;
                 }
             }
         }
@@ -2768,7 +2769,7 @@ namespace game
                         {
                             int r = rnd(files.length());
                             formatstring(musicfile)("%s/%s", musicdir, files[r]);
-                            if(files[r][0] != '.' && playmusic(musicfile, type >= 4 ? "music" : NULL)) break;
+                            if(files[r][0] != '.' && strcmp(files[r], "readme.txt") && playmusic(musicfile, type >= 4 ? "music" : NULL)) break;
                             else files.remove(r);
                         }
                     }
