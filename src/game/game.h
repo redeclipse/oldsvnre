@@ -949,7 +949,8 @@ struct stunevent
 
 struct gameent : dynent, gamestate
 {
-    editinfo *edit; ai::aiinfo *ai;
+    editinfo *edit;
+    ai::aiinfo *ai;
     int team, clientnum, privilege, projid, lastnode, checkpoint, cplast, respawned, suicided, lastupdate, lastpredict, plag, ping, lastflag, totaldamage,
         actiontime[AC_MAX], impulse[IM_MAX], smoothmillis, turnmillis, turnside, aschan, cschan, vschan, wschan, pschan, fschan, sschan[2],
         lasthit, lastteamhit, lastkill, lastattacker, lastpoints, quake, spree, lastfoot;
@@ -1038,9 +1039,9 @@ struct gameent : dynent, gamestate
         if(issound(pschan)) removesound(pschan);
         if(issound(fschan)) removesound(fschan);
         aschan = cschan = vschan = wschan = pschan = fschan = -1;
-        loopi(2) if(issound(sschan[i]))
+        loopi(2)
         {
-            removesound(sschan[i]);
+            if(issound(sschan[i])) removesound(sschan[i]);
             sschan[i] = -1;
         }
     }

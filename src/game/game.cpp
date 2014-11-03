@@ -592,6 +592,7 @@ namespace game
     {
         loopvrev(anclist) anclist.remove(i);
         if(issound(announcerchan)) removesound(announcerchan);
+        announcerchan = -1;
     }
 
     void removeannounce(gameent *d)
@@ -1042,7 +1043,7 @@ namespace game
     void footstep(gameent *d, int curfoot)
     {
         bool moving = d->move || d->strafe, liquid = physics::liquidcheck(d), onfloor = d->physstate >= PHYS_SLOPE || d->onladder || d->turnside;
-        if(footstepsounds&(d != focus ? 2 : 1) && (curfoot < 0 || (moving && (liquid || onfloor))))
+        if(curfoot < 0 || (moving && (liquid || onfloor)))
         {
             float mag = d->vel.magnitude(), m = min(footstepsoundmax, footstepsoundmin), n = max(footstepsoundmax, footstepsoundmin);
             if(n > m && mag > m)
@@ -1179,9 +1180,17 @@ namespace game
                 if(issound(d->pschan)) sounds[d->pschan].vol = vol;
                 else playsound(snd, d->o, d, SND_LOOP, vol, -1, -1, &d->pschan);
             }
-            else if(issound(d->pschan)) removesound(d->pschan);
+            else if(d->pschan >= 0)
+            {
+                if(issound(d->pschan)) removesound(d->pschan);
+                d->pschan = -1;
+            }
         }
-        else if(issound(d->pschan)) removesound(d->pschan);
+        else if(d->pschan >= 0)
+        {
+            if(issound(d->pschan)) removesound(d->pschan);
+            d->pschan = -1;
+        }
         if(local)
         {
             if(d->respawned > 0 && lastmillis-d->respawned >= 2500) d->respawned = -1;
@@ -1192,19 +1201,32 @@ namespace game
             if(lastmillis-d->lastres[WR_BURN] >= burntime) d->resetburning();
             else if(issound(d->fschan)) sounds[d->fschan].vol = int((d != focus ? 128 : 224)*(1.f-(lastmillis-d->lastres[WR_BURN]-(burntime-500))/500.f));
         }
-        else if(issound(d->fschan)) removesound(d->fschan);
+        else if(d->fschan >= 0)
+        {
+            if(issound(d->fschan)) removesound(d->fschan);
+            d->fschan = -1;
+        }
         if(d->lastres[WR_BLEED] > 0 && lastmillis-d->lastres[WR_BLEED] >= bleedtime) d->resetbleeding();
         if(d->lastres[WR_SHOCK] > 0 && lastmillis-d->lastres[WR_SHOCK] >= shocktime) d->resetshocking();
         if(!intermission && d->state == CS_ALIVE)
         {
             int curfoot = d->curfoot();
+            bool hassound = footstepsounds&(d != focus ? 2 : 1);
+            if(!hassound) loopi(2) if(d->sschan[i] >= 0)
+            {
+                if(issound(d->sschan[i])) removesound(d->sschan[i]);
+                d->sschan[i] = -1;
+            }
             if(curfoot != d->lastfoot)
             {
-                if(d->lastfoot >= 0 && issound(d->sschan[d->lastfoot])) sounds[d->sschan[d->lastfoot]].pos = d->footpos(d->lastfoot);
-                footstep(d, curfoot);
-                d->lastfoot = curfoot;
+                if(hassound)
+                {
+                    if(d->lastfoot >= 0 && issound(d->sschan[d->lastfoot])) sounds[d->sschan[d->lastfoot]].pos = d->footpos(d->lastfoot);
+                    footstep(d, curfoot);
+                    d->lastfoot = curfoot;
+                }
             }
-            else loopi(2) if(issound(d->sschan[i])) sounds[d->sschan[i]].pos = d->footpos(i);
+            else if(hassound) loopi(2) if(issound(d->sschan[i])) sounds[d->sschan[i]].pos = d->footpos(i);
         }
         loopv(d->icons) if(lastmillis-d->icons[i].millis > d->icons[i].fade) d->icons.remove(i--);
     }
@@ -2907,8 +2929,11 @@ namespace game
                 }
                 default:
                 {
-                    if(issound(liquidchan)) removesound(liquidchan);
-                    liquidchan = -1;
+                    if(liquidchan >= 0)
+                    {
+                        if(issound(liquidchan)) removesound(liquidchan);
+                        liquidchan = -1;
+                    }
                     break;
                 }
             }
