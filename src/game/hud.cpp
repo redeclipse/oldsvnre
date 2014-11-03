@@ -412,7 +412,7 @@ namespace hud
     FVAR(IDF_PERSIST, swordclipskew, 0, 1, 10);
     FVAR(IDF_PERSIST, shotgunclipskew, 0, 0.75f, 10);
     FVAR(IDF_PERSIST, smgclipskew, 0, 0.55f, 10);
-    FVAR(IDF_PERSIST, flamerclipskew, 0, 0.5f, 10);
+    FVAR(IDF_PERSIST, flamerclipskew, 0, 0.45f, 10);
     FVAR(IDF_PERSIST, plasmaclipskew, 0, 0.55f, 10);
     FVAR(IDF_PERSIST, zapperclipskew, 0, 0.55f, 10);
     FVAR(IDF_PERSIST, rifleclipskew, 0, 1, 10);
