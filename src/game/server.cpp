@@ -504,7 +504,7 @@ namespace server
 
     bool chkloadweap(clientinfo *ci, bool request = true)
     {
-        if(ci->state.loadweap.empty())
+        if(ci->state.actortype == A_PLAYER && ci->state.loadweap.empty())
         {
             if(request) sendf(ci->clientnum, 1, "ri", N_LOADW);
             return false;
@@ -4244,7 +4244,6 @@ namespace server
         else sendf(-1, 1, "ri2", N_WAITING, ci->clientnum);
         ci->state.state = CS_WAITING;
         ci->state.weapreset(false);
-        if(m_loadout(gamemode, mutators)) chkloadweap(ci);
         if(doteam && !allowteam(ci, ci->team, T_FIRST, false)) setteam(ci, chooseteam(ci), TT_INFO);
     }
 
