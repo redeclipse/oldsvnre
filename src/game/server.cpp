@@ -504,29 +504,10 @@ namespace server
 
     bool chkloadweap(clientinfo *ci, bool request = true)
     {
-        while(ci->state.loadweap.length() < G(maxcarry)) ci->state.loadweap.add(-1);
-        loopj(G(maxcarry))
+        if(ci->state.loadweap.empty())
         {
-            int aweap = ci->state.loadweap[j];
-            if(isweap(ci->state.loadweap[j]))
-            {
-                if(aweap < W_OFFSET || aweap >= W_ITEM) ci->state.loadweap[j] = 0;
-                else if(!m_check(W(aweap, modes), W(aweap, muts), gamemode, mutators) || W(aweap, disabled))
-                    ci->state.loadweap[j] = request ? -1 : 0;
-            }
-            if(!isweap(ci->state.loadweap[j]))
-            {
-                if(ci->state.actortype != A_PLAYER) ci->state.loadweap[j] = 0;
-                else
-                {
-                    if(request)
-                    {
-                        if(isweap(aweap)) srvmsgft(ci->clientnum, CON_EVENT, "sorry, the \fs\f[%d]%s\fS is not available, please select a different weapon", W(aweap, colour), W(aweap, name));
-                        sendf(ci->clientnum, 1, "ri", N_LOADW);
-                    }
-                    return false;
-                }
-            }
+            if(request) sendf(ci->clientnum, 1, "ri", N_LOADW);
+            return false;
         }
         return true;
     }
@@ -5242,6 +5223,7 @@ namespace server
                     if(!hasclient(cp, ci)) break;
                     cp->state.loadweap.shrink(0);
                     loopvk(items) cp->state.loadweap.add(items[k]);
+                    if(m_loadout(gamemode, mutators)) chkloadweap(ci);
                     break;
                 }
 
