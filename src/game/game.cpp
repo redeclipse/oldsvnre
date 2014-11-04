@@ -430,12 +430,12 @@ namespace game
     bool allowspec(gameent *d, int level, int cn = -1)
     {
         if(d->o.magnitude() <= 0 || d->o.z < 0) return false;
+        if(d->state == CS_SPECTATOR || ((d->state == CS_DEAD || d->state == CS_WAITING) && !d->lastdeath)) return false;
         if(cn >= 0)
         {
             if(cn == player1->clientnum && player1->state != CS_ALIVE && d->clientnum == player1->lastattacker) return true;
             return d->clientnum == cn; // override
         }
-        if(d->state == CS_SPECTATOR || ((d->state == CS_DEAD || d->state == CS_WAITING) && !d->lastdeath)) return false;
         switch(level)
         {
             case 0: if(d->state != CS_ALIVE) return false; break;
