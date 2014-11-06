@@ -197,7 +197,7 @@ struct bomberservmode : bomberstate, servmode
             int wants = m_gsp1(gamemode, mutators) ? 1 : (m_gsp3(gamemode, mutators) ? 2 : teamcount(gamemode, mutators));
             loopi(wants)
             {
-                int c = candidates[i].length(), r = c > 1 ? rnd(c) : 0;
+                int c = candidates[i].length(), r = rnd(c);
                 if(candidates[i].inrange(r) && flags.inrange(candidates[i][r]) && isteam(gamemode, mutators, flags[candidates[i][r]].team, T_NEUTRAL))
                 {
                     bomberstate::returnaffinity(candidates[i][r], gamemillis, true);
