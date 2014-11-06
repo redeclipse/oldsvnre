@@ -142,7 +142,8 @@ namespace projs
         float dmag = dir.magnitude();
         if(dmag > 1e-3f) dir.div(dmag);
         else dir = vec(0, 0, 1);
-        if(isweap(proj.weap) && !weaptype[proj.weap].traced && flags&HIT_PROJ) vel = proj.vel;
+        if(isweap(proj.weap) && !weaptype[proj.weap].traced && flags&HIT_PROJ && proj.weight != 0 && d->weight != 0)
+            vel = vec(proj.vel).mul(proj.weight).div(d->weight);
         if(proj.owner && proj.local)
         {
             int hflags = proj.flags|flags;
