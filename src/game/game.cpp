@@ -1907,6 +1907,7 @@ namespace game
         physics::reset();
         resetworld();
         resetcursor();
+        resetsway();
         if(!empty) preload();
         // reset perma-state
         gameent *d;
@@ -1915,8 +1916,6 @@ namespace game
             d->mapchange(lastmillis, m_health(gamemode, mutators, d->model), gamemode, mutators);
         if(!client::demoplayback && m_loadout(gamemode, mutators) && autoloadweap && *favloadweaps) chooseloadweap(player1, favloadweaps);
         entities::spawnplayer(player1); // prevent the player from being in the middle of nowhere
-        specreset();
-        resetsway();
         resetcamera();
         if(!empty) client::sendgameinfo = client::sendcrcinfo = true;
         if(m_fight(gamemode)) client::waitplayers = true;
