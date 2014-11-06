@@ -68,6 +68,7 @@ namespace game
 
     VAR(IDF_PERSIST, thirdperson, 0, 0, 1);
     VAR(IDF_PERSIST, dynlighteffects, 0, 2, 2);
+    VAR(IDF_PERSIST, fullbrightfocus, 0, 0, 3); // bitwise: 0 = don't fullbright focus, 1 = fullbright non-player1, 2 = fullbright player1
 
     VAR(IDF_PERSIST, thirdpersonmodel, 0, 1, 1);
     VAR(IDF_PERSIST, thirdpersonfov, 90, 120, 150);
@@ -3072,12 +3073,9 @@ namespace game
         if(!((anim>>ANIM_SECONDARY)&ANIM_INDEX)) anim |= (ANIM_IDLE|ANIM_LOOP)<<ANIM_SECONDARY;
 
         int flags = MDL_LIGHT|MDL_LIGHTFX;
+        if(d->actortype >= A_ENEMY) flags |= MDL_CULL_DIST;
+        if(d != focus || (d != player1 ? fullbrightfocus&1 : fullbrightfocus&2)) flags |= MDL_FULLBRIGHT;
         if(d != focus && !(anim&ANIM_RAGDOLL)) flags |= MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_CULL_QUERY;
-        if(d->actortype < A_ENEMY)
-        {
-            if(!early && third) flags |= MDL_FULLBRIGHT;
-        }
-        else flags |= MDL_CULL_DIST;
         if(early) flags |= MDL_NORENDER;
         else if(third && (anim&ANIM_INDEX)!=ANIM_DEAD) flags |= MDL_DYNSHADOW;
         if(modelpreviewing) flags &= ~(MDL_LIGHT|MDL_FULLBRIGHT|MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_CULL_QUERY|MDL_CULL_DIST|MDL_DYNSHADOW);
