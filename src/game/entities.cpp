@@ -624,7 +624,7 @@ namespace entities
                     float oyaw = d->yaw, opitch = d->pitch;
                     while(!teleports.empty())
                     {
-                        int r = e.type == TELEPORT ? rnd(teleports.length()) : 0, q = teleports[r];
+                        int r = rnd(teleports.length()), q = teleports[r];
                         gameentity &f = *(gameentity *)ents[q];
                         d->o = vec(f.o).add(f.attrs[5] >= 3 ? vec(orig).sub(e.o) : vec(0, 0, d->height*0.5f));
                         float mag = max(vec(d->vel).add(d->falling).magnitude(), f.attrs[2] ? float(f.attrs[2]) : 50.f),
