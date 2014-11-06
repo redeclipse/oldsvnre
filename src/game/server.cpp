@@ -1278,7 +1278,7 @@ namespace server
                 if(!num) mode = rnd(G_RAND)+G_FIGHT;
                 else
                 {
-                    int r = num > 1 ? rnd(num) : 0, n = 0;
+                    int r = rnd(num), n = 0;
                     loopi(G_MAX) if(G(rotatemodefilter)&(1<<i))
                     {
                         if(n != r) n++;
@@ -2326,7 +2326,7 @@ namespace server
 
         votecount *best = NULL;
         bool passed = force;
-        if(style == 3) best = !votes.empty() ? &votes[votes.length() > 1 ? rnd(votes.length()) : 0] : NULL;
+        if(style == 3) best = !votes.empty() ? &votes[rnd(votes.length())] : NULL;
         else
         {
             int morethanone = 0;

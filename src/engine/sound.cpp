@@ -50,7 +50,7 @@ int soundsatonce = 0, lastsoundmillis = 0, musictime = -1, musicdonetime = -1;
 VARF(IDF_PERSIST, mastervol, 0, 255, 255, changedvol = true);
 VAR(IDF_PERSIST, soundvol, 0, 255, 255);
 VARF(0, soundmono, 0, 0, 1, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
-VARF(0, soundachans, 16, 64, 1024, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
+VARF(0, soundachans, 16, 256, 1024, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
 VARF(0, soundfreq, 0, 44100, 48000, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
 VARF(0, soundbufferlen, 128, 1024, VAR_MAX, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
 VAR(IDF_PERSIST, soundmaxrad, 0, 512, VAR_MAX);
@@ -464,13 +464,12 @@ int playsound(int n, const vec &pos, physent *d, int flags, int vol, int maxrad,
             else
             {
                 oldhook = NULL;
-                soundsample *sample = soundset[n].samples[soundset[n].samples.length() > 1 ? rnd(soundset[n].samples.length()) : 0];
+                soundsample *sample = soundset[n].samples[rnd(soundset[n].samples.length())];
                 if((chan = Mix_PlayChannel(-1, sample->sound, flags&SND_LOOP ? -1 : 0)) < 0)
                 {
                     int lowest = -1;
-                    loopv(sounds) if(sounds[i].chan >= 0 && !(sounds[i].flags&SND_NOCULL) && !(sounds[i].flags&SND_MAP) && sounds[i].pos.dist(camera1->o) > 0)
-                        if((nocull || sounds[i].curvol < cvol) && (lowest < 0 || sounds[i].curvol < sounds[lowest].curvol))
-                            lowest = i;
+                    loopv(sounds) if(sounds[i].chan >= 0 && (!(sounds[i].flags&SND_MAP) || flags&SND_MAP) && sounds[i].curvol < cvol && (lowest < 0 || sounds[i].curvol < sounds[lowest].curvol) && (nocull || (!(sounds[i].flags&SND_NOCULL) && sounds[i].pos.dist(camera1->o) > 0)))
+                        lowest = i;
                     if(sounds.inrange(lowest))
                     {
                         if(verbose >= 4) conoutf("culled channel %d (%d)", lowest, sounds[lowest].curvol);
