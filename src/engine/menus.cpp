@@ -15,9 +15,9 @@ struct menu : guicb
     char *name, *header;
     uint *contents, *initscript;
     int passes, menutab, menustart;
-    bool world, useinput, usetitle, usebgfx;
+    bool world, useinput, usetitle, usebgfx, builtin;
 
-    menu() : name(NULL), header(NULL), contents(NULL), initscript(NULL), passes(0), menutab(0), menustart(0), world(false), useinput(true), usetitle(true), usebgfx(true) {}
+    menu() : name(NULL), header(NULL), contents(NULL), initscript(NULL), passes(0), menutab(0), menustart(0), world(false), useinput(true), usetitle(true), usebgfx(true), builtin(false) {}
 
     void gui(guient &g, bool firstpass)
     {
@@ -26,7 +26,7 @@ struct menu : guicb
         guipasses = passes;
         if(!passes) guiactionon = false;
         int oldflags = identflags;
-        if(world) identflags |= IDF_WORLD;
+        if(world && !builtin) identflags |= IDF_WORLD;
         if(initscript) execute(initscript);
         cgui->start(menustart, menuscale, &menutab, useinput, usetitle, usebgfx);
         cgui->tab(header ? header : name);
@@ -847,10 +847,11 @@ void progressmenu()
     menu *m = menus.access("loading");
     if(m)
     {
-        m->usetitle = m->useinput = false;
+        m->usetitle = m->useinput = m->world = false;
+        m->builtin = true;
         UI::addcb(m);
     }
-    else conoutf("cannot find menu 'loading'");
+    else conoutf("cannot find menu: loading");
 }
 
 void mainmenu()
