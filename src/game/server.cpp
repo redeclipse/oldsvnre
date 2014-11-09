@@ -5310,6 +5310,7 @@ namespace server
                         if(rays > 1 && W2(ev->weap, cooktime, WS(ev->flags))) rays = int(ceilf(rays*ev->scale/float(W2(ev->weap, cooktime, WS(ev->flags)))));
                         while(ev->shots.length() > rays) ev->shots.remove(rnd(ev->shots.length()));
                         cp->addevent(ev);
+                        cp->state.lastshoot = gamemillis;
                     }
                     else delete ev;
                     break;

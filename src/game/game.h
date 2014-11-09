@@ -530,14 +530,14 @@ struct gamestate
 {
     int health, ammo[W_MAX], entid[W_MAX], colour, model;
     int weapselect, weapload[W_MAX], weapshot[W_MAX], weapstate[W_MAX], weapwait[W_MAX], weaplast[W_MAX];
-    int lastdeath, lastspawn, lastrespawn, lastpain, lastregen, lastbuff, lastres[WR_MAX], lastrestime[WR_MAX];
+    int lastdeath, lastspawn, lastrespawn, lastpain, lastregen, lastbuff, lastshoot, lastres[WR_MAX], lastrestime[WR_MAX];
     int actortype, spawnpoint, ownernum, skill, points, frags, deaths, cpmillis, cptime;
     bool quarantine;
     string vanity;
     vector<int> loadweap, lastweap;
     verinfo version;
 
-    gamestate() : colour(0), model(0), weapselect(W_MELEE), lastdeath(0), lastspawn(0), lastrespawn(0), lastpain(0), lastregen(0), lastbuff(0),
+    gamestate() : colour(0), model(0), weapselect(W_MELEE), lastdeath(0), lastspawn(0), lastrespawn(0), lastpain(0), lastregen(0), lastbuff(0), lastshoot(0),
         actortype(A_PLAYER), spawnpoint(-1), ownernum(-1), skill(0), points(0), frags(0), deaths(0), cpmillis(0), cptime(0), quarantine(false)
     {
         setvanity();
@@ -739,7 +739,7 @@ struct gamestate
 
     void clearstate()
     {
-        lastdeath = lastpain = lastregen = lastbuff = 0;
+        lastdeath = lastpain = lastregen = lastbuff = lastshoot = 0;
         lastrespawn = -1;
         resetresidual();
     }
@@ -827,9 +827,11 @@ struct gamestate
 
     int protect(int millis, int delay)
     {
-        int amt = 0;
-        if(actortype < A_ENEMY && lastspawn && delay && millis-lastspawn <= delay) amt = delay-(millis-lastspawn);
-        return amt;
+        if(actortype >= A_ENEMY || !lastspawn || !delay) return 0;
+        if(G(protectbreak) && lastshoot) return 0;
+        int len = millis-lastspawn;
+        if(len > delay) return 0;
+        return delay-len;
     }
 
     bool burning(int millis, int len) { return len && lastres[WR_BURN] && millis-lastres[WR_BURN] <= len; }
