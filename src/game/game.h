@@ -750,18 +750,17 @@ struct gamestate
         loadweap.shrink(0);
     }
 
-    void respawn(int millis, int heal = 0)
+    void respawn(int millis)
     {
-        health = heal ? heal : 100;
         lastspawn = millis;
         clearstate();
         weapreset(true);
     }
 
-    void spawnstate(int gamemode, int mutators, int sweap = -1, int heal = 0)
+    void spawnstate(int gamemode, int mutators, int sweap, int heal)
     {
         weapreset(true);
-        health = heal ? heal : m_health(gamemode, mutators, model);
+        health = heal > 0 ? heal : (actortype >= A_ENEMY ? 100 : m_health(gamemode, mutators, model));
         int s = sweap;
         if(!isweap(s))
         {
@@ -814,10 +813,10 @@ struct gamestate
         }
     }
 
-    void editspawn(int gamemode, int mutators, int sweap = -1, int heal = 0)
+    void editspawn(int gamemode, int mutators)
     {
         clearstate();
-        spawnstate(gamemode, mutators, sweap, heal);
+        spawnstate(gamemode, mutators, m_weapon(gamemode, mutators), m_health(gamemode, mutators, model));
     }
 
     int respawnwait(int millis, int delay)
@@ -977,7 +976,7 @@ struct gameent : dynent, gamestate
         removesounds();
         cleartags();
         checktags();
-        respawn(-1, 0, 0, 0);
+        respawn(-1, 0, 0);
     }
     ~gameent()
     {
@@ -1072,16 +1071,16 @@ struct gameent : dynent, gamestate
         used.shrink(0);
     }
 
-    void respawn(int millis, int heal, int gamemode, int mutators)
+    void respawn(int millis, int gamemode, int mutators)
     {
         stopmoving(true);
         removesounds();
         clearstate(gamemode, mutators);
         physent::reset();
-        gamestate::respawn(millis, heal);
+        gamestate::respawn(millis);
     }
 
-    void editspawn(int gamemode, int mutators, int sweap = -1, int heal = 0)
+    void editspawn(int gamemode, int mutators)
     {
         stopmoving(true);
         clearstate(gamemode, mutators);
@@ -1092,22 +1091,22 @@ struct gameent : dynent, gamestate
         vel = falling = vec(0, 0, 0);
         floor = vec(0, 0, 1);
         resetinterp();
-        gamestate::editspawn(gamemode, mutators, sweap, heal);
+        gamestate::editspawn(gamemode, mutators);
     }
 
-    void resetstate(int millis, int heal, int gamemode, int mutators)
+    void resetstate(int millis, int gamemode, int mutators)
     {
-        respawn(millis, heal, gamemode, mutators);
+        respawn(millis, gamemode, mutators);
         checkpoint = -1;
         frags = deaths = totaldamage = cplast = 0;
     }
 
-    void mapchange(int millis, int heal, int gamemode, int mutators)
+    void mapchange(int millis, int gamemode, int mutators)
     {
         dominating.shrink(0);
         dominated.shrink(0);
         icons.shrink(0);
-        resetstate(millis, heal, gamemode, mutators);
+        resetstate(millis, gamemode, mutators);
         gamestate::mapchange();
     }
 

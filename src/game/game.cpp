@@ -279,6 +279,7 @@ namespace game
     FVAR(IDF_PERSIST, playerhintblend, 0, 0.1f, 1);
     FVAR(IDF_PERSIST, playerhintscale, 0, 0.7f, 1); // scale blend depending on health
     FVAR(IDF_PERSIST, playerhintsize, 0, 1.2f, 2);
+    FVAR(IDF_PERSIST, playerhintmaxsize, 0, 20, FVAR_MAX);
     FVAR(IDF_PERSIST, playerhintfadeat, 0, 64, FVAR_MAX);
     FVAR(IDF_PERSIST, playerhintfadecut, 0, 8, FVAR_MAX);
     FVAR(IDF_PERSIST, playerhinthurtblend, 0, 0.9f, 1);
@@ -1442,7 +1443,7 @@ namespace game
         if(hithurts(flags))
         {
             d->health = health;
-            if(d->health <= m_health(gamemode, mutators, d->model)) d->lastregen = 0;
+            d->lastregen = 0;
             d->lastpain = lastmillis;
             v->totaldamage += damage;
         }
@@ -1913,8 +1914,7 @@ namespace game
         // reset perma-state
         gameent *d;
         int numdyns = numdynents();
-        loopi(numdyns) if((d = (gameent *)iterdynents(i)) && (gameent::is(d)))
-            d->mapchange(lastmillis, m_health(gamemode, mutators, d->model), gamemode, mutators);
+        loopi(numdyns) if((d = (gameent *)iterdynents(i)) && gameent::is(d)) d->mapchange(lastmillis, gamemode, mutators);
         if(!client::demoplayback && m_loadout(gamemode, mutators) && autoloadweap && *favloadweaps) chooseloadweap(player1, favloadweaps);
         entities::spawnplayer(player1); // prevent the player from being in the middle of nowhere
         resetcamera();
@@ -3408,7 +3408,7 @@ namespace game
             bool useth = hud::teamhurttime && m_team(gamemode, mutators) && focus == player1 &&
                  d->team == player1->team && d->lastteamhit >= 0 && lastmillis-d->lastteamhit <= hud::teamhurttime,
                  hashint = playerhint&(d->team != focus->team ? 2 : 1);
-            if(d != focus && (useth || hashint))
+            if(d->actortype < A_ENEMY && d != focus && (useth || hashint))
             {
                 if(hashint)
                 {
@@ -3434,7 +3434,7 @@ namespace game
                     vec o = d->center(), offset = vec(o).sub(camera1->o).rescale(d->radius/2);
                     offset.z = max(offset.z, -1.0f);
                     offset.add(o);
-                    part_create(PART_HINT_BOLD_SOFT, 1, offset, c.tohexcolor(), height*playerhintsize, fade*playerhintblend*camera1->o.distrange(o, playerhintfadeat, playerhintfadecut));
+                    part_create(PART_HINT_BOLD_SOFT, 1, offset, c.tohexcolor(), clamp(height*playerhintsize, 1.f, playerhintmaxsize), fade*playerhintblend*camera1->o.distrange(o, playerhintfadeat, playerhintfadecut));
                 }
                 if(useth)
                 {
@@ -3596,7 +3596,7 @@ namespace game
             previewent->state = CS_ALIVE;
             previewent->physstate = PHYS_FLOOR;
             previewent->o = vec(0, 0.75f*(previewent->height + previewent->aboveeye), previewent->height - (previewent->height + previewent->aboveeye)/2);
-            previewent->spawnstate(G_DEATHMATCH, 0);
+            previewent->spawnstate(G_DEATHMATCH, 0, -1, m_health(G_DEATHMATCH, 0, 0));
             previewent->light.color = vec(1, 1, 1);
             previewent->light.dir = vec(0, -1, 2).normalize();
             loopi(W_MAX) previewent->ammo[i] = W(i, ammomax);
