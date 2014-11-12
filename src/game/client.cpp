@@ -2042,7 +2042,7 @@ namespace client
                         parsestate(NULL, p);
                         break;
                     }
-                    f->respawn(lastmillis, m_health(game::gamemode, game::mutators, f->model), game::gamemode, game::mutators);
+                    f->respawn(lastmillis, game::gamemode, game::mutators);
                     parsestate(f, p);
                     break;
                 }
@@ -2057,7 +2057,7 @@ namespace client
                         break;
                     }
                     if(f == game::player1 && editmode) toggleedit();
-                    f->respawn(lastmillis, m_health(game::gamemode, game::mutators, f->model), game::gamemode, game::mutators);
+                    f->respawn(lastmillis, game::gamemode, game::mutators);
                     parsestate(f, p);
                     game::respawned(f, true, ent);
                     break;
@@ -2223,7 +2223,7 @@ namespace client
                             parsestate(NULL, p);
                             break;
                         }
-                        if(f && f != game::player1 && !f->ai) f->respawn(lastmillis, m_health(game::gamemode, game::mutators, f->model), game::gamemode, game::mutators);
+                        if(f && f != game::player1 && !f->ai) f->respawn(lastmillis, game::gamemode, game::mutators);
                         parsestate(f, p, true);
                         f->setscale(game::rescale(f), 0, true);
                     }

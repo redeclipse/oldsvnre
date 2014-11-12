@@ -233,7 +233,7 @@ namespace server
             cpnodes.shrink(0);
             damagelog.shrink(0);
             teamkills.shrink(0);
-            respawn();
+            respawn(0);
         }
 
         void resetresidualowner(int n = -1)
@@ -242,11 +242,11 @@ namespace server
             else loopi(WR_MAX) lastresowner[i] = -1;
         }
 
-        void respawn(int millis = 0, int heal = 0)
+        void respawn(int millis)
         {
             lastboost = rewards[1] = 0;
             resetresidualowner();
-            gamestate::respawn(millis, heal);
+            gamestate::respawn(millis);
             o = vec(-1e10f, -1e10f, -1e10f);
             vel = falling = vec(0, 0, 0);
             yaw = pitch = roll = 0;
@@ -576,7 +576,9 @@ namespace server
         {
             if(v != m && (!m_team(gamemode, mutators) || v->team != m->team) && v->state.state == CS_ALIVE && hurt > 0)
             {
-                int rgn = v->state.health, heal = min(v->state.health+hurt, m_maxhealth(gamemode, mutators, v->state.model)), eff = heal-rgn;
+                int rgn = v->state.health, heal = v->state.health+hurt;
+                if(v->state.actortype < A_ENEMY) heal = min(heal, m_maxhealth(gamemode, mutators, v->state.model));
+                int eff = heal-rgn;
                 if(eff)
                 {
                     v->state.health = heal;
@@ -2009,6 +2011,7 @@ namespace server
             if(!m_insta(gamemode, mutators)) health = max(int((hasent && sents[ci->state.spawnpoint].attrs[7] > 0 ? sents[ci->state.spawnpoint].attrs[7] : actor[ci->state.actortype].health)*G(enemystrength)), 1);
             if(!isweap(weap)) weap = -1; // let spawnstate figure it out
         }
+        else health = m_health(gamemode, mutators, ci->state.model);
         int spawn = pickspawn(ci);
         gs.spawnstate(gamemode, mutators, weap, health);
         sendf(ci->clientnum, 1, "ri9iv", N_SPAWNSTATE, ci->clientnum, spawn, gs.state, gs.points, gs.frags, gs.deaths, gs.health, gs.cptime, gs.weapselect, W_MAX, &gs.ammo[0]);
@@ -3604,8 +3607,9 @@ namespace server
         else
         {
             hurt = min(m->state.health, realdamage);
-            m->state.health = min(m->state.health-realdamage, m_maxhealth(gamemode, mutators, m->state.model));
-            /*if(m->state.health <= m_health(gamemode, mutators, m->state.model))*/ m->state.lastregen = 0;
+            m->state.health = m->state.health-realdamage;
+            if(m->state.actortype < A_ENEMY) m->state.health = min(m->state.health, m_maxhealth(gamemode, mutators, m->state.model));
+            m->state.lastregen = 0;
             m->state.lastpain = gamemillis;
             v->state.damage += realdamage;
             if(m->state.health <= 0) realflags |= HIT_KILL;
@@ -4403,7 +4407,7 @@ namespace server
                     if(ci->state.lastdeath) flushevents(ci, ci->state.lastdeath + DEATHMILLIS);
                     cleartimedevents(ci);
                     ci->state.state = CS_DEAD; // safety
-                    ci->state.respawn(gamemillis, m_health(gamemode, mutators, ci->state.model));
+                    ci->state.respawn(gamemillis);
                     sendspawn(ci);
                 }
             }
