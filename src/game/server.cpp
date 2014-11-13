@@ -1700,14 +1700,13 @@ namespace server
 
     void setupitems(bool update)
     {
-        static vector<int> items, enemies;
-        items.setsize(0); enemies.setsize(0);
+        vector<int> items, enemies;
         int sweap = m_weapon(gamemode, mutators);
         loopv(sents)
         {
             if(sents[i].type == ACTOR && sents[i].attrs[0] >= 0 && sents[i].attrs[0] < A_TOTAL && (sents[i].attrs[5] == triggerid || !sents[i].attrs[5]) && m_check(sents[i].attrs[3], sents[i].attrs[4], gamemode, mutators))
             {
-                sents[i].millis += G(enemyspawndelay);
+                sents[i].millis = gamemillis+G(enemyspawndelay);
                 switch(G(enemyspawnstyle) == 3 ? rnd(2)+1 : G(enemyspawnstyle))
                 {
                     case 1: enemies.add(i); break;
@@ -1717,7 +1716,7 @@ namespace server
             }
             else if(m_fight(gamemode) && enttype[sents[i].type].usetype == EU_ITEM && hasitem(i))
             {
-                sents[i].millis += G(itemspawndelay);
+                sents[i].millis = gamemillis+G(itemspawndelay);
                 switch(G(itemspawnstyle) == 3 ? rnd(2)+1 : G(itemspawnstyle))
                 {
                     case 1: items.add(i); break;
@@ -1739,8 +1738,7 @@ namespace server
         if(!enemies.empty())
         {
             sortrandomly(enemies);
-            loopv(enemies)
-                sents[enemies[i]].millis += G(enemyspawndelay)*i;
+            loopv(enemies) sents[enemies[i]].millis += G(enemyspawndelay)*i;
         }
     }
 

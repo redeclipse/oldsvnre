@@ -219,8 +219,8 @@ GVAR(0, regendecay, 0, 3, VAR_MAX); // if over maxhealth, decay this amount each
 
 GVAR(0, kamikaze, 0, 1, 3); // 0 = never, 1 = holding grenade, 2 = have grenade, 3 = always
 GVAR(0, itemspawntime, 1, 15000, VAR_MAX); // when items respawn
-GVAR(0, itemspawndelay, 0, 1000, VAR_MAX); // after map start items first spawn
-GVAR(0, itemspawnstyle, 0, 1, 3); // 0 = all at once, 1 = staggered, 2 = random, 3 = randomise between both
+GVAR(0, itemspawndelay, 0, 0, VAR_MAX); // after map start items first spawn
+GVAR(0, itemspawnstyle, 0, 0, 3); // 0 = all at once, 1 = staggered, 2 = random, 3 = randomise between both
 GVAR(0, itemcollide, 0, BOUNCE_GEOM, VAR_MAX);
 GVAR(0, itemextinguish, 0, 6, 7);
 GVAR(0, iteminteracts, 0, 3, 3);
@@ -382,7 +382,7 @@ GVAR(0, enemyskillmin, 1, 65, 101);
 GVAR(0, enemyskillmax, 1, 80, 101);
 GVAR(0, enemylimit, 0, 32, MAXAI);
 GVAR(0, enemyspawntime, 1, 30000, VAR_MAX); // when enemies respawn
-GVAR(0, enemyspawndelay, 0, 1000, VAR_MAX); // after map start enemies first spawn
+GVAR(0, enemyspawndelay, 0, 5000, VAR_MAX); // after map start enemies first spawn
 GVAR(0, enemyspawnstyle, 0, 1, 3); // 0 = all at once, 1 = staggered, 2 = random, 3 = randomise between both
 GFVAR(0, enemyspeed, 0, 1, FVAR_MAX);
 GFVAR(0, enemyscale, FVAR_NONZERO, 1, FVAR_MAX);
