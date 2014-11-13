@@ -336,6 +336,7 @@ namespace aiman
                 {
                     int amt = min(G(enemybalance)-count, G(enemylimit)-numenemies);
                     loopk(amt) addai(sents[j].attrs[0]+A_ENEMY, j);
+                    sents[j].millis = gamemillis+G(enemyspawntime);
                 }
             }
         }
