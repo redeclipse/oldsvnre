@@ -816,13 +816,13 @@ weaptypes weaptype[] =
     {
             ANIM_PLASMA,        S_PLASMA,   1,
             false,      false,      true,       false,      false,
-            { 0, 0 },               10,         0,
+            { 0, 0 },               8,         0,
             "plasma", "weapons/plasma/item", "weapons/plasma/vwep", "weapons/plasma/hwep", "", ""
     },
     {
             ANIM_ZAPPER,        S_ZAPPER,   1,
             false,      false,      true,       false,      true,
-            { 0, 0 },               12,         0,
+            { 0, 0 },               10,         0,
             "zapper", "weapons/zapper/item", "weapons/zapper/vwep", "weapons/zapper/hwep", "", ""
     },
     {
