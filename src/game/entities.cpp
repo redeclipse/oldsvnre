@@ -23,6 +23,9 @@ namespace entities
     FVAR(IDF_PERSIST, simpleitemblend, 0, 1, 1);
     FVAR(IDF_PERSIST, simpleitemhalo, 0, 0.5f, 1);
 
+    FVAR(IDF_PERSIST, haloitemsize, 0, 1, 8);
+    FVAR(IDF_PERSIST, haloitemblend, 0, 0.75f, 1);
+
     VARF(0, routeid, -1, -1, VAR_MAX, lastroutenode = -1; lastroutetime = 0; airnodes.setsize(0)); // selected route in time trial
     VARF(0, droproute, 0, 0, 1, lastroutenode = -1; lastroutetime = 0; airnodes.setsize(0); if(routeid < 0) routeid = 0);
     VAR(IDF_HEX, routecolour, 0, 0xFF22FF, 0xFFFFFF);
@@ -2344,6 +2347,11 @@ namespace entities
                 part_icon(o, textureload(hud::itemtex(e.type, attr), 3), simpleitemsize*skew, simpleitemblend*skew, 0, 0, 1, colour);
                 if(radius < simpleitemsize*skew) radius = simpleitemsize*skew;
                 blend *= simpleitemhalo;
+            }
+            else
+            {
+                radius *= haloitemsize;
+                blend *= haloitemblend;
             }
             vec offset = vec(o).sub(camera1->o).rescale(radius/2);
             offset.z = max(offset.z, -1.0f);
