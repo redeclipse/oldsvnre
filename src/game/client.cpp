@@ -496,6 +496,37 @@ namespace client
     VARF(IDF_PERSIST, playermodel, 0, 0, PLAYERTYPES-1, setplayermodel(playermodel));
     SVARF(IDF_PERSIST, playervanity, "", if(game::player1->setvanity(playervanity)) sendplayerinfo = true;);
 
+    void setloadweap(const char *list)
+    {
+        game::player1->loadweap.shrink(0);
+        vector<int> items;
+        if(list && *list)
+        {
+            vector<char *> chunk;
+            explodelist(list, chunk);
+            loopv(chunk)
+            {
+                if(!chunk[i] || !*chunk[i] || !isnumeric(*chunk[i])) continue;
+                int v = parseint(chunk[i]);
+                items.add(v >= W_OFFSET && v < W_ITEM ? v : 0);
+                if(items.length() >= W_LOADOUT) break;
+            }
+            chunk.deletearrays();
+        }
+        int r = max(maxcarry, items.length());
+        while(game::player1->loadweap.length() < r) game::player1->loadweap.add(0);
+        loopi(r)
+        {
+            int n = game::player1->loadweap.find(items[i]);
+            game::player1->loadweap[i] = n < 0 || n >= i ? items[i] : 0;
+        }
+        sendplayerinfo = true;
+    }
+    SVARF(IDF_PERSIST, playerloadweap, "", setloadweap(playerloadweap));
+    ICOMMAND(0, getloadweap, "i", (int *n), intret(game::player1->loadweap.inrange(*n) ? game::player1->loadweap[*n] : -1));
+    ICOMMAND(0, allowedweap, "i", (int *n), intret(isweap(*n) && m_check(W(*n, modes), W(*n, muts), game::gamemode, game::mutators) && !W(*n, disabled) ? 1 : 0));
+    ICOMMAND(0, hasloadweap, "bb", (int *g, int *m), intret(m_loadout(m_game(*g) ? *g : game::gamemode, *m >= 0 ? *m : game::mutators) ? 1 : 0));
+
     int teamname(const char *team)
     {
         if(m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
@@ -1553,6 +1584,8 @@ namespace client
                 putint(p, game::player1->colour);
                 putint(p, game::player1->model);
                 sendstring(game::player1->vanity, p);
+                putint(p, game::player1->loadweap.length());
+                loopv(game::player1->loadweap) putint(p, game::player1->loadweap[i]);
             }
             if(sendcrcinfo)
             {
@@ -1953,6 +1986,9 @@ namespace client
                     int colour = getint(p), model = getint(p);
                     string vanity;
                     getstring(vanity, p);
+                    int lw = getint(p);
+                    vector<int> lweaps;
+                    loopk(lw) lweaps.add(getint(p));
                     if(!d) break;
                     filtertext(text, text, true, true, true, MAXNAMELEN);
                     const char *namestr = text;
@@ -1962,12 +1998,12 @@ namespace client
                     {
                         string oldname, newname;
                         copystring(oldname, game::colourname(d));
-                        d->setinfo(namestr, colour, model, vanity);
+                        d->setinfo(namestr, colour, model, vanity, lweaps);
                         copystring(newname, game::colourname(d));
                         if(showpresence >= (waiting(false) ? 2 : 1) && !isignored(d->clientnum))
                             conoutft(CON_EVENT, "\fm%s is now known as %s", oldname, newname);
                     }
-                    else d->setinfo(namestr, colour, model, vanity);
+                    else d->setinfo(namestr, colour, model, vanity, lweaps);
                     break;
                 }
 
@@ -1978,8 +2014,11 @@ namespace client
                     gameent *d = game::newclient(tcn);
                     if(!d)
                     {
-                        loopi(4) getint(p);
-                        loopi(5) getstring(text, p);
+                        loopk(4) getint(p);
+                        getstring(text, p);
+                        int w = getint(p);
+                        loopk(w) getint(p);
+                        loopk(4) getstring(text, p);
                         dummy.get(p);
                         break;
                     }
@@ -1990,6 +2029,9 @@ namespace client
                     while(*namestr && iscubespace(*namestr)) namestr++;
                     if(!*namestr) namestr = copystring(name, "unnamed");
                     string vanity = ""; getstring(vanity, p);
+                    int lw = getint(p);
+                    vector<int> lweaps;
+                    loopk(lw) lweaps.add(getint(p));
                     getstring(d->handle, p);
                     getstring(d->hostname, p);
                     getstring(d->hostip, p);
@@ -1998,10 +2040,10 @@ namespace client
                     if(d == game::focus && d->team != team) hud::lastteam = 0;
                     d->team = team;
                     d->privilege = priv;
-                    if(d->name[0]) d->setinfo(namestr, colour, model, vanity); // already connected
+                    if(d->name[0]) d->setinfo(namestr, colour, model, vanity, lweaps); // already connected
                     else // new client
                     {
-                        d->setinfo(namestr, colour, model, vanity);
+                        d->setinfo(namestr, colour, model, vanity, lweaps);
                         if(showpresence >= (waiting(false) ? 2 : 1))
                         {
                             int amt = otherclients(true);
@@ -2028,7 +2070,6 @@ namespace client
                 case N_LOADW:
                 {
                     hud::showscores(false);
-                    game::player1->loadweap.shrink(0);
                     if(!menuactive()) showgui("loadout", -1);
                     break;
                 }
@@ -2807,9 +2848,12 @@ namespace client
                     int tm = getint(p), cl = getint(p), md = getint(p);
                     string vanity;
                     getstring(vanity, p);
+                    int lw = getint(p);
+                    vector<int> lweaps;
+                    loopk(lw) lweaps.add(getint(p));
                     gameent *b = game::newclient(bn);
                     if(!b) break;
-                    ai::init(b, at, et, on, sk, bn, text, tm, cl, md, vanity);
+                    ai::init(b, at, et, on, sk, bn, text, tm, cl, md, vanity, lweaps);
                     break;
                 }
 

@@ -131,6 +131,7 @@ namespace aiman
                 ci->state.model = rnd(PLAYERTYPES);
                 ci->state.setvanity(ci->state.model ? G(botfemalevanities) : G(botmalevanities)); // the first slot is special
                 copystring(ci->name, actor[ci->state.actortype].name, MAXNAMELEN);
+                ci->state.loadweap.shrink(0);
                 if(ci->state.actortype == A_BOT)
                 {
                     const char *list = ci->state.model ? G(botfemalenames) : G(botmalenames);
@@ -145,6 +146,7 @@ namespace aiman
                             delete[] name;
                         }
                     }
+                    ci->state.loadweap.add(rnd(W_LOADOUT)+W_OFFSET);
                 }
                 ci->state.state = CS_DEAD;
                 ci->team = type == A_BOT ? T_NEUTRAL : T_ENEMY;
@@ -199,7 +201,7 @@ namespace aiman
         else if(ci->state.aireinit >= 1)
         {
             if(ci->state.aireinit == 2) loopk(W_MAX) loopj(2) ci->state.weapshots[k][j].reset();
-            sendf(-1, 1, "ri6si3s", N_INITAI, ci->clientnum, ci->state.ownernum, ci->state.actortype, ci->state.spawnpoint, ci->state.skill, ci->name, ci->team, ci->state.colour, ci->state.model, ci->state.vanity);
+            sendf(-1, 1, "ri6si3siv", N_INITAI, ci->clientnum, ci->state.ownernum, ci->state.actortype, ci->state.spawnpoint, ci->state.skill, ci->name, ci->team, ci->state.colour, ci->state.model, ci->state.vanity, ci->state.loadweap.length(), ci->state.loadweap.length(), ci->state.loadweap.getbuf());
             if(ci->state.aireinit == 2)
             {
                 waiting(ci, DROP_RESET);

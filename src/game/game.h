@@ -747,7 +747,6 @@ struct gamestate
     void mapchange()
     {
         points = cpmillis = cptime = 0;
-        loadweap.shrink(0);
     }
 
     void respawn(int millis)
@@ -1357,13 +1356,13 @@ struct gameent : dynent, gamestate
         else icons.insert(pos, e);
     }
 
-    void setname(const char *n = NULL)
+    void setname(const char *n)
     {
         if(n && *n) copystring(name, n, MAXNAMELEN+1);
         else name[0] = 0;
     }
 
-    bool setvanity(const char *v = "")
+    bool setvanity(const char *v)
     {
         if(gamestate::setvanity(v))
         {
@@ -1373,12 +1372,14 @@ struct gameent : dynent, gamestate
         return false;
     }
 
-    void setinfo(const char *n = NULL, int c = 0, int m = 0, const char *v = "")
+    void setinfo(const char *n, int c, int m, const char *v, vector<int> &w)
     {
         setname(n);
         colour = c;
         model = m;
         setvanity(v);
+        loadweap.shrink(0);
+        loopv(w) loadweap.add(w[i]);
     }
 
     void addstun(int weap, int millis, int delay, float scale, float gravity)

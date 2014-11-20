@@ -3323,6 +3323,8 @@ namespace server
                 putint(p, ci->state.colour);
                 putint(p, ci->state.model);
                 sendstring(ci->state.vanity, p);
+                putint(p, ci->state.loadweap.length());
+                loopv(ci->state.loadweap) putint(p, ci->state.loadweap[i]);
             }
         }
         else
@@ -3335,6 +3337,8 @@ namespace server
             putint(p, ci->privilege);
             sendstring(ci->name, p);
             sendstring(ci->state.vanity, p);
+            putint(p, ci->state.loadweap.length());
+            loopv(ci->state.loadweap) putint(p, ci->state.loadweap[i]);
             sendstring(ci->handle, p);
             sendstring(gethostname(ci->clientnum), p);
             sendstring(gethostip(ci->clientnum), p);
@@ -4673,7 +4677,7 @@ namespace server
         }
 
         uchar operator[](int msg) const { return msg >= 0 && msg < NUMMSG ? msgmask[msg] : 0; }
-    } msgfilter(-1, N_CONNECT, N_SERVERINIT, N_CLIENTINIT, N_WELCOME, N_NEWGAME, N_MAPCHANGE, N_SERVMSG, N_DAMAGE, N_SHOTFX, N_DIED, N_POINTS, N_SPAWNSTATE, N_ITEMACC, N_ITEMSPAWN, N_TICK, N_DISCONNECT, N_CURRENTPRIV, N_PONG, N_RESUME, N_SCOREAFFIN, N_SCORE, N_ANNOUNCE, N_SENDDEMOLIST, N_SENDDEMO, N_DEMOPLAYBACK, N_REGEN, N_CLIENT, N_AUTHCHAL, -2, N_REMIP, N_NEWMAP, N_CLIPBOARD, -3, N_EDITENT, N_EDITLINK, N_EDITVAR, N_EDITF, N_EDITT, N_EDITM, N_FLIP, N_COPY, N_PASTE, N_ROTATE, N_REPLACE, N_DELCUBE, -4, N_POS, N_SPAWN, N_DESTROY, NUMMSG),
+    } msgfilter(-1, N_CONNECT, N_SERVERINIT, N_CLIENTINIT, N_WELCOME, N_NEWGAME, N_MAPCHANGE, N_SERVMSG, N_DAMAGE, N_SHOTFX, N_LOADW, N_DIED, N_POINTS, N_SPAWNSTATE, N_ITEMACC, N_ITEMSPAWN, N_TICK, N_DISCONNECT, N_CURRENTPRIV, N_PONG, N_RESUME, N_SCOREAFFIN, N_SCORE, N_ANNOUNCE, N_SENDDEMOLIST, N_SENDDEMO, N_DEMOPLAYBACK, N_REGEN, N_CLIENT, N_AUTHCHAL, -2, N_REMIP, N_NEWMAP, N_CLIPBOARD, -3, N_EDITENT, N_EDITLINK, N_EDITVAR, N_EDITF, N_EDITT, N_EDITM, N_FLIP, N_COPY, N_PASTE, N_ROTATE, N_REPLACE, N_DELCUBE, -4, N_POS, N_SPAWN, N_DESTROY, NUMMSG),
       connectfilter(-1, N_CONNECT, -2, N_AUTHANS, -3, N_PING, NUMMSG);
 
     int checktype(int type, clientinfo *ci)
@@ -5210,24 +5214,6 @@ namespace server
                     break;
                 }
 
-                case N_LOADW:
-                {
-                    int lcn = getint(p), n = getint(p);
-                    clientinfo *cp = (clientinfo *)getinfo(lcn);
-                    vector<int> items;
-                    loopk(n)
-                    {
-                        int w = getint(p);
-                        if(p.overread()) break;
-                        if(n <= W_LOADOUT) items.add(w);
-                    }
-                    if(!hasclient(cp, ci)) break;
-                    cp->state.loadweap.shrink(0);
-                    loopvk(items) cp->state.loadweap.add(items[k]);
-                    if(m_loadout(gamemode, mutators)) chkloadweap(ci);
-                    break;
-                }
-
                 case N_WSELECT:
                 {
                     int lcn = getint(p), id = getint(p), weap = getint(p);
@@ -5626,8 +5612,10 @@ namespace server
                         if(!allow)
                         {
                             getstring(text, p);
-                            loopi(2) getint(p);
+                            loopk(2) getint(p);
                             getstring(text, p);
+                            int w = getint(p);
+                            loopk(w) getint(p);
                             sendinitclientself(ci);
                             break;
                         }
@@ -5648,6 +5636,10 @@ namespace server
                     ci->state.model = max(getint(p), 0);
                     getstring(text, p);
                     ci->state.setvanity(text);
+                    ci->state.loadweap.shrink(0);
+                    int lw = getint(p);
+                    vector<int> lweaps;
+                    loopk(lw) ci->state.loadweap.add(getint(p));
                     ci->lastplayerinfo = totalmillis;
                     QUEUE_STR(ci->name);
                     QUEUE_INT(ci->state.colour);
