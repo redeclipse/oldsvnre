@@ -208,7 +208,7 @@ namespace ai
         vector<aistate> state;
         vector<int> route;
         vec target, spot, views, aimrnd;
-        int weappref, enemy, enemyseen, enemymillis, prevnodes[NUMPREVNODES], targnode, targlast, targtime, targseq,
+        int enemy, enemyseen, enemymillis, prevnodes[NUMPREVNODES], targnode, targlast, targtime, targseq,
             lastrun, lastaction, lastcheck, jumpseed, jumprand, blocktime, blockseq, lastaimrnd, lastmelee, lastturn;
         float targyaw, targpitch;
         bool dontmove, tryreset;
@@ -227,7 +227,7 @@ namespace ai
             lastaction = lastcheck = enemyseen = enemymillis = blocktime = blockseq = targtime = targseq = lastaimrnd = lastmelee = lastturn = 0;
             lastrun = jumpseed = lastmillis;
             jumprand = lastmillis+5000;
-            weappref = targnode = targlast = enemy = -1;
+            targnode = targlast = enemy = -1;
             targyaw = targpitch = 0;
         }
 
@@ -311,6 +311,7 @@ namespace ai
     extern bool targetable(gameent *d, gameent *e, bool solid = false);
     extern bool cansee(gameent *d, vec &x, vec &y, bool force = false, vec &targ = aitarget);
     extern bool altfire(gameent *d, gameent *e);
+    extern int weappref(gameent *d);
 
     extern void init(gameent *d, int at, int et, int on, int sk, int bn, char *name, int tm, int cl, int md, const char *vn, vector<int> &lweaps);
 

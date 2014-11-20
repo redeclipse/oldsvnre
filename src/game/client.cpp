@@ -498,7 +498,6 @@ namespace client
 
     void setloadweap(const char *list)
     {
-        game::player1->loadweap.shrink(0);
         vector<int> items;
         if(list && *list)
         {
@@ -513,12 +512,11 @@ namespace client
             }
             chunk.deletearrays();
         }
-        int r = max(maxcarry, items.length());
-        while(game::player1->loadweap.length() < r) game::player1->loadweap.add(0);
-        loopi(r)
+        game::player1->loadweap.shrink(0);
+        loopv(items) if(game::player1->loadweap.find(items[i]) < 0)
         {
-            int n = game::player1->loadweap.find(items[i]);
-            game::player1->loadweap[i] = n < 0 || n >= i ? items[i] : 0;
+            game::player1->loadweap.add(items[i]);
+            if(game::player1->loadweap.length() >= W_LOADOUT) break;
         }
         sendplayerinfo = true;
     }

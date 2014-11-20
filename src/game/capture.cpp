@@ -653,12 +653,12 @@ namespace capture
             {
                 bool guard = false;
                 if(f.owner || f.droptime || targets.empty()) guard = true;
-                else if(d->hasweap(d->ai->weappref, m_weapon(game::gamemode, game::mutators)))
+                else if(d->hasweap(ai::weappref(d), m_weapon(game::gamemode, game::mutators)))
                 { // see if we can relieve someone who only has a piece of crap
                     gameent *t;
                     loopvk(targets) if((t = game::getclient(targets[k])))
                     {
-                        if((t->ai && !t->hasweap(t->ai->weappref, m_weapon(game::gamemode, game::mutators))) || (!t->ai && t->weapselect < W_OFFSET))
+                        if((t->ai && !t->hasweap(ai::weappref(t), m_weapon(game::gamemode, game::mutators))) || (!t->ai && t->weapselect < W_OFFSET))
                         {
                             guard = true;
                             break;

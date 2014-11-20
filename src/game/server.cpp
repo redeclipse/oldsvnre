@@ -5639,7 +5639,11 @@ namespace server
                     ci->state.loadweap.shrink(0);
                     int lw = getint(p);
                     vector<int> lweaps;
-                    loopk(lw) ci->state.loadweap.add(getint(p));
+                    loopk(lw)
+                    {
+                        if(lw >= W_LOADOUT) getint(p);
+                        else ci->state.loadweap.add(getint(p));
+                    }
                     ci->lastplayerinfo = totalmillis;
                     QUEUE_STR(ci->name);
                     QUEUE_INT(ci->state.colour);
