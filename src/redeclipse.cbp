@@ -668,6 +668,14 @@
 			<Option target="redeclipse-amd64-dbg" />
 			<Option target="redeclipse-amd64-prof" />
 		</Unit>
+		<Unit filename="engine/glexts.h">
+			<Option target="redeclipse-x86" />
+			<Option target="redeclipse-x86-dbg" />
+			<Option target="redeclipse-x86-prof" />
+			<Option target="redeclipse-amd64" />
+			<Option target="redeclipse-amd64-dbg" />
+			<Option target="redeclipse-amd64-prof" />
+		</Unit>
 		<Unit filename="engine/grass.cpp">
 			<Option target="redeclipse-x86" />
 			<Option target="redeclipse-x86-dbg" />
