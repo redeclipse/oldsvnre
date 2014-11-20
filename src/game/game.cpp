@@ -300,8 +300,6 @@ namespace game
     VAR(IDF_PERSIST, forceplayermodel, -1, -1, PLAYERTYPES-1);
     VAR(IDF_PERSIST, vanitymodels, 0, 1, 1);
     VAR(IDF_PERSIST, headlessmodels, 0, 1, 1);
-    VAR(IDF_PERSIST, autoloadweap, 0, 0, 1); // 0 = off, 1 = auto-set loadout weapons
-    SVAR(IDF_PERSIST, favloadweaps, "");
     FVAR(IDF_PERSIST, twitchspeed, 0, 8, FVAR_MAX);
 
     bool needname(gameent *d)
@@ -1840,64 +1838,6 @@ namespace game
         if(!empty) smartmusic(true, false);
     }
 
-    int lookupweap(const char *a)
-    {
-        if(isnumeric(*a)) return parseint(a);
-        else loopi(W_MAX) if(!strcasecmp(W(i, name), a)) return i;
-        return -1;
-    }
-
-    void chooseloadweap(gameent *d, const char *list, bool saved = false, bool echo = false)
-    {
-        if(saved && d != player1) saved = false;
-        vector<int> items;
-        if(list && *list)
-        {
-            vector<char *> chunk;
-            explodelist(list, chunk);
-            loopv(chunk)
-            {
-                if(!chunk[i] || !*chunk[i] || !isnumeric(*chunk[i])) continue;
-                int v = parseint(chunk[i]);
-                items.add(v >= W_OFFSET && v < W_ITEM ? v : 0);
-                if(items.length() >= W_LOADOUT) break;
-            }
-            chunk.deletearrays();
-        }
-        int r = max(maxcarry, items.length());
-        while(d->loadweap.length() < r) d->loadweap.add(0);
-        loopi(r)
-        {
-            int n = d->loadweap.find(items[i]);
-            d->loadweap[i] = n < 0 || n >= i ? items[i] : 0;
-        }
-        client::addmsg(N_LOADW, "ri2v", d->clientnum, d->loadweap.length(), d->loadweap.length(), d->loadweap.getbuf());
-        vector<char> value, msg;
-        loopi(r)
-        {
-            if(saved)
-            {
-                if(!value.empty()) value.add(' ');
-                value.add(char(d->loadweap[i]+48));
-            }
-            int colour = W(d->loadweap[i] ? d->loadweap[i] : W_MELEE, colour);
-            const char *pre = msg.empty() ? "" : (i == r-1 ? ", and " : ", "),
-                       *tex = d->loadweap[i] ? hud::itemtex(WEAPON, d->loadweap[i]) : hud::questiontex,
-                       *name = d->loadweap[i] ? W(d->loadweap[i], name) : "random";
-            defformatstring(weap)("%s\fs\f[%d]\f(%s)%s\fS", pre, colour, tex, name);
-            msg.put(weap, strlen(weap));
-        }
-        msg.add('\0');
-        value.add('\0');
-        const char *msgstr = msg.getbuf(), *valstr = value.getbuf();
-        if(valstr && *valstr) setsvar("favloadweaps", value.getbuf(), true);
-        if(d == player1 && echo && msgstr && *msgstr) conoutft(CON_SELF, "weapon selection is now: %s", msgstr);
-    }
-    ICOMMAND(0, loadweap, "sii", (char *s, int *n), chooseloadweap(player1, s, *n!=0, true));
-    ICOMMAND(0, getloadweap, "i", (int *n), intret(player1->loadweap.inrange(*n) ? player1->loadweap[*n] : -1));
-    ICOMMAND(0, allowedweap, "i", (int *n), intret(isweap(*n) && m_check(W(*n, modes), W(*n, muts), gamemode, mutators) && !W(*n, disabled) ? 1 : 0));
-    ICOMMAND(0, hasloadweap, "bb", (int *g, int *m), intret(m_loadout(m_game(*g) ? *g : gamemode, *m >= 0 ? *m : mutators) ? 1 : 0));
-
     void startmap(const char *name, const char *reqname, bool empty)    // called just after a map load
     {
         ai::startmap(name, reqname, empty);
@@ -1915,7 +1855,6 @@ namespace game
         gameent *d;
         int numdyns = numdynents();
         loopi(numdyns) if((d = (gameent *)iterdynents(i)) && gameent::is(d)) d->mapchange(lastmillis, gamemode, mutators);
-        if(!client::demoplayback && m_loadout(gamemode, mutators) && autoloadweap && *favloadweaps) chooseloadweap(player1, favloadweaps);
         entities::spawnplayer(player1); // prevent the player from being in the middle of nowhere
         resetcamera();
         if(!empty) client::sendgameinfo = client::sendcrcinfo = true;
@@ -3601,9 +3540,11 @@ namespace game
             previewent->light.dir = vec(0, -1, 2).normalize();
             loopi(W_MAX) previewent->ammo[i] = W(i, ammomax);
         }
-        previewent->setinfo(NULL, color, model, vanity);
+        previewent->colour = color;
+        previewent->model = model;
         previewent->team = clamp(team, 0, int(T_MULTI));
         previewent->weapselect = clamp(weap, 0, W_MAX-1);
+        previewent->setvanity(vanity);
         previewent->yaw = fmod(lastmillis/10000.0f*360.0f, 360.0f);
         previewent->light.millis = -1;
         renderplayer(previewent, 1, blend, scale);

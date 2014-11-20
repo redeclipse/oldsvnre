@@ -194,7 +194,7 @@ namespace ai
         }
     }
 
-    void init(gameent *d, int at, int et, int on, int sk, int bn, char *name, int tm, int cl, int md, const char *vn)
+    void init(gameent *d, int at, int et, int on, int sk, int bn, char *name, int tm, int cl, int md, const char *vn, vector<int> &lweaps)
     {
         getwaypoints();
 
@@ -226,6 +226,11 @@ namespace ai
         }
 
         if((d->actortype = at) >= A_ENEMY) d->type = ENT_AI;
+        else
+        {
+            d->loadweap.shrink(0);
+            loopv(lweaps) d->loadweap.add(lweaps[i]);
+        }
         d->setname(name);
         d->spawnpoint = et;
         d->ownernum = on;
@@ -1497,13 +1502,6 @@ namespace ai
             {
                 if(d->respawned < 0 && (!d->lastdeath || lastmillis-d->lastdeath > (d->actortype == A_BOT ? 500 : enemyspawntime)))
                 {
-                    if(d->actortype == A_BOT && m_loadout(game::gamemode, game::mutators))
-                    {
-                        d->loadweap.shrink(0);
-                        d->loadweap.add(d->ai->weappref);
-                        if(maxcarry > 1) loopj(maxcarry-1) d->loadweap.add(0);
-                        client::addmsg(N_LOADW, "ri2v", d->clientnum, d->loadweap.length(), d->loadweap.length(), d->loadweap.getbuf());
-                    }
                     client::addmsg(N_TRYSPAWN, "ri", d->clientnum);
                     d->respawned = lastmillis;
                 }
