@@ -32,10 +32,7 @@ struct duelservmode : servmode
 
     bool checkready(clientinfo *ci)
     {
-        if(ci->state.actortype < A_ENEMY)
-        {
-            if(m_loadout(gamemode, mutators) && !chkloadweap(ci, false)) return false;
-        }
+        if(m_loadout(gamemode, mutators) && !chkloadweap(ci, false)) return false;
         return true;
     }
 
