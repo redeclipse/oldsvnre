@@ -3494,7 +3494,7 @@ void genkey(char *s)
 {
     vector<char> privkey, pubkey;
     genprivkey(s, privkey, pubkey);
-    conoutft(CON_MESG, "private key: %s", privkey.getbuf());
-    conoutft(CON_MESG, "public key: %s", pubkey.getbuf());
+    defformatstring(keybuf)("%s %s", privkey.getbuf(), pubkey.getbuf());
+    result(keybuf);
 }
 COMMAND(0, genkey, "s");

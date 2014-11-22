@@ -1617,8 +1617,6 @@ namespace server
                 {
                     int oldbalance = curbalance;
                     if(++curbalance >= numt) curbalance = 0; // safety first
-                    if(smode) smode->balance(oldbalance);
-                    mutate(smuts, mut->balance(oldbalance));
                     static vector<clientinfo *> assign[T_TOTAL];
                     loopk(T_TOTAL) assign[k].setsize(0);
                     loopv(clients) if(isteam(gamemode, mutators, clients[i]->team, T_FIRST))
@@ -1654,6 +1652,8 @@ namespace server
                         sendf(-1, 1, "ri3", N_SCORE, cs.team, cs.total);
                     }
                     ancmsgft(-1, S_V_BALALERT, CON_EVENT, "\fy\fs\fzoyALERT:\fS \fs\fcteams\fS have %sbeen \fs\fcreassigned\fS %s", delpart > 0 ? "now " : "", m_forcebal(gamemode, mutators) ? "to switch roles" : "for map symmetry");
+                    if(smode) smode->balance(oldbalance);
+                    mutate(smuts, mut->balance(oldbalance));
                     if(smode) smode->layout();
                     mutate(smuts, mut->layout());
                     nextbalance = 0;
