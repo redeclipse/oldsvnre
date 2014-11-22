@@ -663,7 +663,7 @@ namespace server
             if(ci->state.actortype >= A_ENEMY) return true;
             else if(tryspawn)
             {
-                if(m_balance(gamemode, mutators, teamspawns) && G(balancenospawn) && nextbalance && m_balreset(gamemode, mutators) && canbalancenow()) return false;
+                //if(m_balance(gamemode, mutators, teamspawns) && G(balancenospawn) && nextbalance && m_balreset(gamemode, mutators) && canbalancenow()) return false;
                 if(m_loadout(gamemode, mutators) && !chkloadweap(ci)) return false;
                 if(spawnqueue(true) && spawnq.find(ci) < 0 && playing.find(ci) < 0) queue(ci);
                 return true;
@@ -5207,10 +5207,14 @@ namespace server
                         spectator(cp);
                         break;
                     }
-                    if(smode) smode->canspawn(cp, true);
-                    mutate(smuts, mut->canspawn(cp, true));
-                    cp->state.state = CS_DEAD;
-                    waiting(cp, DROP_RESET);
+                    int nospawn = 0;
+                    if(smode && !smode->canspawn(ci, true)) { nospawn++; }
+                    mutate(smuts, if(!mut->canspawn(ci, true)) { nospawn++; });
+                    if(!nospawn)
+                    {
+                        cp->state.state = CS_DEAD;
+                        waiting(cp, DROP_RESET);
+                    }
                     break;
                 }
 
@@ -5641,7 +5645,7 @@ namespace server
                     vector<int> lweaps;
                     loopk(lw)
                     {
-                        if(lw >= W_LOADOUT) getint(p);
+                        if(k >= W_LOADOUT) getint(p);
                         else ci->state.loadweap.add(getint(p));
                     }
                     ci->lastplayerinfo = totalmillis;

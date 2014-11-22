@@ -508,7 +508,6 @@ namespace client
                 if(!chunk[i] || !*chunk[i] || !isnumeric(*chunk[i])) continue;
                 int v = parseint(chunk[i]);
                 items.add(v >= W_OFFSET && v < W_ITEM ? v : 0);
-                if(items.length() >= W_LOADOUT) break;
             }
             chunk.deletearrays();
         }
