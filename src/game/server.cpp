@@ -1072,7 +1072,7 @@ namespace server
     {
         if(actortype != A_PLAYER) return "bot";
         const char *privnames[2][PRIV_MAX] = {
-            { "none", "player account", "global supporter", "global moderator", "global operator", "global administrator", "developer", "creator" },
+            { "none", "player account", "global supporter", "global moderator", "global operator", "global administrator", "project developer", "project founder" },
             { "none", "player account", "local supporter", "local moderator", "local operator", "local administrator", "none", "none" }
         };
         return privnames[priv&PRIV_LOCAL ? 1 : 0][clamp(priv&PRIV_TYPE, 0, int(priv&PRIV_LOCAL ? PRIV_ADMINISTRATOR : PRIV_LAST))];
@@ -1082,8 +1082,8 @@ namespace server
     {
         if(actortype != A_PLAYER) return "bot";
         const char *privnames[2][PRIV_MAX] = {
-            { "none", "player", "supporter", "moderator", "operator", "administrator", "developer", "creator" },
-            { "none", "player", "localsupporter", "localmoderator", "localoperator", "localadministrator", "developer", "creator" }
+            { "none", "player", "supporter", "moderator", "operator", "administrator", "developer", "founder" },
+            { "none", "player", "localsupporter", "localmoderator", "localoperator", "localadministrator", "developer", "founder" }
         };
         return privnames[local && priv&PRIV_LOCAL ? 1 : 0][clamp(priv&PRIV_TYPE, 0, int(priv&PRIV_LOCAL ? PRIV_ADMINISTRATOR : PRIV_LAST))];
     }
