@@ -4950,6 +4950,13 @@ namespace server
                         ci->state.model = max(getint(p), 0);
                         getstring(text, p);
                         ci->state.setvanity(text);
+                        int lw = getint(p);
+                        ci->state.loadweap.shrink(0);
+                        loopk(lw)
+                        {
+                            if(k >= W_LOADOUT) getint(p);
+                            else ci->state.loadweap.add(getint(p));
+                        }
 
                         string password = "", authname = "";
                         getstring(text, p); copystring(password, text);
@@ -5653,6 +5660,8 @@ namespace server
                     QUEUE_INT(ci->state.colour);
                     QUEUE_INT(ci->state.model);
                     QUEUE_STR(ci->state.vanity);
+                    QUEUE_INT(ci->state.loadweap.length());
+                    loopvk(ci->state.loadweap) QUEUE_INT(ci->state.loadweap[k]);
                     break;
                 }
 
