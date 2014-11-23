@@ -39,6 +39,20 @@ namespace entities
     int numattrs(int type) { return type >= 0 && type < MAXENTTYPES ? enttype[type].numattrs : 0; }
     ICOMMAND(0, entityattrs, "b", (int *n), intret(numattrs(*n)));
 
+    ICOMMAND(0, getentinfo, "b", (int *n), {
+        if(*n < 0) intret(MAXENTTYPES);
+        else if(*n < MAXENTTYPES) result(enttype[*n].name);
+    });
+
+    ICOMMAND(0, getentattr, "bb", (int *n, int *p), {
+        if(*n < 0) intret(MAXENTTYPES);
+        else if(*n < MAXENTTYPES)
+        {
+            if(*p < 0) intret(enttype[*n].numattrs);
+            else if(*p < enttype[*n].numattrs) result(enttype[*n].attrs[*p]);
+        }
+    });
+
     int triggertime(extentity &e)
     {
         switch(e.type)
@@ -1944,7 +1958,7 @@ namespace entities
             if(mtype == MAP_MAPZ && gver <= 212)
             {
                 if(e.type == ROUTE) e.type = NOTUSED;
-                else if(e.type == UNUSED2)
+                else if(e.type == UNUSEDENT)
                 {
                     ai::oldwaypoint &o = ai::oldwaypoints.add();
                     o.o = e.o;
@@ -1953,7 +1967,7 @@ namespace entities
                     e.type = NOTUSED;
                 }
             }
-            if(mtype == MAP_MAPZ && gver <= 221 && (e.type == ROUTE || e.type == UNUSED2)) e.type = NOTUSED;
+            if(mtype == MAP_MAPZ && gver <= 221 && (e.type == ROUTE || e.type == UNUSEDENT)) e.type = NOTUSED;
             if(e.type < MAXENTTYPES)
             {
                 lastenttype[e.type] = max(lastenttype[e.type], i+1);

@@ -39,7 +39,7 @@ enum                                // entity types
     NOTUSED = ET_EMPTY, LIGHT = ET_LIGHT, MAPMODEL = ET_MAPMODEL, PLAYERSTART = ET_PLAYERSTART, ENVMAP = ET_ENVMAP, PARTICLES = ET_PARTICLES,
     MAPSOUND = ET_SOUND, LIGHTFX = ET_LIGHTFX, SUNLIGHT = ET_SUNLIGHT, WEAPON = ET_GAMESPECIFIC,
     TELEPORT, ACTOR, TRIGGER, PUSHER, AFFINITY, CHECKPOINT,
-    ROUTE, UNUSED2,
+    ROUTE, UNUSEDENT,
     MAXENTTYPES
 };
 
@@ -183,10 +183,10 @@ enttypes enttype[] = {
                 "route",         { "num",   "yaw",      "pitch",    "move",     "strafe",   "action" }
     },
     {
-        UNUSED2,        -1,          0,      0,     EU_NONE,    0,          -1,         -1,
+        UNUSEDENT,      -1,          0,      0,     EU_NONE,    0,          -1,         -1,
             0, 0, 0,
             true,   false,  false,      false,      false,
-                "none",         { "" }
+                "unused",         { "" }
     }
 };
 #else
