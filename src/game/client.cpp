@@ -972,7 +972,7 @@ namespace client
     {
         if(editmode) toggleedit();
         gettingmap = needsmap = remote = isready = sendgameinfo = sendplayerinfo = false;
-        sessionid = sessionver = 0;
+        sessionid = sessionver = lastplayerinfo = 0;
         ignores.shrink(0);
         messages.shrink(0);
         mapvotes.shrink(0);
@@ -1467,6 +1467,9 @@ namespace client
         putint(p, game::player1->colour);
         putint(p, game::player1->model);
         sendstring(game::player1->vanity, p);
+        putint(p, game::player1->loadweap.length());
+        loopv(game::player1->loadweap) putint(p, game::player1->loadweap[i]);
+
         string hash = "";
         if(connectpass[0])
         {
@@ -1981,7 +1984,7 @@ namespace client
                 {
                     getstring(text, p);
                     int colour = getint(p), model = getint(p);
-                    string vanity;
+                    string vanity = "";
                     getstring(vanity, p);
                     int lw = getint(p);
                     vector<int> lweaps;
@@ -2025,7 +2028,8 @@ namespace client
                     const char *namestr = name;
                     while(*namestr && iscubespace(*namestr)) namestr++;
                     if(!*namestr) namestr = copystring(name, "unnamed");
-                    string vanity = ""; getstring(vanity, p);
+                    string vanity = "";
+                    getstring(vanity, p);
                     int lw = getint(p);
                     vector<int> lweaps;
                     loopk(lw) lweaps.add(getint(p));
