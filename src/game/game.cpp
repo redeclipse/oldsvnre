@@ -1713,7 +1713,7 @@ namespace game
             }
         }
 
-        if(actor[d->actortype].living && nogore != 2 && gibscale > 0)
+        if(actor[d->actortype].living && nogore != 2 && gibscale > 0 && !(flags&HIT_LOST))
         {
             int gib = clamp(max(damage, 10)/10, 1, 20), amt = int((rnd(gib)+gib)*gibscale);
             if(d->obliterated) amt *= 2;
