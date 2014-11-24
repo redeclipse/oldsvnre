@@ -2756,15 +2756,11 @@ namespace game
                 if(player1->state == CS_ALIVE) weapons::shoot(player1, worldpos);
             }
             otherplayers();
-            if(!menuactive())
-            {
-                if(needname(player1)) showgui("profile", -1);
-                else if(needloadout(player1)) showgui("loadout", -1);
-            }
             checkannounce();
             flushdamagemerges();
+            if(!menuactive() && needname(player1)) showgui("profile", 1);
         }
-        else if(!menuactive()) showgui(needname(player1) ? "profile" : "main", -1);
+        else if(!menuactive()) showgui(needname(player1) ? "profile" : "main", 1);
         gets2c();
         adjustscaled(hud::damageresidue, hud::damageresiduefade);
         if(connected())

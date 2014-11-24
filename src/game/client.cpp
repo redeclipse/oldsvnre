@@ -2071,7 +2071,8 @@ namespace client
                 case N_LOADW:
                 {
                     hud::showscores(false);
-                    if(!menuactive()) showgui("loadout", -1);
+                    if(!menuactive()) showgui("profile", 2);
+                    lastplayerinfo = 0;
                     break;
                 }
 
