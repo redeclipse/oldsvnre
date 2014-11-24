@@ -65,7 +65,7 @@ basis.
     designated as "family friendly" and provides a clear definition of what
     kind of language is not permitted.
   - Intentionally killing team mates or scoring for an opposing team is not
-    permitted.
+    permitted. This includes "kamikaze" tactics that result in negative scores.
   - Cheating, flooding and/or spamming is not permitted.
 
 * The owner of a server may outline their own rules, specific to their server.
