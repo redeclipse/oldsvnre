@@ -96,6 +96,8 @@ void trydisconnect()
 
 SVAR(0, connectname, "");
 VAR(0, connectport, 0, 0, VAR_MAX);
+VAR(IDF_PERSIST, connectguidelines, 0, 0, 1);
+SVAR(0, guidelinesaction, "");
 
 void connectserv(const char *name, int port, const char *password)
 {
@@ -109,6 +111,13 @@ void connectserv(const char *name, int port, const char *password)
     setvar("connectport", 0);
     if(name && *name)
     {
+        if(!connectguidelines)
+        {
+            defformatstring(s)("connect %s %d %s", name, port, password && *password ? password : "");
+            setsvar("guidelinesaction", s);
+            showgui("guidelines");
+            return;
+        }
         addserver(name, port);
         conoutft(CON_MESG, "\faattempting to connect to %s:[%d]", name, port);
         if(!resolverwait(name, &address))
