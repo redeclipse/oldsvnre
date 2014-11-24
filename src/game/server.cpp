@@ -506,7 +506,11 @@ namespace server
     {
         if(ci->state.actortype == A_PLAYER && ci->state.loadweap.empty())
         {
-            if(request) sendf(ci->clientnum, 1, "ri", N_LOADW);
+            if(request)
+            {
+                ci->lastplayerinfo = 0;
+                sendf(ci->clientnum, 1, "ri", N_LOADW);
+            }
             return false;
         }
         return true;
@@ -4317,6 +4321,14 @@ namespace server
         else if(ci->state.state == CS_SPECTATOR && !val)
         {
             if(ci->clientmap[0] || ci->mapcrc) checkmaps();
+            int nospawn = 0;
+            if(smode && !smode->canspawn(ci, true)) { nospawn++; }
+            mutate(smuts, if(!mut->canspawn(ci, true)) { nospawn++; });
+            if(nospawn)
+            {
+                spectate(ci, true);
+                return false;
+            }
             //if(crclocked(ci)) return false;
             ci->state.state = CS_DEAD;
             ci->state.lasttimeplayed = totalmillis;
@@ -5215,8 +5227,8 @@ namespace server
                         break;
                     }
                     int nospawn = 0;
-                    if(smode && !smode->canspawn(ci, true)) { nospawn++; }
-                    mutate(smuts, if(!mut->canspawn(ci, true)) { nospawn++; });
+                    if(smode && !smode->canspawn(cp, true)) { nospawn++; }
+                    mutate(smuts, if(!mut->canspawn(cp, true)) { nospawn++; });
                     if(!nospawn)
                     {
                         cp->state.state = CS_DEAD;
@@ -6034,7 +6046,7 @@ namespace server
                         break;
                     }
                     bool spec = val != 0, quarantine = cp != ci && val == 2, wasq = cp->state.quarantine;
-                    spectate(cp, spec, quarantine);
+                    if(!spectate(cp, spec, quarantine)) break;
                     if(quarantine && cp->state.quarantine)
                     {
                         defformatstring(name)("%s", colourname(ci));
