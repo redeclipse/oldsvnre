@@ -173,10 +173,9 @@ namespace physics
 
     bool isghost(gameent *d, gameent *e)
     {
-        if(d != e)
+        if(d != e && d->actortype < A_ENEMY && (!e || e->actortype < A_ENEMY))
         {
             if(m_ghost(game::gamemode, game::mutators)) return true;
-            if(d->actortype >= A_ENEMY && e && e->actortype >= A_ENEMY) return true;
             if(m_team(game::gamemode, game::mutators)) switch(G(damageteam))
             {
                 case 1: if(d->actortype > A_PLAYER || (e && e->actortype == A_PLAYER)) break;
