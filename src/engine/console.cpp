@@ -959,3 +959,41 @@ void writecompletions(stream *f)
     }
 }
 
+#if !defined(WIN32) && !defined(__APPLE__)
+#include <X11/XKBlib.h>
+#endif
+bool capslocked()
+{
+    #ifdef WIN32
+    if(GetKeyState(VK_CAPITAL)) return true;
+    #elif defined(__APPLE__)
+    if(mac_capslock()) return true;
+    #else
+    Display *d = XOpenDisplay((char*)0);
+    if(d)
+    {
+        uint n = 0;
+        XkbGetIndicatorState(d, XkbUseCoreKbd, &n);
+        return (n&0x01)!=0;
+    }
+    #endif
+    return false;
+}
+
+bool numlocked()
+{
+    #ifdef WIN32
+    if(GetKeyState(VK_NUMLOCK)) return true;
+    #elif defined(__APPLE__)
+    if(mac_numlock()) return true;
+    #else
+    Display *d = XOpenDisplay((char*)0);
+    if(d)
+    {
+        uint n = 0;
+        XkbGetIndicatorState(d, XkbUseCoreKbd, &n);
+        return (n&0x02)!=0;
+    }
+    #endif
+    return false;
+}

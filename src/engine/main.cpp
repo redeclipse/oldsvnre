@@ -65,22 +65,12 @@ void inputgrab(bool on)
 VARF(0, grabinput, 0, 0, 1, inputgrab(grabinput!=0));
 VAR(IDF_PERSIST, autograbinput, 0, 1, 1);
 
-void setscreensaver(bool active)
-{
-#ifdef WIN32
-    SystemParametersInfo(SPI_SETSCREENSAVEACTIVE, active ? 1 : 0, NULL, 0);
-    SystemParametersInfo(SPI_SETLOWPOWERACTIVE, active ? 1 : 0, NULL, 0);
-    SystemParametersInfo(SPI_SETPOWEROFFACTIVE, active ? 1 : 0, NULL, 0);
-#endif
-}
-
 extern void cleargamma();
 
 void cleanup()
 {
     recorder::stop();
     cleanupserver();
-    setscreensaver(true);
     showcursor(true);
 //#ifdef FAKESHOWCURSOR
 //    if(scursor) SDL_FreeCursor(scursor);
@@ -123,7 +113,6 @@ void fatal(const char *s, ...)    // failure exit
         #endif
         if(errors <= 1) // avoid recursion
         {
-            setscreensaver(true);
             if(SDL_WasInit(SDL_INIT_VIDEO))
             {
                 showcursor(true);
@@ -952,6 +941,13 @@ int main(int argc, char **argv)
     initgame();
 
     conoutf("loading sdl..");
+    #ifdef WIN32
+    SetEnvironmentVariable("SDL_DISABLE_LOCK_KEYS", "1");
+    SetEnvironmentVariable("SDL_VIDEO_ALLOW_SCREENSAVER", "0");
+    #else
+    setenv("SDL_DISABLE_LOCK_KEYS", "1", 1);
+    setenv("SDL_VIDEO_ALLOW_SCREENSAVER", "0", 1);
+    #endif
     int par = 0;
     #ifdef _DEBUG
     par = SDL_INIT_NOPARACHUTE;
@@ -978,7 +974,6 @@ int main(int argc, char **argv)
     setupscreen(usedcolorbits, useddepthbits, usedfsaa);
 
     showcursor(false);
-    setscreensaver(false);
     keyrepeat(false);
     setcaption("please wait..");
 

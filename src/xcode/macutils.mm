@@ -1,4 +1,10 @@
+#include <QtCore>
+#include <QtGui>
+#include <QtMac>
+#import <Foundation/Foundation.h>
 #import <Cocoa/Cocoa.h>
+#include <CoreFoundation/CoreFoundation.h>
+#include <ApplicationServices/ApplicationServices.h>
 #import <CoreFoundation/CFBundle.h>
 
 // -- copied from tools.h -- including the full file introduces too many problems
@@ -88,4 +94,16 @@ const char *mac_resourcedir()
     CFRelease(mainBundleURL);
     CFRelease(cfStringRef);
     return dir;
+}
+
+bool mac_capslock()
+{
+    NSUInteger flags = [NSEvent modifierFlags]&NSDeviceIndependentModifierFlagsMask;
+    return (flags&NSAlphaShiftKeyMask)!=0;
+}
+
+bool mac_numlock()
+{
+    NSUInteger flags = [NSEvent modifierFlags]&NSDeviceIndependentModifierFlagsMask;
+    return (flags&NSNumericPadKeyMask)!=0;
 }
