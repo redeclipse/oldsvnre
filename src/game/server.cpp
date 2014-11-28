@@ -413,7 +413,7 @@ namespace server
 
     string smapname;
     int gamemode = G_EDITMODE, mutators = 0, gamemillis = 0, gamelimit = 0, mastermode = MM_OPEN;
-    int interm = 0, timeremaining = -1, oldtimelimit = -1, gamewait = 0, lastwaitinfo = 0, lastteambalance = 0, nextteambalance = 0, lastrotatecycle = 0;
+    int interm = 0, timeremaining = -1, oldtimelimit = -1, gamewait = 1, lastwaitinfo = 0, lastteambalance = 0, nextteambalance = 0, lastrotatecycle = 0;
     bool hasgameinfo = false, maprequest = false, inovertime = false, updatecontrols = false, mapsending = false, shouldcheckvotes = false, firstblood = false;
     enet_uint32 lastsend = 0;
     stream *mapdata[SENDMAP_MAX] = { NULL };
@@ -2801,7 +2801,7 @@ namespace server
         oldtimelimit = G(timelimit);
         timeremaining = G(timelimit) ? G(timelimit)*60 : -1;
         gamelimit = G(timelimit) ? timeremaining*1000 : 0;
-        gamewait = needswait() ? totalmillis : 0;
+        gamewait = totalmillis ? totalmillis : 1;
         inovertime = false;
         sents.shrink(0);
         scores.shrink(0);
@@ -2945,7 +2945,7 @@ namespace server
             {
                 clientinfo *ci = clients[j];
                 if(ci->state.actortype > A_PLAYER || !ci->clientmap[0] || ci->mapcrc != info.crc || (req < 0 && ci->warned)) continue;
-                srvmsgf(req, "\fy%s is using modified map", colourname(ci));
+                srvmsgf(req, "\fy%s is using a modified map", colourname(ci));
                 if(req < 0) ci->warned = true;
             }
         }
@@ -4500,7 +4500,8 @@ namespace server
             if(!gamewait)
             {
                 if(m_team(gamemode, mutators)) doteambalance(true);
-                if(m_dm(gamemode) && !m_duke(gamemode, mutators)) sendf(-1, 1, "ri3s", N_ANNOUNCE, S_V_FIGHT, CON_INFO, "match start, fight!");
+                if(!m_bomber(gamemode) && !m_duke(gamemode, mutators)) // they do their own "fight"
+                    sendf(-1, 1, "ri3s", N_ANNOUNCE, S_V_FIGHT, CON_INFO, "match start, fight!");
             }
         }
         if(numclients())
