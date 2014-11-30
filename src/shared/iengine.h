@@ -111,6 +111,8 @@ extern void complete(char *s, const char *cmdprefix);
 extern const char *searchbind(const char *action, int type);
 extern void searchbindlist(const char *action, int type, int limit, const char *s1, const char *s2, const char *sep1, const char *sep2, vector<char> &names, bool force = true);
 extern int textkeybg, textkeyseps;
+
+extern bool capslockon, numlockon;
 extern bool capslocked();
 extern bool numlocked();
 
