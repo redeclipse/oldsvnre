@@ -1038,6 +1038,8 @@ int main(int argc, char **argv)
     if(SDL_GetWMInfo(&wminfo)) ShowWindow(wminfo.window, SW_SHOW);
 #endif
     if(autograbinput) setvar("grabinput", 1, true);
+    capslockon = capslocked();
+    numlockon = numlocked();
     ignoremousemotion();
 
     localconnect(false);

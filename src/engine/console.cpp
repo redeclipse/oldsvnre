@@ -305,7 +305,6 @@ ICOMMAND(0, inputcommand, "sssis", (char *init, char *action, char *icon, int *c
 #if !defined(WIN32) && !defined(__APPLE__)
 #include <X11/Xlib.h>
 #endif
-
 void pasteconsole()
 {
 #ifdef WIN32
@@ -670,6 +669,12 @@ void keypress(int code, bool isdown, int cooked)
         case SDLK_TAB:
             keyintercept(iconify, SDL_WM_IconifyWindow());
             break;
+        case SDLK_CAPSLOCK:
+            if(!isdown) capslockon = capslocked();
+            break;
+        case SDLK_NUMLOCK:
+            if(!isdown) numlockon = numlocked();
+            break;
         default: break;
     }
     keym *haskey = keyms.access(code);
@@ -959,6 +964,7 @@ void writecompletions(stream *f)
     }
 }
 
+bool capslockon = false, numlockon = false;
 #if !defined(WIN32) && !defined(__APPLE__)
 #include <X11/XKBlib.h>
 #endif
@@ -974,6 +980,7 @@ bool capslocked()
     {
         uint n = 0;
         XkbGetIndicatorState(d, XkbUseCoreKbd, &n);
+        XCloseDisplay(d);
         return (n&0x01)!=0;
     }
     #endif
@@ -992,6 +999,7 @@ bool numlocked()
     {
         uint n = 0;
         XkbGetIndicatorState(d, XkbUseCoreKbd, &n);
+        XCloseDisplay(d);
         return (n&0x02)!=0;
     }
     #endif
