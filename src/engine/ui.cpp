@@ -414,9 +414,9 @@ struct gui : guient
         if(width) tooltipwidth = width;
     }
 
-    int text  (const char *text, int color, const char *icon, int icolor) { return button_(text, color, icon, icolor, false, false); }
-    int button(const char *text, int color, const char *icon, int icolor, bool faded) { return button_(text, color, icon, icolor, true, faded); }
-    int title (const char *text, int color, const char *icon, int icolor) { return button_(text, color, icon, icolor, false, false, "emphasis"); }
+    int text  (const char *text, int color, const char *icon, int icolor, int wrap) { return button_(text, color, icon, icolor, false, wrap, false); }
+    int button(const char *text, int color, const char *icon, int icolor, int wrap, bool faded) { return button_(text, color, icon, icolor, true, wrap, faded); }
+    int title (const char *text, int color, const char *icon, int icolor) { return button_(text, color, icon, icolor, false, -1, false, "emphasis"); }
 
     void separator() { line_(guisepsize); }
 
@@ -771,11 +771,11 @@ struct gui : guient
         xtraverts += 4;
     }
 
-    void text_(const char *text, int x, int y, int color, int alpha, bool shadow, bool force = false)
+    void text_(const char *text, int x, int y, int color, int alpha, bool shadow, bool force = false, int wrap = -1)
     {
         if(FONTH != guibound[1]) y += (guibound[1]-FONTH)/2;
-        if(shadow) draw_text(text, x+guishadow, y+guishadow, 0x00, 0x00, 0x00, -0xC0*alpha/255);
-        draw_text(text, x, y, color>>16, (color>>8)&0xFF, color&0xFF, force ? -alpha : alpha);
+        if(shadow) draw_text(text, x+guishadow, y+guishadow, 0x00, 0x00, 0x00, -0xC0*alpha/255, TEXT_NO_INDENT, -1, wrap > 0 ? wrap : -1);
+        draw_text(text, x, y, color>>16, (color>>8)&0xFF, color&0xFF, force ? -alpha : alpha, TEXT_NO_INDENT, -1, wrap > 0 ? wrap : -1);
     }
 
     void fill(int color, int inheritw, int inherith)
@@ -1118,13 +1118,19 @@ struct gui : guient
         return space;
     }
 
-    int button_(const char *text, int color, const char *icon, int icolor, bool clickable, bool faded, const char *font = "")
+    int button_(const char *text, int color, const char *icon, int icolor, bool clickable, int wrap = -1, bool faded = true, const char *font = "")
     {
         if(font && *font) gui::pushfont(font);
         int w = 0, h = max((int)FONTH, guibound[1]);
         if(icon) w += guibound[1];
         if(icon && text) w += 8;
-        if(text) w += text_width(text);
+        if(text)
+        {
+            int tw = 0, th = 0;
+            text_bounds(text, tw, th, wrap > 0 ? wrap : -1);
+            w += tw;
+            h += th-h;
+        }
 
         if(visible())
         {
@@ -1138,7 +1144,7 @@ struct gui : guient
                 x += guibound[1];
             }
             if(icon && text) x += 8;
-            if(text) text_(text, x, cury, color, (hit && hitfx) || !faded || !clickable ? guitextblend : guitextfade, hit && clickable, forcecolor);
+            if(text) text_(text, x, cury, color, (hit && hitfx) || !faded || !clickable ? guitextblend : guitextfade, hit && clickable, forcecolor, wrap);
         }
         if(font && *font) gui::popfont();
         return layout(w, h);
