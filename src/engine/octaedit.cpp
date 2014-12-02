@@ -2373,7 +2373,7 @@ struct texturegui : guicb
             if(texmru.inrange(curtex))
             {
                 VSlot &v = lookupvslot(texmru[curtex]);
-                g.textf("#%-3d \fa%s", 0xFFFFFF, NULL, 0, texmru[curtex], v.slot->sts.empty() ? "<unknown texture>" : v.slot->sts[0].name);
+                g.textf("#%-3d \fa%s", 0xFFFFFF, NULL, 0, -1, texmru[curtex], v.slot->sts.empty() ? "<unknown texture>" : v.slot->sts[0].name);
             }
             else g.textf("no texture selected", 0x888888);
         });

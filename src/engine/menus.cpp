@@ -228,15 +228,14 @@ void guinohitfx(uint *contents)
     cgui->allowhitfx(true);
 }
 
-//@DOC name and icon are optional
 SVAR(0, guirollovername, "");
 SVAR(0, guirolloveraction, "");
 SVAR(0, guirollovertype, "");
 
-void guibutton(char *name, char *action, char *altact, char *icon, int *colour)
+void guibutton(char *name, char *action, char *altact, char *icon, int *colour, int *icolour, int *wrap)
 {
     if(!cgui) return;
-    int ret = cgui->button(name, *colour >= 0 ? *colour : 0xFFFFFF, *icon ? icon : NULL);
+    int ret = cgui->button(name, *colour >= 0 ? *colour : 0xFFFFFF, *icon ? icon : NULL, *icolour >= 0 ? *icolour : 0xFFFFFF, *wrap > 0 ? *wrap : -1);
     if(ret&GUI_UP)
     {
         char *act = NULL;
@@ -314,9 +313,9 @@ void guislice(char *path, char *action, float *scale, float *start, float *end, 
     }
 }
 
-void guitext(char *name, char *icon, int *colour, int *icolour)
+void guitext(char *name, char *icon, int *colour, int *icolour, int *wrap)
 {
-    if(cgui) cgui->text(name, *colour >= 0 ? *colour : 0xFFFFFF, icon[0] ? icon : NULL, *icolour >= 0 ? *icolour : 0xFFFFFF);
+    if(cgui) cgui->text(name, *colour >= 0 ? *colour : 0xFFFFFF, icon[0] ? icon : NULL, *icolour >= 0 ? *icolour : 0xFFFFFF, *wrap > 0 ? *wrap : -1);
 }
 
 void guititle(char *name)
@@ -646,8 +645,8 @@ void guimodify(char *name, char *contents)
 COMMAND(0, newgui, "sss");
 COMMAND(0, guiheader, "s");
 COMMAND(0, guimodify, "ss");
-COMMAND(0, guibutton, "ssssb");
-COMMAND(0, guitext, "ssbb");
+COMMAND(0, guibutton, "ssssbbb");
+COMMAND(0, guitext, "ssbbb");
 COMMANDN(0, cleargui, cleargui_, "i");
 ICOMMAND(0, showgui, "si", (const char *s, int *n), showgui(s, *n));
 COMMAND(0, guishowtitle, "i");

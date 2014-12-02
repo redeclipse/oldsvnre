@@ -543,17 +543,17 @@ struct guient
     virtual void start(int starttime, float basescale, int *tab = NULL, bool allowinput = true, bool wantstitle = true, bool wantsbgfx = true) = 0;
     virtual void end() = 0;
 
-    virtual int text(const char *text, int color, const char *icon = NULL, int icolor = 0xFFFFFF) = 0;
-    int textf(const char *fmt, int color, const char *icon = NULL, int icolor = 0xFFFFFF, ...) PRINTFARGS(2, 6)
+    virtual int text(const char *text, int color, const char *icon = NULL, int icolor = 0xFFFFFF, int wrap = -1) = 0;
+    int textf(const char *fmt, int color, const char *icon = NULL, int icolor = 0xFFFFFF, int wrap = -1, ...) PRINTFARGS(2, 7)
     {
-        defvformatstring(str, icolor, fmt);
-        return text(str, color, icon, icolor);
+        defvformatstring(str, wrap, fmt);
+        return text(str, color, icon, icolor, wrap);
     }
-    virtual int button(const char *text, int color, const char *icon = NULL, int icolor = 0xFFFFFF, bool faded = true) = 0;
-    int buttonf(const char *fmt, int color, const char *icon = NULL, int icolor = 0xFFFFFF, bool faded = true, ...) PRINTFARGS(2, 7)
+    virtual int button(const char *text, int color, const char *icon = NULL, int icolor = 0xFFFFFF, int wrap = -1, bool faded = true) = 0;
+    int buttonf(const char *fmt, int color, const char *icon = NULL, int icolor = 0xFFFFFF, int wrap = -1, bool faded = true, ...) PRINTFARGS(2, 8)
     {
         defvformatstring(str, faded, fmt);
-        return button(str, color, icon, icolor, faded);
+        return button(str, color, icon, icolor, wrap, faded);
     }
     virtual void fill(int color, int parentw = 0, int parenth = 0) = 0;
     virtual void outline(int color, int parentw = 0, int parenth = 0, int offsetx = 0, int offsety = 0) = 0;
