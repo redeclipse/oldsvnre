@@ -42,6 +42,7 @@
     $app['targets']['devel'] = array('name' => 'Devel', 'url' => 'http://redeclipse.net/wiki/Obtain_development_version', 'nav' => -1, 'redir' => 1);
     $app['targets']['license'] = array('name' => 'License', 'url' => 'http://redeclipse.net/wiki/License', 'nav' => -1, 'redir' => 1);
     $app['targets']['readme'] = array('name' => 'Readme', 'url' => 'http://redeclipse.net/wiki/Readme', 'nav' => -1, 'redir' => 1);
+    $app['targets']['tracker'] = array('name' => 'Tracker', 'url' => 'http://redeclipse.net/forum/viewforum.php?f=9', 'alturl' => 'http://redeclipse.net/forum/viewforum.php?f=9&t=', 'nav' => 0, 'redir' => 1);
 
     function checkarg($arg = "", $def = "") {
         return isset($_GET[$arg]) && $_GET[$arg] != "" ? $_GET[$arg] : $def;
