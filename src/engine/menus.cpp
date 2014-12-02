@@ -392,20 +392,36 @@ void guifont(char *font, uint *body)
     }
 }
 
-float guitextwidth(char *text, char *font, int wrap)
+int guifontwidth(char *font)
 {
     if(font && *font) pushfont(font);
-    float width = 0, height = 0;
-    text_boundsf(text, width, height, wrap > 0 ? wrap : 0, TEXT_NO_INDENT);
+    int width = FONTW;
     if(font && *font) popfont();
     return width;
 }
 
-float guitextheight(char *text, char *font, int wrap)
+int guifontheight(char *font)
 {
     if(font && *font) pushfont(font);
-    float width = 0, height = 0;
-    text_boundsf(text, width, height, wrap > 0 ? wrap : 0, TEXT_NO_INDENT);
+    int height = FONTH;
+    if(font && *font) popfont();
+    return height;
+}
+
+int guitextwidth(char *text, char *font, int wrap)
+{
+    if(font && *font) pushfont(font);
+    int width = 0, height = 0;
+    text_bounds(text, width, height, wrap > 0 ? wrap : 0, TEXT_NO_INDENT);
+    if(font && *font) popfont();
+    return width;
+}
+
+int guitextheight(char *text, char *font, int wrap)
+{
+    if(font && *font) pushfont(font);
+    int width = 0, height = 0;
+    text_bounds(text, width, height, wrap > 0 ? wrap : 0, TEXT_NO_INDENT);
     if(font && *font) popfont();
     return height;
 }
@@ -693,8 +709,11 @@ COMMAND(0, guikeyfield, "sisbis");
 COMMAND(0, guieditor, "siiibiss");
 
 ICOMMAND(0, guicount, "", (), intret(menustack.length()));
-ICOMMAND(0, guitextwidth, "ssb", (char *text, char *font, int *wrap), floatret(guitextwidth(text, font, *wrap)));
-ICOMMAND(0, guitextheight, "ssb", (char *text, char *font, int *wrap), floatret(guitextheight(text, font, *wrap)));
+ICOMMAND(0, guibound, "i", (int *n), intret(guibound[*n!=0 ? 1 : 0]));
+ICOMMAND(0, guifontwidth, "s", (char *font), intret(guifontwidth(font)));
+ICOMMAND(0, guifontheight, "s", (char *font), intret(guifontheight(font)));
+ICOMMAND(0, guitextwidth, "ssb", (char *text, char *font, int *wrap), intret(guitextwidth(text, font, *wrap)));
+ICOMMAND(0, guitextheight, "ssb", (char *text, char *font, int *wrap), intret(guitextheight(text, font, *wrap)));
 
 void guiplayerpreview(int *model, int *color, int *team, int *weap, char *vanity, char *action, float *scale, int *overlaid, float *size, float *blend, char *altact)
 {
