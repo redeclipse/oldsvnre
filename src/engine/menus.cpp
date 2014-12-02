@@ -392,12 +392,22 @@ void guifont(char *font, uint *body)
     }
 }
 
-float guitextwidth(char *text, char *font)
+float guitextwidth(char *text, char *font, int wrap)
 {
     if(font && *font) pushfont(font);
-    float width = text_width(text)/float(guibound[0]);
+    float width = 0, height = 0;
+    text_boundsf(text, width, height, wrap > 0 ? wrap : 0, TEXT_NO_INDENT);
     if(font && *font) popfont();
     return width;
+}
+
+float guitextheight(char *text, char *font, int wrap)
+{
+    if(font && *font) pushfont(font);
+    float width = 0, height = 0;
+    text_boundsf(text, width, height, wrap > 0 ? wrap : 0, TEXT_NO_INDENT);
+    if(font && *font) popfont();
+    return height;
 }
 
 template<class T> static void updateval(char *var, T val, char *onchange)
@@ -683,7 +693,8 @@ COMMAND(0, guikeyfield, "sisbis");
 COMMAND(0, guieditor, "siiibiss");
 
 ICOMMAND(0, guicount, "", (), intret(menustack.length()));
-ICOMMAND(0, guitextwidth, "ss", (char *text, char *font), floatret(guitextwidth(text, font)));
+ICOMMAND(0, guitextwidth, "ssb", (char *text, char *font, int *wrap), floatret(guitextwidth(text, font, *wrap)));
+ICOMMAND(0, guitextheight, "ssb", (char *text, char *font, int *wrap), floatret(guitextheight(text, font, *wrap)));
 
 void guiplayerpreview(int *model, int *color, int *team, int *weap, char *vanity, char *action, float *scale, int *overlaid, float *size, float *blend, char *altact)
 {
