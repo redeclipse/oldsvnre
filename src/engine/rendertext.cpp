@@ -249,7 +249,8 @@ static void text_color(char c, cvec *stack, int size, int &sp, cvec &color, int 
         }
         case 'S': // restore
         {
-            color = stack[sp > 0 ? --sp : sp];
+            if(sp > 0) --sp;
+            color = stack[sp];
             break;
         }
         default: color = stack[sp]; break; // everything else
