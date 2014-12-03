@@ -188,15 +188,16 @@
             <div class="sliderblock">
                 <div id="slider">
                     <ul id="gallery">
-<?php                   $i = 1;
+<?php                   $i = 0;
                         $c = true;
-                        while ($app['screenshots'] >= $i) {
+                        while ($app['screenshots'] > $i) {
+                            $f = $i + 1;
                             $j = $i % 4;
                             if ($j == 0) {
                                 echo "<li>";
                                 $c = false;
                             }
-                            $k = $i < 10 ? "00".$i."" : "0".$i."";
+                            $k = $f < 10 ? "00".$f."" : "0".$f."";
                             echo "<a href=\"/bits/images/".$k.".jpg\"><img src=\"/bits/thumbs/".$k.".jpg\" width=\"180\" height=\"102\" border=\"0\" alt=\"Screenshot ".$k."\" /></a>";
                             if ($j == 3) {
                                 echo "</li>";
