@@ -432,7 +432,7 @@ void updatesounds()
 
 int playsound(int n, const vec &pos, physent *d, int flags, int vol, int maxrad, int minrad, int *hook, int ends, int *oldhook)
 {
-    if(nosound || !mastervol || !soundvol) return -1;
+    if(nosound || !mastervol || !soundvol || ((flags&SND_MAP || n >= S_GAMESPECIFIC) && client::waiting(true))) return -1;
 
     vector<soundslot> &soundset = flags&SND_MAP ? mapsounds : gamesounds;
 
