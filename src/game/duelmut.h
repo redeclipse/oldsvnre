@@ -108,8 +108,8 @@ struct duelservmode : servmode
                 vector<clientinfo *> mates;
                 loopv(clients) if(clients[i]->state.actortype < A_ENEMY && clients[i]->team == ci->team)
                 { // includes ci
-                    if(clients[i]->state.state == CS_ALIVE) alive++;
                     mates.add(clients[i]);
+                    if(clients[i]->state.state == CS_ALIVE && (!G(duelbotcheck) || clients[i]->state.actortype != A_BOT)) alive++;
                 }
                 if(!alive)
                 {
