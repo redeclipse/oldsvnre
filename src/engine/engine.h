@@ -631,7 +631,7 @@ extern void drawskybox(int farplane, bool limited);
 extern bool limitsky();
 
 // gui
-extern int mouseaction[2], guibound[2];
+extern int mouseaction[2];
 extern bool guiactionon;
 
 extern int guishadow, guiclicktab, guitextblend, guitextfade, guisepsize, guiscaletime,

@@ -709,7 +709,6 @@ COMMAND(0, guikeyfield, "sisbis");
 COMMAND(0, guieditor, "siiibiss");
 
 ICOMMAND(0, guicount, "", (), intret(menustack.length()));
-ICOMMAND(0, guibound, "i", (int *n), intret(guibound[*n!=0 ? 1 : 0]));
 ICOMMAND(0, guifontwidth, "s", (char *font), intret(guifontwidth(font)));
 ICOMMAND(0, guifontheight, "s", (char *font), intret(guifontheight(font)));
 ICOMMAND(0, guitextwidth, "ssb", (char *text, char *font, int *wrap), intret(guitextwidth(text, font, *wrap)));

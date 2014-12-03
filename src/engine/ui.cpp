@@ -4,7 +4,7 @@ int uimillis = -1;
 
 VAR(IDF_READONLY, guilayoutpass, 1, 0, -1);
 bool guiactionon = false;
-int mouseaction[2] = {0}, guibound[2] = {0};
+int mouseaction[2] = {0};
 
 static float firstx, firsty;
 
@@ -18,6 +18,7 @@ VAR(IDF_PERSIST, guitabborder, 0, 1, 2);
 VAR(IDF_PERSIST, guitextblend, 1, 255, 255);
 VAR(IDF_PERSIST, guitextfade, 1, 200, 255);
 VAR(IDF_PERSIST, guisepsize, 1, 2, 128);
+VAR(IDF_PERSIST, guispacesize, 1, 48, 128);
 VAR(IDF_PERSIST, guiscaletime, 0, 250, VAR_MAX);
 
 VAR(IDF_PERSIST, guitooltipwidth, -1, 768, VAR_MAX);
@@ -258,7 +259,7 @@ struct gui : guient
         if(color) tcolor = color;
         if(!name) name = intstr(tpos);
         gui::pushfont("super");
-        int width, height;
+        int width = 0, height = 0;
         text_bounds(name, width, height);
         if(guilayoutpass)
         {
@@ -268,7 +269,7 @@ struct gui : guient
         else
         {
             cury = -ysize;
-            int x1 = curx+tx, x2 = x1+width+guibound[0]*2, y1 = cury-guibound[1]-height, y2 = cury-guibound[1]*3/4, alpha = guitextblend, border = -1;
+            int x1 = curx+tx, x2 = x1+width+guispacesize, y1 = cury-guispacesize-height, y2 = cury-guispacesize*3/4, alpha = guitextblend, border = -1;
             if(!visibletab())
             {
                 if(tcurrent && hitx>=x1 && hity>=y1 && hitx<x2 && hity<y2)
@@ -286,37 +287,42 @@ struct gui : guient
             }
             else if(guitabborder == 2) border = guibordercolour;
             if(hasbgfx) skin(x1, y1, x2, y2, guibgcolour, guibgblend, border >= 0 ? border : guibordercolour, guiborderblend, border >= 0);
-            text_(name, x1+guibound[0], y1+guibound[1]/4, tcolor, alpha, visible());
+            text_(name, x1+guispacesize/2, y1+guispacesize/8, tcolor, alpha, visible());
         }
-        tx += width+guibound[0]*3;
+        tx += width+guispacesize*3/2;
         gui::popfont();
     }
 
     void uibuttons()
     {
-        tx += guibound[1]*3/2+guibound[0]*2; // acts like a tab
-        if(guilayoutpass) return;
-        cury = -ysize;
-        int x1 = curx+(xsize-guibound[1]), x2 = x1+guibound[1]*3/2, y1 = cury-guibound[1]*225/100, y2 = cury-guibound[1]*3/4;
-        #define uibtn(a,b) \
-        { \
-            int border = -1; \
-            bool hit = false; \
-            if(hitx>=x1 && hity>=y1 && hitx<x2 && hity<y2) \
+        gui::pushfont("super");
+        tx += FONTH+guispacesize*2; // acts like a tab
+        if(!guilayoutpass)
+        {
+            cury = -ysize;
+            int x1 = curx+(xsize-FONTH+guispacesize/4), x2 = x1+FONTH+guispacesize/4, y1 = cury-guispacesize-FONTH, y2 = cury-guispacesize*3/4;
+            //int x1 = curx+(xsize-FONTH), x2 = x1+FONTH*3/2, y1 = cury-FONTH*225/100, y2 = cury-FONTH*3/4;
+            #define uibtn(a,b) \
             { \
-                if(mouseaction[0]&GUI_UP) { b; } \
-                hit = true; \
-                if(guitabborder) border = guiactivecolour; \
-            } \
-            else if(guitabborder == 2) border = vec::hexcolor(guibordercolour).mul(0.25f).tohexcolor(); \
-            if(hasbgfx) skin(x1, y1, x2, y2, guibgcolour, guibgblend, border >= 0 ? border : guibordercolour, guiborderblend, border >= 0); \
-            x1 += guibound[1]/4; \
-            y1 += guibound[1]/4; \
-            icon_(a, false, x1, y1, guibound[1], hit, 0xFFFFFF); \
-            y1 += guibound[1]*3/2; \
+                int border = -1; \
+                bool hit = false; \
+                if(hitx>=x1 && hity>=y1 && hitx<x2 && hity<y2) \
+                { \
+                    if(mouseaction[0]&GUI_UP) { b; } \
+                    hit = true; \
+                    if(guitabborder) border = guiactivecolour; \
+                } \
+                else if(guitabborder == 2) border = vec::hexcolor(guibordercolour).mul(0.25f).tohexcolor(); \
+                if(hasbgfx) skin(x1, y1, x2, y2, guibgcolour, guibgblend, border >= 0 ? border : guibordercolour, guiborderblend, border >= 0); \
+                x1 += guispacesize/8; \
+                y1 += guispacesize/8; \
+                icon_(a, false, x1, y1, FONTH, hit, 0xFFFFFF); \
+                y1 += FONTH*3/2; \
+            }
+            if(!exittex) exittex = textureload(guiexittex, 3, true, false); \
+            uibtn(exittex, cleargui(1));
         }
-        if(!exittex) exittex = textureload(guiexittex, 3, true, false); \
-        uibtn(exittex, cleargui(1));
+        gui::popfont();
     }
 
     bool ishorizontal() const { return curdepth&1; }
@@ -421,9 +427,9 @@ struct gui : guient
     void separator() { line_(guisepsize); }
 
     //use to set min size (useful when you have progress bars)
-    void strut(float size) { layout(isvertical() ? int(size*guibound[0]) : 0, isvertical() ? 0 : int(size*guibound[1])); }
+    void strut(float size) { layout(isvertical() ? int(size*FONTW) : 0, isvertical() ? 0 : int(size*FONTH)); }
     //add space between list items
-    void space(float size) { layout(isvertical() ? 0 : int(size*guibound[0]), isvertical() ? int(size*guibound[1]) : 0); }
+    void space(float size) { layout(isvertical() ? 0 : int(size*FONTW), isvertical() ? int(size*FONTH) : 0); }
 
     void pushfont(const char *font) { ::pushfont(font); fontdepth++; }
     void popfont() { if(fontdepth) { ::popfont(); fontdepth--; } }
@@ -485,7 +491,7 @@ struct gui : guient
     int image(Texture *t, float scale, bool overlaid, int icolor)
     {
         if(scale == 0) scale = 1;
-        int size = (int)(scale*2*guibound[1])-guishadow;
+        int size = (int)(scale*2*FONTH)-guishadow;
         if(visible()) icon_(t, overlaid, curx, cury, size, ishit(size+guishadow, size+guishadow), icolor);
         return layout(size+guishadow, size+guishadow);
     }
@@ -493,7 +499,7 @@ struct gui : guient
     int texture(VSlot &vslot, float scale, bool overlaid)
     {
         if(scale==0) scale = 1;
-        int size = (int)(scale*2*guibound[1])-guishadow;
+        int size = (int)(scale*2*FONTH)-guishadow;
         if(visible()) previewslot(vslot, overlaid, curx, cury, size, ishit(size+guishadow, size+guishadow));
         return layout(size+guishadow, size+guishadow);
     }
@@ -501,7 +507,7 @@ struct gui : guient
     int playerpreview(int model, int color, int team, int weap, const char *vanity, float sizescale, bool overlaid, float scale, float blend)
     {
         if(sizescale==0) sizescale = 1;
-        int size = (int)(sizescale*2*guibound[1])-guishadow;
+        int size = (int)(sizescale*2*FONTH)-guishadow;
         if(visible())
         {
             bool hit = ishit(size+guishadow, size+guishadow);
@@ -543,7 +549,7 @@ struct gui : guient
     int modelpreview(const char *name, int anim, float sizescale, bool overlaid, float scale, float blend)
     {
         if(sizescale==0) sizescale = 1;
-        int size = (int)(sizescale*2*guibound[1])-guishadow;
+        int size = (int)(sizescale*2*FONTH)-guishadow;
         if(visible())
         {
             bool hit = ishit(size+guishadow, size+guishadow);
@@ -597,7 +603,7 @@ struct gui : guient
     int slice(Texture *t, float scale, float start, float end, const char *text)
     {
         if(scale == 0) scale = 1;
-        int size = (int)(scale*2*guibound[1]);
+        int size = (int)(scale*2*FONTH);
         if(t!=notexture && visible()) slice_(t, curx, cury, size, start, end, text);
         return layout(size, size);
     }
@@ -605,7 +611,7 @@ struct gui : guient
     void progress(float percent, float scale)
     {
         if(scale == 0) scale = 1;
-        int size = (int)(scale*2*guibound[1]);
+        int size = (int)(scale*2*FONTH);
         slice_(textureload(hud::progringtex, 3, true, false), curx, cury, size, (SDL_GetTicks()%1000)/1000.f, 0.1f);
         string s; if(percent > 0) formatstring(s)("\fg%d%%", int(percent*100)); else formatstring(s)("\fg...");
         slice_(textureload(hud::progresstex, 3, true, false), curx, cury, size, 0, percent, s);
@@ -617,7 +623,7 @@ struct gui : guient
         int x = curx, y = cury;
         float percent = (val-vmin)/float(max(vmax-vmin, 1));
         bool hit = false;
-        int space = slider_(guislidersize, percent, ishorizontal() ? guibound[0]*3 : guibound[1], hit, style, scolour);
+        int space = slider_(guislidersize, percent, ishorizontal() ? FONTW*3 : FONTH, hit, style, scolour);
         if(visible())
         {
             if(hit)
@@ -675,15 +681,13 @@ struct gui : guient
             e->pixelwidth = abs(length)*FONTW;
             if(e->linewrap && e->maxy == 1)
             {
-                int temp;
+                int temp = 0;
                 text_bounds(e->lines[0].text, temp, e->pixelheight, e->pixelwidth); //only single line editors can have variable height
             }
             else e->pixelheight = FONTH*max(height, 1);
         }
-        int h = e->pixelheight, hpad = guibound[1]/4, w = e->pixelwidth, wpad = guibound[0];
-        //if((h+hpad)%guibound[1]) hpad += guibound[1]-((h+hpad)%guibound[1]);
+        int h = e->pixelheight, hpad = FONTH/4, w = e->pixelwidth, wpad = FONTW;
         h += hpad;
-        //if((w+wpad)%guibound[0]) wpad += guibound[0]-((w+wpad)%guibound[0]);
         w += wpad;
 
         bool wasvertical = isvertical();
@@ -773,7 +777,7 @@ struct gui : guient
 
     void text_(const char *text, int x, int y, int color, int alpha, bool shadow, bool force = false, int wrap = -1)
     {
-        if(FONTH != guibound[1]) y += (guibound[1]-FONTH)/2;
+        if(FONTH != FONTH) y += (FONTH-FONTH)/2;
         if(shadow) draw_text(text, x+guishadow, y+guishadow, 0x00, 0x00, 0x00, -0xC0*alpha/255, TEXT_NO_INDENT, -1, wrap > 0 ? wrap : -1);
         draw_text(text, x, y, color>>16, (color>>8)&0xFF, color&0xFF, force ? -alpha : alpha, TEXT_NO_INDENT, -1, wrap > 0 ? wrap : -1);
     }
@@ -1046,7 +1050,7 @@ struct gui : guient
 
     int slider_(int size, float percent, int space, bool &hit, int style, int colour)
     {
-        space = max(max(space, guibound[0]), size);
+        space = max(max(space, FONTW), size);
         if(visible())
         {
             int x = ishorizontal() ? curx+space/2-size/2 : curx, w = ishorizontal() ? size : xsize,
@@ -1076,7 +1080,7 @@ struct gui : guient
 
     int line_(int size, int space = 0)
     {
-        space = max(max(space, guibound[0]), size);
+        space = max(max(space, FONTW), size);
         if(visible())
         {
             int colour1 = guibgcolour >= 0 ? guibgcolour : (guibordercolour >= 0 ? guibordercolour : 0x000000),
@@ -1121,10 +1125,10 @@ struct gui : guient
     int button_(const char *text, int color, const char *icon, int icolor, bool clickable, int wrap = -1, bool faded = true, const char *font = "")
     {
         if(font && *font) gui::pushfont(font);
-        int w = 0, h = guibound[1];
+        int w = 0, h = FONTH;
         if(icon && *icon)
         {
-            w += guibound[1];
+            w += FONTH;
             if(text && *text) w += 8;
         }
         if(text && *text)
@@ -1132,7 +1136,7 @@ struct gui : guient
             int tw = 0, th = 0;
             text_bounds(text, tw, th, wrap > 0 ? wrap : -1);
             w += tw;
-            if(h > guibound[1]) h += th-guibound[1];
+            if(h > FONTH) h += th-FONTH;
         }
 
         if(visible())
@@ -1143,8 +1147,8 @@ struct gui : guient
             if(icon && *icon)
             {
                 const char *tname = strstr(icon, "textures/") ? icon : makerelpath("textures", icon);
-                icon_(textureload(tname, 3, true, false), false, x, cury, guibound[1], clickable && hit, icolor);
-                x += guibound[1];
+                icon_(textureload(tname, 3, true, false), false, x, cury, FONTH, clickable && hit, icolor);
+                x += FONTH;
                 if(text && *text) x += 8;
             }
             if(text && *text) text_(text, x, cury, color, (hit && hitfx) || !faded || !clickable ? guitextblend : guitextfade, hit && clickable, forcecolor, wrap);
@@ -1163,17 +1167,18 @@ struct gui : guient
 
     void adjustscale()
     {
-        int w = xsize + guibound[0]*8, h = ysize + guibound[1]*6;
+        int w = xsize + FONTW*8, h = ysize + FONTH*6;
         float aspect = forceaspect ? 1.0f/forceaspect : float(screen->h)/float(screen->w), fit = 1.0f;
         if(w*aspect*basescale>1.0f) fit = 1.0f/(w*aspect*basescale);
         if(h*basescale*fit>maxscale) fit *= maxscale/(h*basescale*fit);
         uiscale = vec(aspect*uiscale.x*fit, uiscale.y*fit, 1);
-        uiorigin = vec(0.5f - ((w-xsize)/2 - (guibound[0]*4))*uiscale.x, 0.5f + (0.5f*h-(guibound[1]*2))*uiscale.y, 0);
-        //uiorigin = vec(0.5f - (guibound[0]*2)*uiscale.x, 0.5f + (h-guibound[1]*2)*uiscale.y, 0);
+        uiorigin = vec(0.5f - ((w-xsize)/2 - (FONTW*4))*uiscale.x, 0.5f + (0.5f*h-(FONTH*2))*uiscale.y, 0);
     }
 
     void start(int starttime, float initscale, int *tab, bool allowinput, bool wantstitle, bool wantsbgfx)
     {
+        fontdepth = 0;
+        gui::pushfont("reduced");
         initscale *= 0.025f;
         basescale = initscale;
         if(guilayoutpass)
@@ -1182,11 +1187,9 @@ struct gui : guient
         hastitle = wantstitle;
         hasbgfx = wantsbgfx;
         passthrough = !allowinput;
-        fontdepth = 0;
-        gui::pushfont("reduced");
         curdepth = curlist = mergedepth = mergelist = -1;
         tpos = ty = 0;
-        tx = -guibound[0];
+        tx = -FONTW;
         tcurrent = tab;
         tcolor = 0xFFFFFF;
         pushlist(false);
@@ -1202,7 +1205,7 @@ struct gui : guient
             glScalef(uiscale.x, uiscale.y, uiscale.z);
             if(hasbgfx)
             {
-                int x1 = curx-guibound[0], y1 = cury-guibound[1]/2, x2 = x1+xsize+guibound[0]*2, y2 = y1+ysize+guibound[1];
+                int x1 = curx-FONTW, y1 = cury-FONTH/2, x2 = x1+xsize+FONTW*2, y2 = y1+ysize+FONTH;
                 skin(x1, y1, x2, y2, guibgcolour, guibgblend, guibordercolour, guiborderblend);
             }
         }
@@ -1215,7 +1218,7 @@ struct gui : guient
             if(needsinput) uibuttons();
             xsize = max(tx, xsize);
             ysize = max(ty, ysize);
-            ysize = max(ysize, guibound[1]);
+            ysize = max(ysize, FONTH);
 
             if(tcurrent) *tcurrent = max(1, min(*tcurrent, tpos));
             adjustscale();
@@ -1232,11 +1235,11 @@ struct gui : guient
             if(guistatusline && statusstr && *statusstr)
             {
                 gui::pushfont("little");
-                int width, height, tw = min(statuswidth ? statuswidth : (guistatuswidth ? guistatuswidth : -1), int(screen->w*(1/uiscale.y)));
+                int width = 0, height = 0, tw = min(statuswidth ? statuswidth : (guistatuswidth ? guistatuswidth : -1), int(screen->w*(1/uiscale.y)));
                 text_bounds(statusstr, width, height, tw, TEXT_CENTERED|TEXT_NO_INDENT);
-                int w = width+guibound[0]*2, h = guibound[1]/2+height, x1 = -w/2, y1 = guibound[1]*3/4, x2 = x1+w, y2 = y1+h;
+                int w = width+FONTW*2, h = FONTH/2+height, x1 = -w/2, y1 = guispacesize*3/2, x2 = x1+w, y2 = y1+h;
                 if(hasbgfx) skin(x1, y1, x2, y2, guibgcolour, guibgblend, guibordercolour, guiborderblend);
-                draw_text(statusstr, x1+guibound[0], y1+guibound[1]/4, 255, 255, 255, 255, TEXT_CENTERED|TEXT_NO_INDENT, -1, tw);
+                draw_text(statusstr, x1+FONTW, y1+FONTH/4, 255, 255, 255, 255, TEXT_CENTERED|TEXT_NO_INDENT, -1, tw);
                 gui::popfont();
             }
             if(needsinput) uibuttons();
@@ -1253,11 +1256,11 @@ struct gui : guient
                     gui::pushfont("little");
                     int width, height, tw = min(tooltipwidth ? tooltipwidth : (guitooltipwidth ? guitooltipwidth : -1), int(screen->w*(1/uiscale.y)));
                     text_bounds(tooltipstr, width, height, tw, TEXT_NO_INDENT);
-                    int w = width+guibound[0]*2, h = guibound[1]/2+height, x1 = hitx, y1 = hity-height-guibound[1]/2, x2 = x1+w, y2 = y1+h,
+                    int w = width+FONTW*2, h = FONTH/2+height, x1 = hitx, y1 = hity-height-FONTH/2, x2 = x1+w, y2 = y1+h,
                         offset = totalmillis-lasttooltip-guitooltiptime;
                     float blend = tooltipforce ? 1.f : (offset > 0 ? (offset < guitooltipfade ? offset/float(guitooltipfade) : 1.f) : 0.f);
                     skin(x1, y1, x2, y2, guitooltipcolour, guitooltipblend*blend, guitooltipbordercolour, guitooltipborderblend*blend, guitooltipborderskin!=0);
-                    draw_text(tooltip, x1+guibound[0], y1+guibound[1]/4, 255, 255, 255, int(255*blend), TEXT_NO_INDENT, -1, tw);
+                    draw_text(tooltip, x1+FONTW, y1+FONTH/4, 255, 255, 255, int(255*blend), TEXT_NO_INDENT, -1, tw);
                     gui::popfont();
                 }
             }
@@ -1289,15 +1292,7 @@ static vector<gui> guis;
 
 namespace UI
 {
-    bool isopen = false, ready = false;
-
-    void setup()
-    {
-        pushfont("reduced");
-        loopk(2) guibound[k] = (k ? FONTH : FONTW);
-        popfont();
-        ready = true;
-    }
+    bool isopen = false;
 
     bool keypress(int code, bool isdown, int cooked)
     {
