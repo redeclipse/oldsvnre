@@ -667,82 +667,76 @@ namespace server
             if(ci->state.actortype >= A_ENEMY) return true;
             else if(tryspawn)
             {
-                //if(m_balance(gamemode, mutators, teamspawns) && G(balancenospawn) && nextbalance && m_balreset(gamemode, mutators) && canbalancenow()) return false;
                 if(m_loadout(gamemode, mutators) && !chkloadweap(ci)) return false;
                 if(spawnqueue(true) && spawnq.find(ci) < 0 && playing.find(ci) < 0) queue(ci);
                 return true;
             }
-            else
+            if(m_balance(gamemode, mutators, teamspawns) && G(balancenospawn) && nextbalance && m_balreset(gamemode, mutators) && canbalancenow()) return false;
+            int delay = ci->state.actortype >= A_ENEMY && ci->state.lastdeath ? G(enemyspawntime) : m_delay(gamemode, mutators, ci->team);
+            if(delay && ci->state.respawnwait(gamemillis, delay)) return false;
+            if(spawnqueue() && playing.find(ci) < 0)
             {
-                if(m_balance(gamemode, mutators, teamspawns) && G(balancenospawn) && nextbalance && m_balreset(gamemode, mutators) && canbalancenow()) return false;
-                //if(m_loadout(gamemode, mutators) && !chkloadweap(ci, false)) return false;
-                int delay = ci->state.actortype >= A_ENEMY && ci->state.lastdeath ? G(enemyspawntime) : m_delay(gamemode, mutators, ci->team);
-                if(delay && ci->state.respawnwait(gamemillis, delay)) return false;
-                if(spawnqueue() && playing.find(ci) < 0)
+                if(!canplay()) return false;
+                if(G(maxalivequeue) && spawnq.find(ci) < 0) queue(ci);
+                int x = max(int(G(maxalive)*G(maxplayers)), max(int(numclients()*G(maxalivethreshold)), G(maxaliveminimum)));
+                if(m_team(gamemode, mutators))
                 {
-                    if(!canplay()) return false;
-                    if(G(maxalivequeue) && spawnq.find(ci) < 0) queue(ci);
-                    int x = max(int(G(maxalive)*G(maxplayers)), max(int(numclients()*G(maxalivethreshold)), G(maxaliveminimum)));
-                    if(m_team(gamemode, mutators))
-                    {
-                        if(x%2) x++;
-                        x = x/2;
-                        if(m_coop(gamemode, mutators) && ci->state.actortype == A_BOT)
-                            x = int(x*G(coopbalance));
-                    }
-                    int alive = 0;
-                    loopv(playing)
-                    {
-                        if(playing[i]->state.state != CS_DEAD && playing[i]->state.state != CS_ALIVE)
-                        {
-                            if(playing[i]->state.state != CS_WAITING || !G(maxalivequeue))
-                            {
-                                playing.removeobj(playing[i--]);
-                                continue;
-                            }
-                        }
-                        if(spawnq.find(playing[i]) >= 0) spawnq.removeobj(playing[i]);
-                        if(ci->team == playing[i]->team) alive++;
-                    }
-                    if(alive >= x)
-                    {
-                        if(ci->state.actortype == A_PLAYER) loopv(playing)
-                        { // kill off bots for the human
-                            if(playing[i]->state.actortype != A_BOT || ci->team != playing[i]->team)
-                                continue;
-                            queue(playing[i--]);
-                            if(--alive < x) break;
-                        }
-                        if(alive >= x) return false;
-                    }
-                    if(G(maxalivequeue))
-                    {
-                        if(ci->state.actortype == A_BOT) loopv(spawnq) if(spawnq[i]->team == ci->team)
-                        {
-                            if(spawnq[i] != ci && spawnq[i]->state.actortype == A_PLAYER) return false;
-                            break;
-                        }
-                        // at this point is where it decides this player is spawning, so tell everyone else their position
-                        if(x-alive == 1)
-                        {
-                            int qn = 0;
-                            loopv(spawnq) if(spawnq[i] != ci && spawnq[i]->team == ci->team && spawnq[i]->state.actortype == A_PLAYER)
-                            {
-                                qn++;
-                                if(allowbroadcast(spawnq[i]->clientnum))
-                                {
-                                    if(qn > 1) srvmsgft(spawnq[i]->clientnum, CON_EVENT, "\fyyou are \fs\fzcg#%d\fS in the \fs\fgrespawn queue\fS", qn);
-                                    else srvmsgft(spawnq[i]->clientnum, CON_EVENT, "\fyyou are \fs\fzcrNEXT\fS in the \fs\fgrespawn queue\fS");
-                                }
-                            }
-                        }
-                    }
-                    spawnq.removeobj(ci);
-                    if(playing.find(ci) < 0) playing.add(ci);
+                    if(x%2) x++;
+                    x = x/2;
+                    if(m_coop(gamemode, mutators) && ci->state.actortype == A_BOT)
+                        x = int(x*G(coopbalance));
                 }
-                return true;
+                int alive = 0;
+                loopv(playing)
+                {
+                    if(playing[i]->state.state != CS_DEAD && playing[i]->state.state != CS_ALIVE)
+                    {
+                        if(playing[i]->state.state != CS_WAITING || !G(maxalivequeue))
+                        {
+                            playing.removeobj(playing[i--]);
+                            continue;
+                        }
+                    }
+                    if(spawnq.find(playing[i]) >= 0) spawnq.removeobj(playing[i]);
+                    if(ci->team == playing[i]->team) alive++;
+                }
+                if(alive >= x)
+                {
+                    if(ci->state.actortype == A_PLAYER) loopv(playing)
+                    { // kill off bots for the human
+                        if(playing[i]->state.actortype != A_BOT || ci->team != playing[i]->team)
+                            continue;
+                        queue(playing[i--]);
+                        if(--alive < x) break;
+                    }
+                    if(alive >= x) return false;
+                }
+                if(G(maxalivequeue))
+                {
+                    if(ci->state.actortype == A_BOT) loopv(spawnq) if(spawnq[i]->team == ci->team)
+                    {
+                        if(spawnq[i] != ci && spawnq[i]->state.actortype == A_PLAYER) return false;
+                        break;
+                    }
+                    // at this point is where it decides this player is spawning, so tell everyone else their position
+                    if(x-alive == 1)
+                    {
+                        int qn = 0;
+                        loopv(spawnq) if(spawnq[i] != ci && spawnq[i]->team == ci->team && spawnq[i]->state.actortype == A_PLAYER)
+                        {
+                            qn++;
+                            if(allowbroadcast(spawnq[i]->clientnum))
+                            {
+                                if(qn > 1) srvmsgft(spawnq[i]->clientnum, CON_EVENT, "\fyyou are \fs\fzcg#%d\fS in the \fs\fgrespawn queue\fS", qn);
+                                else srvmsgft(spawnq[i]->clientnum, CON_EVENT, "\fyyou are \fs\fzcrNEXT\fS in the \fs\fgrespawn queue\fS");
+                            }
+                        }
+                    }
+                }
+                spawnq.removeobj(ci);
+                if(playing.find(ci) < 0) playing.add(ci);
             }
-            return false;
+            return true;
         }
 
         void spawned(clientinfo *ci)
