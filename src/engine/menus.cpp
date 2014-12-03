@@ -318,11 +318,6 @@ void guitext(char *name, char *icon, int *colour, int *icolour, int *wrap)
     if(cgui) cgui->text(name, *colour >= 0 ? *colour : 0xFFFFFF, icon[0] ? icon : NULL, *icolour >= 0 ? *icolour : 0xFFFFFF, *wrap > 0 ? *wrap : -1);
 }
 
-void guititle(char *name)
-{
-    if(cgui) cgui->title(name);
-}
-
 void guitab(char *name)
 {
     if(cgui) cgui->tab(name);
@@ -579,24 +574,24 @@ void guibitfield(char *name, char *var, int *mask, char *onchange, int *colour)
 }
 
 //-ve length indicates a wrapped text field of any (approx 260 chars) length, |length| is the field width
-void guifield(char *var, int *maxlength, char *onchange, int *colour, int *focus, char *parent, int *height)
+void guifield(char *var, int *maxlength, char *onchange, int *colour, int *focus, char *parent, int *height, char *prompt)
 {
     if(!cgui) return;
     const char *initval = getsval(var);
-    char *result = cgui->field(var, *colour >= 0 ? *colour : 0xFFFFFF, *maxlength ? *maxlength : 12, *height, initval, EDITORFOCUSED, *focus!=0, parent);
+    char *result = cgui->field(var, *colour >= 0 ? *colour : 0xFFFFFF, *maxlength ? *maxlength : 12, *height, initval, EDITORFOCUSED, *focus!=0, parent, prompt);
     if(result) updateval(var, result, onchange);
 }
 
 //-ve maxlength indicates a wrapped text field of any (approx 260 chars) length, |maxlength| is the field width
-void guieditor(char *name, int *maxlength, int *height, int *mode, int *colour, int *focus, char *parent, char *str)
+void guieditor(char *name, int *maxlength, int *height, int *mode, int *colour, int *focus, char *parent, char *str, char *prompt)
 {
     if(!cgui) return;
-    cgui->field(name, *colour >= 0 ? *colour : 0xFFFFFF, *maxlength ? *maxlength : 12, *height, str && *str ? str : NULL, *mode<=0 ? EDITORFOREVER : *mode, *focus!=0, parent);
+    cgui->field(name, *colour >= 0 ? *colour : 0xFFFFFF, *maxlength ? *maxlength : 12, *height, str && *str ? str : NULL, *mode<=0 ? EDITORFOREVER : *mode, *focus!=0, parent, prompt);
     //returns a non-NULL pointer (the currentline) when the user commits, could then manipulate via text* commands
 }
 
 //-ve length indicates a wrapped text field of any (approx 260 chars) length, |length| is the field width
-void guikeyfield(char *var, int *maxlength, char *onchange, int *colour, int *focus, char *parent)
+void guikeyfield(char *var, int *maxlength, char *onchange, int *colour, int *focus, char *parent, char *prompt)
 {
     if(!cgui) return;
     const char *initval = getsval(var);
@@ -682,7 +677,6 @@ COMMAND(0, guinohitfx, "e");
 
 COMMAND(0, guilist, "e");
 COMMAND(0, guibody, "esse");
-COMMAND(0, guititle, "s");
 COMMAND(0, guibar, "");
 COMMAND(0, guifill, "ii");
 COMMAND(0, guioutline, "iiii");
@@ -704,9 +698,9 @@ COMMAND(0, guicheckbox, "ssffsb");
 COMMAND(0, guitab, "s");
 COMMAND(0, guistatus, "si");
 COMMAND(0, guitooltip, "si");
-COMMAND(0, guifield, "sisbisi");
-COMMAND(0, guikeyfield, "sisbis");
-COMMAND(0, guieditor, "siiibiss");
+COMMAND(0, guifield, "sisbisis");
+COMMAND(0, guikeyfield, "sisbiss");
+COMMAND(0, guieditor, "siiibisss");
 
 ICOMMAND(0, guicount, "", (), intret(menustack.length()));
 ICOMMAND(0, guifontwidth, "s", (char *font), intret(guifontwidth(font)));

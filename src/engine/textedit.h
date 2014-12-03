@@ -565,9 +565,21 @@ struct editor
         return slines;
     }
 
-    void draw(int x, int y, int color, bool hit)
+    void draw(int x, int y, int color, bool hit, const char *prompt = NULL)
     {
-        int maxwidth = linewrap ? pixelwidth : -1, starty = scrolly, sx, sy, ex, ey;
+        int h = 0, maxwidth = linewrap ? pixelwidth : -1;
+        if(lines.empty() || !lines[0].text[0])
+        {
+            if(!hit && prompt && *prompt)
+            {
+                int width = 0, height = 0;
+                text_bounds(prompt, width, height, maxwidth, TEXT_NO_INDENT);
+                if(h+height <= pixelheight)
+                    draw_text(prompt, x, y+h, color>>16, (color>>8)&0xFF, color&0xFF, 0xFF, TEXT_NO_INDENT, -1, maxwidth);
+            }
+            return;
+        }
+        int starty = scrolly, sx = 0, sy = 0, ex = 0, ey = 0;
         bool selection = region(sx, sy, ex, ey);
         if(starty == SCROLLEND) // fix scrolly so that <cx, cy> is always on screen
         {
@@ -653,7 +665,6 @@ struct editor
             }
         }
 
-        int h = 0;
         for(int i = starty; i < lines.length(); i++)
         {
             int width, height;
