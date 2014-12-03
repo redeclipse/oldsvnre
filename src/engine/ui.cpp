@@ -420,9 +420,17 @@ struct gui : guient
         if(width) tooltipwidth = width;
     }
 
-    int text  (const char *text, int color, const char *icon, int icolor, int wrap) { return button_(text, color, icon, icolor, false, wrap, false); }
-    int button(const char *text, int color, const char *icon, int icolor, int wrap, bool faded) { return button_(text, color, icon, icolor, true, wrap, faded); }
-    int title (const char *text, int color, const char *icon, int icolor) { return button_(text, color, icon, icolor, false, -1, false, "emphasis"); }
+    void pushfont(const char *font) { ::pushfont(font); fontdepth++; }
+    void popfont() { if(fontdepth) { ::popfont(); fontdepth--; } }
+
+    int text(const char *text, int color, const char *icon, int icolor, int wrap)
+    {
+        return button_(text, color, icon, icolor, false, wrap, false);
+    }
+    int button(const char *text, int color, const char *icon, int icolor, int wrap, bool faded)
+    {
+        return button_(text, color, icon, icolor, true, wrap, faded);
+    }
 
     void separator() { line_(guisepsize); }
 
@@ -430,9 +438,6 @@ struct gui : guient
     void strut(float size) { layout(isvertical() ? int(size*FONTW) : 0, isvertical() ? 0 : int(size*FONTH)); }
     //add space between list items
     void space(float size) { layout(isvertical() ? 0 : int(size*FONTW), isvertical() ? int(size*FONTH) : 0); }
-
-    void pushfont(const char *font) { ::pushfont(font); fontdepth++; }
-    void popfont() { if(fontdepth) { ::popfont(); fontdepth--; } }
 
     void spring(int weight)
     {
@@ -657,19 +662,18 @@ struct gui : guient
         return space;
     }
 
-    char *field(const char *name, int color, int length, int height, const char *initval, int initmode, bool focus, const char *parent)
+    char *field(const char *name, int color, int length, int height, const char *initval, int initmode, bool focus, const char *parent, const char *prompt)
     {
-        return field_(name, color, length, height, initval, initmode, FIELDEDIT, focus, parent, "console");
+        return field_(name, color, length, height, initval, initmode, FIELDEDIT, focus, parent, prompt);
     }
 
-    char *keyfield(const char *name, int color, int length, int height, const char *initval, int initmode, bool focus, const char *parent)
+    char *keyfield(const char *name, int color, int length, int height, const char *initval, int initmode, bool focus, const char *parent, const char *prompt)
     {
-        return field_(name, color, length, height, initval, initmode, FIELDKEY, focus, parent, "console");
+        return field_(name, color, length, height, initval, initmode, FIELDKEY, focus, parent, prompt);
     }
 
-    char *field_(const char *name, int color, int length, int height, const char *initval, int initmode, int fieldtype = FIELDEDIT, bool focus = false, const char *parent = NULL, const char *font = "")
+    char *field_(const char *name, int color, int length, int height, const char *initval, int initmode, int fieldtype = FIELDEDIT, bool focus = false, const char *parent = NULL, const char *prompt = NULL)
     {
-        if(font && *font) gui::pushfont(font);
         editor *e = useeditor(name, initmode, false, initval, parent); // generate a new editor if necessary
         if(guilayoutpass)
         {
@@ -728,7 +732,7 @@ struct gui : guient
             }
             else fieldsactive = true;
             skin(curx, cury, curx+w, cury+h, guifieldbgcolour, guifieldbgblend, editing ? guifieldactivecolour : guifieldbordercolour, editing ? guifieldactiveblend : guifieldborderblend, true);
-            e->draw(curx+wpad/2, cury+hpad/2, color, editing);
+            e->draw(curx+wpad/2, cury+hpad/2, color, editing, prompt);
         }
         else if(e->unfocus) e->unfocus = false;
         layout(w, h);
@@ -747,7 +751,6 @@ struct gui : guient
             }
             if(wasvertical) poplist();
         }
-        if(font && *font) gui::popfont();
         return result;
     }
 
@@ -1122,9 +1125,8 @@ struct gui : guient
         return space;
     }
 
-    int button_(const char *text, int color, const char *icon, int icolor, bool clickable, int wrap = -1, bool faded = true, const char *font = "")
+    int button_(const char *text, int color, const char *icon, int icolor, bool clickable, int wrap = -1, bool faded = true)
     {
-        if(font && *font) gui::pushfont(font);
         int w = 0, h = FONTH;
         if(icon && *icon)
         {
@@ -1153,7 +1155,6 @@ struct gui : guient
             }
             if(text && *text) text_(text, x, cury, color, (hit && hitfx) || !faded || !clickable ? guitextblend : guitextfade, hit && clickable, forcecolor, wrap);
         }
-        if(font && *font) gui::popfont();
         return layout(w, h);
     }
 
