@@ -107,12 +107,15 @@ struct duelservmode : servmode
             if(m_survivor(gamemode, mutators))
             {
                 int alive = 0;
+                vector<clientinfo *> mates;
                 loopv(clients) if(clients[i]->state.actortype < A_ENEMY && clients[i]->team == ci->team)
                 { // includes ci
+                    mates.add(clients[i]);
                     if(clients[i]->state.state == CS_ALIVE && (!G(duelbotcheck) || clients[i]->state.actortype != A_BOT)) alive++;
                 }
                 if(!alive)
                 {
+                    loopv(mates) if(allowed.find(mates[i]) < 0) allowed.add(mates[i]);
                     duelcheck = gamemillis+1000;
                     return true;
                 }
