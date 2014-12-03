@@ -66,7 +66,7 @@ struct duelservmode : servmode
     void entergame(clientinfo *ci)
     {
         queue(ci);
-        if(m_affinity(gamemode)) switch(G(duelaffinity))
+        if(dueltime < 0 && dueldeath < 0 && m_affinity(gamemode)) switch(G(duelaffinity))
         {
             case 2: allowed.add(ci); // fall through because they need to be in respawns too
             case 1: respawns.add(ci); break;
@@ -97,34 +97,27 @@ struct duelservmode : servmode
         if(allowed.find(ci) >= 0 || ci->state.actortype >= A_ENEMY) return true;
         else if(tryspawn)
         {
-            if(dueltime < 0 && dueldeath < 0) queue(ci);
+            if(!m_affinity(gamemode)) queue(ci);
             return true;
         }
-        else if(m_affinity(gamemode) && respawns.find(ci) >= 0)
+        if(m_affinity(gamemode) && respawns.find(ci) >= 0)
         {
+            int delay = m_xdelay(gamemode, mutators, ci->team);
+            if(delay && ci->state.respawnwait(gamemillis, delay)) return false;
             if(m_survivor(gamemode, mutators))
             {
                 int alive = 0;
-                vector<clientinfo *> mates;
                 loopv(clients) if(clients[i]->state.actortype < A_ENEMY && clients[i]->team == ci->team)
                 { // includes ci
-                    mates.add(clients[i]);
                     if(clients[i]->state.state == CS_ALIVE && (!G(duelbotcheck) || clients[i]->state.actortype != A_BOT)) alive++;
                 }
                 if(!alive)
                 {
-                    loopv(mates)
-                    {
-                        if(allowed.find(mates[i]) < 0) allowed.add(mates[i]);
-                        if(mates[i]->state.state == CS_DEAD) waiting(mates[i], DROP_RESET);
-                    }
                     duelcheck = gamemillis+1000;
                     return true;
                 }
                 return false; // only respawn when all dead
             }
-            int delay = m_xdelay(gamemode, mutators, ci->team);
-            if(delay && ci->state.respawnwait(gamemillis, delay)) return false;
             if(allowed.find(ci) < 0) allowed.add(ci);
             duelcheck = gamemillis+1000;
             return true; // overrides it
