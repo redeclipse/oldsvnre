@@ -2,7 +2,7 @@
 h1 { color: #ffffff; display: block; float: left; margin: 0px 0px 16px 0px; padding: 0px; font: bold 28px "Trebuchet MS", Arial, Helvetica, sans-serif; text-shadow: 0px 0px 32px #ff4444; }
 h2 { color: #bb1111; display: block; float: left; margin: 8px 0px 16px 0px; padding: 0px; font: bold normal 18px "Trebuchet MS", Arial, Helvetica, sans-serif; text-shadow: 0px 0px 24px #666666; }
 h3 { font: 13px "Trebuchet MS", Arial, Helvetica, sans-serif; color: #FFFFFF; background: url(/bits/sprite.png) no-repeat -860px -777px; display: block; float: left; margin: 0px 0px 10px; padding: 0px 0px 0px 20px; width: 390px; }
-h4 { font: bold 21px Trebuchet MS, Arial, Helvetica, sans-serif; color: #FFFFFF; margin: 0px 0px 10px; padding: 0px; text-shadow: 0px 0px 15px #ff3333;}
+h4 { font: bold 21px "Trebuchet MS", Arial, Helvetica, sans-serif; color: #FFFFFF; margin: 0px 0px 10px; padding: 0px; text-shadow: 0px 0px 15px #ff3333;}
 #container { margin: 0px auto; width: 980px; padding: 0px; }
 #main { margin: 5px 0px 0px 30px; width: 410px; float: left; }
 #button { font: bold normal 20px "Trebuchet MS", Arial, Helvetica, sans-serif; color: #FFFFFF; background: url(/bits/sprite.png) no-repeat -690px -1126px; margin: 0px 0px 0px 65px; padding: 12px 0px 0px 98px; float: left; height: 64px; width: 176px; text-decoration: none; text-shadow: -1px -1px 1px #773a00; }
@@ -66,7 +66,7 @@ a.info:hover span.bubble { display:block; position:absolute; top:2em; left:-10em
 #lightbox-nav { position: absolute; top: 0; left: 0; height: 100%; width: 100%; z-index: 10; }
 #lightbox-container-image-box > #lightbox-nav { left: 0; }
 #lightbox-nav a { outline: none;}
-#lightbox-nav-btnPrev, #lightbox-nav-btnNext { width: 49%; height: 100%; zoom: 1; display: block; }
+#lightbox-nav-btnPrev, #lightbox-nav-btnNext { width: 49%; height: 100%; display: block; }
 #lightbox-nav-btnPrev { left: 0; float: left; }
 #lightbox-nav-btnNext { right: 0; float: right; }
 #lightbox-container-image-data-box { font: 10px Verdana, Helvetica, sans-serif; background-color: #333; margin: 0 auto; line-height: 1.4em; overflow: auto; width: 100%; padding: 0 10px 0; }
