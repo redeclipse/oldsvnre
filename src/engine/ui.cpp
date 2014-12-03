@@ -1121,30 +1121,33 @@ struct gui : guient
     int button_(const char *text, int color, const char *icon, int icolor, bool clickable, int wrap = -1, bool faded = true, const char *font = "")
     {
         if(font && *font) gui::pushfont(font);
-        int w = 0, h = max((int)FONTH, guibound[1]);
-        if(icon) w += guibound[1];
-        if(icon && text) w += 8;
-        if(text)
+        int w = 0, h = guibound[1];
+        if(icon && *icon)
+        {
+            w += guibound[1];
+            if(text && *text) w += 8;
+        }
+        if(text && *text)
         {
             int tw = 0, th = 0;
             text_bounds(text, tw, th, wrap > 0 ? wrap : -1);
             w += tw;
-            h += th-h;
+            if(h > guibound[1]) h += th-guibound[1];
         }
 
         if(visible())
         {
-            bool hit = ishit(w, FONTH), forcecolor = false;
+            bool hit = ishit(w, h), forcecolor = false;
             if(hit && hitfx && clickable) { forcecolor = true; color = guiactivecolour; }
             int x = curx;
-            if(icon)
+            if(icon && *icon)
             {
                 const char *tname = strstr(icon, "textures/") ? icon : makerelpath("textures", icon);
                 icon_(textureload(tname, 3, true, false), false, x, cury, guibound[1], clickable && hit, icolor);
                 x += guibound[1];
+                if(text && *text) x += 8;
             }
-            if(icon && text) x += 8;
-            if(text) text_(text, x, cury, color, (hit && hitfx) || !faded || !clickable ? guitextblend : guitextfade, hit && clickable, forcecolor, wrap);
+            if(text && *text) text_(text, x, cury, color, (hit && hitfx) || !faded || !clickable ? guitextblend : guitextfade, hit && clickable, forcecolor, wrap);
         }
         if(font && *font) gui::popfont();
         return layout(w, h);
