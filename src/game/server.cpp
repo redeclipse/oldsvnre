@@ -6037,13 +6037,12 @@ namespace server
                     clientinfo *cp = (clientinfo *)getinfo(sn);
                     if(!cp || cp->state.actortype > A_PLAYER || (val ? cp->state.state == CS_SPECTATOR : cp->state.state != CS_SPECTATOR))
                     {
-                        if(G(serverdebug)) srvmsgf(cp->clientnum, "sync error: unable to modify spectator %s - %d [%d, %d]", colourname(cp), cp->state.state, cp->state.lastdeath, gamemillis);
+                        if(G(serverdebug)) srvmsgf(ci->clientnum, "sync error: unable to modify spectator %s - %d [%d, %d]", colourname(cp), cp->state.state, cp->state.lastdeath, gamemillis);
                         break;
                     }
                     if(sn != sender ? !haspriv(ci, max(m_edit(gamemode) ? G(spawneditlock) : G(spawnlock), G(speclock)), "control other players") : !allowstate(cp, val ? ALST_SPEC : ALST_TRY, m_edit(gamemode) ? G(spawneditlock) : G(spawnlock)))
                     {
-                        if(G(serverdebug)) srvmsgf(cp->clientnum, "sync error: unable to modify spectator %s - %d [%d, %d]", colourname(cp), cp->state.state, cp->state.lastdeath, gamemillis);
-                        spectate(cp, true);
+                        if(G(serverdebug)) srvmsgf(ci->clientnum, "sync error: unable to modify spectator %s - %d [%d, %d]", colourname(cp), cp->state.state, cp->state.lastdeath, gamemillis);
                         break;
                     }
                     bool spec = val != 0, quarantine = cp != ci && val == 2, wasq = cp->state.quarantine;

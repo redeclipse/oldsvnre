@@ -30,12 +30,6 @@ struct duelservmode : servmode
         duelwinner = -1;
     }
 
-    bool checkready(clientinfo *ci)
-    {
-        if(m_loadout(gamemode, mutators) && !chkloadweap(ci, false)) return false;
-        return true;
-    }
-
     void position(clientinfo *ci, int n)
     {
         if(m_survivor(gamemode, mutators))
@@ -100,9 +94,13 @@ struct duelservmode : servmode
 
     bool canspawn(clientinfo *ci, bool tryspawn = false)
     {
-        if(!checkready(ci)) return false;
         if(allowed.find(ci) >= 0 || ci->state.actortype >= A_ENEMY) return true;
-        if(m_affinity(gamemode) && respawns.find(ci) >= 0)
+        else if(tryspawn)
+        {
+            if(dueltime < 0 && dueldeath < 0) queue(ci);
+            return true;
+        }
+        else if(m_affinity(gamemode) && respawns.find(ci) >= 0)
         {
             if(m_survivor(gamemode, mutators))
             {
@@ -131,7 +129,6 @@ struct duelservmode : servmode
             duelcheck = gamemillis+1000;
             return true; // overrides it
         }
-        if(tryspawn && dueltime < 0 && dueldeath < 0) queue(ci);
         return false; // you spawn when we want you to buddy
     }
 
@@ -234,7 +231,6 @@ struct duelservmode : servmode
                 loopv(duelqueue)
                 {
                     if(m_duel(gamemode, mutators) && playing.length() >= wants) break;
-                    if(!checkready(duelqueue[i])) continue; // they are not ready yet.
                     if(duelqueue[i]->state.state != CS_ALIVE)
                     {
                         if(duelqueue[i]->state.state != CS_WAITING) waiting(duelqueue[i], DROP_RESET);
