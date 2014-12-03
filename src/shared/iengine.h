@@ -601,9 +601,8 @@ struct editor;
 
 namespace UI
 {
-    extern bool isopen, ready;
+    extern bool isopen;
     extern bool keypress(int code, bool isdown, int cooked);
-    extern void setup();
     extern void update();
     extern void render();
     extern bool active(bool pass = true);

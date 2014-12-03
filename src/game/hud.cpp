@@ -1562,7 +1562,7 @@ namespace hud
             }
             glDisable(GL_BLEND);
         }
-        if(UI::ready && (progressing || (commandmillis <= 0 && !curcompass))) UI::render();
+        if(progressing || (commandmillis <= 0 && !curcompass)) UI::render();
         if(!progressing) drawpointers(hudwidth, hudheight);
     }
 

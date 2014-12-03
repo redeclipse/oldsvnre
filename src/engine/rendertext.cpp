@@ -1,7 +1,7 @@
 #include "engine.h"
 
 VAR(IDF_PERSIST, textblinking, 0, 250, VAR_MAX);
-FVARF(IDF_PERSIST, textscale, FVAR_NONZERO, 1, FVAR_MAX, UI::setup());
+FVAR(IDF_PERSIST, textscale, FVAR_NONZERO, 1, FVAR_MAX);
 VAR(IDF_PERSIST, textfaded, 0, 1, 1);
 VAR(IDF_PERSIST, textminintensity, 0, 32, 255);
 VARF(IDF_PERSIST, textkeybg, 0, 1, 1, changedkeys = totalmillis);
