@@ -2152,7 +2152,7 @@ namespace server
             formatstring(msg)("\frsorry, \fs\fc%s\fS is not a demo file", file);
         else
         {
-            lilswap(&hdr.version, 2);
+            lilswap(&hdr.version, 5);
             if(hdr.version!=DEMO_VERSION) formatstring(msg)("\frdemo \fs\fc%s\fS requires %s version of %s", file, hdr.version<DEMO_VERSION ? "an older" : "a newer", versionname);
             else if(hdr.gamever!=GAMEVERSION) formatstring(msg)("\frdemo \fs\fc%s\fS requires %s version of %s", file, hdr.gamever<GAMEVERSION ? "an older" : "a newer", versionname);
         }
@@ -2275,7 +2275,11 @@ namespace server
         memcpy(hdr.magic, DEMO_MAGIC, sizeof(hdr.magic));
         hdr.version = DEMO_VERSION;
         hdr.gamever = GAMEVERSION;
-        lilswap(&hdr.version, 2);
+        hdr.gamemode = gamemode;
+        hdr.mutators = mutators;
+        hdr.starttime = clocktime;
+        lilswap(&hdr.version, 5);
+        copystring(hdr.mapname, smapname);
         demorecord->write(&hdr, sizeof(demoheader));
 
         packetbuf p(MAXTRANS, ENET_PACKET_FLAG_RELIABLE);
