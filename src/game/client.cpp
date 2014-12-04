@@ -160,19 +160,10 @@ namespace client
     struct demoinfo
     {
         demoheader hdr;
-        string file, mapname;
-        int gamemode, mutators;
+        string file;
     };
     vector<demoinfo> demoinfos;
     vector<char *> faildemos;
-
-    int demoint(stream *f)
-    {
-        int c = (char)f->get<uchar>();
-        if(c==-128) { int n = f->get<uchar>(); n |= char(f->get<uchar>())<<8; return n; }
-        else if(c==-127) { int n = f->get<uchar>(); n |= f->get<uchar>()<<8; n |= f->get<uchar>()<<16; return n|(f->get<uchar>()<<24); }
-        else return c;
-    }
 
     int scandemo(const char *name)
     {
@@ -193,47 +184,19 @@ namespace client
             formatstring(msg)("\frsorry, \fs\fc%s\fS is not a demo file", name);
         else
         {
-            lilswap(&d.hdr.version, 2);
+            lilswap(&d.hdr.version, 5);
             if(d.hdr.version!=DEMO_VERSION) formatstring(msg)("\frdemo \fs\fc%s\fS requires \fs\fc%s\fS version of %s", name, d.hdr.version<DEMO_VERSION ? "an older" : "a newer", versionname);
             else if(d.hdr.gamever!=GAMEVERSION) formatstring(msg)("\frdemo \fs\fc%s\fS requires \fs\fc%s\fS version of %s", name, d.hdr.gamever<GAMEVERSION ? "an older" : "a newer", versionname);
         }
+        delete f;
         if(msg[0])
         {
             conoutft(CON_INFO, "%s", msg);
             demoinfos.pop();
             faildemos.add(newstring(name));
-            delete f;
             return -1;
         }
-        if(f->seek(sizeof(int)*3, SEEK_CUR) && demoint(f) == N_WELCOME && demoint(f) == N_MAPCHANGE)
-        {
-            char *t = d.mapname;
-            do // serialised version of getstring
-            {
-                if(t >= &d.mapname[MAXSTRLEN]) { d.mapname[MAXSTRLEN-1] = 0; break; }
-                int c = (char)demoint(f);
-                if(c == -1)
-                {
-                    conoutft(CON_INFO, "\frunable to parse map name from: \fc%s", name);
-                    demoinfos.pop();
-                    faildemos.add(newstring(name));
-                    delete f;
-                    return -1;
-                }
-                *t = c;
-            } while(*t++);
-            demoint(f);
-            d.gamemode = demoint(f);
-            d.mutators = demoint(f);
-            //conoutft(CON_INFO, "read demo %s: [%d:%d] %s on %s", d.file, d.hdr.version, d.hdr.gamever, server::gamename(d.gamemode, d.mutators), d.mapname);
-            delete f;
-            return num;
-        }
-        conoutft(CON_INFO, "\frunexpected message while reading: \fc%s", name);
-        demoinfos.pop();
-        faildemos.add(newstring(name));
-        delete f;
-        return -1;
+        return num;
     }
     ICOMMAND(0, demoscan, "s", (char *name), intret(scandemo(name)));
 
@@ -258,9 +221,10 @@ namespace client
             {
                 case 0: intret(d.hdr.version); break;
                 case 1: intret(d.hdr.gamever); break;
-                case 2: result(d.mapname); break;
-                case 3: intret(d.gamemode); break;
-                case 4: intret(d.mutators); break;
+                case 2: result(d.hdr.mapname); break;
+                case 3: intret(d.hdr.gamemode); break;
+                case 4: intret(d.hdr.mutators); break;
+                case 5: intret(d.hdr.starttime); break;
                 default: break;
             }
         }
@@ -1211,6 +1175,7 @@ namespace client
             case N_SENDDEMO:
             {
                 int ctime = getint(p);
+                if(filetimelocal) ctime += clockoffset;
                 data += p.length();
                 len -= p.length();
                 string fname;

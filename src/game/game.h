@@ -4,7 +4,7 @@
 #include "engine.h"
 
 #define GAMEID "fps"
-#define GAMEVERSION 225
+#define GAMEVERSION 226
 
 #define DEMO_MAGIC "RED_ECLIPSE_DEMO"
 #define DEMO_VERSION GAMEVERSION
@@ -316,7 +316,8 @@ enum { CON_CHAT = CON_GAMESPECIFIC, CON_EVENT, CON_MAX, CON_LO = CON_MESG, CON_H
 struct demoheader
 {
     char magic[16];
-    int version, gamever;
+    int version, gamever, gamemode, mutators, starttime;
+    string mapname;
 };
 #include "player.h"
 #ifndef GAMESERVER
