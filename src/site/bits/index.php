@@ -6,7 +6,7 @@
     $app['youtubevid'] = "oJRZHjyj7Zg";
     $app['screenshots'] = 84;
 
-    $app['banner'] = "<b>VOTE FOR US</b> Indie Game of the Year 2014";
+    $app['banner'] = "<b>VOTE FOR US!</b> Indie Game of the Year 2014";
     $app['bannerurl'] = "http://www.indiedb.com/games/red-eclipse";
 
     $app['targets'] = array('home' => array('name' => '', 'url' => '/', 'alturl' => '', 'nav' => -1, 'redir' => 0));
@@ -147,7 +147,7 @@
             <div id="links"><?php echo $app['navbar']; ?></div>
             <div id="header">
                 <a href="/home"><img src="/bits/lightbox-blank.gif" alt="Red Eclipse" width="450" height="143" border="0" align="left" title="Red Eclipse" /></a>
-                <a href="http://www.indiedb.com/games/red-eclipse"><img src="http://media.indiedb.com/images/groups/1/17/16308/profile/ioty-250.png" width="143" height="143" border="0" align="center" title="VOTE FOR US!"></a>
+                <a href="http://www.indiedb.com/games/red-eclipse"><img src="http://media.indiedb.com/images/groups/1/17/16308/profile/ioty-250.png" width="143" height="100" border="0" align="center" title="VOTE FOR US!"></a>
                 <a href="http://www.cubeengine.com/"><img src="/bits/lightbox-blank.gif" alt="Built on Cube Engine 2" width="150" height="143" border="0" align="right" title="Built on Cube Engine 2" /></a>
             </div>
             <div id="video">
