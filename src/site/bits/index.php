@@ -22,6 +22,8 @@
 
     $app['targets']['facebook'] = array('name' => 'Facebook', 'url' => 'http://www.facebook.com/redeclipse.net', 'nav' => 0, 'redir' => 1);
     $app['targets']['youtube'] = array('name' => 'Youtube', 'url' => 'http://www.youtube.com/results?search_query=%22Red%20Eclipse%22', 'alturl' => 'http://www.youtube.com/results?search_query=%22Red%20Eclipse%22+', 'nav' => 0, 'redir' => 1);
+
+    $app['targets']['itchio'] = array('name' => 'Itch.io', 'url' => 'http://redeclipse.itch.io/red-eclipse', 'nav' => 0, 'redir' => 1);
     $app['targets']['desura'] = array('name' => 'Desura', 'url' => 'http://www.desura.com/games/red-eclipse', 'nav' => 0, 'redir' => 1);
     $app['targets']['indiedb'] = array('name' => 'IndieDB', 'url' => 'http://www.indiedb.com/games/red-eclipse', 'nav' => 0, 'redir' => 1);
 
@@ -159,7 +161,7 @@
                     <h3>Favourite game modes with an array of mutators and variables</h3>
                     <h3>Builtin editor lets you create your own maps cooperatively online</h3>
                     <a href="/download" id="button">Free Download<br /><em><?php echo $app['releasever']; ?><br /> released <i><?php echo $app['releasedate']; ?></i></em></a>	 
-                    <p id="digidist">also available on <a href="/desura">Desura</a> and <a href="/indiedb">IndieDB</a></p>
+                    <p id="digidist">also available on <a href="/itchio">Itch.io</a>, <a href="/desura">Desura</a> and <a href="/indiedb">IndieDB</a></p>
                     <p id="mirror">and 3<sup>rd</sup> party packages for:
 <?php                   $m = 0;
                         foreach ($app['platforms'] as $key => $targ) {
