@@ -119,6 +119,8 @@ struct ident
             };
             identvalptr storage;
             identval overrideval;
+            identval def; // declared-default (by *init.cfg)
+            identval bin; // builtin-default (hard coded or version.cfg)
         };
         struct // ID_ALIAS
         {
@@ -133,8 +135,6 @@ struct ident
         };
     };
     identfun fun; // ID_VAR, ID_FVAR, ID_SVAR, ID_COMMAND
-    identval def; // declared-default (by *init.cfg)
-    identval bin; // builtin-default (hard coded or version.cfg)
     char *desc, *usage;
 
     ident() {}
