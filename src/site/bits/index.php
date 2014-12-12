@@ -7,7 +7,7 @@
     $app['screenshots'] = 84;
 
     $app['banner'] = "<b>VOTE FOR US!</b> Indie Game of the Year 2014";
-    $app['bannerurl'] = "/indiedb";
+    $app['bannerurl'] = "http://www.indiedb.com/events/2014-indie-of-the-year-awards/top100#vote14457";
 
     $app['targets'] = array('home' => array('name' => '', 'url' => '/', 'alturl' => '', 'nav' => -1, 'redir' => 0));
 
