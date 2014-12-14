@@ -2245,7 +2245,7 @@ namespace client
                     gameentity &e = *(gameentity *)entities::ents[ent];
                     entities::setspawn(ent, value);
                     ai::itemspawned(ent, value!=0);
-                    if(e.spawned)
+                    if(e.spawned())
                     {
                         int sweap = m_weapon(game::gamemode, game::mutators), attr = w_attr(game::gamemode, game::mutators, e.type, e.attrs[0], sweap),
                             colour = e.type == WEAPON ? W(attr, colour) : 0xFFFFFF;

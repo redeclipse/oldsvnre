@@ -41,30 +41,27 @@ struct entity : entbase
 {
     attrvector attrs;
     linkvector links;
+};
 
-    entity() { reset(); }
-
-    void reset()
-    {
-        attrs.setsize(0);
-        links.setsize(0);
-    }
+enum
+{
+    EF_OCTA      = 1<<0,
+    EF_RENDER    = 1<<1,
+    EF_SPAWNED   = 1<<2
 };
 
 struct extentity : entity                       // part of the entity that doesn't get saved to disk
 {
-    uchar spawned, inoctanode, visible;        // the only dynamic state of a map entity
+    int flags;        // the only dynamic state of a map entity
     entitylight light;
     int lastemit, emit[3];
 
-    extentity() { reset(); }
+    extentity() : flags(0), lastemit(0) { emit[0] = emit[1] = emit[2] = 0; }
 
-    void reset()
-    {
-        entity::reset();
-        spawned = inoctanode = visible = false;
-        lastemit = emit[0] = emit[1] = emit[2] = 0;
-    }
+    bool spawned() const { return (flags&EF_SPAWNED) != 0; }
+    void setspawned(bool val) { if(val) flags |= EF_SPAWNED; else flags &= ~EF_SPAWNED; }
+    void setspawned() { flags |= EF_SPAWNED; }
+    void clearspawned() { flags &= ~EF_SPAWNED; }
 };
 
 #define MAXENTS 30000
