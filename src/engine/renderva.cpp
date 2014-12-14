@@ -371,8 +371,8 @@ void findvisiblemms(const vector<extentity *> &ents)
                 loopv(oe->mapmodels)
                 {
                     extentity &e = *ents[oe->mapmodels[i]];
-                    if(e.lastemit && e.spawned && e.attrs[6]&MMT_HIDE) continue;
-                    e.visible = true;
+                    if(e.lastemit && e.spawned() && e.attrs[6]&MMT_HIDE) continue;
+                    e.flags |= EF_RENDER;
                     ++visible;
                 }
                 if(!visible) continue;
@@ -403,8 +403,8 @@ void rendermapmodel(extentity &e)
     int anim = ANIM_MAPMODEL|ANIM_LOOP, basetime = 0, flags = MDL_CULL_VFC|MDL_CULL_DIST|MDL_DYNLIGHT;
     if(e.lastemit)
     {
-        if(e.attrs[6]&MMT_HIDE && e.spawned) return;
-        anim = e.spawned ? ANIM_TRIGGER_ON : ANIM_TRIGGER_OFF;
+        if(e.attrs[6]&MMT_HIDE && e.spawned()) return;
+        anim = e.spawned() ? ANIM_TRIGGER_ON : ANIM_TRIGGER_OFF;
         if(e.lastemit > 0 && lastmillis-e.lastemit < entities::triggertime(e)) basetime = e.lastemit;
         else anim |= ANIM_END;
     }
@@ -459,8 +459,8 @@ void renderreflectedmapmodels()
         loopv(oe->mapmodels)
         {
            extentity &e = *ents[oe->mapmodels[i]];
-           if(e.visible || (e.lastemit && e.spawned && e.attrs[6]&MMT_HIDE)) continue;
-           e.visible = true;
+           if(e.flags&EF_RENDER || (e.lastemit && e.spawned() && e.attrs[6]&MMT_HIDE)) continue;
+           e.flags |= EF_RENDER;
         }
     }
     if(mms)
@@ -471,9 +471,9 @@ void renderreflectedmapmodels()
             loopv(oe->mapmodels)
             {
                 extentity &e = *ents[oe->mapmodels[i]];
-                if(!e.visible) continue;
+                if(!(e.flags&EF_RENDER)) continue;
                 rendermapmodel(e);
-                e.visible = false;
+                e.flags &= ~EF_RENDER;
             }
         }
         endmodelbatches();
@@ -498,7 +498,7 @@ void rendermapmodels()
         loopv(oe->mapmodels)
         {
             extentity &e = *ents[oe->mapmodels[i]];
-            if(!e.visible) continue;
+            if(!(e.flags&EF_RENDER)) continue;
             if(!rendered)
             {
                 rendered = true;
@@ -506,7 +506,7 @@ void rendermapmodels()
                 if(oe->query) startmodelquery(oe->query);
             }
             rendermapmodel(e);
-            e.visible = false;
+            e.flags &= ~EF_RENDER;
         }
         if(rendered && oe->query) endmodelquery();
     }

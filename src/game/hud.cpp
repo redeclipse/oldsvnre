@@ -2056,12 +2056,12 @@ namespace hud
             loopv(entgroup) if(entities::ents.inrange(entgroup[i]) && entgroup[i] != hover)
             {
                 gameentity &e = *(gameentity *)entities::ents[entgroup[i]];
-                drawentblip(w, h, blend, entgroup[i], e.o, e.type, e.attrs, e.spawned, e.lastspawn, true);
+                drawentblip(w, h, blend, entgroup[i], e.o, e.type, e.attrs, e.spawned(), e.lastspawn, true);
             }
             if(entities::ents.inrange(hover))
             {
                 gameentity &e = *(gameentity *)entities::ents[hover];
-                drawentblip(w, h, blend, hover, e.o, e.type, e.attrs, e.spawned, e.lastspawn, true);
+                drawentblip(w, h, blend, hover, e.o, e.type, e.attrs, e.spawned(), e.lastspawn, true);
             }
         }
         else
@@ -2069,7 +2069,7 @@ namespace hud
             loopi(entities::lastuse(EU_ITEM))
             {
                 gameentity &e = *(gameentity *)entities::ents[i];
-                drawentblip(w, h, blend, i, e.o, e.type, e.attrs, e.spawned, e.lastspawn, false);
+                drawentblip(w, h, blend, i, e.o, e.type, e.attrs, e.spawned(), e.lastspawn, false);
             }
             loopv(projs::projs) if(projs::projs[i]->projtype == PRJ_ENT && projs::projs[i]->ready())
             {

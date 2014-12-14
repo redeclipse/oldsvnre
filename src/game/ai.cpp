@@ -505,7 +505,7 @@ namespace ai
             gameentity &e = *(gameentity *)entities::ents[j];
             if(enttype[e.type].usetype != EU_ITEM || e.type != WEAPON) continue;
             int attr = w_attr(game::gamemode, game::mutators, e.type, e.attrs[0], sweap);
-            if(e.spawned && isweap(attr) && wantsweap(d, attr))
+            if(e.spawned() && isweap(attr) && wantsweap(d, attr))
             { // go get a weapon upgrade
                 interest &n = interests.add();
                 n.state = AI_S_INTEREST;
@@ -742,7 +742,7 @@ namespace ai
                     gameentity &e = *(gameentity *)entities::ents[b.target];
                     if(enttype[e.type].usetype != EU_ITEM || e.type != WEAPON) return false;
                     int sweap = m_weapon(game::gamemode, game::mutators), attr = w_attr(game::gamemode, game::mutators, e.type, e.attrs[0], sweap);
-                    if(!isweap(attr) || !e.spawned || !wantsweap(d, attr)) return false;
+                    if(!isweap(attr) || !e.spawned() || !wantsweap(d, attr)) return false;
                     //float guard = enttype[e.type].radius;
                     //if(d->feetpos().squaredist(e.o) <= guard*guard)
                     //    b.acttype = enemy(d, b, e.o, guard*4, weaptype[d->weapselect].melee ? 1 : 0, false) ? AI_A_PROTECT : AI_A_IDLE;
@@ -1442,7 +1442,7 @@ namespace ai
                 if(expl > 0) obstacles.avoidnear(p, p->o.z + expl, p->o, guessradius + expl + 1);
             }
         }
-        loopi(entities::lastent(MAPMODEL)) if(entities::ents[i]->type == MAPMODEL && !entities::ents[i]->spawned)
+        loopi(entities::lastent(MAPMODEL)) if(entities::ents[i]->type == MAPMODEL && !entities::ents[i]->spawned())
         {
             gameentity &e = *(gameentity *)entities::ents[i];
             bool skip = false;

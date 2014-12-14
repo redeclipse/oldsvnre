@@ -127,15 +127,15 @@ int hitent, hitorient;
             { \
                 if(e.attrs[6]&MMT_HIDE) \
                 { \
-                    if(e.spawned) continue; \
+                    if(e.spawned()) continue; \
                 } \
                 else if(e.lastemit > 0) \
                 { \
                     int millis = lastmillis-e.lastemit, delay = entities::triggertime(e); \
-                    if(!e.spawned && millis < delay/2) continue; \
-                    if(e.spawned && millis > delay/2) continue; \
+                    if(!e.spawned() && millis < delay/2) continue; \
+                    if(e.spawned() && millis > delay/2) continue; \
                 } \
-                else if(e.spawned) continue; \
+                else if(e.spawned()) continue; \
             } \
     }
 
@@ -152,7 +152,7 @@ static float disttoent(octaentities *oc, const vec &o, const vec &ray, float rad
         { \
             int n = oc->type[i]; \
             extentity &e = *ents[n]; \
-            if(!e.inoctanode || &e==t) continue; \
+            if(!(e.flags&EF_OCTA) || &e==t) continue; \
             func; \
             if(f<dist && f>0 && vec(ray).mul(f).add(o).insidebb(oc->o, oc->size)) \
             { \
@@ -193,7 +193,7 @@ static float disttooutsideent(const vec &o, const vec &ray, float radius, int mo
     loopv(outsideents)
     {
         extentity &e = *ents[outsideents[i]];
-        if(!e.inoctanode || &e == t) continue;
+        if(!(e.flags&EF_OCTA) || &e == t) continue;
         entselectionbox(e, eo, es);
         if(!rayboxintersect(eo, es, o, ray, f, orient)) continue;
         if(f<dist && f>0)
@@ -214,7 +214,7 @@ static float shadowent(octaentities *oc, const vec &o, const vec &ray, float rad
     loopv(oc->mapmodels)
     {
         extentity &e = *ents[oc->mapmodels[i]];
-        if(!e.inoctanode || &e==t) continue;
+        if(!(e.flags&EF_OCTA) || &e==t) continue;
         if(e.attrs[6]&MMT_NOSHADOW) continue;
         if(!mmintersect(e, o, ray, radius, mode, f)) continue;
         if(f>0 && f<dist) dist = f;

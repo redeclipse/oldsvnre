@@ -394,9 +394,9 @@ namespace entities
             attr = w_attr(game::gamemode, game::mutators, f.type, f.attrs[0], sweap);
             if(isweap(attr)) projs::drop(d, attr, drop, ammo, d == game::player1 || d->ai, 0, weap);
         }
-        if(e.spawned != spawn)
+        if(e.spawned() != spawn)
         {
-            e.spawned = spawn;
+            e.setspawned(spawn);
             e.lastemit = lastmillis;
         }
         checkspawns(ent);
@@ -410,7 +410,7 @@ namespace entities
         {
             int n = oe.other[i];
             extentity &e = *ents[n];
-            if(enttype[e.type].usetype != EU_NONE && (enttype[e.type].usetype != EU_ITEM || (alive && e.spawned)))
+            if(enttype[e.type].usetype != EU_NONE && (enttype[e.type].usetype != EU_ITEM || (alive && e.spawned())))
             {
                 float radius = enttype[e.type].radius;
                 switch(e.type)
@@ -476,7 +476,7 @@ namespace entities
         loopv(ents)
         {
             extentity &e = *ents[i];
-            if(enttype[e.type].usetype != EU_NONE && (enttype[e.type].usetype != EU_ITEM || (d->state == CS_ALIVE && e.spawned)))
+            if(enttype[e.type].usetype != EU_NONE && (enttype[e.type].usetype != EU_ITEM || (d->state == CS_ALIVE && e.spawned())))
             {
                 float eradius = enttype[e.type].radius, edist = pos.dist(e.o);
                 switch(e.type)
@@ -558,7 +558,7 @@ namespace entities
                 case TR_TOGGLE: case TR_LINK: case TR_ONCE:
                 {
                     client::addmsg(N_TRIGGER, "ri2", d->clientnum, n);
-                    if(!e.spawned || e.attrs[1] == TR_TOGGLE) setspawn(n, e.spawned ? 0 : 1);
+                    if(!e.spawned() || e.attrs[1] == TR_TOGGLE) setspawn(n, e.spawned() ? 0 : 1);
                     break;
                 }
                 case TR_SCRIPT:
@@ -881,11 +881,12 @@ namespace entities
         if(ents.inrange(n))
         {
             gameentity &e = *(gameentity *)ents[n];
-            bool on = m%2, spawned = e.spawned;
-            if((e.spawned = on) == true) e.lastspawn = lastmillis;
+            bool on = m%2, spawned = e.spawned();
+            e.setspawned(on);
+            if(on) e.lastspawn = lastmillis;
             if(e.type == TRIGGER && cantrigger(n) && (e.attrs[1] == TR_TOGGLE || e.attrs[1] == TR_LINK || e.attrs[1] == TR_ONCE))
             {
-                if(m >= 2 || e.lastemit <= 0 || e.spawned != spawned)
+                if(m >= 2 || e.lastemit <= 0 || e.spawned() != spawned)
                 {
                     if(m >= 2) e.lastemit = -1;
                     else if(e.lastemit > 0)
@@ -900,7 +901,7 @@ namespace entities
                     {
                         gameentity &f = *(gameentity *)ents[e.kin[i]];
                         if(!cantrigger(e.kin[i])) continue;
-                        f.spawned = e.spawned;
+                        f.setspawned(e.spawned());
                         f.lastemit = e.lastemit;
                         execlink(NULL, e.kin[i], false, n);
                     }
@@ -978,7 +979,7 @@ namespace entities
                     gameentity &f = *(gameentity *)ents[e.links[i]];
                     if(f.type != TRIGGER || !cantrigger(e.links[i])) continue;
                     e.lastemit = f.lastemit;
-                    e.spawned = TRIGSTATE(f.spawned, f.attrs[4]);
+                    e.setspawned(TRIGSTATE(f.spawned(), f.attrs[4]));
                     break;
                 }
                 break;
@@ -1028,7 +1029,7 @@ namespace entities
                 if(cantrigger(n)) loopv(e.links) if(ents.inrange(e.links[i]) && (ents[e.links[i]]->type == MAPMODEL || ents[e.links[i]]->type == PARTICLES || ents[e.links[i]]->type == MAPSOUND || ents[e.links[i]]->type == LIGHTFX))
                 {
                     ents[e.links[i]]->lastemit = e.lastemit;
-                    ents[e.links[i]]->spawned = TRIGSTATE(e.spawned, e.attrs[4]);
+                    ents[e.links[i]]->setspawned(TRIGSTATE(e.spawned(), e.attrs[4]));
                 }
                 break;
             }
@@ -1123,21 +1124,21 @@ namespace entities
                     case MAPMODEL:
                     {
                         f.lastemit = e.lastemit;
-                        if(e.type == TRIGGER) f.spawned = TRIGSTATE(e.spawned, e.attrs[4]);
+                        if(e.type == TRIGGER) f.setspawned(TRIGSTATE(e.spawned(), e.attrs[4]));
                         break;
                     }
                     case LIGHTFX:
                     case PARTICLES:
                     {
                         f.lastemit = e.lastemit;
-                        if(e.type == TRIGGER) f.spawned = TRIGSTATE(e.spawned, e.attrs[4]);
+                        if(e.type == TRIGGER) f.setspawned(TRIGSTATE(e.spawned(), e.attrs[4]));
                         else if(local) commit = true;
                         break;
                     }
                     case MAPSOUND:
                     {
                         f.lastemit = e.lastemit;
-                        if(e.type == TRIGGER) f.spawned = TRIGSTATE(e.spawned, e.attrs[4]);
+                        if(e.type == TRIGGER) f.setspawned(TRIGSTATE(e.spawned(), e.attrs[4]));
                         else if(local) commit = true;
                         if(mapsounds.inrange(f.attrs[0]) && !issound(f.schan))
                         {
@@ -2165,9 +2166,9 @@ namespace entities
         }
         loopi(lastent(LIGHTFX)) if(ents[i]->type == LIGHTFX && ents[i]->attrs[0] != LFX_SPOTLIGHT)
         {
-            if(ents[i]->spawned || ents[i]->lastemit)
+            if(ents[i]->spawned() || ents[i]->lastemit)
             {
-                if(!ents[i]->spawned && ents[i]->lastemit > 0 && lastmillis-ents[i]->lastemit > triggertime(*ents[i])/2)
+                if(!ents[i]->spawned() && ents[i]->lastemit > 0 && lastmillis-ents[i]->lastemit > triggertime(*ents[i])/2)
                     continue;
             }
             else
@@ -2253,7 +2254,7 @@ namespace entities
             {
                 gameentity &e = *(gameentity *)ents[i];
                 if(e.type <= NOTUSED || e.type >= MAXENTTYPES || (enttype[e.type].usetype == EU_ITEM && simpleitems)) continue;
-                bool active = enttype[e.type].usetype == EU_ITEM && (e.spawned || (e.lastemit && lastmillis-e.lastemit < 500));
+                bool active = enttype[e.type].usetype == EU_ITEM && (e.spawned() || (e.lastemit && lastmillis-e.lastemit < 500));
                 if((m_edit(game::gamemode) && rendermainview) || active)
                 {
                     const char *mdlname = entmdlname(e.type, e.attrs);
@@ -2282,7 +2283,7 @@ namespace entities
                             }
                             //fade = 0.5f;
                         }
-                        else if(e.spawned)
+                        else if(e.spawned())
                         {
                             int millis = lastmillis-e.lastspawn;
                             if(millis < 500) size = fade = float(millis)/500.f;
@@ -2329,7 +2330,7 @@ namespace entities
                     if((e.nextemit -= curtime) <= 0) e.nextemit = 0;
                     if(e.nextemit) break;
                 }
-                if(idx < 0 || e.links.empty() || e.spawned || (e.lastemit > 0 && lastmillis-e.lastemit <= triggertime(e)/2)) makeparticle(o, e.attrs);
+                if(idx < 0 || e.links.empty() || e.spawned() || (e.lastemit > 0 && lastmillis-e.lastemit <= triggertime(e)/2)) makeparticle(o, e.attrs);
                 if(idx >= 0 && e.attrs[11]) e.nextemit += e.attrs[11];
                 break;
             case TELEPORT:
@@ -2444,7 +2445,7 @@ namespace entities
             else if(e.o.squaredist(camera1->o) > maxdist) continue;
             float skew = 1;
             bool active = false;
-            if(e.spawned)
+            if(e.spawned())
             {
                 int millis = lastmillis-e.lastspawn;
                 if(millis < 500) skew = float(millis)/500.f;
@@ -2459,7 +2460,7 @@ namespace entities
                     active = true;
                 }
             }
-            drawparticle(e, e.o, i, e.spawned, active, skew);
+            drawparticle(e, e.o, i, e.spawned(), active, skew);
         }
         loopv(projs::projs)
         {
