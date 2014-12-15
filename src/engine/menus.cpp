@@ -868,12 +868,11 @@ void progressmenu()
 {
     menu *m = menus.access("loading");
     if(m)
-    {
+    { // it doesn't need to exist
         m->usetitle = m->useinput = m->world = false;
         m->builtin = true;
         UI::addcb(m);
     }
-    else conoutf("cannot find menu: loading");
 }
 
 void mainmenu()
