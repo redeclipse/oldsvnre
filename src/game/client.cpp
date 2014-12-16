@@ -547,6 +547,12 @@ namespace client
         if(m_edit(game::gamemode)) addmsg(N_EDITMODE, "ri", edit ? 1 : 0);
     }
 
+    int getcn(physent *d)
+    {
+        if(!d || !gameent::is(d)) return -1;
+        return ((gameent *)d)->clientnum;
+    }
+
     int getclientpresence(int cn)
     {
         gameent *d = game::getclient(cn);

@@ -27,6 +27,7 @@ namespace entities
 
 namespace client
 {
+    extern int getcn(physent *d);
     extern int maxmsglen();
     extern void gamedisconnect(int clean);
     extern void parsepacketclient(int chan, packetbuf &p);
