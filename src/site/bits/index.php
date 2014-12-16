@@ -56,31 +56,28 @@
     if (!isset($app['targets'][$app['target']])) $app['target'] = "home";
 
     $title = checkarg("title");
-    if ($app['targets'][$app['target']]['redir']) {
-        $app['url'] = $title != "" ? (
-                $app['targets'][$app['target']]['alturl'] != "" ? $app['targets'][$app['target']]['alturl'].$title : $app['targets'][$app['target']]['url'].$title
-        ) : $app['targets'][$app['target']]['url'];
-        header("Location: ".$app['url']);
-        exit;
-    }
-    else {
-        $app['url'] = $title != "" ? (
-                $app['targets'][$app['target']]['alturl'] != "" ? $app['targets'][$app['target']]['alturl'].$title : $app['targets'][$app['target']]['url'].$title
-        ) : $app['targets'][$app['target']]['url'];
-        $app['navbar'] = ''; // cache the navbar
-        foreach ($app['targets'] as $key => $targ) {
-            if ($key != "" && $targ['name'] != "" && $targ['nav'] == 1) {
-                $app['navbar'] .= '<a href="/'.$key.'">'. $targ['name'] .'</a> ';
-            }
+    $app['url'] = $title != "" ? (
+            $app['targets'][$app['target']]['alturl'] != "" ? $app['targets'][$app['target']]['alturl'].$title : $app['targets'][$app['target']]['url'].$title
+    ) : $app['targets'][$app['target']]['url'];
+    $app['page'] = $app['targets'][$app['target']]['name'] != "" ? $app['targets'][$app['target']]['name'] : "Home";
+    $app['navbar'] = ''; // cache the navbar
+    foreach ($app['targets'] as $key => $targ) {
+        if ($key != "" && $targ['name'] != "" && $targ['nav'] == 1) {
+            $app['navbar'] .= '<a href="/'.$key.'">'. $targ['name'] .'</a> ';
         }
+    }
+    if ($app['targets'][$app['target']]['redir']) {
+        header("Location: ".$app['url']);
+    }
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" dir="ltr">
     <head>
-        <title>Red Eclipse: <?php echo ($app['targets'][$app['target']]['name'] != "" ? $app['targets'][$app['target']]['name'] : "Home"); ?></title>
+        <title>Red Eclipse: <?php echo ($app['page']); ?></title>
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
         <link rel="shortcut icon" href="/bits/favicon.ico" />
         <link rel="stylesheet" type="text/css" href="/bits/style.css" />
+<?php   if ($app['target'] == "home") { ?>
         <script type="text/javascript" src="/bits/js/jquery.js"></script>
         <script type="text/javascript" src="/bits/js/jquery.lightbox-0.5.js"></script>
         <script type="text/javascript">
@@ -116,12 +113,14 @@
                 });
             }); 
         </script>
+<?php   } ?>
         <script type="text/javascript">
             (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
                 (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
                 m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
             })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
             ga('create', 'UA-45886576-1', 'redeclipse.net');
+            ga('require', 'linkid', 'linkid.js');
             ga('send', 'pageview');
         </script>
     </head>
@@ -134,7 +133,8 @@
                 <a href="http://www.cubeengine.com/"><img src="/bits/lightbox-blank.gif" alt="Built on Cube Engine 2" width="150" height="143" border="0" align="right" title="Built on Cube Engine 2" /></a>
                 <a href="/indiedb"><img src="http://media.indiedb.com/images/groups/1/17/16308/profile/ioty-250.png" width="143" height="100" border="0" align="right" style="margin-right: 10px" title="VOTE FOR US!"></a>
             </div>
-            <div id="video">
+<?php       if ($app['target'] == "home") { ?>
+            <div id="context">
                 <div id="main">
                     <h1>Red Eclipse</h1><h2>&nbsp;&nbsp;a Free, Casual Arena Shooter</h2>
                     <h3>Available for Windows, GNU/Linux, BSD, and OS X</h3>
@@ -209,6 +209,17 @@
                 <h4>Support Us</h4>
                 <p id="donatemsg">Red Eclipse is developed by volunteers, and you get it free of charge; your contributions keep this project alive. You're encouraged to get involved with the community and help evolve the game.</p>
             </div>
+<?php       } else { ?>
+            <div id="context">
+                <div id="main">
+                    <h1>Redirecting..</h1><h2>please wait.</h2>
+                    <p id="redirect">
+                        You are being redirected to <a href="<?php echo ($app['url']); ?>"><?php echo ($app['page']); ?></a>.
+                        If it does not happen automatically, please <a href="<?php echo ($app['url']); ?>">click here</a>.
+                    </p>
+                </div>
+            </div>
+<?php       } ?>
             <div class="endrightblock">&nbsp;</div>
             <div id="footer">
                 <a href="/download">Download</a>, <a href="/chat">Chat</a>, <a href="/forum">Discuss</a>, or <a href="/wiki">Learn More</a> today.
