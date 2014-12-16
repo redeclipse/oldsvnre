@@ -135,7 +135,7 @@
                 <a href="http://www.cubeengine.com/"><img src="/bits/lightbox-blank.gif" alt="Built on Cube Engine 2" width="150" height="143" border="0" align="right" title="Built on Cube Engine 2" /></a>
                 <a href="/indiedb"><img src="http://media.indiedb.com/images/groups/1/17/16308/profile/ioty-250.png" width="143" height="100" border="0" align="right" style="margin-right: 10px" title="VOTE FOR US!"></a>
             </div>
-            <div id="video">
+            <div id="context">
                 <div id="main">
                     <h1>Red Eclipse</h1><h2>&nbsp;&nbsp;a Free, Casual Arena Shooter</h2>
                     <h3>Available for Windows, GNU/Linux, BSD, and OS X</h3>
