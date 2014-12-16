@@ -140,6 +140,58 @@ void clearsound()
     mapsounds.setsize(0);
 }
 
+void getsounds(bool mapsnd, int idx, int prop)
+{
+    vector<soundslot> &soundset = mapsnd ? mapsounds : gamesounds;
+    if(idx < 0) intret(soundset.length());
+    else if(soundset.inrange(idx))
+    {
+        if(prop < 0) intret(4);
+        else switch(prop)
+        {
+            case 0: intret(soundset[idx].vol); break;
+            case 1: intret(soundset[idx].maxrad); break;
+            case 2: intret(soundset[idx].minrad); break;
+            case 3: result(soundset[idx].name); break;
+            default: break;
+        }
+    }
+}
+ICOMMAND(0, getsound, "ibb", (int *n, int *v, int *p), getsounds(*n!=0, *v, *p));
+
+void getcursounds(int idx, int prop)
+{
+    if(idx < 0) intret(sounds.length());
+    else if(sounds.inrange(idx))
+    {
+        if(prop < 0) intret(19);
+        else switch(prop)
+        {
+            case 0: intret(sounds[idx].vol); break;
+            case 1: intret(sounds[idx].curvol); break;
+            case 2: intret(sounds[idx].curpan); break;
+            case 3: intret(sounds[idx].flags); break;
+            case 4: intret(sounds[idx].maxrad); break;
+            case 5: intret(sounds[idx].minrad); break;
+            case 6: intret(sounds[idx].material); break;
+            case 7: intret(sounds[idx].millis); break;
+            case 8: intret(sounds[idx].ends); break;
+            case 9: intret(sounds[idx].slotnum); break;
+            case 10: intret(sounds[idx].chan); break;
+            case 11: defformatstring(pos)("%.f %.f %.f", sounds[idx].pos.x, sounds[idx].pos.y, sounds[idx].pos.z); result(pos); break;
+            case 12: defformatstring(oldpos)("%.f %.f %.f", sounds[idx].oldpos.x, sounds[idx].oldpos.y, sounds[idx].oldpos.z); result(oldpos); break;
+            case 13: intret(sounds[idx].valid() ? 1 : 0); break;
+            case 14: intret(sounds[idx].playing() ? 1 : 0); break;
+            case 15: intret(sounds[idx].flags&SND_MAP ? 1 : 0); break;
+            case 16: intret(sounds[idx].owner!=NULL ? 1 : 0); break;
+            case 17: intret(sounds[idx].owner==camera1 ? 1 : 0); break;
+            case 18: intret(client::getcn(sounds[idx].owner)); break;
+            default: break;
+        }
+    }
+}
+ICOMMAND(0, getcursound, "bb", (int *n, int *p), getcursounds(*n, *p));
+
 Mix_Music *loadmusic(const char *name)
 {
     if(!musicstream) musicstream = openzipfile(name, "rb");
@@ -230,9 +282,9 @@ void smartmusic(bool cond, bool autooff)
 }
 ICOMMAND(0, smartmusic, "ii", (int *a, int *b), smartmusic(*a, *b));
 
-int findsound(const char *name, int vol, vector<soundslot> &sounds)
+int findsound(const char *name, int vol, vector<soundslot> &soundset)
 {
-    loopv(sounds) if(!strcmp(sounds[i].name, name) && (!vol || sounds[i].vol == vol)) return i;
+    loopv(soundset) if(!strcmp(soundset[i].name, name) && (!vol || soundset[i].vol == vol)) return i;
     return -1;
 }
 
@@ -254,7 +306,7 @@ static Mix_Chunk *loadwav(const char *name)
     return c;
 }
 
-int addsound(const char *name, int vol, int maxrad, int minrad, int value, vector<soundslot> &sounds)
+int addsound(const char *name, int vol, int maxrad, int minrad, int value, vector<soundslot> &soundset)
 {
     bool emptyslot = !strcmp(name, "<none>");
 
@@ -263,20 +315,20 @@ int addsound(const char *name, int vol, int maxrad, int minrad, int value, vecto
     if(minrad < 0) minrad = -1;
     if(value == 1)
     {
-        loopv(sounds)
+        loopv(soundset)
         {
-            soundslot &slot = sounds[i];
+            soundslot &slot = soundset[i];
             if((emptyslot || (slot.vol == vol && slot.maxrad == maxrad && slot.minrad == minrad)) && !strcmp(slot.name, name))
                 return i;
         }
     }
     if(emptyslot)
     {
-        soundslot &slot = sounds.add();
+        soundslot &slot = soundset.add();
         slot.name = newstring(name);
         slot.vol = 0;
         slot.maxrad = slot.minrad = -1;
-        return sounds.length()-1;
+        return soundset.length()-1;
     }
     soundsample *sample = NULL;
     #define loadsound(req) \
@@ -317,7 +369,7 @@ int addsound(const char *name, int vol, int maxrad, int minrad, int value, vecto
         }
         else break;
     }
-    soundslot &slot = sounds.add();
+    soundslot &slot = soundset.add();
     slot.name = newstring(name);
     slot.vol = vol;
     slot.maxrad = maxrad; // use these values if none are supplied when playing
@@ -330,7 +382,7 @@ int addsound(const char *name, int vol, int maxrad, int minrad, int value, vecto
         if(!sample->sound) conoutf("\frfailed to load sample: %s", sam);
         else slot.samples.add(sample);
     }
-    return sounds.length()-1;
+    return soundset.length()-1;
 }
 
 ICOMMAND(0, registersound, "sissi", (char *n, int *v, char *w, char *x, int *u), intret(addsound(n, *v, *w ? parseint(w) : -1, *x ? parseint(x) : -1, *u, gamesounds)));

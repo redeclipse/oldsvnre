@@ -70,7 +70,7 @@ extern bool playingmusic(bool check = true);
 extern void smartmusic(bool cond, bool autooff);
 extern void musicdone(bool docmd);
 extern void updatesounds();
-extern int addsound(const char *name, int vol, int maxrad, int minrad, int value, vector<soundslot> &sounds);
+extern int addsound(const char *name, int vol, int maxrad, int minrad, int value, vector<soundslot> &soundset);
 extern void removesound(int c);
 extern void clearsound();
 extern int playsound(int n, const vec &pos, physent *d = NULL, int flags = 0, int vol = -1, int maxrad = -1, int minrad = -1, int *hook = NULL, int ends = 0, int *oldhook = NULL);
