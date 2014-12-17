@@ -1086,11 +1086,6 @@ namespace entities
                 break;
             default: break;
         }
-        if(enttype[e.type].idattr >= 0 && (e.attrs[enttype[e.type].idattr] < 0 || e.attrs[enttype[e.type].idattr] > TRIGGERIDS))
-        {
-            while(e.attrs[enttype[e.type].idattr] < 0) e.attrs[enttype[e.type].idattr] += TRIGGERIDS+1;
-            while(e.attrs[enttype[e.type].idattr] > TRIGGERIDS) e.attrs[enttype[e.type].idattr] -= TRIGGERIDS+1;
-        }
     }
 
     const char *findname(int type)
