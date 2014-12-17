@@ -217,8 +217,13 @@ namespace defend
                     break;
                 case 0: team = T_NEUTRAL; break;
             }
-            defformatstring(alias)("point_%d", e->attrs[4]);
+            defformatstring(alias)("point_%d", e->attrs[5]);
             const char *name = getalias(alias);
+            if(!name || !*name)
+            {
+                formatstring(alias)("point #%d", st.flags.length()+1);
+                name = alias;
+            }
             st.addaffinity(e->o, team, e->attrs[1], e->attrs[2], name);
         }
         if(!st.flags.length()) return; // map doesn't seem to support this mode at all..
