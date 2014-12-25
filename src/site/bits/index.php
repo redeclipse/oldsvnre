@@ -6,8 +6,8 @@
     $app['youtubevid'] = "oJRZHjyj7Zg";
     $app['screenshots'] = 84;
 
-    $app['banner'] = "<b>VOTE FOR US!</b> Indie Game of the Year 2014";
-    $app['bannerurl'] = "http://www.indiedb.com/events/2014-indie-of-the-year-awards/top100#vote14457";
+    $app['banner'] = "<b>HELP US:</b> Try SVN and beta test!";
+    $app['bannerurl'] = "/devel";
 
     $app['targets'] = array('home' => array('name' => '', 'url' => '/', 'alturl' => '', 'nav' => -1, 'redir' => 0));
 
@@ -133,7 +133,7 @@
             <div id="header">
                 <a href="/home"><img src="/bits/lightbox-blank.gif" alt="Red Eclipse" width="450" height="143" border="0" align="left" title="Red Eclipse" /></a>
                 <a href="http://www.cubeengine.com/"><img src="/bits/lightbox-blank.gif" alt="Built on Cube Engine 2" width="150" height="143" border="0" align="right" title="Built on Cube Engine 2" /></a>
-                <a href="/indiedb"><img src="http://media.indiedb.com/images/groups/1/17/16308/profile/ioty-250.png" width="143" height="100" border="0" align="right" style="margin-right: 10px" title="VOTE FOR US!"></a>
+                <a href="/indiedb"><img src="/bits/indiedb.png" width="208" height="100" border="0" align="right" style="margin-right: 10px" title="Find us on IndieDB"></a>
             </div>
             <div id="context">
                 <div id="main">
