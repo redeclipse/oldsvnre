@@ -780,7 +780,6 @@ struct gui : guient
 
     void text_(const char *text, int x, int y, int color, int alpha, bool shadow, bool force = false, int wrap = -1)
     {
-        if(FONTH != FONTH) y += (FONTH-FONTH)/2;
         if(shadow) draw_text(text, x+guishadow, y+guishadow, 0x00, 0x00, 0x00, -0xC0*alpha/255, TEXT_NO_INDENT, -1, wrap > 0 ? wrap : -1);
         draw_text(text, x, y, color>>16, (color>>8)&0xFF, color&0xFF, force ? -alpha : alpha, TEXT_NO_INDENT, -1, wrap > 0 ? wrap : -1);
     }
@@ -1127,7 +1126,7 @@ struct gui : guient
 
     int button_(const char *text, int color, const char *icon, int icolor, bool clickable, int wrap = -1, bool faded = true)
     {
-        int w = 0, h = FONTH;
+        int w = 0, h = 0;
         if(icon && *icon)
         {
             w += FONTH;
@@ -1138,7 +1137,7 @@ struct gui : guient
             int tw = 0, th = 0;
             text_bounds(text, tw, th, wrap > 0 ? wrap : -1);
             w += tw;
-            if(h > FONTH) h += th-FONTH;
+            h += th;
         }
 
         if(visible())
@@ -1153,7 +1152,7 @@ struct gui : guient
                 x += FONTH;
                 if(text && *text) x += 8;
             }
-            if(text && *text) text_(text, x, cury, color, (hit && hitfx) || !faded || !clickable ? guitextblend : guitextfade, hit && clickable, forcecolor, wrap);
+            if(text && *text) text_(text, x, cury, color, (hit && hitfx) || !faded || !clickable ? guitextblend : guitextfade, hit && clickable, forcecolor, wrap > 0 ? wrap : -1);
         }
         return layout(w, h);
     }
