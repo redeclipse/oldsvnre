@@ -430,7 +430,7 @@ namespace client
             if(*namestr && strcmp(game::player1->name, namestr))
             {
                 game::player1->setname(namestr);
-                conoutft(CON_EVENT, "\fm* you are now known as %s", game::player1->name);
+                if(initing == NOT_INITING) conoutft(CON_EVENT, "\fm* you are now known as %s", game::player1->name);
                 sendplayerinfo = true;
             }
         }
