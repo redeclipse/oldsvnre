@@ -5,9 +5,7 @@
 
 #define GAMEID "fps"
 #define GAMEVERSION 226
-
 #define DEMO_MAGIC "RED_ECLIPSE_DEMO"
-#define DEMO_VERSION GAMEVERSION
 
 #define MAXAI 256
 #define MAXPLAYERS (MAXCLIENTS + MAXAI*2)
@@ -316,7 +314,7 @@ enum { CON_CHAT = CON_GAMESPECIFIC, CON_EVENT, CON_MAX, CON_LO = CON_MESG, CON_H
 struct demoheader
 {
     char magic[16];
-    int version, gamever, gamemode, mutators, starttime;
+    int gamever, gamemode, mutators, starttime;
     string mapname;
 };
 #include "player.h"

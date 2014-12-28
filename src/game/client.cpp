@@ -184,9 +184,9 @@ namespace client
             formatstring(msg)("\frsorry, \fs\fc%s\fS is not a demo file", name);
         else
         {
-            lilswap(&d.hdr.version, 5);
-            if(d.hdr.version!=DEMO_VERSION) formatstring(msg)("\frdemo \fs\fc%s\fS requires \fs\fc%s\fS version of %s", name, d.hdr.version<DEMO_VERSION ? "an older" : "a newer", versionname);
-            else if(d.hdr.gamever!=GAMEVERSION) formatstring(msg)("\frdemo \fs\fc%s\fS requires \fs\fc%s\fS version of %s", name, d.hdr.gamever<GAMEVERSION ? "an older" : "a newer", versionname);
+            lilswap(&d.hdr.gamever, 4);
+            if(d.hdr.gamever!=GAMEVERSION)
+                formatstring(msg)("\frdemo \fs\fc%s\fS requires \fs\fc%s\fS version of %s", name, d.hdr.gamever<GAMEVERSION ? "an older" : "a newer", versionname);
         }
         delete f;
         if(msg[0])
@@ -219,12 +219,11 @@ namespace client
             demoinfo &d = demoinfos[idx];
             switch(prop)
             {
-                case 0: intret(d.hdr.version); break;
-                case 1: intret(d.hdr.gamever); break;
-                case 2: result(d.hdr.mapname); break;
-                case 3: intret(d.hdr.gamemode); break;
-                case 4: intret(d.hdr.mutators); break;
-                case 5: intret(d.hdr.starttime); break;
+                case 0: intret(d.hdr.gamever); break;
+                case 1: result(d.hdr.mapname); break;
+                case 2: intret(d.hdr.gamemode); break;
+                case 3: intret(d.hdr.mutators); break;
+                case 4: intret(d.hdr.starttime); break;
                 default: break;
             }
         }
