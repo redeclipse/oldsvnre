@@ -2152,9 +2152,9 @@ namespace server
             formatstring(msg)("\frsorry, \fs\fc%s\fS is not a demo file", file);
         else
         {
-            lilswap(&hdr.version, 5);
-            if(hdr.version!=DEMO_VERSION) formatstring(msg)("\frdemo \fs\fc%s\fS requires %s version of %s", file, hdr.version<DEMO_VERSION ? "an older" : "a newer", versionname);
-            else if(hdr.gamever!=GAMEVERSION) formatstring(msg)("\frdemo \fs\fc%s\fS requires %s version of %s", file, hdr.gamever<GAMEVERSION ? "an older" : "a newer", versionname);
+            lilswap(&hdr.gamever, 4);
+            if(hdr.gamever!=GAMEVERSION)
+                formatstring(msg)("\frdemo \fs\fc%s\fS requires %s version of %s", file, hdr.gamever<GAMEVERSION ? "an older" : "a newer", versionname);
         }
         if(msg[0])
         {
@@ -2164,7 +2164,6 @@ namespace server
         }
 
         srvoutf(4, "\fyplaying demo \fs\fc%s\fS", file);
-
         sendf(-1, 1, "ri3", N_DEMOPLAYBACK, 1, -1);
 
         if(demoplayback->read(&nextplayback, sizeof(nextplayback))!=sizeof(nextplayback))
@@ -2273,12 +2272,11 @@ namespace server
 
         demoheader hdr;
         memcpy(hdr.magic, DEMO_MAGIC, sizeof(hdr.magic));
-        hdr.version = DEMO_VERSION;
         hdr.gamever = GAMEVERSION;
         hdr.gamemode = gamemode;
         hdr.mutators = mutators;
         hdr.starttime = clocktime;
-        lilswap(&hdr.version, 5);
+        lilswap(&hdr.gamever, 4);
         copystring(hdr.mapname, smapname);
         demorecord->write(&hdr, sizeof(demoheader));
 
