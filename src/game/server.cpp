@@ -2005,7 +2005,7 @@ namespace server
             if(m_sweaps(gamemode, mutators)) weap = m_weapon(gamemode, mutators);
             else weap = hasent && sents[ci->state.spawnpoint].attrs[6] > 0 ? sents[ci->state.spawnpoint].attrs[6]-1 : actor[ci->state.actortype].weap;
             if(!m_insta(gamemode, mutators)) health = max(int((hasent && sents[ci->state.spawnpoint].attrs[7] > 0 ? sents[ci->state.spawnpoint].attrs[7] : actor[ci->state.actortype].health)*G(enemystrength)), 1);
-            if(!isweap(weap)) weap = -1; // let spawnstate figure it out
+            if(!isweap(weap) || (!actor[ci->state.actortype].canmove && weaptype[weap].melee)) weap = -1; // let spawnstate figure it out
         }
         else health = m_health(gamemode, mutators, ci->state.model);
         int spawn = pickspawn(ci);
