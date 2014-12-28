@@ -574,12 +574,12 @@ void guibitfield(char *name, char *var, int *mask, char *onchange, int *colour)
 }
 
 //-ve length indicates a wrapped text field of any (approx 260 chars) length, |length| is the field width
-void guifield(char *var, int *maxlength, char *onchange, int *colour, int *focus, char *parent, int *height, char *prompt)
+void guifield(char *var, int *maxlength, char *onchange, int *colour, int *focus, char *parent, int *height, char *prompt, int *immediate)
 {
     if(!cgui) return;
     const char *initval = getsval(var);
-    char *result = cgui->field(var, *colour >= 0 ? *colour : 0xFFFFFF, *maxlength ? *maxlength : 12, *height, initval, EDITORFOCUSED, *focus!=0, parent, prompt);
-    if(result) updateval(var, result, onchange);
+    char *result = cgui->field(var, *colour >= 0 ? *colour : 0xFFFFFF, *maxlength ? *maxlength : 12, *height, initval, EDITORFOCUSED, *focus!=0, parent, prompt, *immediate!=0);
+    if(result && (!*immediate || strcmp(initval, result))) updateval(var, result, onchange);
 }
 
 //-ve maxlength indicates a wrapped text field of any (approx 260 chars) length, |maxlength| is the field width
@@ -591,12 +591,12 @@ void guieditor(char *name, int *maxlength, int *height, int *mode, int *colour, 
 }
 
 //-ve length indicates a wrapped text field of any (approx 260 chars) length, |length| is the field width
-void guikeyfield(char *var, int *maxlength, char *onchange, int *colour, int *focus, char *parent, char *prompt)
+void guikeyfield(char *var, int *maxlength, char *onchange, int *colour, int *focus, char *parent, char *prompt, int *immediate)
 {
     if(!cgui) return;
     const char *initval = getsval(var);
-    char *result = cgui->keyfield(var, *colour >= 0 ? *colour : 0xFFFFFF, *maxlength ? *maxlength : -8, 0, initval, EDITORFOCUSED, *focus!=0, parent);
-    if(result) updateval(var, result, onchange);
+    char *result = cgui->keyfield(var, *colour >= 0 ? *colour : 0xFFFFFF, *maxlength ? *maxlength : -8, 0, initval, EDITORFOCUSED, *focus!=0, parent, prompt, *immediate!=0);
+    if(result && (!*immediate || strcmp(initval, result))) updateval(var, result, onchange);
 }
 
 //use text<action> to do more...
@@ -698,8 +698,8 @@ COMMAND(0, guicheckbox, "ssffsb");
 COMMAND(0, guitab, "s");
 COMMAND(0, guistatus, "si");
 COMMAND(0, guitooltip, "si");
-COMMAND(0, guifield, "sisbisis");
-COMMAND(0, guikeyfield, "sisbiss");
+COMMAND(0, guifield, "sisbisisi");
+COMMAND(0, guikeyfield, "sisbissi");
 COMMAND(0, guieditor, "siiibisss");
 
 ICOMMAND(0, guicount, "", (), intret(menustack.length()));

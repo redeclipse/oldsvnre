@@ -719,7 +719,8 @@ static editor *useeditor(const char *name, int mode, bool focus, const char *ini
         return e;
     }
     editor *e = new editor(name, mode, initval, parent);
-    if(focus) editors.add(e); else editors.insert(0, e);
+    if(focus) editors.add(e);
+    else editors.insert(0, e);
     return e;
 }
 
