@@ -286,15 +286,16 @@ ICOMMAND(0, filterword, "ss", (char *s, char *t),
 });
 
 
-bool filtertext(char *dst, const char *src, bool newline, bool colour, bool whitespace, size_t len)
+bool filtertext(char *dst, const char *src, bool newline, bool colour, bool whitespace, bool wsstrip, size_t len)
 {
     bool filtered = false;
-    for(int c = uchar(*src); c; c = uchar(*++src))
+    size_t n = 0;
+    for(int c = uchar(*src); c && n < len; c = uchar(*++src))
     {
         if(newline && (c=='\n' || c=='\r')) c = ' ';
         if(c=='\f')
         {
-            if(!colour) *dst++ = c;
+            if(!colour) dst[n++] = c;
             else
             {
                 filtered = true;
@@ -315,21 +316,19 @@ bool filtertext(char *dst, const char *src, bool newline, bool colour, bool whit
             }
             continue;
         }
-        if(iscubeprint(c) || (iscubespace(c) && whitespace))
-        {
-            *dst++ = c;
-            if(!--len) break;
-        }
+        if(iscubeprint(c) || (iscubespace(c) && whitespace && (!wsstrip || n)))
+            dst[n++] = c;
         else filtered = true;
     }
-    *dst = '\0';
+    if(whitespace && wsstrip && n) while(iscubespace(dst[n-1])) dst[--n] = 0;
+    dst[n < len ? n : len-1] = 0;
     return filtered;
 }
 
-ICOMMAND(0, filter, "siiiN", (char *s, int *a, int *b, int *c, int *numargs),
+ICOMMAND(0, filter, "siiiiN", (char *s, int *a, int *b, int *c, int *d, int *numargs),
 {
     char *d = newstring(s);
-    filtertext(d, s, *numargs >= 2 ? *a>0 : true, *numargs >= 3 ? *b>0 : true, *numargs >= 4 ? *c>0 : true);
+    filtertext(d, s, *numargs >= 2 ? *a>0 : true, *numargs >= 3 ? *b>0 : true, *numargs >= 4 ? *c>0 : true, *numargs >= 5 ? *d>0 : false);
     stringret(d);
 });
 

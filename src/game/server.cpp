@@ -4950,10 +4950,9 @@ namespace server
                     case N_CONNECT:
                     {
                         getstring(text, p);
-                        filtertext(text, text, true, true, true, MAXNAMELEN);
-                        const char *namestr = text;
-                        while(*namestr && iscubespace(*namestr)) namestr++;
-                        if(!*namestr) namestr = copystring(text, "unnamed");
+                        string namestr = "";
+                        filtertext(namestr, text, true, true, true, true, MAXNAMELEN);
+                        if(!*namestr) copystring(namestr, "unnamed");
                         copystring(ci->name, namestr, MAXNAMELEN+1);
                         ci->state.colour = max(getint(p), 0);
                         ci->state.model = max(getint(p), 0);
@@ -4968,8 +4967,9 @@ namespace server
                         }
 
                         string password = "", authname = "";
-                        getstring(text, p); copystring(password, text);
-                        getstring(text, p); filtertext(authname, text, true, true, true, 100);
+                        getstring(password, p);
+                        getstring(text, p);
+                        filtertext(authname, text, true, true, true, true, 100);
 
                         ci->state.version.get(p);
 
@@ -5643,10 +5643,9 @@ namespace server
                     QUEUE_MSG;
                     defformatstring(oldname)("%s", colourname(ci));
                     getstring(text, p);
-                    filtertext(text, text, true, true, true, MAXNAMELEN);
-                    const char *namestr = text;
-                    while(*namestr && iscubespace(*namestr)) namestr++;
-                    if(!*namestr) namestr = copystring(text, "unnamed");
+                    string namestr = "";
+                    filtertext(namestr, text, true, true, true, true, MAXNAMELEN);
+                    if(!*namestr) copystring(namestr, "unnamed");
                     if(strcmp(ci->name, namestr))
                     {
                         copystring(ci->name, namestr, MAXNAMELEN+1);
@@ -6284,7 +6283,7 @@ namespace server
                 {
                     getstring(text, p);
                     string authname = "";
-                    filtertext(authname, text, true, true, true, 100);
+                    filtertext(authname, text, true, true, true, true, 100);
                     auth::tryauth(ci, authname);
                     break;
                 }

@@ -425,13 +425,12 @@ namespace client
     {
         if(name && *name)
         {
-            string text;
-            filtertext(text, name, true, true, true, MAXNAMELEN);
-            const char *namestr = text;
-            while(*namestr && iscubespace(*namestr)) namestr++;
+            string namestr;
+            filtertext(namestr, name, true, true, true, true, MAXNAMELEN);
             if(*namestr && strcmp(game::player1->name, namestr))
             {
                 game::player1->setname(namestr);
+                conoutft(CON_EVENT, "\fm* you are now known as %s", game::player1->name);
                 sendplayerinfo = true;
             }
         }
@@ -1020,7 +1019,7 @@ namespace client
     void saytext(gameent *d, int flags, char *text)
     {
         string msg;
-        filtertext(msg, text, true, colourchat ? false : true);
+        filtertext(msg, text, true, colourchat ? false : true, true, true);
         if(*filterwords) filterword(msg, filterwords);
         defformatstring(m)("%s", game::colourname(d));
         if(flags&SAY_TEAM)
@@ -1960,10 +1959,9 @@ namespace client
                     vector<int> lweaps;
                     loopk(lw) lweaps.add(getint(p));
                     if(!d) break;
-                    filtertext(text, text, true, true, true, MAXNAMELEN);
-                    const char *namestr = text;
-                    while(*namestr && iscubespace(*namestr)) namestr++;
-                    if(!*namestr) namestr = copystring(text, "unnamed");
+                    string namestr = "";
+                    filtertext(namestr, text, true, true, true, true, MAXNAMELEN);
+                    if(!*namestr) copystring(namestr, "unnamed");
                     if(strcmp(d->name, namestr))
                     {
                         string oldname, newname;
@@ -1993,11 +1991,10 @@ namespace client
                         break;
                     }
                     int colour = getint(p), model = getint(p), team = clamp(getint(p), int(T_NEUTRAL), int(T_ENEMY)), priv = getint(p);
-                    string name = ""; getstring(name, p);
-                    filtertext(name, name, true, true, true, MAXNAMELEN);
-                    const char *namestr = name;
-                    while(*namestr && iscubespace(*namestr)) namestr++;
-                    if(!*namestr) namestr = copystring(name, "unnamed");
+                    getstring(text, p);
+                    string namestr = "";
+                    filtertext(namestr, text, true, true, true, true, MAXNAMELEN);
+                    if(!*namestr) copystring(namestr, "unnamed");
                     string vanity = "";
                     getstring(vanity, p);
                     int lw = getint(p);

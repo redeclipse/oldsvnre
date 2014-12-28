@@ -2748,7 +2748,7 @@ ICOMMAND(0, stripcolors, "s", (char *s),
 {
     size_t len = strlen(s);
     char *d = newstring(len);
-    filtertext(d, s, false, true, true, len);
+    filtertext(d, s, false, true, true, false, len);
     stringret(d);
 });
 
