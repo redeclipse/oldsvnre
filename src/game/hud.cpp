@@ -535,7 +535,6 @@ namespace hud
 
     TVAR(IDF_PERSIST, modeeditingtex, "<grey>textures/modes/editing", 3);
     TVAR(IDF_PERSIST, modedeathmatchtex, "<grey>textures/modes/deathmatch", 3);
-    TVAR(IDF_PERSIST, modetimetrialtex, "<grey>textures/modes/timetrial", 3);
 
     TVAR(IDF_PERSIST, modecapturetex, "<grey>textures/modes/capture", 3);
     TVAR(IDF_PERSIST, modecapturequicktex, "<grey>textures/modes/capturequick", 3);
@@ -549,6 +548,12 @@ namespace hud
     TVAR(IDF_PERSIST, modebombertex, "<grey>textures/modes/bomber", 3);
     TVAR(IDF_PERSIST, modebomberholdtex, "<grey>textures/modes/bomberhold", 3);
     TVAR(IDF_PERSIST, modebomberbaskettex, "<grey>textures/modes/bomberbasket", 3);
+    TVAR(IDF_PERSIST, modebomberattacktex, "<grey>textures/modes/bomberattack", 3);
+
+    TVAR(IDF_PERSIST, modetrialtex, "<grey>textures/modes/trial", 3);
+    TVAR(IDF_PERSIST, modetrialmarathontex, "<grey>textures/modes/trialmarathon", 3);
+    TVAR(IDF_PERSIST, modetrialendurancetex, "<grey>textures/modes/trialendurance", 3);
+    TVAR(IDF_PERSIST, modetrialgauntlettex, "<grey>textures/modes/trialgauntlet", 3);
 
     TVAR(IDF_PERSIST, modemultitex, "<grey>textures/modes/multi", 3);
     TVAR(IDF_PERSIST, modeffatex, "<grey>textures/modes/ffa", 3);
@@ -568,7 +573,6 @@ namespace hud
     #define ADDMODEICON(g,m) \
     { \
         if(m_edit(g)) ADDMODE(modeeditingtex) \
-        else if(m_trial(g)) ADDMODE(modetimetrialtex) \
         else if(m_capture(g)) \
         { \
             if(m_gsp1(g, m)) ADDMODE(modecapturequicktex) \
@@ -578,15 +582,40 @@ namespace hud
         } \
         else if(m_defend(g)) \
         { \
-            if(m_gsp1(g, m)) ADDMODE(modedefendquicktex) \
-            else if(m_gsp2(g, m)) ADDMODE(modedefendkingtex) \
+            if(m_gsp2(g, m)) \
+            { \
+                ADDMODE(modedefendkingtex) \
+                if(m_gsp1(g, m)) ADDMODE(modedefendquicktex) \
+            } \
+            else if(m_gsp1(g, m)) ADDMODE(modedefendquicktex) \
             else ADDMODE(modedefendtex) \
         } \
         else if(m_bomber(g)) \
         { \
             if(m_gsp1(g, m)) ADDMODE(modebomberholdtex) \
+            else if(m_gsp3(g, m)) \
+            { \
+                ADDMODE(modebomberattacktex) \
+                if(m_gsp2(g, m)) ADDMODE(modebomberbaskettex) \
+            } \
             else if(m_gsp2(g, m)) ADDMODE(modebomberbaskettex) \
             else ADDMODE(modebombertex) \
+        } \
+        else if(m_trial(g)) \
+        { \
+            if(m_gsp3(g, m)) \
+            { \
+                ADDMODE(modetrialgauntlettex) \
+                if(m_gsp1(g, m)) ADDMODE(modetrialmarathontex) \
+                if(m_gsp2(g, m)) ADDMODE(modetrialendurancetex) \
+            } \
+            else if(m_gsp1(g, m)) \
+            { \
+                ADDMODE(modetrialmarathontex) \
+                if(m_gsp2(g, m)) ADDMODE(modetrialendurancetex) \
+            } \
+            else if(m_gsp2(g, m)) ADDMODE(modetrialendurancetex) \
+            else ADDMODE(modetrialtex) \
         } \
         else ADDMODE(modedeathmatchtex) \
     }

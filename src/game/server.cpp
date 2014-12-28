@@ -1227,8 +1227,8 @@ namespace server
             if((type == 4 || type == 5) && m_capture(mode) && m_gsp3(mode, muts)) concatstring(mdname, gametype[mode].gsd[2]);
             else if((type == 4 || type == 5) && m_defend(mode) && m_gsp2(mode, muts)) concatstring(mdname, gametype[mode].gsd[1]);
             else if((type == 4 || type == 5) && m_bomber(mode) && m_gsp1(mode, muts)) concatstring(mdname, gametype[mode].gsd[0]);
-            else if((type == 4 || type == 5) && m_bomber(mode) && m_gsp2(mode, muts)) concatstring(mdname, gametype[mode].gsd[1]);
-            else if((type == 4 || type == 5) && m_trial(mode) && m_gsp1(mode, muts)) concatstring(mdname, gametype[mode].gsd[0]);
+            else if((type == 4 || type == 5) && m_bomber(mode) && m_gsp3(mode, muts)) concatstring(mdname, gametype[mode].gsd[2]);
+            else if((type == 4 || type == 5) && m_trial(mode) && m_gsp3(mode, muts)) concatstring(mdname, gametype[mode].gsd[2]);
             else concatstring(mdname, gametype[mode].desc);
         }
         return mdname;
@@ -1246,8 +1246,8 @@ namespace server
         {
             if(m_capture(mode) && m_gsp3(mode, muts)) return "";
             else if(m_defend(mode) && m_gsp2(mode, muts)) return "";
-            else if(m_bomber(mode) && (m_gsp1(mode, muts) || m_gsp2(mode, muts))) return "";
-            else if(m_trial(mode) && m_gsp1(mode, muts)) return "";
+            else if(m_bomber(mode) && (m_gsp1(mode, muts) || m_gsp3(mode, muts))) return "";
+            else if(m_trial(mode) && m_gsp3(mode, muts)) return "";
         }
         if(type == 1 || type == 3 || type == 4)
         {
