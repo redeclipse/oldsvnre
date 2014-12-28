@@ -762,7 +762,7 @@ struct gamestate
         int s = sweap;
         if(!isweap(s))
         {
-            if(actortype >= A_ENEMY) s = W_MELEE;
+            if(actortype >= A_ENEMY) s = actor[actortype].weap;
             else if(m_kaboom(gamemode, mutators)) s = W_GRENADE;
             else s = isweap(m_weapon(gamemode, mutators)) ? m_weapon(gamemode, mutators) : W_PISTOL;
         }
@@ -771,7 +771,7 @@ struct gamestate
             ammo[s] = max(1, W(s, ammomax));
             weapselect = s;
         }
-        if(s != W_MELEE) ammo[W_MELEE] = max(1, W(W_MELEE, ammomax));
+        if(s != W_MELEE && !actor[actortype].canmove) ammo[W_MELEE] = max(1, W(W_MELEE, ammomax));
         if(actortype < A_ENEMY)
         {
             if(!m_trial(gamemode))
