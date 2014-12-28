@@ -1683,7 +1683,7 @@ namespace ai
     {
         if((!m_edit(game::gamemode) && !m_team(game::gamemode, game::mutators)) || flags&SAY_ACTION || d->actortype != A_PLAYER) return;
         string msg;
-        filtertext(msg, text, true, true);
+        filtertext(msg, text, true, true, true, true);
         const int MAXWORDS = 8;
         int numargs = MAXWORDS, reply = flags&SAY_TEAM ? SAY_TEAM : SAY_NONE;
         char *w[MAXWORDS];

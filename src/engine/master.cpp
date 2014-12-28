@@ -99,7 +99,7 @@ static hashtable<char *, authuser> authusers;
 void addauth(char *name, char *flags, char *pubkey, char *email)
 {
     string authname;
-    if(filtertext(authname, name, true, true, true, 100)) name = authname;
+    if(filtertext(authname, name, true, true, true, true, 100)) name = authname;
     if(authusers.access(name))
     {
         conoutf("auth handle \"%s\" already exists, skipping (%s)", name, email);

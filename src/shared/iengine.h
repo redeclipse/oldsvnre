@@ -416,7 +416,7 @@ extern int getservermtu();
 extern int getnumclients();
 extern uint getclientip(int n);
 extern bool filterword(char *src, const char *list);
-extern bool filtertext(char *dst, const char *src, bool newline = true, bool colour = true, bool whitespace = true, size_t len = sizeof(string)-1);
+extern bool filtertext(char *dst, const char *src, bool newline = true, bool colour = true, bool whitespace = true, bool wsstrip = false, size_t len = sizeof(string)-1);
 extern void disconnect_client(int n, int reason);
 extern void kicknonlocalclients(int reason);
 extern bool hasnonlocalclients();
