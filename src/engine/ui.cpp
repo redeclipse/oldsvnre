@@ -662,17 +662,17 @@ struct gui : guient
         return space;
     }
 
-    char *field(const char *name, int color, int length, int height, const char *initval, int initmode, bool focus, const char *parent, const char *prompt)
+    char *field(const char *name, int color, int length, int height, const char *initval, int initmode, bool focus, const char *parent, const char *prompt, bool immediate)
     {
-        return field_(name, color, length, height, initval, initmode, FIELDEDIT, focus, parent, prompt);
+        return field_(name, color, length, height, initval, initmode, FIELDEDIT, focus, parent, prompt, immediate);
     }
 
-    char *keyfield(const char *name, int color, int length, int height, const char *initval, int initmode, bool focus, const char *parent, const char *prompt)
+    char *keyfield(const char *name, int color, int length, int height, const char *initval, int initmode, bool focus, const char *parent, const char *prompt, bool immediate)
     {
-        return field_(name, color, length, height, initval, initmode, FIELDKEY, focus, parent, prompt);
+        return field_(name, color, length, height, initval, initmode, FIELDKEY, focus, parent, prompt, immediate);
     }
 
-    char *field_(const char *name, int color, int length, int height, const char *initval, int initmode, int fieldtype = FIELDEDIT, bool focus = false, const char *parent = NULL, const char *prompt = NULL)
+    char *field_(const char *name, int color, int length, int height, const char *initval, int initmode, int fieldtype = FIELDEDIT, bool focus = false, const char *parent = NULL, const char *prompt = NULL, bool immediate = false)
     {
         editor *e = useeditor(name, initmode, false, initval, parent); // generate a new editor if necessary
         if(guilayoutpass)
@@ -730,7 +730,11 @@ struct gui : guient
                 e->active = (e->mode != EDITORFOCUSED);
                 fieldmode = FIELDSHOW;
             }
-            else fieldsactive = true;
+            else
+            {
+                if(editing && immediate) result = e->currentline().text;
+                fieldsactive = true;
+            }
             skin(curx, cury, curx+w, cury+h, guifieldbgcolour, guifieldbgblend, editing ? guifieldactivecolour : guifieldbordercolour, editing ? guifieldactiveblend : guifieldborderblend, true);
             e->draw(curx+wpad/2, cury+hpad/2, color, editing, prompt);
         }
