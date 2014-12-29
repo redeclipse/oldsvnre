@@ -407,7 +407,7 @@ int guitextwidth(char *text, char *font, int wrap)
 {
     if(font && *font) pushfont(font);
     int width = 0, height = 0;
-    text_bounds(text, width, height, wrap > 0 ? wrap : 0, TEXT_NO_INDENT);
+    text_bounds(text, width, height, wrap > 0 ? wrap : -1, TEXT_NO_INDENT);
     if(font && *font) popfont();
     return width;
 }
@@ -416,7 +416,7 @@ int guitextheight(char *text, char *font, int wrap)
 {
     if(font && *font) pushfont(font);
     int width = 0, height = 0;
-    text_bounds(text, width, height, wrap > 0 ? wrap : 0, TEXT_NO_INDENT);
+    text_bounds(text, width, height, wrap > 0 ? wrap : -1, TEXT_NO_INDENT);
     if(font && *font) popfont();
     return height;
 }
