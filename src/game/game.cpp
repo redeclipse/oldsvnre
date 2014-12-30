@@ -3340,7 +3340,7 @@ namespace game
         float blend = opacity(d, third);
         if(d->state == CS_ALIVE)
         {
-            bool useth = hud::teamhurttime && m_team(gamemode, mutators) && focus == player1 &&
+            bool useth = hud::teamhurthud&1 && hud::teamhurttime && m_team(gamemode, mutators) && focus == player1 &&
                  d->team == player1->team && d->lastteamhit >= 0 && lastmillis-d->lastteamhit <= hud::teamhurttime,
                  hashint = playerhint&(d->team != focus->team ? 2 : 1);
             if(d->actortype < A_ENEMY && d != focus && (useth || hashint))
