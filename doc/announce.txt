@@ -1,16 +1,12 @@
-Red Eclipse, a fun-filled new take on the casual first person arena shooter, makes even greater strides in its development with the release of version 1.4, codenamed "Elara Edition". The success of "Operation Spitshine" has brought many graphical and gameplay enhancements such as; 
+Red Eclipse, a fun-filled new take on the casual first person arena shooter, makes an impressive return with the release of version 1.5, codenamed "Edition". The solid dedication of the Red Eclipse team and its thriving community has led to several new ideas to enrich gameplay; 
 
-* Vanity items and improved colours: dress up and frag with style.
-* Visible legs in first person: know where you are kicking and parkouring.
-* New and revamped maps: bringing you even more variety.
-* Better viewing: level flythroughs, improved third and first person cameras.
-* Better menus and other HUD elements: easier to see and read at a glance.
-* New weapon: Mines add a new dimension to the existing gameplay.
-* New mode: attack and defend in Gauntlet, competing for the most laps.
-* Automatic demo recording: for those times you just have to watch it again.
-* User Accounts: donate or contribute, and wear the in-game supporter badge.
-* Improved weapon balance and gameplay rules, bugs fixed, and much more.
+* New weapon: electrocute your foes and reduce their agility with the all-purpose zapper.
+* New models: accessorize with new vanity items and test a more refined and colorful arsenal of weaponry.
+* New mutators: [explain new muts]
+* New deathmatch and time-trial maps: with more levels to explore than ever before, experience new terrain as well as some remixed favorites.
+* Further improved menus, GUIs, variables and gameplay options: navigate quickly and take control of all aspects or get help when needed.
+* Improved weapon balance, team balance, bugs fixed, and much more.
 
-Even more, our community has been slowly, but surely, growing. We would like to thank each and every person who has contributed to or supported the project so far. Without their time and dedication, Red Eclipse would not even be a fraction of what it is today.
+[community growing, thanks for support, porting to tesseract]
 
 As always, you can download Red Eclipse from http://redeclipse.net/
