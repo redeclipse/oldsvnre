@@ -29,7 +29,7 @@
 
     $app['targets']['google'] = array('name' => 'Google', 'url' => 'http://www.google.com/search?q=%22Red%20Eclipse%22', 'alturl' => 'http://www.google.com/search?q=%22Red%20Eclipse%22+', 'nav' => -1, 'redir' => 1);
 
-    $app['targets']['arch'] = array('name' => 'Arch', 'url' => 'http://aur.archlinux.org/packages.php?ID=47449', 'nav' => -1, 'redir' => 1);
+    $app['targets']['arch'] = array('name' => 'Arch', 'url' => 'https://aur.archlinux.org/packages/redeclipse/', 'nav' => -1, 'redir' => 1);
     $app['targets']['chakra'] = array('name' => 'Chakra', 'url' => 'http://www.chakra-project.org/packages/index.php?act=search&subdir=&sortby=date&order=descending&searchpattern=redeclipse', 'nav' => -1, 'redir' => 1);
     $app['targets']['debian'] = array('name' => 'Debian', 'url' => 'http://packages.debian.org/search?keywords=redeclipse', 'nav' => -1, 'redir' => 1);
     $app['targets']['slackware'] = array('name' => 'Slackware', 'url' => 'http://slackbuilds.org/repository/14.0/games/redeclipse/', 'nav' => -1, 'redir' => 1);
