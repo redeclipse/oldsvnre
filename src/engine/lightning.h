@@ -89,8 +89,8 @@ static void renderlightning(Texture *tex, const vec &o, const vec &d, float sz, 
 
 struct lightningrenderer : sharedlistrenderer
 {
-    lightningrenderer()
-        : sharedlistrenderer("<grey>particles/lightning", 2, PT_LIGHTNING|PT_GLARE)
+    lightningrenderer(const char *texname)
+        : sharedlistrenderer(texname, 2, PT_LIGHTNING|PT_GLARE)
     {}
 
     void startrender()
@@ -129,4 +129,4 @@ struct lightningrenderer : sharedlistrenderer
         renderlightning(tex, p->o, p->d, size, midcol, endcol);
     }
 };
-static lightningrenderer lightnings;
+static lightningrenderer lightnings("<grey>particles/lightning"), lightzaps("<grey>particles/lightzap");
