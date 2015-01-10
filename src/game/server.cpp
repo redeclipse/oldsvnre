@@ -4496,7 +4496,7 @@ namespace server
             if(!gamewait)
             {
                 if(m_team(gamemode, mutators)) doteambalance(true);
-                if(!m_bomber(gamemode) && !m_duke(gamemode, mutators)) // they do their own "fight"
+                if(m_fight(gamemode) && !m_bomber(gamemode) && !m_duke(gamemode, mutators)) // they do their own "fight"
                     sendf(-1, 1, "ri3s", N_ANNOUNCE, S_V_FIGHT, CON_INFO, "match start, fight!");
             }
         }
