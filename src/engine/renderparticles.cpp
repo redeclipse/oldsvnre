@@ -1033,14 +1033,17 @@ static partrenderer *parts[] =
     new quadrenderer("<grey>particles/plasma", PT_PART|PT_GLARE|PT_FLIP|PT_SHRINK),
     new softquadrenderer("<grey>particles/electric", PT_PART|PT_GLARE|PT_RND4|PT_FLIP|PT_SHRINK),
     new quadrenderer("<grey>particles/electric", PT_PART|PT_GLARE|PT_RND4|PT_FLIP|PT_SHRINK),
+    new softquadrenderer("<grey>particles/eleczap", PT_PART|PT_GLARE|PT_RND4|PT_FLIP|PT_SHRINK),
+    new quadrenderer("<grey>particles/eleczap", PT_PART|PT_GLARE|PT_RND4|PT_FLIP|PT_SHRINK),
     new quadrenderer("<grey>particles/fire", PT_PART|PT_GLARE|PT_FLIP|PT_RND4|PT_GLARE|PT_SHRINK),
     new taperenderer("<grey>particles/sflare", PT_TAPE|PT_GLARE),
     new taperenderer("<grey>particles/mflare", PT_TAPE|PT_GLARE|PT_RND4|PT_VFLIP|PT_GLARE),
     new taperenderer("<grey>particles/lightning", PT_TAPE|PT_GLARE|PT_HFLIP|PT_VFLIP, 2), // uses same clamp setting as normal lightning to avoid conflict
+    new taperenderer("<grey>particles/lightzap", PT_TAPE|PT_GLARE|PT_HFLIP|PT_VFLIP, 2),
     new quadrenderer("<grey>particles/muzzle", PT_PART|PT_GLARE|PT_RND4|PT_FLIP),
     new quadrenderer("<grey>particles/snow", PT_PART|PT_GLARE|PT_FLIP),
     &texts, &textontop,
-    &explosions, &shockwaves, &shockballs, &lightnings,
+    &explosions, &shockwaves, &shockballs, &lightnings, &lightzaps,
     &flares // must be done last!
 };
 

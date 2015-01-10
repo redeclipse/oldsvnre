@@ -3428,7 +3428,7 @@ namespace game
                     { 2, PART_SPARK, 0.1f, 2 },
                     { 2, PART_FIREBALL, 0.1f, 6 },
                     { 1, PART_PLASMA, 0.05f, 2 },
-                    { 4, PART_LIGHTNING, 0.75f, 1 },
+                    { 4, PART_LIGHTZAP, 0.75f, 1 },
                     { 2, PART_PLASMA, 0.05f, 2.5f },
                     { 3, PART_PLASMA, 0.1f, 0.125f },
                     { 0, 0, 0, 0 },
