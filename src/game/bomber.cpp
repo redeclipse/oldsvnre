@@ -109,7 +109,7 @@ namespace bomber
         {
             bomberstate::flag &f = st.flags[i];
             if(hasbombs.find(i) >= 0 || !f.enabled) continue;
-            vec pos = f.pos(true), dir = vec(pos).sub(camera1->o), colour = isbomberaffinity(f) ? pulsecolour() : vec::hexcolor(TEAM(f.team, colour));
+            vec pos = f.pos(true), colour = isbomberaffinity(f) ? pulsecolour() : vec::hexcolor(TEAM(f.team, colour));
             float area = 3, size = hud::radaraffinitysize;
             if(isbomberaffinity(f))
             {
@@ -125,7 +125,7 @@ namespace bomber
                 area = 3;
                 if(isbombertarg(f, game::focus->team) && !hasbombs.empty()) size *= 1.25f;
             }
-            hud::drawblip(isbomberaffinity(f) ? hud::bombtex : (isbombertarg(f, game::focus->team) ? hud::arrowtex : hud::pointtex), area, w, h, size, blend*hud::radaraffinityblend, (isbombertarg(f, game::focus->team) ? -1-hud::radarstyle : hud::radarstyle), (isbombertarg(f, game::focus->team) ? dir : pos), colour);
+            hud::drawblip(isbomberaffinity(f) ? hud::bombtex : (isbombertarg(f, game::focus->team) ? hud::arrowtex : hud::pointtex), area, w, h, size, blend*hud::radaraffinityblend, isbombertarg(f, game::focus->team) ? 0 : -1, pos, colour);
         }
     }
 
