@@ -1819,11 +1819,17 @@ namespace hud
         popfont();
     }
 
+    int radartype()
+    {
+        if(game::focus->state == CS_EDITING) return editradarstyle;
+        return radarstyle;
+    }
+
     int radarrange()
     {
         if(game::focus->state == CS_EDITING) return editradardist ? editradardist : getworldsize();
         int dist = getworldsize();
-        switch(radarstyle)
+        switch(radartype())
         {
             case 3: dist = radarcornerdist ? radarcornerdist : getworldsize(); break;
             case 2: case 1: case 0: case -1: default: dist = radardist ? radardist : getworldsize(); break;
@@ -1833,18 +1839,9 @@ namespace hud
 
     void drawblip(const char *tex, float area, int w, int h, float s, float blend, int style, vec &pos, const vec &colour, const char *font, const char *text, ...)
     {
-        vec dir;
-        float dist = 1;
-        if(style < 0)
-        {
-            style = -style-1;
-            dir = pos;
-        }
-        else
-        {
-            dir = style ? vec(pos).sub(camera1->o) : pos;
-            dist = clamp(dir.magnitude()/float(radarrange()), 0.f, 1.f);
-        }
+        if(style < 0) style = radartype();
+        vec dir = vec(pos).sub(camera1->o);
+        float dist = clamp(dir.magnitude()/float(radarrange()), 0.f, 1.f);
         dir.rotate_around_z(-camera1->yaw*RAD).normalize();
         vec loc(0, 0, 0);
         if(style == 2)
@@ -2065,15 +2062,11 @@ namespace hud
                 else size = radaritemsize;
                 fade *= radarblipblend;
             }
-            int style = editradarstyle;
             if(game::focus->state != CS_EDITING && !insel && inspawn > 0.f)
-            {
                 fade = radaritemspawn ? 1.f-inspawn : fade+((1.f-fade)*(1.f-inspawn));
-                style = radarstyle;
-            }
-            if(insel) drawblip(tex, 0, w, h, size, fade*blend, style, o, colour, "tiny", "%s %s", enttype[type].name, entities::entinfo(type, attr, insel));
-            else if(chkcond(radaritemnames, !game::tvmode())) drawblip(tex, 0, w, h, size, fade*blend, style, o, colour, "tiny", "%s", entities::entinfo(type, attr, false));
-            else drawblip(tex, 0, w, h, size, fade*blend, style, o, colour);
+            if(insel) drawblip(tex, 0, w, h, size, fade*blend, -1, o, colour, "tiny", "%s %s", enttype[type].name, entities::entinfo(type, attr, insel));
+            else if(chkcond(radaritemnames, !game::tvmode())) drawblip(tex, 0, w, h, size, fade*blend, -1, o, colour, "tiny", "%s", entities::entinfo(type, attr, false));
+            else drawblip(tex, 0, w, h, size, fade*blend, -1, o, colour);
         }
     }
 
@@ -2122,19 +2115,20 @@ namespace hud
                     range = clamp(max(d.damage, radardamagemin)/float(max(radardamagemax-radardamagemin, 1)), radardamagemin/100.f, 1.f),
                     fade = clamp(radardamageblend*blend, min(radardamageblend*radardamagemin/100.f, 1.f), radardamageblend)*amt,
                     size = clamp(range*radardamagesize, min(radardamagesize*radardamagemin/100.f, 1.f), radardamagesize)*amt;
+                vec o = vec(camera1->o).add(vec(d.dir).mul(radarrange()));
                 if(radardamage >= 5)
                 {
                     gameent *a = game::getclient(d.attacker);
-                    drawblip(hurttex, 2+size/3, w, h, size, fade, 0, d.dir, d.colour, "tiny", "%s +%d", a ? game::colourname(a) : "?", d.damage);
+                    drawblip(hurttex, 2+size/3, w, h, size, fade, 0, o, d.colour, "tiny", "%s +%d", a ? game::colourname(a) : "?", d.damage);
                 }
-                else drawblip(hurttex, 2+size/3, w, h, size, fade, 0, d.dir, d.colour);
+                else drawblip(hurttex, 2+size/3, w, h, size, fade, 0, o, d.colour);
             }
         }
     }
 
     void drawradar(int w, int h, float blend)
     {
-        if(radarstyle == 3)
+        if(radartype() == 3)
         {
             if(lastnewgame) return;
             vec pos = vec(camera1->o).sub(minimapcenter).mul(minimapscale).add(0.5f), dir(camera1->yaw*RAD, 0.f);
@@ -2166,7 +2160,7 @@ namespace hud
         if(chkcond(radarplayers, radarplayerfilter != 3 || m_duke(game::gamemode, game::mutators) || m_edit(game::gamemode))) // 4
         {
             gameent *d = NULL;
-            int numdyns = game::numdynents(), style = radarstyle != 2 ? radarstyle : 1, others[T_MAX] = {0};
+            int numdyns = game::numdynents(), style = radartype() != 2 ? radartype() : 1, others[T_MAX] = {0};
             if(radarplayerduke && game::focus->state == CS_ALIVE && m_survivor(game::gamemode, game::mutators))
             {
                 loopi(numdyns) if((d = (gameent *)game::iterdynents(i)) && d->state == CS_ALIVE && d->actortype < A_ENEMY)
@@ -2899,7 +2893,7 @@ namespace hud
             case 1:
             {
                 int cm = cr+top;
-                if(!m_hard(game::gamemode, game::mutators) && radarstyle == 3 && !hasinput(true) && (game::focus->state == CS_EDITING ? showeditradar >= 1 : chkcond(showradar, !game::tvmode() || (game::focus != game::player1 && radarstyle==3))))
+                if(!m_hard(game::gamemode, game::mutators) && radartype() == 3 && !hasinput(true) && (game::focus->state == CS_EDITING ? showeditradar >= 1 : chkcond(showradar, !game::tvmode() || (game::focus != game::player1 && radartype() == 3))))
                     cm += int(max(w, h)/2*radarcorner*2);
                 if(inventorydate)
                     cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorydateskew, "super", fade*inventorydateblend, "%s", gettime(currenttime, inventorydateformat));
@@ -3167,7 +3161,7 @@ namespace hud
                     }
                 }
             }
-            if(!m_hard(game::gamemode, game::mutators) && !hasinput(true) && (game::focus->state == CS_EDITING ? showeditradar >= 1 : chkcond(showradar, !game::tvmode() || (game::focus != game::player1 && radarstyle==3))))
+            if(!m_hard(game::gamemode, game::mutators) && !hasinput(true) && (game::focus->state == CS_EDITING ? showeditradar >= 1 : chkcond(showradar, !game::tvmode() || (game::focus != game::player1 && radartype() == 3))))
                 drawradar(w, h, fade);
         }
         drawspecborder(w, h, game::intermission || client::waitplayers || game::player1->state == CS_SPECTATOR ? BORDER_SPEC : (game::player1->state == CS_WAITING ? BORDER_WAIT : (game::player1->state == CS_WAITING ? BORDER_EDIT : BORDER_PLAY)), top, bottom);

@@ -57,7 +57,7 @@ namespace capture
             capturestate::flag &f = st.flags[i];
             loopk(2)
             {
-                vec dir, pos, colour = vec::hexcolor(TEAM(f.team, colour));
+                vec pos, colour = vec::hexcolor(TEAM(f.team, colour));
                 const char *tex = hud::flagtex;
                 bool arrow = false;
                 float fade = blend*hud::radaraffinityblend, size = hud::radaraffinitysize;
@@ -68,7 +68,6 @@ namespace capture
                 {
                     if(f.owner == game::focus || (!f.owner && !f.droptime)) break;
                     pos = f.pos(true);
-                    dir = vec(pos).sub(camera1->o);
                     int interval = lastmillis%500;
                     if(interval >= 300 || interval <= 200)
                         fade *= clamp(interval >= 300 ? 1.f-((interval-300)/200.f) : interval/200.f, 0.f, 1.f);
@@ -76,7 +75,6 @@ namespace capture
                 else
                 {
                     pos = f.spawnloc;
-                    dir = vec(pos).sub(camera1->o);
                     if(f.team == game::focus->team && !m_gsp3(game::gamemode, game::mutators) && !hasflags.empty())
                     {
                         size *= 1.25f;
@@ -85,8 +83,8 @@ namespace capture
                     }
                     else if(f.owner || f.droptime) tex = hud::alerttex;
                 }
-                if(hud::radaraffinitynames > (arrow ? 0 : 1)) hud::drawblip(tex, arrow ? 3 : 2, w, h, size, fade, arrow ? -1-hud::radarstyle : hud::radarstyle, arrow ? dir : pos, colour, "little", "\f[%d]%s", TEAM(f.team, colour), k ? "flag" : "base");
-                else hud::drawblip(tex, arrow ? 3 : 2, w, h, hud::radaraffinitysize, fade, arrow ? -1-hud::radarstyle : hud::radarstyle, arrow ? dir : pos, colour);
+                if(hud::radaraffinitynames > (arrow ? 0 : 1)) hud::drawblip(tex, arrow ? 3 : 2, w, h, size, fade, arrow ? 0 : -1, pos, colour, "little", "\f[%d]%s", TEAM(f.team, colour), k ? "flag" : "base");
+                else hud::drawblip(tex, arrow ? 3 : 2, w, h, hud::radaraffinitysize, fade, arrow ? 0 : -1, pos, colour);
             }
         }
     }
