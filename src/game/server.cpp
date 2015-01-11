@@ -3608,32 +3608,35 @@ namespace server
         }
         else
         {
-            hurt = min(m->state.health, realdamage);
             m->state.health = m->state.health-realdamage;
             if(m->state.actortype < A_ENEMY) m->state.health = min(m->state.health, m_maxhealth(gamemode, mutators, m->state.model));
-            m->state.lastregen = 0;
-            m->state.lastpain = gamemillis;
-            v->state.damage += realdamage;
-            if(m->state.health <= 0) realflags |= HIT_KILL;
-            if(wr_burning(weap, flags))
+            if(realdamage > 0)
             {
-                m->state.lastres[WR_BURN] = m->state.lastrestime[WR_BURN] = gamemillis;
-                m->state.lastresowner[WR_BURN] = v->clientnum;
-            }
-            if(wr_bleeding(weap, flags))
-            {
-                m->state.lastres[WR_BLEED] = m->state.lastrestime[WR_BLEED] = gamemillis;
-                m->state.lastresowner[WR_BLEED] = v->clientnum;
-            }
-            if(wr_shocking(weap, flags))
-            {
-                m->state.lastres[WR_SHOCK] = m->state.lastrestime[WR_SHOCK] = gamemillis;
-                m->state.lastresowner[WR_SHOCK] = v->clientnum;
+                hurt = min(m->state.health, realdamage);
+                m->state.lastregen = 0;
+                m->state.lastpain = gamemillis;
+                v->state.damage += realdamage;
+                if(m->state.health <= 0) realflags |= HIT_KILL;
+                if(wr_burning(weap, flags))
+                {
+                    m->state.lastres[WR_BURN] = m->state.lastrestime[WR_BURN] = gamemillis;
+                    m->state.lastresowner[WR_BURN] = v->clientnum;
+                }
+                if(wr_bleeding(weap, flags))
+                {
+                    m->state.lastres[WR_BLEED] = m->state.lastrestime[WR_BLEED] = gamemillis;
+                    m->state.lastresowner[WR_BLEED] = v->clientnum;
+                }
+                if(wr_shocking(weap, flags))
+                {
+                    m->state.lastres[WR_SHOCK] = m->state.lastrestime[WR_SHOCK] = gamemillis;
+                    m->state.lastresowner[WR_SHOCK] = v->clientnum;
+                }
             }
         }
         if(smode) smode->dodamage(m, v, realdamage, hurt, weap, realflags, material, hitpush, hitvel, dist);
         mutate(smuts, mut->dodamage(m, v, realdamage, hurt, weap, realflags, material, hitpush, hitvel, dist));
-        if(m != v && (!m_team(gamemode, mutators) || m->team != v->team))
+        if(realdamage >= 0 && m != v && (!m_team(gamemode, mutators) || m->team != v->team))
             addhistory(m, v, gamemillis);
         sendf(-1, 1, "ri9i5", N_DAMAGE, m->clientnum, v->clientnum, weap, realflags, realdamage, m->state.health, hitpush.x, hitpush.y, hitpush.z, hitvel.x, hitvel.y, hitvel.z, int(dist*DNF));
         if(realflags&HIT_KILL)

@@ -1356,8 +1356,8 @@ namespace game
         bool burning = burn(d, weap, flags), bleeding = bleed(d, weap, flags), shocking = shock(d, weap, flags);
         if(!local || burning || bleeding || shocking)
         {
-            float scale = isweap(weap) && WF(WK(flags), weap, damage, WS(flags)) ? damage/float(WF(WK(flags), weap, damage, WS(flags))) : 1.f;
-            if(hithurts(flags))
+            float scale = isweap(weap) && WF(WK(flags), weap, damage, WS(flags)) ? abs(damage)/float(WF(WK(flags), weap, damage, WS(flags))) : 1.f;
+            if(hithurts(flags) && damage > 0)
             {
                 if(d == focus) hud::damage(damage, v->o, v, weap, flags);
                 if(actor[d->actortype].living)
@@ -1407,7 +1407,7 @@ namespace game
                     if(WF(WK(flags), weap, hitpush, WS(flags)) != 0 || WF(WK(flags), weap, hitvel, WS(flags)) != 0)
                     {
                         float amt = scale*WRS(flags&HIT_WAVE || !hithurts(flags) ? wavepushscale : (d->health <= 0 ? deadpushscale : hitpushscale), push, gamemode, mutators);
-                        bool doquake = hithurts(flags);
+                        bool doquake = hithurts(flags) && damage > 0;
                         if(d == v)
                         {
                             float modify = WF(WK(flags), weap, damageself, WS(flags))*G(damageselfscale);
@@ -1441,9 +1441,12 @@ namespace game
         if(hithurts(flags))
         {
             d->health = health;
-            d->lastregen = 0;
-            d->lastpain = lastmillis;
-            v->totaldamage += damage;
+            if(damage > 0)
+            {
+                d->lastregen = 0;
+                d->lastpain = lastmillis;
+                v->totaldamage += damage;
+            }
         }
         hiteffect(weap, flags, damage, d, v, dir, vel, dist, v == player1 || v->ai);
     }
