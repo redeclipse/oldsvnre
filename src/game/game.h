@@ -258,7 +258,7 @@ enum
     N_SHOOT, N_DESTROY, N_STICKY, N_SUICIDE, N_DIED, N_POINTS, N_DAMAGE, N_SHOTFX,
     N_LOADW, N_TRYSPAWN, N_SPAWNSTATE, N_SPAWN, N_DROP, N_WSELECT,
     N_MAPCHANGE, N_MAPVOTE, N_CLEARVOTE, N_CHECKPOINT, N_ITEMSPAWN, N_ITEMUSE, N_TRIGGER, N_EXECLINK,
-    N_PING, N_PONG, N_CLIENTPING, N_TICK, N_NEWGAME, N_ITEMACC, N_SERVMSG, N_GAMEINFO, N_RESUME,
+    N_PING, N_PONG, N_CLIENTPING, N_TICK, N_ITEMACC, N_SERVMSG, N_GAMEINFO, N_RESUME,
     N_EDITMODE, N_EDITENT, N_EDITLINK, N_EDITVAR, N_EDITF, N_EDITT, N_EDITM, N_FLIP, N_COPY, N_PASTE, N_ROTATE, N_REPLACE, N_DELCUBE, N_REMIP, N_CLIPBOARD, N_NEWMAP,
     N_GETMAP, N_SENDMAP, N_FAILMAP, N_SENDMAPFILE,
     N_MASTERMODE, N_ADDCONTROL, N_CLRCONTROL, N_CURRENTPRIV, N_SPECTATOR, N_WAITING, N_SETPRIV, N_SETTEAM,
@@ -284,7 +284,7 @@ char msgsizelookup(int msg)
         N_DROP, 0, N_WSELECT, 0,
         N_MAPCHANGE, 0, N_MAPVOTE, 0, N_CLEARVOTE, 0, N_CHECKPOINT, 0, N_ITEMSPAWN, 3, N_ITEMUSE, 0, N_TRIGGER, 0, N_EXECLINK, 3,
         N_PING, 2, N_PONG, 2, N_CLIENTPING, 2,
-        N_TICK, 2, N_NEWGAME, 1, N_ITEMACC, 0,
+        N_TICK, 3, N_ITEMACC, 0,
         N_SERVMSG, 0, N_GAMEINFO, 0, N_RESUME, 0,
         N_EDITMODE, 2, N_EDITENT, 0, N_EDITLINK, 4, N_EDITVAR, 0, N_EDITF, 16, N_EDITT, 16, N_EDITM, 17, N_FLIP, 14, N_COPY, 14, N_PASTE, 14, N_ROTATE, 15, N_REPLACE, 17, N_DELCUBE, 14, N_REMIP, 1, N_NEWMAP, 2,
         N_GETMAP, 0, N_SENDMAP, 0, N_FAILMAP, 0, N_SENDMAPFILE, 0,
@@ -525,7 +525,7 @@ struct verinfo
 };
 
 // inherited by gameent and server clients
-struct gamestate
+struct clientstate
 {
     int health, ammo[W_MAX], entid[W_MAX], colour, model;
     int weapselect, weapload[W_MAX], weapshot[W_MAX], weapstate[W_MAX], weapwait[W_MAX], weaplast[W_MAX];
@@ -536,7 +536,7 @@ struct gamestate
     vector<int> loadweap, lastweap;
     verinfo version;
 
-    gamestate() : colour(0), model(0), weapselect(W_MELEE), lastdeath(0), lastspawn(0), lastrespawn(0), lastpain(0), lastregen(0), lastbuff(0), lastshoot(0),
+    clientstate() : colour(0), model(0), weapselect(W_MELEE), lastdeath(0), lastspawn(0), lastrespawn(0), lastpain(0), lastregen(0), lastbuff(0), lastshoot(0),
         actortype(A_PLAYER), spawnpoint(-1), ownernum(-1), skill(0), points(0), frags(0), deaths(0), cpmillis(0), cptime(0), quarantine(false)
     {
         setvanity();
@@ -544,7 +544,7 @@ struct gamestate
         lastweap.shrink(0);
         resetresidual();
     }
-    ~gamestate() {}
+    ~clientstate() {}
 
     bool setvanity(const char *v = "")
     {
@@ -946,7 +946,7 @@ struct stunevent
     float scale, gravity;
 };
 
-struct gameent : dynent, gamestate
+struct gameent : dynent, clientstate
 {
     editinfo *edit;
     ai::aiinfo *ai;
@@ -1075,7 +1075,7 @@ struct gameent : dynent, gamestate
         removesounds();
         clearstate(gamemode, mutators);
         physent::reset();
-        gamestate::respawn(millis);
+        clientstate::respawn(millis);
     }
 
     void editspawn(int gamemode, int mutators)
@@ -1089,7 +1089,7 @@ struct gameent : dynent, gamestate
         vel = falling = vec(0, 0, 0);
         floor = vec(0, 0, 1);
         resetinterp();
-        gamestate::editspawn(gamemode, mutators);
+        clientstate::editspawn(gamemode, mutators);
     }
 
     void resetstate(int millis, int gamemode, int mutators)
@@ -1105,7 +1105,7 @@ struct gameent : dynent, gamestate
         dominated.shrink(0);
         icons.shrink(0);
         resetstate(millis, gamemode, mutators);
-        gamestate::mapchange();
+        clientstate::mapchange();
     }
 
     void cleartags() { head = torso = muzzle = origin = eject[0] = eject[1] = waist = jet[0] = jet[1] = jet[2] = toe[0] = toe[1] = vec(-1, -1, -1); }
@@ -1303,17 +1303,17 @@ struct gameent : dynent, gamestate
     {
         if(issound(fschan)) removesound(fschan);
         fschan = -1;
-        gamestate::resetresidual(WR_BURN);
+        clientstate::resetresidual(WR_BURN);
     }
 
     void resetbleeding()
     {
-        gamestate::resetresidual(WR_BLEED);
+        clientstate::resetresidual(WR_BLEED);
     }
 
     void resetshocking()
     {
-        gamestate::resetresidual(WR_SHOCK);
+        clientstate::resetresidual(WR_SHOCK);
     }
 
     void resetresidual()
@@ -1363,7 +1363,7 @@ struct gameent : dynent, gamestate
 
     bool setvanity(const char *v)
     {
-        if(gamestate::setvanity(v))
+        if(clientstate::setvanity(v))
         {
             vitems.shrink(0);
             return true;
@@ -1556,7 +1556,7 @@ struct cament
 namespace client
 {
     extern int showpresence, showteamchange;
-    extern bool sendplayerinfo, sendcrcinfo, sendgameinfo, demoplayback, isready, needsmap, gettingmap, waitplayers;
+    extern bool sendplayerinfo, sendcrcinfo, sendgameinfo, demoplayback, isready, needsmap, gettingmap;
     extern void clearvotes(gameent *d, bool msg = false);
     extern void ignore(int cn);
     extern void unignore(int cn);
@@ -1659,12 +1659,12 @@ namespace hud
 enum { CTONE_TEAM = 0, CTONE_TONE, CTONE_TEAMED, CTONE_ALONE, CTONE_MIXED, CTONE_TMIX, CTONE_AMIX, CTONE_MAX };
 namespace game
 {
-    extern int gamemode, mutators, nextmode, nextmuts, timeremaining, lasttimeremain, maptime, lastzoom, lasttvcam, lasttvchg, spectvtime, waittvtime,
+    extern int gamestate, gamemode, mutators, nextmode, nextmuts, timeremaining, lasttimeremain, maptime, lastzoom, lasttvcam, lasttvchg, spectvtime, waittvtime,
             bloodfade, bloodsize, bloodsparks, debrisfade, eventiconfade, eventiconshort,
             announcefilter, dynlighteffects, aboveheadnames, followthirdperson, nogore, forceplayermodel,
             playerovertone, playerundertone, playerdisplaytone, playereffecttone, playerteamtone, follow, specmode, spectvfollow, spectvfollowing;
     extern float bloodscale, debrisscale, aboveitemiconsize;
-    extern bool intermission, zooming;
+    extern bool zooming;
     extern vec swaypush, swaydir;
     extern string clientmap;
 
@@ -1718,7 +1718,7 @@ namespace game
     extern void hiteffect(int weap, int flags, int damage, gameent *d, gameent *v, vec &dir, vec &vel, float dist, bool local = false);
     extern void damaged(int weap, int flags, int damage, int health, gameent *d, gameent *v, int millis, vec &dir, vec &vel, float dist);
     extern void killed(int weap, int flags, int damage, gameent *d, gameent *v, vector<gameent*> &log, int style, int material);
-    extern void timeupdate(int timeremain);
+    extern void timeupdate(int state, int remain);
     extern vec rescolour(dynent *d, int c = PULSE_BURN);
     extern float rescale(gameent *d);
     extern float opacity(gameent *d, bool third = true);

@@ -21,9 +21,14 @@ enum
     G_M_DK = (1<<G_M_DUEL)|(1<<G_M_SURVIVOR),
     G_M_IM = (1<<G_M_INSTA)|(1<<G_M_MEDIEVAL),
 };
-
 enum { G_F_GSP = 0, G_F_NUM };
-
+enum {
+    G_S_WAITING = 0,
+    G_S_VOTING,
+    G_S_INTERMISSION,
+    G_S_PLAYING,
+    G_S_MAX
+};
 struct gametypes
 {
     int type, flags, implied, mutators[G_M_GSN+1];

@@ -667,7 +667,6 @@ namespace hud
 
     bool hasinput(bool pass, bool focus)
     {
-        //if(pass && (game::intermission || game::focus->state != CS_ALIVE)) pass = false;
         if(focus && (commandmillis > 0 || curcompass)) return true;
         return UI::active(pass);
     }
@@ -1263,7 +1262,7 @@ namespace hud
     {
         int index = POINTER_NONE;
         if(hasinput()) index = !hasinput(true) || commandmillis > 0 ? POINTER_NONE : POINTER_GUI;
-        else if(!showhud || !showcrosshair || game::focus->state == CS_DEAD || game::intermission || client::waitplayers || client::waiting() || (game::thirdpersonview(true) && game::focus != game::player1))
+        else if(!showhud || !showcrosshair || game::focus->state == CS_DEAD || game::gamestate != G_S_PLAYING || client::waiting() || (game::thirdpersonview(true) && game::focus != game::player1))
             index = POINTER_NONE;
         else if(game::focus->state == CS_EDITING) index = POINTER_EDIT;
         else if(game::focus->state >= CS_SPECTATOR) index = POINTER_SPEC;
@@ -1344,11 +1343,12 @@ namespace hud
             popfont();
             ty += FONTH/3;
         }
-        if(game::intermission)
+        if(game::gamestate == G_S_INTERMISSION)
             ty += draw_textx("Intermission", tx, ty, 255, 255, 255, tf, TEXT_CENTERED, -1, tw)+FONTH/3;
+        else if(game::gamestate == G_S_VOTING) ty += draw_textx("Voting in progress", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw)+FONTH/3;
         else if(client::demoplayback && showdemoplayback)
-            ty += draw_textx("Demo Playback in Progress", tx, ty, 255, 255, 255, tf, TEXT_CENTERED, -1, tw)+FONTH/3;
-        else if(client::waitplayers) ty += draw_textx("Waiting for players", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw)+FONTH/3;
+            ty += draw_textx("Demo playback in progress", tx, ty, 255, 255, 255, tf, TEXT_CENTERED, -1, tw)+FONTH/3;
+        else if(game::gamestate == G_S_WAITING) ty += draw_textx("Waiting for players", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw)+FONTH/3;
         else if(hastkwarn(game::focus)) // first and foremost
             ty += draw_textx("\fzryDo NOT shoot team-mates", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1)+FONTH/3;
         popfont();
@@ -1364,7 +1364,7 @@ namespace hud
         else if(game::player1->state == CS_WAITING && showname())
             ty += draw_textx("[ %s ]", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, game::colourname(game::focus))+FONTH/3;
 
-        if(!game::intermission)
+        if(game::gamestate == G_S_PLAYING)
         {
             gameent *target = game::player1->state != CS_SPECTATOR ? game::player1 : game::focus;
             if(target->state == CS_DEAD || target->state == CS_WAITING)
@@ -1373,7 +1373,7 @@ namespace hud
                 SEARCHBINDCACHE(attackkey)("primary", 0);
                 if(delay || m_duke(game::gamemode, game::mutators) || (m_fight(game::gamemode) && maxalive > 0))
                 {
-                    if(client::waitplayers || m_duke(game::gamemode, game::mutators)) ty += draw_textx("Queued for new round", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw);
+                    if(game::gamestate == G_S_WAITING || m_duke(game::gamemode, game::mutators)) ty += draw_textx("Queued for new round", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw);
                     else if(delay) ty += draw_textx("%s: Down for \fs\fy%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, target == game::player1 && target->state == CS_WAITING ? "Please Wait" : "Fragged", timestr(delay));
                     else if(target == game::player1 && target->state == CS_WAITING && m_fight(game::gamemode) && maxalive > 0 && maxalivequeue)
                     {
@@ -2879,7 +2879,7 @@ namespace hud
         }
         if(!minimal(showinventory, true)) return left;
         float fade = blend*inventoryblend;
-        bool interm = game::intermission && game::tvmode() && game::focus == game::player1;
+        bool interm = game::gamestate != G_S_PLAYING && game::tvmode() && game::focus == game::player1;
         loopi(2) switch(i)
         {
             case 0:
@@ -2899,27 +2899,47 @@ namespace hud
                     cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorydateskew, "super", fade*inventorydateblend, "%s", gettime(currenttime, inventorydateformat));
                 if(inventorytime)
                 {
-                    if(m_edit(game::gamemode)) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fgediting\fS");
+                    if(paused) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fopaused\fS", 0xFFFFFF);
+                    else if(m_edit(game::gamemode)) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fgediting\fS");
                     else if(m_play(game::gamemode) || client::demoplayback)
                     {
-                        if(game::intermission)
+                        int timecorrected = max(game::timeremaining*1000-(lastmillis-game::lasttimeremain), 0);
+                        if(game::gamestate != G_S_PLAYING)
                         {
-                            if(lastnewgame)
+                            const char *name = "\fs\fywaiting\fS";
+                            float amt = 0.f;
+                            switch(game::gamestate)
                             {
-                                int millis = votelimit-(totalmillis-lastnewgame);
-                                float amt = float(millis)/float(votelimit);
-                                const char *col = "\fw";
-                                if(amt > 0.75f) col = "\fg";
-                                else if(amt > 0.5f) col = "\fc";
-                                else if(amt > 0.25f) col = "\fy";
-                                else col = "\fo";
-                                cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fcvoting:\fS \fs%s%s\fS", col, timestr(millis, inventorytimestyle));
+                                case G_S_WAITING:
+                                {
+                                    if(!waitforplayertime) break;
+                                    amt = float(timecorrected)/float(waitforplayertime);
+                                    name = "\fs\fywaiting\fS";
+                                    break;
+                                }
+                                case G_S_VOTING:
+                                {
+                                    if(!votelimit) break;
+                                    amt = float(timecorrected)/float(votelimit);
+                                    name = "\fs\fcvoting\fS";
+                                    break;
+                                }
+                                case G_S_INTERMISSION: default:
+                                {
+                                    if(!intermlimit) break;
+                                    amt = float(timecorrected)/float(intermlimit);
+                                    name = "\fs\fyintermission\fS";
+                                    break;
+                                }
                             }
-                            else cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fyintermission\fS");
+                            const char *col = "\fw";
+                            if(amt > 0.75f) col = "\fg";
+                            else if(amt > 0.5f) col = "\fc";
+                            else if(amt > 0.25f) col = "\fy";
+                            else col = "\fo";
+                            cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "%s \fs%s%s\fS", name, col, timestr(timecorrected, inventorytimestyle));
                         }
-                        else if(client::waitplayers) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fywaiting\fS");
-                        else if(paused) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fopaused\fS", 0xFFFFFF);
-                        else if(game::timeremaining && timelimit) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fg%s\fS", timestr(game::timeremaining*1000-(lastmillis-game::lasttimeremain), inventorytimestyle));
+                        else if(timelimit) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fg%s\fS", timestr(timecorrected, inventorytimestyle));
                     }
                 }
                 if(texpaneltimer) break;
@@ -3127,7 +3147,7 @@ namespace hud
                 drawtexture(0, top, w, h-top-bottom);
             }
         }
-        if(!game::intermission && !client::waitplayers)
+        if(game::gamestate == G_S_PLAYING)
         {
             bool third = game::thirdpersonview(true) && game::focus != game::player1;
             if(game::focus->state == CS_ALIVE && game::inzoom()) drawzoom(w, h);
@@ -3164,7 +3184,7 @@ namespace hud
             if(!m_hard(game::gamemode, game::mutators) && !hasinput(true) && (game::focus->state == CS_EDITING ? showeditradar >= 1 : chkcond(showradar, !game::tvmode() || (game::focus != game::player1 && radartype() == 3))))
                 drawradar(w, h, fade);
         }
-        drawspecborder(w, h, game::intermission || client::waitplayers || game::player1->state == CS_SPECTATOR ? BORDER_SPEC : (game::player1->state == CS_WAITING ? BORDER_WAIT : (game::player1->state == CS_WAITING ? BORDER_EDIT : BORDER_PLAY)), top, bottom);
+        drawspecborder(w, h, game::gamestate != G_S_PLAYING || game::player1->state == CS_SPECTATOR ? BORDER_SPEC : (game::player1->state == CS_WAITING ? BORDER_WAIT : (game::player1->state == CS_WAITING ? BORDER_EDIT : BORDER_PLAY)), top, bottom);
         return drawinventory(w, h, edge, top, bottom, fade);
     }
 
@@ -3320,7 +3340,7 @@ namespace hud
                 left += drawheadsup(hudwidth, hudheight, edge, top, bottom, fade);
                 if(!texpaneltimer && !game::tvmode() && !client::waiting() && !hasinput(false)) drawevents(fade);
             }
-            else if(!game::intermission && !client::waitplayers && game::focus == game::player1 && game::focus->state == CS_ALIVE && game::inzoom())
+            else if(game::gamestate == G_S_PLAYING && game::focus == game::player1 && game::focus->state == CS_ALIVE && game::inzoom())
                 drawzoom(hudwidth, hudheight);
         }
         drawconsole(showconsole < 2 || noview ? 0 : 1, hudwidth, hudheight, edge*2, edge+top, hudwidth-edge*2, consolefade);
