@@ -262,7 +262,10 @@ namespace ai
 
     void update()
     {
-        if(game::intermission) { loopv(game::players) if(game::players[i] && game::players[i]->ai) game::players[i]->stopmoving(true); }
+        if(game::gamestate != G_S_PLAYING)
+        {
+            loopv(game::players) if(game::players[i] && game::players[i]->ai) game::players[i]->stopmoving(true);
+        }
         else // fixed rate logic done out-of-sequence at 1 frame per second for each ai
         {
             if(totalmillis-updatemillis > 100) avoid();
@@ -1402,7 +1405,7 @@ namespace ai
         else
         {
             if(d->ragdoll) cleanragdoll(d);
-            if(d->state == CS_ALIVE && !game::intermission)
+            if(d->state == CS_ALIVE && game::gamestate == G_S_PLAYING)
             {
                 if(d->speedscale != 0)
                 {
@@ -1416,7 +1419,7 @@ namespace ai
                 }
             }
         }
-        if(!game::intermission && (d->state == CS_ALIVE || d->state == CS_DEAD || d->state == CS_WAITING))
+        if(game::gamestate == G_S_PLAYING && (d->state == CS_ALIVE || d->state == CS_DEAD || d->state == CS_WAITING))
             entities::checkitems(d);
     }
 

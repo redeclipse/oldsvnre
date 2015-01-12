@@ -196,7 +196,7 @@ namespace server
 
     enum { WARN_CHAT = 0, WARN_TEAMKILL, WARN_MAX };
 
-    struct servstate : gamestate
+    struct servstate : clientstate
     {
         vec o, vel, falling;
         float yaw, pitch, roll;
@@ -226,7 +226,7 @@ namespace server
             dropped.reset();
             loopi(W_MAX) loopj(2) weapshots[i][j].reset();
             if(!change) score = timeplayed = 0;
-            else gamestate::mapchange();
+            else clientstate::mapchange();
             frags = spree = rewards[0] = rewards[1] = deaths = shotdamage = damage = 0;
             fraglog.shrink(0);
             fragmillis.shrink(0);
@@ -246,7 +246,7 @@ namespace server
         {
             lastboost = rewards[1] = 0;
             resetresidualowner();
-            gamestate::respawn(millis);
+            clientstate::respawn(millis);
             o = vec(-1e10f, -1e10f, -1e10f);
             vel = falling = vec(0, 0, 0);
             yaw = pitch = roll = 0;
@@ -1361,24 +1361,45 @@ namespace server
             inovertime = maprequest = false;
             if(smode) smode->intermission();
             mutate(smuts, mut->intermission());
-            sendf(-1, 1, "ri2", N_TICK, 0);
         }
         if(req || !G(intermlimit))
         {
             checkdemorecord(true);
             if(!maprequest && G(votelimit))
             {
-                sendf(-1, 1, "ri", N_NEWGAME);
                 maprequest = true;
                 interm = totalmillis+G(votelimit);
+                sendf(-1, 1, "ri3", N_TICK, G_S_VOTING, G(votelimit)/1000);
             }
             else
             {
                 interm = totalmillis+1;
+                sendf(-1, 1, "ri3", N_TICK, G_S_INTERMISSION, 0);
                 checkvotes(true);
             }
         }
-        else interm = totalmillis+G(intermlimit);
+        else
+        {
+            interm = totalmillis+G(intermlimit);
+            sendf(-1, 1, "ri3", N_TICK, G_S_INTERMISSION, G(intermlimit)/1000);
+        }
+    }
+
+    int timestate(int &state)
+    {
+        if(interm)
+        {
+            if(maprequest) state = G_S_VOTING;
+            else state = G_S_INTERMISSION;
+            return max(interm-totalmillis, 0)/1000;
+        }
+        else if(gamewait)
+        {
+            state = G_S_WAITING;
+            return max(G(waitforplayertime)-(totalmillis-gamewait), 0)/1000;
+        }
+        state = G_S_PLAYING;
+        return timeremaining;
     }
 
     bool wantsovertime()
@@ -1559,7 +1580,7 @@ namespace server
                 }
                 if(timeremaining != 0)
                 {
-                    sendf(-1, 1, "ri2", N_TICK, timeremaining);
+                    sendf(-1, 1, "ri3", N_TICK, G_S_PLAYING, timeremaining);
                     if(wantsoneminute && timeremaining == 60) ancmsgft(-1, S_V_ONEMINUTE, CON_EVENT, "\fzygone minute remains");
                 }
             }
@@ -2882,7 +2903,8 @@ namespace server
 
         if(numclients())
         {
-            if(m_fight(gamemode)) sendf(-1, 1, "ri2", N_TICK, timeremaining);
+            int state = 0, remain = timestate(state);
+            sendf(-1, 1, "ri3", N_TICK, state, remain);
             if(m_demo(gamemode)) setupdemoplayback();
             else if(demonextmatch) setupdemorecord();
         }
@@ -3454,8 +3476,10 @@ namespace server
 
         if(!ci || (m_fight(gamemode) && numclients()))
         {
+            int state = 0, remain = timestate(state);
             putint(p, N_TICK);
-            putint(p, timeremaining);
+            putint(p, state);
+            putint(p, remain);
         }
 
         if(hasgameinfo)
@@ -4605,7 +4629,7 @@ namespace server
         putint(p, mutators); // 3
         putint(p, timeremaining); // 4
         putint(p, G(serverclients)); // 5
-        putint(p, serverpass[0] ? MM_PASSWORD : (m_local(gamemode) ? MM_PRIVATE : mastermode)); // 6
+        putint(p, serverpass[0] || G(connectlock) ? MM_PASSWORD : (m_local(gamemode) ? MM_PRIVATE : mastermode)); // 6
         putint(p, numgamevars); // 7
         putint(p, numgamemods); // 8
         putint(p, versionmajor); // 9
@@ -4689,7 +4713,7 @@ namespace server
         }
 
         uchar operator[](int msg) const { return msg >= 0 && msg < NUMMSG ? msgmask[msg] : 0; }
-    } msgfilter(-1, N_CONNECT, N_SERVERINIT, N_CLIENTINIT, N_WELCOME, N_NEWGAME, N_MAPCHANGE, N_SERVMSG, N_DAMAGE, N_SHOTFX, N_LOADW, N_DIED, N_POINTS, N_SPAWNSTATE, N_ITEMACC, N_ITEMSPAWN, N_TICK, N_DISCONNECT, N_CURRENTPRIV, N_PONG, N_RESUME, N_SCOREAFFIN, N_SCORE, N_ANNOUNCE, N_SENDDEMOLIST, N_SENDDEMO, N_DEMOPLAYBACK, N_REGEN, N_CLIENT, N_AUTHCHAL, -2, N_REMIP, N_NEWMAP, N_CLIPBOARD, -3, N_EDITENT, N_EDITLINK, N_EDITVAR, N_EDITF, N_EDITT, N_EDITM, N_FLIP, N_COPY, N_PASTE, N_ROTATE, N_REPLACE, N_DELCUBE, -4, N_POS, N_SPAWN, N_DESTROY, NUMMSG),
+    } msgfilter(-1, N_CONNECT, N_SERVERINIT, N_CLIENTINIT, N_WELCOME, N_MAPCHANGE, N_SERVMSG, N_DAMAGE, N_SHOTFX, N_LOADW, N_DIED, N_POINTS, N_SPAWNSTATE, N_ITEMACC, N_ITEMSPAWN, N_TICK, N_DISCONNECT, N_CURRENTPRIV, N_PONG, N_RESUME, N_SCOREAFFIN, N_SCORE, N_ANNOUNCE, N_SENDDEMOLIST, N_SENDDEMO, N_DEMOPLAYBACK, N_REGEN, N_CLIENT, N_AUTHCHAL, -2, N_REMIP, N_NEWMAP, N_CLIPBOARD, -3, N_EDITENT, N_EDITLINK, N_EDITVAR, N_EDITF, N_EDITT, N_EDITM, N_FLIP, N_COPY, N_PASTE, N_ROTATE, N_REPLACE, N_DELCUBE, -4, N_POS, N_SPAWN, N_DESTROY, NUMMSG),
       connectfilter(-1, N_CONNECT, -2, N_AUTHANS, -3, N_PING, NUMMSG);
 
     int checktype(int type, clientinfo *ci)

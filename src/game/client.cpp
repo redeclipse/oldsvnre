@@ -3,7 +3,7 @@
 namespace client
 {
     bool sendplayerinfo = false, sendcrcinfo = false, sendgameinfo = false, isready = false, remote = false,
-        demoplayback = false, needsmap = false, gettingmap = false, waitplayers = false;
+        demoplayback = false, needsmap = false, gettingmap = false;
     int lastping = 0, sessionid = 0, sessionver = 0, lastplayerinfo = 0;
     string connectpass = "";
     int needclipboard = -1;
@@ -129,7 +129,7 @@ namespace client
         }
         m->players.add(d);
         mapvotes.sort(mapvote::compare);
-        if(showmapvotes >= (game::intermission ? 2 : 1) && !isignored(d->clientnum))
+        if(showmapvotes >= (game::gamestate != G_S_PLAYING ? 2 : 1) && !isignored(d->clientnum))
         {
             SEARCHBINDCACHE(votekey)("showgui maps 2", 0);
             conoutft(CON_EVENT, "%s suggests: \fs\fy%s\fS on \fs\fo%s\fS, press %s to vote", game::colourname(d), server::gamename(mode, muts), text, votekey);
@@ -1136,6 +1136,7 @@ namespace client
 
     void changemapserv(char *name, int gamemode, int mutators, bool temp)
     {
+        game::gamestate = G_S_WAITING;
         game::gamemode = gamemode;
         game::mutators = mutators;
         modecheck(game::gamemode, game::mutators);
@@ -1143,14 +1144,12 @@ namespace client
         game::nextmuts = game::mutators;
         game::timeremaining = -1;
         game::maptime = 0;
-        if(m_fight(game::gamemode)) waitplayers = true;
         hud::resetscores();
         mapvotes.shrink(0);
         if(editmode) toggleedit();
         if(m_demo(game::gamemode))
         {
             game::maptime = 1;
-            game::intermission = true;
             game::timeremaining = 0;
             return;
         }
@@ -1629,11 +1628,7 @@ namespace client
     {
         if(!d) { static gameent dummy; d = &dummy; }
         if(d == game::player1 || d->ai) getint(p);
-        else
-        {
-            d->state = getint(p);
-            if(d->state == CS_ALIVE && waitplayers) waitplayers = false;
-        }
+        else d->state = getint(p);
         d->points = getint(p);
         d->frags = getint(p);
         d->deaths = getint(p);
@@ -1938,14 +1933,6 @@ namespace client
                     int n;
                     while(p.remaining() && (n = getint(p)) != -1) entities::setspawn(n, getint(p));
                     sendgameinfo = false;
-                    break;
-                }
-
-                case N_NEWGAME: // server requests next game
-                {
-                    hud::showscores(false);
-                    if(!menuactive()) showgui("maps", 1);
-                    if(game::intermission) hud::lastnewgame = totalmillis;
                     break;
                 }
 
@@ -2444,8 +2431,11 @@ namespace client
                     break;
 
                 case N_TICK:
-                    game::timeupdate(getint(p));
+                {
+                    int state = getint(p), remain = getint(p);
+                    game::timeupdate(state, remain);
                     break;
+                }
 
                 case N_SERVMSG:
                 {

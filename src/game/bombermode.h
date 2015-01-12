@@ -74,6 +74,7 @@ struct bomberservmode : bomberstate, servmode
 
     void scorebomb(clientinfo *ci, int relay, int goal)
     {
+        if(!canplay(hasflaginfo)) return;
         flag g = flags[goal];
         if(!g.enabled) return;
         int total = 0;
@@ -195,7 +196,7 @@ struct bomberservmode : bomberstate, servmode
             vector<int> candidates[T_MAX];
             loopv(flags) candidates[flags[i].team].add(i);
             int wants = m_gsp1(gamemode, mutators) ? 1 : (m_gsp3(gamemode, mutators) ? 2 : teamcount(gamemode, mutators));
-            loopi(wants)
+            loopi(wants) if(!candidates[i].empty())
             {
                 int c = candidates[i].length(), r = rnd(c);
                 if(candidates[i].inrange(r) && flags.inrange(candidates[i][r]) && isteam(gamemode, mutators, flags[candidates[i][r]].team, T_NEUTRAL))
