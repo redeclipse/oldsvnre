@@ -1848,7 +1848,7 @@ namespace game
     void startmap(const char *name, const char *reqname, bool empty)    // called just after a map load
     {
         ai::startmap(name, reqname, empty);
-        gamestate = G_S_WAITING;
+        gamestate = m_fight(gamemode) ? G_S_WAITING : G_S_PLAYING;
         maptime = hud::lastnewgame = 0;
         removedamagemergeall();
         removeannounceall();

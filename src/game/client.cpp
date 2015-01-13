@@ -1136,7 +1136,7 @@ namespace client
 
     void changemapserv(char *name, int gamemode, int mutators, bool temp)
     {
-        game::gamestate = G_S_WAITING;
+        game::gamestate = m_fight(gamemode) ? G_S_WAITING : G_S_PLAYING;
         game::gamemode = gamemode;
         game::mutators = mutators;
         modecheck(game::gamemode, game::mutators);

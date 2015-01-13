@@ -2815,10 +2815,10 @@ namespace server
         stopdemo();
         changemode(gamemode = mode, mutators = muts);
         curbalance = nextbalance = lastteambalance = nextteambalance = gamemillis = interm = 0;
-        oldtimelimit = G(timelimit);
-        timeremaining = G(timelimit) ? G(timelimit)*60 : -1;
-        gamelimit = G(timelimit) ? timeremaining*1000 : 0;
-        gamewait = totalmillis ? totalmillis : 1;
+        oldtimelimit = m_fight(gamemode) && G(timelimit) ? G(timelimit) : -1;
+        timeremaining = m_fight(gamemode) && G(timelimit) ? G(timelimit)*60 : -1;
+        gamelimit = m_fight(gamemode) && G(timelimit) ? timeremaining*1000 : 0;
+        gamewait = m_fight(gamemode) ? (totalmillis ? totalmillis : 1) : 0;
         inovertime = false;
         sents.shrink(0);
         scores.shrink(0);
