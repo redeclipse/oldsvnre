@@ -215,8 +215,8 @@
                 <a href="/download">Download</a>, <a href="/chat">Chat</a>, <a href="/forum">Discuss</a>, or <a href="/wiki">Learn More</a> today.
             </div>
             <div id="copyright" align="center">
-                <p>Red Eclipse, Copyright (C) 2009-2014 Quinton Reeves, Lee Salzman</p>
-                <p>Cube Engine 2, Copyright (C) 2001-2014 Wouter van Oortmerssen, Lee Salzman, Mike Dysart, Robert Pointon, and Quinton Reeves</p>
+                <p>Red Eclipse, Copyright (C) 2009-2015 Quinton Reeves, Lee Salzman</p>
+                <p>Cube Engine 2, Copyright (C) 2001-2015 Wouter van Oortmerssen, Lee Salzman, Mike Dysart, Robert Pointon, and Quinton Reeves</p>
             </div>
         </div>
     </body>
