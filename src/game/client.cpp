@@ -129,7 +129,7 @@ namespace client
         }
         m->players.add(d);
         mapvotes.sort(mapvote::compare);
-        if(showmapvotes >= (game::gamestate != G_S_PLAYING ? 2 : 1) && !isignored(d->clientnum))
+        if(showmapvotes >= (!gs_playing(game::gamestate) ? 2 : 1) && !isignored(d->clientnum))
         {
             SEARCHBINDCACHE(votekey)("showgui maps 2", 0);
             conoutft(CON_EVENT, "%s suggests: \fs\fy%s\fS on \fs\fo%s\fS, press %s to vote", game::colourname(d), server::gamename(mode, muts), text, votekey);
