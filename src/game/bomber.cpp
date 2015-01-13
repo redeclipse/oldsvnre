@@ -189,7 +189,7 @@ namespace bomber
             int millis = lastmillis-f.displaytime;
             vec colour = pulsecolour();
             float skew = hud::inventoryskew, wait = f.droptime ? clamp((lastmillis-f.droptime)/float(bomberresetdelay), 0.f, 1.f) : (f.owner ? clamp((lastmillis-f.taketime)/float(carrytime), 0.f, 1.f) : 1.f);
-            if(game::gamestate == G_S_PLAYING && (f.droptime || (f.owner && carrytime)) && wait > 0.5f)
+            if(gs_playing(game::gamestate) && (f.droptime || (f.owner && carrytime)) && wait > 0.5f)
             {
                 int delay = wait > 0.7f ? (wait > 0.85f ? 150 : 300) : 600, millis = lastmillis%(delay*2);
                 float amt = (millis <= delay ? millis/float(delay) : 1.f-((millis-delay)/float(delay)));
@@ -207,7 +207,7 @@ namespace bomber
             }
             else if(millis <= 1000) skew += ((1.f-skew)-(clamp(float(millis)/1000.f, 0.f, 1.f)*(1.f-skew)));
             int oldy = y-sy;
-            if(game::gamestate == G_S_PLAYING && (f.owner || f.droptime))
+            if(gs_playing(game::gamestate) && (f.owner || f.droptime))
                 sy += hud::drawitem(hud::bombtex, x, oldy, size, 0, true, false, colour.x, colour.y, colour.z, blend, skew, "super", "%d%%", int(wait*100.f));
             else sy += hud::drawitem(hud::bombtex, x, oldy, size, 0, true, false, colour.x, colour.y, colour.z, blend, skew);
             if(f.owner)
@@ -216,7 +216,7 @@ namespace bomber
                 hud::drawitem(hud::bombtakentex, x, oldy, size, 0.5f, true, false, c2.r, c2.g, c2.b, blend, skew);
             }
             else if(f.droptime) hud::drawitem(hud::bombdroptex, x, oldy, size, 0.5f, true, false, 0.25f, 1.f, 1.f, blend, skew);
-            if(game::gamestate == G_S_PLAYING)
+            if(gs_playing(game::gamestate))
             {
                 if(f.droptime || (f.owner && carrytime)) hud::drawitembar(x, oldy, size, false, colour.r, colour.g, colour.b, blend, skew, wait);
                 if(f.owner == game::focus && m_team(game::gamemode, game::mutators) && bomberlockondelay && f.owner->action[AC_AFFINITY] && lastmillis-f.owner->actiontime[AC_AFFINITY] >= bomberlockondelay)
@@ -315,7 +315,7 @@ namespace bomber
                     float fluc = interval >= 500 ? (1500-interval)/1000.f : (500+interval)/1000.f;
                     int pcolour = effect.tohexcolor();
                     part_create(PART_HINT_SOFT, 1, above, pcolour, enttype[AFFINITY].radius/4*trans+(2*fluc), fluc*trans);
-                    if(game::gamestate == G_S_PLAYING && f.droptime)
+                    if(gs_playing(game::gamestate) && f.droptime)
                     {
                         above.z += enttype[AFFINITY].radius/4*trans+1.5f;
                         part_icon(above, textureload(hud::progringtex, 3), 4*trans, 1, 0, 0, 1, pcolour, (lastmillis%1000)/1000.f, 0.1f);

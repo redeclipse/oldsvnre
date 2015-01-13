@@ -310,10 +310,11 @@ namespace hud
                                     int timecorrected = max(game::timeremaining*1000-(lastmillis-game::lasttimeremain), 0);
                                     switch(game::gamestate)
                                     {
-                                        case G_S_WAITING: g.text(", \fs\fcwaiting\fS", 0xFFFFFF); break;
+                                        case G_S_WAITING: default: g.text(", \fs\fcwaiting\fS", 0xFFFFFF); break;
                                         case G_S_VOTING: g.text(", \fs\fcvoting\fS", 0xFFFFFF); break;
                                         case G_S_INTERMISSION: g.text(", \fs\fcintermission\fS", 0xFFFFFF); break;
-                                        case G_S_PLAYING: default: g.text(", \fs\fcplaying\fS", 0xFFFFFF); break;
+                                        case G_S_PLAYING: g.text(", \fs\fcplaying\fS", 0xFFFFFF); break;
+                                        case G_S_OVERTIME: g.text(", \fs\fcovertime\fS", 0xFFFFFF); break;
                                     }
                                     g.textf(", \fs\fg%s\fS remain", 0xFFFFFF, NULL, 0, -1, timestr(timecorrected, scoretimestyle));
                                 }
@@ -351,7 +352,7 @@ namespace hud
                                     uifont(g, "default", g.text("Demo Playback in Progress", 0xFFFFFF));
                                 });
                             }
-                            if(game::gamestate == G_S_PLAYING && !client::demoplayback)
+                            if(gs_playing(game::gamestate) && !client::demoplayback)
                             {
                                 if(game::player1->state == CS_DEAD || game::player1->state == CS_WAITING)
                                 {
@@ -434,7 +435,7 @@ namespace hud
                             uicenterlist(g, uifont(g, "little", g.textf("%s %s to close this window", 0xFFFFFF, NULL, 0, -1, scoresoff ? "Release" : "Press", scoreboardkey)));
                             uicenterlist(g, uifont(g, "tiny", g.text("Double-tap to keep the window open", 0xFFFFFF)));
 
-                            if(m_play(game::gamemode) && game::player1->state != CS_SPECTATOR && (game::gamestate != G_S_PLAYING || scoresinfo))
+                            if(m_play(game::gamemode) && game::player1->state != CS_SPECTATOR && (!gs_playing(game::gamestate) || scoresinfo))
                             {
                                 float ratio = game::player1->frags >= game::player1->deaths ? (game::player1->frags/float(max(game::player1->deaths, 1))) : -(game::player1->deaths/float(max(game::player1->frags, 1)));
                                 uicenterlist(g, uifont(g, "little", {

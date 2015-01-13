@@ -59,7 +59,7 @@ namespace game
 
     void stopmapmusic()
     {
-        if(connected() && maptime > 0 && gamestate != G_S_PLAYING && gamestate != G_S_WAITING) musicdone(true);
+        if(connected() && maptime > 0 && gs_intermission(gamestate)) musicdone(true);
     }
     VARF(IDF_PERSIST, musictype, 0, 1, 6, stopmapmusic()); // 0 = no in-game music, 1 = map music (or random if none), 2 = always random, 3 = map music (silence if none), 4-5 = same as 1-2 but pick new tracks when done, 6 = always use theme song
     VARF(IDF_PERSIST, musicedit, -1, 0, 6, stopmapmusic()); // same as above for editmode, -1 = use musictype
@@ -329,7 +329,7 @@ namespace game
     ICOMMAND(0, mutsallowed, "ii", (int *g, int *h), intret(*g >= 0 && *g < G_MAX ? gametype[*g].mutators[*h >= 0 && *h < G_M_GSP+1 ? *h : 0] : 0));
     ICOMMAND(0, mutsimplied, "ii", (int *g, int *m), intret(*g >= 0 && *g < G_MAX ? gametype[*g].implied : 0));
     ICOMMAND(0, gspmutname, "ii", (int *g, int *n), result(*g >= 0 && *g < G_MAX && *n >= 0 && *n < G_M_GSN ? gametype[*g].gsp[*n] : ""));
-    ICOMMAND(0, getintermission, "", (), intret(gamestate != G_S_PLAYING ? 1 : 0));
+    ICOMMAND(0, getintermission, "", (), intret(gs_intermission(gamestate) ? 1 : 0));
     ICOMMAND(0, getgamestate, "", (), intret(gamestate));
 
     const char *gametitle() { return connected() ? server::gamename(gamemode, mutators) : "ready"; }
@@ -448,7 +448,7 @@ namespace game
 
     bool thirdpersonview(bool viewonly, physent *d)
     {
-        if(gamestate != G_S_PLAYING) return true;
+        if(!gs_playing(gamestate)) return true;
         if(!d) d = focus;
         if(!viewonly && (d->state == CS_DEAD || d->state == CS_WAITING)) return true;
         if(player1->state == CS_EDITING) return false;
@@ -704,7 +704,7 @@ namespace game
     {
         if(!m_edit(gamemode) && (!check || !cameras.empty()))
         {
-            if(gamestate != G_S_PLAYING && intermmode) return true;
+            if(!gs_playing(gamestate) && intermmode) return true;
             else switch(player1->state)
             {
                 case CS_SPECTATOR: if(specmode || (force && focus != player1 && followmode && followaim())) return true; break;
@@ -787,7 +787,7 @@ namespace game
     {
         if(gameent::is(d))
         {
-            if((d == player1 && tvmode()) || d->state == CS_DEAD || d->state >= CS_SPECTATOR || gamestate != G_S_PLAYING)
+            if((d == player1 && tvmode()) || d->state == CS_DEAD || d->state >= CS_SPECTATOR || !gs_playing(gamestate))
                 return false;
         }
         return true;
@@ -1157,14 +1157,14 @@ namespace game
             }
         }
 
-        loopi(W_MAX) if(d->weapstate[i] != W_S_IDLE && (gamestate != G_S_PLAYING || d->weapselect != i || d->weapstate[i] != W_S_ZOOM))
+        loopi(W_MAX) if(d->weapstate[i] != W_S_IDLE && (!gs_playing(gamestate) || d->weapselect != i || d->weapstate[i] != W_S_ZOOM))
         {
             bool timeexpired = lastmillis-d->weaplast[i] >= d->weapwait[i]+(d->weapselect != i || d->weapstate[i] != W_S_POWER ? 0 : PHYSMILLIS);
-            if(gamestate == G_S_PLAYING && d->state == CS_ALIVE && i == d->weapselect && d->weapstate[i] == W_S_RELOAD && timeexpired && playreloadnotify&(d == focus ? 1 : 2) && (d->ammo[i] >= W(i, ammomax) || playreloadnotify&(d == focus ? 4 : 8)))
+            if(gs_playing(gamestate) && d->state == CS_ALIVE && i == d->weapselect && d->weapstate[i] == W_S_RELOAD && timeexpired && playreloadnotify&(d == focus ? 1 : 2) && (d->ammo[i] >= W(i, ammomax) || playreloadnotify&(d == focus ? 4 : 8)))
                 playsound(WSND(i, S_W_NOTIFY), d->o, d, 0, reloadnotifyvol, -1, -1, &d->wschan);
-            if(gamestate != G_S_PLAYING || d->state != CS_ALIVE || timeexpired) d->setweapstate(i, W_S_IDLE, 0, lastmillis);
+            if(!gs_playing(gamestate) || d->state != CS_ALIVE || timeexpired) d->setweapstate(i, W_S_IDLE, 0, lastmillis);
         }
-        if(gamestate == G_S_PLAYING && d->state == CS_ALIVE && isweap(d->weapselect) && (d->weapstate[d->weapselect] == W_S_POWER || d->weapstate[d->weapselect] == W_S_ZOOM))
+        if(gs_playing(gamestate) && d->state == CS_ALIVE && isweap(d->weapselect) && (d->weapstate[d->weapselect] == W_S_POWER || d->weapstate[d->weapselect] == W_S_ZOOM))
         {
             int millis = lastmillis-d->weaplast[d->weapselect];
             if(millis >= 0 && millis <= d->weapwait[d->weapselect])
@@ -1208,7 +1208,7 @@ namespace game
         }
         if(d->lastres[WR_BLEED] > 0 && lastmillis-d->lastres[WR_BLEED] >= bleedtime) d->resetbleeding();
         if(d->lastres[WR_SHOCK] > 0 && lastmillis-d->lastres[WR_SHOCK] >= shocktime) d->resetshocking();
-        if(gamestate == G_S_PLAYING && d->state == CS_ALIVE)
+        if(gs_playing(gamestate) && d->state == CS_ALIVE)
         {
             int curfoot = d->curfoot();
             bool hassound = footstepsounds&(d != focus ? 2 : 1);
@@ -1238,10 +1238,10 @@ namespace game
         {
             gameent *d = players[i];
             const int lagtime = totalmillis-d->lastupdate;
-            if(d->ai || !lagtime || gamestate != G_S_PLAYING) continue;
+            if(d->ai || !lagtime || !gs_playing(gamestate)) continue;
             //else if(lagtime > 1000) continue;
             physics::smoothplayer(d, 1, false);
-            if(gamestate == G_S_PLAYING && (d->state == CS_DEAD || d->state == CS_WAITING)) entities::checkitems(d);
+            if(gs_playing(gamestate) && (d->state == CS_DEAD || d->state == CS_WAITING)) entities::checkitems(d);
         }
     }
 
@@ -1437,7 +1437,7 @@ namespace game
 
     void damaged(int weap, int flags, int damage, int health, gameent *d, gameent *v, int millis, vec &dir, vec &vel, float dist)
     {
-        if(d->state != CS_ALIVE || gamestate != G_S_PLAYING) return;
+        if(d->state != CS_ALIVE || !gs_playing(gamestate)) return;
         if(hithurts(flags))
         {
             d->health = health;
@@ -1737,7 +1737,7 @@ namespace game
         gamestate = state;
         timeremaining = remain;
         lasttimeremain = lastmillis;
-        if(gamestate != G_S_PLAYING && oldstate == G_S_PLAYING)
+        if(gs_intermission(gamestate) && gs_playing(oldstate))
         {
             player1->stopmoving(true);
             if(gamestate == G_S_INTERMISSION) hud::showscores(true, true);
@@ -2123,7 +2123,7 @@ namespace game
         }
         else if(!tvmode())
         {
-            physent *d = (gamestate != G_S_PLAYING || player1->state >= CS_SPECTATOR) && (focus == player1 || followaim()) ? camera1 : (allowmove(player1) ? player1 : NULL);
+            physent *d = (!gs_playing(gamestate) || player1->state >= CS_SPECTATOR) && (focus == player1 || followaim()) ? camera1 : (allowmove(player1) ? player1 : NULL);
             if(d)
             {
                 float scale = (focus == player1 && inzoom() && zoomsensitivity > 0 ? (1.f-((zoomlevel+1)/float(zoomlevels+2)))*zoomsensitivity : 1.f)*sensitivity;
@@ -2259,7 +2259,7 @@ namespace game
             if(firstpersonpitchscale >= 0) lean *= firstpersonpitchscale;
             to.add(vec(yaw*RAD, (lean+90)*RAD).mul(spineoff));
         }
-        if(firstpersonbob && gamestate == G_S_PLAYING && d->state == CS_ALIVE)
+        if(firstpersonbob && gs_playing(gamestate) && d->state == CS_ALIVE)
         {
             float scale = 1;
             if(d == focus && inzoom())
@@ -2435,7 +2435,7 @@ namespace game
     bool cameratv()
     {
         if(!tvmode(false)) return false;
-        if(gamestate != G_S_PLAYING) spectvfollowing = -1;
+        if(!gs_playing(gamestate)) spectvfollowing = -1;
         else if(player1->state != CS_SPECTATOR && spectvfollowself >= (m_duke(gamemode, mutators) ? 2 : 1))
             spectvfollowing = player1->clientnum;
         else spectvfollowing = spectvfollow;
@@ -2489,7 +2489,7 @@ namespace game
         }
         if(!found) spectvfollow = spectvfollowing = -1;
         camrefresh(cam);
-        #define stvf(z) (gamestate != G_S_PLAYING ? spectvinterm##z : (spectvfollowing >= 0 ? spectvfollow##z : spectv##z))
+        #define stvf(z) (!gs_playing(gamestate) ? spectvinterm##z : (spectvfollowing >= 0 ? spectvfollow##z : spectv##z))
         if(forced)
         {
             camupdate(cam, amt, renew, true);
@@ -2621,7 +2621,7 @@ namespace game
             camera1->state = CS_ALIVE;
             camera1->height = camera1->zradius = camera1->radius = camera1->xradius = camera1->yradius = 2;
         }
-        if(player1->state < CS_SPECTATOR && focus != player1 && gamestate == G_S_PLAYING) specreset();
+        if(player1->state < CS_SPECTATOR && focus != player1 && gs_playing(gamestate)) specreset();
         if(tvmode() || player1->state < CS_SPECTATOR)
         {
             camera1->vel = vec(0, 0, 0);
@@ -2646,7 +2646,7 @@ namespace game
     void calcangles(physent *c, gameent *d)
     {
         c->roll = calcroll(d);
-        if(firstpersonbob && gamestate == G_S_PLAYING && d->state == CS_ALIVE && !thirdpersonview(true))
+        if(firstpersonbob && gs_playing(gamestate) && d->state == CS_ALIVE && !thirdpersonview(true))
         {
             float scale = 1;
             if(d == focus && inzoom())
@@ -2747,14 +2747,14 @@ namespace game
             checkoften(player1, true);
             loopv(players) if(players[i]) checkoften(players[i], players[i]->ai != NULL);
             if(!allowmove(player1)) player1->stopmoving(player1->state < CS_SPECTATOR);
-            if(focus->state == CS_ALIVE && gamestate == G_S_PLAYING) zoomset(focus->zooming(), lastmillis);
+            if(focus->state == CS_ALIVE && gs_playing(gamestate)) zoomset(focus->zooming(), lastmillis);
             else if(zooming) zoomset(false, 0);
 
             physics::update();
             ai::navigate();
             projs::update();
             ai::update();
-            if(gamestate == G_S_PLAYING)
+            if(gs_playing(gamestate))
             {
                 entities::update();
                 if(m_capture(gamemode)) capture::update();
@@ -2782,13 +2782,13 @@ namespace game
             {
                 if(player1->ragdoll) cleanragdoll(player1);
                 if(player1->state == CS_EDITING) physics::move(player1, 10, true);
-                else if(player1->state == CS_ALIVE && gamestate == G_S_PLAYING && !tvmode())
+                else if(player1->state == CS_ALIVE && gs_playing(gamestate) && !tvmode())
                 {
                     physics::move(player1, 10, true);
                     weapons::checkweapons(player1);
                 }
             }
-            if(gamestate == G_S_PLAYING)
+            if(gs_playing(gamestate))
             {
                 addsway(focus);
                 if(player1->state == CS_ALIVE || player1->state == CS_DEAD || player1->state == CS_WAITING)
@@ -2819,10 +2819,10 @@ namespace game
                     deathcamyawpitch(focus, camera1->yaw, camera1->pitch);
                 else
                 {
-                    physent *d = player1->state >= CS_SPECTATOR || (gamestate != G_S_PLAYING && focus == player1) ? camera1 : focus;
-                    if(d != camera1 || focus != player1 || gamestate != G_S_PLAYING)
+                    physent *d = player1->state >= CS_SPECTATOR || (!gs_playing(gamestate) && focus == player1) ? camera1 : focus;
+                    if(d != camera1 || focus != player1 || !gs_playing(gamestate))
                         camera1->o = camerapos(focus, true, true, d->yaw, d->pitch);
-                    if(d != camera1 || (gamestate != G_S_PLAYING && focus == player1) || (focus != player1 && !followaim()))
+                    if(d != camera1 || (!gs_playing(gamestate) && focus == player1) || (focus != player1 && !followaim()))
                     {
                         camera1->yaw = (d != camera1 ? d : focus)->yaw;
                         camera1->pitch = (d != camera1 ? d : focus)->pitch;
@@ -2914,7 +2914,7 @@ namespace game
                 if(minz > camera1->o.z) o.z -= minz-camera1->o.z;
             }
         }
-        else if(gamestate == G_S_PLAYING)
+        else if(gs_playing(gamestate))
         {
             if(third == 1 && d == focus && d == player1 && thirdpersonview(true, d))
                 vectoyawpitch(vec(worldpos).sub(d->headpos()).normalize(), yaw, pitch);

@@ -22,13 +22,11 @@ enum
     G_M_IM = (1<<G_M_INSTA)|(1<<G_M_MEDIEVAL),
 };
 enum { G_F_GSP = 0, G_F_NUM };
-enum {
-    G_S_WAITING = 0,
-    G_S_VOTING,
-    G_S_INTERMISSION,
-    G_S_PLAYING,
-    G_S_MAX
-};
+
+enum { G_S_WAITING = 0, G_S_VOTING, G_S_INTERMISSION, G_S_PLAYING, G_S_OVERTIME, G_S_MAX };
+#define gs_playing(a) (a == G_S_PLAYING || a == G_S_OVERTIME)
+#define gs_intermission(a) (a == G_S_INTERMISSION || a == G_S_VOTING)
+
 struct gametypes
 {
     int type, flags, implied, mutators[G_M_GSN+1];
@@ -301,6 +299,13 @@ extern mutstypes mutstype[];
     else mapshrink(!f, a, G(previousmaps), true) \
 }
 #ifdef GAMESERVER
+SVAR(0, gamestatename, "waiting voting intermission playing overtime");
+VAR(0, gamestatewaiting, 1, G_S_WAITING, -1);
+VAR(0, gamestatevoting, 1, G_S_VOTING, -1);
+VAR(0, gamestateintermission, 1, G_S_INTERMISSION, -1);
+VAR(0, gamestateplaying, 1, G_S_PLAYING, -1);
+VAR(0, gamestateovertime, 1, G_S_OVERTIME, -1);
+VAR(0, gamestatenum, 1, G_S_MAX, -1);
 SVAR(0, modename, "demo editing deathmatch capture-the-flag defend-and-control bomber-ball time-trial");
 SVAR(0, modeidxname, "demo editing deathmatch capture defend bomber trial");
 VAR(0, modeidxdemo, 1, G_DEMO, -1);

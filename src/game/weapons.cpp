@@ -46,7 +46,7 @@ namespace weapons
 
     bool weapselect(gameent *d, int weap, int filter, bool local)
     {
-        if(game::gamestate != G_S_PLAYING) return false;
+        if(!gs_playing(game::gamestate)) return false;
         if(local)
         {
             int interrupts = filter;
@@ -71,7 +71,7 @@ namespace weapons
 
     bool weapreload(gameent *d, int weap, int load, int ammo, bool local)
     {
-        if(game::gamestate != G_S_PLAYING || (!local && (d == game::player1 || d->ai))) return false; // this can't be fixed until 1.5
+        if(!gs_playing(game::gamestate) || (!local && (d == game::player1 || d->ai))) return false; // this can't be fixed until 1.5
         if(local)
         {
             if(!d->canreload(weap, m_weapon(game::gamemode, game::mutators), false, lastmillis))
@@ -93,7 +93,7 @@ namespace weapons
 
     void weaponswitch(gameent *d, int a = -1, int b = -1)
     {
-        if(game::gamestate != G_S_PLAYING || a < -1 || b < -1 || a >= W_MAX || b >= W_MAX) return;
+        if(!gs_playing(game::gamestate) || a < -1 || b < -1 || a >= W_MAX || b >= W_MAX) return;
         if(weapselectdelay && lastweapselect && totalmillis-lastweapselect < weapselectdelay) return;
         if(d->weapwaited(d->weapselect, lastmillis, (1<<W_S_SWITCH)|(1<<W_S_RELOAD)))
         {
@@ -141,7 +141,7 @@ namespace weapons
 
     void weapdrop(gameent *d, int w)
     {
-        if(game::gamestate != G_S_PLAYING) return;
+        if(!gs_playing(game::gamestate)) return;
         int weap = isweap(w) ? w : d->weapselect, sweap = m_weapon(game::gamemode, game::mutators);
         d->action[AC_DROP] = false;
         if(!d->candrop(weap, sweap, lastmillis, m_loadout(game::gamemode, game::mutators), (1<<W_S_SWITCH)))
@@ -164,7 +164,7 @@ namespace weapons
 
     bool autoreload(gameent *d, int flags = 0)
     {
-        if(game::gamestate == G_S_PLAYING && d == game::player1 && W2(d->weapselect, ammosub, WS(flags)) && d->canreload(d->weapselect, m_weapon(game::gamemode, game::mutators), false, lastmillis))
+        if(gs_playing(game::gamestate) && d == game::player1 && W2(d->weapselect, ammosub, WS(flags)) && d->canreload(d->weapselect, m_weapon(game::gamemode, game::mutators), false, lastmillis))
         {
             bool noammo = d->ammo[d->weapselect] < W2(d->weapselect, ammosub, WS(flags)),
                  noattack = !d->action[AC_PRIMARY] && !d->action[AC_SECONDARY];

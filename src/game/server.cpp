@@ -412,9 +412,9 @@ namespace server
     }
 
     string smapname;
-    int gamemode = G_EDITMODE, mutators = 0, gamemillis = 0, gamelimit = 0, mastermode = MM_OPEN;
-    int interm = 0, timeremaining = -1, oldtimelimit = -1, gamewait = 1, lastwaitinfo = 0, lastteambalance = 0, nextteambalance = 0, lastrotatecycle = 0;
-    bool hasgameinfo = false, maprequest = false, inovertime = false, updatecontrols = false, mapsending = false, shouldcheckvotes = false, firstblood = false;
+    int gamestate = G_S_WAITING, gamemode = G_EDITMODE, mutators = 0, gamemillis = 0, gamelimit = 0, mastermode = MM_OPEN;
+    int timeremaining = -1, oldtimelimit = -1, gamewait = 0, lastteambalance = 0, nextteambalance = 0, lastrotatecycle = 0;
+    bool hasgameinfo = false, updatecontrols = false, mapsending = false, shouldcheckvotes = false, firstblood = false;
     enet_uint32 lastsend = 0;
     stream *mapdata[SENDMAP_MAX] = { NULL };
     uint mapcrc = 0;
@@ -443,7 +443,7 @@ namespace server
     bool canplay(bool chk = true)
     {
         if(!demoplayback && !m_demo(gamemode))
-            if(!chk || !hasgameinfo || gamewait || interm) return false;
+            if(!chk || !hasgameinfo || !gs_playing(gamestate)) return false;
         return true;
     }
 
@@ -1353,53 +1353,41 @@ namespace server
     bool checkvotes(bool force = false);
     void startintermission(bool req = false)
     {
-        if(!interm)
+        if(gs_playing(gamestate))
         {
             setpause(false);
             timeremaining = 0;
             gamelimit = min(gamelimit, gamemillis);
-            inovertime = maprequest = false;
             if(smode) smode->intermission();
             mutate(smuts, mut->intermission());
         }
         if(req || !G(intermlimit))
         {
             checkdemorecord(true);
-            if(!maprequest && G(votelimit))
+            if(gamestate != G_S_VOTING && G(votelimit))
             {
-                maprequest = true;
-                interm = totalmillis+G(votelimit);
+                gamestate = G_S_VOTING;
+                gamewait = totalmillis+G(votelimit);
                 sendf(-1, 1, "ri3", N_TICK, G_S_VOTING, G(votelimit)/1000);
             }
-            else
-            {
-                interm = totalmillis+1;
-                sendf(-1, 1, "ri3", N_TICK, G_S_INTERMISSION, 0);
-                checkvotes(true);
-            }
+            else checkvotes(true);
         }
         else
         {
-            interm = totalmillis+G(intermlimit);
+            gamestate = G_S_INTERMISSION;
+            gamewait = totalmillis+G(intermlimit);
             sendf(-1, 1, "ri3", N_TICK, G_S_INTERMISSION, G(intermlimit)/1000);
         }
     }
 
-    int timestate(int &state)
+    int timeleft()
     {
-        if(interm)
+        switch(gamestate)
         {
-            if(maprequest) state = G_S_VOTING;
-            else state = G_S_INTERMISSION;
-            return max(interm-totalmillis, 0)/1000;
+            case G_S_PLAYING: case G_S_OVERTIME: return timeremaining;
+            default: return max(gamewait-totalmillis, 0)/1000;
         }
-        else if(gamewait)
-        {
-            state = G_S_WAITING;
-            return max(G(waitforplayertime)-(totalmillis-gamewait), 0)/1000;
-        }
-        state = G_S_PLAYING;
-        return timeremaining;
+        return 0;
     }
 
     bool wantsovertime()
@@ -1531,9 +1519,10 @@ namespace server
     void checklimits()
     {
         if(!m_fight(gamemode)) return;
-        int limit = inovertime ? G(overtimelimit) : G(timelimit), numt = numteams(gamemode, mutators);
+        bool wasinovertime = gamestate == G_S_OVERTIME;
+        int limit = wasinovertime ? G(overtimelimit) : G(timelimit), numt = numteams(gamemode, mutators);
         bool newlimit = limit != oldtimelimit, newtimer = gamemillis-curtime>0 && gamemillis/1000!=(gamemillis-curtime)/1000,
-             iterate = newlimit || newtimer, wasinovertime = inovertime;
+             iterate = newlimit || newtimer;
         if(iterate)
         {
             if(newlimit)
@@ -1553,7 +1542,7 @@ namespace server
                 bool wantsoneminute = true;
                 if(!timeremaining)
                 {
-                    if(!inovertime && wantsovertime())
+                    if(gamestate != G_S_OVERTIME && wantsovertime())
                     {
                         limit = oldtimelimit = G(overtimelimit);
                         if(limit)
@@ -1568,7 +1557,7 @@ namespace server
                             gamelimit = 0;
                             ancmsgft(-1, S_V_OVERTIME, CON_EVENT, "\fyovertime, match extended until someone wins");
                         }
-                        inovertime = true;
+                        gamestate = G_S_OVERTIME;
                         wantsoneminute = false;
                     }
                     else
@@ -1578,9 +1567,9 @@ namespace server
                         return; // bail
                     }
                 }
-                if(timeremaining != 0)
+                if(gs_playing(gamestate) && timeremaining != 0)
                 {
-                    sendf(-1, 1, "ri3", N_TICK, G_S_PLAYING, timeremaining);
+                    sendf(-1, 1, "ri3", N_TICK, gamestate, timeremaining);
                     if(wantsoneminute && timeremaining == 60) ancmsgft(-1, S_V_ONEMINUTE, CON_EVENT, "\fzygone minute remains");
                 }
             }
@@ -1679,7 +1668,7 @@ namespace server
                 }
             }
         }
-        if(m_balteam(gamemode, mutators, 4) && !inovertime && !interm && gamemillis >= G(teambalancewait) &&
+        if(m_balteam(gamemode, mutators, 4) && gamestate != G_S_OVERTIME && gamemillis >= G(teambalancewait) &&
            (!lastteambalance || gamemillis >= lastteambalance) && (!nextteambalance || gamemillis >= nextteambalance))
                 doteambalance(false);
     }
@@ -2271,7 +2260,7 @@ namespace server
         lilswap(stamp, 3);
         demorecord->write(stamp, sizeof(stamp));
         demorecord->write(data, len);
-        if(demorecord->rawtell() >= (G(demomaxsize)<<20)) enddemorecord(interm != 0);
+        if(demorecord->rawtell() >= (G(demomaxsize)<<20)) enddemorecord(!gs_playing(gamestate));
     }
 
     void recordpacket(int chan, void *data, int len)
@@ -2322,7 +2311,7 @@ namespace server
     bool checkvotes(bool force)
     {
         shouldcheckvotes = false;
-        int style = maprequest ? G(voteinterm) : G(votestyle);
+        int style = gamestate == G_S_VOTING ? G(voteinterm) : G(votestyle);
         if(style == 3 && !force) return false;
         vector<votecount> votes;
         int maxvotes = 0;
@@ -2666,7 +2655,7 @@ namespace server
         else if(m_fight(gamemode) && m_team(gamemode, mutators) && ci->state.state != CS_SPECTATOR && ci->state.state != CS_EDITING)
         {
             bool human = ci->state.actortype == A_PLAYER;
-            int team = -1, bal = human && !wantbal && (G(teambalance) != 6 || gamewait) ? G(teambalance) : 1;
+            int team = -1, bal = human && !wantbal && (G(teambalance) != 6 || !gs_playing(gamestate)) ? G(teambalance) : 1;
             if(human)
             {
                 if(m_coop(gamemode, mutators)) return mapbals[curbalance][0];
@@ -2735,7 +2724,7 @@ namespace server
     void stopdemo()
     {
         if(m_demo(gamemode)) enddemoplayback();
-        else checkdemorecord(interm != 0);
+        else checkdemorecord(!gs_playing(gamestate));
     }
 
     void connected(clientinfo *ci);
@@ -2811,15 +2800,15 @@ namespace server
 
     void changemap(const char *name, int mode, int muts)
     {
-        hasgameinfo = maprequest = mapsending = shouldcheckvotes = firstblood = false;
+        hasgameinfo = mapsending = shouldcheckvotes = firstblood = false;
         stopdemo();
         changemode(gamemode = mode, mutators = muts);
-        curbalance = nextbalance = lastteambalance = nextteambalance = gamemillis = interm = 0;
+        curbalance = nextbalance = lastteambalance = nextteambalance = gamemillis = 0;
+        gamestate = m_fight(gamemode) ? G_S_WAITING : G_S_PLAYING;
         oldtimelimit = m_fight(gamemode) && G(timelimit) ? G(timelimit) : -1;
         timeremaining = m_fight(gamemode) && G(timelimit) ? G(timelimit)*60 : -1;
         gamelimit = m_fight(gamemode) && G(timelimit) ? timeremaining*1000 : 0;
-        gamewait = m_fight(gamemode) ? (totalmillis ? totalmillis : 1) : 0;
-        inovertime = false;
+        gamewait = m_fight(gamemode) ? totalmillis+G(waitforplayertime) : 0;
         sents.shrink(0);
         scores.shrink(0);
         loopv(savedscores) savedscores[i].mapchange();
@@ -2903,8 +2892,7 @@ namespace server
 
         if(numclients())
         {
-            int state = 0, remain = timestate(state);
-            sendf(-1, 1, "ri3", N_TICK, state, remain);
+            sendf(-1, 1, "ri3", N_TICK, gamestate, timeleft());
             if(m_demo(gamemode)) setupdemoplayback();
             else if(demonextmatch) setupdemorecord();
         }
@@ -3476,10 +3464,9 @@ namespace server
 
         if(!ci || (m_fight(gamemode) && numclients()))
         {
-            int state = 0, remain = timestate(state);
             putint(p, N_TICK);
-            putint(p, state);
-            putint(p, remain);
+            putint(p, gamestate);
+            putint(p, timeleft());
         }
 
         if(hasgameinfo)
@@ -4506,22 +4493,21 @@ namespace server
             updatecontrols = false;
         }
 
-        if(gamewait)
+        if(gamestate == G_S_WAITING)
         {
-            if(interm || !needswait() || totalmillis-gamewait >= G(waitforplayertime)) gamewait = 0;
+            bool ready = false;
+            if(!needswait() || gamewait <= totalmillis) ready = true;
             else
             {
                 int numwait = 0;
                 loopv(clients) if(!clients[i]->ready || (G(waitforplayers) == 2 && clients[i]->state.state == CS_SPECTATOR)) numwait++;
-                if(!numwait) gamewait = lastwaitinfo = 0;
-                else if(G(waitforplayerannounce) && (!lastwaitinfo || totalmillis-lastwaitinfo >= G(waitforplayerannounce)) && numwait != numclients())
-                {
-                    srvoutf(-3, "\fawaiting for \fs\fc%d\fS %s to be ready..", numwait, numwait != 1 ? "players" : "player");
-                    lastwaitinfo = totalmillis;
-                }
+                if(!numwait) ready = true;
             }
-            if(!gamewait)
+            if(ready)
             {
+                gamewait = 0;
+                gamestate = G_S_PLAYING;
+                sendf(-1, 1, "ri3", N_TICK, G_S_PLAYING, timeremaining);
                 if(m_team(gamemode, mutators)) doteambalance(true);
                 if(m_fight(gamemode) && !m_bomber(gamemode) && !m_duke(gamemode, mutators)) // they do their own "fight"
                     sendf(-1, 1, "ri3s", N_ANNOUNCE, S_V_FIGHT, CON_INFO, "match start, fight!");
@@ -4540,7 +4526,7 @@ namespace server
                 if(smode) smode->update();
                 mutate(smuts, mut->update());
             }
-            if(interm && totalmillis-interm >= 0) startintermission(true); // wait then call for next map
+            if(gs_intermission(gamestate) && gamewait <= totalmillis) startintermission(true); // wait then call for next map
             if(shouldcheckvotes) checkvotes();
         }
         else if(G(rotatecycle) && clocktime-lastrotatecycle >= G(rotatecycle)*60) cleanup();
@@ -4623,7 +4609,7 @@ namespace server
             lastquerysort = totalmillis;
         }
         putint(p, queryplayers.length());
-        putint(p, 13); // number of attrs following
+        putint(p, 15); // number of attrs following
         putint(p, GAMEVERSION); // 1
         putint(p, gamemode); // 2
         putint(p, mutators); // 3
@@ -4637,6 +4623,8 @@ namespace server
         putint(p, versionpatch); // 11
         putint(p, versionplatform); // 12
         putint(p, versionarch); // 13
+        putint(p, gamestate); // 14
+        putint(p, timeleft()); // 15
         sendstring(smapname, p);
         if(*G(serverdesc)) sendstring(G(serverdesc), p);
         else
@@ -6105,7 +6093,7 @@ namespace server
                 {
                     if(!haspriv(ci, G(demolock), "stop demos")) break;
                     if(m_demo(gamemode)) enddemoplayback();
-                    else checkdemorecord(interm != 0);
+                    else checkdemorecord(!gs_playing(gamestate));
                     break;
                 }
 

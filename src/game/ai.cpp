@@ -262,7 +262,7 @@ namespace ai
 
     void update()
     {
-        if(game::gamestate != G_S_PLAYING)
+        if(!gs_playing(game::gamestate))
         {
             loopv(game::players) if(game::players[i] && game::players[i]->ai) game::players[i]->stopmoving(true);
         }
@@ -1405,7 +1405,7 @@ namespace ai
         else
         {
             if(d->ragdoll) cleanragdoll(d);
-            if(d->state == CS_ALIVE && game::gamestate == G_S_PLAYING)
+            if(d->state == CS_ALIVE && gs_playing(game::gamestate))
             {
                 if(d->speedscale != 0)
                 {
@@ -1419,7 +1419,7 @@ namespace ai
                 }
             }
         }
-        if(game::gamestate == G_S_PLAYING && (d->state == CS_ALIVE || d->state == CS_DEAD || d->state == CS_WAITING))
+        if(gs_playing(game::gamestate) && (d->state == CS_ALIVE || d->state == CS_DEAD || d->state == CS_WAITING))
             entities::checkitems(d);
     }
 
