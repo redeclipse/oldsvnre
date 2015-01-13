@@ -1849,7 +1849,7 @@ namespace game
     {
         ai::startmap(name, reqname, empty);
         gamestate = m_fight(gamemode) ? G_S_WAITING : G_S_PLAYING;
-        maptime = hud::lastnewgame = 0;
+        maptime = 0;
         removedamagemergeall();
         removeannounceall();
         projs::reset();

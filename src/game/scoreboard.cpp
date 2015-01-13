@@ -310,10 +310,10 @@ namespace hud
                                     int timecorrected = max(game::timeremaining*1000-(lastmillis-game::lasttimeremain), 0);
                                     switch(game::gamestate)
                                     {
-                                        case G_S_WAITING: g.text(", \fs\fywaiting\fS", 0xFFFFFF); break;
+                                        case G_S_WAITING: g.text(", \fs\fcwaiting\fS", 0xFFFFFF); break;
                                         case G_S_VOTING: g.text(", \fs\fcvoting\fS", 0xFFFFFF); break;
-                                        case G_S_INTERMISSION: default: g.text(", \fs\fyintermission\fS", 0xFFFFFF); break;
-                                        case G_S_PLAYING: break;
+                                        case G_S_INTERMISSION: g.text(", \fs\fcintermission\fS", 0xFFFFFF); break;
+                                        case G_S_PLAYING: default: g.text(", \fs\fcplaying\fS", 0xFFFFFF); break;
                                     }
                                     g.textf(", \fs\fg%s\fS remain", 0xFFFFFF, NULL, 0, -1, timestr(timecorrected, scoretimestyle));
                                 }
