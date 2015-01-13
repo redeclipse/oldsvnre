@@ -23,6 +23,8 @@ namespace physics
     VAR(IDF_PERSIST, crouchstyle, 0, 0, 2); // 0 = press and hold, 1 = double-tap toggle, 2 = toggle
     VAR(IDF_PERSIST, walkstyle, 0, 0, 2); // 0 = press and hold, 1 = double-tap toggle, 2 = toggle
     VAR(IDF_PERSIST, kickstyle, 0, 1, 1); // 0 = old method, wall kicks go up, 1 = wall kicks go in aim direction
+    FVAR(IDF_PERSIST, kickoffangle, 0, 60, 89);
+    FVAR(IDF_PERSIST, kickupangle, 0, 89, 89);
 
     int physsteps = 0, lastphysframe = 0, lastmove = 0, lastdirmove = 0, laststrafe = 0, lastdirstrafe = 0, lastcrouch = 0, lastwalk = 0;
 
@@ -776,7 +778,7 @@ namespace physics
                 if(mag > 0)
                 {
                     vec rft;
-                    vecfromyawpitch(d->yaw, d->actortype >= A_BOT || !kickstyle ? 89.9f : d->pitch, 1, 0, rft);
+                    vecfromyawpitch(d->yaw, d->actortype >= A_BOT || !kickstyle ? kickoffangle : d->pitch, 1, 0, rft);
                     d->vel = vec(rft).mul(mag).add(keepvel);
                     d->doimpulse(cost, IM_T_KICK, lastmillis);
                     d->turnmillis = PHYSMILLIS;
@@ -891,7 +893,7 @@ namespace physics
                         if(mag > 0)
                         {
                             vec rft;
-                            vecfromyawpitch(d->yaw, vault || d->actortype >= A_BOT || !kickstyle ? 89.9f : fabs(d->pitch), 1, 0, rft);
+                            vecfromyawpitch(d->yaw, vault || d->actortype >= A_BOT || !kickstyle ? kickupangle : fabs(d->pitch), 1, 0, rft);
                             rft.reflect(face);
                             d->vel = vec(rft).mul(mag).add(keepvel);
                             d->doimpulse(cost, vault ? IM_T_VAULT : IM_T_KICK, lastmillis);
