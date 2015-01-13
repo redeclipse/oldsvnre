@@ -2,7 +2,7 @@
 namespace hud
 {
     const int NUMSTATS = 11;
-    int damageresidue = 0, hudwidth = 0, hudheight = 0, lastteam = 0, lastnewgame = 0, laststats = 0, prevstats[NUMSTATS] = {0}, curstats[NUMSTATS] = {0};
+    int damageresidue = 0, hudwidth = 0, hudheight = 0, lastteam = 0, laststats = 0, prevstats[NUMSTATS] = {0}, curstats[NUMSTATS] = {0};
 
     #include "compass.h"
     vector<int> teamkills;
@@ -2130,7 +2130,6 @@ namespace hud
     {
         if(radartype() == 3)
         {
-            if(lastnewgame) return;
             vec pos = vec(camera1->o).sub(minimapcenter).mul(minimapscale).add(0.5f), dir(camera1->yaw*RAD, 0.f);
             float scale = radarrange(), size = max(w, h)/2, s = size*radarcorner, x = w-s*2, y = 0, q = s*2*radarcorneroffset, r = s-q;
             bindminimap();
@@ -2906,7 +2905,7 @@ namespace hud
                         int timecorrected = max(game::timeremaining*1000-(lastmillis-game::lasttimeremain), 0);
                         if(game::gamestate != G_S_PLAYING)
                         {
-                            const char *name = "\fs\fywaiting\fS";
+                            const char *name = "";
                             float amt = 0.f;
                             switch(game::gamestate)
                             {
@@ -2914,32 +2913,31 @@ namespace hud
                                 {
                                     if(!waitforplayertime) break;
                                     amt = float(timecorrected)/float(waitforplayertime);
-                                    name = "\fs\fywaiting\fS";
+                                    name = "waiting";
                                     break;
                                 }
                                 case G_S_VOTING:
                                 {
                                     if(!votelimit) break;
                                     amt = float(timecorrected)/float(votelimit);
-                                    name = "\fs\fcvoting\fS";
+                                    name = "voting";
                                     break;
                                 }
-                                case G_S_INTERMISSION: default:
+                                case G_S_INTERMISSION:
                                 {
                                     if(!intermlimit) break;
                                     amt = float(timecorrected)/float(intermlimit);
-                                    name = "\fs\fyintermission\fS";
+                                    name = "intermission";
                                     break;
                                 }
                             }
-                            const char *col = "\fw";
+                            const char *col = "\fo";
                             if(amt > 0.75f) col = "\fg";
                             else if(amt > 0.5f) col = "\fc";
                             else if(amt > 0.25f) col = "\fy";
-                            else col = "\fo";
                             cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "%s \fs%s%s\fS", name, col, timestr(timecorrected, inventorytimestyle));
                         }
-                        else if(timelimit) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs\fg%s\fS", timestr(timecorrected, inventorytimestyle));
+                        else if(timelimit) cm += drawitemtextx(cx[i], cm, 0, TEXT_RIGHT_JUSTIFY, inventorytimeskew, "super", fade*inventorytimeblend, "\fs%s%s\fS", timecorrected > 60000 ? "\fg" : "\fy", timestr(timecorrected, inventorytimestyle));
                     }
                 }
                 if(texpaneltimer) break;
@@ -3370,6 +3368,6 @@ namespace hud
     {
         teamkills.shrink(0);
         damagelocs.shrink(0);
-        damageresidue = lastteam = lastnewgame = 0;
+        damageresidue = lastteam = 0;
     }
 }
