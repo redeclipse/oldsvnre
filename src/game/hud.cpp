@@ -331,9 +331,9 @@ namespace hud
 
     VAR(IDF_PERSIST, inventoryvelocity, 0, 0, 2);
     FVAR(IDF_PERSIST, inventoryvelocityblend, 0, 1, 1);
-    VAR(IDF_PERSIST, inventorytrial, 0, 2, 2);
-    VAR(IDF_PERSIST, inventorytrialstyle, 0, 1, 4);
-    FVAR(IDF_PERSIST, inventorytrialblend, 0, 1, 1);
+    VAR(IDF_PERSIST, inventoryrace, 0, 2, 2);
+    VAR(IDF_PERSIST, inventoryracestyle, 0, 1, 4);
+    FVAR(IDF_PERSIST, inventoryraceblend, 0, 1, 1);
     VAR(IDF_PERSIST, inventorystatus, 0, 2, 3); // 0 = off, 1 = text, 2 = icon, 3 = icon + tex
     FVAR(IDF_PERSIST, inventorystatusblend, 0, 1, 1);
     FVAR(IDF_PERSIST, inventorystatusiconblend, 0, 0.65f, 1);
@@ -550,10 +550,10 @@ namespace hud
     TVAR(IDF_PERSIST, modebomberbaskettex, "<grey>textures/modes/bomberbasket", 3);
     TVAR(IDF_PERSIST, modebomberattacktex, "<grey>textures/modes/bomberattack", 3);
 
-    TVAR(IDF_PERSIST, modetrialtex, "<grey>textures/modes/trial", 3);
-    TVAR(IDF_PERSIST, modetrialmarathontex, "<grey>textures/modes/trialmarathon", 3);
-    TVAR(IDF_PERSIST, modetrialendurancetex, "<grey>textures/modes/trialendurance", 3);
-    TVAR(IDF_PERSIST, modetrialgauntlettex, "<grey>textures/modes/trialgauntlet", 3);
+    TVAR(IDF_PERSIST, moderacetex, "<grey>textures/modes/race", 3);
+    TVAR(IDF_PERSIST, moderacetimedtex, "<grey>textures/modes/racetimed", 3);
+    TVAR(IDF_PERSIST, moderaceendurancetex, "<grey>textures/modes/raceendurance", 3);
+    TVAR(IDF_PERSIST, moderacegauntlettex, "<grey>textures/modes/racegauntlet", 3);
 
     TVAR(IDF_PERSIST, modemultitex, "<grey>textures/modes/multi", 3);
     TVAR(IDF_PERSIST, modeffatex, "<grey>textures/modes/ffa", 3);
@@ -601,21 +601,21 @@ namespace hud
             else if(m_gsp2(g, m)) ADDMODE(modebomberbaskettex) \
             else ADDMODE(modebombertex) \
         } \
-        else if(m_trial(g)) \
+        else if(m_race(g)) \
         { \
             if(m_gsp3(g, m)) \
             { \
-                ADDMODE(modetrialgauntlettex) \
-                if(m_gsp1(g, m)) ADDMODE(modetrialmarathontex) \
-                if(m_gsp2(g, m)) ADDMODE(modetrialendurancetex) \
+                ADDMODE(moderacegauntlettex) \
+                if(m_gsp1(g, m)) ADDMODE(moderacetimedtex) \
+                if(m_gsp2(g, m)) ADDMODE(moderaceendurancetex) \
             } \
             else if(m_gsp1(g, m)) \
             { \
-                ADDMODE(modetrialmarathontex) \
-                if(m_gsp2(g, m)) ADDMODE(modetrialendurancetex) \
+                ADDMODE(moderacetimedtex) \
+                if(m_gsp2(g, m)) ADDMODE(moderaceendurancetex) \
             } \
-            else if(m_gsp2(g, m)) ADDMODE(modetrialendurancetex) \
-            else ADDMODE(modetrialtex) \
+            else if(m_gsp2(g, m)) ADDMODE(moderaceendurancetex) \
+            else ADDMODE(moderacetex) \
         } \
         else ADDMODE(modedeathmatchtex) \
     }
@@ -2642,7 +2642,7 @@ namespace hud
                     }
                 }
             }
-            if(inventoryvelocity >= (m_trial(game::gamemode) ? 1 : 2))
+            if(inventoryvelocity >= (m_race(game::gamemode) ? 1 : 2))
             {
                 float fade = blend*inventoryvelocityblend;
                 pushfont("emphasis");
@@ -2808,21 +2808,21 @@ namespace hud
     {
         if(game::focus->state == CS_EDITING || game::focus->state == CS_SPECTATOR) return 0;
         int sy = 0;
-        if(inventorytrial && m_trial(game::gamemode))
+        if(inventoryrace && m_race(game::gamemode))
         {
-            float fade = blend*inventorytrialblend;
+            float fade = blend*inventoryraceblend;
             pushfont("default");
             if((!m_gsp3(game::gamemode, game::mutators) || game::focus->team == T_ALPHA) && (game::focus->cpmillis || game::focus->cptime) && (game::focus->state == CS_ALIVE || game::focus->state == CS_DEAD || game::focus->state == CS_WAITING))
             {
                 sy += draw_textx("\falap: \fw%d", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, game::focus->points+1);
                 if(game::focus->cptime)
-                    sy += draw_textx("\fy%s", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, timestr(game::focus->cptime, inventorytrialstyle));
+                    sy += draw_textx("\fy%s", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, timestr(game::focus->cptime, inventoryracestyle));
                 if(game::focus->cpmillis)
-                    sy += draw_textx("%s", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, timestr(lastmillis-game::focus->cpmillis, inventorytrialstyle));
+                    sy += draw_textx("%s", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, timestr(lastmillis-game::focus->cpmillis, inventoryracestyle));
                 else if(game::focus->cplast)
-                    sy += draw_textx("\fzwe%s", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, timestr(game::focus->cplast, inventorytrialstyle));
+                    sy += draw_textx("\fzwe%s", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, timestr(game::focus->cplast, inventoryracestyle));
             }
-            sy += trialinventory(x, y-sy, s, fade);
+            sy += raceinventory(x, y-sy, s, fade);
             popfont();
         }
         return sy;
@@ -3206,7 +3206,7 @@ namespace hud
             int tf = int(255*hudblend*noticeblend), tr = 255, tg = 255, tb = 255,
                 tw = int((hudwidth-(int(hudsize*edgesize)*2+int(hudsize*inventoryleft)+(hudsize*inventoryright)))/noticescale);
             if(noticestone) skewcolour(tr, tg, tb, noticestone);
-            if(m_trial(game::gamemode)) ty -= draw_textx("%sTime Trial", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1, col);
+            if(m_race(game::gamemode)) ty -= draw_textx("%sRace", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1, col);
             else if(!m_team(game::gamemode, game::mutators)) ty -= draw_textx("%sFree-for-all %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1, col, m_bomber(game::gamemode) ? "Bomber-ball" : "Deathmatch");
             else ty -= draw_textx("%sYou are on team %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, col, game::colourteam(game::focus->team));
             popfont();

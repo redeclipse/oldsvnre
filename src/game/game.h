@@ -774,7 +774,7 @@ struct clientstate
         if(s != W_MELEE && actor[actortype].canmove) ammo[W_MELEE] = max(1, W(W_MELEE, ammomax));
         if(actortype < A_ENEMY)
         {
-            if(!m_trial(gamemode))
+            if(!m_race(gamemode))
             {
                 if(s != W_GRENADE && G(spawngrenades) >= (m_insta(gamemode, mutators) ? 2 : 1))
                     ammo[W_GRENADE] = max(1, W(W_GRENADE, ammomax));
@@ -1057,7 +1057,7 @@ struct gameent : dynent, clientstate
 
     void clearstate(int gamemode, int mutators)
     {
-        loopi(IM_MAX) if(i != IM_METER || !m_trial(gamemode) || !m_gsp2(gamemode, mutators)) impulse[i] = 0;
+        loopi(IM_MAX) if(i != IM_METER || !m_race(gamemode) || !m_gsp2(gamemode, mutators)) impulse[i] = 0;
         lasthit = lastkill = quake = turnmillis = turnside = spree = 0;
         turnroll = turnyaw = 0;
         lastteamhit = lastflag = respawned = suicided = lastnode = lastfoot = -1;
@@ -1621,7 +1621,7 @@ namespace hud
         *spree1tex, *spree2tex, *spree3tex, *spree4tex, *multi1tex, *multi2tex, *multi3tex, *headshottex, *dominatetex, *revengetex,
         *firstbloodtex, *breakertex;
     extern int hudwidth, hudheight, hudsize, lastteam, damageresidue, damageresiduefade, shownotices, radaraffinitynames,
-        inventorygame, inventoryscore, inventoryscorespec, inventoryscorebg, inventoryscoreinfo, inventoryscorebreak, inventoryscorepos, inventorytrialstyle,
+        inventorygame, inventoryscore, inventoryscorespec, inventoryscorebg, inventoryscoreinfo, inventoryscorebreak, inventoryscorepos, inventoryracestyle,
         teamhurthud, teamhurttime, teamhurtdist;
     extern float noticescale, inventoryblend, inventoryskew, radaraffinityblend, radarblipblend, radaraffinitysize,
         inventoryglow, inventoryscoresize, inventoryscoreshrink, inventoryscoreshrinkmax;
@@ -1651,7 +1651,7 @@ namespace hud
     extern void showscores(bool on, bool interm = false, bool onauto = true, bool ispress = false);
     extern score &teamscore(int team);
     extern void resetscores();
-    extern int trialinventory(int x, int y, int s, float blend);
+    extern int raceinventory(int x, int y, int s, float blend);
     extern int drawscore(int x, int y, int s, int m, float blend, int count);
     extern void cleanup();
 }

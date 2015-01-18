@@ -108,7 +108,7 @@ GSVAR(IDF_ADMIN, defendmaps, "untitled");
 GSVAR(IDF_ADMIN, kingmaps, "untitled");
 GSVAR(IDF_ADMIN, bombermaps, "untitled");
 GSVAR(IDF_ADMIN, holdmaps, "untitled");
-GSVAR(IDF_ADMIN, trialmaps, "untitled");
+GSVAR(IDF_ADMIN, racemaps, "untitled");
 
 GSVAR(IDF_ADMIN, multimaps, "untitled"); // applies to modes which *require* multi spawns (ctf/bb)
 GSVAR(IDF_ADMIN, duelmaps, "untitled");
@@ -170,13 +170,13 @@ GVAR(0, maxcarry, 1, 2, W_LOADOUT);
 GVAR(0, spawnrotate, 0, 2, 2); // 0 = let client decide, 1 = sequence, 2 = random
 GVAR(0, spawnweapon, 0, W_PISTOL, W_MAX-1);
 GVAR(0, instaweapon, 0, W_RIFLE, W_MAX-1);
-GVAR(0, trialweapon, 0, W_MELEE, W_MAX-1);
-GVAR(0, spawngrenades, 0, 0, 2); // 0 = never, 1 = all but insta/trial, 2 = always
-GVAR(0, spawnmines, 0, 0, 2); // 0 = never, 1 = all but insta/trial, 2 = always
+GVAR(0, raceweapon, 0, W_MELEE, W_MAX-1);
+GVAR(0, spawngrenades, 0, 0, 2); // 0 = never, 1 = all but insta/race, 2 = always
+GVAR(0, spawnmines, 0, 0, 2); // 0 = never, 1 = all but insta/race, 2 = always
 GVAR(0, spawndelay, 0, 5000, VAR_MAX); // delay before spawning in most modes
 GVAR(0, instadelay, 0, 3000, VAR_MAX); // .. in instagib matches
-GVAR(0, trialdelay, 0, 1000, VAR_MAX); // .. in time trial matches
-GVAR(0, trialdelayex, 0, 3000, VAR_MAX); // .. for defenders in gauntlet time trial matches
+GVAR(0, racedelay, 0, 1000, VAR_MAX); // .. in time race matches
+GVAR(0, racedelayex, 0, 3000, VAR_MAX); // .. for defenders in gauntlet time race matches
 GVAR(0, bomberdelay, 0, 3000, VAR_MAX); // delay before spawning in bomber
 GVAR(0, spawnprotect, 0, 3000, VAR_MAX); // delay before damage can be dealt to spawning player
 GVAR(0, duelprotect, 0, 5000, VAR_MAX); // .. in duel/survivor matches
@@ -263,7 +263,7 @@ GVAR(0, teambalanceswap, 0, 1, 1); // allow swap requests if unable to change te
 GVAR(0, teambalancelock, 0, PRIV_PLAYER, PRIV_CREATOR); // level at which one can override swap and automatically reassign a lower player
 GVAR(0, teambalancestyle, 0, 4, 4); // when moving players, sort by: 0 = top of list, 1 = lowest time played, 2 = lowest points, 3 = lowest frags, 4 = lowest skill
 
-GVAR(0, trialgauntletwinner, 0, 1, 1); // declare the winner when the final team exceeds best score
+GVAR(0, racegauntletwinner, 0, 1, 1); // declare the winner when the final team exceeds best score
 
 GVAR(0, capturelimit, 0, 0, VAR_MAX); // finish when score is this or more
 GVAR(0, captureresetstore, 0, 2, 15);

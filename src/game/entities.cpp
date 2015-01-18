@@ -26,7 +26,7 @@ namespace entities
     FVAR(IDF_PERSIST, haloitemsize, 0, 1, 8);
     FVAR(IDF_PERSIST, haloitemblend, 0, 0.75f, 1);
 
-    VARF(0, routeid, -1, -1, VAR_MAX, lastroutenode = -1; lastroutetime = 0; airnodes.setsize(0)); // selected route in time trial
+    VARF(0, routeid, -1, -1, VAR_MAX, lastroutenode = -1; lastroutetime = 0; airnodes.setsize(0)); // selected route in time race
     VARF(0, droproute, 0, 0, 1, lastroutenode = -1; lastroutetime = 0; airnodes.setsize(0); if(routeid < 0) routeid = 0);
     VAR(IDF_HEX, routecolour, 0, 0xFF22FF, 0xFFFFFF);
     VAR(0, droproutedist, 1, 16, VAR_MAX);
@@ -778,10 +778,10 @@ namespace entities
                 }
                 else if(e.type == CHECKPOINT)
                 {
-                    if(d->state != CS_ALIVE || !gameent::is(d) || !m_trial(game::gamemode)) break;
+                    if(d->state != CS_ALIVE || !gameent::is(d) || !m_race(game::gamemode)) break;
                     if(!m_check(e.attrs[3], e.attrs[4], game::gamemode, game::mutators)) break;
                     gameent *g = (gameent *)d;
-                    if(g->checkpoint == n || (m_trial(game::gamemode) && m_gsp3(game::gamemode, game::mutators) && g->team != T_ALPHA)) break;
+                    if(g->checkpoint == n || (m_race(game::gamemode) && m_gsp3(game::gamemode, game::mutators) && g->team != T_ALPHA)) break;
                     if(e.attrs[6] == CP_START)
                     {
                         if(g->cpmillis || (d->vel.iszero() && !d->move && !d->strafe)) break;
@@ -1170,7 +1170,7 @@ namespace entities
                 case CHECKPOINT:
                 {
                     float yaw = ents[ent]->attrs[1], pitch = ents[ent]->attrs[2];
-                    if(m_trial(game::gamemode) && m_gsp3(game::gamemode, game::mutators) && d->team != T_ALPHA)
+                    if(m_race(game::gamemode) && m_gsp3(game::gamemode, game::mutators) && d->team != T_ALPHA)
                     {
                         yaw -= 180;
                         pitch = -pitch;
@@ -2189,7 +2189,7 @@ namespace entities
                 playsound(e.attrs[0], e.o, NULL, flags, e.attrs[3], e.attrs[1], e.attrs[2], &e.schan);
             }
         }
-        if((m_edit(game::gamemode) || m_trial(game::gamemode)) && routeid >= 0 && droproute)
+        if((m_edit(game::gamemode) || m_race(game::gamemode)) && routeid >= 0 && droproute)
         {
             if(game::player1->state == CS_ALIVE)
             {   // don't start until the player begins moving
@@ -2333,7 +2333,7 @@ namespace entities
                 break;
             case ROUTE:
             {
-                if(e.attrs[0] != routeid || (!m_edit(game::gamemode) && !m_trial(game::gamemode))) break;
+                if(e.attrs[0] != routeid || (!m_edit(game::gamemode) && !m_race(game::gamemode))) break;
                 loopv(e.links) if(ents.inrange(e.links[i]) && ents[e.links[i]]->type == ROUTE && (!routemaxdist || e.o.dist(ents[e.links[i]]->o) <= routemaxdist))
                     part_flare(e.o, ents[e.links[i]]->o, 1, PART_LIGHTNING_FLARE, routecolour);
             }
@@ -2431,7 +2431,7 @@ namespace entities
     {
         float maxdist = float(maxparticledistance)*float(maxparticledistance);
         int numents = m_edit(game::gamemode) ? ents.length() : max(lastuse(EU_ITEM), max(lastent(PARTICLES), lastent(TELEPORT)));
-        bool hasroute = (m_edit(game::gamemode) || m_trial(game::gamemode)) && routeid >= 0;
+        bool hasroute = (m_edit(game::gamemode) || m_race(game::gamemode)) && routeid >= 0;
         if(hasroute) numents = max(numents, lastent(ROUTE));
         loopi(numents)
         {

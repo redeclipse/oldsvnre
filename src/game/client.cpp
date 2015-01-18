@@ -2535,7 +2535,7 @@ namespace client
                     if(s == game::player1)
                     {
                         game::specreset();
-                        if(m_trial(game::gamemode)) game::specmode = 0;
+                        if(m_race(game::gamemode)) game::specmode = 0;
                     }
                     if(val != 0)
                     {
@@ -2635,7 +2635,7 @@ namespace client
                 {
                     int tn = getint(p), ent = getint(p);
                     gameent *t = game::getclient(tn);
-                    if(!t || !m_trial(game::gamemode))
+                    if(!t || !m_race(game::gamemode))
                     {
                         if(ent < 0) break;
                         if(getint(p) < 0) break;
