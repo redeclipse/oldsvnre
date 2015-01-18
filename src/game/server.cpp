@@ -603,7 +603,7 @@ namespace server
 
         bool spawnqueue(bool all = false, bool needinfo = true)
         {
-            return m_fight(gamemode) && !m_trial(gamemode) && !m_duke(gamemode, mutators) && G(maxalive) > 0 && (!needinfo || canplay()) && (!all || G(maxalivequeue)) && numclients() > 1;
+            return m_fight(gamemode) && !m_race(gamemode) && !m_duke(gamemode, mutators) && G(maxalive) > 0 && (!needinfo || canplay()) && (!all || G(maxalivequeue)) && numclients() > 1;
         }
 
         void queue(clientinfo *ci, bool msg = true, bool wait = true, bool top = false)
@@ -1228,7 +1228,8 @@ namespace server
             else if((type == 4 || type == 5) && m_defend(mode) && m_gsp2(mode, muts)) concatstring(mdname, gametype[mode].gsd[1]);
             else if((type == 4 || type == 5) && m_bomber(mode) && m_gsp1(mode, muts)) concatstring(mdname, gametype[mode].gsd[0]);
             else if((type == 4 || type == 5) && m_bomber(mode) && m_gsp3(mode, muts)) concatstring(mdname, gametype[mode].gsd[2]);
-            else if((type == 4 || type == 5) && m_trial(mode) && m_gsp3(mode, muts)) concatstring(mdname, gametype[mode].gsd[2]);
+            else if((type == 4 || type == 5) && m_race(mode) && m_gsp1(mode, muts)) concatstring(mdname, gametype[mode].gsd[0]);
+            else if((type == 4 || type == 5) && m_race(mode) && m_gsp3(mode, muts)) concatstring(mdname, gametype[mode].gsd[2]);
             else concatstring(mdname, gametype[mode].desc);
         }
         return mdname;
@@ -1247,7 +1248,7 @@ namespace server
             if(m_capture(mode) && m_gsp3(mode, muts)) return "";
             else if(m_defend(mode) && m_gsp2(mode, muts)) return "";
             else if(m_bomber(mode) && (m_gsp1(mode, muts) || m_gsp3(mode, muts))) return "";
-            else if(m_trial(mode) && m_gsp3(mode, muts)) return "";
+            else if(m_race(mode) && (m_gsp1(mode, muts) || m_gsp3(mode, muts))) return "";
         }
         if(type == 1 || type == 3 || type == 4)
         {
@@ -1646,7 +1647,7 @@ namespace server
                                     break;
                                 }
                             }
-                            if(m_trial(gamemode))
+                            if(m_race(gamemode))
                             {
                                 cp->state.cpmillis = 0;
                                 cp->state.cpnodes.shrink(0);
@@ -1675,7 +1676,7 @@ namespace server
 
     bool hasitem(int i)
     {
-        if(m_trial(gamemode) || !sents.inrange(i) || sents[i].type != WEAPON) return false;
+        if(m_race(gamemode) || !sents.inrange(i) || sents[i].type != WEAPON) return false;
         int sweap = m_weapon(gamemode, mutators), attr = w_attr(gamemode, mutators, sents[i].type, sents[i].attrs[0], sweap);
         if(!isweap(attr) || !w_item(attr, sweap) || !m_check(W(attr, modes), W(attr, muts), gamemode, mutators) || W(attr, disabled)) return false;
         if((sents[i].attrs[4] && sents[i].attrs[4] != triggerid) || !m_check(sents[i].attrs[2], sents[i].attrs[3], gamemode, mutators)) return false;
@@ -1815,7 +1816,7 @@ namespace server
         if(update)
         {
             int numt = numteams(gamemode, mutators), cplayers = 0;
-            if(m_trial(gamemode))
+            if(m_race(gamemode))
             {
                 loopv(sents) if(sents[i].type == PLAYERSTART && sents[i].attrs[0] == T_NEUTRAL && (sents[i].attrs[5] == triggerid || !sents[i].attrs[5]) && m_check(sents[i].attrs[3], sents[i].attrs[4], gamemode, mutators))
                 {
@@ -1944,7 +1945,7 @@ namespace server
         if(ci->state.actortype >= A_ENEMY) return ci->state.spawnpoint;
         else
         {
-            if(m_trial(gamemode) && !ci->state.cpnodes.empty() && (!m_gsp3(gamemode, mutators) || ci->team == T_ALPHA))
+            if(m_race(gamemode) && !ci->state.cpnodes.empty() && (!m_gsp3(gamemode, mutators) || ci->team == T_ALPHA))
             {
                 int checkpoint = ci->state.cpnodes.last();
                 if(sents.inrange(checkpoint)) return checkpoint;
@@ -1958,7 +1959,7 @@ namespace server
                         team = spawns[T_ALPHA].iteration <= spawns[T_OMEGA].iteration ? T_ALPHA : T_OMEGA;
                     if(!rotate) rotate = 2;
                 }
-                else if(m_fight(gamemode) && m_team(gamemode, mutators) && (!m_trial(gamemode) || m_gsp3(gamemode, mutators)) && !spawns[ci->team].ents.empty()) team = ci->team;
+                else if(m_fight(gamemode) && m_team(gamemode, mutators) && (!m_race(gamemode) || m_gsp3(gamemode, mutators)) && !spawns[ci->team].ents.empty()) team = ci->team;
                 else switch(rotate)
                 {
                     case 2:
@@ -3743,7 +3744,7 @@ namespace server
                     }
                 }
             }
-            if(m_trial(gamemode) && (!m_gsp3(gamemode, mutators) || m->team == T_ALPHA) && m->state.cpnodes.length() == 1)
+            if(m_race(gamemode) && (!m_gsp3(gamemode, mutators) || m->team == T_ALPHA) && m->state.cpnodes.length() == 1)
             {  // reset if hasn't reached another checkpoint yet
                 m->state.cpmillis = 0;
                 m->state.cpnodes.shrink(0);
@@ -3822,7 +3823,7 @@ namespace server
         ci->state.spree = 0;
         ci->state.deaths++;
         bool kamikaze = dropitems(ci, actor[ci->state.actortype].living ? DROP_DEATH : DROP_EXPIRE);
-        if(m_trial(gamemode) && (!m_gsp3(gamemode, mutators) || ci->team == T_ALPHA) && !(flags&HIT_SPEC) && (!flags || ci->state.cpnodes.length() == 1))
+        if(m_race(gamemode) && (!m_gsp3(gamemode, mutators) || ci->team == T_ALPHA) && !(flags&HIT_SPEC) && (!flags || ci->state.cpnodes.length() == 1))
         { // reset if suicided, hasn't reached another checkpoint yet
             ci->state.cpmillis = 0;
             ci->state.cpnodes.shrink(0);
@@ -5437,7 +5438,7 @@ namespace server
                         {
                             if(sents[ent].attrs[5] && sents[ent].attrs[5] != triggerid) break;
                             if(!m_check(sents[ent].attrs[3], sents[ent].attrs[4], gamemode, mutators)) break;
-                            if(!m_trial(gamemode) || (m_gsp3(gamemode, mutators) && cp->team != T_ALPHA)) break;
+                            if(!m_race(gamemode) || (m_gsp3(gamemode, mutators) && cp->team != T_ALPHA)) break;
                             if(cp->state.cpnodes.find(ent) >= 0) break;
                             switch(sents[ent].attrs[6])
                             {
@@ -5466,7 +5467,7 @@ namespace server
                                                 total = ++ts.total;
                                                 sendf(-1, 1, "ri3", N_SCORE, ts.team, ts.total);
                                             }
-                                            if(total && m_gsp3(gamemode, mutators) && G(trialgauntletwinner))
+                                            if(total && m_gsp3(gamemode, mutators) && G(racegauntletwinner))
                                             {
                                                 int numt = numteams(gamemode, mutators);
                                                 if(curbalance == numt-1)

@@ -43,7 +43,7 @@ namespace hud
     VAR(IDF_PERSIST, scoreratios, 0, 0, 2);
     VAR(IDF_PERSIST, scoreclientnum, 0, 1, 1);
     VAR(IDF_PERSIST, scoretimestyle, 0, 3, 4);
-    VAR(IDF_PERSIST, scoretrialstyle, 0, 1, 4);
+    VAR(IDF_PERSIST, scoreracestyle, 0, 1, 4);
     VAR(IDF_PERSIST, scorebotinfo, 0, 0, 1);
     VAR(IDF_PERSIST, scorespectators, 0, 1, 1);
     VAR(IDF_PERSIST, scoreconnecting, 0, 0, 1);
@@ -92,7 +92,7 @@ namespace hud
         }
         if(a->points > b->points) return true;
         if(a->points < b->points) return false;
-        if(!m_trial(game::gamemode))
+        if(!m_race(game::gamemode))
         {
             if(a->frags > b->frags) return true;
             if(a->frags < b->frags) return false;
@@ -205,9 +205,9 @@ namespace hud
                                 }
                                 else break;
                             }
-                            game::announcef(S_V_DRAW, CON_MESG, NULL, true, "\fw%s tied %swith a total score of \fs\fc%s\fS", game::colourteam(sg.team), winner, m_laptime(game::gamemode, game::mutators) ? timestr(sg.total, scoretrialstyle) : intstr(sg.total));
+                            game::announcef(S_V_DRAW, CON_MESG, NULL, true, "\fw%s tied %swith a total score of \fs\fc%s\fS", game::colourteam(sg.team), winner, m_laptime(game::gamemode, game::mutators) ? timestr(sg.total, scoreracestyle) : intstr(sg.total));
                         }
-                        else game::announcef(anc, CON_MESG, NULL, true, "\fwteam %s won the match with a total score of \fs\fc%s\fS", game::colourteam(sg.team), m_laptime(game::gamemode, game::mutators) ? timestr(sg.total, scoretrialstyle) : intstr(sg.total));
+                        else game::announcef(anc, CON_MESG, NULL, true, "\fwteam %s won the match with a total score of \fs\fc%s\fS", game::colourteam(sg.team), m_laptime(game::gamemode, game::mutators) ? timestr(sg.total, scoreracestyle) : intstr(sg.total));
                     }
                 }
                 else
@@ -227,9 +227,9 @@ namespace hud
                                 }
                                 else break;
                             }
-                            game::announcef(S_V_DRAW, CON_MESG, NULL, true, "\fw%s tied %swith the fastest lap \fs\fc%s\fS", game::colourname(sg.players[0]), winner, sg.players[0]->cptime ? timestr(sg.players[0]->cptime, scoretrialstyle) : "dnf");
+                            game::announcef(S_V_DRAW, CON_MESG, NULL, true, "\fw%s tied %swith the fastest lap \fs\fc%s\fS", game::colourname(sg.players[0]), winner, sg.players[0]->cptime ? timestr(sg.players[0]->cptime, scoreracestyle) : "dnf");
                         }
-                        else game::announcef(anc, CON_MESG, NULL, true, "\fw%s won the match with the fastest lap \fs\fc%s\fS", game::colourname(sg.players[0]), sg.players[0]->cptime ? timestr(sg.players[0]->cptime, scoretrialstyle) : "dnf");
+                        else game::announcef(anc, CON_MESG, NULL, true, "\fw%s won the match with the fastest lap \fs\fc%s\fS", game::colourname(sg.players[0]), sg.players[0]->cptime ? timestr(sg.players[0]->cptime, scoreracestyle) : "dnf");
                     }
                     else
                     {
@@ -552,8 +552,8 @@ namespace hud
                                         g.textf("team %s", 0xFFFFFF, teamtexname(sg.team), colour, -1, TEAM(sg.team, name));
                                         g.spring();
                                         if(m_defend(game::gamemode) && ((defendlimit && sg.total >= defendlimit) || sg.total == INT_MAX)) g.text("WINNER", 0xFFFFFF);
-                                        else if(m_laptime(game::gamemode, game::mutators)) g.textf("%s", 0xFFFFFF, NULL, 0, -1, sg.total ? timestr(sg.total, scoretrialstyle) : "\fadnf");
-                                        else if(m_trial(game::gamemode)) g.textf("%d %s", 0xFFFFFF, NULL, 0, -1, sg.total, sg.total != 1 ? "laps" : "lap");
+                                        else if(m_laptime(game::gamemode, game::mutators)) g.textf("%s", 0xFFFFFF, NULL, 0, -1, sg.total ? timestr(sg.total, scoreracestyle) : "\fadnf");
+                                        else if(m_race(game::gamemode)) g.textf("%d %s", 0xFFFFFF, NULL, 0, -1, sg.total, sg.total != 1 ? "laps" : "lap");
                                         else g.textf("%d %s", 0xFFFFFF, NULL, 0, -1, sg.total, sg.total != 1 ? "points" : "point");
                                     }
                                     else
@@ -600,7 +600,7 @@ namespace hud
                                     });
                                 }
 
-                                if(m_trial(game::gamemode))
+                                if(m_race(game::gamemode))
                                 {
                                     if(scoretimer && (scoretimer >= 2 || m_laptime(game::gamemode, game::mutators)))
                                     {
@@ -611,7 +611,7 @@ namespace hud
                                             });
                                             loopscoregroup(uilist(g, {
                                                 if((scorehilight && o == game::player1) || scorebgrows > 2) g.background(i%2 ? bgc2 : bgc1, scorebgblend, scorehilight && o == game::player1 ? scorehilight : -1, scorebgblend, scorehilight && o == game::player1);
-                                                uicenter(g, uipad(g, 0.5f, g.textf("%s", 0xFFFFFF, NULL, 0, -1, o->cptime ? timestr(o->cptime, scoretrialstyle) : "\fadnf")));
+                                                uicenter(g, uipad(g, 0.5f, g.textf("%s", 0xFFFFFF, NULL, 0, -1, o->cptime ? timestr(o->cptime, scoreracestyle) : "\fadnf")));
                                             }));
                                         });
                                     }
@@ -835,13 +835,13 @@ namespace hud
         }
         int size = int(s*skew);
         string str, q;
-        if(m_laptime(game::gamemode, game::mutators)) { formatstring(str)("\fs\f[%d]\f(%s)\fS %s", col, insigniatex, timestr(score, inventorytrialstyle)); }
+        if(m_laptime(game::gamemode, game::mutators)) { formatstring(str)("\fs\f[%d]\f(%s)\fS %s", col, insigniatex, timestr(score, inventoryracestyle)); }
         else if(m_defend(game::gamemode) && score == INT_MAX) { formatstring(str)("\fs\f[%d]\f(%s)\fS WIN", col, insigniatex); }
         else { formatstring(str)("\fs\f[%d]\f(%s)\fS %d", col, insigniatex, score); }
         if(inventoryscoreinfo)
         {
             if(m_laptime(game::gamemode, game::mutators))
-                { formatstring(q)("\n\fs\f[%d]\f(%s)\fS %s", col, offset ? (offset < 0 ? arrowtex : arrowdowntex) : arrowrighttex, timestr(offset < 0 ? 0-offset : offset, inventorytrialstyle)); }
+                { formatstring(q)("\n\fs\f[%d]\f(%s)\fS %s", col, offset ? (offset < 0 ? arrowtex : arrowdowntex) : arrowrighttex, timestr(offset < 0 ? 0-offset : offset, inventoryracestyle)); }
             else { formatstring(q)("%s\fs\f[%d]\f(%s)\fS %d", inventoryscorebreak ? "\n" : " ", col, offset ? (offset > 0 ? arrowtex : arrowdowntex) : arrowrighttex, offset < 0 ? 0-offset : offset); }
             concatstring(str, q);
         }
@@ -904,7 +904,7 @@ namespace hud
         return sy;
     }
 
-    int trialinventory(int x, int y, int s, float blend)
+    int raceinventory(int x, int y, int s, float blend)
     {
         int sy = 0;
         if(groupplayers())
@@ -919,7 +919,7 @@ namespace hud
                         pushfont("little");
                         sy += draw_textx("by %s", x+FONTW*2, y, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, game::colourteam(sg.team));
                         popfont();
-                        sy += draw_textx("\fg%s", x, y-sy, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, timestr(sg.total, inventorytrialstyle));
+                        sy += draw_textx("\fg%s", x, y-sy, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, timestr(sg.total, inventoryracestyle));
                     }
                 }
                 else if(!sg.players.empty())
@@ -929,7 +929,7 @@ namespace hud
                         pushfont("little");
                         sy += draw_textx("by %s", x+FONTW*2, y, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, game::colourname(sg.players[0]));
                         popfont();
-                        sy += draw_textx("\fg%s", x, y-sy, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, timestr(sg.players[0]->cptime, inventorytrialstyle));
+                        sy += draw_textx("\fg%s", x, y-sy, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, timestr(sg.players[0]->cptime, inventoryracestyle));
                     }
                 }
             }
