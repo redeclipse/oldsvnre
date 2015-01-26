@@ -49,7 +49,8 @@ Copyright: Jonathan 'Wicked' Roels
            2013 Ulukai <jonathan.denil@gmail.com>
 License: CC-BY-SA-3.0
 
-Files: data/maps/ares* data/maps/canals* data/maps/conflict*
+Files: data/maps/ares* data/maps/canals* data/maps/conflict* data/maps/enyo*
+       data/ulukai/*
 Copyright: 2011-2013, Ulukai <jonathan.denil@gmail.com>
 License: CC-BY-SA-3.0
 
@@ -57,7 +58,7 @@ Files: data/maps/keystone2k* data/maps/livefire*
 Copyright: 2012-2013, John_III <snaginneb@yahoo.com>
 License: CC-BY-SA-3.0
 
-Files: data/maps/neodrive* data/maps/hawk*
+Files: data/maps/neodrive* data/maps/wardepot*
 Copyright: 2012-2013, Kirill "TristamK" Kolesnikov <tristamk@bk.ru>
 License: CC-BY-SA-3.0
 
@@ -73,7 +74,7 @@ Files: data/maps/battlefield*
 Copyright: 2012-2013, Quinton Reeves, Ulukai <jonathan.denil@gmail.com>
 License: CC-BY-SA-3.0+
 
-Files: data/maps/cyanide*
+Files: data/maps/cyanide* data/maps/decay* data/maps/octavus*
 Copyright: 2013 Ricky Thomson "unixfreak" <punkalert@gmail.com>
 License: CC-BY-SA-3.0
 
@@ -92,6 +93,22 @@ Copyright: 2013 Joseph "ballist1c" Calabria
            2013 Matt "greaserpirate" Kalt
 License: CC-BY-SA-3.0
 
+Files: data/maps/abuse*
+Copyright: 2013, Joseph "ballist1c" Calabria
+License: CC-BY-SA-3.0
+
+Files: data/maps/castle* data/maps/rooftop*
+Copyright: 2014, Fatony
+License: CC0-1.0
+
+Files: data/maps/fortitude*
+Copyright: 2014, James "Max Payne" Tonjes <tonjesjames@gmail.com>
+License: CC-BY-SA-3.0
+
+Files: data/maps/relax* data/maps/tonatiuh*
+Copyright: 2013-2014, Bonifarz <bonifarz@gmx.ch>
+License: CC-BY-SA-3.0
+
 Files: data/jwin/*
 Copyright: JWindecker <jacobwindecker@hotmail.com>
 License: CC-BY-3.0
@@ -102,10 +119,6 @@ License: CC-BY-SA-3.0
 
 Files: data/penguins/*
 Copyright: 2009, 2012, Zachery "skiingpenguins" Slocum <freezurbern@gmail.com>
-License: CC-BY-SA-3.0
-
-Files: data/ulukai/*
-Copyright: 2013 Ulukai <jonathan.denil@gmail.com>
 License: CC-BY-SA-3.0
 
 Files: data/ulukai/redeclipse*
@@ -119,6 +132,10 @@ Comment:
 
 Files: data/crosshairs/*
 Copyright: 2011, fluxord <fluxord> at <yahoo.com>
+License: CC-BY-SA-3.0
+
+Files: data/crosshairs/fed* data/crosshairs/trident*
+Copyright: 2014, pyccna
 License: CC-BY-SA-3.0
 
 Files: data/skyboxes/gradient* data/skyboxes/stars*
@@ -188,9 +205,12 @@ Copyright: 2009, Georges 'TRaK' Grondin
            http://trak.mercenariesguild.net/
 License: Expat
 
-Files: data/models/weapons/plasma/* data/models/weapons/flamer/*
-       data/models/actors/turret/*
+Files: data/models/weapons/flamer/* data/models/actors/turret/*
 Copyright: Mike Ledger ( mikeplus[i] )
+License: CC-BY-SA-3.0-AU
+
+Files: data/models/weapons/plasma/* data/models/weapons/zapper/*
+Copyright: Unnamed <Viktor.Hahn@web.de>
 License: CC-BY-SA-3.0-AU
 
 Files: data/models/john/*
@@ -200,6 +220,18 @@ License: CC-BY-SA-3.0
 Files: data/mayhem/*
 Copyright: Mayhem
 License: CC-BY-SA-3.0
+
+Files: data/models/vanities/antenna/* data/models/vanities/blade/*
+       data/models/vanities/boots* data/models/vanities/chestplate/*
+       data/models/vanities/disc/* data/models/vanities/mask/*
+       data/models/vanities/microeye/* data/models/vanities/prongs/*
+       data/models/vanities/shoulder2/* data/models/vanities/shoulder3/*
+Copyright: Unnamed <Viktor.Hahn@web.de>
+License: CC-BY-SA-3.0
+
+Files: data/nobiax/*
+Copyright: Nobiax
+License: CC0-1.0
 
 Files: data/fonts/Play*.ttf
 Copyright: 2011, Jonas Hecksher, Playtypes, e-types AS (e-types.com)
@@ -320,6 +352,10 @@ License: CC-BY-SA-3.0+ and Mark-Policy
 Files: data/torley/*
 Copyright: 2007-2008, Torley Linden
            2010, Red Eclipse Team
+License: CC-BY-SA-3.0
+
+Files: data/unnamed/*
+Copyright: 2013-2014, Unnamed <Viktor.Hahn@web.de>
 License: CC-BY-SA-3.0
 
 Files: data/sounds/ambience/*
@@ -445,9 +481,9 @@ Files: data/sounds/music/track_01.ogg to data/sounds/music/track_12.ogg
 Copyright: Copyright Derek "JoJo" Stegall
 License: CC-BY-SA-3.0
 
-Files: data/sounds/music/track_13.ogg
-Copyright: Copyright yd 
-License: CC0
+Files: data/sounds/music/track_13.ogg data/maps/tonatiuh.ogg
+Copyright: Copyright yd
+License: CC0-1.0
 Comment:
  This track originates from:
  http://opengameart.org/content/galactic-temple
