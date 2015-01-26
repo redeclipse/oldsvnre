@@ -308,17 +308,6 @@ License:
  Licensed publicly for everyone to use, modify and distribute as long as the
  author is credited for the original work.
 
-Files: data/textures/lava.jpg
-Copyright: Red Eclipse Team
-License:
- Created by Matt "greaserpirate" Kalt
- Copyright (C) 2009-2014 Red Eclipse Team
- Creative Commons Attribution ShareAlike 3.0 License (CC-BY-SA)
-
-Files: data/textures/rewards/*
-Copyright: 2011, Red Eclipse Team
-License: CC-BY-SA-3.0+
-
 Files: data/textures/logo.png data/luckystrike/pub2* data/luckystrike/pub1*
 Copyright: Ed Merrit, Ten by Twenty, <http://www.tenbytwenty.com/>
            2011, Red Eclipse Team
