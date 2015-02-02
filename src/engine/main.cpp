@@ -206,10 +206,10 @@ void writeinitcfg()
     f->printf("shaders %d\n", useshaders);
     f->printf("shaderprecision %d\n", shaderprecision);
     f->printf("forceglsl %d\n", forceglsl);
-    extern int soundmono, soundachans, soundbufferlen, soundfreq;
+    extern int soundmono, soundachans, soundbuflen, soundfreq;
     f->printf("soundmono %d\n", soundmono);
     f->printf("soundachans %d\n", soundachans);
-    f->printf("soundbufferlen %d\n", soundbufferlen);
+    f->printf("soundbuflen %d\n", soundbuflen);
     f->printf("soundfreq %d\n", soundfreq);
     f->printf("verbose %d\n", verbose);
     delete f;
