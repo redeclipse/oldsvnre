@@ -45,14 +45,14 @@ Mix_Music *music = NULL;
 SDL_RWops *musicrw = NULL;
 stream *musicstream = NULL;
 char *musicfile = NULL, *musicdonecmd = NULL;
-int soundsatonce = 0, lastsoundmillis = 0, musictime = -1, musicdonetime = -1;
+int musictime = -1, musicdonetime = -1;
 
 VARF(IDF_PERSIST, mastervol, 0, 255, 255, changedvol = true);
 VAR(IDF_PERSIST, soundvol, 0, 255, 255);
 VARF(0, soundmono, 0, 0, 1, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
 VARF(0, soundachans, 16, 256, 1024, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
 VARF(0, soundfreq, 0, 44100, 48000, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
-VARF(0, soundbufferlen, 128, 1024, VAR_MAX, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
+VARF(0, soundbuflen, 128, 4096, VAR_MAX, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
 VAR(IDF_PERSIST, soundmaxrad, 0, 512, VAR_MAX);
 VAR(IDF_PERSIST, soundminrad, 0, 0, VAR_MAX);
 FVAR(IDF_PERSIST, soundevtvol, 0, 1, FVAR_MAX);
@@ -70,7 +70,7 @@ void initsound()
 {
     if(nosound)
     {
-        if(Mix_OpenAudio(soundfreq, MIX_DEFAULT_FORMAT, soundmono ? 1 : 2, soundbufferlen) == -1)
+        if(Mix_OpenAudio(soundfreq, MIX_DEFAULT_FORMAT, soundmono ? 1 : 2, soundbuflen) == -1)
         {
             conoutf("\frsound initialisation failed: %s", Mix_GetError());
             return;
@@ -308,8 +308,6 @@ static Mix_Chunk *loadwav(const char *name)
 
 int addsound(const char *name, int vol, int maxrad, int minrad, int value, vector<soundslot> &soundset)
 {
-    bool emptyslot = !strcmp(name, "<none>");
-
     if(vol <= 0 || vol >= 255) vol = 255;
     if(maxrad <= 0) maxrad = -1;
     if(minrad < 0) minrad = -1;
@@ -318,11 +316,11 @@ int addsound(const char *name, int vol, int maxrad, int minrad, int value, vecto
         loopv(soundset)
         {
             soundslot &slot = soundset[i];
-            if((emptyslot || (slot.vol == vol && slot.maxrad == maxrad && slot.minrad == minrad)) && !strcmp(slot.name, name))
+            if(slot.vol == vol && slot.maxrad == maxrad && slot.minrad == minrad && !strcmp(slot.name, name))
                 return i;
         }
     }
-    if(emptyslot)
+    if(!strcmp(name, "<none>"))
     {
         soundslot &slot = soundset.add();
         slot.name = newstring(name);
