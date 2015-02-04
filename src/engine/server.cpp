@@ -1496,8 +1496,13 @@ void trytofindocta(bool fallback)
 {
     if(!octadir || !*octadir)
     {
-        const char *dir = getenv("OCTA_DIR");
+        const char *dir = getenv("OCTA_DATA");
         if(dir && *dir) setsvar("octadir", dir, false);
+        else
+        {
+            dir = getenv("OCTA_DIR"); // backward compat
+            if(dir && *dir) setsvar("octadir", dir, false);
+        }
     }
     if((!octadir || !*octadir || !findoctadir(octadir, false)) && fallback)
     { // user hasn't specifically set it, try some common locations alongside our folder
@@ -1541,7 +1546,10 @@ void setlocations(bool wanthome)
     }
     if(!execfile("config/version.cfg", false, EXEC_VERSION|EXEC_BUILTIN) || !*versionuname || !*versionname || !*versionstring || (!versionmajor && !versionminor && !versionpatch))
         fatal("cannot determine game version, please ensure 'config/version.cfg' properly loaded");
-    addpackagedir("data"); // pseudo directory with game content
+    // pseudo directory with game content
+    const char *dir = getenv("GAME_DATA");
+    if(dir && *dir) addpackagedir(dir);
+    else addpackagedir("data");
 #ifndef STANDALONE
     if(!fileexists(findfile("textures/logo.png", "r"), "r")) fatal("could not find game data");
 #endif
