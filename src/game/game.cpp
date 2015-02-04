@@ -3,7 +3,7 @@
 namespace game
 {
     int nextmode = G_EDITMODE, nextmuts = 0, gamestate = G_S_WAITING, gamemode = G_EDITMODE, mutators = 0, maptime = 0, timeremaining = 0, lasttimeremain = 0,
-        lastcamera = 0, lasttvcam = 0, lasttvchg = 0, lastzoom = 0, liquidchan = -1, spectvfollowing = -1;
+        lastcamera = 0, lasttvcam = 0, lasttvchg = 0, lastzoom = 0, spectvfollowing = -1;
     bool prevzoom = false, zooming = false, inputmouse = false, inputview = false, inputmode = false;
     float swayfade = 0, swayspeed = 0, swaydist = 0, bobfade = 0, bobdist = 0;
     vec swaydir(0, 0, 0), swaypush(0, 0, 0);
@@ -1196,18 +1196,8 @@ namespace game
             if(d->respawned > 0 && lastmillis-d->respawned >= 2500) d->respawned = -1;
             if(d->suicided > 0 && lastmillis-d->suicided >= 2500) d->suicided = -1;
         }
-        if(d->lastres[WR_BURN] > 0 && lastmillis-d->lastres[WR_BURN] >= burntime-500)
-        {
-            if(lastmillis-d->lastres[WR_BURN] >= burntime) d->resetburning();
-            else if(issound(d->fschan)) sounds[d->fschan].vol = int((d != focus ? 128 : 224)*(1.f-(lastmillis-d->lastres[WR_BURN]-(burntime-500))/500.f));
-        }
-        else if(d->fschan >= 0)
-        {
-            if(issound(d->fschan)) removesound(d->fschan);
-            d->fschan = -1;
-        }
-        if(d->lastres[WR_BLEED] > 0 && lastmillis-d->lastres[WR_BLEED] >= bleedtime) d->resetbleeding();
-        if(d->lastres[WR_SHOCK] > 0 && lastmillis-d->lastres[WR_SHOCK] >= shocktime) d->resetshocking();
+        int restime[WR_MAX] = { burntime, bleedtime, shocktime };
+        loopi(WR_MAX) if(d->lastres[i] > 0 && lastmillis-d->lastres[i] >= restime[i]) d->resetresidual(i);
         if(gs_playing(gamestate) && d->state == CS_ALIVE)
         {
             int curfoot = d->curfoot();
@@ -1250,7 +1240,6 @@ namespace game
         if(wr_burns(weap, flags))
         {
             d->lastrestime[WR_BURN] = lastmillis;
-            if(!issound(d->fschan)) playsound(S_BURNING, d->o, d, SND_LOOP, -1, -1, -1, &d->fschan);
             if(isweap(weap)) d->lastres[WR_BURN] = lastmillis;
             else return true;
         }
@@ -2859,25 +2848,6 @@ namespace game
 
             camera1->inmaterial = lookupmaterial(camera1->o);
             camera1->inliquid = isliquid(camera1->inmaterial&MATF_VOLUME);
-
-            switch(camera1->inmaterial&MATF_VOLUME)
-            {
-                case MAT_WATER:
-                {
-                    if(!issound(liquidchan))
-                        playsound(S_UNDERWATER, camera1->o, camera1, SND_LOOP|SND_NOATTEN|SND_NODELAY|SND_NOCULL, -1, -1, -1, &liquidchan);
-                    break;
-                }
-                default:
-                {
-                    if(liquidchan >= 0)
-                    {
-                        if(issound(liquidchan)) removesound(liquidchan);
-                        liquidchan = -1;
-                    }
-                    break;
-                }
-            }
             lastcamera = lastmillis;
         }
     }

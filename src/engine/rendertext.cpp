@@ -100,7 +100,7 @@ font *loadfont(const char *name)
     font *f = fonts.access(name);
     if(!f)
     {
-        defformatstring(n)("fonts/%s.cfg", name);
+        defformatstring(n)("config/fonts/%s.cfg", name);
         if(execfile(n, false)) f = fonts.access(name);
     }
     return f;

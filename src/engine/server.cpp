@@ -1535,19 +1535,18 @@ void setlocations(bool wanthome)
     if(dir && *dir && !chdir(dir))
         conoutf("attempting to use resources in: %s", dir);
 #endif
-#ifndef STANDALONE
-    loopirev(3) if(!fileexists(findfile("data/config/keymap.cfg", "r"), "r"))
+    loopirev(3) if(!fileexists(findfile("config/version.cfg", "r"), "r"))
     { // standalone solution to this is: pebkac
-        if(!i || chdir("..") < 0) fatal("could not find data directory");
+        if(!i || chdir("..") < 0) fatal("could not find config directory");
     }
+    if(!execfile("config/version.cfg", false, EXEC_VERSION|EXEC_BUILTIN) || !*versionuname || !*versionname || !*versionstring || (!versionmajor && !versionminor && !versionpatch))
+        fatal("cannot determine game version, please ensure 'config/version.cfg' properly loaded");
+    addpackagedir("data"); // pseudo directory with game content
+#ifndef STANDALONE
+    if(!fileexists(findfile("textures/logo.png", "r"), "r")) fatal("could not find game data");
 #endif
-    addpackagedir("data");
     //defformatstring(gamedata)("game/%s", server::gameid());
     //addpackagedir(gamedata);
-    if(!execfile("config/version.cfg", false, EXEC_VERSION|EXEC_BUILTIN))
-        fatal("cannot find 'config/version.cfg', please ensure you have the game data installed");
-    else if(!*versionuname || !*versionname || !*versionstring || (!versionmajor && !versionminor && !versionpatch))
-        fatal("cannot determine game version, please ensure 'config/version.cfg' properly loaded");
     if(wanthome)
     {
 #if defined(WIN32)

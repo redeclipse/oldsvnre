@@ -50,7 +50,7 @@ int musictime = -1, musicdonetime = -1;
 VARF(IDF_PERSIST, mastervol, 0, 255, 255, changedvol = true);
 VAR(IDF_PERSIST, soundvol, 0, 255, 255);
 VARF(0, soundmono, 0, 0, 1, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
-VARF(0, soundachans, 16, 256, 1024, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
+VARF(0, soundmixchans, 16, 32, 1024, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
 VARF(0, soundfreq, 0, 44100, 48000, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
 VARF(0, soundbuflen, 128, 4096, VAR_MAX, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
 VAR(IDF_PERSIST, soundmaxrad, 0, 512, VAR_MAX);
@@ -75,8 +75,8 @@ void initsound()
             conoutf("\frsound initialisation failed: %s", Mix_GetError());
             return;
         }
-        int chans = Mix_AllocateChannels(soundachans);
-        conoutf("allocated %d of %d sound channels", chans, soundachans);
+        int chans = Mix_AllocateChannels(soundmixchans);
+        conoutf("allocated %d of %d sound channels", chans, soundmixchans);
         nosound = false;
     }
     initmumble();
@@ -616,6 +616,7 @@ void resetsound()
         soundsamples.clear();
         return;
     }
+    rehash(true);
     if(music && loadmusic(musicfile))
     {
         if(musicfadein) Mix_FadeInMusic(music, musicdonecmd ? 0 : -1, musicfadein);

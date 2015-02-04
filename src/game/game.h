@@ -19,7 +19,7 @@
 enum
 {
     S_JUMP = S_GAMESPECIFIC, S_IMPULSE, S_LAND, S_FOOTSTEP, S_SWIMSTEP, S_PAIN, S_DEATH,
-    S_SPLASH1, S_SPLASH2, S_UNDERWATER, S_SPLOSH, S_DEBRIS, S_BURNLAVA, S_BURNING,
+    S_SPLASH1, S_SPLASH2, S_SPLOSH, S_DEBRIS, S_BURNLAVA,
     S_EXTINGUISH, S_SHELL, S_ITEMUSE, S_ITEMSPAWN,
     S_REGEN, S_DAMAGE, S_DAMAGE2, S_DAMAGE3, S_DAMAGE4, S_DAMAGE5, S_DAMAGE6, S_DAMAGE7, S_DAMAGE8,
     S_BURNED, S_BLEED, S_SHOCK, S_RESPAWN, S_CHAT, S_ERROR, S_ALARM, S_CATCH, S_BOUNCE,
@@ -951,7 +951,7 @@ struct gameent : dynent, clientstate
     editinfo *edit;
     ai::aiinfo *ai;
     int team, clientnum, privilege, projid, lastnode, checkpoint, cplast, respawned, suicided, lastupdate, lastpredict, plag, ping, lastflag, totaldamage,
-        actiontime[AC_MAX], impulse[IM_MAX], smoothmillis, turnmillis, turnside, aschan, cschan, vschan, wschan, pschan, fschan, sschan[2],
+        actiontime[AC_MAX], impulse[IM_MAX], smoothmillis, turnmillis, turnside, aschan, cschan, vschan, wschan, pschan, sschan[2],
         lasthit, lastteamhit, lastkill, lastattacker, lastpoints, quake, spree, lastfoot;
     float deltayaw, deltapitch, newyaw, newpitch, turnyaw, turnroll;
     vec head, torso, muzzle, origin, eject[2], waist, jet[3], legs, hrad, trad, lrad, toe[2];
@@ -1036,8 +1036,7 @@ struct gameent : dynent, clientstate
         if(issound(vschan)) removesound(vschan);
         if(issound(wschan)) removesound(wschan);
         if(issound(pschan)) removesound(pschan);
-        if(issound(fschan)) removesound(fschan);
-        aschan = cschan = vschan = wschan = pschan = fschan = -1;
+        aschan = cschan = vschan = wschan = pschan = -1;
         loopi(2)
         {
             if(issound(sschan[i])) removesound(sschan[i]);
@@ -1297,30 +1296,6 @@ struct gameent : dynent, clientstate
     {
         resetphys();
         resetjump();
-    }
-
-    void resetburning()
-    {
-        if(issound(fschan)) removesound(fschan);
-        fschan = -1;
-        clientstate::resetresidual(WR_BURN);
-    }
-
-    void resetbleeding()
-    {
-        clientstate::resetresidual(WR_BLEED);
-    }
-
-    void resetshocking()
-    {
-        clientstate::resetresidual(WR_SHOCK);
-    }
-
-    void resetresidual()
-    {
-        resetburning();
-        resetbleeding();
-        resetshocking();
     }
 
     void addicon(int type, int millis, int fade, int value = 0)
