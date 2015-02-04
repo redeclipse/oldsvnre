@@ -1851,7 +1851,7 @@ namespace client
                         }
                         case SPHY_EXTINGUISH:
                         {
-                            t->resetburning();
+                            t->resetresidual(WR_BURN);
                             playsound(S_EXTINGUISH, t->o, t);
                             part_create(PART_SMOKE, 500, t->feetpos(t->height/2), 0xAAAAAA, t->radius*4, 1, -10);
                             break;

@@ -1090,7 +1090,7 @@ namespace physics
                     gameent *d = (gameent *)pl;
                     if(d->burning(lastmillis, burntime) && lastmillis-d->lastres[WR_BURN] > PHYSMILLIS)
                     {
-                        d->resetburning();
+                        d->resetresidual(WR_BURN);
                         playsound(S_EXTINGUISH, d->o, d);
                         part_create(PART_SMOKE, 500, center, 0xAAAAAA, radius*4, 1, -10);
                         if(d->state == CS_ALIVE) client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_EXTINGUISH);
